@@ -1,0 +1,687 @@
+/*
+
+Copyright (C) 2013-2014, Securifera, Inc 
+
+All rights reserved. 
+
+Redistribution and use in source and binary forms, with or without modification, 
+are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice,
+	this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above copyright notice,
+	this list of conditions and the following disclaimer in the documentation 
+	and/or other materials provided with the distribution.
+
+    * Neither the name of Securifera, Inc nor the names of its contributors may be 
+	used to endorse or promote products derived from this software without specific
+	prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER 
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+================================================================================
+
+Pwnbrew is provided under the 3-clause BSD license above.
+
+The copyright on this package is held by Securifera, Inc
+
+*/
+
+
+/*
+* SocketChannelHandler.java
+*
+* Created on June 2, 2013, 9:12:00 PM
+*/
+
+package pwnbrew.selector;
+
+import pwnbrew.logging.Log;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.CancelledKeyException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.logging.Level;
+import javax.net.ssl.SSLException;
+import pwnbrew.manager.DataManager;
+import pwnbrew.misc.Constants;
+import pwnbrew.misc.DebugPrinter;
+import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.network.PortRouter;
+import pwnbrew.network.PortWrapper;
+import pwnbrew.network.control.messages.ResetId;
+import pwnbrew.network.socket.SocketChannelWrapper;
+
+/**
+ *
+ *  
+ */
+public class SocketChannelHandler implements Selectable {
+
+    private SocketChannelWrapper theSCW = null;
+    private static final String NAME_Class = SocketChannelHandler.class.getSimpleName();
+
+    private PortRouter thePortRouter = null;
+    private int rootHostId = -1;
+    private int state = 0;
+    
+    //Add a hashset
+    private final HashSet<Integer> internalHostIds = new HashSet<>();
+       
+    //Debug message
+    private String hostAlias = null;
+    private volatile boolean wrappingFlag = true;
+    
+    private final Queue<byte[]> pendingByteArrs = new LinkedList<>();
+    private int msgByteReverseCounter = 0;
+    private byte currMsgType = 0;
+    private byte lowerByte = 0;
+    private final ByteBuffer localMsgBuffer = ByteBuffer.allocate( 256 * 256 );
+    
+    // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param passedParent
+     * @throws java.io.IOException
+    */
+    public SocketChannelHandler( PortRouter passedParent ) throws IOException{ // NO_UCD (use default)
+        thePortRouter = passedParent;
+
+    }
+   
+    //===============================================================
+        /**
+        * Handles the operation associated with the incoming key
+        *
+     * @param passedSelKey
+    */
+    @Override
+    public void handle(SelectionKey passedSelKey) {
+
+        //Do nothing if the socket is null
+        if(theSCW == null){
+            passedSelKey.cancel();
+            return;
+        }
+
+        // Switch on event
+        try {
+
+            if (passedSelKey.isReadable()) {
+                receive(passedSelKey);
+            } else if (passedSelKey.isWritable()) {
+                send(passedSelKey);
+            } else {
+                passedSelKey.cancel();
+            }
+            
+        } catch ( CancelledKeyException | IOException ex ){
+            
+            //Cancel the key
+            passedSelKey.cancel();
+            
+            //Flush any remaining packets from the queue in the handler
+            shutdown();
+            
+            DebugPrinter.printException(ex);
+            thePortRouter.getCommManager().socketClosed( this );
+            
+        }
+
+        //TODO handle the case a RuntimeException is thrown doing SSL handshake
+    }
+
+    //===============================================================
+    /**
+     *  Returns the socket channel managed by the AccessHandler
+     * 
+     * @return 
+     */
+    public SocketChannelWrapper getSocketChannelWrapper(){
+        return theSCW;
+    }
+    
+    //===============================================================
+    /**
+    *  Queues a byte array to be sent out the specified socket channel
+    *
+    * @param data
+    */
+    public void queueBytes( byte[] data) {
+
+        SelectionRouter aSR = getPortRouter().getSelRouter();
+        if( theSCW != null ){
+            
+            SocketChannel aSC = theSCW.getSocketChannel();
+            synchronized (pendingByteArrs) {
+                pendingByteArrs.add(data);
+                if( ( aSR.interestOps( aSC) & SelectionKey.OP_WRITE ) == 0){
+                    aSR.changeOps( aSC, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
+                }
+            }
+            
+        }
+        
+    }
+    
+     //===============================================================
+    /**
+    *  Clears the outgoing queue
+    *
+    */
+    public void clearQueue() {
+
+        synchronized (pendingByteArrs) {
+            pendingByteArrs.clear();
+        }
+    }
+    
+     //===============================================================
+    /**
+     *  Method that handles the reception of bytes from the socket channel.
+     * 
+     * @param sk the Selection Key
+     * @throws IOException 
+    */
+    private void receive(SelectionKey sk) throws IOException {
+	
+        try {
+            
+            if ( !theSCW.doHandshake(sk)) {
+                return;
+            }
+            
+        } catch (SSLException ex){
+            
+            Log.log(Level.WARNING, NAME_Class, "receive()", ex.getMessage(), ex);
+            return;
+        }       
+
+        theSCW.clear();
+        int bytesRead = theSCW.read();        
+        if(bytesRead > 0){
+            
+            //Copy over the bytes
+            ByteBuffer readByteBuf = ByteBuffer.wrap( Arrays.copyOf( theSCW.getReadBuf().array(), bytesRead ) );
+            
+            //Check if a port wrapper has been assigned
+            PortWrapper aPortWrapper = DataManager.getPortWrapper( getPort() );
+            if( aPortWrapper == null || !isWrapping() ){  
+                
+                
+                while( readByteBuf.remaining() > 0){
+                    
+                    //See if we are already in the middle of receive
+                    if( msgByteReverseCounter == 0 ){
+
+                        //Get the message type and ensure it is supported
+                        if( currMsgType == 0 ){
+                            currMsgType = readByteBuf.get();
+                            if( !DataManager.isValidType( currMsgType ) ){
+                                 
+                                //Print error message
+                                currMsgType = 0;
+                                msgByteReverseCounter = 0;
+                                Integer.toHexString(currMsgType);
+                                
+                                String ipStr = "";
+                                if( theSCW != null ){
+                                    ipStr = theSCW.getSocketChannel().socket().getInetAddress().getHostAddress();
+                                }
+                                
+                                StringBuilder aSB = new StringBuilder()
+                                    .append("Encountered unrecognized data on the socket channel: ")
+                                    .append( ipStr )
+                                    .append( ":0x")
+                                    .append( Integer.toHexString(currMsgType) );
+                                
+                                Log.log( Level.SEVERE, NAME_Class, "receive()", aSB.toString(), null);
+                                break;
+                                
+                            }
+                        }
+                        
+                        if( readByteBuf.remaining() > 1 ){
+                        
+                            //Get the msg length
+                            byte[] msgLen = new byte[2];
+                            if( lowerByte != 0 ){
+                                msgLen[0] = lowerByte;
+                                msgLen[1] = readByteBuf.get();
+                            } else {
+                                //Get the length of the ctrl msg
+                                readByteBuf.get( msgLen );
+                            }
+                            
+                            //Get the counter
+                            msgByteReverseCounter = SocketUtilities.byteArrayToInt(msgLen);  
+                            
+                            //Reset byte
+                            lowerByte = 0;
+                        
+                        } else if( readByteBuf.remaining() > 0 ){
+                            
+                            
+                            lowerByte = readByteBuf.get();
+                            //End of stream, get next byte array
+                            continue;   
+                            
+                        } else {
+                            continue;
+                        }                  
+
+                    }   
+
+                    //If the bytes read is more than is needed for the msg
+                    if( msgByteReverseCounter <= readByteBuf.remaining() ){                
+
+                        //Put the rest of the bytes in and process the message
+                        byte[] remBytes = new byte[msgByteReverseCounter];
+                        readByteBuf.get(remBytes);
+                        localMsgBuffer.put( remBytes );
+
+                        //copy into byte array
+                        byte [] msgByteArr = Arrays.copyOf( localMsgBuffer.array(), localMsgBuffer.position());
+
+                        //Get the id If the client is already registered then return
+                        if( msgByteArr.length > 3 ){
+                            
+                            byte[] clientIdArr = Arrays.copyOf(msgByteArr, 4);
+                            int tempId = SocketUtilities.byteArrayToInt(clientIdArr);
+                            if( !registerId(tempId))    
+                                return;
+
+                            //Route the message to the right handler
+                            DataManager.routeMessage( thePortRouter.getCommManager(), currMsgType, msgByteArr );                      
+
+                            //Reset the counter
+                            currMsgType = 0;
+                            localMsgBuffer.clear();
+                            msgByteReverseCounter = 0;
+                            continue;
+                            
+                        }
+
+                    //If the bytes read is less than the number remaining
+                    } else {
+
+                        //Put the rest of the bytes in and process the message
+                        msgByteReverseCounter -= readByteBuf.remaining();
+                        localMsgBuffer.put( readByteBuf );
+                        break;
+                    }
+                
+                }
+                
+            } else {
+                
+                //Unwrap and process the data
+                aPortWrapper.processData( this, readByteBuf );
+            }  
+
+        
+        } else  if(bytesRead == 0){
+            
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                ex = null;
+            }
+            
+        } else if(bytesRead == -1){
+            
+           //Socket has been closed on the other side
+            throw new IOException("Socket closed from other end.");
+        }
+
+    }
+    
+    //===============================================================
+    /**
+     *  Register the client
+     * 
+     * @param passedId
+     * @return 
+     */
+    public boolean registerId( int passedId ){
+        
+        if( rootHostId == -1 ){
+                            
+            SocketChannelHandler aHandler = thePortRouter.getSocketChannelHandler(passedId);
+            if( aHandler == null ){
+
+                //Register the handler
+                rootHostId = passedId;
+                thePortRouter.registerHandler(rootHostId, this);
+
+            } else if( aHandler == this ){
+
+                //Set the clientId
+                rootHostId = passedId;
+
+            } else {
+               
+                if( theSCW.getSocketChannel().socket().getInetAddress().equals( 
+                        aHandler.getSocketChannelWrapper().getSocketChannel().socket().getInetAddress())){
+
+                    //Register the new one
+                    rootHostId = passedId;
+                    thePortRouter.registerHandler(rootHostId, this);
+                    
+                    //Shutdown the previous one
+                    aHandler.shutdown();
+                   
+                } else {    
+                
+                    //Send message to tell client to reset their id
+                    ResetId resetIdMsg = new ResetId(passedId);
+                    ByteBuffer aByteBuffer;
+
+                    int msgLen = resetIdMsg.getLength() + 3;
+                    aByteBuffer = ByteBuffer.allocate( msgLen );
+                    resetIdMsg.append(aByteBuffer);
+
+                    //Queue to be sent
+                    queueBytes(Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()));
+                    return false;
+                }
+            }
+            
+        } else {
+            
+            //Register the relay
+            internalHostIds.add( passedId );
+            thePortRouter.registerHandler(passedId, this);
+            
+        }
+        
+        return true;
+    }
+
+    //===============================================================
+    /**
+     * This method is responsible for sending the next control message
+     *
+     * @param theSelKey
+     * @throws IOException
+    */
+    private void send(SelectionKey theSelKey) throws IOException {
+
+        //Sending handshake messages as needed
+        if( canSend( theSelKey ) ){            
+
+            synchronized (pendingByteArrs) {
+
+                // Write until there's not more data ...
+                if( !pendingByteArrs.isEmpty() ){
+
+                    //Send message
+                    byte[] nextArr = pendingByteArrs.poll();
+                    if( nextArr != null){
+
+                        try {
+
+                            send(nextArr);
+
+                        } catch( IOException ex ){
+
+                            if (ex.getMessage().startsWith("Resource temporarily")) {
+                                Log.log(Level.INFO, NAME_Class, "send()", ex.getMessage(), ex );
+                                return;
+                            }                                   
+
+                        } catch( IllegalStateException ex1 ){
+                            //Resend it
+                            retrySend(nextArr);    
+                        }                            
+                    }
+                    
+                } else {
+                    
+                    SocketChannelWrapper aSCW = getSocketChannelWrapper();
+                    if( aSCW != null ){
+                        getPortRouter().getSelRouter().changeOps( aSCW.getSocketChannel(), SelectionKey.OP_READ);
+                    }
+                }
+
+                //Notify any threads waiting on this monitor
+                pendingByteArrs.notifyAll();
+            }
+
+        }
+    }    
+     
+    //===============================================================
+    /**
+     *   Send the message out the given channel.
+     *
+     * @param passedArr
+    */
+    private void send( byte[] passedArr ) throws IOException {
+
+        ByteBuffer aByteBuffer = ByteBuffer.wrap( passedArr );
+        while(aByteBuffer.hasRemaining()) {
+            if (theSCW.write(aByteBuffer) <= 0) 
+                break;
+        }
+
+        //Flush the channel
+        theSCW.dataFlush();
+
+    }
+    
+     //===============================================================
+    /**
+     * This method is responsible for sending the next control message
+     *
+     * @param theSelKey
+     * @throws IOException
+    */
+    private void retrySend( byte[] passedArr ){
+        
+        //Handshake is not complete, sleep then add back to the queue
+        final byte[] byteArr = passedArr;
+        Constants.Executor.execute( new Runnable(){
+
+            @Override
+            public void run() {
+                
+                try {
+                    Thread.sleep(250);                    
+                } catch (InterruptedException ex1) {
+                    ex1 = null;
+                }
+                
+                thePortRouter.queueSend( byteArr, getRootHostId() );
+                
+            }
+
+        }); 
+    }
+     
+    //===============================================================
+    /**
+    * Returns the Inet Address associated with the channel io for the
+    * access handler
+    *
+    * @return
+    */
+    public InetAddress getInetAddress(){
+        
+        InetAddress theInet = null;
+        if( theSCW != null){
+            theInet = theSCW.getSocketChannel().socket().getInetAddress();
+        }
+        return theInet;
+    }
+    
+    //===============================================================
+    /**
+    * Returns the Inet Address associated with the channel io for the
+    * access handler
+    *
+    * @return
+    */
+    public int getPort(){
+        
+        int port = 0;
+        if( theSCW != null){
+            port = theSCW.getSocketChannel().socket().getLocalPort();
+        }
+        return port;
+    }
+
+    //===============================================================
+    /**
+    * Returns the state of the channel
+    *
+    * @return
+    */
+    public synchronized int getState(){
+
+        //Get the current state
+        return Integer.valueOf(state);
+      
+    }
+
+    //===============================================================
+    /**
+     * Sets the socket channel wrapper
+     *
+     * @param passedSCW
+    */
+    public void setSocketChannelWrapper(SocketChannelWrapper passedSCW){      
+        theSCW = passedSCW;
+    }
+
+    //===============================================================
+    /**
+    * Gets the client id
+    *
+    * @return
+    */
+    public int getRootHostId() {
+       return rootHostId;
+    }
+
+    //===============================================================
+    /**
+    * Sets the state of the underlying
+    *
+     * @param passedState
+    */
+    public synchronized void setState(int passedState) {
+        state = passedState;
+    }
+
+    //===============================================================
+    /**
+    * Shutdown the handler and any of its resources
+    *
+    */
+    public void shutdown() {
+
+        try {
+
+            //Shutdown the socket channel
+            if(theSCW != null){
+                theSCW.shutdown();
+                theSCW = null;
+            }
+                        
+        } catch (IOException ex) {
+            ex = null;
+        }
+        
+    }
+
+    //===============================================================
+    /**
+     * Sets the alias for the client
+     *
+     * @param passedAlias
+    */
+    public void setAlias(String passedAlias) {
+       hostAlias = passedAlias;
+    }
+   
+    //===============================================================
+    /**
+     * Returns the alias for the client
+     *
+     * @return 
+    */
+    public String getAlias() {
+       return hostAlias;
+    }
+
+    //===============================================================
+    /**
+     * Returns whether or not the channel is able to send messages out.
+     *
+    */
+    private boolean canSend( SelectionKey theSelKey) throws IOException {
+        
+        try {
+            
+            if ( !theSCW.doHandshake(theSelKey) ) {
+
+                //Set the flag that specifies a send was attempted but failed.
+                return false;
+            }
+            
+        } catch (SSLException ex){
+            
+            return false;
+        }
+        
+        return true;
+    }
+
+    //===============================================================
+    /**
+     *  Returns the port router
+     * 
+     * @return 
+     */
+    public PortRouter getPortRouter() {
+        return thePortRouter;
+    }
+    
+     //===================================================================
+    /**
+     *  Set the flag
+     * 
+     * @param passedBool 
+     */
+    public synchronized void setWrapping( boolean passedBool ) {
+        wrappingFlag = passedBool;
+    }
+    
+    //===================================================================
+    /**
+     *  Wrap the data
+     * 
+     * @return 
+     */
+    public synchronized boolean isWrapping() {
+        return wrappingFlag;
+    }
+
+}/* END CLASS AccessHandler */
