@@ -348,10 +348,12 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
             theStdOutRecorder = new StreamRecorder( theProcess.getInputStream() );
             theStdOutRecorder.setIStreamReaderListener( this );
             theStdOutRecorder.setOutputFile( new File( workingDirectory, "stdout.txt" ) );
+            theStdOutRecorder.start();
        
             //Collect the data from stderr...
             theStdErrRecorder.setInputStream(theProcess.getErrorStream());
             theStdErrRecorder.setIStreamReaderListener( this );
+            theStdErrRecorder.start();
         
             //Wait for the process to complete...
             int exitValue = Integer.MIN_VALUE;

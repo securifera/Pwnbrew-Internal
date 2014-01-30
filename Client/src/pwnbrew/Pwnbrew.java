@@ -347,7 +347,7 @@ public final class Pwnbrew extends CommManager implements TaskListener {
                 addTaskRunner(Integer.valueOf(taskId), aHandler);
 
                 //Execute the runnable
-                execute(aHandler);
+                aHandler.start();
             }
 
         //If a msg was received to cancel the task

@@ -75,17 +75,6 @@ public class ControlMessageManager extends DataManager {
         
         super(passedCommManager);        
         
-//        //Set the port
-//        try {
-//            
-//            ClientConfig theConfig = ClientConfig.getConfig();
-//            int thePort = theConfig.getSocketPort();
-//            setPort( thePort );
-//            
-//        } catch (LoggableException ex) {
-//            Log.log( Level.SEVERE, NAME_Class, "ControlMessageManager()", ex.getMessage());
-//        }
-        
         //Create the handler
         ControlMessageHandler theMessageHandler = new ControlMessageHandler( this );
         theMessageHandler.start();

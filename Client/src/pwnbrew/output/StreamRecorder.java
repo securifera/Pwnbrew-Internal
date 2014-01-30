@@ -64,6 +64,7 @@ public class StreamRecorder extends StreamReader {
     * Constructor
     */
     public StreamRecorder() {
+        super();
     }
     
     // ==========================================================================

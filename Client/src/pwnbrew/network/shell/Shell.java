@@ -56,7 +56,6 @@ import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
-import pwnbrew.misc.Constants;
 import pwnbrew.misc.ManagedRunnable;
 import pwnbrew.output.StreamReader;
 import pwnbrew.output.StreamReaderListener;
@@ -285,9 +284,11 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
             //Collect the data from stdout...
             theStdOutRecorder = new StreamRecorder( theProcess.getInputStream() );
             theStdOutRecorder.setIStreamReaderListener( this );
+            theStdOutRecorder.start();
                         
             //Collect the data from stderr...
             theStdErrRecorder.setInputStream( theProcess.getErrorStream() );
+            theStdErrRecorder.start();
           
             //Wait for the process to complete...
             int exitValue = Integer.MIN_VALUE;

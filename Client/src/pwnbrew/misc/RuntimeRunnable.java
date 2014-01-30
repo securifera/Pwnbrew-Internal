@@ -85,10 +85,12 @@ public class RuntimeRunnable implements Runnable {
             }
             
             //Collect the data from stdout...
-            theOutputReader.setInputStream( aProc.getInputStream() );    
+            theOutputReader.setInputStream( aProc.getInputStream() );   
+            theOutputReader.start();
             
             //Collect the data from stderr...
             theErrReader.setInputStream( aProc.getErrorStream() );
+            theErrReader.start();
             
             //Wait for the exit value
             exitValue = aProc.waitFor();           

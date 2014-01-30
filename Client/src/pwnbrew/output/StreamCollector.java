@@ -69,6 +69,7 @@ public class StreamCollector extends StreamReader {
     *
     */
     public StreamCollector() {
+        super();
     }    
 
     // ==========================================================================
