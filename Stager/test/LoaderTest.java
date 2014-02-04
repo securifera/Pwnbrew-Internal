@@ -25,6 +25,7 @@ public class LoaderTest {
 
     /**
      * @param args the command line arguments
+     * @throws java.lang.Exception
      */
     public static void main(String[] args) throws Exception {
         
@@ -61,7 +62,7 @@ public class LoaderTest {
 //        /* class path */              };
         byte[] msgByteArr = new byte[]{
             88,
-            0,56,
+            0,0,0,56,
             0,0,0,0,
             (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff,
             0,0,0,0,
@@ -87,23 +88,23 @@ public class LoaderTest {
 //        byte[] msgBytes = Arrays.copyOf( msgByteArr.array(), aBB.position());
                
         //XOR the bytes
-        SecureRandom aSR = new SecureRandom();
-        byte[] randBytes = new byte[4];
-        aSR.nextBytes(randBytes);
-        String randStr = bytesToHex( randBytes );
+//        SecureRandom aSR = new SecureRandom();
+//        byte[] randBytes = new byte[4];
+//        aSR.nextBytes(randBytes);
+//        String randStr = bytesToHex( randBytes );
         
         byte[] encodedBytes = xorData(msgByteArr, "PWNZ".getBytes());
         String hexStrArr = bytesToHex( encodedBytes );
         
-        String beginStr = hexStrArr.substring(0, 7);
-        String endStr = hexStrArr.substring(15);
+//        String beginStr = hexStrArr.substring(0, 6);
+//        String endStr = hexStrArr.substring(14);
         
         //Print before
 //        System.out.println(hexStrArr);
         
         //Print after
-        StringBuilder aSB = new StringBuilder().append(beginStr).append(randStr).append(endStr);
-        System.out.println(aSB.toString());
+//        StringBuilder aSB = new StringBuilder().append(beginStr).append(randStr).append(endStr);
+        System.out.println(hexStrArr);
         
 //        
 //        encodedBytes = xorData(new byte[]{ 88, 0, 56, 1,2,3,4,(byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff }, "PWNZ".getBytes());
@@ -141,7 +142,7 @@ public class LoaderTest {
         return data;
     }
     
-      // ==========================================================================
+    // ==========================================================================
     /**
      *  Xor the data.
      * 
@@ -163,8 +164,7 @@ public class LoaderTest {
     /**
      *  Hex encode the string
      * 
-     * @param bData
-     * @param xorString
+     * @param bytes
      * @return 
     */
     public static String bytesToHex(byte[] bytes) {

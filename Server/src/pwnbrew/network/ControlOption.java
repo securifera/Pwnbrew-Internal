@@ -66,8 +66,8 @@ public class ControlOption extends TlvOption {
         type = new byte[]{ passedType };
 
         //Convert the length to a byte array
-        //Max size is (256*256)/2 = 32768
-        length = new byte[2];
+        //Max size is (256*256*256*256)
+        length = new byte[4];
         if(passedValue != null){
             SocketUtilities.intToByteArray(length, passedValue.length);
             value = Arrays.copyOf(passedValue, passedValue.length);

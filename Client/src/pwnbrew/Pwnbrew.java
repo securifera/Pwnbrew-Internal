@@ -84,7 +84,7 @@ import pwnbrew.task.TaskRunner;
 public final class Pwnbrew extends CommManager implements TaskListener {
 
     private static final String NAME_Class = Pwnbrew.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
   
     //The Server Details
     private final Map<Integer, TaskRunner> theTaskMap = new HashMap<Integer, TaskRunner>();
@@ -497,15 +497,27 @@ public final class Pwnbrew extends CommManager implements TaskListener {
      */
     public void initialize() throws LoggableException {
 
+        //Get the port
+        int thePort = ClientConfig.getConfig().getSocketPort();        
+        
         //Create and set the http wrapper
-        int thePort = ClientConfig.getConfig().getSocketPort();
-        switch( thePort ){
-            case Http.DEFAULT_PORT:
-            case Http.SECURE_PORT:
-                ClientHttpWrapper aWrapper = new ClientHttpWrapper();
-                DataManager.setPortWrapper( thePort, aWrapper);
-                break;
+        if( Utilities.isStaged() ){
+            //Has to use http because the stager is currently http
+            ClientHttpWrapper aWrapper = new ClientHttpWrapper();
+            DataManager.setPortWrapper( thePort, aWrapper); 
+            
+        } else {
+        
+            //Switch based on the port
+            switch( thePort ){
+                case Http.DEFAULT_PORT:
+                case Http.SECURE_PORT:
+                    ClientHttpWrapper aWrapper = new ClientHttpWrapper();
+                    DataManager.setPortWrapper( thePort, aWrapper);
+                    break;
+            }
         }
+        
              
     }    
     

@@ -113,7 +113,7 @@ final public class AcceptHandler implements Selectable {
         try {            
             
             DebugPrinter.printMessage(NAME_Class, "Received a connection from " + srcAddr.getHostAddress());
-            SocketChannelHandler theSCH = new SocketChannelHandler(theSPR);
+            SocketChannelHandler theSCH = new SocketChannelHandler(theSPR, SocketChannelHandler.SERVER_TYPE);
             
             try {
                 //Set a keepalive so we are notified of disconnects

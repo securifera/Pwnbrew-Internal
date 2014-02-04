@@ -36,43 +36,46 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
 /*
- * ControlOption.java
- *
- * Created on June 7, 2013, 10:11 PM
- */
+* SetRelayWrap.java
+*
+* Created on Feb 4, 2014, 6:13:45 PM
+*/
 
-package pwnbrew.network;
+package pwnbrew.network.control.messages;
 
-import java.util.Arrays;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.network.ControlOption;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
  *  
  */
-public class ControlOption extends TlvOption {
-
-    //======================================================================
-    /**
-     *  Constructor
-     * @param passedType
-     * @param passedValue
-     */
-    public ControlOption(byte passedType, byte[] passedValue) {
-        
-        type = new byte[]{ passedType };
-
-        //Convert the length to a byte array
-        length = new byte[4];
+@SuppressWarnings("ucd")
+public final class SetRelayWrap extends ControlMessage{
+ 
+    private static final byte OPTION_WRAPPER = 45;
+    private static final byte OPTION_CLIENT_ID = 43;
     
-        if(passedValue != null){
-            SocketUtilities.intToByteArray(length, passedValue.length);
-            value = Arrays.copyOf(passedValue, passedValue.length);
-        } else {
-            value = new byte[0];
-        }
+    // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param dstHostId
+     * @param clientId
+     * @param passedWrapper
+    */
+    public SetRelayWrap( int dstHostId, int clientId, byte passedWrapper ) {
+        super( dstHostId );     
+        
+         //Add the option
+        byte[] clientIdArr = SocketUtilities.intToByteArray(clientId);
+        ControlOption aTlv = new ControlOption( OPTION_CLIENT_ID, clientIdArr );
+        addOption(aTlv);
+        
+        //Add the option
+        aTlv = new ControlOption( OPTION_WRAPPER, new byte[]{ passedWrapper });
+        addOption(aTlv);
     }
 
 }

@@ -61,6 +61,7 @@ import pwnbrew.gui.panels.PanelListener;
     //==============================================================
     /**
      * Constructor
+     * @param panelName
      * @param passedListener 
      */
     public OptionsJPanel( String panelName, PanelListener passedListener) {
@@ -90,6 +91,7 @@ import pwnbrew.gui.panels.PanelListener;
     //===============================================================
     /**
      * 
+     * @param passedBool
      * @return 
      */
     public void setDirtyFlag( boolean passedBool ){

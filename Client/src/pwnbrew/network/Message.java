@@ -63,12 +63,14 @@ public abstract class Message {
     public static final byte PROCESS_MESSAGE_TYPE = 89;
     public static final byte FILE_MESSAGE_TYPE = 90;
 
-    public static final int SRC_HOST_ID_OFFSET = 3;
-    public static final int DEST_HOST_ID_OFFSET = 7;
+    public static final int SRC_HOST_ID_OFFSET = 5;
+    public static final int DEST_HOST_ID_OFFSET = 9;
+    
+    public static final int MSG_LEN_SIZE = 4;
     
     //Data members
     private final byte type;
-    protected final byte[] length = new byte[2];
+    protected final byte[] length = new byte[MSG_LEN_SIZE];
     private final byte[] srcHostId = new byte[4];
     private final byte[] destHostId = new byte[4];
     protected final byte[] msgId = new byte[4];
@@ -95,7 +97,7 @@ public abstract class Message {
         SocketUtilities.intToByteArray(msgId, SocketUtilities.getNextId());        
         
         //Set the base length
-        length[1] = 15;
+        length[3] = 15;
     }
     
     //===========================================================================
@@ -115,7 +117,7 @@ public abstract class Message {
         }
         
         //Set the base length
-        length[1] = 11;
+        length[3] = 11;
     }
     
     //===============================================================
@@ -220,7 +222,7 @@ public abstract class Message {
         rtnBuffer.put( type );
 
         //Add the length
-        int fullLength = getLength() - 3;
+        int fullLength = getLength() - ( length.length + 1);
          
         //Set the length
         SocketUtilities.intToByteArray(length, fullLength );

@@ -36,40 +36,34 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
 /*
-* RelayStart.java
+* SetRelayWrap.java
 *
-* Created on Dec 2, 2013, 9:22:22 PM
+* Created on Feb 4, 2014, 6:13:45 PM
 */
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
-import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
-import pwnbrew.manager.DataManager;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.ServerPortRouter;
-import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
  *  
  */
-public final class RelayStart extends ControlMessage{
-
-    private static final byte OPTION_PORT = 24;
-    private int port;   
+@SuppressWarnings("ucd")
+public final class SetRelayWrap extends ControlMessage{
+      
+    private static final int NO_WRAP = 0x0;
+    private static final byte OPTION_WRAPPER = 45; 
+    private static final byte OPTION_CLIENT_ID = 43;
     
-    //Class name
-    private static final String NAME_Class = RelayStart.class.getSimpleName();
+    private byte relayWrap;
+    private int theRelayClientId;
     
     // ==========================================================================
     /**
@@ -77,11 +71,11 @@ public final class RelayStart extends ControlMessage{
      *
      * @param passedId
     */
-    public RelayStart( byte[] passedId ) {
-        super(passedId);
+    public SetRelayWrap(byte[] passedId ) {
+        super( passedId );
     }
     
-    //=========================================================================
+     //=========================================================================
     /**
      *  Sets the variable in the message related to this TLV
      * 
@@ -90,19 +84,23 @@ public final class RelayStart extends ControlMessage{
      */
     @Override
     public boolean setOption( ControlOption tempTlv ){        
-       
+
         boolean retVal = true;
         byte[] theValue = tempTlv.getValue();
         switch( tempTlv.getType()){
-
-            case OPTION_PORT:                    
-                port = SocketUtilities.byteArrayToInt(theValue); 
+            case OPTION_WRAPPER:
+                if( theValue.length > 0 ){
+                    relayWrap = theValue[0];
+                }
                 break;
+            case OPTION_CLIENT_ID:
+                theRelayClientId = SocketUtilities.byteArrayToInt(theValue);
+                break;
+            
             default:
                 retVal = false;
                 break;
-        }
-       
+        }  
         return retVal;
     }
     
@@ -113,50 +111,26 @@ public final class RelayStart extends ControlMessage{
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) { 
-        
-        boolean retVal = true;
-        try {
-            
-            RelayManager aManager = RelayManager.getRelayManager();
-            if( aManager == null ){
-                aManager = RelayManager.initialize( passedManager );
-            }
-            
-            ServerPortRouter aSPR = aManager.getServerPorterRouter();
-            if( aSPR.getServerSocketChannel() == null ){
-                aSPR.startServer(null, port );
+    public void evaluate( CommManager passedManager ) {   
+    
+        switch( relayWrap){
+            case NO_WRAP:
                 
-                ServerHttpWrapper aWrapper = new ServerHttpWrapper();
-                DataManager.setPortWrapper( port, aWrapper);
-            }
-            
-        } catch(IOException ex ){
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null); 
-            retVal = false;
-        } catch (GeneralSecurityException ex) {
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null); 
-            retVal = false;
-        }
-        
-        //Get the control message manager send an ack
-        try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize(passedManager);
-            }
+                //Get the relay
+                RelayManager theRelayManager = RelayManager.getRelayManager();
+                ServerPortRouter theSPR = theRelayManager.getServerPorterRouter();
 
-            //Send the message
-            RelayStatus aMsg = new RelayStatus( retVal );
-            aCMManager.send(aMsg);
-        
-        } catch(IOException ex ){
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null);        
-        } catch (LoggableException ex) {
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null);        
-        }
-        
+                //Set the flag on the handler
+                SocketChannelHandler aHandler = theSPR.getSocketChannelHandler(theRelayClientId);
+                if( aHandler != null ){
+                    aHandler.setWrapping(false);
+                }
+                
+                break;
+            default:
+                break;
+        }            
+           
     }
 
-}/* END CLASS RelayStart */
+}

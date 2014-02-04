@@ -46,7 +46,10 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
 import pwnbrew.host.HostController;
+import pwnbrew.logging.Log;
+import pwnbrew.logging.LogLevel;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
@@ -125,9 +128,16 @@ public class LogMsg extends ControlMessage {
         
             ServerManager theManager = (ServerManager)passedManager;
             String clientIdStr = Integer.toString( getClientId() );
-            HostController theController = theManager.getServer().getGuiController().getHostController( clientIdStr );
             
-//            theController.addLogMessage(theMessage);
+            //Get the host controller
+            HostController theController = theManager.getServer().getGuiController().getHostController( clientIdStr );
+            String hostStr = theController.getItemName();
+               
+            StringBuilder aSB = new StringBuilder();
+            aSB.append("Remote Exception: ").append(hostStr).append("-").append(theMessage);
+            
+            //Log it
+            Log.log( LogLevel.SEVERE, NAME_Class, "evaluate()", aSB.toString(), null );
         }
     }
 

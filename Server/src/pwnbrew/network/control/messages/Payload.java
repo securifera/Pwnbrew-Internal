@@ -38,41 +38,40 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
- * ControlOption.java
- *
- * Created on June 7, 2013, 10:11 PM
- */
+* Payload.java
+*
+* Created on Feb 2, 2014, 7:21:29 PM
+*/
 
-package pwnbrew.network;
+package pwnbrew.network.control.messages;
 
-import java.util.Arrays;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-public class ControlOption extends TlvOption {
-
-    //======================================================================
-    /**
-     *  Constructor
-     * @param passedType
-     * @param passedValue
-     */
-    public ControlOption(byte passedType, byte[] passedValue) {
-        
-        type = new byte[]{ passedType };
-
-        //Convert the length to a byte array
-        length = new byte[4];
+@SuppressWarnings("ucd")
+public final class Payload extends ControlMessage{
     
-        if(passedValue != null){
-            SocketUtilities.intToByteArray(length, passedValue.length);
-            value = Arrays.copyOf(passedValue, passedValue.length);
-        } else {
-            value = new byte[0];
-        }
+    private static final byte OPTION_PAYLOAD = 32;
+    
+     //Class name
+    private static final String NAME_Class = Payload.class.getSimpleName();    
+
+
+    // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param dstHostId
+     * @param passedPayloadBytes
+    */
+    public Payload( int dstHostId, byte[] passedPayloadBytes ) {
+        super( dstHostId );
+        
+        ControlOption aTlv = new ControlOption( OPTION_PAYLOAD, passedPayloadBytes);
+        addOption(aTlv);
     }
 
 }

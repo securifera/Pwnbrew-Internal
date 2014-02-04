@@ -64,8 +64,6 @@ import pwnbrew.network.control.ControlMessageManager;
 public final class TaskGetFile extends TaskStatus{
 
     private File fileToRetrieve;
-//    private String fileName = null;
-//    private String fileHash = null;
     private String hashFilenameStr;
     
     //Class name
@@ -134,16 +132,6 @@ public final class TaskGetFile extends TaskStatus{
         }
         return retVal;
     }    
-
-//    //===============================================================
-//    /**
-//     * Returns a string specifying the local file name.
-//     *
-//     * @return
-//     */
-//    public String getFileNameToRetrieve() {       
-//        return fileName;
-//    }
 
     //===============================================================
     /**

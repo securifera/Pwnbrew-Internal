@@ -197,10 +197,10 @@ public final class Hello extends ControlMessage {
                 aCMManager.send( aHostAck );
             
                 //Turn off wrapping
-                aSCH.setWrapping(false);
+                aSCH.setWrapping( theClientId, false);
                              
                 //Create a host
-                Host aHost = HostFactory.getHost( getClientId(), getHostname() );
+                Host aHost = HostFactory.getHost( theClientId, getHostname() );
                 
                 //Get the list
                 List<String> nicInfoList = getNicInfoList();

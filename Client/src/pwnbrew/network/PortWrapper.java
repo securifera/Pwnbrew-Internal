@@ -48,6 +48,7 @@ package pwnbrew.network;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import pwnbrew.manager.CommManager;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
@@ -59,11 +60,11 @@ public abstract class PortWrapper {
     /**
      *  Unwraps any data in the bytes
      *
-     * @param passedManager
+     * @param passedHandler
      * @param aByteBuffer
      * @param passedAddress
     */
-    abstract public void processData( CommManager passedManager, ByteBuffer aByteBuffer, InetAddress passedAddress );
+    abstract public void processData( SocketChannelHandler passedHandler, ByteBuffer aByteBuffer, InetAddress passedAddress );
     
     //===============================================================
     /**

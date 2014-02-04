@@ -150,7 +150,7 @@ public class ShellMessageManager extends DataManager {
 //        if( aWrapper != null ){
 //            aByteBuffer = aWrapper.wrapBytes( passedMessage.getBytes() );        
 //        } else {
-            int msgLen = passedMessage.getLength() + 3;
+            int msgLen = passedMessage.getLength();
             aByteBuffer = ByteBuffer.allocate( msgLen );
             passedMessage.append(aByteBuffer);
 //        }

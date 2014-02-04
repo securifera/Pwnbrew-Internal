@@ -38,41 +38,55 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
- * ControlOption.java
- *
- * Created on June 7, 2013, 10:11 PM
- */
+* StageFlag.java
+*
+* Created on Feb 2, 2014, 8:11:15 PM
+*/
 
-package pwnbrew.network;
+package pwnbrew.network.control.messages;
 
-import java.util.Arrays;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.network.ControlOption;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
  *  
  */
-public class ControlOption extends TlvOption {
-
-    //======================================================================
-    /**
-     *  Constructor
-     * @param passedType
-     * @param passedValue
-     */
-    public ControlOption(byte passedType, byte[] passedValue) {
-        
-        type = new byte[]{ passedType };
-
-        //Convert the length to a byte array
-        length = new byte[4];
+@SuppressWarnings("ucd")
+public final class StageFlag extends ControlMessage{
     
-        if(passedValue != null){
-            SocketUtilities.intToByteArray(length, passedValue.length);
-            value = Arrays.copyOf(passedValue, passedValue.length);
-        } else {
-            value = new byte[0];
+    private static final byte OPTION_STAGE_FLAG = 42;
+    private static final byte OPTION_CLIENT_ID = 43;
+    
+     //Class name
+    private static final String NAME_Class = StageFlag.class.getSimpleName();    
+
+
+    // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param dstHostId
+     * @param clientId
+     * @param isStaged
+    */
+    public StageFlag( int dstHostId, int clientId, boolean isStaged ) {
+        super( dstHostId );
+        
+        //Add the option
+        byte[] clientIdArr = SocketUtilities.intToByteArray(clientId);
+        ControlOption aTlv = new ControlOption( OPTION_CLIENT_ID, clientIdArr );
+        addOption(aTlv);
+        
+        //Add the flag
+        byte stageFlag = 0x0;
+        if( isStaged ){
+            stageFlag = 0x1;
         }
+        
+        //Add the option
+        aTlv = new ControlOption( OPTION_STAGE_FLAG, new byte[]{ stageFlag });
+        addOption(aTlv);
     }
 
 }

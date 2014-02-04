@@ -51,7 +51,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
@@ -169,8 +168,8 @@ public abstract class ControlMessage extends Message {
        aMessage.setDestHostId( theDestHostId );
 
        //Parse the tlvs
-       byte[] tlvArray = Arrays.copyOfRange( passedBuffer.array(), passedBuffer.position(), passedBuffer.limit());
-       aMessage.parseTlvByteArray(tlvArray);
+//       byte[] tlvArray = Arrays.copyOfRange( passedBuffer.array(), passedBuffer.position(), passedBuffer.limit());
+       aMessage.parseControlOptions(passedBuffer);
 
        return aMessage;
     }
@@ -209,47 +208,85 @@ public abstract class ControlMessage extends Message {
         
         return aMsg;
     }
-
-       //===============================================================
+    
+    //===============================================================
     /**
-     *   Parses out the tlv list form the passed byte array
+     *   Parses out the control options
      *
      * @param tlvArray
     */
-    private void parseTlvByteArray(byte[] tlvArray) throws LoggableException  {
+    private void parseControlOptions( ByteBuffer passedBB ) throws LoggableException  {
 
-        int marker = 0;
-        final byte[] tempLen = new byte[2];
+        final byte[] tempLen = new byte[4];
 
         //Loop through the array and create tlvs
-        while(marker < tlvArray.length){
+        while( passedBB.hasRemaining() ){
 
-            byte localType = tlvArray[marker++];
+            byte localType = passedBB.get();
             if(localType == 0){
                 continue;
             }
 
             //Ensure we won't get an out of bound exception
-            if(marker + tempLen.length > tlvArray.length){
-                throw new LoggableException("Error parsing length field in TLV.");
+            if( passedBB.position() + tempLen.length > passedBB.limit() ){
+                throw new LoggableException("Error parsing length field in Control Option.");
             }
 
-            System.arraycopy( tlvArray, marker, tempLen, 0, tempLen.length );
-            marker = marker + tempLen.length;
-            int localLen = SocketUtilities.byteArrayToInt(tempLen);
-
-            //And the length value with 0xff in case it is negative
-            byte[] value = new byte[localLen & 0xffff];
-
-            //Copy value into tempArray
-            System.arraycopy( tlvArray, marker, value, 0, value.length );
-            marker = marker + value.length;
+            //Get the length of the value
+            passedBB.get(tempLen);
+            //AND the length value with 0xff in case it is negative
+            int localLen = SocketUtilities.byteArrayToInt(tempLen) & 0xffffffff;
+            
+            //Get the value
+            byte[] value = new byte[localLen];
+            passedBB.get(value);
 
             //Create the tlv and add it to the message
             ControlOption tempTlv = new ControlOption(localType, value);
             setOption(tempTlv);
         }
     }
+
+//       //===============================================================
+//    /**
+//     *   Parses out the tlv list form the passed byte array
+//     *
+//     * @param tlvArray
+//    */
+//    private void parseTlvByteArray(byte[] tlvArray) throws LoggableException  {
+//
+//        int marker = 0;
+//        final byte[] tempLen = new byte[2];
+//
+//        //Loop through the array and create tlvs
+//        while(marker < tlvArray.length){
+//
+//            byte localType = tlvArray[marker++];
+//            if(localType == 0){
+//                continue;
+//            }
+//
+//            //Ensure we won't get an out of bound exception
+//            if(marker + tempLen.length > tlvArray.length){
+//                throw new LoggableException("Error parsing length field in TLV.");
+//            }
+//
+//            System.arraycopy( tlvArray, marker, tempLen, 0, tempLen.length );
+//            marker = marker + tempLen.length;
+//            int localLen = SocketUtilities.byteArrayToInt(tempLen);
+//
+//            //And the length value with 0xff in case it is cnegative
+//            byte[] value = new byte[localLen & 0xffff];
+//
+//            //Copy value into tempArray
+//            System.arraycopy( tlvArray, marker, value, 0, value.length );
+//            marker = marker + value.length;
+//
+//            //Create the tlv and add it to the message
+//            ControlOption tempTlv = new ControlOption(localType, value);
+//            setOption(tempTlv);
+//        }
+//    }
     
     //===============================================================
     /**

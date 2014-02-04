@@ -49,11 +49,11 @@ import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.logging.Level;
-import pwnbrew.logging.Log;
+import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.DataManager;
+import pwnbrew.misc.SocketUtilities;
+import pwnbrew.misc.Utilities;
 import pwnbrew.network.Message;
-import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.utilities.Utilities;
 import pwnbrew.selector.SocketChannelHandler;
 
 /**
@@ -66,7 +66,7 @@ public class ServerHttpWrapper extends HttpWrapper {
     private static final int STEALTH_COOKIE_B64 = 5;   
     
     //Random number gen for age
-    private final SecureRandom aSR = new SecureRandom();   
+    private final SecureRandom aSR = new SecureRandom();  
     private volatile boolean staging = false;
        
     //==========================================================================
@@ -117,7 +117,7 @@ public class ServerHttpWrapper extends HttpWrapper {
                                 if( DataManager.isValidType( type ) ){
                                     
                                     //Get the length
-                                    byte[] msgLenArr = new byte[ Message.MSG_LEN_SIZE ];
+                                    byte[] msgLenArr = new byte[Message.MSG_LEN_SIZE];
                                     msgBB.get(msgLenArr);
                                     
                                     //Verify that it matches
@@ -129,22 +129,22 @@ public class ServerHttpWrapper extends HttpWrapper {
                                         //Get the id If the client is already registered then return
                                         if( msgBytes.length > 3 ){
                                             
+                                            //Get dest id
+                                            byte[] dstHostId = Arrays.copyOfRange(msgBytes, 4, 8);
+                                            int dstId = SocketUtilities.byteArrayToInt(dstHostId);
+                                            
                                             byte [] tempIdArr = Arrays.copyOf( msgBytes, 4);
                                             int tempId = SocketUtilities.byteArrayToInt(tempIdArr);
-                                            if( !passedHandler.registerId(tempId)){
+                                            if( !passedHandler.registerId(tempId, dstId)){
                                                 return;
                                             }
-    //                                        byte[] msgBytes = Arrays.copyOf(msgBB.array(), msgBB.remaining());
-                                            try{
-                                                DataManager.routeMessage( passedHandler.getPortRouter().getCommManager(), type, msgBytes );
-                                            } catch(Exception ex ){
-                                                Log.log( Level.SEVERE, NAME_Class, "processHeader()", ex.toString(), ex);
-                                            }
+                                           
+                                            DataManager.routeMessage( passedHandler.getPortRouter().getCommManager(), type, dstId, msgBytes );
                                             return;
                                         }
                                         
                                     } else {
-                                        Log.log( Level.WARNING, NAME_Class, "processHeader()", "Message size doesn't match remaing size.", null);
+                                        RemoteLog.log( Level.WARNING, NAME_Class, "processHeader()", "Message size doesn't match remaing size.", null);
                                     }
                                 }
                             }
@@ -161,15 +161,11 @@ public class ServerHttpWrapper extends HttpWrapper {
                     }
                 }
             }  
-            
-            //Send redirect
-            ByteBuffer reply = wrapBytes( new byte[0]);
-            passedHandler.queueBytes( Arrays.copyOf(reply.array(), reply.position()));
-            
+                                    
         }
     }
     
-      //===============================================================
+    //===============================================================
     /**
      *  Returns a ByteBuffer with the necessary bytes in it.
      * 
@@ -179,42 +175,42 @@ public class ServerHttpWrapper extends HttpWrapper {
     @Override
     public ByteBuffer wrapBytes( byte[] msgBytes ) {
          
-         //Allocate and add the bytes from the message
         if( staging )
             return wrapStager( msgBytes );
         else {
-            
-            Http aHttpMsg = Http.getGeneric( Http._302 );
+            //Allocate and add the bytes from the message
+           Http aHttpMsg = Http.getGeneric( Http._302 );
 
-            //XOR the bytes
-            if( msgBytes.length > 0 ){     
+           //XOR the bytes
+           if( msgBytes.length > 0 ){     
 
-                //Have to add 1 because this call is between 0 and n which means the check on the other
-                //side will fail if the number returns 0
-                int exp = aSR.nextInt( 9 ) + 1;
-                int ageVal = (int) Math.pow(STEALTH_COOKIE_B64, exp);
+               //Have to add 1 because this call is between 0 and n which means the check on the other
+               //side will fail if the number returns 0
+               int exp = aSR.nextInt( 9 ) + 1;
+               int ageVal = (int) Math.pow(STEALTH_COOKIE_B64, exp);
 
-                //XOR the bytes
-                byte[] encodedBytes = Utilities.xorData(msgBytes, XOR_STRING.getBytes());
-                //Get a hex string representation
-                String encodedByteStr = SocketUtilities.toString(encodedBytes).replace(" ", "");
-                StringBuilder aSB = new StringBuilder()
-                        .append(COOKIE_REF).append("=").append( encodedByteStr ); 
+               //XOR the bytes
+               byte[] encodedBytes = Utilities.xorData(msgBytes, XOR_STRING.getBytes());
+               //Get a hex string representation
+               String encodedByteStr = SocketUtilities.toString(encodedBytes).replace(" ", "");
+               StringBuilder aSB = new StringBuilder()
+                       .append(COOKIE_REF).append("=").append( encodedByteStr ); 
 
-                aHttpMsg.setOption(Http.SET_COOKIE, aSB.toString());
-                aHttpMsg.setOption(Http.AGE, Integer.toString(ageVal));
+               aHttpMsg.setOption(Http.SET_COOKIE, aSB.toString());
+               aHttpMsg.setOption(Http.AGE, Integer.toString(ageVal));
 
-            }
+           }
 
-            //Allocate enough space
-            int httpLen = aHttpMsg.getLength();
-            ByteBuffer aByteBuffer = ByteBuffer.allocate( httpLen );
+           //Allocate enough space
+           int httpLen = aHttpMsg.getLength();
+           ByteBuffer aByteBuffer = ByteBuffer.allocate( httpLen );
 
-            //Add the bytes
-            aHttpMsg.append(aByteBuffer);
-            return aByteBuffer;
+           //Add the bytes
+           aHttpMsg.append(aByteBuffer);
+
+           return aByteBuffer;
         }
-      
+        
     }
     
       
@@ -277,8 +273,8 @@ public class ServerHttpWrapper extends HttpWrapper {
         }  
            
         return msgBytes;
-    }   
-    
+    }       
+     
     //===================================================================
     /**
      *  Set the staging flag
@@ -298,6 +294,7 @@ public class ServerHttpWrapper extends HttpWrapper {
     public synchronized boolean isStaged() {
         return staging;
     }
+    
     
     
 }

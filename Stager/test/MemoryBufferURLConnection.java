@@ -96,6 +96,7 @@ public class MemoryBufferURLConnection extends URLConnection {
     //==================================================================
     /**
      * Create a new URL from a byte array and its content type.
+     * @return 
      */
     public static URL createURL(byte[] data, String contentType) throws MalformedURLException {
         synchronized(files) {

@@ -76,7 +76,8 @@ public class Http {
     static final String COOKIE = "Cookie"; 
         
     //RESPONSE
-    //static final String CONTENT_TYPE = "Content-Type";
+    static final String CONTENT_TYPE = "Content-Type";
+    public static final String LOCATION = "Location";    
     //static final String CONTENT_ENCODING = "Content-Encoding";
     static final String CONTENT_LENGTH = "Content-Length";
     //static final String DATE = "Date";
@@ -91,6 +92,9 @@ public class Http {
     public static final int DEFAULT_PORT = 80;
     public static final int SECURE_PORT = 443;
        
+    public static final int _302 = 302;
+    public static final int _200 = 200;
+    
     // ==========================================================================
     /**
      *  Constructor
@@ -195,6 +199,20 @@ public class Http {
         Http aHttpMsg = null;       
             
         switch( passedType ){
+            case _200:
+                    
+                    aHttpMsg = new Http( Http.DEFAULT_VERSION, Integer.toString(passedType), "Found");
+                    aHttpMsg.setOption( Http.CONTENT_TYPE, "text/html");
+                    break;
+            case _302:
+
+                aHttpMsg = new Http( Http.DEFAULT_VERSION, Integer.toString(passedType), "Found");
+                aHttpMsg.setOption( Http.LOCATION, "http://www.google.com");
+                aHttpMsg.setOption( Http.CONTENT_TYPE, "text/html");
+                aHttpMsg.setOption( Http.CONTENT_LENGTH, Integer.toString(0) );                  
+
+                break;
+                
             case GET:
                 aHttpMsg = new Http("GET", "/", Http.DEFAULT_VERSION, "", "");
                 aHttpMsg.setOption( Http.ACCEPT, "*/*");

@@ -54,6 +54,7 @@ import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.SSLUtilities;
+import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.selector.SelectionRouter;
 import pwnbrew.selector.SocketChannelHandler;
 
@@ -186,6 +187,13 @@ abstract public class PortRouter {
             if( theHandler.isWrapping() ){
                 PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
                 if( aWrapper != null ){
+                    
+                     //Set the staged wrapper if necessary
+                    if( aWrapper instanceof ServerHttpWrapper ){
+                        ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+                        aSrvWrapper.setStaging( theHandler.isStaged());
+                    }
+                    
                     ByteBuffer aByteBuffer = aWrapper.wrapBytes( byteArr );  
                     byteArr = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
                 } 

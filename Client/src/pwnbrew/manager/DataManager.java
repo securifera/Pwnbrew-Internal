@@ -186,8 +186,8 @@ abstract public class DataManager {
                 }   
                 
                 //Reconstruct the msg
-                byte[] msgLen = new byte[2];
-                byte[] tmpBytes = new byte[msgBytes.length + 3];
+                byte[] msgLen = new byte[Message.MSG_LEN_SIZE];
+                byte[] tmpBytes = new byte[msgBytes.length + msgLen.length + 1];
                 tmpBytes[0] = msgType;
 
                 //Copy length
@@ -195,7 +195,7 @@ abstract public class DataManager {
                 System.arraycopy(msgLen, 0, tmpBytes, 1, msgLen.length);
                                 
                 //Copy payload
-                System.arraycopy(msgBytes, 0, tmpBytes, 3, msgBytes.length);
+                System.arraycopy(msgBytes, 0, tmpBytes, msgLen.length + 1, msgBytes.length);
                                 
                 //Reassign
                 msgBytes = tmpBytes;

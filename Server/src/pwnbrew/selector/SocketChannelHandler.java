@@ -61,10 +61,13 @@ import javax.net.ssl.SSLException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
+import pwnbrew.network.Message;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.PortWrapper;
 import pwnbrew.network.control.messages.ResetId;
+import pwnbrew.network.control.messages.SetRelayWrap;
+import pwnbrew.network.control.messages.StageFlag;
 import pwnbrew.network.socket.SocketChannelWrapper;
 
 /**
@@ -86,13 +89,14 @@ public class SocketChannelHandler implements Selectable {
     //Debug message
     private String hostAlias = null;
     private volatile boolean wrappingFlag = true;
+    private volatile boolean staging = false;
     
     private final Queue<byte[]> pendingByteArrs = new LinkedList<>();
-    private int msgByteReverseCounter = 0;
+//    private int msgByteReverseCounter = 0;
     private byte currMsgType = 0;
-    private byte lowerByte = 0;
-    private final ByteBuffer localMsgBuffer = ByteBuffer.allocate( 256 * 256 );
-    
+//    private byte lowerByte = 0;
+//    private final ByteBuffer localMsgBuffer = ByteBuffer.allocate( 256 * 256 );
+    private ByteBuffer localMsgBuffer = null;
     // ==========================================================================
     /**
      * Constructor
@@ -224,12 +228,13 @@ public class SocketChannelHandler implements Selectable {
             PortWrapper aPortWrapper = DataManager.getPortWrapper( getPort() );
             if( aPortWrapper == null || !isWrapping() ){  
                 
-                
+                //Until the message length is populated
+                ByteBuffer msgLenBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE );
                 while( readByteBuf.remaining() > 0){
                     
                     //See if we are already in the middle of receive
-                    if( msgByteReverseCounter == 0 ){
-
+                    if( localMsgBuffer == null ){
+                    
                         //Get the message type and ensure it is supported
                         if( currMsgType == 0 ){
                             currMsgType = readByteBuf.get();
@@ -237,8 +242,8 @@ public class SocketChannelHandler implements Selectable {
                                  
                                 //Print error message
                                 currMsgType = 0;
-                                msgByteReverseCounter = 0;
-                                Integer.toHexString(currMsgType);
+//                                msgByteReverseCounter = 0;
+//                                Integer.toHexString(currMsgType);
                                 
                                 String ipStr = "";
                                 if( theSCW != null ){
@@ -256,76 +261,111 @@ public class SocketChannelHandler implements Selectable {
                                 
                             }
                         }
+                                                   
+                        //Copy over the bytes until we get how many we need
+                        while( msgLenBuffer.hasRemaining() && readByteBuf.hasRemaining() ){
+                            msgLenBuffer.put( readByteBuf.get());
+                        }
                         
-                        if( readByteBuf.remaining() > 1 ){
-                        
-                            //Get the msg length
-                            byte[] msgLen = new byte[2];
-                            if( lowerByte != 0 ){
-                                msgLen[0] = lowerByte;
-                                msgLen[1] = readByteBuf.get();
-                            } else {
-                                //Get the length of the ctrl msg
-                                readByteBuf.get( msgLen );
-                            }
-                            
+                        //Convert to the counter
+                        if( !msgLenBuffer.hasRemaining() ){
                             //Get the counter
-                            msgByteReverseCounter = SocketUtilities.byteArrayToInt(msgLen);  
-                            
-                            //Reset byte
-                            lowerByte = 0;
+                            byte[] msgLen = Arrays.copyOf( msgLenBuffer.array(), msgLenBuffer.capacity());
+//                            msgByteReverseCounter = SocketUtilities.byteArrayToInt(msgLen);  
+                            localMsgBuffer = ByteBuffer.allocate( SocketUtilities.byteArrayToInt(msgLen) );
+                            msgLenBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE );
+                        }
                         
-                        } else if( readByteBuf.remaining() > 0 ){
-                            
-                            
-                            lowerByte = readByteBuf.get();
-                            //End of stream, get next byte array
-                            continue;   
-                            
-                        } else {
-                            continue;
-                        }                  
+                        //Break out of the loop until more bytes are available
+                        if( !readByteBuf.hasRemaining()){
+                            break;
+                        }           
 
                     }   
-
-                    //If the bytes read is more than is needed for the msg
-                    if( msgByteReverseCounter <= readByteBuf.remaining() ){                
-
-                        //Put the rest of the bytes in and process the message
-                        byte[] remBytes = new byte[msgByteReverseCounter];
-                        readByteBuf.get(remBytes);
-                        localMsgBuffer.put( remBytes );
-
-                        //copy into byte array
-                        byte [] msgByteArr = Arrays.copyOf( localMsgBuffer.array(), localMsgBuffer.position());
-
-                        //Get the id If the client is already registered then return
-                        if( msgByteArr.length > 3 ){
+                    
+                      //Add the bytes to the msg buffer
+                    if( localMsgBuffer != null ){
+                        //Copy over the bytes until we get how many we need
+                        int remBytes = localMsgBuffer.remaining();
+                        if( remBytes >= readByteBuf.remaining()){
                             
-                            byte[] clientIdArr = Arrays.copyOf(msgByteArr, 4);
-                            int tempId = SocketUtilities.byteArrayToInt(clientIdArr);
-                            if( !registerId(tempId))    
-                                return;
+                            //Put all the bytes in there
+                            localMsgBuffer.put(readByteBuf);
+                        } else {  //if( remBytes < readByteBuf.remaining()){
+                            //Put as many as we can
+                            byte[] remBytesArr = new byte[remBytes];
+                            readByteBuf.get(remBytesArr);
+                            localMsgBuffer.put(remBytesArr);
+                        }
+                        
+                        //If it's full then process it
+                        if( !localMsgBuffer.hasRemaining() ){
 
-                            //Route the message to the right handler
-                            DataManager.routeMessage( thePortRouter.getCommManager(), currMsgType, msgByteArr );                      
+                            //copy into byte array
+                            byte [] msgByteArr = Arrays.copyOf( localMsgBuffer.array(), localMsgBuffer.position());
+                            if( msgByteArr.length > 3 ){
+
+                                byte[] clientIdArr = Arrays.copyOf(msgByteArr, 4);
+                                int tempId = SocketUtilities.byteArrayToInt(clientIdArr);
+                                if( !registerId(tempId))    
+                                    return;
+
+                                try{
+                                    DataManager.routeMessage( thePortRouter.getCommManager(), currMsgType, msgByteArr ); 
+                                } catch(Exception ex ){
+                                    Log.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
+                                }
+                            }
 
                             //Reset the counter
                             currMsgType = 0;
-                            localMsgBuffer.clear();
-                            msgByteReverseCounter = 0;
-                            continue;
-                            
+                            localMsgBuffer = null;
                         }
-
-                    //If the bytes read is less than the number remaining
-                    } else {
-
-                        //Put the rest of the bytes in and process the message
-                        msgByteReverseCounter -= readByteBuf.remaining();
-                        localMsgBuffer.put( readByteBuf );
-                        break;
+                        
                     }
+
+                    //If the bytes read is more than is needed for the msg
+//                    if( msgByteReverseCounter <= readByteBuf.remaining() ){                
+//
+//                        //Put the rest of the bytes in and process the message
+//                        byte[] remBytes = new byte[msgByteReverseCounter];
+//                        readByteBuf.get(remBytes);
+//                        localMsgBuffer.put( remBytes );
+
+                        //copy into byte array
+//                        byte [] msgByteArr = Arrays.copyOf( localMsgBuffer.array(), localMsgBuffer.position());
+//
+//                        //Get the id If the client is already registered then return
+//                        if( msgByteArr.length > 3 ){
+//                            
+//                            byte[] clientIdArr = Arrays.copyOf(msgByteArr, 4);
+//                            int tempId = SocketUtilities.byteArrayToInt(clientIdArr);
+//                            if( !registerId(tempId))    
+//                                return;
+//
+//                            //Route the message to the right handler
+//                            try{
+//                                DataManager.routeMessage( thePortRouter.getCommManager(), currMsgType, msgByteArr );                      
+//                            } catch(Exception ex ){
+//                                Log.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
+//                            }
+//                            
+//                            //Reset the counter
+//                            currMsgType = 0;
+//                            localMsgBuffer.clear();
+//                            msgByteReverseCounter = 0;
+//                            continue;
+//                            
+//                        }
+//
+//                    //If the bytes read is less than the number remaining
+//                    } else {
+//
+//                        //Put the rest of the bytes in and process the message
+//                        msgByteReverseCounter -= readByteBuf.remaining();
+//                        localMsgBuffer.put( readByteBuf );
+//                        break;
+//                    }
                 
                 }
                 
@@ -393,7 +433,7 @@ public class SocketChannelHandler implements Selectable {
                     ResetId resetIdMsg = new ResetId(passedId);
                     ByteBuffer aByteBuffer;
 
-                    int msgLen = resetIdMsg.getLength() + 3;
+                    int msgLen = resetIdMsg.getLength();
                     aByteBuffer = ByteBuffer.allocate( msgLen );
                     resetIdMsg.append(aByteBuffer);
 
@@ -668,10 +708,25 @@ public class SocketChannelHandler implements Selectable {
     /**
      *  Set the flag
      * 
+     * @param passedClientId
      * @param passedBool 
      */
-    public synchronized void setWrapping( boolean passedBool ) {
-        wrappingFlag = passedBool;
+    public synchronized void setWrapping(int passedClientId, boolean passedBool ) {
+        if( rootHostId == passedClientId ){
+            wrappingFlag = passedBool;
+        } else {   
+            //Reset the wrapper
+            SetRelayWrap wrapMsg = new SetRelayWrap( rootHostId, passedClientId, (byte)0x0);
+            ByteBuffer aByteBuffer;
+
+            int msgLen = wrapMsg.getLength();
+            aByteBuffer = ByteBuffer.allocate( msgLen );
+            wrapMsg.append(aByteBuffer);
+
+            //Queue to be sent
+            queueBytes(Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position())); 
+            
+        }
     }
     
     //===================================================================
@@ -682,6 +737,47 @@ public class SocketChannelHandler implements Selectable {
      */
     public synchronized boolean isWrapping() {
         return wrappingFlag;
+    }
+    
+     //===================================================================
+    /**
+     *  Set the staging flag
+     * 
+     * @param passedClientId
+     * @param passedBool 
+     * @return  
+     */
+    public synchronized boolean setStaging( int passedClientId, boolean passedBool ) {
+        
+        boolean retVal = true;
+        if( rootHostId == -1 || rootHostId == passedClientId ){
+            staging = passedBool;
+        } else if( passedBool ){
+            
+            //Set stage flag if relaying the message
+            StageFlag aFlag = new StageFlag( rootHostId, passedClientId, passedBool );
+            ByteBuffer aByteBuffer;
+
+            int msgLen = aFlag.getLength();
+            aByteBuffer = ByteBuffer.allocate( msgLen );
+            aFlag.append(aByteBuffer);
+
+            //Queue to be sent
+            queueBytes(Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position())); 
+            retVal = false;
+            
+        }
+        return retVal;
+    }
+    
+    //===================================================================
+    /**
+     *  Check if the handler is managing a staged connection
+     * 
+     * @return 
+     */
+    public synchronized boolean isStaged() {
+        return staging;
     }
 
 }/* END CLASS AccessHandler */

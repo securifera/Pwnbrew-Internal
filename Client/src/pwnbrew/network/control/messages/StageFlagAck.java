@@ -36,43 +36,43 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
 /*
- * ControlOption.java
- *
- * Created on June 7, 2013, 10:11 PM
- */
+* StageFlagAck.java
+*
+* Created on Feb 3, 2014, 7:34:22 PM
+*/
 
-package pwnbrew.network;
+package pwnbrew.network.control.messages;
 
-import java.util.Arrays;
 import pwnbrew.misc.SocketUtilities;
+import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-public class ControlOption extends TlvOption {
-
-    //======================================================================
-    /**
-     *  Constructor
-     * @param passedType
-     * @param passedValue
-     */
-    public ControlOption(byte passedType, byte[] passedValue) {
-        
-        type = new byte[]{ passedType };
-
-        //Convert the length to a byte array
-        length = new byte[4];
+@SuppressWarnings("ucd")
+public final class StageFlagAck extends ControlMessage{
     
-        if(passedValue != null){
-            SocketUtilities.intToByteArray(length, passedValue.length);
-            value = Arrays.copyOf(passedValue, passedValue.length);
-        } else {
-            value = new byte[0];
-        }
+    private static final byte OPTION_CLIENT_ID = 44;
+    
+     //Class name
+    private static final String NAME_Class = StageFlagAck.class.getSimpleName();    
+
+
+    // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param clientId
+    */
+    public StageFlagAck( int clientId ) {
+        super();
+        
+        //Add the option
+        byte[] clientIdArr = SocketUtilities.intToByteArray(clientId);
+        ControlOption aTlv = new ControlOption( OPTION_CLIENT_ID, clientIdArr );
+        addOption(aTlv);        
     }
 
 }

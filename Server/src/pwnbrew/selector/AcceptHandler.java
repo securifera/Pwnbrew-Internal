@@ -53,7 +53,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.Constants;
@@ -137,12 +136,8 @@ final public class AcceptHandler implements Selectable {
                 theSCH.setState(Constants.CONNECTED);
             }           
 
-        } catch (IOException ex) {
+        } catch ( IOException | LoggableException | InterruptedException ex) {
             Log.log(Level.WARNING, NAME_Class, "handle()", ex.getMessage(), ex);
-        } catch (LoggableException ex) {
-            Logger.getLogger(AcceptHandler.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(AcceptHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

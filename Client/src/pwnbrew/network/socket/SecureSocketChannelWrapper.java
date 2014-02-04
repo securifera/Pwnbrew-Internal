@@ -415,8 +415,11 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
         * it's been selected.  Odds of a write buffer being full
         * is less than a read buffer being empty.
         */
-        if (outNetBB.hasRemaining()) {
+        while (outNetBB.hasRemaining()) {
             tryFlush(outNetBB);
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ex) {}
         }
 
         return retValue;

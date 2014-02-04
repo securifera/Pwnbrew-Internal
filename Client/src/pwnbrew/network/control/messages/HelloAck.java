@@ -47,9 +47,7 @@ package pwnbrew.network.control.messages;
 
 
 import java.io.IOException;
-import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.network.PortRouter;

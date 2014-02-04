@@ -48,10 +48,7 @@ package pwnbrew.network.relay;
 import pwnbrew.network.PortRouter;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.log.RemoteLog;
-import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
@@ -134,17 +131,16 @@ public class RelayManager extends DataManager {
         if( tempId == Constants.SERVER_ID ){   
 
             thePR = theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );    
-
+            DebugPrinter.printMessage(NAME_Class, "Queueing relay message to server");
         } else {     
 
             //If the dest is not the server
             thePR = theServerPortRouter;  
+            DebugPrinter.printMessage(NAME_Class, "Queueing relay message to client");
         }
 
         //Queue the message to be sent
-        thePR.queueSend( msgBytes, tempId );
-        DebugPrinter.printMessage(NAME_Class, "Queueing relay message");
-
+        thePR.queueSend( msgBytes, tempId );       
         
     }
     

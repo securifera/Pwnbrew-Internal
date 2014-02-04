@@ -123,7 +123,7 @@ public class ConnectHandler implements Selectable {
             //Get or create the access handler
             SocketChannelHandler theSCH = theClientPortRouter.getSocketChannelHandler();
             if( theSCH == null ){
-                theSCH = new SocketChannelHandler(theClientPortRouter);
+                theSCH = new SocketChannelHandler(theClientPortRouter, SocketChannelHandler.CLIENT_TYPE );
                 theClientPortRouter.registerHandler( 0, theSCH );
             }
 

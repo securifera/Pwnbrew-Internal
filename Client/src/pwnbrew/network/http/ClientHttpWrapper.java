@@ -49,10 +49,11 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.misc.Utilities;
+import pwnbrew.network.Message;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
@@ -81,7 +82,7 @@ public class ClientHttpWrapper extends HttpWrapper {
      * @param aLine 
      */
     @Override
-    void processHeader( CommManager passedManager ) {
+    void processHeader( SocketChannelHandler passedHandler ) {
     
         if( currentHeader != null ){
             
@@ -105,7 +106,7 @@ public class ClientHttpWrapper extends HttpWrapper {
                         if( DataManager.isValidType( type ) ){
 
                             //Get the length
-                            byte[] msgLenArr = new byte[2];
+                            byte[] msgLenArr = new byte[ Message.MSG_LEN_SIZE ];
                             msgBB.get(msgLenArr);
 
                             //Verify that it matches
@@ -118,8 +119,11 @@ public class ClientHttpWrapper extends HttpWrapper {
                                 byte[] dstHostId = Arrays.copyOfRange(msgBytes, 4, 8);
                                 int dstId = SocketUtilities.byteArrayToInt(dstHostId);
                                 
-                                DataManager.routeMessage( passedManager, type, dstId, msgBytes );
-                                
+                                try{
+                                    DataManager.routeMessage(  passedHandler.getPortRouter().getCommManager(), type, dstId, msgBytes );
+                                } catch(Exception ex ){
+                                    RemoteLog.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
+                                }   
                             } else {
                                 RemoteLog.log( Level.WARNING, NAME_Class, "processHeader()", "Message size doesn't match remaing size.", null);
                             }

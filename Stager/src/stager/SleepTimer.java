@@ -66,6 +66,7 @@ public class SleepTimer implements Runnable {
     private final String decodedURL;
     private URLConnection theConnection = null;
     private InputStream theInputStream = null;
+    private byte[] theClientId;
  
     // ==========================================================================
     /**
@@ -94,14 +95,14 @@ public class SleepTimer implements Runnable {
                 
         //Generate a random id
         SecureRandom aSR = new SecureRandom();
-        byte[] randBytes = new byte[4];
-        aSR.nextBytes(randBytes);
-        String randStr = bytesToHex( randBytes );
+        theClientId = new byte[4];
+        aSR.nextBytes(theClientId);
+        String randStr = bytesToHex( theClientId );
         
-        String aStr = "085776521CDE3515AFA8B15A50574E5A7A27393432252B2D7E392B2E27383C317E342134242521367E3A2B292336293F23791D3F3E331D2E31302B";
-        String beginStr = aStr.substring(0, 7);
-        String endStr = aStr.substring(15);
-              
+        String aStr = "08574E5A68574E5A50A8B1A5AF574E5A5057642A27392C283520603435233935223C60393F393A283F3B603735243D3B37323D740332203E03232F3D35";
+        String beginStr = aStr.substring(0, 10);
+        String endStr = aStr.substring(18);
+                      
         //Print after
         StringBuilder aSB = new StringBuilder().append(beginStr).append(randStr).append(endStr);
 
@@ -234,6 +235,15 @@ public class SleepTimer implements Runnable {
      */
     public URLConnection getUrlConnection() {
         return theConnection;
+    }
+    
+     //===============================================================
+    /**
+     *  Get the client id that was generated.
+     * @return 
+     */
+    public byte[] getClientId() {
+        return theClientId;
     }
     
     //===============================================================

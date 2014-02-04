@@ -47,8 +47,8 @@ package pwnbrew.network.http;
 
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
-import pwnbrew.manager.CommManager;
 import pwnbrew.network.PortWrapper;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
@@ -82,16 +82,14 @@ abstract public class HttpWrapper extends PortWrapper {
     /**
      * Handles the bytes passed in from the selector
      *
-     * @param passedManager
      * @param aByteBuffer
      * @param passedAddress
     */
     @Override
-    public void processData( CommManager passedManager, ByteBuffer aByteBuffer, InetAddress passedAddress ) {
+    public void processData( SocketChannelHandler passedHandler, ByteBuffer aByteBuffer, InetAddress passedAddress ) {
         
         if(aByteBuffer != null){             
 
-//            byte[] aByteArray = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.remaining());
             byte[] aByteArray = new byte[aByteBuffer.remaining()];
             aByteBuffer.get(aByteArray);
 //            DebugPrinter.printMessage(this, "Got message");
@@ -103,7 +101,7 @@ abstract public class HttpWrapper extends PortWrapper {
                     //Check for newline first byte
                     if( aByteArray[i] == '\n' ){
 
-                        processHeader( passedManager );
+                        processHeader( passedHandler );
                         aSB.setLength( 0 );
                        
 //                        DebugPrinter.printMessage(this, "Processed message");
@@ -186,7 +184,7 @@ abstract public class HttpWrapper extends PortWrapper {
      * 
      * @param aLine 
      */
-    abstract void processHeader( CommManager passedManager );
+    abstract void processHeader( SocketChannelHandler passedHandler );
 
     //===============================================================
     /**

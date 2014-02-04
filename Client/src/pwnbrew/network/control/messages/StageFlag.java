@@ -38,50 +38,52 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
-* RelayStart.java
+* StageFlag.java
 *
-* Created on Dec 2, 2013, 9:22:22 PM
+* Created on Feb 2, 2014, 8:11:15 PM
 */
 
 package pwnbrew.network.control.messages;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
+import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.CommManager;
-import pwnbrew.manager.DataManager;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
  *  
  */
-public final class RelayStart extends ControlMessage{
+@SuppressWarnings("ucd")
+public final class StageFlag extends ControlMessage{
+    
+    private static final byte OPTION_STAGE_FLAG = 42;
+    private static final byte OPTION_CLIENT_ID = 43;
+    
+    private byte theFlag;
+    private int theRelayClientId;
+    
+     //Class name
+    private static final String NAME_Class = StageFlag.class.getSimpleName();    
 
-    private static final byte OPTION_PORT = 24;
-    private int port;   
-    
-    //Class name
-    private static final String NAME_Class = RelayStart.class.getSimpleName();
-    
     // ==========================================================================
     /**
      * Constructor
      *
      * @param passedId
     */
-    public RelayStart( byte[] passedId ) {
-        super(passedId);
+    public StageFlag(byte[] passedId ) {
+        super( passedId );
     }
     
-    //=========================================================================
+     //=========================================================================
     /**
      *  Sets the variable in the message related to this TLV
      * 
@@ -90,19 +92,22 @@ public final class RelayStart extends ControlMessage{
      */
     @Override
     public boolean setOption( ControlOption tempTlv ){        
-       
+
         boolean retVal = true;
         byte[] theValue = tempTlv.getValue();
         switch( tempTlv.getType()){
-
-            case OPTION_PORT:                    
-                port = SocketUtilities.byteArrayToInt(theValue); 
+            case OPTION_STAGE_FLAG:
+                if( theValue.length > 0 ){
+                    theFlag = theValue[0];
+                }
+                break;
+            case OPTION_CLIENT_ID:
+                theRelayClientId = SocketUtilities.byteArrayToInt(theValue);
                 break;
             default:
                 retVal = false;
                 break;
-        }
-       
+        }  
         return retVal;
     }
     
@@ -113,50 +118,37 @@ public final class RelayStart extends ControlMessage{
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) { 
-        
-        boolean retVal = true;
-        try {
+    public void evaluate( CommManager passedManager ) {   
+    
+        if( theFlag == 0x1 ){
             
-            RelayManager aManager = RelayManager.getRelayManager();
-            if( aManager == null ){
-                aManager = RelayManager.initialize( passedManager );
+            
+            //Get the relay
+            RelayManager theRelayManager = RelayManager.getRelayManager();
+            ServerPortRouter theSPR = theRelayManager.getServerPorterRouter();
+            
+            //Set the flag on the handler
+            SocketChannelHandler aHandler = theSPR.getSocketChannelHandler(theRelayClientId);
+            if( aHandler != null ){
+                aHandler.setStaging(true);
             }
             
-            ServerPortRouter aSPR = aManager.getServerPorterRouter();
-            if( aSPR.getServerSocketChannel() == null ){
-                aSPR.startServer(null, port );
+            try {
                 
-                ServerHttpWrapper aWrapper = new ServerHttpWrapper();
-                DataManager.setPortWrapper( port, aWrapper);
+                //Send the ack
+                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+                if( aCMManager != null ){
+                    StageFlagAck ackFlag = new StageFlagAck( theRelayClientId );
+                    aCMManager.send(ackFlag);
+                }
+                
+            } catch( IOException ex ){
+                RemoteLog.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex );
+            } catch (LoggableException ex) {
+                RemoteLog.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex );
             }
             
-        } catch(IOException ex ){
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null); 
-            retVal = false;
-        } catch (GeneralSecurityException ex) {
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null); 
-            retVal = false;
-        }
-        
-        //Get the control message manager send an ack
-        try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize(passedManager);
-            }
-
-            //Send the message
-            RelayStatus aMsg = new RelayStatus( retVal );
-            aCMManager.send(aMsg);
-        
-        } catch(IOException ex ){
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null);        
-        } catch (LoggableException ex) {
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null);        
-        }
-        
+        }    
     }
 
-}/* END CLASS RelayStart */
+}
