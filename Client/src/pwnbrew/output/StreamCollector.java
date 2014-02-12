@@ -65,12 +65,13 @@ public class StreamCollector extends StreamReader {
 
     // ==========================================================================
     /**
-    * Creates a new instance of {@link StreamRecorder}.
+    * Constructor
     *
+     * @param passedId
     */
-    public StreamCollector() {
-        super();
-    }    
+    public StreamCollector( int passedId ) {
+        super(passedId);
+    }      
 
     // ==========================================================================
     /**

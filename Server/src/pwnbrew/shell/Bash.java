@@ -38,29 +38,24 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
- *  CommandPrompt.java
+ *  Bash.java
  *
- *  Created on May 21, 2013
+ *  Created on Feb 11, 2014
  */
 
 package pwnbrew.shell;
 
 import java.util.concurrent.Executor;
-import java.util.logging.Level;
 import pwnbrew.gui.panels.RunnerPane;
-import pwnbrew.logging.Log;
-import pwnbrew.misc.Constants;
 
 /**
  *
  *  
  */
-public class CommandPrompt extends Shell {
+public class Bash extends Shell {
     
-    private static final String[] CMD_EXE_STR = new String[]{ "cmd", "/k"};
-    private static final String ENCODING = "UTF-8";
-    private static final String PROMPT_REGEX = "^[a-zA-Z]:(\\\\|(\\\\[^\\\\/\\s:*\"<>|]+)+)>";
-    private static final String LINE_SEPARATOR = "\r\n";
+    private static final String[] BASH_EXE_STR = new String[]{ "/bin/bash", "-i"};
+    private static final String encoding = "UTF-8";
     
     // ==========================================================================
     /**
@@ -69,7 +64,7 @@ public class CommandPrompt extends Shell {
      * @param passedExecutor
      * @param passedListener 
      */
-    public CommandPrompt(Executor passedExecutor, ShellListener passedListener) {
+    public Bash(Executor passedExecutor, ShellListener passedListener) {
         super(passedExecutor, passedListener);
     }
     
@@ -80,64 +75,41 @@ public class CommandPrompt extends Shell {
      * @return 
      */
     @Override
-    public String[] getCommandStringArray(){                
-        return CMD_EXE_STR;
+    public String[] getCommandStringArray() {                
+        return BASH_EXE_STR;
     }
-    
-    // ==========================================================================
+   
+   // ==========================================================================
     /**
      * Handles the bytes read
      *
      * @param passedId
      * @param buffer the buffer into which the bytes were read
      */
-    @Override
+    @Override 
     public void handleBytesRead( int passedId, byte[] buffer ) {
 
-        //Get runner pane
-        RunnerPane thePane = theListener.getShellTextPane(); 
-        String aStr = null;
-        
-        //Add the bytes to the string builder
-        switch( passedId ){
-            case Constants.STD_OUT_ID:
-                synchronized(theStdOutStringBuilder) {
-                    theStdOutStringBuilder.append( new String( buffer ));
-                    String tempStr = theStdOutStringBuilder.toString();
-                    
-                    //Set the prompt
-                    if( !promptFlag ){
-                        if( tempStr.trim().matches(PROMPT_REGEX) ){
-                            aStr = tempStr.trim();
-                            setShellPrompt( aStr );
-                            promptFlag = true;
-                        } else{
-                            aStr = tempStr;
-                        }
-                        
-                        //Reset the string builder
-                        theStdOutStringBuilder.setLength(0);
-                    }                    
-                }
-                break;
-            case Constants.STD_ERR_ID:
-                synchronized(theStdErrStringBuilder) {
-                    theStdErrStringBuilder.append( new String( buffer )); 
-                    aStr = theStdErrStringBuilder.toString();
-                    
-                    //Reset the string builder
-                    theStdErrStringBuilder.setLength(0);
-                }
-                break;
-            default:
-                Log.log(Level.SEVERE, NAME_Class, "handleBytesRead()", "Unrecognized stream id.", null );    
-                break;
-        }          
-        
-        //Send to the runner pane
-        if( aStr != null ){
-            thePane.handleStreamBytes(passedId, aStr);
+        String currentPrompt = getShellPrompt();
+        String aStr = new String(buffer);
+            
+        //Get the prompt location
+        if( currentPrompt.indexOf(">") == -1){
+            
+            int pos = aStr.indexOf(">");
+            
+            //Add the str to the prompt
+            if( pos == -1 ){
+                setShellPrompt( currentPrompt.concat(aStr) );
+            } else {
+                setShellPrompt( currentPrompt.concat( aStr.substring(0, pos + 1)) );
+            }
         }
+        
+        //Get runner pane
+        RunnerPane thePane = theListener.getShellTextPane();   
+                           
+        //Handle the bytes
+        thePane.handleStreamBytes(passedId, aStr);
 
     }
     
@@ -149,7 +121,7 @@ public class CommandPrompt extends Shell {
      */
     @Override
     public String getEncoding() {
-        return ENCODING;
+        return encoding;
     }
     
     // ==========================================================================
@@ -159,6 +131,6 @@ public class CommandPrompt extends Shell {
      */
     @Override
     public String toString(){
-        return "Command Prompt";
+        return "Bash";
     }
 }

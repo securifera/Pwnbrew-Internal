@@ -62,8 +62,10 @@ public class StreamCollector extends StreamReader {
     /**
     * Constructor
     *
+     * @param passedId
     */
-    public StreamCollector() {
+    public StreamCollector( int passedId ) {
+        super(passedId);
     }    
 
     // ==========================================================================
@@ -80,7 +82,7 @@ public class StreamCollector extends StreamReader {
     public void handleBytesRead( byte[] buffer, int numberRead ) {
 
         if( buffer == null || theStringBuilder.length() >= maxLength)
-            return; //Do nothing        
+            return;    
         
         try {
             theStringBuilder.append(new String(buffer, "US-ASCII"));

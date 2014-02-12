@@ -314,9 +314,9 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
 
             ProcessBuilder theProcessBuilder = new ProcessBuilder( cmdLineArgs );
             theProcessBuilder.directory( workingDirectory );
-
+        
             //Create the stderr reader
-            theStdErrRecorder = new StreamRecorder();
+            theStdErrRecorder = new StreamRecorder( Constants.STD_ERR_ID );
             theStdErrRecorder.setOutputFile( new File( workingDirectory, "stderr.txt" ) );
 
             try {
@@ -345,14 +345,14 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
             }
 
             //Collect the data from stdout...
-            theStdOutRecorder = new StreamRecorder( theProcess.getInputStream() );
-            theStdOutRecorder.setIStreamReaderListener( this );
+            theStdOutRecorder = new StreamRecorder( Constants.STD_OUT_ID, theProcess.getInputStream() );
+            theStdOutRecorder.setStreamReaderListener( this );
             theStdOutRecorder.setOutputFile( new File( workingDirectory, "stdout.txt" ) );
             theStdOutRecorder.start();
        
             //Collect the data from stderr...
             theStdErrRecorder.setInputStream(theProcess.getErrorStream());
-            theStdErrRecorder.setIStreamReaderListener( this );
+            theStdErrRecorder.setStreamReaderListener( this );
             theStdErrRecorder.start();
         
             //Wait for the process to complete...
@@ -436,17 +436,6 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
         }
 
     }
-//
-//    // ==========================================================================
-//    /**
-//    *  Notifies the {@link ClientMananger}
-//    *
-//    * @see #waitForStreamRecordersToFinish
-//    */
-//    private synchronized void beNotified() {
-//       notifyAll();
-//    }/* END beNotified() */
-
 
     // ==========================================================================
     /**
@@ -454,59 +443,102 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
      * receiver.
      * <p>
      *
-     * @param reader the {@code StreamReader}
      * @param buffer the buffer into which the bytes were read
-     * @param numberRead the number of bytes read
     */
     @Override
-    public void handleBytesRead( StreamReader reader, byte[] buffer, int numberRead ) {
+    public void handleBytesRead( int theStreamId, byte[] buffer ){
+    }
 
-    }/* END handleBytesRead( StreamReader, byte[], int ) */
 
-
+//    // ==========================================================================
+//    /**
+//     * Notifies the {@link TaskRunner} that the given {@link StreamReader} has completed.
+//     * <p>
+//     *
+//     * @param reader the {@code StreamReader}
+//    */
+//    @Override
+//    public void handleEndOfStream( StreamReader reader ) {
+//
+//        if( reader == null || ( reader != theStdOutRecorder && reader != theStdErrRecorder ) ) 
+//            return;
+//
+//        if( reader == theStdOutRecorder )
+//            stdOutRecorderFinished = true; 
+//        else
+//            stdErrRecorderFinished = true; 
+//
+//        beNotified();
+//
+//    }
+//
+//    // ==========================================================================
+//    /**
+//     * Notifies the {@link TaskRunner} that the given {@link StreamReader} has encountered
+//     * an {@link IOException} and will read no more bytes from its {@link InputStream}.
+//     * <p>
+//     * @param reader the {@code StreamReader}
+//     * @param ex the {@code IOException} thrown
+//    */
+//    @Override
+//    public void handleIOException( StreamReader reader, IOException ex ) {
+//
+//        if( reader == null || ( reader != theStdOutRecorder && reader != theStdErrRecorder ) )
+//            return; 
+//
+//        if( reader == theStdOutRecorder ) 
+//            stdOutRecorderFinished = true;
+//        else 
+//            stdErrRecorderFinished = true; 
+//        
+//        beNotified();
+//
+//    }
+    
+    
     // ==========================================================================
     /**
-     * Notifies the {@link TaskRunner} that the given {@link StreamReader} has completed.
+     * Notifies the {@link ExecutionHandler} that the given {@link StreamReader}
+     * has completed.
      * <p>
+     * If the given {@link StreamReader} is null or is not one of the {@code ExecutionHandler}'s
+     * {@code StreamRecorder}s, this method does nothing.
+     * <P>
+     * Called by a {@code StreamReader} when it detects the end of file in its {@link InputStream}.
      *
-     * @param reader the {@code StreamReader}
-    */
-    @Override
-    public void handleEndOfStream( StreamReader reader ) {
+     * @param passedId
+     */
+     @Override
+     public synchronized void handleEndOfStream( int passedId ) {
 
-        if( reader == null || ( reader != theStdOutRecorder && reader != theStdErrRecorder ) ) 
-            return;
+        switch( passedId ){
+            case Constants.STD_OUT_ID:
+                stdOutRecorderFinished = true; 
+                break;
+            case Constants.STD_ERR_ID:
+                stdErrRecorderFinished = true;
+                break;
+            default:
+                RemoteLog.log(Level.SEVERE, NAME_Class, "handleEndOfStream()", "Unrecognized stream id.", null );    
+                break;
+        } 
 
-        if( reader == theStdOutRecorder )
-            stdOutRecorderFinished = true; 
-        else
-            stdErrRecorderFinished = true; 
-
-        beNotified();
+        notifyAll();
 
     }
 
+    
     // ==========================================================================
     /**
-     * Notifies the {@link TaskRunner} that the given {@link StreamReader} has encountered
-     * an {@link IOException} and will read no more bytes from its {@link InputStream}.
-     * <p>
-     * @param reader the {@code StreamReader}
+     * Handles any exceptions from the reader
+     *
+     * @param passedId
      * @param ex the {@code IOException} thrown
-    */
+     */
     @Override
-    public void handleIOException( StreamReader reader, IOException ex ) {
-
-        if( reader == null || ( reader != theStdOutRecorder && reader != theStdErrRecorder ) )
-            return; 
-
-        if( reader == theStdOutRecorder ) 
-            stdOutRecorderFinished = true;
-        else 
-            stdErrRecorderFinished = true; 
-        
-        beNotified();
-
+    public synchronized void handleIOException( int passedId, IOException ex ) {
+        handleEndOfStream(passedId);
+        RemoteLog.log(Level.INFO, NAME_Class, "receiveByteArray()", ex.getMessage(), ex );        
     }
 
     //===============================================================

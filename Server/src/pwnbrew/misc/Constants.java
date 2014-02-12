@@ -151,4 +151,8 @@ abstract public class Constants {
     public static String FILE_UPLOAD = "FILE_UPLOAD";
     public static String FILE_DOWNLOAD = "FILE_DOWNLOAD";
     
-}/* END CLASS Constants */
+    //Constants for process streams
+    public static final int STD_OUT_ID = 41;
+    public static final int STD_ERR_ID = 42;
+    
+}

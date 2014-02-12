@@ -42,11 +42,238 @@ The copyright on this package is held by Securifera, Inc
  * Created on Aug 22, 2013, 7:17:31 PM
  */
 
+//package pwnbrew.output;
+//
+//import java.io.IOException;
+//import java.io.InputStream;
+//import java.security.InvalidParameterException;
+//import java.util.logging.Level;
+//import pwnbrew.log.RemoteLog;
+//import pwnbrew.misc.Constants;
+//import pwnbrew.misc.ManagedRunnable;
+
+//
+///**
+//* StreamReader reads the bytes from an {@link InputStream} 
+//* <p>
+//* StreamReader reports to its {@code IStreamReaderListener}...
+//*
+//*/
+//public class StreamReader extends ManagedRunnable {
+//
+//    private static final String NAME_Class = StreamReader.class.getSimpleName();
+//    private InputStream theInputStream = null; //The InputStream from which to read
+//    private StreamReaderListener theListener = null; //The listener to which the read bytes will be passed
+//
+//    private int theMaxBufferSize = 1000; //The maximum number of bytes to read at one time
+//    private int theNumberOfBytesRead = 0; //The number of bytes that have hitherto been read
+//    private final int theStreamId;
+//    
+//    // ==========================================================================
+//    /**
+//    * Constructor
+//    */
+//    public StreamReader(){
+//        super(Constants.Executor);
+//    }
+//
+//    // ==========================================================================
+//    /**
+//     *  Constructor
+//     * 
+//     * @param stream 
+//    */   
+//    public StreamReader( InputStream stream ) { // NO_UCD (use default)
+//
+//        this();
+//        if( stream == null ) { //If the InputStream is null...
+//            throw new InvalidParameterException();
+//        }
+//
+//        theInputStream = stream;
+//    }
+//
+//
+//    // ==========================================================================
+//    /**
+//    * Sets the {@link StreamReaderListener} to notify when bytes are read or the
+//    * end of the stream is reached.
+//    * <p>
+//    * If the {@link StreamReader} has already been started, this method does nothing.
+//    * 
+//    * @param listener the {@code IStreamReaderListener} to notify
+//    */
+//    public void setIStreamReaderListener( StreamReaderListener listener ) {
+//        theListener = listener;
+//    }
+//
+//    // ==========================================================================
+//    /**
+//    * Reads bytes from the {@link InputStream}.
+//    * <p>
+//    */
+//    @Override 
+//    public void go() {
+//
+//        int bytesRead = 0;
+//        byte[] buffer = new byte[ theMaxBufferSize ];
+//        while( bytesRead != -1 && !shutdownRequested ) { 
+//
+//            try { 
+//                bytesRead = theInputStream.read( buffer, 0, buffer.length );           
+//            } catch( IOException ioex ) {
+//                handleIoException( ioex );
+//                break;
+//            }
+//
+//            if( bytesRead > 0 ) { 
+//                theNumberOfBytesRead += bytesRead;
+//                handleBytesRead( buffer, bytesRead ); 
+//            }
+//
+//        } 
+//
+////        if( bytesRead == -1 ) {
+//            try {
+//                //Handle the end of the stream
+//                theInputStream.close();
+//                handleEndOfStream(); 
+//            } catch (IOException ex) {
+//                RemoteLog.log(Level.SEVERE, NAME_Class, "run()", ex.getMessage(), ex );
+//            }
+////        }
+//
+//    }
+//
+//
+//    // ==========================================================================
+//    /**
+//    * Called by {@link StreamReader} each time at least one byte is read from
+//    * the {@link InputStream}.
+//    * <p>
+//    *
+//    * @param buffer the buffer into which the bytes were read
+//    * @param numberRead the number of bytes read
+//    */
+//    public void handleBytesRead( byte[] buffer, int numberRead ) {
+//
+//        if( buffer == null ) 
+//            return; 
+//
+//        if( theListener != null ) { 
+//            //Notify the listener
+//            theListener.handleBytesRead( this, buffer, numberRead );
+//        }
+//
+//    }
+//
+//    // ==========================================================================
+//    /**
+//    * Called by {@link StreamReader} when the end of file is detected from the
+//    * {@link InputStream}.
+//    */
+//    public void handleEndOfStream() {
+//
+//        if( theListener != null )
+//            theListener.handleEndOfStream( this );
+//
+//    }
+//
+//    // ==========================================================================
+//    /**
+//    * Called by {@link StreamReader} if an {@link IOException} occurs.
+//    * <p>
+//    * @param exception
+//    */
+//    protected void handleIoException( IOException exception ) {
+//
+//        if( exception == null ) 
+//            return; 
+//
+//        if( theListener != null )
+//            theListener.handleIOException( this, exception );        
+//
+//    }
+//
+//
+//    // ==========================================================================
+//    /**
+//    * Returns the number of bytes that have been read.
+//    *
+//    * @return the number of bytes that have been read
+//    */
+//    public int getNumberOfBytesRead() {
+//        return theNumberOfBytesRead;
+//    }
+//
+//
+//    // ==========================================================================
+//    /**
+//    * Returns the {@link InputStream} that was given to the {@link StreamReader}
+//    * when it was instantiated.
+//    *
+//    * @return the {@code InputStream} that was given to the {@code StreamReader}
+//    * when it was instantiated
+//    */
+//    public InputStream getInputStream() {
+//        return theInputStream;
+//    }
+//
+//
+//    // ==========================================================================
+//    /**
+//    * Returns the length of the byte buffer.
+//    *
+//    * @return the length of the byte buffer
+//    */
+//    public int getBufferLength() {
+//        return theMaxBufferSize;
+//    }
+//
+//    // ==========================================================================
+//    /**
+//    * Sets the length of the byte buffer.
+//    * <p>
+//    * The length of the byte buffer is the maximum number of bytes the {@code StreamReader}
+//    * will read at one time.
+//    * <p>
+//    * If the {@code StreamReader} has already been started or the given number is
+//    * less than 1, this method does nothing.
+//    *
+//    * @param length the length of the byte buffer
+//    */
+//    public void setBufferLength( int length ) {
+//        if( length > 0 )
+//            theMaxBufferSize = length; 
+//    }
+//
+//    // ==========================================================================
+//    /**
+//    * Sets the input stream.
+//    *
+//     * @param stream
+//    */
+//    public void setInputStream( InputStream stream ) {
+//
+//        if( stream == null )
+//            throw new InvalidParameterException();
+//
+//        theInputStream = stream;
+//    }
+//}
+
+/*
+ * StreamReader.java
+ *
+ * Created on Nov 9, 2013, 9:22:42 PM
+ */
+
 package pwnbrew.output;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidParameterException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.misc.Constants;
@@ -54,40 +281,41 @@ import pwnbrew.misc.ManagedRunnable;
 
 
 /**
-* StreamReader reads the bytes from an {@link InputStream} 
-* <p>
-* StreamReader reports to its {@code IStreamReaderListener}...
 *
 */
 public class StreamReader extends ManagedRunnable {
 
     private static final String NAME_Class = StreamReader.class.getSimpleName();
-    private InputStream theInputStream = null; //The InputStream from which to read
-    private StreamReaderListener theListener = null; //The listener to which the read bytes will be passed
+    private InputStream theInputStream = null; 
+    private StreamReaderListener theListener = null;
 
-    private int theBufferLength = 1000; //The maximum number of bytes to read at one time
-    private int theNumberOfBytesRead = 0; //The number of bytes that have hitherto been read
-
+    private int theMaxBufferSize = 1000; 
+    private final int theStreamId;
+  
     // ==========================================================================
     /**
     * Constructor
+     * @param passedId
     */
-    public StreamReader(){
+    public StreamReader( int passedId ){
         super(Constants.Executor);
+        theStreamId = passedId;
     }
 
     // ==========================================================================
     /**
-     *  Constructor
-     * 
-     * @param stream 
-    */   
-    public StreamReader( InputStream stream ) { // NO_UCD (use default)
+    * Constructor
+    *
+     * @param passedId
+    * @param stream the {@code InputStream} from which to read
+    *
+    * @throws InvalidParameterException if the given {@code InputStream} is null
+    */
+    public StreamReader( int passedId, InputStream stream ) { // NO_UCD (use default)
 
-        this();
-        if( stream == null ) { //If the InputStream is null...
-            throw new InvalidParameterException();
-        }
+        this(passedId);
+        if( stream == null )
+            throw new InvalidParameterException();        
 
         theInputStream = stream;
     }
@@ -95,51 +323,49 @@ public class StreamReader extends ManagedRunnable {
 
     // ==========================================================================
     /**
-    * Sets the {@link StreamReaderListener} to notify when bytes are read or the
+    * Sets the Listener to notify when bytes are read or the
     * end of the stream is reached.
     * <p>
     * If the {@link StreamReader} has already been started, this method does nothing.
     * 
-    * @param listener the {@code IStreamReaderListener} to notify
+    * @param listener 
     */
-    public void setIStreamReaderListener( StreamReaderListener listener ) {
-        theListener = listener;
+    public void setStreamReaderListener( StreamReaderListener listener ){ 
+        theListener = listener; 
     }
+
 
     // ==========================================================================
     /**
     * Reads bytes from the {@link InputStream}.
     * <p>
     */
-    @Override 
+    @Override //Runnable
     public void go() {
 
         int bytesRead = 0;
-        byte[] buffer = new byte[ theBufferLength ];
+        byte[] buffer = new byte[ theMaxBufferSize ];
         while( bytesRead != -1 && !shutdownRequested ) { 
 
-            try {                bytesRead = theInputStream.read( buffer, 0, buffer.length );
-           
+            try {
+                bytesRead = theInputStream.read( buffer, 0, buffer.length );          
             } catch( IOException ioex ) {
-                handleIoException( ioex );
-                break;
+                handleIoException( ioex ); 
+                break; 
             }
 
-            if( bytesRead > 0 ) { 
-                theNumberOfBytesRead += bytesRead;
-                handleBytesRead( buffer, bytesRead ); 
-            }
+            //Handle the bytes read
+            if( bytesRead > 0 )
+                handleBytesRead( buffer, bytesRead );
 
         } 
-
-        if( bytesRead == -1 ) {
-            try {
-                //Handle the end of the stream
-                theInputStream.close();
-                handleEndOfStream(); 
-            } catch (IOException ex) {
-                RemoteLog.log(Level.SEVERE, NAME_Class, "run()", ex.getMessage(), ex );
-            }
+        
+        try {
+            //Handle the end of the stream
+            theInputStream.close();
+            handleEndOfStream();
+        } catch (IOException ex) {
+            RemoteLog.log(Level.SEVERE, NAME_Class, "run()", ex.getMessage(), ex );
         }
 
     }
@@ -147,64 +373,52 @@ public class StreamReader extends ManagedRunnable {
 
     // ==========================================================================
     /**
-    * Called by {@link StreamReader} each time at least one byte is read from
-    * the {@link InputStream}.
+    * Handle the bytes read
     * <p>
+    * If the given {@code byte[]} is null, this method does nothing.
     *
     * @param buffer the buffer into which the bytes were read
     * @param numberRead the number of bytes read
     */
     public void handleBytesRead( byte[] buffer, int numberRead ) {
 
-        if( buffer == null ) 
-            return; 
+        if( buffer == null )
+            return;        
 
-        if( theListener != null ) { 
-            //Notify the listener
-            theListener.handleBytesRead( this, buffer, numberRead );
-        }
-
+        if( theListener != null )
+            theListener.handleBytesRead( theStreamId, Arrays.copyOf(buffer, numberRead) );
     }
+
 
     // ==========================================================================
     /**
-    * Called by {@link StreamReader} when the end of file is detected from the
+    * Called by {@link StreamReader#act} when the end of file is detected from the
     * {@link InputStream}.
     */
     public void handleEndOfStream() {
-
         if( theListener != null )
-            theListener.handleEndOfStream( this );
+            theListener.handleEndOfStream( theStreamId );        
 
     }
 
+
     // ==========================================================================
     /**
-    * Called by {@link StreamReader} if an {@link IOException} occurs.
+    * Called by {@link StreamReader#act} if an {@link IOException} occurs.
     * <p>
-    * @param exception
+    * If the given {@code IOException} is null, this method does nothing.
+    * 
+     * @param exception
     */
     protected void handleIoException( IOException exception ) {
 
-        if( exception == null ) 
-            return; 
+        if( exception == null )
+            return;   
 
         if( theListener != null )
-            theListener.handleIOException( this, exception );        
+            theListener.handleIOException( theStreamId, exception );        
 
     }
-
-
-    // ==========================================================================
-    /**
-    * Returns the number of bytes that have been read.
-    *
-    * @return the number of bytes that have been read
-    */
-    public int getNumberOfBytesRead() {
-        return theNumberOfBytesRead;
-    }
-
 
     // ==========================================================================
     /**
@@ -218,7 +432,6 @@ public class StreamReader extends ManagedRunnable {
         return theInputStream;
     }
 
-
     // ==========================================================================
     /**
     * Returns the length of the byte buffer.
@@ -226,7 +439,7 @@ public class StreamReader extends ManagedRunnable {
     * @return the length of the byte buffer
     */
     public int getBufferLength() {
-        return theBufferLength;
+        return theMaxBufferSize;
     }
 
     // ==========================================================================
@@ -243,7 +456,7 @@ public class StreamReader extends ManagedRunnable {
     */
     public void setBufferLength( int length ) {
         if( length > 0 )
-            theBufferLength = length; 
+            theMaxBufferSize = length; 
     }
 
     // ==========================================================================
@@ -255,8 +468,10 @@ public class StreamReader extends ManagedRunnable {
     public void setInputStream( InputStream stream ) {
 
         if( stream == null )
-            throw new InvalidParameterException();
+            throw new InvalidParameterException();        
 
         theInputStream = stream;
+
     }
+
 }

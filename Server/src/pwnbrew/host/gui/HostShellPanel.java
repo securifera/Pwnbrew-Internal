@@ -46,7 +46,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.host.gui;
 
 import pwnbrew.gui.panels.RunnerPane;
-import pwnbrew.shell.Shell;
 import java.awt.Color;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -83,8 +82,6 @@ public class HostShellPanel extends javax.swing.JPanel {
     private final ArrayList<String> history = new ArrayList<>();
     private ListIterator<String> historyIterator = null;
     private String lastCommand = "";
-    private String currentPrompt = "";
-    private final StringBuilder stdOutBuilder = new StringBuilder();
     private JFileChooser theFileChooser = null;
         
     //===============================================================
@@ -103,30 +100,46 @@ public class HostShellPanel extends javax.swing.JPanel {
     /*
      *  Check if the document should be altered
      */
-    private boolean updateCaret( RunnerPane theTextPane, int offset, int theKeyPressed ) throws BadLocationException{
+    private boolean updateCaret( RunnerPane theTextPane, int offset, String passedStr ) throws BadLocationException{
 
-        boolean retVal = false;
+        boolean retVal = true;
         if( !theTextPane.isEnabled()){
-            return true;
+            return retVal;
         }
         
+        //Get the prompt
+        String thePrompt = theListener.getShell().getShellPrompt();
         StyledDocument theDoc = theTextPane.getStyledDocument();
         Element rootElement = theDoc.getDefaultRootElement();
         if( rootElement != null ){
 
-            Element anElement = rootElement.getElement( rootElement.getElementCount() - 1 );
-            int startPos = anElement.getStartOffset();
-            int endPos = anElement.getEndOffset();
-
-            String theStr = theDoc.getText(startPos, (endPos - startPos) - 1);
-            int pathPos = theStr.indexOf(">");
-            if( (pathPos == -1 || offset > pathPos + startPos) && theKeyPressed != KeyEvent.VK_TAB){
-                retVal = true;
-            } else {
-                theTextPane.setCaretPosition( theTextPane.getStyledDocument().getLength());
+            //find the prompt working backwords
+            int docElements = rootElement.getElementCount();
+            for( int i = 1; i <= docElements; i++){
+                
+                //Get the element
+                Element anElement = rootElement.getElement( rootElement.getElementCount() - i );
+                int startPos = anElement.getStartOffset();
+                int endPos = anElement.getEndOffset();
+                
+                //Get the string for that element
+                String theStr = theDoc.getText(startPos, (endPos - startPos) - 1);
+                int promptIndex = theStr.indexOf(thePrompt);
+                if( promptIndex != -1){
+                    
+                    int promptEndOff = startPos + promptIndex + thePrompt.length();
+                    if( offset < promptEndOff ) {
+                        theTextPane.setCaretPosition( promptEndOff );
+                        retVal = false;
+                        break;
+                    }
+                }
             }
 
+        } else {
+            retVal = false;
         }
+        
         return retVal;
     }
        
@@ -184,12 +197,11 @@ public class HostShellPanel extends javax.swing.JPanel {
             getShellTextPane().setEnabled( true );
         
             //Spawn the shell
-            theListener.spawnShell( (Shell)shellCombo.getSelectedItem());
+            ClassWrapper aClassWrapper = (ClassWrapper)shellCombo.getSelectedItem();
+            theListener.spawnShell( aClassWrapper.theClass );
             
             //Set to stop shell
             openButton.setText("Kill Shell");
-//            uploadButton.setEnabled(true);
-//            downButton.setEnabled(true);
             
         } else {
             
@@ -237,8 +249,6 @@ public class HostShellPanel extends javax.swing.JPanel {
 
          //Set to stop shell
         openButton.setText("Open Shell");
-//        uploadButton.setEnabled(false);
-//        downButton.setEnabled(false);
     }
     
     //===============================================================
@@ -249,6 +259,42 @@ public class HostShellPanel extends javax.swing.JPanel {
     */
     public RunnerPane getShellTextPane() {
         return (RunnerPane) shellScrollPane.getViewport().getView();
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @param theOffset
+     * @return 
+     */
+    private boolean canRemove() throws BadLocationException {
+        
+        boolean retVal = true;
+        RunnerPane theTextPane = getShellTextPane();
+        if( !theTextPane.isEnabled()){
+            return true;
+        }
+        
+        StyledDocument theDoc = theTextPane.getStyledDocument();
+        Element rootElement = theDoc.getDefaultRootElement();
+        if( rootElement != null ){
+
+            Element anElement = rootElement.getElement( rootElement.getElementCount() - 1 );
+            int startPos = anElement.getStartOffset();
+            int endPos = anElement.getEndOffset();
+
+            //Get the last line
+            String theStr = theDoc.getText(startPos, (endPos - startPos) - 1);
+             
+            //Don't let someone backspace past the prompt
+            String thePrompt = theListener.getShell().getShellPrompt();
+            if( !thePrompt.isEmpty() && thePrompt.equals( theStr )){
+                theTextPane.setCaretPosition( theTextPane.getStyledDocument().getLength());
+                retVal = false;                
+            }            
+        } 
+        
+        return retVal;
     }
 
     //===============================================================
@@ -274,7 +320,7 @@ public class HostShellPanel extends javax.swing.JPanel {
                 
                 try {
                     
-                    updateCaret( theTextPane, theTextPane.getCaretPosition(), e.getKeyChar());     
+                    updateCaret( theTextPane, theTextPane.getCaretPosition(), String.valueOf( e.getKeyChar() ));     
                     if( e.getKeyChar() == KeyEvent.VK_ENTER ){
 
                         StyledDocument aSD = theTextPane.getStyledDocument();
@@ -298,9 +344,6 @@ public class HostShellPanel extends javax.swing.JPanel {
                                             pathPos = theStr.indexOf(":");
                                         } 
                                     }
-
-                                    //Set the command prompt
-                                    currentPrompt = theStr.substring(0, pathPos + 1);
 
                                     //Get the command
                                     theStr = theStr.substring(pathPos + 1).trim().concat("\n");
@@ -415,14 +458,16 @@ public class HostShellPanel extends javax.swing.JPanel {
                 if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1){
                     String selText = theTextPane.getSelectedText();
                     if( selText == null ){
-                        theTextPane.setCaretPosition( theTextPane.getStyledDocument().getLength());
+                        try {   
+                            updateCaret( theTextPane, theTextPane.getCaretPosition(), "");
+                        } catch (BadLocationException ex) {                        
+                        }
                     }
                 }
 
-            } // end MouseReleased
-        }; // end MouseAdapter class
-        theTextPane.addMouseListener(mouseAdapter);
-        
+            } 
+        };
+        theTextPane.addMouseListener(mouseAdapter);        
         theTextPane.setStyledDocument( new DefaultStyledDocument(){
         
             //============================================================
@@ -431,22 +476,19 @@ public class HostShellPanel extends javax.swing.JPanel {
              */
             @Override
             public void insertString( int offset, String str, AttributeSet a) throws BadLocationException{
-       
-                    
-                if( updateCaret( theTextPane, offset, 0 ) ){
+                if( updateCaret( theTextPane, offset, str ) ){
                     super.insertString(offset, str, a);
                 }
-
             }
             
             //============================================================
             /*
-             *  Remote the string if it is at the end of the textpane
+             *  Remove the string if it is at the end of the textpane
              */
             @Override
-            public void remove( int offs, int len) throws BadLocationException{
-                if( updateCaret( theTextPane, offs, 0 ) ){
-                    super.remove(offs, len);
+            public void remove( int theOffset, int len) throws BadLocationException{
+                if( canRemove() ){
+                    super.remove(theOffset, len);
                 }
             }
             
@@ -456,13 +498,27 @@ public class HostShellPanel extends javax.swing.JPanel {
         setShellTextPane( theTextPane );
         
         //Add the command prompt
-        List<Shell> shellList = theListener.getShellList();
-        for( Shell aShell : shellList ){
-            shellCombo.addItem(aShell);
+        List<Class> shellList = theListener.getShellList();
+        for( Class aClass : shellList ){
+            shellCombo.addItem( new ClassWrapper( aClass ) );
         }
         
         //Center the items
         ((JLabel)shellCombo.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
-    }  
+    } 
+    
+    class ClassWrapper {
+        
+        public final Class theClass;
+        
+        public ClassWrapper( Class passedClass ){
+            theClass = passedClass;
+        }
+              
+        @Override
+        public String toString(){
+            return theClass.getSimpleName();
+        }
+    }
 
 }

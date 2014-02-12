@@ -59,20 +59,19 @@ public interface StreamReaderListener {
     * The bytes placed in the buffer during the read will occupy the elements at
     * indices 0 - (numberRead - 1).
     *
-    * @param reader the {@code StreamReader}
+    * @param theStreamId
     * @param buffer the buffer into which the bytes were read
-    * @param numberRead the number of bytes read
     */
-    public void handleBytesRead( StreamReader reader, byte[] buffer, int numberRead );
+    public void handleBytesRead( int theStreamId, byte[] buffer );
 
 
     // ==========================================================================
     /**
     * Called by a {@link StreamReader} when it detects the end of file in its {@link InputStream}.
     *
-    * @param reader the {@code StreamReader}
+     * @param theStreamId
     */
-    public void handleEndOfStream( StreamReader reader );
+    public void handleEndOfStream( int theStreamId );
 
 
     // ==========================================================================
@@ -80,9 +79,9 @@ public interface StreamReaderListener {
     * Called by a {@link StreamReader} when reading from its {@link InputStream} throws
     * an {@link IOException}.
     *
-    * @param reader the {@code StreamReader}
-    * @param ex the {@code IOException} thrown
+     * @param theStreamId
+     * @param ex
     */
-    public void handleIOException( StreamReader reader, IOException ex );
+    public void handleIOException( int theStreamId, IOException ex );
 
 }

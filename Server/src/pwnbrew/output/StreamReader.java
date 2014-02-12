@@ -48,66 +48,65 @@ package pwnbrew.output;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidParameterException;
+import java.util.Arrays;
 import java.util.logging.Level;
+import pwnbrew.execution.ManagedRunnable;
 import pwnbrew.logging.Log;
+import pwnbrew.misc.Constants;
 
 
 /**
-* StreamReader reads the bytes from an {@link InputStream} and reports to
-* an {@link IStreamReaderListener}.
-* <p>
 *
 */
-public class StreamReader implements Runnable {
+public class StreamReader extends ManagedRunnable {
 
     private static final String NAME_Class = StreamReader.class.getSimpleName();
-    private InputStream theInputStream = null; //The InputStream from which to read
-    private StreamReaderListener theListener = null; //The listener to which the read bytes will be passed
+    private InputStream theInputStream = null; 
+    private StreamReaderListener theListener = null;
 
-    private int theBufferLength = 1000; //The maximum number of bytes to read at one time
-    private int theNumberOfBytesRead = 0; //The number of bytes that have hitherto been read
-    protected volatile boolean aborting = false;
-
-
+    private int theMaxBufferSize = 1000; 
+    private final int theStreamId;
+  
     // ==========================================================================
     /**
     * Constructor
+     * @param passedId
     */
-    public StreamReader(){
-    }/* END CONSTRUCTOR() */
+    public StreamReader( int passedId ){
+        super(Constants.Executor);
+        theStreamId = passedId;
+    }
 
     // ==========================================================================
     /**
     * Constructor
     *
+     * @param passedId
     * @param stream the {@code InputStream} from which to read
     *
     * @throws InvalidParameterException if the given {@code InputStream} is null
     */
-    public StreamReader( InputStream stream ) { // NO_UCD (use default)
+    public StreamReader( int passedId, InputStream stream ) { // NO_UCD (use default)
 
-        if( stream == null ) { //If the InputStream is null...
-            throw new InvalidParameterException();
-        }
+        this(passedId);
+        if( stream == null )
+            throw new InvalidParameterException();        
 
         theInputStream = stream;
-
     }
 
 
     // ==========================================================================
     /**
-    * Sets the {@link IStreamReaderListener} to notify when bytes are read or the
+    * Sets the Listener to notify when bytes are read or the
     * end of the stream is reached.
     * <p>
     * If the {@link StreamReader} has already been started, this method does nothing.
     * 
-    * @param listener the {@code IStreamReaderListener} to notify
+    * @param listener 
     */
-    public void setIStreamReaderListener( StreamReaderListener listener ) {
-
-        theListener = listener; //Set the IStreamReaderListener
-
+    public void setStreamReaderListener( StreamReaderListener listener ){ 
+        theListener = listener; 
     }
 
 
@@ -115,42 +114,33 @@ public class StreamReader implements Runnable {
     /**
     * Reads bytes from the {@link InputStream}.
     * <p>
-    * This method calls {@link InputStream#read( byte[], int, int )} which <strong>WILL BLOCK</strong>
-    * until data is received or an {@code IOException} occurs.
     */
     @Override //Runnable
-    public void run() {
+    public void go() {
 
-        int numberOfBytesJustRead = 0;
-        byte[] buffer = new byte[ theBufferLength ];
-        while( numberOfBytesJustRead != -1 && //Until the end of the InputStream has been reached or...
-        !aborting ) { //...an abort is triggered...
+        int bytesRead = 0;
+        byte[] buffer = new byte[ theMaxBufferSize ];
+        while( bytesRead != -1 && !shutdownRequested ) { 
 
             try {
-                numberOfBytesJustRead = theInputStream.read( buffer, 0, buffer.length );
-          
+                bytesRead = theInputStream.read( buffer, 0, buffer.length );          
             } catch( IOException ioex ) {
-                handleIoException( ioex ); //Handle the IOException
-                break; //Stop looping
+                handleIoException( ioex ); 
+                break; 
             }
 
-            if( numberOfBytesJustRead > 0 ) { //If any bytes were read...
+            //Handle the bytes read
+            if( bytesRead > 0 )
+                handleBytesRead( buffer, bytesRead );
 
-                theNumberOfBytesRead += numberOfBytesJustRead; //Add the number of bytes read to the total
-                handleBytesRead( buffer, numberOfBytesJustRead ); //Handle the bytes
-
-            }
-
-        } //End of "while( numberOfBytesJustRead != -1 || //Until the end of the InputStream has been reached or..."
-
-        if( numberOfBytesJustRead == -1 ) { //If the end of file was detected...
-            try {
-                //Handle the end of the stream
-                theInputStream.close();
-                handleEndOfStream(); //Handle the end of the stream
-            } catch (IOException ex) {
-                Log.log(Level.SEVERE, NAME_Class, "run()", ex.getMessage(), ex );
-            }
+        } 
+        
+        try {
+            //Handle the end of the stream
+            theInputStream.close();
+            handleEndOfStream();
+        } catch (IOException ex) {
+            Log.log(Level.SEVERE, NAME_Class, "run()", ex.getMessage(), ex );
         }
 
     }
@@ -158,8 +148,7 @@ public class StreamReader implements Runnable {
 
     // ==========================================================================
     /**
-    * Called by {@link StreamReader#act} each time at least one byte is read from
-    * the {@link InputStream}.
+    * Handle the bytes read
     * <p>
     * If the given {@code byte[]} is null, this method does nothing.
     *
@@ -172,7 +161,7 @@ public class StreamReader implements Runnable {
             return;        
 
         if( theListener != null )
-            theListener.handleBytesRead( this, buffer, numberRead );
+            theListener.handleBytesRead( theStreamId, Arrays.copyOf(buffer, numberRead) );
     }
 
 
@@ -182,9 +171,8 @@ public class StreamReader implements Runnable {
     * {@link InputStream}.
     */
     public void handleEndOfStream() {
-
         if( theListener != null )
-            theListener.handleEndOfStream( this );        
+            theListener.handleEndOfStream( theStreamId );        
 
     }
 
@@ -200,25 +188,12 @@ public class StreamReader implements Runnable {
     protected void handleIoException( IOException exception ) {
 
         if( exception == null )
-            return; //Do nothing        
+            return;   
 
         if( theListener != null )
-            theListener.handleIOException( this, exception );
-        
+            theListener.handleIOException( theStreamId, exception );        
 
     }
-
-
-    // ==========================================================================
-    /**
-    * Returns the number of bytes that have hitherto been read.
-    *
-    * @return the number of bytes that have hitherto been read
-    */
-    public int getNumberOfBytesRead() {
-        return theNumberOfBytesRead;
-    }
-
 
     // ==========================================================================
     /**
@@ -232,7 +207,6 @@ public class StreamReader implements Runnable {
         return theInputStream;
     }
 
-
     // ==========================================================================
     /**
     * Returns the length of the byte buffer.
@@ -240,9 +214,8 @@ public class StreamReader implements Runnable {
     * @return the length of the byte buffer
     */
     public int getBufferLength() {
-        return theBufferLength;
+        return theMaxBufferSize;
     }
-
 
     // ==========================================================================
     /**
@@ -257,10 +230,8 @@ public class StreamReader implements Runnable {
     * @param length the length of the byte buffer
     */
     public void setBufferLength( int length ) {
-
         if( length > 0 )
-            theBufferLength = length;         
-
+            theMaxBufferSize = length; 
     }
 
     // ==========================================================================
@@ -271,29 +242,11 @@ public class StreamReader implements Runnable {
     */
     public void setInputStream( InputStream stream ) {
 
-        if( stream == null ) { //If the InputStream is null...
-            throw new InvalidParameterException();
-        }
+        if( stream == null )
+            throw new InvalidParameterException();        
 
         theInputStream = stream;
 
-    }/* END setInputStream( InputStream stream ) */
-
-
-    // ==========================================================================
-    /**
-    * Triggers an abort.
-    * <p>
-    * Calling this method will signal {@link StreamReader} to stop reading bytes
-    * from the {@link InputStream} and end its run.
-    * <p>
-    * NOTE: Triggering an abort will prevent {@code StreamReader} from performing
-    * another read from the {@code InputStream}, but does not force it to abandon
-    * a read in progress. If an abort is triggered, {@code StreamReader} will complete
-    * its read in progress, handle any bytes read as normal, then end its run.
-    */
-    public void abort() {
-        aborting = true;
     }
 
-}/* END CLASS StreamReader */
+}

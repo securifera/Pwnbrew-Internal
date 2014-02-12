@@ -78,7 +78,6 @@ public class FileSender extends ManagedRunnable {
 
     private final CommManager theCommManager;
     private final PushFileAck theFileAck;
-//    private ProgressListener theListener;
     private final int thePort;
     
     
@@ -160,6 +159,7 @@ public class FileSender extends ManagedRunnable {
         
         //Get the port router
         int dstHostId = theFileAck.getClientId();
+        DebugPrinter.printMessage(NAME_Class, "Port: " + thePort);
         PortRouter thePR = theCommManager.getPortRouter( thePort );
         SocketChannelHandler aHandler = thePR.getSocketChannelHandler( dstHostId );
         DebugPrinter.printMessage(NAME_Class, "Sending file to: " + dstHostId);
@@ -175,9 +175,9 @@ public class FileSender extends ManagedRunnable {
             byte[] theFileId = SocketUtilities.intToByteArray(fileId); 
             if( fileToBeSent.length() == 0 ){
 
-                ByteBuffer tempBuffer = ByteBuffer.allocate( 2 + clientIdArr.length + destIdArr.length + theFileId.length + 1 );
+                ByteBuffer tempBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE + clientIdArr.length + destIdArr.length + theFileId.length + 1 );
                 tempBuffer.put( Message.FILE_MESSAGE_TYPE );
-                tempBuffer.put( new byte[]{0x0,0x0c});
+                tempBuffer.put( new byte[]{0x0,0x0,0x0,0x0c});
                 tempBuffer.put(clientIdArr);
                 tempBuffer.put(destIdArr);
                 tempBuffer.put(theFileId);
@@ -195,7 +195,7 @@ public class FileSender extends ManagedRunnable {
                     ByteBuffer fileChannelBB = ByteBuffer.allocate(maxMsgLen);
 
                     //Set the msglen
-                    final byte[] msgLen = new byte[2];
+                    final byte[] msgLen = new byte[ Message.MSG_LEN_SIZE ];
                     int readCount;            
 
                     int fileRead = 0;

@@ -49,8 +49,6 @@ import pwnbrew.misc.FileUtilities;
 
 
 /**
-* StreamRecorder is a {@link StreamReader} that writes the bytes read from the
-* {@link InputStream} into a file.
 *
 */
 public class StreamRecorder extends StreamReader {
@@ -59,22 +57,25 @@ public class StreamRecorder extends StreamReader {
     private FileOutputStream theFileOutputStream = null;
 
 
-    // ==========================================================================
+   // ==========================================================================
     /**
     * Constructor
+    *
+    * @param passedId
     */
-    public StreamRecorder() {
-        super();
+    public StreamRecorder( int passedId ) {
+        super(passedId);
     }
-    
+
     // ==========================================================================
     /**
     * Creates a new instance of {@link StreamRecorder}.
     * 
+     * @param passedId
     * @param stream the {@code InputStream} from which to read
     */
-    public StreamRecorder( InputStream stream ) {
-        super( stream ); 
+    public StreamRecorder( int passedId, InputStream stream ) {
+        super( passedId, stream );
     }
 
 

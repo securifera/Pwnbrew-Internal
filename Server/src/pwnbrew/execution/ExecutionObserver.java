@@ -63,8 +63,8 @@ public interface ExecutionObserver {
     
     public void executionObserver_ExecutionFailed( ExecutableItem item, String error );
 
-    public void executionObserver_HandleStdoutData( ExecutableItem item, byte[] buffer, int bytes );
+    public void executionObserver_HandleStdoutData( ExecutableItem item, byte[] buffer );
     
-    public void executionObserver_HandleStderrData( ExecutableItem item, byte[] buffer, int bytes );
+    public void executionObserver_HandleStderrData( ExecutableItem item, byte[] buffer );
         
 }/* END INTERFACE ExecutionObserver */

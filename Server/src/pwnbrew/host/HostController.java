@@ -46,10 +46,10 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.host;
 
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -59,8 +59,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.Icon;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
@@ -90,6 +90,7 @@ import pwnbrew.host.gui.RemoteFile;
 import pwnbrew.host.gui.RemoteFileSystemTask;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
+import pwnbrew.manager.CommManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.ControlOption;
@@ -101,12 +102,10 @@ import pwnbrew.network.control.messages.KillShell;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.Sleep;
 import pwnbrew.network.control.messages.TaskGetFile;
-import pwnbrew.network.shell.messages.StdInMessage;
 import pwnbrew.shell.CommandPrompt;
+import pwnbrew.shell.Powershell;
 import pwnbrew.shell.Shell;
-import pwnbrew.shell.ShellException;
 import pwnbrew.shell.ShellListener;
-import pwnbrew.shell.ShellMessageManager;
 import pwnbrew.tasks.RemoteTask;
 import pwnbrew.utilities.Utilities;
 
@@ -124,10 +123,7 @@ public final class HostController extends LibraryItemController implements Actio
     //The task map
     private final Map<Integer, RemoteFileSystemTask> theTaskMap = new HashMap<>();
     private Shell theShell = null;
-    
-    private static final BufferedImage termBuffImage = Utilities.loadImageFromJar( Constants.TERM_IMG_STR );  
-    private String hostPathSeparator;
-    
+    private String hostPathSeparator;    
   
     
     // ==========================================================================
@@ -759,41 +755,48 @@ public final class HostController extends LibraryItemController implements Actio
     /**
      *  Returns the id of the host controller to save to
      * 
-     * @param passedShell 
+     * @param passedClass 
      */
     @Override
-    public void spawnShell( Shell passedShell ) {
+    public void spawnShell( Class passedClass ) {
         
         //Get the shell
-        if( passedShell != null ){
+        if( passedClass != null ){
             
-            if( isLocalHost() ){
-                
-                theShell = passedShell;
-                theShell.start();
-                
-            } else {
-                
-                try {     
+            try {
+                Constructor aConstructor = passedClass.getConstructor( Executor.class, ShellListener.class );
+                theShell = (Shell)aConstructor.newInstance( Constants.Executor, this);
+                if( isLocalHost() ){     
                     
-                    //Get the control message manager
-                    ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                    if( aCMManager == null ){
-                        aCMManager = ControlMessageManager.initialize(theMainGuiController.getServer().getServerManager());
-                    }
+                    //Execute the shell
+                    theShell.start();
                     
-                    //Create the message
-                    int dstHostId = Integer.parseInt( theHost.getId());
-                    CreateShell aShellMsg = new CreateShell( dstHostId, passedShell.getCommandStringArray(),
-                            passedShell.getEncoding() );
-                    aCMManager.send( aShellMsg );
-                     
-                } catch ( IOException | ShellException ex) {
-                    Log.log(Level.WARNING, NAME_Class, "spawnShell()", ex.getMessage(), ex );        
+                } else {
+                    
+                    try {
+                        
+                        //Get the control message manager
+                        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+                        if( aCMManager == null ){
+                            aCMManager = ControlMessageManager.initialize(theMainGuiController.getServer().getServerManager());
+                        }
+                        
+                        //Create the message
+                        int dstHostId = Integer.parseInt( theHost.getId());
+                        CreateShell aShellMsg = new CreateShell( dstHostId, theShell.getCommandStringArray(),
+                                theShell.getEncoding(), theShell.getStartupCommand() );
+                        aCMManager.send( aShellMsg );
+                        
+                    } catch ( IOException ex) {
+                        Log.log(Level.WARNING, NAME_Class, "spawnShell()", ex.getMessage(), ex );
+                    }                    
+        
                 }
                 
-                
+            } catch (  NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                Log.log(Level.WARNING, NAME_Class, "spawnShell()", ex.getMessage(), ex );
             }
+            
         }
     }
     
@@ -842,13 +845,17 @@ public final class HostController extends LibraryItemController implements Actio
      * @return 
      */
     @Override
-    public List<Shell> getShellList(){
+    public List<Class> getShellList(){
         
-        List<Shell> theShellList = new ArrayList<>();
+        List<Class> theShellList = new ArrayList<>();
         
         //Add the cmd shell
-        CommandPrompt aCmdShell = new CommandPrompt( Constants.Executor, this);
-        theShellList.add(aCmdShell);
+//        CommandPrompt aCmdShell = new CommandPrompt( Constants.Executor, this);
+        theShellList.add( CommandPrompt.class );
+        
+        //Add powershell
+//        Powershell aPwrShell = new Powershell( Constants.Executor, this);
+        theShellList.add(Powershell.class);
         
         return theShellList;
     }
@@ -862,29 +869,29 @@ public final class HostController extends LibraryItemController implements Actio
     @Override
     public void sendInput(String theStr) {
         
-        if( isLocalHost() ){
+//        if( isLocalHost() ){
             
             if( theShell != null ){
                 theShell.sendInput(theStr);
             }
             
-        } else {
-            
-            int dstHostId = Integer.parseInt( theHost.getId());
-            StdInMessage aMsg = new StdInMessage( ByteBuffer.wrap(theStr.getBytes()), dstHostId);  
-            aMsg.setClientId( dstHostId );
-            try {
-
-                ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
-                if( aSMM == null){
-                    aSMM = ShellMessageManager.initialize( theMainGuiController.getServer().getServerManager());
-                }
-                aSMM.send(aMsg);
-
-            } catch (IOException ex) {
-                Log.log( Level.SEVERE, NAME_Class, "sendInput()", ex.getMessage(), ex);
-            }
-        }
+//        } else {
+//            
+//            int dstHostId = Integer.parseInt( theHost.getId());
+//            StdInMessage aMsg = new StdInMessage( ByteBuffer.wrap(theStr.getBytes()), dstHostId);  
+//            aMsg.setClientId( dstHostId );
+//            try {
+//
+//                ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
+//                if( aSMM == null){
+//                    aSMM = ShellMessageManager.initialize( theMainGuiController.getServer().getServerManager());
+//                }
+//                aSMM.send(aMsg);
+//
+//            } catch (IOException ex) {
+//                Log.log( Level.SEVERE, NAME_Class, "sendInput()", ex.getMessage(), ex);
+//            }
+//        }
     }
     
      //===============================================================
@@ -1150,43 +1157,35 @@ public final class HostController extends LibraryItemController implements Actio
             int clientId = Integer.parseInt( theHost.getId() );
             for( RemoteFile aFile : theRemoteFiles) { //For each file path...
 
-//                RemoteFile aFile = new RemoteFile(filePath);
-//                if( FileUtilities.verifyCanRead( aFile ) ) { //If the file the File represents can be read...
+                try {
 
-                    try {
+                    int taskId = Utilities.SecureRandomGen.nextInt();
+                    String[] theCmdList = new String[]{};
 
-                        int taskId = Utilities.SecureRandomGen.nextInt();
-                        String[] theCmdList = new String[]{};
+                    //Set the remote task information
+                    RemoteTask aRemoteTask = new RemoteTask( "File Download", theHost, Constants.FILE_DOWNLOAD, theCmdList, Constants.DOWNLOAD_IMG_STR );
+                    aRemoteTask.setTaskId(Integer.toString( taskId ));
+                    aRemoteTask.setState( RemoteTask.TASK_XFER_FILES);
 
-                        //Set the remote task information
-                        RemoteTask aRemoteTask = new RemoteTask( "File Download", theHost, Constants.FILE_DOWNLOAD, theCmdList, Constants.DOWNLOAD_IMG_STR );
-                        aRemoteTask.setTaskId(Integer.toString( taskId ));
-                        aRemoteTask.setState( RemoteTask.TASK_XFER_FILES);
+                    aRemoteTask.setClientId(theHost.getId());
+                    aRemoteTask.setTarget(theHost);
 
-                        aRemoteTask.setClientId(theHost.getId());
-                        aRemoteTask.setTarget(theHost);
+                    //Add support files and add to the task list
+                    theMainGuiController.addTask(aRemoteTask, true);
 
-                        //Add support files and add to the task list
-                        theMainGuiController.addTask(aRemoteTask, true);
+                    TasksJDialog theTasksDialog = TasksJDialog.getTasksJDialog();
+                    theTasksDialog.setVisible(true);
 
-                        TasksJDialog theTasksDialog = TasksJDialog.getTasksJDialog();
-                        theTasksDialog.setVisible(true);
+                    //Queue the file to be sent
+                    String fileHashNameStr = new StringBuilder().append("0").append(":").append(aFile.getAbsolutePath()).toString();
+                    TaskGetFile theTaskMsg = new TaskGetFile( taskId, fileHashNameStr, clientId );
 
-                        //Queue the file to be sent
-                        String fileHashNameStr = new StringBuilder().append("0").append(":").append(aFile.getAbsolutePath()).toString();
-                        TaskGetFile theTaskMsg = new TaskGetFile( taskId, fileHashNameStr, clientId );
+                    //Send the message
+                    aCMManager.send( theTaskMsg );  
 
-                        //Send the message
-                        aCMManager.send( theTaskMsg );  
-
-                    } catch ( LoggableException | IOException ex) {
-                        JOptionPane.showMessageDialog( theMainGuiController.getParentJFrame(), ex.getMessage(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
-                    }
-
-//                } else { //If the file cannot be read...
-//                   JOptionPane.showMessageDialog( theMainGuiController.getParentJFrame(), new StringBuilder( "\tThe file(s) could not be read: \"" )
-//                            .append( aFile.getAbsolutePath() ).append( "\"" ).toString(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
-//                }         
+                } catch ( LoggableException | IOException ex) {
+                    JOptionPane.showMessageDialog( theMainGuiController.getParentJFrame(), ex.getMessage(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
+                }       
 
             }
             
@@ -1252,6 +1251,36 @@ public final class HostController extends LibraryItemController implements Actio
     @Override
     public String getOsName() {
         return theHost.getOsName();
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public Shell getShell() {
+        return theShell;
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public Host getHost() {
+        return getObject();
+    }
+
+    //========================================================================
+    /**
+     * Returns the comm manager
+     * @return 
+     */
+    @Override
+    public CommManager getCommManager() {
+        return theMainGuiController.getServer().getServerManager();
     }
 
 }

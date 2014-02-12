@@ -58,9 +58,9 @@ public interface HostShellPanelListener {
     /**
      *  Spawns a shell given the cmd line string.
      * 
-     * @param passedShell 
+     * @param passedShellClass 
      */
-    public void spawnShell( Shell passedShell );
+    public void spawnShell( Class passedShellClass );
 
     // ==========================================================================
     /**
@@ -73,17 +73,24 @@ public interface HostShellPanelListener {
     
     //==========================================================================
     /**
-     *  Get the list of available shells
+     *  Get the list of available shell classes
      * 
      * @return 
      */
-    public List<Shell> getShellList();
+    public List<Class> getShellList();
 
      //==========================================================================
     /**
      *  Kill the shell
      */
     public void killShell();
+    
+     //==========================================================================
+    /**
+     *  Get the Shell
+     * @return 
+     */
+    public Shell getShell();
     
 
 

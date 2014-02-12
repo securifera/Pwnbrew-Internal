@@ -50,12 +50,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.misc.Constants;
 import pwnbrew.misc.ManagedRunnable;
 import pwnbrew.output.StreamReader;
 import pwnbrew.output.StreamReaderListener;
@@ -89,6 +89,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
     
     private final String encoding;
     private final String[] cmdStringArr;
+    private final String startupCmd;
     
     private final CommManager theCommManager;
     private static final String NAME_Class = Shell.class.getSimpleName();
@@ -101,13 +102,16 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
      * @param passedManager 
      * @param passedArr 
      * @param passedEncoding 
+     * @param passedStartupCmd 
      */
-    public Shell( Executor passedExecutor, CommManager passedManager, String passedEncoding, String[] passedArr ) {
+    public Shell( Executor passedExecutor, CommManager passedManager, 
+            String passedEncoding, String[] passedArr, String passedStartupCmd ) {
         super(passedExecutor);
         
         theCommManager = passedManager;
         encoding = passedEncoding;
         cmdStringArr = passedArr;
+        startupCmd = passedStartupCmd;
     }    
            
     // ==========================================================================
@@ -123,27 +127,25 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
      * The bytes placed in the buffer during the read will occupy the elements at
      * indices 0 - (numberRead - 1).
      *
-     * @param reader the {@code StreamReader}
+     * @param passedId
      * @param buffer the buffer into which the bytes were read
-     * @param numberRead the number of bytes read
      */
     @Override 
-    public void handleBytesRead( StreamReader reader, byte[] buffer, int numberRead ) {
+    public void handleBytesRead( int passedId, byte[] buffer ) {
 
-        if( reader == null || //If the StreamReader is null or...
-                ( reader != theStdOutRecorder && reader != theStdErrRecorder ) ) { //The StreamReader does not belong to the ExecutionHandler...
-            return; //Do nothing
-        }
-        
-        byte[] byteArr = Arrays.copyOf(buffer, numberRead);
         if( sendRemote ){
             
-            //Get runner pane
             ProcessMessage aMsg;
-            if( reader == theStdOutRecorder ) { //If the StreamReader is the stdout StreamRecorder...
-                aMsg = new StdOutMessage( ByteBuffer.wrap(byteArr));
-            } else { //If the StreamReader is the stderr StreamRecorder...
-                aMsg = new StdErrMessage( ByteBuffer.wrap(byteArr));       
+            switch( passedId ){
+                case Constants.STD_OUT_ID:
+                    aMsg = new StdOutMessage( ByteBuffer.wrap(buffer));
+                    break;
+                case Constants.STD_ERR_ID:
+                    aMsg = new StdErrMessage( ByteBuffer.wrap(buffer));
+                    break;
+                default:
+                    RemoteLog.log(Level.SEVERE, NAME_Class, "handleBytesRead()", "Unrecognized stream id.", null );        
+                    return;
             }
 
             try {
@@ -164,7 +166,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
             
             try {
                 //Add to the stringbuilder
-                localStringBuilder.append( new String(byteArr, encoding));
+                localStringBuilder.append( new String(buffer, encoding));
                 beNotified();
             } catch (UnsupportedEncodingException ex) {
                 RemoteLog.log( Level.SEVERE, NAME_Class, "handleBytesRead()", ex.getMessage(), null);
@@ -172,7 +174,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
             
         }
 
-    }/* END handleBytesRead( StreamReader, byte[], int ) */
+    }
 
 
     // ==========================================================================
@@ -185,25 +187,26 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
      * <P>
      * Called by a {@code StreamReader} when it detects the end of file in its {@link InputStream}.
      *
-     * @param reader the {@code StreamReader}
+     * @param passedId
      */
-    @Override 
-    public void handleEndOfStream( StreamReader reader ) {
-        
-        if( reader == null || //If the StreamReader is null or...
-                ( reader != theStdOutRecorder && reader != theStdErrRecorder ) ) { //The StreamReader does not belong to the ExecutionHandler...
-            return; //Do nothing
-        }
+     @Override
+     public synchronized void handleEndOfStream( int passedId ) {
 
-        if( reader == theStdOutRecorder ) { //If the StreamReader is the stdout StreamRecorder...
-            stdoutRecorderFinished = true; //The stdout StreamRecorder has finished
-        } else { //If the StreamReader is the stderr StreamRecorder...
-            stderrRecorderFinished = true; //The stderr StreamRecorder has finished
-        }
+        switch( passedId ){
+            case Constants.STD_OUT_ID:
+                stdoutRecorderFinished = true; 
+                break;
+            case Constants.STD_ERR_ID:
+                stderrRecorderFinished = true;
+                break;
+            default:
+                RemoteLog.log(Level.SEVERE, NAME_Class, "handleEndOfStream()", "Unrecognized stream id.", null );    
+                break;
+        } 
 
-        beNotified(); //Notify the ExecutionHandler
-        
-    }/* END handleEndOfStream( StreamReader ) */
+        notifyAll();
+
+    }
 
     
     // ==========================================================================
@@ -217,24 +220,14 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
      * Called by a {@code StreamReader} when reading from its {@code InputStream} throws
      * an {@code IOException}.
      *
-     * @param reader the {@code StreamReader}
+     * @param passedId
      * @param ex the {@code IOException} thrown
      */
-    @Override 
-    public void handleIOException( StreamReader reader, IOException ex ) {
-        
-        if( reader == null || //If the StreamReader is null or...
-                ( reader != theStdOutRecorder && reader != theStdErrRecorder ) ) //The StreamReader does not belong to the ExecutionHandler...
-            return; //Do nothing
-        
-        if( reader == theStdOutRecorder )//If the StreamReader is the stdout StreamRecorder...
-            stdoutRecorderFinished = true; //The stdout StreamRecorder has finished
-        else //If the StreamReader is the stderr StreamRecorder...
-            stderrRecorderFinished = true; //The stderr StreamRecorder has finished
-        
-        beNotified(); //Notify the ExecutionHandler    
-        
-    }/* END handleIOException( StreamReader, IOException ) */
+    @Override
+    public synchronized void handleIOException( int passedId, IOException ex ) {
+        handleEndOfStream(passedId);
+        RemoteLog.log(Level.INFO, NAME_Class, "receiveByteArray()", ex.getMessage(), ex );        
+    }
     
     // ==========================================================================
     /**
@@ -255,10 +248,10 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
 
             ProcessBuilder theProcessBuilder = new ProcessBuilder( theShellCmdArr );
             theProcessBuilder.directory( null );
-
+                       
             //Create the stderr reader
-            theStdErrRecorder = new StreamRecorder();
-            theStdErrRecorder.setIStreamReaderListener( this );
+            theStdErrRecorder = new StreamRecorder( Constants.STD_ERR_ID);
+            theStdErrRecorder.setStreamReaderListener( this );
             
             //Start the execution
             try {
@@ -282,13 +275,18 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
             theOsStream = new BufferedOutputStream( theProcess.getOutputStream() );
 
             //Collect the data from stdout...
-            theStdOutRecorder = new StreamRecorder( theProcess.getInputStream() );
-            theStdOutRecorder.setIStreamReaderListener( this );
+            theStdOutRecorder = new StreamRecorder( Constants.STD_OUT_ID, theProcess.getInputStream() );
+            theStdOutRecorder.setStreamReaderListener( this );
             theStdOutRecorder.start();
                         
             //Collect the data from stderr...
             theStdErrRecorder.setInputStream( theProcess.getErrorStream() );
             theStdErrRecorder.start();
+            
+            //Send any startup commands
+            if( startupCmd != null && !startupCmd.isEmpty() ){
+                sendInput( startupCmd );
+            }
           
             //Wait for the process to complete...
             int exitValue = Integer.MIN_VALUE;
@@ -312,7 +310,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
 
         }
 
-    }/* END execute( File, IStdOutReceiver, IStdErrReceiver ) */
+    }
  
     //===============================================================
     /*
@@ -376,7 +374,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
             waitToBeNotified();            
         }
 
-    }/* END waitForStreamRecordersToFinish() */
+    }
 
     // ==========================================================================
     /**

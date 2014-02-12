@@ -36,9 +36,8 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
 /*
- *  CommandPrompt.java
+ *  Powershell.java
  *
  *  Created on May 21, 2013
  */
@@ -47,21 +46,25 @@ package pwnbrew.shell;
 
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import pwnbrew.gui.panels.RunnerPane;
 import pwnbrew.logging.Log;
 import pwnbrew.misc.Constants;
+import static pwnbrew.shell.Shell.NAME_Class;
 
 /**
  *
  *  
  */
-public class CommandPrompt extends Shell {
+public class Powershell extends Shell {
     
-    private static final String[] CMD_EXE_STR = new String[]{ "cmd", "/k"};
-    private static final String ENCODING = "UTF-8";
-    private static final String PROMPT_REGEX = "^[a-zA-Z]:(\\\\|(\\\\[^\\\\/\\s:*\"<>|]+)+)>";
-    private static final String LINE_SEPARATOR = "\r\n";
-    
+    private static final String[] POWERSHELL_EXE_STR = new String[]{"powershell", "-"};
+    private static final String encoding = "UTF-8";
+    private static final String promptCmd = "prompt\n";
+    private static final String PROMPT_REGEX = "PS [a-zA-Z]:(\\\\|(\\\\[^\\\\/\\s:*\"<>|]+)+)>";
+    private static final Pattern PROMPT_PATTERN = Pattern.compile(PROMPT_REGEX);
+
     // ==========================================================================
     /**
      *  Constructor
@@ -69,22 +72,11 @@ public class CommandPrompt extends Shell {
      * @param passedExecutor
      * @param passedListener 
      */
-    public CommandPrompt(Executor passedExecutor, ShellListener passedListener) {
+    public Powershell(Executor passedExecutor, ShellListener passedListener) {
         super(passedExecutor, passedListener);
     }
     
-    // ==========================================================================
-    /**
-     *  Get the command string
-     * 
-     * @return 
-     */
-    @Override
-    public String[] getCommandStringArray(){                
-        return CMD_EXE_STR;
-    }
-    
-    // ==========================================================================
+     // ==========================================================================
     /**
      * Handles the bytes read
      *
@@ -104,12 +96,16 @@ public class CommandPrompt extends Shell {
                 synchronized(theStdOutStringBuilder) {
                     theStdOutStringBuilder.append( new String( buffer ));
                     String tempStr = theStdOutStringBuilder.toString();
-                    
+                                        
                     //Set the prompt
                     if( !promptFlag ){
-                        if( tempStr.trim().matches(PROMPT_REGEX) ){
-                            aStr = tempStr.trim();
-                            setShellPrompt( aStr );
+                        
+                        //See if it matches the prompt
+                        Matcher m = PROMPT_PATTERN.matcher(tempStr);
+                        if( m.find()){
+                            int matchEnd = m.end();
+                            aStr = tempStr.substring(0, matchEnd);
+                            setShellPrompt( m.group() );
                             promptFlag = true;
                         } else{
                             aStr = tempStr;
@@ -143,13 +139,24 @@ public class CommandPrompt extends Shell {
     
     // ==========================================================================
     /**
+     *  Get the command string
+     * 
+     * @return 
+     */
+    @Override
+    public String[] getCommandStringArray() {                
+        return POWERSHELL_EXE_STR;
+    }
+
+    // ==========================================================================
+    /**
      *  Get character encoding.
      * 
      * @return 
      */
     @Override
     public String getEncoding() {
-        return ENCODING;
+        return encoding;
     }
     
     // ==========================================================================
@@ -159,6 +166,28 @@ public class CommandPrompt extends Shell {
      */
     @Override
     public String toString(){
-        return "Command Prompt";
+        return "Powershell";
+    }
+    
+     // ==========================================================================
+    /**
+     *  Get the string to append to the end of every command
+     * 
+     * @return 
+     */
+    @Override
+    public String getInputTerminator(){
+        return promptCmd;    
+    }
+    
+    // ==========================================================================
+    /**
+     *  Get the string to run on the shell startup
+     * 
+     * @return 
+     */
+    @Override
+    public String getStartupCommand(){
+        return "\n";    
     }
 }

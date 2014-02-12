@@ -47,6 +47,8 @@ package pwnbrew.shell;
 
 import pwnbrew.gui.panels.RunnerPane;
 import java.io.File;
+import pwnbrew.host.Host;
+import pwnbrew.manager.CommManager;
 
 /**
  *
@@ -77,5 +79,26 @@ public interface ShellListener {
      * @return 
     */
     public String getOsName();
+
+    //===============================================================
+    /**
+     * Returns
+     * @return 
+     */
+    public boolean isLocalHost();
+    
+    //===============================================================
+    /**
+     * Returns the host
+     * @return 
+     */
+    public Host getHost();
+    
+    //===============================================================
+    /**
+     * Returns the comm manager
+     * @return 
+     */
+    public CommManager getCommManager();
 
 }

@@ -56,6 +56,7 @@ import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.ServerManager;
+import pwnbrew.misc.Constants;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.shell.messages.ProcessMessage;
 import pwnbrew.network.shell.messages.StdErrMessage;
@@ -142,7 +143,6 @@ public class ShellMessageHandler extends DataHandler {
             
     }
 
-
     //===============================================================
     /**
      *  Receive the byte array
@@ -164,12 +164,22 @@ public class ShellMessageHandler extends DataHandler {
                 String theClientIdStr = Integer.toString(aMessage.getClientId());
                 
                 HostController aController = aServMgr.getServer().getGuiController().getHostController(theClientIdStr);
-                RunnerPane thePane = aController.getShellTextPane();
-                if( aMessage instanceof StdOutMessage ) { 
-                    thePane.handleStdOut( msgBytes );
-                } else if( aMessage instanceof StdErrMessage ) {
-                    thePane.handleStdErr( msgBytes );        
+                Shell theShell = aController.getShell();
+                if( theShell != null ){
+                    if( aMessage instanceof StdOutMessage ) { 
+                        theShell.handleBytesRead( Constants.STD_OUT_ID, msgBytes );
+                    } else if( aMessage instanceof StdErrMessage ) {
+                        theShell.handleBytesRead( Constants.STD_ERR_ID, msgBytes );    
+                    }
                 }
+                
+//                RunnerPane thePane = aController.getShellTextPane();
+//                if( aMessage instanceof StdOutMessage ) { 
+//                    
+//                    thePane.handleStreamBytes( Constants.STD_OUT_ID, msgBytes);
+//                } else if( aMessage instanceof StdErrMessage ) {
+//                    thePane.handleStreamBytes( Constants.STD_ERR_ID, msgBytes);      
+//                }
             }
            
             

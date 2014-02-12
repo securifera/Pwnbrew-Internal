@@ -73,4 +73,8 @@ abstract public class Constants {
     public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");
     public static final int SERVER_ID = -1;    
     
+    //Constants for process streams
+    public static final int STD_OUT_ID = 41;
+    public static final int STD_ERR_ID = 42;
+    
 }/* END CLASS Constants */

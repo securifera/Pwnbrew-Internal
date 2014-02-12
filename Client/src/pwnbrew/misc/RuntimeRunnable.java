@@ -59,8 +59,8 @@ public class RuntimeRunnable implements Runnable {
 
     private final String[] theCommand;
     private static final String NAME_Class = RuntimeRunnable.class.getSimpleName();
-    private final StreamCollector theOutputReader = new StreamCollector();
-    private final StreamCollector theErrReader = new StreamCollector();
+    private final StreamCollector theOutputReader = new StreamCollector( Constants.STD_OUT_ID);
+    private final StreamCollector theErrReader = new StreamCollector( Constants.STD_ERR_ID );
     private int exitValue = 0;
     
     //===============================================================

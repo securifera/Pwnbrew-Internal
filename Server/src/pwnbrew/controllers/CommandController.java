@@ -426,18 +426,16 @@ public class CommandController extends JobController implements ActionListener, 
     *
     * @param item the {@code ExecutableItem}
      * @param buffer
-     * @param numberRead
     */
     @Override //ExecutionObserver
-    public void executionObserver_HandleStdoutData( ExecutableItem item, byte[] buffer, int numberRead ){
+    public void executionObserver_HandleStdoutData( ExecutableItem item, byte[] buffer ){
     
-        if( item == null ) {
-            return; //Do nothing
-        }
+        if( item == null )
+            return;        
 
         //Send to the runner pane.
         RunnerPane theRunnerPane = getRunnerPane( false );
-        theRunnerPane.handleStdOut(Arrays.copyOfRange( buffer, 0, numberRead));
+        theRunnerPane.handleStreamBytes(Constants.STD_OUT_ID, new String( buffer ));
         
     }
 
@@ -449,23 +447,21 @@ public class CommandController extends JobController implements ActionListener, 
     *
     * @param item the {@code ExecutableItem}
      * @param buffer
-     * @param numberRead
     */
     @Override //ExecutionObserver
-    public void executionObserver_HandleStderrData( ExecutableItem item, byte[] buffer, int numberRead ) {
+    public void executionObserver_HandleStderrData( ExecutableItem item, byte[] buffer ) {
 
-        if( item == null ) { //If the ExecutableItem is null...
-            return; //Do nothing
-        }
-        
+        if( item == null )
+            return;
+                
         errorOccurred = true;
         theCommand.setAttribute( Command.ATTRIBUTE_LastRunResult, Constants.LastRunResults_ErrorOccurred );
 
 
         //Send to the runner pane
         RunnerPane theRunnerPane = getRunnerPane( false );
-        theRunnerPane.handleStdErr(Arrays.copyOfRange( buffer, 0, numberRead));
-          
+        theRunnerPane.handleStreamBytes(Constants.STD_ERR_ID, new String( buffer) );
+            
         if( theRunObserver != null )
             theRunObserver.errorOccurred( this );
         
@@ -496,7 +492,7 @@ public class CommandController extends JobController implements ActionListener, 
             theRunObserver.runBeginning( this );
         updateLastRunDetails();
         
-    }/* END executionObserver_ExecutionStarting( ExecutableItem ) */
+    }
     
 
     // ==========================================================================
@@ -671,7 +667,7 @@ public class CommandController extends JobController implements ActionListener, 
     @Override //LibraryItemController
     public String getItemTypeDisplayName() {
         return "Command";
-    }/* END getItemTypeDisplayName() */
+    }
 
      // ========================================================================
     /**

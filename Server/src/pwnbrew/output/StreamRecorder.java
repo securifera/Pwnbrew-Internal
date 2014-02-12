@@ -62,18 +62,21 @@ public class StreamRecorder extends StreamReader {
     /**
     * Constructor
     *
+    * @param passedId
     */
-    public StreamRecorder() {
+    public StreamRecorder( int passedId ) {
+        super(passedId);
     }
 
     // ==========================================================================
     /**
     * Creates a new instance of {@link StreamRecorder}.
     * 
+     * @param passedId
     * @param stream the {@code InputStream} from which to read
     */
-    public StreamRecorder( InputStream stream ) {
-        super( stream );
+    public StreamRecorder( int passedId, InputStream stream ) {
+        super( passedId, stream );
     }
 
 
@@ -133,8 +136,7 @@ public class StreamRecorder extends StreamReader {
 
         return rtnBool;
 
-    }/* END setOutputFile( File ) */
-
+    }
 
     // ==========================================================================
     /**
@@ -145,8 +147,8 @@ public class StreamRecorder extends StreamReader {
     * {@link InputStream} are written; null if the {@code File} has not been set
     */
     public File getOutputFile() {
-    return theOutputFile;
-    }/* END getOutputFile() */
+        return theOutputFile;
+    }
 
 
     // ==========================================================================
@@ -166,14 +168,14 @@ public class StreamRecorder extends StreamReader {
             return; 
 
         try {
-            if( theFileOutputStream != null ){
+            if( theFileOutputStream != null )
                 theFileOutputStream.write( buffer, 0, numberRead );
-            }
+            
         } catch( IOException ex ) {
-            aborting = true; 
+            shutdown();
         }
 
-        if( aborting == false )
+        if( shutdownRequested == false )
             super.handleBytesRead( buffer, numberRead );         
 
     }

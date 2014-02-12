@@ -51,6 +51,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
+import pwnbrew.logging.Log;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.FileUtilities;
@@ -87,10 +89,11 @@ public class ExecutionHandler implements Runnable, LibraryFileCopyListener, Stre
     
     private String theErrorString;
     
+    private static final String NAME_Class = ExecutionHandler.class.getSimpleName();
     
     // ========================================================================
     /**
-     * Creates a new instance of {@link ExecutionHandler}.
+     * Constructor
      * @param item
      * @param observer
      */
@@ -102,14 +105,13 @@ public class ExecutionHandler implements Runnable, LibraryFileCopyListener, Stre
         theExecutableItem = item;
         theExecutionObserver = observer;
         
-    }/* END CONSTRUCTOR( ExecutableItem, ExecutionObserver ) */
-    
+    }    
 
     // ========================================================================
     /**
      * 
      */
-    @Override //Runnable
+    @Override
     public void run() {
         
         //Get the command args
@@ -251,16 +253,20 @@ public class ExecutionHandler implements Runnable, LibraryFileCopyListener, Stre
         }
 
         //Collect the data from stdout...
-        theStdoutStreamRecorder = new StreamRecorder( theProcess.getInputStream() );
-        theStdoutStreamRecorder.setIStreamReaderListener( this );
+        theStdoutStreamRecorder = new StreamRecorder( Constants.STD_OUT_ID, theProcess.getInputStream() );
+        theStdoutStreamRecorder.setStreamReaderListener( this );
         theStdoutStreamRecorder.setOutputFile( new File( theWorkingDirectory, "stdout.txt" ) );
-        Constants.Executor.execute( theStdoutStreamRecorder );
+        theStdoutStreamRecorder.start();
+        
+//        Constants.Executor.execute( theStdoutStreamRecorder );
 
         //Collect the data from stderr...
-        theStderrStreamRecorder = new StreamRecorder( theProcess.getErrorStream() );
-        theStderrStreamRecorder.setIStreamReaderListener( this );
+        theStderrStreamRecorder = new StreamRecorder( Constants.STD_ERR_ID, theProcess.getErrorStream() );
+        theStderrStreamRecorder.setStreamReaderListener( this );
         theStderrStreamRecorder.setOutputFile( new File( theWorkingDirectory, "stderr.txt" ) );
-        Constants.Executor.execute( theStderrStreamRecorder );
+        theStderrStreamRecorder.start();
+        
+//        Constants.Executor.execute( theStderrStreamRecorder );
 
         waitForProcessToFinish();
         synchronized( this ) {
@@ -315,7 +321,6 @@ public class ExecutionHandler implements Runnable, LibraryFileCopyListener, Stre
             try {
                 wait();
             } catch( InterruptedException ex ) {
-                //Do nothing
                 ex = null;
             }
 
@@ -362,29 +367,28 @@ public class ExecutionHandler implements Runnable, LibraryFileCopyListener, Stre
      * The bytes placed in the buffer during the read will occupy the elements at
      * indices 0 - (numberRead - 1).
      *
-     * @param reader the {@code StreamReader}
+     * @param passedId
      * @param buffer the buffer into which the bytes were read
-     * @param numberRead the number of bytes read
      */
-    @Override //IStreamReaderListener
-    public void handleBytesRead( StreamReader reader, byte[] buffer, int numberRead ) {
+    @Override 
+    public void handleBytesRead( int passedId, byte[] buffer ) {
 
-        if( reader == null || //If the StreamReader is null or...
-                ( reader != theStdoutStreamRecorder && reader != theStderrStreamRecorder ) ) { //The StreamReader does not belong to the ExecutionHandler...
-            return; //Do nothing
-        }
-        
         if( theExecutionObserver != null ) { //If an ExecutionObserver was given...
 
-            if( reader == theStdoutStreamRecorder ) { //If the StreamReader is the stdout StreamRecorder...
-                theExecutionObserver.executionObserver_HandleStdoutData( theExecutableItem, buffer, numberRead );
-            } else { //If the StreamReader is the stderr StreamRecorder...
-                theExecutionObserver.executionObserver_HandleStderrData( theExecutableItem, buffer, numberRead );
-            }
+            switch( passedId ){
+                case Constants.STD_OUT_ID:
+                    theExecutionObserver.executionObserver_HandleStdoutData( theExecutableItem, buffer );
+                    break;
+                case Constants.STD_ERR_ID:
+                    theExecutionObserver.executionObserver_HandleStderrData( theExecutableItem, buffer );
+                    break;
+                default:
+                    Log.log(Level.SEVERE, NAME_Class, "handleBytesRead()", "Unrecognized stream id.", null );        
+                    break;
+            }          
             
         }
-
-    }/* END iStreamReaderListener_HandleBytesRead( StreamReader, byte[], int ) */
+    }
 
 
     // ==========================================================================
@@ -397,25 +401,26 @@ public class ExecutionHandler implements Runnable, LibraryFileCopyListener, Stre
      * <P>
      * Called by a {@code StreamReader} when it detects the end of file in its {@link InputStream}.
      *
-     * @param reader the {@code StreamReader}
+     * @param passedId
      */
-    @Override //IStreamReaderListener
-    public synchronized void handleEndOfStream( StreamReader reader ) {
+     @Override
+     public synchronized void handleEndOfStream( int passedId ) {
 
-        if( reader == null || //If the StreamReader is null or...
-                ( reader != theStdoutStreamRecorder && reader != theStderrStreamRecorder ) ) { //The StreamReader does not belong to the ExecutionHandler...
-            return; //Do nothing
-        }
+        switch( passedId ){
+            case Constants.STD_OUT_ID:
+                stdoutRecorderFinished = true; 
+                break;
+            case Constants.STD_ERR_ID:
+                stderrRecorderFinished = true;
+                break;
+            default:
+                Log.log(Level.SEVERE, NAME_Class, "handleEndOfStream()", "Unrecognized stream id.", null );    
+                break;
+        } 
 
-        if( reader == theStdoutStreamRecorder ) { //If the StreamReader is the stdout StreamRecorder...
-            stdoutRecorderFinished = true; //The stdout StreamRecorder has finished
-        } else { //If the StreamReader is the stderr StreamRecorder...
-            stderrRecorderFinished = true; //The stderr StreamRecorder has finished
-        }
+        notifyAll();
 
-        notifyAll(); //Notify the ExecutionHandler
-
-    }/* END iStreamReaderListener_HandleEndOfStream( StreamReader ) */
+    }
 
     
     // ==========================================================================
@@ -429,25 +434,13 @@ public class ExecutionHandler implements Runnable, LibraryFileCopyListener, Stre
      * Called by a {@code StreamReader} when reading from its {@code InputStream} throws
      * an {@code IOException}.
      *
-     * @param reader the {@code StreamReader}
+     * @param passedId
      * @param ex the {@code IOException} thrown
      */
-    @Override //IStreamReaderListener
-    public synchronized void handleIOException( StreamReader reader, IOException ex ) {
-
-        if( reader == null || //If the StreamReader is null or...
-                ( reader != theStdoutStreamRecorder && reader != theStderrStreamRecorder ) ) { //The StreamReader does not belong to the ExecutionHandler...
-            return; //Do nothing
-        }
-
-        if( reader == theStdoutStreamRecorder ) { //If the StreamReader is the stdout StreamRecorder...
-            stdoutRecorderFinished = true; //The stdout StreamRecorder has finished
-        } else { //If the StreamReader is the stderr StreamRecorder...
-            stderrRecorderFinished = true; //The stderr StreamRecorder has finished
-        }
-
-        notifyAll(); //Notify the ExecutionHandler
-
+    @Override
+    public synchronized void handleIOException( int passedId, IOException ex ) {
+        handleEndOfStream(passedId);
+        Log.log(Level.INFO, NAME_Class, "receiveByteArray()", ex.getMessage(), ex );        
     }
     
     
@@ -458,7 +451,7 @@ public class ExecutionHandler implements Runnable, LibraryFileCopyListener, Stre
      * @param error
      * @param destination
      */
-    @Override //LibraryFileCopyListener
+    @Override 
     public void libraryFileCopyFailed( String libFileName, File destination, String error ) {
         
         if( libFileName != null && libFileName.equals( theCurrentFileHash ) )
@@ -474,7 +467,7 @@ public class ExecutionHandler implements Runnable, LibraryFileCopyListener, Stre
      * @param fileBytes
      * @param bytesCopied
      */
-    @Override //LibraryFileCopyListener
+    @Override
     public void libraryFileCopyProgress( String libFileName, long bytesCopied, long fileBytes ) {
         
         if( libFileName != null && libFileName.equals( theCurrentFileHash ) ) {
@@ -485,7 +478,6 @@ public class ExecutionHandler implements Runnable, LibraryFileCopyListener, Stre
         }
         
     }
-
     
     // ========================================================================
     /**
@@ -493,9 +485,8 @@ public class ExecutionHandler implements Runnable, LibraryFileCopyListener, Stre
      * @param libFileName
      * @param destination
      */
-    @Override //LibraryFileCopyListener
+    @Override 
     public void libraryFileCopyCompleted( String libFileName, File destination ) {
-        //Do nothing
     }
 
 }

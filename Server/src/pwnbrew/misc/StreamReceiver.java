@@ -38,21 +38,26 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
- * ShellException.java
+ * StreamReceiver.java
  *
- * Created on January 14 2014, 7:16 PM
+ * Created on June 25, 2013, 11:41 AM
  */
 
-package pwnbrew.shell;
+package pwnbrew.misc;
+
 
 /**
- *
  *  
  */
-public class ShellException extends Exception {
+public interface StreamReceiver {
 
-    public ShellException(String aString ) {
-        super(aString);
-    }
+    // ==========================================================================
+    /**
+    * Handles the bytes received from a stream with the given id
+     * @param passedId
+     * @param passedString
+    */
+    public void handleStreamBytes( int passedId, String passedString );
+
 
 }

@@ -140,7 +140,9 @@ public class RelayManager extends DataManager {
         }
 
         //Queue the message to be sent
-        thePR.queueSend( msgBytes, tempId );       
+        if( thePR != null ){
+            thePR.queueSend( msgBytes, tempId ); 
+        }      
         
     }
     

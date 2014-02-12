@@ -1982,7 +1982,6 @@ final public class MainGuiController extends Controller implements ActionListene
         //Get the host controller
         HostController theController = getHostController( passedTask.getClientId() );
       
-//        RunnerPane theRunnerPane = null;
         LibraryItemController aLibController = getControllerByObjName( theController.getItemName(), passedTask.getType(), passedTask.getName());
         RunnerPane theRunnerPane = aLibController.getRunnerPane( true );
         
@@ -2000,13 +1999,13 @@ final public class MainGuiController extends Controller implements ActionListene
                 File stdErrFile = new File( theTaskDir, Constants.STD_ERR_FILENAME );
                 byte[] fileBytes = FileUtilities.readFile(stdErrFile);
                 if( fileBytes != null && fileBytes.length > 0){
-                    theRunnerPane.handleStdErr(fileBytes);
+                    theRunnerPane.handleStreamBytes(Constants.STD_ERR_ID, new String( fileBytes ));
                 }
                 
                 File stdOutFile = new File( theTaskDir, Constants.STD_OUT_FILENAME ); 
                 fileBytes = FileUtilities.readFile(stdOutFile);
                 if( fileBytes != null && fileBytes.length > 0 ){
-                    theRunnerPane.handleStdOut( fileBytes );
+                    theRunnerPane.handleStreamBytes(Constants.STD_OUT_ID, new String( fileBytes) );
                 }
 
                            

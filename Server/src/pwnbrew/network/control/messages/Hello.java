@@ -54,6 +54,7 @@ import pwnbrew.host.Host;
 import pwnbrew.host.HostFactory;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
+import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Nic;
 import pwnbrew.network.PortRouter;
@@ -187,6 +188,7 @@ public final class Hello extends ControlMessage {
 
             //Register the host
             Integer theClientId = getClientId();
+            DebugPrinter.printMessage(NAME_Class, "Accepted connection from host id: " + theClientId);
             PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort() );
             SocketChannelHandler aSCH = aPR.getSocketChannelHandler(theClientId);
             

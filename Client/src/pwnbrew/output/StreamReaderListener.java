@@ -52,37 +52,36 @@ import java.io.IOException;
  */
 public interface StreamReaderListener {
 
-  // ==========================================================================
-  /**
-   * Called by a {@link StreamReader} each time it reads bytes from its {@link InputStream}.
-   * <p>
-   * The bytes placed in the buffer during the read will occupy the elements at
-   * indices 0 - (numberRead - 1).
-   *
-   * @param reader the {@code StreamReader}
-   * @param buffer the buffer into which the bytes were read
-   * @param numberRead the number of bytes read
-   */
-  public void handleBytesRead( StreamReader reader, byte[] buffer, int numberRead );
+    // ==========================================================================
+    /**
+    * Called by a {@link StreamReader} each time it reads bytes from its {@link InputStream}.
+    * <p>
+    * The bytes placed in the buffer during the read will occupy the elements at
+    * indices 0 - (numberRead - 1).
+    *
+    * @param theStreamId
+    * @param buffer the buffer into which the bytes were read
+    */
+    public void handleBytesRead( int theStreamId, byte[] buffer );
 
 
-  // ==========================================================================
-  /**
-   * Called by a {@link StreamReader} when it detects the end of file in its {@link InputStream}.
-   *
-   * @param reader the {@code StreamReader}
-   */
-  public void handleEndOfStream( StreamReader reader );
+    // ==========================================================================
+    /**
+    * Called by a {@link StreamReader} when it detects the end of file in its {@link InputStream}.
+    *
+     * @param theStreamId
+    */
+    public void handleEndOfStream( int theStreamId );
 
 
-  // ==========================================================================
-  /**
-   * Called by a {@link StreamReader} when reading from its {@link InputStream} throws
-   * an {@link IOException}.
-   *
-   * @param reader the {@code StreamReader}
-   * @param ex the {@code IOException} thrown
-   */
-  public void handleIOException( StreamReader reader, IOException ex );
+    // ==========================================================================
+    /**
+    * Called by a {@link StreamReader} when reading from its {@link InputStream} throws
+    * an {@link IOException}.
+    *
+     * @param theStreamId
+     * @param ex
+    */
+    public void handleIOException( int theStreamId, IOException ex );
 
-}/* END INTERFACE IStreamReaderListener */
+}
