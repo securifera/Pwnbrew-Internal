@@ -170,33 +170,32 @@ public final class TaskGetFile extends TaskStatus{
         try {
             
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize(passedManager);
-            }
-            
-            //Alert the manager of the change in the task
-            passedManager.getTaskManager().taskChanged(this);
+            if( aCMManager != null ){
+                
+                //Alert the manager of the change in the task
+                passedManager.getTaskManager().taskChanged(this);
 
-            File libDir = Directories.getFileLibraryDirectory();
-            String theHash = getHashToRetrieve();
-            
-            //Debug
-            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received TaskGetFile for " + theHash);
+                File libDir = Directories.getFileLibraryDirectory();
+                String theHash = getHashToRetrieve();
 
-            File fileToSend = new File(libDir, theHash);
-            if(fileToSend.exists()){
+                //Debug
+                DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received TaskGetFile for " + theHash);
 
-                //Queue the file to be sent
-                String fileHashNameStr = new StringBuilder().append(fileToSend.getName()).append(":").append(fileToSend.getName()).toString();
-        
-                int clientId =  getClientId();
-                PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.JOB_SUPPORT, clientId );
-                aCMManager.send(thePFM);
-            }
+                File fileToSend = new File(libDir, theHash);
+                if(fileToSend.exists()){
+
+                    //Queue the file to be sent
+                    String fileHashNameStr = new StringBuilder().append(fileToSend.getName()).append(":").append(fileToSend.getName()).toString();
+
+                    int clientId =  getClientId();
+                    PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.JOB_SUPPORT, clientId );
+                    aCMManager.send(thePFM);
+                }
+            }           
 
         } catch (IOException ex) {
             Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
         }
     }
 
-}/* END CLASS TaskGetFile */
+}

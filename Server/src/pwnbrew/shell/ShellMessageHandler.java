@@ -50,7 +50,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
-import pwnbrew.gui.panels.RunnerPane;
 import pwnbrew.host.HostController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
@@ -172,16 +171,7 @@ public class ShellMessageHandler extends DataHandler {
                         theShell.handleBytesRead( Constants.STD_ERR_ID, msgBytes );    
                     }
                 }
-                
-//                RunnerPane thePane = aController.getShellTextPane();
-//                if( aMessage instanceof StdOutMessage ) { 
-//                    
-//                    thePane.handleStreamBytes( Constants.STD_OUT_ID, msgBytes);
-//                } else if( aMessage instanceof StdErrMessage ) {
-//                    thePane.handleStreamBytes( Constants.STD_ERR_ID, msgBytes);      
-//                }
-            }
-           
+            }           
             
         } catch (LoggableException ex) {
             Log.log(Level.INFO, NAME_Class, "receiveByteArray()", ex.getMessage(), ex );

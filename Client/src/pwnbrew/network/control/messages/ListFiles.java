@@ -36,7 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
 /*
 * ListFiles.java
 *
@@ -46,10 +45,8 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
-import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.CommManager;
 import pwnbrew.network.ControlOption;
@@ -120,32 +117,29 @@ public final class ListFiles extends Tasking {
         try {
             
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize(passedManager);
-            }
+            if( aCMManager != null ){
+               
+                File theRemoteFile = new File(theFilePath); 
+                File[] fileList = theRemoteFile.listFiles();
+                if( fileList != null ){
 
-            File theRemoteFile = new File(theFilePath); 
-            File[] fileList = theRemoteFile.listFiles();
-            if( fileList != null ){
-                
-                //Send the count
-                ControlMessage aMsg = new DirCount(getTaskId(), fileList.length);
-                aCMManager.send(aMsg);
-                
-                //Send a message per file
-                for (File aFile : fileList) {                    
-                    aMsg = new FileSystemMsg( getTaskId(), aFile, false );
+                    //Send the count
+                    ControlMessage aMsg = new DirCount(getTaskId(), fileList.length);
                     aCMManager.send(aMsg);
+
+                    //Send a message per file
+                    for (File aFile : fileList) {                    
+                        aMsg = new FileSystemMsg( getTaskId(), aFile, false );
+                        aCMManager.send(aMsg);
+                    }
+
+                } else {
+                    FileSystemMsg aMsg = new FileSystemMsg( getTaskId(), null, false );
+                    aCMManager.send(aMsg);                
                 }
-                
-            } else {
-                FileSystemMsg aMsg = new FileSystemMsg( getTaskId(), null, false );
-                aCMManager.send(aMsg);                
             }
             
-        } catch (LoggableException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        
-        } catch (IOException ex) {
+        } catch (UnsupportedEncodingException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        
         }
     

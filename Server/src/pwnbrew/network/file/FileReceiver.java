@@ -48,6 +48,7 @@ package pwnbrew.network.file;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -253,7 +254,7 @@ final public class FileReceiver {
                         theCMM.send( finMessage );
                     }
                     
-                } catch ( IOException ex) {
+                } catch ( UnsupportedEncodingException ex) {
                     Log.log(Level.SEVERE, NAME_Class, "receiveFile()", ex.getMessage(), ex);
                 }
 

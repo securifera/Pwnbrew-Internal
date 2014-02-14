@@ -67,10 +67,12 @@ public final class CreateShell extends ControlMessage{
     private String[] cmdString;
     private String encoding;
     private String startupCmd;
+    private boolean redirectStderr = false;
     
     private static final byte OPTION_CMD_STRING = 5;
     private static final byte OPTION_ENCODING = 20;
     public static final byte OPTION_STARTUP_CMD = 22;
+    public static final byte OPTION_REDIRECT_STDERR = 24;
     
     //Class name
     private static final String NAME_Class = CreateShell.class.getSimpleName();
@@ -122,6 +124,13 @@ public final class CreateShell extends ControlMessage{
                 case OPTION_STARTUP_CMD:
                     startupCmd = new String( theValue, "US-ASCII");
                     break;
+                case OPTION_REDIRECT_STDERR:
+                    if( theValue.length > 0 ){
+                        byte aByte = theValue[0];
+                        if( aByte == 0x1)
+                            redirectStderr = true;
+                    }
+                    break;
                 default:
                     retVal = false;
                     break;
@@ -152,7 +161,7 @@ public final class CreateShell extends ControlMessage{
             Shell aShell = aShellMsgManager.getShell();
             if( aShell == null){            
             
-                aShell = new Shell( Constants.Executor, passedManager, encoding, cmdString, startupCmd );
+                aShell = new Shell( Constants.Executor, passedManager, encoding, cmdString, startupCmd, redirectStderr );
                 aShell.start();                
 
                 //Register the shell

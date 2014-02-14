@@ -132,6 +132,21 @@ public class ServerPortRouter extends PortRouter {
     
     //===============================================================
     /**
+     *  Returns the SocketChannelHandler map.  
+     * 
+     * @return 
+    */  
+    public Map<Integer, SocketChannelHandler> getSocketChannelHandlerMap(){
+        
+        Map<Integer, SocketChannelHandler> retMap;
+        synchronized(hostHandlerMap){
+            retMap = new HashMap<Integer, SocketChannelHandler>(hostHandlerMap);
+        }
+        return retMap;
+    }
+    
+    //===============================================================
+    /**
      *  Returns the SocketChannelHandler for the passed address.  
      * 
      * @param passedInt

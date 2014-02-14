@@ -182,74 +182,73 @@ public final class Hello extends ControlMessage {
         try {
             
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
+            if( aCMManager != null ){
                 aCMManager = ControlMessageManager.initialize(passedManager);
-            }
+            
 
-            //Register the host
-            Integer theClientId = getClientId();
-            DebugPrinter.printMessage(NAME_Class, "Accepted connection from host id: " + theClientId);
-            PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort() );
-            SocketChannelHandler aSCH = aPR.getSocketChannelHandler(theClientId);
-            
-            if( aSCH != null ){
-                
-                //Send HostAck
-                HelloAck aHostAck = new HelloAck(theClientId);
-                aCMManager.send( aHostAck );
-            
-                //Turn off wrapping
-                aSCH.setWrapping( theClientId, false);
-                             
-                //Create a host
-                Host aHost = HostFactory.getHost( theClientId, getHostname() );
-                
-                //Get the list
-                List<String> nicInfoList = getNicInfoList();
-                for( String aStr : nicInfoList ){   
-                    
-                    String[] nicTriple = aStr.split(":");
-                    String nicMac = nicTriple[0];
-                    
-                    //Split on delim
-                    String ipAddrTuple = "";
-                    if( nicTriple.length == 2 ){
-                        ipAddrTuple = nicTriple[1];
+                //Register the host
+                Integer theClientId = getClientId();
+                DebugPrinter.printMessage(NAME_Class, "Accepted connection from host id: " + theClientId);
+                PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort() );
+                SocketChannelHandler aSCH = aPR.getSocketChannelHandler(theClientId);
+
+                if( aSCH != null ){
+
+                    //Send HostAck
+                    HelloAck aHostAck = new HelloAck(theClientId);
+                    aCMManager.send( aHostAck );
+
+                    //Turn off wrapping
+                    aSCH.setWrapping( theClientId, false);
+
+                    //Create a host
+                    Host aHost = HostFactory.getHost( theClientId, getHostname() );
+
+                    //Get the list
+                    List<String> nicInfoList = getNicInfoList();
+                    for( String aStr : nicInfoList ){   
+
+                        String[] nicTriple = aStr.split(":");
+                        String nicMac = nicTriple[0];
+
+                        //Split on delim
+                        String ipAddrTuple = "";
+                        if( nicTriple.length == 2 ){
+                            ipAddrTuple = nicTriple[1];
+                        }
+
+                        //Split the ip details
+                        String ipAddress = "";
+                        String netMask = "";
+                        String[] ipArr = ipAddrTuple.split("/");  
+                        if( ipArr.length == 2){
+                            ipAddress = ipArr[0];
+                            netMask = ipArr[1];
+                        }
+
+                        //Create a NIC
+                        Nic aNic = new Nic( nicMac, ipAddress, netMask);
+                        aHost.addNicPair(nicMac, aNic );
                     }
-                    
-                    //Split the ip details
-                    String ipAddress = "";
-                    String netMask = "";
-                    String[] ipArr = ipAddrTuple.split("/");  
-                    if( ipArr.length == 2){
-                        ipAddress = ipArr[0];
-                        netMask = ipArr[1];
-                    }
-                    
-                    //Create a NIC
-                    Nic aNic = new Nic( nicMac, ipAddress, netMask);
-                    aHost.addNicPair(nicMac, aNic );
+
+                    TaskManager theTaskManager = passedManager.getTaskManager();
+
+                    //Set the host to connected
+                    aHost.setConnected(true);
+
+                    //Set the OS Name and arch
+                    aHost.setOsName( getOsName() );
+
+                    //Set the OS Name and arch
+                    aHost.setJvmArch( getJavaArch() );
+
+                    //Notify the task manager
+                    theTaskManager.registerHost( aHost );
+
+                } else {
+                    Log.log(Level.INFO, NAME_Class, "evaluate()", "Unable to locate the client id specified.", null );
                 }
-                
-                TaskManager theTaskManager = passedManager.getTaskManager();
-                
-                //Set the host to connected
-                aHost.setConnected(true);
-                
-                //Set the OS Name and arch
-                aHost.setOsName( getOsName() );
-                
-                //Set the OS Name and arch
-                aHost.setJvmArch( getJavaArch() );
-
-                //Notify the task manager
-                theTaskManager.registerHost( aHost );
-
-           
-            } else {
-                Log.log(Level.INFO, NAME_Class, "evaluate()", "Unable to locate the client id specified.", null );
             }
-           
         } catch (IOException ex) {
             Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
         }

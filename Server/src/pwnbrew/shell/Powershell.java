@@ -61,8 +61,8 @@ public class Powershell extends Shell {
     
     private static final String[] POWERSHELL_EXE_STR = new String[]{"powershell", "-"};
     private static final String encoding = "UTF-8";
-    private static final String promptCmd = "prompt\n";
-    private static final String PROMPT_REGEX = "PS [a-zA-Z]:(\\\\|(\\\\[^\\\\/\\s:*\"<>|]+)+)>";
+    private static final String promptCmd = "prompt\r\n";
+    private static final String PROMPT_REGEX = "PS [a-zA-Z]:(\\\\|(\\\\[^\\\\/:*\"<>|]+)+)>";
     private static final Pattern PROMPT_PATTERN = Pattern.compile(PROMPT_REGEX);
 
     // ==========================================================================
@@ -86,6 +86,8 @@ public class Powershell extends Shell {
     @Override
     public void handleBytesRead( int passedId, byte[] buffer ) {
 
+        super.handleBytesRead(passedId, buffer);
+        
         //Get runner pane
         RunnerPane thePane = theListener.getShellTextPane(); 
         String aStr = null;
@@ -111,9 +113,11 @@ public class Powershell extends Shell {
                             aStr = tempStr;
                         }
                         
-                        //Reset the string builder
-                        theStdOutStringBuilder.setLength(0);
-                    }                    
+                    }
+                    
+                    //Reset the string builder
+                    theStdOutStringBuilder.setLength(0);
+                    
                 }
                 break;
             case Constants.STD_ERR_ID:
@@ -177,7 +181,8 @@ public class Powershell extends Shell {
      */
     @Override
     public String getInputTerminator(){
-        return promptCmd;    
+        String aStr = super.getInputTerminator();
+        return aStr.concat(promptCmd);    
     }
     
     // ==========================================================================
@@ -188,6 +193,6 @@ public class Powershell extends Shell {
      */
     @Override
     public String getStartupCommand(){
-        return "\n";    
+        return "\r\n";    
     }
 }

@@ -94,8 +94,6 @@ final public class RemoteLog {
             //Print if possible
             DebugPrinter.printMessage(RemoteLog.class.getSimpleName(), aSB.toString());
             
-        } catch (LoggableException ex) {
-            ex = null;
         } catch (UnsupportedEncodingException ex) {
             ex = null;
         } catch (IOException ex) {

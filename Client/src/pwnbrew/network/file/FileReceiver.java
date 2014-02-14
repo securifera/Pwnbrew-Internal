@@ -48,6 +48,7 @@ package pwnbrew.network.file;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -220,8 +221,6 @@ final public class FileReceiver {
                     try {
                         TaskProgress aProgMsg = new TaskProgress(taskId, sndFileProgress );
                         theCMM.send(aProgMsg);
-                    } catch (LoggableException ex) {
-                        RemoteLog.log(Level.SEVERE, NAME_Class, "receiveFile()", ex.getMessage(), ex);
                     }  catch (IOException ex) {
                         RemoteLog.log(Level.SEVERE, NAME_Class, "receiveFile()", ex.getMessage(), ex);
                     }
@@ -255,16 +254,13 @@ final public class FileReceiver {
                 //Send fin message to host
                 try {
                     
-                    PushFileFin finMessage = new PushFileFin( taskId, fileId, hexString );
-                   
+                    PushFileFin finMessage = new PushFileFin( taskId, fileId, hexString );                   
                     //Returns if it should unlock or not
                     if( theCMM != null ){
                         theCMM.send(finMessage);
                     }
                     
-                } catch ( LoggableException ex) {
-                    RemoteLog.log(Level.SEVERE, NAME_Class, "receiveFile()", ex.getMessage(), ex);
-                } catch ( IOException ex) {
+                } catch ( UnsupportedEncodingException ex) {
                     RemoteLog.log(Level.SEVERE, NAME_Class, "receiveFile()", ex.getMessage(), ex);
                 }
 

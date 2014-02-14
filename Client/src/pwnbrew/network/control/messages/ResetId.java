@@ -92,17 +92,15 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
             theConf.writeSelfToDisk();
             
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize(passedManager);
-            }  
-            
-            //Get the port router
-            String hostname = SocketUtilities.getHostname();
-            
-            //Create a hello message and send it
-            Hello helloMessage = new Hello( hostname );
-            aCMManager.send(helloMessage);
-            
+            if( aCMManager != null ){
+                //Get the port router
+                String hostname = SocketUtilities.getHostname();
+
+                //Create a hello message and send it
+                Hello helloMessage = new Hello( hostname );
+                aCMManager.send(helloMessage);
+            }              
+                       
         } catch (IOException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
         } catch (LoggableException ex) {

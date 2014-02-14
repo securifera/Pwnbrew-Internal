@@ -146,7 +146,7 @@ abstract public class Constants {
     public static final Path PAYLOAD_PATH = Paths.get( Directories.getPayloadPath() + File.separator + "p.jar");
     public static final String PAYLOAD_PROPERTIES_FILE = "prpt";
     public static final String PAYLOAD_VERSION_LABEL = "V";
-    public static String CURRENT_VERSION = "1.0.3.0";
+    public static String CURRENT_VERSION = "1.0.3.1";
     
     public static String FILE_UPLOAD = "FILE_UPLOAD";
     public static String FILE_DOWNLOAD = "FILE_DOWNLOAD";
@@ -154,5 +154,8 @@ abstract public class Constants {
     //Constants for process streams
     public static final int STD_OUT_ID = 41;
     public static final int STD_ERR_ID = 42;
+    
+    public static final SimpleDateFormat SHELL_DATE_FORMAT = new SimpleDateFormat("MM-dd-yyyy--HHmm");    
+   
     
 }

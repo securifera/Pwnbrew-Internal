@@ -47,8 +47,6 @@ package pwnbrew.network.control.messages;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
@@ -145,24 +143,18 @@ public class TaskStatus extends Tasking {
     public void evaluate( CommManager passedManager ) {
         
         //Pass it to the manager
-        passedManager.getTaskManager().taskChanged(this);
-        
-        try {
+        passedManager.getTaskManager().taskChanged(this);       
             
-            //Send an empty message
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize(passedManager);
-            }
+        //Send an empty message
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager != null ){
             
+            //Send a noop to look like a typical HTTP response
             int clientId = getClientId();
             NoOp aNoOp = new NoOp(clientId);
             aCMManager.send(  aNoOp );
-        
-        } catch( IOException ex){
-            Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
+
         }
-        
     }
 
 }/* END CLASS TaskStatus */

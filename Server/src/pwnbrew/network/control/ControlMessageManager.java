@@ -142,9 +142,8 @@ public class ControlMessageManager extends DataManager {
      *   Send the message out the given channel.
      *
      * @param passedMessage
-     * @throws java.io.IOException
     */
-    public void send( ControlMessage passedMessage ) throws IOException {
+    public void send( ControlMessage passedMessage ) {
 
          //Get the port router
         int destClientId = passedMessage.getDestHostId();

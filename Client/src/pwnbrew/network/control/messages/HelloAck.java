@@ -46,11 +46,13 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 
-import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
 import pwnbrew.ClientConfig;
-import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.network.PortRouter;
+import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.selector.SocketChannelHandler;
 
 /**
@@ -62,18 +64,7 @@ public final class HelloAck extends ControlMessage {
 
     //Class name
     private static final String NAME_Class = HelloAck.class.getSimpleName();
-  
-    // ==========================================================================
-    /**
-     * Constructor
-     *
-     * @throws pwnbrew.log.LoggableException
-     * @throws java.io.IOException
-    */
-    public HelloAck() throws LoggableException, IOException {
-       super( );
-    }
-    
+     
     // ==========================================================================
     /**
      *  Constructor 
@@ -94,16 +85,32 @@ public final class HelloAck extends ControlMessage {
     public void evaluate( CommManager passedManager ) {   
         
         //Get the address and connect    
-        int srvId = getClientId();
+        int theClientId = getClientId();
         PortRouter aPR = passedManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
         if( aPR != null ){
 
-            SocketChannelHandler aSCH = aPR.getSocketChannelHandler( srvId );
+            //Get the handler
+            SocketChannelHandler aSCH = aPR.getSocketChannelHandler( theClientId );
 
-            //Set the wrapper
+            //Set the wrapping flag
             if( aSCH != null ){
                 aSCH.setWrapping(false);
             }
+            
+            //Ensure any internal hosts resend their hello message
+            RelayManager theManager = RelayManager.getRelayManager();
+            if( theManager != null ){
+                ServerPortRouter aSPR = theManager.getServerPorterRouter();
+                Map<Integer, SocketChannelHandler> aMap = aSPR.getSocketChannelHandlerMap();
+                if( !aMap.isEmpty() ){
+                    Set<Integer> keySet = aMap.keySet();
+                    for( Integer aInt : keySet){
+                        HelloRepeat aRepeatMsg = new HelloRepeat(aInt);
+                        theManager.send(aRepeatMsg);                    
+                    }
+                }     
+            }       
+            
         }    
 
     }

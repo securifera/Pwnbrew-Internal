@@ -36,7 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
 /*
 * Message.java
 *
@@ -97,7 +96,7 @@ public abstract class Message {
         SocketUtilities.intToByteArray(msgId, SocketUtilities.getNextId());        
         
         //Set the base length
-        length[3] = 15;
+        length[3] = (byte)(1 + srcHostId.length + destHostId.length + msgId.length);
     }
     
     //===========================================================================
@@ -117,7 +116,7 @@ public abstract class Message {
         }
         
         //Set the base length
-        length[3] = 11;
+        length[3] = (byte)(1 + srcHostId.length + destHostId.length + msgId.length);;
     }
     
     //===============================================================
@@ -127,7 +126,7 @@ public abstract class Message {
      * @param passedId
     */
     public void setDestHostId( int passedId ){
-       SocketUtilities.intToByteArray( destHostId, passedId );
+        SocketUtilities.intToByteArray( destHostId, passedId );
     }
     
      //===============================================================
@@ -137,7 +136,7 @@ public abstract class Message {
      * @return
     */
     public int getDestHostId(){
-       return SocketUtilities.byteArrayToInt(destHostId);
+        return SocketUtilities.byteArrayToInt(destHostId);
     }
 
     //===============================================================
@@ -175,7 +174,7 @@ public abstract class Message {
      * @return
     */
     public int getMsgId(){
-       return SocketUtilities.byteArrayToInt(msgId);
+        return SocketUtilities.byteArrayToInt(msgId);
     }
     
     //===============================================================
@@ -185,7 +184,7 @@ public abstract class Message {
      * @return
     */
     public int getClientId(){
-       return SocketUtilities.byteArrayToInt(srcHostId);
+        return SocketUtilities.byteArrayToInt(srcHostId);
     }
 
     //===============================================================
@@ -195,7 +194,7 @@ public abstract class Message {
      * @param passedId
     */
     public void setClientId( int passedId ){
-       SocketUtilities.intToByteArray( srcHostId, passedId );
+        SocketUtilities.intToByteArray( srcHostId, passedId );
     }
 
    
@@ -206,8 +205,7 @@ public abstract class Message {
      * @param theManager
      * @throws pwnbrew.log.LoggableException
     */
-    public void evaluate( CommManager theManager ) throws LoggableException {
-    
+    public void evaluate( CommManager theManager ) throws LoggableException {    
     }
     
     //===============================================================
@@ -261,4 +259,4 @@ public abstract class Message {
         return msgBytes;
     }
     
-}/* END CLASS Message */
+}

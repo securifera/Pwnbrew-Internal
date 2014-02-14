@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.SocketUtilities;
@@ -139,24 +138,14 @@ public final class RelayStart extends ControlMessage{
             retVal = false;
         }
         
-        //Get the control message manager send an ack
-        try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize(passedManager);
-            }
-
+        //Get the control message manager send an ack        
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager != null ){
             //Send the message
             RelayStatus aMsg = new RelayStatus( retVal );
             aCMManager.send(aMsg);
-        
-        } catch(IOException ex ){
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null);        
-        } catch (LoggableException ex) {
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null);        
         }
         
     }
 
-}/* END CLASS RelayStart */
+}

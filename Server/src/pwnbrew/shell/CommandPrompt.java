@@ -59,9 +59,8 @@ public class CommandPrompt extends Shell {
     
     private static final String[] CMD_EXE_STR = new String[]{ "cmd", "/k"};
     private static final String ENCODING = "UTF-8";
-    private static final String PROMPT_REGEX = "^[a-zA-Z]:(\\\\|(\\\\[^\\\\/\\s:*\"<>|]+)+)>";
-    private static final String LINE_SEPARATOR = "\r\n";
-    
+    private static final String PROMPT_REGEX = "^[a-zA-Z]:(\\\\|(\\\\[^\\\\/:*\"<>|]+)+)>";
+     
     // ==========================================================================
     /**
      *  Constructor
@@ -94,6 +93,8 @@ public class CommandPrompt extends Shell {
     @Override
     public void handleBytesRead( int passedId, byte[] buffer ) {
 
+        super.handleBytesRead(passedId, buffer);
+        
         //Get runner pane
         RunnerPane thePane = theListener.getShellTextPane(); 
         String aStr = null;

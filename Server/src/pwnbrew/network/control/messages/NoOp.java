@@ -100,21 +100,15 @@ public final class NoOp extends ControlMessage{
     @Override
     public void evaluate( CommManager passedManager ) {
         
-        //Get the address and connect
-        try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize(passedManager);
-            }
-            
+        //Get the address and connect                   
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager != null ){
+
+            //Send one back
             int clientId = getClientId();
             NoOp aNoOp = new NoOp(clientId);
             aCMManager.send(  aNoOp );
-            
-        } catch (IOException ex) {
-            Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        }
+        }       
     
     }
 

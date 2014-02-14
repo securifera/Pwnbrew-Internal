@@ -46,7 +46,13 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.shell;
 
 import java.util.concurrent.Executor;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import pwnbrew.gui.panels.RunnerPane;
+import pwnbrew.logging.Log;
+import pwnbrew.misc.Constants;
+import static pwnbrew.shell.Shell.NAME_Class;
 
 /**
  *
@@ -56,6 +62,9 @@ public class Bash extends Shell {
     
     private static final String[] BASH_EXE_STR = new String[]{ "/bin/bash", "-i"};
     private static final String encoding = "UTF-8";
+    private static final String PROMPT_REGEX_BASH = "\\w+@\\w+:\\S.*[$#]";
+    private static final Pattern PROMPT_PATTERN = Pattern.compile(PROMPT_REGEX_BASH);
+   
     
     // ==========================================================================
     /**
@@ -66,6 +75,7 @@ public class Bash extends Shell {
      */
     public Bash(Executor passedExecutor, ShellListener passedListener) {
         super(passedExecutor, passedListener);
+        setStderrRedirectFlag(true);
     }
     
     // ==========================================================================
@@ -79,37 +89,63 @@ public class Bash extends Shell {
         return BASH_EXE_STR;
     }
    
-   // ==========================================================================
+    // ==========================================================================
     /**
      * Handles the bytes read
      *
      * @param passedId
      * @param buffer the buffer into which the bytes were read
      */
-    @Override 
+    @Override
     public void handleBytesRead( int passedId, byte[] buffer ) {
 
-        String currentPrompt = getShellPrompt();
-        String aStr = new String(buffer);
-            
-        //Get the prompt location
-        if( currentPrompt.indexOf(">") == -1){
-            
-            int pos = aStr.indexOf(">");
-            
-            //Add the str to the prompt
-            if( pos == -1 ){
-                setShellPrompt( currentPrompt.concat(aStr) );
-            } else {
-                setShellPrompt( currentPrompt.concat( aStr.substring(0, pos + 1)) );
-            }
-        }
+        super.handleBytesRead(passedId, buffer);
         
         //Get runner pane
-        RunnerPane thePane = theListener.getShellTextPane();   
-                           
-        //Handle the bytes
-        thePane.handleStreamBytes(passedId, aStr);
+        RunnerPane thePane = theListener.getShellTextPane(); 
+        String aStr = null;
+        
+        //Add the bytes to the string builder
+        switch( passedId ){
+            case Constants.STD_OUT_ID:
+                synchronized(theStdOutStringBuilder) {
+                    theStdOutStringBuilder.append( new String( buffer ));
+                    String tempStr = theStdOutStringBuilder.toString();                   
+                    
+                    //Set the prompt
+                    if( !promptFlag ){
+                        
+                        //See if it matches the prompt
+                        Matcher m = PROMPT_PATTERN.matcher(tempStr);
+                        if( m.find()){
+                            
+                            aStr = m.group();
+                            setShellPrompt( m.group() );
+                            promptFlag = true;
+                            
+                            //Set the id to stdout so it will change color
+                            passedId = Constants.STD_OUT_ID;
+                                                       
+                        } else{
+                            aStr = tempStr;
+                        }
+                        
+                    }   
+                    
+                    //Reset the string builder
+                    theStdOutStringBuilder.setLength(0);
+                    
+                }
+                break;
+            default:
+                Log.log(Level.SEVERE, NAME_Class, "handleBytesRead()", "Unrecognized stream id.", null );    
+                break;
+        }          
+        
+        //Send to the runner pane
+        if( aStr != null ){
+            thePane.handleStreamBytes(passedId, aStr);
+        }
 
     }
     

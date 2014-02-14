@@ -47,6 +47,7 @@ package pwnbrew.network.relay;
 
 import pwnbrew.network.PortRouter;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import pwnbrew.ClientConfig;
 import pwnbrew.manager.CommManager;
@@ -181,6 +182,24 @@ public class RelayManager extends DataManager {
     */
     public ServerPortRouter getServerPorterRouter() {
         return theServerPortRouter;
+    }
+    
+    //===============================================================
+    /**
+     *   Send the message out the given channel.
+     *
+     * @param passedMessage
+    */
+    public void send( Message passedMessage ) {
+
+        int msgLen = passedMessage.getLength();
+        ByteBuffer aByteBuffer = ByteBuffer.allocate( msgLen );
+        passedMessage.append(aByteBuffer);
+        
+        //Queue the message to be sent
+        theServerPortRouter.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
+        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+              
     }
     
 }

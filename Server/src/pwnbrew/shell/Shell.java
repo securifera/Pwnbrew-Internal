@@ -48,17 +48,24 @@ package pwnbrew.shell;
 import pwnbrew.execution.ManagedRunnable;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.Date;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.misc.Constants;
+import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.CreateShell;
+import pwnbrew.network.control.messages.KillShell;
 import pwnbrew.network.shell.messages.StdInMessage;
 import pwnbrew.output.StreamReader;
 import pwnbrew.output.StreamReaderListener;
 import pwnbrew.output.StreamRecorder;
+import pwnbrew.utilities.Utilities;
 
 /**
  *
@@ -70,11 +77,11 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     protected final ShellListener theListener;
 
     //Stdout reading mechanisms...
-    private StreamRecorder theStdOutRecorder = null;
+    private StreamReader theStdOutRecorder = null;
     private boolean stdoutRecorderFinished = false;
  
     //Stderr reading mechanisms...
-    private StreamRecorder theStdErrRecorder = null;
+    private StreamReader theStdErrRecorder = null;
     private boolean stderrRecorderFinished = false;
     
     //The input stream
@@ -86,9 +93,13 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     protected final StringBuilder theStdErrStringBuilder = new StringBuilder();
     
     //If enabled then save the shell to disk
-    private boolean logging = false;     
+    private boolean logging = true;     
     protected static final String NAME_Class = Shell.class.getSimpleName();  
     protected volatile boolean promptFlag = false;
+    protected boolean stderrRedirectFlag = false;
+    
+    //Logging for remote shells
+    private FileOutputStream theFileOutputStream = null;
 
     //===========================================================================
     /**
@@ -101,6 +112,63 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         super(passedExecutor);
         theListener = passedListener;        
     }    
+    
+    //===============================================================
+    /**
+    *  Starts the detector thread
+    */
+    @Override
+    public synchronized void start(){
+        
+        //Get the log dir
+        File shellDir = theListener.getShellLogDir();
+
+        //Create the date string file
+        String dateStr = Constants.SHELL_DATE_FORMAT.format( new Date()).concat(".txt");            
+        try {
+            theFileOutputStream = new FileOutputStream( new File(shellDir , dateStr), true);
+        } catch (FileNotFoundException ex) {
+            Log.log(Level.WARNING, NAME_Class, "start()", ex.getMessage(), ex );
+        }
+        
+        if( theListener.isLocalHost() ){
+            
+            if( !isRunning ){           
+                theExecutor.execute( this );
+            }
+            
+        } else {
+            
+//            //Get the log dir
+//            File shellDir = theListener.getShellLogDir();
+//            
+//            //Create the date string file
+//            String dateStr = Constants.SHELL_DATE_FORMAT.format( new Date()).concat(".txt");            
+//            try {
+//                theFileOutputStream = new FileOutputStream( new File(shellDir , dateStr), true);
+//            } catch (FileNotFoundException ex) {
+//                Log.log(Level.WARNING, NAME_Class, "spawnShell()", ex.getMessage(), ex );
+//            }
+            
+            try {
+                        
+                //Get the control message manager
+                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+                if( aCMManager == null ){
+                    aCMManager = ControlMessageManager.initialize(theListener.getCommManager());
+                }
+
+                //Create the message
+                int dstHostId = Integer.parseInt( theListener.getHost().getId());
+                CreateShell aShellMsg = new CreateShell( dstHostId, getCommandStringArray(),
+                        getEncoding(), getStartupCommand(), getStderrRedirectFlag() );
+                aCMManager.send( aShellMsg );
+
+            } catch ( IOException ex) {
+                Log.log(Level.WARNING, NAME_Class, "spawnShell()", ex.getMessage(), ex );
+            }     
+        }
+    }
 
     // ==========================================================================
     /**
@@ -118,7 +186,16 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
      */
     public void setPromptFlag(boolean passedBool ){
         promptFlag = passedBool;
-    }   
+    }  
+    
+    // ==========================================================================
+    /**
+     * 
+     * @param passedBool
+     */
+    public void setLoggingFlag(boolean passedBool ){
+        logging = passedBool;
+    } 
 
     // ==========================================================================
     /**
@@ -136,6 +213,27 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
      */
     public void setShellPrompt(String passedStr ) {
         thePrompt = passedStr;
+    }
+    
+    // ==========================================================================
+    /**
+    * Called by a {@link StreamReader} each time it reads bytes from its {@link InputStream}.
+    * <p>
+    * The bytes placed in the buffer during the read will occupy the elements at
+    * indices 0 - (numberRead - 1).
+    *
+    * @param theStreamId
+    * @param buffer the buffer into which the bytes were read
+    */
+    @Override
+    public void handleBytesRead( int theStreamId, byte[] buffer ){
+        if( logging && theFileOutputStream != null && buffer != null ){            
+            try {
+                theFileOutputStream.write( buffer );
+            } catch( IOException ex ) {
+                Log.log(Level.WARNING, NAME_Class, "handleBytesRead()", ex.getMessage(), ex );
+            }
+        }
     }
 
     // ==========================================================================
@@ -209,13 +307,13 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
             theProcessBuilder.directory( null );
             
             //Create the stderr reader before we create the process in case there is an error
-            theStdErrRecorder = new StreamRecorder( Constants.STD_ERR_ID );
+            theStdErrRecorder = new StreamReader( Constants.STD_ERR_ID );
             theStdErrRecorder.setStreamReaderListener( this );
-            if( logging ){
-                //Set the output file
-                File stdErrFile =  new File( theListener.getShellLogDir(), "stderr.txt" );
-                theStdErrRecorder.setOutputFile( stdErrFile );
-            }
+//            if( logging ){
+//                //Set the output file
+//                File stdErrFile =  new File( theListener.getShellLogDir(), "stderr.txt" );
+//                theStdErrRecorder.setOutputFile( stdErrFile );
+//            }
             
             try {
                 theProcess = theProcessBuilder.start(); //Start a new process
@@ -238,13 +336,13 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
             theOsStream = new BufferedOutputStream( theProcess.getOutputStream() );
 
             //Collect the data from stdout...
-            theStdOutRecorder = new StreamRecorder( Constants.STD_OUT_ID, theProcess.getInputStream() );
+            theStdOutRecorder = new StreamReader( Constants.STD_OUT_ID, theProcess.getInputStream() );
             theStdOutRecorder.setStreamReaderListener( this );
-            if( logging ){
-                //Set the output file
-                File stdOutFile =  new File( theListener.getShellLogDir(), "stdout.txt" );
-                theStdOutRecorder.setOutputFile( stdOutFile );
-            }
+//            if( logging ){
+//                //Set the output file
+//                File stdOutFile =  new File( theListener.getShellLogDir(), "stdout.txt" );
+//                theStdOutRecorder.setOutputFile( stdOutFile );
+//            }
             theStdOutRecorder.start();
 
             //Collect the data from stderr...
@@ -286,40 +384,54 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
  
     //===============================================================
     /*
-     * Sent the input to the input stream.
+     * Send the input to the input stream.
      */
     public void sendInput(String theStr) {
         
         try {
         
-            //Set the flag
-            setPromptFlag(false);
-            
-            //Add the command terminator
-            String inputTerm = getInputTerminator();
-            if( !inputTerm.isEmpty() ){
-                theStr = theStr.concat( getInputTerminator() );
-            }
-            
-            byte[] outStream = theStr.getBytes(  getEncoding() );
-            if( theListener.isLocalHost() ){
+            if( theStr != null && theStr.length() != 0){
+                    
+                //Set the flag
+                setPromptFlag(false);
 
-                //Send it locally
-                theOsStream.write(outStream);
-                theOsStream.flush(); 
-
-            } else {
-
-                int dstHostId = Integer.parseInt( theListener.getHost().getId());
-                StdInMessage aMsg = new StdInMessage( ByteBuffer.wrap(theStr.getBytes()), dstHostId);  
-                aMsg.setClientId( dstHostId );
-
-                ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
-                if( aSMM == null){
-                    aSMM = ShellMessageManager.initialize( theListener.getCommManager() );
+                //Add the command terminator
+                String inputTerm = getInputTerminator();
+                if( !inputTerm.isEmpty() ){
+                    theStr = theStr.concat( getInputTerminator() );
                 }
-                aSMM.send(aMsg);
+                
+                 //Log it
+                byte[] outStream = theStr.getBytes(  getEncoding() );
+                if( logging && theFileOutputStream != null ){            
+                    try {
+                        theFileOutputStream.write( outStream );
+                    } catch( IOException ex ) {
+                        Log.log(Level.WARNING, NAME_Class, "sendInput()", ex.getMessage(), ex );
+                    }
+                }
 
+                if( theListener.isLocalHost() ){
+
+                    //Send it locally
+                    if( theOsStream != null ){
+                        theOsStream.write(outStream);
+                        theOsStream.flush(); 
+                    }
+
+                } else {
+
+                    int dstHostId = Integer.parseInt( theListener.getHost().getId());
+                    StdInMessage aMsg = new StdInMessage( ByteBuffer.wrap(theStr.getBytes()), dstHostId);  
+                    aMsg.setClientId( dstHostId );
+
+                    ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
+                    if( aSMM == null){
+                        aSMM = ShellMessageManager.initialize( theListener.getCommManager() );
+                    }
+                    aSMM.send(aMsg);
+
+                }
             }
         } catch (IOException ex) {
             Log.log( Level.SEVERE, NAME_Class, "sendInput()", ex.getMessage(), ex);
@@ -334,27 +446,61 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     public synchronized void shutdown(){
         super.shutdown();
         
-        //Kill the process
-        if( theProcess != null ){
-            theProcess.destroy();
-        }
-        
-        if( theStdOutRecorder != null ){
-            theStdOutRecorder.shutdown();
-        }
-        
-        
-        if( theStdErrRecorder != null ){
-            theStdErrRecorder.shutdown();
-        }
-        
+        //Close the file
         try {
-            //Close the stdin
-            theOsStream.close();
+            if( theFileOutputStream != null ){
+                theFileOutputStream.flush();
+                theFileOutputStream.close();
+            }        
         } catch (IOException ex) {
             ex = null;
         }
         
+        if( theListener.isLocalHost() ){
+            
+            //Kill the process
+            if( theProcess != null ){
+                theProcess.destroy();
+            }
+
+            if( theStdOutRecorder != null ){
+                theStdOutRecorder.shutdown();
+            }
+
+            if( theStdErrRecorder != null ){
+                theStdErrRecorder.shutdown();
+            }
+
+            try {
+
+                if( theOsStream != null ){
+                    //Close the stdin
+                    theOsStream.close();
+                }
+
+            } catch (IOException ex) {
+                ex = null;
+            }
+            
+        } else {
+            
+            try {     
+
+                //Get the control message manager
+                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+                if( aCMManager == null ){
+                    aCMManager = ControlMessageManager.initialize( theListener.getCommManager());
+                }
+
+                //Create the message
+                int dstHostId = Integer.parseInt( theListener.getHost().getId() );
+                KillShell aShellMsg = new KillShell(dstHostId);
+                aCMManager.send(aShellMsg );
+
+            } catch ( IOException ex ) {
+                Log.log(Level.WARNING, NAME_Class, "killShell()", ex.getMessage(), ex );        
+            }
+        }
     }
     
     // ==========================================================================
@@ -395,7 +541,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
      * @return 
      */
     public String getInputTerminator(){
-        return "";
+        return Utilities.getLineEnding( theListener.getOsName());
     };
     
     // ==========================================================================
@@ -407,5 +553,23 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     public String getStartupCommand(){
         return "";
     };
+    
+    // ==========================================================================
+    /**
+     * 
+     * @param passedBool 
+     */
+    public void setStderrRedirectFlag( boolean passedBool ) {
+        stderrRedirectFlag = passedBool;
+    }
+
+    // ==========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public boolean getStderrRedirectFlag() {
+        return stderrRedirectFlag;
+    }
 
 }

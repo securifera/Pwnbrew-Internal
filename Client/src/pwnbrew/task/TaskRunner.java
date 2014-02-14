@@ -189,13 +189,10 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
                 //Run the task if the files are present
                 if(filesPresent && !runCancelled){
 
-                    try {
-                        //Send status msg indicating that the task is running
-                        TaskStatus taskRunMsg = new TaskStatus( theTaskId, TaskStatus.TASK_RUNNING );
-                        aCMManager.send(taskRunMsg);
-                    } catch (LoggableException ex) {
-                        RemoteLog.log(Level.INFO, NAME_Class, "run()", ex.getMessage(), ex );
-                    }
+                    
+                    //Send status msg indicating that the task is running
+                    TaskStatus taskRunMsg = new TaskStatus( theTaskId, TaskStatus.TASK_RUNNING );
+                    aCMManager.send(taskRunMsg);                   
 
                     //Copy over the needed files to the dir
                     hashFilenameList = theTask.getSupportFiles();

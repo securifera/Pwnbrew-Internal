@@ -59,6 +59,7 @@ public final class CreateShell extends ControlMessage{
     public static final byte OPTION_CMD_STRING = 5;
     public static final byte OPTION_ENCODING = 20;
     public static final byte OPTION_STARTUP_CMD = 22;
+    public static final byte OPTION_REDIRECT_STDERR = 24;
     
     // ==========================================================================
     /**
@@ -68,9 +69,11 @@ public final class CreateShell extends ControlMessage{
      * @param passedEncoding
      * @param passedCmdString
      * @param passedStartCmd
+     * @param passedBool
      * @throws java.io.UnsupportedEncodingException
     */
-    public CreateShell( int dstHostId, String[] passedCmdString, String passedEncoding, String passedStartCmd ) throws UnsupportedEncodingException {
+    public CreateShell( int dstHostId, String[] passedCmdString, String passedEncoding, 
+            String passedStartCmd, boolean passedBool ) throws UnsupportedEncodingException {
         super( dstHostId );
 
         //Get each string and append a null byte to ensure that each string is terminated
@@ -100,6 +103,15 @@ public final class CreateShell extends ControlMessage{
         strBytes = passedStartCmd.getBytes("US-ASCII");
         aTlv = new ControlOption( OPTION_STARTUP_CMD, strBytes);
         optionList.add(aTlv);
+        
+        //Add STDERR redirect byte
+        byte redByte = 0x0;
+        if(passedBool){
+            redByte = 0x1;
+        }
+        byte[] tempBytes = new byte[]{ redByte };
+        aTlv = new ControlOption( OPTION_REDIRECT_STDERR, tempBytes);
+        addOption(aTlv);
         
     }
 

@@ -36,7 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
 /*
 * GetDrives.java
 *
@@ -46,9 +45,8 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
-import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.CommManager;
 import pwnbrew.network.control.ControlMessageManager;
@@ -85,24 +83,20 @@ public final class GetDrives extends Tasking {
         try {
             
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize(passedManager);
-            }
-
-            //Get the roots
-            File[] theRoots = File.listRoots();
-            int taskId = getTaskId();
-            ControlMessage aMsg = new DirCount(taskId, theRoots.length);
-            aCMManager.send(aMsg);
-            
-            for (File aFile : theRoots) {
-                aMsg = new FileSystemMsg( taskId, aFile, true );
+            if( aCMManager != null ){
+                //Get the roots
+                File[] theRoots = File.listRoots();
+                int taskId = getTaskId();
+                ControlMessage aMsg = new DirCount(taskId, theRoots.length);
                 aCMManager.send(aMsg);
+
+                for (File aFile : theRoots) {
+                    aMsg = new FileSystemMsg( taskId, aFile, true );
+                    aCMManager.send(aMsg);
+                }
             }
             
-        } catch (LoggableException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        
-        } catch (IOException ex) {
+        } catch (UnsupportedEncodingException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        
         }
         

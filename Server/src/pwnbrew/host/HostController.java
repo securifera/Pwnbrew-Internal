@@ -48,6 +48,7 @@ package pwnbrew.host;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
@@ -96,12 +97,11 @@ import pwnbrew.misc.Directories;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.network.control.messages.CreateShell;
 import pwnbrew.network.control.messages.FileOperation;
-import pwnbrew.network.control.messages.KillShell;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.Sleep;
 import pwnbrew.network.control.messages.TaskGetFile;
+import pwnbrew.shell.Bash;
 import pwnbrew.shell.CommandPrompt;
 import pwnbrew.shell.Powershell;
 import pwnbrew.shell.Shell;
@@ -175,6 +175,7 @@ public final class HostController extends LibraryItemController implements Actio
      * 
      * @return 
     */     
+    @Override
     public boolean isLocalHost(){    
         return theHost.getHostname().equals( HostFactory.LOCALHOST);        
     }
@@ -205,9 +206,8 @@ public final class HostController extends LibraryItemController implements Actio
     */
     @Override
     public HostTabPanel getRootPanel() {
-        //TODO create panel for HostController
-        if( theTabPanel == null ){ //If the TaskTabPanel has not yet been created...
-            createTabPanel(); //Create the TaskTabPanel for the Task 
+        if( theTabPanel == null ){ 
+            createTabPanel(); 
         }
         return theTabPanel;
     }
@@ -259,7 +259,7 @@ public final class HostController extends LibraryItemController implements Actio
      * 
      * @return the name of the {@code Host}; null if the {@code Host} is not set
      */
-    @Override //LibraryItemController
+    @Override 
     public String getItemName() {
         
         String rtnString = null;
@@ -307,10 +307,10 @@ public final class HostController extends LibraryItemController implements Actio
      * to the user.
      * @return 
      */
-    @Override //LibraryItemController
+    @Override
     public String getItemTypeDisplayName() {
-        return "Scripting Language";
-    }/* END getItemTypeDisplayName() */
+        return "Host";
+    }
 
     // ==========================================================================
     /**
@@ -561,7 +561,7 @@ public final class HostController extends LibraryItemController implements Actio
         return this;
     }
     
-     //****************************************************************************
+     //===================================================================
     /**
     * Deletes the given {@link XmlBase} from the library.
     * 
@@ -579,9 +579,9 @@ public final class HostController extends LibraryItemController implements Actio
             Log.log(Level.WARNING, NAME_Class, "deleteFromLibrary()", ex.getMessage(), ex );        
         }
         
-   }/* END deleteFromLibrary() */
+   }
 
-    //****************************************************************************
+    //===================================================================
     /**
      *  Sets the auto sleep flag in the host
      * 
@@ -766,33 +766,10 @@ public final class HostController extends LibraryItemController implements Actio
             try {
                 Constructor aConstructor = passedClass.getConstructor( Executor.class, ShellListener.class );
                 theShell = (Shell)aConstructor.newInstance( Constants.Executor, this);
-                if( isLocalHost() ){     
                     
-                    //Execute the shell
-                    theShell.start();
-                    
-                } else {
-                    
-                    try {
-                        
-                        //Get the control message manager
-                        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                        if( aCMManager == null ){
-                            aCMManager = ControlMessageManager.initialize(theMainGuiController.getServer().getServerManager());
-                        }
-                        
-                        //Create the message
-                        int dstHostId = Integer.parseInt( theHost.getId());
-                        CreateShell aShellMsg = new CreateShell( dstHostId, theShell.getCommandStringArray(),
-                                theShell.getEncoding(), theShell.getStartupCommand() );
-                        aCMManager.send( aShellMsg );
-                        
-                    } catch ( IOException ex) {
-                        Log.log(Level.WARNING, NAME_Class, "spawnShell()", ex.getMessage(), ex );
-                    }                    
-        
-                }
-                
+                //Start the shell
+                theShell.start();
+
             } catch (  NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                 Log.log(Level.WARNING, NAME_Class, "spawnShell()", ex.getMessage(), ex );
             }
@@ -805,37 +782,13 @@ public final class HostController extends LibraryItemController implements Actio
      *  Kill the shell
      */
     @Override
-    public void killShell(){
-        
-        //If local
-        if( isLocalHost() ){
+    public void killShell(){        
             
-            if( theShell != null && theShell.isRunning() ){
-                theShell.shutdown();
-                theShell = null;
-            }
-            
-        } else {
-            
-            try {     
-                    
-                //Get the control message manager
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager == null ){
-                    aCMManager = ControlMessageManager.initialize(theMainGuiController.getServer().getServerManager());
-                }
-
-                //Create the message
-                int dstHostId = Integer.parseInt( theHost.getId());
-                KillShell aShellMsg = new KillShell(dstHostId);
-                aCMManager.send(aShellMsg );
-
-            } catch ( IOException ex ) {
-                Log.log(Level.WARNING, NAME_Class, "killShell()", ex.getMessage(), ex );        
-            }
-            
-        }
-        
+        if( theShell != null ){
+                //&& theShell.isRunning() ){
+            theShell.shutdown();
+            theShell = null;
+        }        
     }
     
     //==========================================================================
@@ -849,13 +802,19 @@ public final class HostController extends LibraryItemController implements Actio
         
         List<Class> theShellList = new ArrayList<>();
         
-        //Add the cmd shell
-//        CommandPrompt aCmdShell = new CommandPrompt( Constants.Executor, this);
-        theShellList.add( CommandPrompt.class );
-        
-        //Add powershell
-//        Powershell aPwrShell = new Powershell( Constants.Executor, this);
-        theShellList.add(Powershell.class);
+        String osName = theHost.getOsName();
+        if( Utilities.isWindows( osName) ){
+            //Add the cmd shell
+            theShellList.add( CommandPrompt.class );
+
+            //Add powershell
+            theShellList.add(Powershell.class);
+            
+        } else if( Utilities.isUnix(osName)){
+            
+            //Add bash
+            theShellList.add(Bash.class);   
+        }
         
         return theShellList;
     }
@@ -867,31 +826,10 @@ public final class HostController extends LibraryItemController implements Actio
      * @param theStr 
      */
     @Override
-    public void sendInput(String theStr) {
-        
-//        if( isLocalHost() ){
-            
-            if( theShell != null ){
-                theShell.sendInput(theStr);
-            }
-            
-//        } else {
-//            
-//            int dstHostId = Integer.parseInt( theHost.getId());
-//            StdInMessage aMsg = new StdInMessage( ByteBuffer.wrap(theStr.getBytes()), dstHostId);  
-//            aMsg.setClientId( dstHostId );
-//            try {
-//
-//                ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
-//                if( aSMM == null){
-//                    aSMM = ShellMessageManager.initialize( theMainGuiController.getServer().getServerManager());
-//                }
-//                aSMM.send(aMsg);
-//
-//            } catch (IOException ex) {
-//                Log.log( Level.SEVERE, NAME_Class, "sendInput()", ex.getMessage(), ex);
-//            }
-//        }
+    public void sendInput(String theStr) {            
+        if( theShell != null ){
+            theShell.sendInput(theStr);
+        }
     }
     
      //===============================================================
@@ -913,7 +851,19 @@ public final class HostController extends LibraryItemController implements Actio
     */
     @Override
     public File getShellLogDir() {
-        return new File( getObjectLibraryDirectory(), Constants.CHECKIN_DATE_FORMAT.format( new Date()));
+        
+        File parentDir;
+        if( isLocalHost() ){                
+            parentDir = Directories.getLocalTasksDirectory();
+        } else {
+            parentDir = new File( Directories.getRemoteTasksDirectory(), theHost.getHostname());
+        }
+        
+        //Add the shell dir
+        File shellDir = new File( parentDir, "shell");
+        shellDir.mkdirs(); 
+        
+        return shellDir;
     }
 
     //===============================================================
@@ -1237,7 +1187,7 @@ public final class HostController extends LibraryItemController implements Actio
             FileOperation aFileOp = new FileOperation( hostId, passedOp, filePath, addParam );
             aCMM.send(aFileOp);
             
-        } catch (IOException ex) {
+        } catch (UnsupportedEncodingException ex) {
             Log.log(Level.WARNING, NAME_Class, "performFileOperation()", ex.getMessage(), ex );        
         }
         

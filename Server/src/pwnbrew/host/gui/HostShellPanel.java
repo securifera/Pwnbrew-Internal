@@ -68,8 +68,6 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-import pwnbrew.host.HostController;
-import pwnbrew.utilities.Utilities;
 
 /**
  *
@@ -100,14 +98,11 @@ public class HostShellPanel extends javax.swing.JPanel {
     /*
      *  Check if the document should be altered
      */
-    private boolean updateCaret( RunnerPane theTextPane, int offset, String passedStr ) throws BadLocationException{
-
-        boolean retVal = true;
-        if( !theTextPane.isEnabled()){
-            return retVal;
-        }
+    private int getPromptEndOffset( RunnerPane theTextPane ){
         
-        //Get the prompt
+        int retVal = -1;
+        
+         //Get the prompt
         String thePrompt = theListener.getShell().getShellPrompt();
         StyledDocument theDoc = theTextPane.getStyledDocument();
         Element rootElement = theDoc.getDefaultRootElement();
@@ -123,22 +118,67 @@ public class HostShellPanel extends javax.swing.JPanel {
                 int endPos = anElement.getEndOffset();
                 
                 //Get the string for that element
-                String theStr = theDoc.getText(startPos, (endPos - startPos) - 1);
-                int promptIndex = theStr.indexOf(thePrompt);
-                if( promptIndex != -1){
-                    
-                    int promptEndOff = startPos + promptIndex + thePrompt.length();
-                    if( offset < promptEndOff ) {
-                        theTextPane.setCaretPosition( promptEndOff );
-                        retVal = false;
+                try {
+                    String theStr = theDoc.getText(startPos, (endPos - startPos) - 1);
+                    int promptIndex = theStr.indexOf(thePrompt);
+                    if( promptIndex != -1){
+                        
+                        retVal = startPos + promptIndex + thePrompt.length();
                         break;
                     }
+                } catch (BadLocationException ex ){
+                        
                 }
             }
 
-        } else {
-            retVal = false;
+        } 
+        
+        return retVal;
+    }
+    
+    //==============================================================
+    /*
+     *  Check if the document should be altered
+     */
+    private boolean updateCaret( RunnerPane theTextPane, int offset, String passedStr ) throws BadLocationException{
+
+        boolean retVal = true;
+        if( !theTextPane.isEnabled()){
+            return retVal;
         }
+        
+//        //Get the prompt
+//        String thePrompt = theListener.getShell().getShellPrompt();
+//        StyledDocument theDoc = theTextPane.getStyledDocument();
+//        Element rootElement = theDoc.getDefaultRootElement();
+//        if( rootElement != null ){
+//
+//            //find the prompt working backwords
+//            int docElements = rootElement.getElementCount();
+//            for( int i = 1; i <= docElements; i++){
+//                
+//                //Get the element
+//                Element anElement = rootElement.getElement( rootElement.getElementCount() - i );
+//                int startPos = anElement.getStartOffset();
+//                int endPos = anElement.getEndOffset();
+//                
+//                //Get the string for that element
+//                String theStr = theDoc.getText(startPos, (endPos - startPos) - 1);
+//                int promptIndex = theStr.indexOf(thePrompt);
+//                if( promptIndex != -1){
+                    
+                    int promptEndOff = getPromptEndOffset(theTextPane);
+                    if( promptEndOff != -1 && offset < promptEndOff ) {
+                        theTextPane.setCaretPosition( promptEndOff );
+                        retVal = false;
+//                        break;
+                    }
+//                }
+//            }
+
+//        } else {
+//            retVal = false;
+//        }
         
         return retVal;
     }
@@ -323,44 +363,65 @@ public class HostShellPanel extends javax.swing.JPanel {
                     updateCaret( theTextPane, theTextPane.getCaretPosition(), String.valueOf( e.getKeyChar() ));     
                     if( e.getKeyChar() == KeyEvent.VK_ENTER ){
 
-                        StyledDocument aSD = theTextPane.getStyledDocument();
-                        Element rootElement = aSD.getDefaultRootElement();
-                        if( rootElement != null ){
+                        int promptEndOff = getPromptEndOffset(theTextPane);
+                        if( promptEndOff != -1 ){
+                            
+                            //Get any input after the prompt
+                            StyledDocument aSD = theTextPane.getStyledDocument();
+                            int len = aSD.getLength() - promptEndOff;
+                            String theStr = aSD.getText(promptEndOff, len - 1);                            
+                            theListener.sendInput( theStr );
 
-                            int elementCount = rootElement.getElementCount();
-                            if( elementCount > 1 ){
-                                Element anElement = rootElement.getElement( elementCount - 2);
-                                int startPos = anElement.getStartOffset();
-                                int endPos = anElement.getEndOffset();
+                            //Add the command to the history
+                            lastCommand = theStr.replace("\n", "");
+                            if( !lastCommand.isEmpty() ){
+                                history.remove(lastCommand);
+                                history.add(lastCommand);
+                                historyIterator = null;
+                            }
+                            
+                        }
+//                        StyledDocument aSD = theTextPane.getStyledDocument();
+//                        Element rootElement = aSD.getDefaultRootElement();
+//                        if( rootElement != null ){
+//
+//                            int elementCount = rootElement.getElementCount();
+////                            if( elementCount > 1 ){
+//                                Element anElement = rootElement.getElement( elementCount - 2);
+//                                int startPos = anElement.getStartOffset();
+//                                int endPos = anElement.getEndOffset();
+                            
+//                            String theStr = aSD.getText(promptEndOff, WIDTH);
 
-                                
-                                String theStr = aSD.getText(startPos, endPos - startPos);
-                                String osName = ((HostController)theListener).getOsName();
-                                if( Utilities.isWindows( osName )){
-                                    int pathPos = theStr.indexOf(">");
-                                    if( pathPos == -1 ){
-                                        pathPos = theStr.indexOf("?");
-                                        if( pathPos == -1 ){
-                                            pathPos = theStr.indexOf(":");
-                                        } 
-                                    }
+//                                String theStr = aSD.getText(startPos, endPos - startPos);
+//                                String osName = ((HostController)theListener).getOsName();
+//                                if( Utilities.isWindows( osName )){
+//                                    int pathPos = theStr.indexOf(">");
+//                                    if( pathPos == -1 ){
+//                                        pathPos = theStr.indexOf("?");
+//                                        if( pathPos == -1 ){
+//                                            pathPos = theStr.indexOf(":");
+//                                        } 
+//                                    }
 
                                     //Get the command
-                                    theStr = theStr.substring(pathPos + 1).trim().concat("\n");
-                                }
+//                                    theStr = theStr.substring(pathPos + 1).trim().concat("\n");
+//                                } else if( Utilities.isUnix(osName)){
+//                                    
+//                                }
 
-                                theListener.sendInput( theStr );
+//                                theListener.sendInput( theStr );
+//
+//                                //Add the command to the history
+//                                lastCommand = theStr.replace("\n", "");
+//                                if( !lastCommand.isEmpty() ){
+//                                    history.remove(lastCommand);
+//                                    history.add(lastCommand);
+//                                    historyIterator = null;
+//                                }
+//                            }
 
-                                //Add the command to the history
-                                lastCommand = theStr.replace("\n", "");
-                                if( !lastCommand.isEmpty() ){
-                                    history.remove(lastCommand);
-                                    history.add(lastCommand);
-                                    historyIterator = null;
-                                }
-                            }
-
-                        }                    
+//                        }                    
 
                     } else if( e.getKeyCode() == KeyEvent.VK_TAB ){
 
@@ -507,6 +568,10 @@ public class HostShellPanel extends javax.swing.JPanel {
         ((JLabel)shellCombo.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
     } 
     
+    //=======================================================================
+    /**
+     * Internal class for populating the shell combobox
+     */
     class ClassWrapper {
         
         public final Class theClass;

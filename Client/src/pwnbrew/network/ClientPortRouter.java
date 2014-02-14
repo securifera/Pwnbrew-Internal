@@ -236,13 +236,10 @@ public class ClientPortRouter extends PortRouter {
                             if( aCMManager == null ){
                                 aCMManager = ControlMessageManager.initialize(theCommManager);
                             }
-
-//                            if( passedPort == aCMManager.getPort() ){
-
-                                //Create a hello message and send it
-                                Hello helloMessage = new Hello( hostname );
-                                aCMManager.send( helloMessage );
-//                            }
+                            
+                            //Create a hello message and send it
+                            Hello helloMessage = new Hello( hostname );
+                            aCMManager.send( helloMessage );
                             
                         } catch(IOException ex){
                             throw new LoggableException(ex);

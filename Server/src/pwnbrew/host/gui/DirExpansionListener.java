@@ -45,15 +45,12 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.host.gui;
 
-import java.io.IOException;
-import java.util.logging.Level;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
-import pwnbrew.logging.Log;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.GetDrives;
 import pwnbrew.network.control.messages.ListFiles;
@@ -110,12 +107,11 @@ public class DirExpansionListener implements TreeExpansionListener {
 
             int taskId = aTaskMessage.getTaskId();
             RemoteFileSystemTask aRFST = new RemoteFileSystemTask(taskId, node );
-            try {
-                theController.addRemoteFileSystemTask(aRFST);
-                aCMM.send(aTaskMessage);
-            } catch (IOException ex) {
-                Log.log( Level.SEVERE, NAME_Class, "treeExpanded()", ex.getMessage(), ex );
-            }
+            
+            //Send a message
+            theController.addRemoteFileSystemTask(aRFST);
+            aCMM.send(aTaskMessage);
+            
         }
 
     }

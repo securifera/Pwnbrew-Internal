@@ -45,9 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
@@ -108,19 +105,13 @@ public final class StageFlagAck extends ControlMessage{
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {   
-    
-        try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
-                Payload aPayload = Utilities.getClientPayload(theRelayClientId);
-                aCMManager.send(aPayload);  
-            }
-            
-        } catch( IOException ex ){
-            Log.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        }
+    public void evaluate( CommManager passedManager ) {     
+        
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager != null ){
+            Payload aPayload = Utilities.getClientPayload(theRelayClientId);
+            aCMManager.send(aPayload);  
+        }        
     }
 
 }

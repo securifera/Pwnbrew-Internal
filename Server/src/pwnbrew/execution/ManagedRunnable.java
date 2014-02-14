@@ -56,7 +56,7 @@ import pwnbrew.logging.Log;
 abstract public class ManagedRunnable implements Runnable {
     
     protected volatile boolean shutdownRequested = false;
-    private volatile boolean isRunning = false;
+    protected volatile boolean isRunning = false;
     private volatile boolean notified = false;
     protected final Executor theExecutor;
 

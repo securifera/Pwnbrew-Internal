@@ -120,8 +120,7 @@ public final class StageFlag extends ControlMessage{
     @Override
     public void evaluate( CommManager passedManager ) {   
     
-        if( theFlag == 0x1 ){
-            
+        if( theFlag == 0x1 ){            
             
             //Get the relay
             RelayManager theRelayManager = RelayManager.getRelayManager();
@@ -131,22 +130,14 @@ public final class StageFlag extends ControlMessage{
             SocketChannelHandler aHandler = theSPR.getSocketChannelHandler(theRelayClientId);
             if( aHandler != null ){
                 aHandler.setStaging(true);
-            }
-            
-            try {
-                
-                //Send the ack
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager != null ){
-                    StageFlagAck ackFlag = new StageFlagAck( theRelayClientId );
-                    aCMManager.send(ackFlag);
-                }
-                
-            } catch( IOException ex ){
-                RemoteLog.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex );
-            } catch (LoggableException ex) {
-                RemoteLog.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex );
-            }
+            }            
+                            
+            //Send the ack
+            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            if( aCMManager != null ){
+                StageFlagAck ackFlag = new StageFlagAck( theRelayClientId );
+                aCMManager.send(ackFlag);
+            }            
             
         }    
     }

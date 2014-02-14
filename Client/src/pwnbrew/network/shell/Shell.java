@@ -90,6 +90,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
     private final String encoding;
     private final String[] cmdStringArr;
     private final String startupCmd;
+    private final boolean redirect_stderr;
     
     private final CommManager theCommManager;
     private static final String NAME_Class = Shell.class.getSimpleName();
@@ -103,15 +104,18 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
      * @param passedArr 
      * @param passedEncoding 
      * @param passedStartupCmd 
+     * @param passedBool 
      */
     public Shell( Executor passedExecutor, CommManager passedManager, 
-            String passedEncoding, String[] passedArr, String passedStartupCmd ) {
+            String passedEncoding, String[] passedArr, String passedStartupCmd,
+            boolean passedBool ) {
         super(passedExecutor);
         
         theCommManager = passedManager;
         encoding = passedEncoding;
         cmdStringArr = passedArr;
         startupCmd = passedStartupCmd;
+        redirect_stderr = passedBool;
     }    
            
     // ==========================================================================
@@ -248,6 +252,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
 
             ProcessBuilder theProcessBuilder = new ProcessBuilder( theShellCmdArr );
             theProcessBuilder.directory( null );
+            theProcessBuilder.redirectErrorStream(redirect_stderr);
                        
             //Create the stderr reader
             theStdErrRecorder = new StreamRecorder( Constants.STD_ERR_ID);

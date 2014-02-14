@@ -127,13 +127,10 @@ public class ControlMessageManager extends DataManager {
      *   Send the message out the given channel.
      *
      * @param passedMessage
-     * @throws java.io.IOException
-     * @throws pwnbrew.log.LoggableException
     */
-    public void send( Message passedMessage ) throws IOException, LoggableException {
+    public void send( Message passedMessage ) {
 
-        //Allows for more specific handles to encode the message however necessary
-        int msgLen = passedMessage.getLength() + 3;
+        int msgLen = passedMessage.getLength();
         ByteBuffer aByteBuffer = ByteBuffer.allocate( msgLen );
         passedMessage.append(aByteBuffer);
         
@@ -143,7 +140,6 @@ public class ControlMessageManager extends DataManager {
         //Queue the message to be sent
         thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
         DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-      
         
     }
     

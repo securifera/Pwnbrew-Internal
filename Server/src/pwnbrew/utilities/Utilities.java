@@ -126,7 +126,9 @@ public class Utilities {
     private static final List<String> theExtPanelClassList = new ArrayList<>();
       
     public static final String IMAGE_PATH_IN_JAR= "pwnbrew/images";
-   
+    
+    public static final String WINDOWS_LINE_SEPARATOR = "\r\n";
+    public static final String UNIX_LINE_SEPARATOR = "\n";
 
     //UNIX OS family...
     private static final List<String> OS_FAMILY_Unix;
@@ -213,6 +215,20 @@ public class Utilities {
             return DummyMenuItem;
         }
        
+    }
+    
+    // ==========================================================================
+    /**
+    * Returns the OS_Name
+     * @param passedOs
+     * @return 
+    */
+    static public String getLineEnding( String passedOs ) {
+        if( Utilities.isWindows(passedOs)){
+            return WINDOWS_LINE_SEPARATOR;
+        } else {
+            return UNIX_LINE_SEPARATOR;
+        }
     }
     
     // ==========================================================================
@@ -448,7 +464,9 @@ public class Utilities {
                 encryptedData = theEncryptCipher.doFinal( dataToEncrypt, 0, dataToEncrypt.length );
             }
 
-        } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchPaddingException | IOException ex) {
+        } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | 
+                InvalidAlgorithmParameterException | NoSuchAlgorithmException | 
+                NoSuchPaddingException | IOException ex) {
            throw new LoggableException(ex);
         }
 

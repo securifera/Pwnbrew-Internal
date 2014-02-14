@@ -230,42 +230,34 @@ public class FileMessageManager extends DataManager implements LockListener {
                 break;
             case PushFile.FILE_UPLOAD:
                 libDir = new File( passedMessage.getRemoteDir() );
-//                ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
-//                if( aSMM != null ){
-//                    Shell theShell = aSMM.getShell();
-//                    if( theShell != null ){
-//                        libDir = theShell.getCurrentDirectory(); 
-//                    }
-//                }
                 break;
         }
                 
         if( libDir != null ){
+            
             //Get the control manager for sending messages
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( getCommManager() );
+            if( aCMManager != null ){
+                try {
+                    //Get the hash/filename
+                    String hashFileNameStr = passedMessage.getHashFilenameString();
+
+                    //Try to begin the file transfer
+                    initFileTransfer( taskId, fileId, libDir, hashFileNameStr, passedMessage.getFileSize() );
+
+                    //Send an ack to the sender to begin transfer
+                    DebugPrinter.printMessage(CommManager.class.getSimpleName(), "Sending ACK for " + hashFileNameStr);
+                    PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr);
+                    aCMManager.send(aSFMA);
+                
+                } catch ( IOException  ex){
+                    throw new LoggableException(ex);
+                } catch ( NoSuchAlgorithmException ex){
+                    throw new LoggableException(ex);
+                }
+                retVal = true;
             }
 
-            try {
-
-                //Get the hash/filename
-                String hashFileNameStr = passedMessage.getHashFilenameString();
-
-                //Try to begin the file transfer
-                initFileTransfer( taskId, fileId, libDir, hashFileNameStr, passedMessage.getFileSize() );
-
-                //Send an ack to the sender to begin transfer
-                DebugPrinter.printMessage(CommManager.class.getSimpleName(), "Sending ACK for " + hashFileNameStr);
-                PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr);
-                aCMManager.send(aSFMA);            
-
-            } catch ( IOException  ex){
-                throw new LoggableException(ex);
-            } catch ( NoSuchAlgorithmException ex){
-                throw new LoggableException(ex);
-            }
-            retVal = true;
         }
 
         return retVal;

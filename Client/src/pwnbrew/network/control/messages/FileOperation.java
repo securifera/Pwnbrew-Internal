@@ -46,12 +46,10 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.logging.Level;
-import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.Constants;
@@ -170,9 +168,7 @@ public final class FileOperation extends Tasking {
                 FileOpResult theResult = new FileOpResult( getTaskId(), retByte);
                 aCMManager.send(theResult);
             }
-        } catch (IOException ex) {
-            RemoteLog.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex);
-        } catch (LoggableException ex) {
+        } catch (UnsupportedEncodingException ex) {
             RemoteLog.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex);
         }       
     

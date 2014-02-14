@@ -155,33 +155,30 @@ public final class TaskGetFile extends TaskStatus{
         try {
             
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize(passedManager);
-            }
-        
-            //Get the filename hash 
-            String theHashFilenameStr = getHashFilenameString();
-            String[] theFilePathArr = theHashFilenameStr.split(":", 2);
-            if( theFilePathArr.length > 1 ){
-            
-                String theFilePath = theFilePathArr[1];
-                //Debug
-                DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received TaskGetFile for " + theFilePath);
+            if( aCMManager != null ){
+                 
+                //Get the filename hash 
+                String theHashFilenameStr = getHashFilenameString();
+                String[] theFilePathArr = theHashFilenameStr.split(":", 2);
+                if( theFilePathArr.length > 1 ){
 
-                File fileToSend = new File(theFilePath);
-                if(fileToSend.exists()){
+                    String theFilePath = theFilePathArr[1];
+                    //Debug
+                    DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received TaskGetFile for " + theFilePath);
 
-                    //Queue the file to be sent
-                    String fileHashNameStr = new StringBuilder().append("0").append(":").append(theFilePath).toString();
+                    File fileToSend = new File(theFilePath);
+                    if(fileToSend.exists()){
 
-                    PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
-                    aCMManager.send(thePFM);
+                        //Queue the file to be sent
+                        String fileHashNameStr = new StringBuilder().append("0").append(":").append(theFilePath).toString();
+
+                        PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
+                        aCMManager.send(thePFM);
+                    }
                 }
             }
-
+        
         } catch (IOException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        } catch (LoggableException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
         }
     }

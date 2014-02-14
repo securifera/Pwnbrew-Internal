@@ -36,7 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
 /*
 * SendStage.java
 *
@@ -45,9 +44,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.ControlMessageManager;
@@ -90,30 +86,22 @@ public final class SendStage extends ControlMessage{ // NO_UCD (use default)
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {   
-        
-        try {
+    public void evaluate( CommManager passedManager ) {       
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
-            
-                //Get the socketchannel handler
-                int clientId = getClientId();
-                PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort());
-                SocketChannelHandler aSCH = aPR.getSocketChannelHandler( clientId );
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager != null ){
 
-                //Turn on staging flag and send the payload if it isn't relayed
-                if( aSCH.setStaging(clientId, true) ) {
-                    Payload aPayload = Utilities.getClientPayload(clientId);
-                    aCMManager.send(aPayload);
-                }
+            //Get the socketchannel handler
+            int clientId = getClientId();
+            PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort());
+            SocketChannelHandler aSCH = aPR.getSocketChannelHandler( clientId );
+
+            //Turn on staging flag and send the payload if it isn't relayed
+            if( aSCH.setStaging(clientId, true) ) {
+                Payload aPayload = Utilities.getClientPayload(clientId);
+                aCMManager.send(aPayload);
             }
- 
-        } catch( IOException ex ){
-           Log.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex );
         }
+ 
     }
-
-    
-
-}/* END CLASS SendStage */
+}
