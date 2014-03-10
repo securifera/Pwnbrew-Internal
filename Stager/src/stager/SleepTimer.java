@@ -90,8 +90,7 @@ public class SleepTimer implements Runnable {
         Calendar theCalendar = Calendar.getInstance(); 
         theCalendar.setTime( new Date() );
         theCalendar.add(Calendar.SECOND, 5 );
-        Date theDate = theCalendar.getTime();
-        
+        Date theDate = theCalendar.getTime();        
                 
         //Generate a random id
         SecureRandom aSR = new SecureRandom();

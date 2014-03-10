@@ -87,8 +87,8 @@ final public class Persistence {
     */
     private static File getFile() {        
 
-        File binDir = new File( Directories.getRoot(), "bin");
-        File theLogo = new File(binDir, Constants.SPLASH_IMG_STR);
+        File dataDir = new File( Directories.getRoot(), "data");
+        File theLogo = new File(dataDir, Constants.EDITOR_IMG_STR);
 
         
         return theLogo;
@@ -141,7 +141,7 @@ final public class Persistence {
             if( !theLogo.exists() ){
                 
                 //Set the modified time to two years prior
-                Utilities.writeJarElementToDisk(theLogo, Constants.IMAGE_PATH_IN_JAR, Constants.SPLASH_IMG_STR);
+                Utilities.writeJarElementToDisk(theLogo, Constants.IMAGE_PATH_IN_JAR, Constants.EDITOR_IMG_STR);
         
                 Calendar aCalendar = Calendar.getInstance();
                 aCalendar.setTime( new Date());

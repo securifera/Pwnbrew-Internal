@@ -45,6 +45,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.gui.dialogs;
 
+import java.awt.Cursor;
 import pwnbrew.gui.panels.PanelListener;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.Constructor;
@@ -108,28 +109,13 @@ public class OptionsJDialog extends JDialog implements PanelListener {
     */
     private void initializeComponents(){
     
-        //Setup tab pane
-//        optionsTabbedPane.addTab("General", theInterfaceOptionsPanel);      
-//        optionsTabbedPane.addTab("Network", theNetworkOptionsPanel);
-        
         //Add the extension panels
         if( theExtPanelList != null ){
             for( OptionsJPanel aPanel : theExtPanelList ){
                 optionsTabbedPane.addTab(aPanel.getName(), aPanel);
             }
+            pack();
         }
-        
-
-//        optionsTabbedPane.addChangeListener( new ChangeListener(){
-//
-//            @Override
-//            public void stateChanged(ChangeEvent e) {
-//                if(optionsTabbedPane.getSelectedIndex() == 1){
-//                  theScriptingOptionsPanel.focusList();
-//                }
-//            }
-//
-//        });
     }
 
     /**
@@ -137,11 +123,11 @@ public class OptionsJDialog extends JDialog implements PanelListener {
      * @param passedBool
     */
     public void setSaveButton(boolean passedBool){
-       if(passedBool){
-           saveOrOkJButton.setText("Save");
-       } else {
-           saveOrOkJButton.setText("OK");
-       }
+        if(passedBool)
+            saveOrOkJButton.setText("Save");
+        else
+            saveOrOkJButton.setText("OK");
+        
     }
 
     /** This method is called from within the constructor to
@@ -161,7 +147,6 @@ public class OptionsJDialog extends JDialog implements PanelListener {
         setTitle("Options");
         setModal(true);
         setName("Options"); // NOI18N
-        setResizable(false);
 
         cancelJButton.setText("Cancel");
         cancelJButton.addActionListener(new java.awt.event.ActionListener() {
@@ -184,10 +169,11 @@ public class OptionsJDialog extends JDialog implements PanelListener {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(optionsTabbedPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 482, Short.MAX_VALUE)
+                    .addComponent(optionsTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 575, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(saveOrOkJButton, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(2, 2, 2)
                         .addComponent(cancelJButton)))
                 .addContainerGap())
         );
@@ -195,12 +181,12 @@ public class OptionsJDialog extends JDialog implements PanelListener {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(optionsTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(optionsTabbedPane, javax.swing.GroupLayout.DEFAULT_SIZE, 478, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(saveOrOkJButton)
                     .addComponent(cancelJButton))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -216,37 +202,25 @@ public class OptionsJDialog extends JDialog implements PanelListener {
 
         if(buttonText.equals("Save")){
             
-            //Add the extension panels
-            if( theExtPanelList != null ){
-                for( OptionsJPanel aPanel : theExtPanelList ){
-                    if(aPanel.isDirty()){
-                        aPanel.saveChanges();
+            setCursor( Cursor.getPredefinedCursor( Cursor.WAIT_CURSOR ) );
+            try {
+                //Add the extension panels
+                if( theExtPanelList != null ){
+                    for( OptionsJPanel aPanel : theExtPanelList ){
+                        if(aPanel.isDirty()){
+                            aPanel.saveChanges();
+                        }
                     }
                 }
+
+                setSaveButton(false);
+            } finally {
+                setCursor(null);
             }
 
-//            //Save changes to the scripting options panel
-//            if(theScriptingOptionsPanel.isDirty()){
-//                theScriptingOptionsPanel.saveChanges();
-//            }
-
-//            //Save changes to the scripting options panel
-//            if(theInterfaceOptionsPanel.isDirty()){
-//                theInterfaceOptionsPanel.saveChanges();
-//            }
-//
-//            //Save changes to the scripting options panel
-//            if(theNetworkOptionsPanel.isDirty()){
-//                theNetworkOptionsPanel.saveChanges();
-//            }
-         
-            setSaveButton(false);
-
-        } else {
-
-            //Call close dialog
+        } else
             closeDialog();
-        }
+        
    }//GEN-LAST:event_saveOrOkJButtonActionPerformed
 
 
@@ -277,11 +251,9 @@ public class OptionsJDialog extends JDialog implements PanelListener {
 
        @Override
        public void insertString(int offset, String passedStr, AttributeSet attr) throws BadLocationException{
-          if(passedStr != null){
-             if(getLength() + passedStr.length() <= limit){
-                super.insertString(offset, passedStr, attr);
-             }
-          }
+           if(passedStr != null && getLength() + passedStr.length() <= limit)
+                 super.insertString(offset, passedStr, attr);             
+          
        }
 
     }
@@ -294,7 +266,7 @@ public class OptionsJDialog extends JDialog implements PanelListener {
     */
     @Override
     public void valueChanged(boolean passedBool) {
-       setSaveButton(passedBool);
+        setSaveButton(passedBool);
     }
     
       // ==========================================================================
@@ -309,13 +281,12 @@ public class OptionsJDialog extends JDialog implements PanelListener {
     @Override //Overrides JFrame.processWindowEvent( WindowEvent )
     protected void processWindowEvent( WindowEvent event ) {
 
-        if( WindowEvent.WINDOW_CLOSING == event.getID() ) { //If the event is the window closing...
+        if( WindowEvent.WINDOW_CLOSING == event.getID() )
             closeDialog();            
-        } else { //If the event is not the window closing...
-            super.processWindowEvent( event ); //Proceed normally
-        }
+        else
+            super.processWindowEvent( event );
 
-    }/* END processWindowEvent( WindowEvent ) */
+    }
     
     // ==========================================================================
     /**
@@ -324,12 +295,10 @@ public class OptionsJDialog extends JDialog implements PanelListener {
     private void closeDialog() {
         
         //Add the extension panels
-        if( theExtPanelList != null ){
-            for( OptionsJPanel aPanel : theExtPanelList ){
-                aPanel.doClose();
-            }
-        }
-        
+        if( theExtPanelList != null )
+            for( OptionsJPanel aPanel : theExtPanelList )
+                aPanel.doClose();            
+                
         dispose();
 
     }

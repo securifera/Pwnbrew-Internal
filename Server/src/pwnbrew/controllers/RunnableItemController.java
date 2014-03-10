@@ -158,40 +158,7 @@ abstract public class RunnableItemController extends LibraryItemController {
      * Cancels the running of the {@link RunnableItemController}'s item.
      */
     abstract public void cancelRun();
-    
-     // ========================================================================
-    /**
-     * Determines if the {@link RunnableItemController}'s item requires staging.
-     * This is used to determine which panel to show in the RemoteExecutionWizard.
-     * 
-     * @return {@code true} if the item is running; {@code false} otherwise
-     */
-    public boolean isStaged(){        
-        return false;       
-    }
-    
-     // ========================================================================
-    /**
-     * Determines if the {@link RunnableItemController}'s item is client specific.
-     * This is used to determine which panel to show in the RemoteExecutionWizard.
-     * 
-     * @return {@code true} if the item is running; {@code false} otherwise
-     */
-    public boolean isClientSpecific(){        
-        return false;       
-    }
-    
-     // ========================================================================
-    /**
-     * Determines if the {@link RunnableItemController}'s item is client independent.
-     * This is used to determine which panel to show in the RemoteExecutionWizard.
-     * 
-     * @return {@code true} if the item is running; {@code false} otherwise
-     */
-    public boolean isClientIndependent(){        
-        return false;        
-    }
-    
+      
     // ========================================================================
     /**
      * Determines if the {@link RunnableItemController}'s item is running.
@@ -200,7 +167,7 @@ abstract public class RunnableItemController extends LibraryItemController {
      */
     public boolean isRunning() {
         return theExecutionHandler != null ;
-    }/* END isRunning() */
+    }
     
     
     // ========================================================================

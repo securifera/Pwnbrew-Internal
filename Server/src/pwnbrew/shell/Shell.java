@@ -53,6 +53,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
@@ -64,7 +65,6 @@ import pwnbrew.network.control.messages.KillShell;
 import pwnbrew.network.shell.messages.StdInMessage;
 import pwnbrew.output.StreamReader;
 import pwnbrew.output.StreamReaderListener;
-import pwnbrew.output.StreamRecorder;
 import pwnbrew.utilities.Utilities;
 
 /**
@@ -139,17 +139,6 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
             
         } else {
             
-//            //Get the log dir
-//            File shellDir = theListener.getShellLogDir();
-//            
-//            //Create the date string file
-//            String dateStr = Constants.SHELL_DATE_FORMAT.format( new Date()).concat(".txt");            
-//            try {
-//                theFileOutputStream = new FileOutputStream( new File(shellDir , dateStr), true);
-//            } catch (FileNotFoundException ex) {
-//                Log.log(Level.WARNING, NAME_Class, "spawnShell()", ex.getMessage(), ex );
-//            }
-            
             try {
                         
                 //Get the control message manager
@@ -158,10 +147,17 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
                     aCMManager = ControlMessageManager.initialize(theListener.getCommManager());
                 }
 
+                //Add the command terminator
+                String startupStr = getStartupCommand();
+                String inputTerm = getInputTerminator();
+                if( !inputTerm.isEmpty() ){
+                    startupStr = startupStr.concat( inputTerm );
+                }
+                
                 //Create the message
                 int dstHostId = Integer.parseInt( theListener.getHost().getId());
                 CreateShell aShellMsg = new CreateShell( dstHostId, getCommandStringArray(),
-                        getEncoding(), getStartupCommand(), getStderrRedirectFlag() );
+                        getEncoding(), startupStr, getStderrRedirectFlag() );
                 aCMManager.send( aShellMsg );
 
             } catch ( IOException ex) {
@@ -229,7 +225,8 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     public void handleBytesRead( int theStreamId, byte[] buffer ){
         if( logging && theFileOutputStream != null && buffer != null ){            
             try {
-                theFileOutputStream.write( buffer );
+                theFileOutputStream.write( Arrays.copyOf(buffer, buffer.length) );
+                theFileOutputStream.flush();
             } catch( IOException ex ) {
                 Log.log(Level.WARNING, NAME_Class, "handleBytesRead()", ex.getMessage(), ex );
             }
@@ -309,12 +306,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
             //Create the stderr reader before we create the process in case there is an error
             theStdErrRecorder = new StreamReader( Constants.STD_ERR_ID );
             theStdErrRecorder.setStreamReaderListener( this );
-//            if( logging ){
-//                //Set the output file
-//                File stdErrFile =  new File( theListener.getShellLogDir(), "stderr.txt" );
-//                theStdErrRecorder.setOutputFile( stdErrFile );
-//            }
-            
+
             try {
                 theProcess = theProcessBuilder.start(); //Start a new process
             } catch( IOException ex ) {
@@ -338,11 +330,6 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
             //Collect the data from stdout...
             theStdOutRecorder = new StreamReader( Constants.STD_OUT_ID, theProcess.getInputStream() );
             theStdOutRecorder.setStreamReaderListener( this );
-//            if( logging ){
-//                //Set the output file
-//                File stdOutFile =  new File( theListener.getShellLogDir(), "stdout.txt" );
-//                theStdOutRecorder.setOutputFile( stdOutFile );
-//            }
             theStdOutRecorder.start();
 
             //Collect the data from stderr...
@@ -390,7 +377,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         
         try {
         
-            if( theStr != null && theStr.length() != 0){
+            if( theStr != null ){
                     
                 //Set the flag
                 setPromptFlag(false);
@@ -398,7 +385,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
                 //Add the command terminator
                 String inputTerm = getInputTerminator();
                 if( !inputTerm.isEmpty() ){
-                    theStr = theStr.concat( getInputTerminator() );
+                    theStr = theStr.concat( inputTerm );
                 }
                 
                  //Log it
@@ -406,6 +393,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
                 if( logging && theFileOutputStream != null ){            
                     try {
                         theFileOutputStream.write( outStream );
+                        theFileOutputStream.flush();
                     } catch( IOException ex ) {
                         Log.log(Level.WARNING, NAME_Class, "sendInput()", ex.getMessage(), ex );
                     }

@@ -113,7 +113,7 @@ abstract public class Constants {
     public static final String JOB_SET_IMAGE_STR = "folder1.png";
     
     public static final String EDITOR_IMG_STR = "brew.png";
-    public static final String SPLASH_IMG_STR = "LogoImage.png";
+//    public static final String SPLASH_IMG_STR = "LogoImage.png";
     
     public final static String DELETE = "Delete";
     
@@ -146,7 +146,7 @@ abstract public class Constants {
     public static final Path PAYLOAD_PATH = Paths.get( Directories.getPayloadPath() + File.separator + "p.jar");
     public static final String PAYLOAD_PROPERTIES_FILE = "prpt";
     public static final String PAYLOAD_VERSION_LABEL = "V";
-    public static String CURRENT_VERSION = "1.0.3.1";
+    public static String CURRENT_VERSION = "1.0.3.2";
     
     public static String FILE_UPLOAD = "FILE_UPLOAD";
     public static String FILE_DOWNLOAD = "FILE_DOWNLOAD";
@@ -157,5 +157,7 @@ abstract public class Constants {
     
     public static final SimpleDateFormat SHELL_DATE_FORMAT = new SimpleDateFormat("MM-dd-yyyy--HHmm");    
    
+    //Old stager marker 
+    public static final byte[] OLD_STAGER_MARKER = new byte[]{ (byte)0xde, (byte)0xad, (byte)0xbe, (byte)0xef};
     
 }

@@ -47,6 +47,8 @@ package pwnbrew.utilities;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -59,6 +61,7 @@ import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Level;
 import javax.net.ssl.KeyManagerFactory;
@@ -79,7 +82,7 @@ final public class SSLUtilities {
     private static KeyStore theKeystore;
     private static SSLContext theSSLContext = null;
     
-    private static final String KEYSTORE_NAME =  "keystore.jks";    
+//    private static final String KEYSTORE_NAME =  "keystore.jks";    
     
     //===============================================================
     /**
@@ -230,7 +233,9 @@ final public class SSLUtilities {
 
             //Check that the host alias has a certificate
             if(!checkAlias(tempKeystore, theAlias)){
-               createSelfSignedCertificate(tempKeystore, keyStorePass, theAlias);
+               String distName = "CN=lisle.net, O=RSA, L=Snailville, S=CA, C=USA";
+               String issuerName = "CN=a.gov, O=sfsefse, L=sefesf, S=CA, C=USA";
+               createSelfSignedCertificate(distName, issuerName, 365, tempKeystore, keyStorePass, theAlias);
             }
 
         } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException ex) {
@@ -270,9 +275,9 @@ final public class SSLUtilities {
         return tempKeystore;
     }
 
-    //****************************************************************************
+    //===============================================================
     /**
-     *  
+     *  Saves the passed keystore
      * 
      * @param passedKeyStore
      * @param keystorePass
@@ -305,12 +310,10 @@ final public class SSLUtilities {
     /**
      * Returns a file representing a java keystore
     */
-    private static void createSelfSignedCertificate(KeyStore passedKeyStore, String keystorePass, String hostAlias ) throws LoggableException {
+    private static void createSelfSignedCertificate(String subjectDN, String issuerDN, int days, KeyStore passedKeyStore, String keystorePass, String hostAlias ) throws LoggableException {
      
-        String distName = "CN=PWN, OU=PLACE, O=ORG, L=CITY, S=STATE, C=COUNTRY";
-
         try {
-            Object[] theObjArr = X509CertificateFactory.generateCertificate( distName, 365, "RSA", 2048 );
+            Object[] theObjArr = X509CertificateFactory.generateCertificate( subjectDN, issuerDN, days, "RSA", 2048 );
             Key theKey = (Key) theObjArr[0];
             Certificate newCert = (Certificate) theObjArr[1];
 
@@ -325,66 +328,24 @@ final public class SSLUtilities {
     }
 
 
-//    //****************************************************************************
-//    /**
-//     * Returns the certificate for the localhost
-//    */
-//    public static Certificate getCertificate() throws KeyStoreException, LoggableException {
-//
-//       Certificate theCert = null;
-//       ServerConfig theConf = ServerConfig.getServerConfig();
-//       String theAlias = theConf.getAlias();
-//
-//       KeyStore localKeyStore = getKeystore();
-//       if(localKeyStore != null){
-//          theCert = localKeyStore.getCertificate(theAlias);
-//       }
-//       
-//       return theCert;
-//    }
-  
-//
-//    //****************************************************************************
-//    /**
-//     * Returns the certificate for the localhost
-//    */
-//    public static synchronized boolean importCertificate(String passedAlias, Certificate certificate) throws LoggableException {
-//
-//        boolean retVal = false;
-//
-//        try {
-//            
-//            KeyStore localKeyStore = getKeystore();
-//            if(certificate != null && localKeyStore != null){
-//            
-//                localKeyStore.setCertificateEntry(passedAlias, certificate);
-//
-//                //Write it to disk
-//                ServerConfig theConf = ServerConfig.getServerConfig();
-//                String keyStorePass = theConf.getKeyStorePass();
-//                
-//                //Save it
-//                saveKeyStore( localKeyStore, keyStorePass ); 
-//
-////                //Set path to write to
-////                File libDir = new File( Persistence.getKeystorePath() );
-////                File keyStore = new File(libDir, KEYSTORE_NAME);
-////
-////                //Write the keystore back to disk
-////                FileOutputStream theOS = new FileOutputStream(keyStore);
-////                try {
-////                    localKeyStore.store(theOS, keyStorePass.toCharArray());
-////                    retVal = true;
-////                } finally {
-////                    theOS.close();
-////                }
-//            }
-//        } catch (KeyStoreException ex) {
-//            throw new LoggableException(ex);
-//        }
-//
-//        return retVal;
-//    }
+    //===============================================================
+    /**
+     * Returns the certificate for the localhost
+    */
+    public static Certificate getCertificate() throws KeyStoreException, LoggableException {
+
+       Certificate theCert = null;
+       ServerConfig theConf = ServerConfig.getServerConfig();
+       String theAlias = theConf.getAlias();
+
+       KeyStore localKeyStore = getKeystore();
+       if(localKeyStore != null){
+          theCert = localKeyStore.getCertificate(theAlias);
+       }
+       
+       return theCert;
+    }
+
 
     //===============================================================
     /*
@@ -428,104 +389,109 @@ final public class SSLUtilities {
         return theSSLContext;
     }
     
-//    //****************************************************************************
-//    /**
-//     * Replaces the Public/Private entries with ones imported from a PKCS12
-//     * @param passedFile
-//     * @param passedPW
-//     * @return 
-//     * @throws pwnbrew.logging.LoggableException 
-//    */
-//    public static synchronized boolean importPKCS12Keystore( File passedFile, char[] passedPW ) throws LoggableException {
-//
-//       boolean retVal = false;
-//
-//       try {
-//           KeyStore localKeystore = getKeystore();
-//           if(passedFile != null && localKeystore != null){
-//               
-//              //Get the pass to the local keystore
-//              ServerConfig theConf = ServerConfig.getServerConfig();
-//              char[] keyStorePassArr = theConf.getKeyStorePass().toCharArray();
-//              
-//              //Write it to disk
-//              String localAlias = theConf.getAlias();
-//                                   
-//              KeyStore fileKeystore = KeyStore.getInstance("PKCS12");
-//              FileInputStream aFIS = new FileInputStream(passedFile);
-//              
-//              try {
-//                  
-//                 fileKeystore.load(aFIS, passedPW); 
-//                                  
-//                 //Get all of the aliases
-//                 Enumeration<String> keystoreAliases = fileKeystore.aliases();
-//                 while( keystoreAliases.hasMoreElements() ){
-//                     String anAlias = keystoreAliases.nextElement();
-//                    
-//                     //If the entry is a key entry
-//                     if(fileKeystore.isKeyEntry(anAlias)){
-//                        Key thePrivKey = fileKeystore.getKey(anAlias, passedPW);
-//                        Certificate[] theCertChain = fileKeystore.getCertificateChain(anAlias);
-//                        
-//                        //Create a unique alias so that the key is different
-//                        if(anAlias.equals(localAlias)){
-//          
-//                           String hostname = localAlias.split("_")[0];
-//                           anAlias = new StringBuilder().append(hostname)
-//                              .append("_").append(SocketUtilities.getNextId())
-//                              .toString();
-//
-//                        }
-//                        
-//                        //Delete local entry
-//                        localKeystore.deleteEntry(localAlias); 
-//                        
-//                        //Store the cert
-//                        theConf.setAlias(anAlias);
-//                        localKeystore.setKeyEntry(anAlias, thePrivKey, keyStorePassArr, theCertChain);
-//                        break;
-//                     }                    
-//                 }
-//                
-//                 //Set path to write to
-//                 File libDir = new File( Directories.getLibPath() );
-//                 File keyStore = new File(libDir, KEYSTORE_NAME);
-//
-//                 //Write the keystore back to disk
-//                 FileOutputStream theOS = new FileOutputStream(keyStore);
-//                 try {
-//                    localKeystore.store(theOS, keyStorePassArr);
-//                    retVal = true;
-//                 } finally {
-//                    //Close the file
-//                    try {
-//                        theOS.close();
-//                    } catch (IOException ex){
-//                        ex = null;
-//                    }
-//                 }
-//              } catch (IOException ex){
-//                 
-//                 if(ex.getMessage().contains("failed to decrypt")){
-//                    throw new IllegalArgumentException("Incorrect password. Import aborted.");
-//                 }
-//                 return false;
-//                 
-//              } finally {
-//                 //Close the file
-//                 try {
-//                     aFIS.close();
-//                 } catch (IOException ex){
-//                    ex = null;
-//                 } 
-//              }
-//           }
-//       } catch (UnrecoverableKeyException | KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException ex) {
-//          throw new LoggableException(ex);
-//       }
-//
-//       return retVal;
-//    }
+    //===============================================================
+    /**
+     * Replaces the Public/Private entries with ones imported from a PKCS12
+     * @param passedFile
+     * @param passedPW
+     * @return 
+     * @throws pwnbrew.logging.LoggableException 
+    */
+    public static synchronized boolean importPKCS12Keystore( File passedFile, char[] passedPW ) throws LoggableException {
+
+        boolean retVal = false;
+        try {
+
+            KeyStore localKeystore = getKeystore();
+            if(passedFile != null && localKeystore != null){
+
+                //Get the pass to the local keystore
+                ServerConfig theConf = ServerConfig.getServerConfig();
+                char[] keyStorePassArr = theConf.getKeyStorePass().toCharArray();
+
+                //Write it to disk
+                String localAlias = theConf.getAlias();
+
+                KeyStore fileKeystore = KeyStore.getInstance("PKCS12");
+                FileInputStream aFIS = new FileInputStream(passedFile);
+
+                try {
+
+                    fileKeystore.load(aFIS, passedPW); 
+
+                    //Get all of the aliases
+                    Enumeration<String> keystoreAliases = fileKeystore.aliases();
+                    while( keystoreAliases.hasMoreElements() ){
+                        String anAlias = keystoreAliases.nextElement();
+
+                        //If the entry is a key entry
+                        if(fileKeystore.isKeyEntry(anAlias)){
+                            Key thePrivKey = fileKeystore.getKey(anAlias, passedPW);
+                            Certificate[] theCertChain = fileKeystore.getCertificateChain(anAlias);
+
+                            //Create a unique alias so that the key is different
+                            if(anAlias.equals(localAlias)){
+
+                                String hostname = localAlias.split("_")[0];
+                                anAlias = new StringBuilder().append(hostname)
+                                .append("_").append(SocketUtilities.getNextId())
+                                .toString();
+                            }
+
+                            //Delete local entry
+                            localKeystore.deleteEntry(localAlias); 
+
+                            //Store the cert
+                            theConf.setAlias(anAlias);
+                            localKeystore.setKeyEntry(anAlias, thePrivKey, keyStorePassArr, theCertChain);
+                            break;
+                        }                    
+                    }
+
+                    //Save the keystore
+                    SSLUtilities.saveKeyStore(localKeystore, new String(keyStorePassArr));
+                    retVal = true;
+
+                } catch (IOException ex){
+
+                    if(ex.getMessage().contains("failed to decrypt"))
+                        throw new IllegalArgumentException("Incorrect password. Import aborted.");
+                    
+                    retVal = false;
+
+                } finally {
+                    //Close the file
+                    try {
+                        aFIS.close();
+                    } catch (IOException ex){
+                        ex = null;
+                    } 
+                }
+            }
+        } catch (UnrecoverableKeyException | KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException ex) {
+            throw new LoggableException(ex);
+        }
+
+        return retVal;
+    }
+
+    //==========================================================================
+    /**
+     *  Wrapper for creating a self signed certificate
+     * 
+     * @param sueeDN
+     * @param suerDN
+     * @param days 
+     */
+    public static void createSelfSignedCertificate(String issueeDN, String issuerDN, int days) throws LoggableException {
+        
+        //Get the pass to the local keystore
+        ServerConfig theConf = ServerConfig.getServerConfig();
+        char[] keyStorePassArr = theConf.getKeyStorePass().toCharArray();
+                
+        KeyStore theKeyStore = getKeystore();
+        String theAlias = theConf.getAlias();
+        createSelfSignedCertificate(issueeDN, issuerDN, days, theKeyStore, new String(keyStorePassArr), theAlias );
+    }
 
 }/* END CLASS SSLUtilities */

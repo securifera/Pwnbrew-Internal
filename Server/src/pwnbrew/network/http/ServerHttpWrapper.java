@@ -51,6 +51,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.DataManager;
+import pwnbrew.misc.Constants;
 import pwnbrew.network.Message;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
@@ -127,14 +128,14 @@ public class ServerHttpWrapper extends HttpWrapper {
                                         msgBB.get(msgBytes);
                                         
                                         //Get the id If the client is already registered then return
-                                        if( msgBytes.length > 3 ){
+                                        if( msgBytes.length > Message.MSG_LEN_SIZE + 1 ){
                                             
                                             byte [] tempIdArr = Arrays.copyOf( msgBytes, 4);
                                             int tempId = SocketUtilities.byteArrayToInt(tempIdArr);
                                             if( !passedHandler.registerId(tempId)){
                                                 return;
                                             }
-    //                                        byte[] msgBytes = Arrays.copyOf(msgBB.array(), msgBB.remaining());
+                                            
                                             try{
                                                 DataManager.routeMessage( passedHandler.getPortRouter().getCommManager(), type, msgBytes );
                                             } catch(Exception ex ){
@@ -144,7 +145,40 @@ public class ServerHttpWrapper extends HttpWrapper {
                                         }
                                         
                                     } else {
-                                        Log.log( Level.WARNING, NAME_Class, "processHeader()", "Message size doesn't match remaing size.", null);
+                                        
+                                        //Try to process the previous version's protocol
+                                        byte[] prevLenArr = Arrays.copyOf(msgLenArr, 2);
+                                        msgLen = SocketUtilities.byteArrayToInt(prevLenArr);
+                                        if( msgLen == msgBB.remaining() + 2){
+                                        
+                                            byte[] msgBytes = new byte[msgLen];
+                                            System.arraycopy(msgLenArr, 2, msgBytes, 0, 2);
+                                            msgBB.get(msgBytes, 2, msgLen - 2);
+
+                                            //Get the id If the client is already registered then return
+                                            if( msgBytes.length > 3 ){
+
+                                                byte[] tempIdArr = Arrays.copyOf( msgBytes, 4);
+                                                int tempId = SocketUtilities.byteArrayToInt(tempIdArr);
+                                                if( !passedHandler.registerId(tempId)){
+                                                    return;
+                                                }
+                                                
+                                                //Set the marker so the handler will know to send a different stage
+                                                System.arraycopy(Constants.OLD_STAGER_MARKER, 0, msgBytes, 8, Constants.OLD_STAGER_MARKER.length);
+
+                                                try{
+                                                    DataManager.routeMessage( passedHandler.getPortRouter().getCommManager(), type, msgBytes );
+                                                } catch(Exception ex ){
+                                                    Log.log( Level.SEVERE, NAME_Class, "processHeader()", ex.toString(), ex);
+                                                }
+                                                return;
+                                            }
+                                        
+                                            
+                                        } else {
+                                            Log.log( Level.WARNING, NAME_Class, "processHeader()", "Message size doesn't match remaing size.", null);
+                                        }
                                     }
                                 }
                             }

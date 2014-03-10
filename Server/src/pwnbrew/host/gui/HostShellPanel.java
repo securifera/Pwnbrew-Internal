@@ -367,9 +367,11 @@ public class HostShellPanel extends javax.swing.JPanel {
                         if( promptEndOff != -1 ){
                             
                             //Get any input after the prompt
+                            String theStr = "";
                             StyledDocument aSD = theTextPane.getStyledDocument();
                             int len = aSD.getLength() - promptEndOff;
-                            String theStr = aSD.getText(promptEndOff, len - 1);                            
+                            if( len > 0 )
+                                theStr = aSD.getText(promptEndOff, len - 1);                            
                             theListener.sendInput( theStr );
 
                             //Add the command to the history

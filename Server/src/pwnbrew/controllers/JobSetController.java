@@ -644,6 +644,7 @@ public class JobSetController extends RunnableItemController implements Ancestor
      * 
      * @param controller
      */
+    @Override
     public void addChild( LibraryItemController controller ) {
         
         if( ( controller instanceof JobController ) == false ) return;
@@ -653,7 +654,7 @@ public class JobSetController extends RunnableItemController implements Ancestor
         theJobControllerList.add( (JobController)controller );
         theJobSet.addJobRef( new JobRef( controller.getItemName(), ( (JobController)controller ).getJobType() ) );
         
-    }/* END addChild( LibraryItemController ) */
+    }
 
     
     // ========================================================================
@@ -690,7 +691,7 @@ public class JobSetController extends RunnableItemController implements Ancestor
             theJobSet.insertJobRef( jobRef, index );
         }
         
-    }/* END insertChild( LibraryItemController, int ) */
+    }
 
     
     // ========================================================================
@@ -706,16 +707,15 @@ public class JobSetController extends RunnableItemController implements Ancestor
     @Override //Ancestor
     public boolean removeChild( LibraryItemController controller ) {
         
-        if( ( controller instanceof JobController ) == false ) return false;
-        //NOTE: If the argument is null the condition above will cause the method
-        //  to return.
-        
+        if( ( controller instanceof JobController ) == false ) 
+            return false;
+         
         JobController aJC = (JobController)controller;
         theJobSet.removeJobRef( aJC.getItemName(), aJC.getJobType() );       
         
         return theJobControllerList.remove( aJC );
         
-    }/* END removeChild( LibraryItemController ) */
+    }
     
     
     // ========================================================================
@@ -731,13 +731,12 @@ public class JobSetController extends RunnableItemController implements Ancestor
     @Override //Ancestor
     public boolean hasChild( LibraryItemController controller ) {
         
-        if( ( controller instanceof JobController ) == false ) return false;
-        //NOTE: If the argument is null the condition above will cause the method
-        //  to return.
-        
+        if( ( controller instanceof JobController ) == false ) 
+            return false;
+          
         return theJobControllerList.contains( (JobController)controller );
         
-    }/* END hasChild( LibraryItemController ) */
+    }
     
     
     
@@ -762,8 +761,8 @@ public class JobSetController extends RunnableItemController implements Ancestor
                 if( controller.getItemName().equals( aRef.getJobName() )
                         && controller.getJobType().equals( aRef.getJobType() ) ) {
                     
-                    jobFound = true; //The Job[Controller] was found
-                    break; //Stop iterating through the JobControllers
+                    jobFound = true; 
+                    break; 
                     
                 }
                 
@@ -776,7 +775,7 @@ public class JobSetController extends RunnableItemController implements Ancestor
         
         super.saveToDisk();
         
-    }/* END saveToDisk() */
+    }
     
     
     // ========================================================================
@@ -787,7 +786,7 @@ public class JobSetController extends RunnableItemController implements Ancestor
     @Override //Controller
     public Object getObject() {
         return theJobSet;
-    }/* END getObject() */
+    }
 
     
     // ==========================================================================
@@ -798,13 +797,12 @@ public class JobSetController extends RunnableItemController implements Ancestor
     @Override //Controller
     public JobSetPanel getRootPanel() {
         
-        if( theJobSetPanel == null ) { //If the JobSetPanel has not yet been created...
-            theJobSetPanel = new JobSetPanel( this );
-        }
+        if( theJobSetPanel == null ) 
+            theJobSetPanel = new JobSetPanel( this );        
         
         return theJobSetPanel;
         
-    }/* END getRootPanel() */
+    }
 
     
     // ========================================================================
@@ -828,15 +826,15 @@ public class JobSetController extends RunnableItemController implements Ancestor
         
         String rtnStr;
         
-        if( theJobSet != null ) {
+        if( theJobSet != null )
             rtnStr = theJobSet.getName();
-        } else {
+        else
             rtnStr = super.toString();
-        }
+        
         
         return rtnStr;
         
-    }/* END toString() */
+    }
 
     // ========================================================================
     /**
@@ -892,67 +890,7 @@ public class JobSetController extends RunnableItemController implements Ancestor
         
         return aJobSetController;
     }
-    
-//      // ========================================================================
-//    /**
-//     * Determines if the {@link RunnableItemController}'s item requires staging.
-//     * This is used to determine which panel to show in the RemoteExecutionWizard.
-//     * 
-//     * @return {@code true} if the item is running; {@code false} otherwise
-//     */
-//    @Override
-//    public boolean isStaged(){
-//        
-//        boolean retVal = false;
-//        for( JobController aController : theJobControllerList ){
-//            if( aController instanceof ScriptController && ((ScriptController)aController).isStaged()){
-//                retVal = true;
-//                break;
-//            }
-//        }
-//        return retVal;
-//    }
-    
-//     // ========================================================================
-//    /**
-//     * Determines if the {@link RunnableItemController}'s item is client specific.
-//     * This is used to determine which panel to show in the RemoteExecutionWizard.
-//     * 
-//     * @return {@code true} if the item is running; {@code false} otherwise
-//     */
-//    @Override
-//    public boolean isClientSpecific(){
-//        
-//        boolean retVal = false;
-//        for( JobController aController : theJobControllerList ){
-//            if( aController instanceof ScriptController && ((ScriptController)aController).isClientSpecific()){
-//                retVal = true;
-//                break;
-//            }
-//        }
-//        return retVal;
-//    }
-    
-//     // ========================================================================
-//    /**
-//     * Determines if the {@link RunnableItemController}'s item is client independent.
-//     * This is used to determine which panel to show in the RemoteExecutionWizard.
-//     * 
-//     * @return {@code true} if the item is running; {@code false} otherwise
-//     */
-//    @Override
-//    public boolean isClientIndependent(){
-//        boolean retVal = false;
-//        for( JobController aController : theJobControllerList ){
-//            if( aController instanceof ScriptController && ((ScriptController)aController).isClientIndependent()){
-//                retVal = true;
-//                break;
-//            }
-//        }
-//        return retVal;
-//        
-//    }
-    
+     
      // ========================================================================
     /**
      *  Returns the right click popup menu for the library item.
@@ -1066,7 +1004,7 @@ public class JobSetController extends RunnableItemController implements Ancestor
                 break; //Abort the creation
             }
         
-        } //End of "while( true ) { //Forever..."
+        } 
         
     
         if( newJobSet != null ) { //If a new JobSet was created...

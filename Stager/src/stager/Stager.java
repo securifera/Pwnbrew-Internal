@@ -255,12 +255,10 @@ public class Stager extends ClassLoader {
                 //Skip the message length
                 byte[] msglenArr = new byte[4];
                 localDataInputStream.read(msglenArr);
-//                localDataInputStream.skipBytes(2);
                 
                 //Skip the client id
                 byte[] cltId = new byte[4];
                 localDataInputStream.read(cltId);
-//                localDataInputStream.skipBytes(4);
                 
                 //Get the dest ID
                 byte[] dstId = new byte[4];
