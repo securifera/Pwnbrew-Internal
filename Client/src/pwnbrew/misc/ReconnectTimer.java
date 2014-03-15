@@ -195,8 +195,6 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
 
                     } catch ( IOException ex) {
                         RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
-                    } catch (LoggableException ex) {
-                        RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
                     }
                    
                 } else  {

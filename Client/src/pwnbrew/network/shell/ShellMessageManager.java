@@ -133,16 +133,12 @@ public class ShellMessageManager extends DataManager {
     public void send( ProcessMessage passedMessage ) throws IOException, LoggableException {
 
         //Allows for more specific handles to encode the message however necessary
-//        PortWrapper aWrapper = DataManager.getPortWrapper( operatingPort );
-        
         ByteBuffer aByteBuffer;
-//        if( aWrapper != null ){
-//            aByteBuffer = aWrapper.wrapBytes( passedMessage.getBytes() );        
-//        } else {
-            int msgLen = passedMessage.getLength() + 3;
-            aByteBuffer = ByteBuffer.allocate( msgLen );
-            passedMessage.append(aByteBuffer);
-//        }
+
+        int msgLen = passedMessage.getLength() + 3;
+        aByteBuffer = ByteBuffer.allocate( msgLen );
+        passedMessage.append(aByteBuffer);
+
         
         //Get the port router
         PortRouter thePR = theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );

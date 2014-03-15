@@ -91,7 +91,7 @@ public class ControlMessageManager extends DataManager {
      * @throws java.io.IOException 
      * @throws pwnbrew.log.LoggableException 
      */
-    public synchronized static ControlMessageManager initialize( CommManager passedCommManager ) throws IOException, LoggableException {
+    public synchronized static ControlMessageManager initialize( CommManager passedCommManager ) throws IOException {
 
         if( theControlManager == null ) {
             theControlManager = new ControlMessageManager( passedCommManager );

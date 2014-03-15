@@ -47,7 +47,6 @@ package pwnbrew.network;
 
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
-import pwnbrew.manager.CommManager;
 import pwnbrew.selector.SocketChannelHandler;
 
 /**

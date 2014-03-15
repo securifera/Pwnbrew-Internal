@@ -185,8 +185,6 @@ public class ServerPortRouter extends PortRouter {
             RelayDisconnect aMsg = new RelayDisconnect( theHandler.getClientId() );
             aCMManager.send(aMsg);
             
-        } catch( LoggableException ex ){
-            RemoteLog.log(Level.INFO, NAME_Class, "socketClosed()", ex.getMessage(), null );                    
         } catch (IOException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "socketClosed()", ex.getMessage(), null );                    
         }
