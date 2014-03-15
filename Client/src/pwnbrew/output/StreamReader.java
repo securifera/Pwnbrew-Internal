@@ -350,7 +350,6 @@ public class StreamReader extends ManagedRunnable {
             try {
                 bytesRead = theInputStream.read( buffer, 0, buffer.length );          
             } catch( IOException ioex ) {
-                handleIoException( ioex ); 
                 break; 
             }
 

@@ -62,7 +62,8 @@ public class Bash extends Shell {
     
     private static final String[] BASH_EXE_STR = new String[]{ "/bin/bash", "-i"};
     private static final String encoding = "UTF-8";
-    private static final String PROMPT_REGEX_BASH = "\\w+@\\w+:\\S.*[$#]";
+    //private static final String PROMPT_REGEX_BASH = "\\w+@\\w+:\\S.*[$#]";
+    private static final String PROMPT_REGEX_BASH = "\\x1b.*[$#]";
     private static final Pattern PROMPT_PATTERN = Pattern.compile(PROMPT_REGEX_BASH);
    
     
@@ -105,6 +106,7 @@ public class Bash extends Shell {
         RunnerPane thePane = theListener.getShellTextPane(); 
         String aStr = null;
         
+        
         //Add the bytes to the string builder
         switch( passedId ){
             case Constants.STD_OUT_ID:
@@ -119,13 +121,33 @@ public class Bash extends Shell {
                         Matcher m = PROMPT_PATTERN.matcher(tempStr);
                         if( m.find()){
                             
-                            aStr = m.group();
-                            setShellPrompt( m.group() );
-                            promptFlag = true;
+                            //Split on funky byte
+                            String[] theStrArr = m.group().split("\u0007");
                             
-                            //Set the id to stdout so it will change color
-                            passedId = Constants.STD_OUT_ID;
-                                                       
+                            if(theStrArr.length > 0 ){
+                                //Construct the prompt
+                                int promptIndex = 0;
+                                if( theStrArr[promptIndex].isEmpty() ){
+                                    promptIndex++;
+                                }
+
+                                //Get the prompt
+                                String[] promptArr = theStrArr[promptIndex].split(";");
+                                if(promptArr.length > 1){
+
+                                    //Get first part of prompt
+                                    String prompt = promptArr[1].trim();
+                                    
+                                    //Get prompt terminator
+                                    String termSec = theStrArr[ theStrArr.length - 1];
+                                    aStr = prompt.concat( termSec.substring( termSec.length() - 1));
+                                    
+                                    promptFlag = true;
+                                    setShellPrompt( aStr );                                 
+
+                                }     
+                            }                                                
+                                                        
                         } else{
                             aStr = tempStr;
                         }
@@ -144,7 +166,7 @@ public class Bash extends Shell {
         
         //Send to the runner pane
         if( aStr != null ){
-            thePane.handleStreamBytes(passedId, aStr);
+            thePane.handleStreamBytes(Constants.STD_OUT_ID, aStr);
         }
 
     }

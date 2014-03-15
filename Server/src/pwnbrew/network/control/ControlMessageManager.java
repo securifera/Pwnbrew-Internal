@@ -55,7 +55,6 @@ import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
-import pwnbrew.network.Message;
 import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.network.control.messages.TaskStatus;
 import pwnbrew.network.control.messages.Tasking;

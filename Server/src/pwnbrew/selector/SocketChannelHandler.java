@@ -143,7 +143,10 @@ public class SocketChannelHandler implements Selectable {
             //Flush any remaining packets from the queue in the handler
             shutdown();
             
-            DebugPrinter.printException(ex);
+            if( !ex.getMessage().contains("closed")){
+                DebugPrinter.printException(ex);
+            }            
+            
             thePortRouter.getCommManager().socketClosed( this );
             
         }
@@ -386,7 +389,7 @@ public class SocketChannelHandler implements Selectable {
             
         } else if(bytesRead == -1){
             
-           //Socket has been closed on the other side
+            //Socket has been closed on the other side
             throw new IOException("Socket closed from other end.");
         }
 

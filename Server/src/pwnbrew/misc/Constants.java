@@ -146,7 +146,7 @@ abstract public class Constants {
     public static final Path PAYLOAD_PATH = Paths.get( Directories.getPayloadPath() + File.separator + "p.jar");
     public static final String PAYLOAD_PROPERTIES_FILE = "prpt";
     public static final String PAYLOAD_VERSION_LABEL = "V";
-    public static String CURRENT_VERSION = "1.0.3.2";
+    public static String CURRENT_VERSION = "1.0.3.3";
     
     public static String FILE_UPLOAD = "FILE_UPLOAD";
     public static String FILE_DOWNLOAD = "FILE_DOWNLOAD";
