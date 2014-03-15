@@ -276,7 +276,7 @@ public class Utilities {
     }
    
         
-    //==========================================================================
+    //****************************************************************************
     /**
     *   Wrapper function for simpleEncrypt that takes a string and returns a Base64 encoded String.
      * @param clearText
@@ -297,7 +297,7 @@ public class Utilities {
         }
     }
     
-    //==========================================================================
+    //****************************************************************************
     /**
     * Takes a byte array and input key and encrypts using
      * AES_Cipher 256
@@ -357,7 +357,7 @@ public class Utilities {
 
     }
 
-    //==========================================================================
+    //****************************************************************************
     /**
      * Takes a base64 encrypted string and input key and returns the clear text after
      * decoding the base 64 and decrypting using AES_Cipher 256.
@@ -417,7 +417,7 @@ public class Utilities {
 
     }
     
-    //==========================================================================
+    //****************************************************************************
     /**
      *   Returns the class path for the application.
      * 

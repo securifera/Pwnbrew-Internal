@@ -80,6 +80,7 @@ final public class SSLUtilities {
 
     private static final String NAME_Class = "SSLUtilities";
     private static KeyStore theKeystore;
+//    private static SSLContext theSSLContext = null;
     
     //===============================================================
     /**

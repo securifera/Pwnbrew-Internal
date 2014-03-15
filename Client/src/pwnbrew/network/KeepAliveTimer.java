@@ -55,6 +55,7 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.RemoteLog;
+import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.NoOp;
@@ -117,6 +118,7 @@ public class KeepAliveTimer extends ManagedRunnable {
                     }
 
                     //Get the socket router
+//                    int thePort = aCMManager.getPort();
                     ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
 
                     //Initiate the file transfer
@@ -132,6 +134,8 @@ public class KeepAliveTimer extends ManagedRunnable {
                     }
 
                 } catch ( IOException ex) {
+                    RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
+                } catch (LoggableException ex) {
                     RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
                 }         
                 

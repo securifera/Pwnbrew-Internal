@@ -251,6 +251,9 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
         } catch (IOException ex ){
             resultStatus = TaskStatus.TASK_FAILED;
             RemoteLog.log(Level.INFO, NAME_Class, "run()", ex.getMessage(), ex );
+        } catch (LoggableException ex ){
+            resultStatus = TaskStatus.TASK_FAILED;
+            RemoteLog.log(Level.INFO, NAME_Class, "run()", ex.getMessage(), ex );
         }
 
         //Remove the handler from the list

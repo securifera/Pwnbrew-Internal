@@ -406,6 +406,8 @@ public final class Pwnbrew extends CommManager implements TaskListener {
             
         } catch (IOException ex ){
            RemoteLog.log(Level.SEVERE, NAME_Class, "taskFinished()", ex.getMessage(), ex);
+        } catch (LoggableException ex ){
+           RemoteLog.log(Level.SEVERE, NAME_Class, "taskFinished()", ex.getMessage(), ex);
         }
 
     }

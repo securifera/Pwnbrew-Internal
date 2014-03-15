@@ -120,6 +120,14 @@ final public class Persistence {
     
     // ==========================================================================
     /**
+     * Prevents instantiation of {@link Directories} outside of itself.
+     */
+    private Persistence() {
+    }/* END CONSTRUCTOR() */
+    
+    
+    // ==========================================================================
+    /**
      * Determines if the host is running a Windows or Unix operating system and
      * sets the {@code PATH_Root} accordingly.
      * 
