@@ -92,10 +92,7 @@ public class SocketChannelHandler implements Selectable {
     private volatile boolean staging = false;
     
     private final Queue<byte[]> pendingByteArrs = new LinkedList<>();
-//    private int msgByteReverseCounter = 0;
     private byte currMsgType = 0;
-//    private byte lowerByte = 0;
-//    private final ByteBuffer localMsgBuffer = ByteBuffer.allocate( 256 * 256 );
     private ByteBuffer localMsgBuffer = null;
     // ==========================================================================
     /**
@@ -245,8 +242,6 @@ public class SocketChannelHandler implements Selectable {
                                  
                                 //Print error message
                                 currMsgType = 0;
-//                                msgByteReverseCounter = 0;
-//                                Integer.toHexString(currMsgType);
                                 
                                 String ipStr = "";
                                 if( theSCW != null ){
@@ -274,7 +269,6 @@ public class SocketChannelHandler implements Selectable {
                         if( !msgLenBuffer.hasRemaining() ){
                             //Get the counter
                             byte[] msgLen = Arrays.copyOf( msgLenBuffer.array(), msgLenBuffer.capacity());
-//                            msgByteReverseCounter = SocketUtilities.byteArrayToInt(msgLen);  
                             localMsgBuffer = ByteBuffer.allocate( SocketUtilities.byteArrayToInt(msgLen) );
                             msgLenBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE );
                         }
@@ -326,49 +320,6 @@ public class SocketChannelHandler implements Selectable {
                         }
                         
                     }
-
-                    //If the bytes read is more than is needed for the msg
-//                    if( msgByteReverseCounter <= readByteBuf.remaining() ){                
-//
-//                        //Put the rest of the bytes in and process the message
-//                        byte[] remBytes = new byte[msgByteReverseCounter];
-//                        readByteBuf.get(remBytes);
-//                        localMsgBuffer.put( remBytes );
-
-                        //copy into byte array
-//                        byte [] msgByteArr = Arrays.copyOf( localMsgBuffer.array(), localMsgBuffer.position());
-//
-//                        //Get the id If the client is already registered then return
-//                        if( msgByteArr.length > 3 ){
-//                            
-//                            byte[] clientIdArr = Arrays.copyOf(msgByteArr, 4);
-//                            int tempId = SocketUtilities.byteArrayToInt(clientIdArr);
-//                            if( !registerId(tempId))    
-//                                return;
-//
-//                            //Route the message to the right handler
-//                            try{
-//                                DataManager.routeMessage( thePortRouter.getCommManager(), currMsgType, msgByteArr );                      
-//                            } catch(Exception ex ){
-//                                Log.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
-//                            }
-//                            
-//                            //Reset the counter
-//                            currMsgType = 0;
-//                            localMsgBuffer.clear();
-//                            msgByteReverseCounter = 0;
-//                            continue;
-//                            
-//                        }
-//
-//                    //If the bytes read is less than the number remaining
-//                    } else {
-//
-//                        //Put the rest of the bytes in and process the message
-//                        msgByteReverseCounter -= readByteBuf.remaining();
-//                        localMsgBuffer.put( readByteBuf );
-//                        break;
-//                    }
                 
                 }
                 

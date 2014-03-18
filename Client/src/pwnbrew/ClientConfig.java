@@ -59,7 +59,6 @@ import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Base64Converter;
-import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.SocketUtilities;
 
 /**

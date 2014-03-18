@@ -295,12 +295,6 @@ public class LibraryItemJTree extends SearchableJTree {
                     theList.add( theController );
                 } else if( anObj.getClass() == passedClass ){
                     theList.add( theController );
-//                } else if( anObj instanceof CommandController && passedClass == CommandController.class ){
-//                    theList.add( theController );
-//                } else if( anObj instanceof JobSetController && passedClass == JobSetController.class ){
-//                    theList.add( theController );
-//                } else if( anObj instanceof HostController && passedClass == HostController.class ){
-//                    theList.add( theController );
                 }
             }
         }

@@ -47,12 +47,12 @@ package pwnbrew.xmlBase;
 
 import pwnbrew.exception.XmlBaseCreationException;
 import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
 import java.io.*;
 import java.util.logging.Level;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 import pwnbrew.Environment;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.misc.IdGenerator;
@@ -272,9 +272,17 @@ final public class XmlBaseFactory {
     throws XmlBaseCreationException {
 
         XMLReader xmlReader = null;
+//        try {
+//            xmlReader = XMLReaderFactoryWrapper.createXMLReader();
+//        } catch( LoggableException ex ) {
+//            throw new XmlBaseCreationException( "Could not create an XMLReader." );
+//        }
+        
         try {
-            xmlReader = XMLReaderFactoryWrapper.createXMLReader();
-        } catch( LoggableException ex ) {
+            xmlReader = XMLReaderFactory.createXMLReader();
+//        } catch( LoggableException ex ) {
+//            throw new XmlBaseCreationException( "Could not create an XMLReader." );
+        } catch (SAXException ex) {
             throw new XmlBaseCreationException( "Could not create an XMLReader." );
         }
 

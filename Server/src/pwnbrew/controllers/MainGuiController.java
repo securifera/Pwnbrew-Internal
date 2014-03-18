@@ -2054,6 +2054,17 @@ final public class MainGuiController extends Controller implements ActionListene
         return retController;
     }
     
+    // ==========================================================================
+    /**
+     *  Get all of the host controllers
+     * 
+     * @param clientIdStr
+     * @return 
+     */
+    public List<LibraryItemController> getHostControllers() {
+        return new ArrayList<>( theMainGui.getJTree().getLibraryItemControllers( HostController.class ));  
+    }
+    
      //=========================================================================
     /**
      *  Removes the selected nodes from the JTree 
