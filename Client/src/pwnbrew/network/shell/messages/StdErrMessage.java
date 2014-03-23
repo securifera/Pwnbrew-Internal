@@ -60,8 +60,9 @@ public class StdErrMessage extends ProcessMessage {
      *
      * @param passedBB
     */
-    public StdErrMessage( ByteBuffer passedBB ) {
+    public StdErrMessage( int dstId, ByteBuffer passedBB ) {
         super( STD_ERR, passedBB );
+        setDestHostId(dstId);
     }
     
     //==========================================================================

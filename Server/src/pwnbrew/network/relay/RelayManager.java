@@ -49,15 +49,18 @@ import pwnbrew.network.PortRouter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import pwnbrew.ClientConfig;
+import java.util.logging.Level;
+import pwnbrew.logging.Log;
+import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
-import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.ServerPortRouter;
+import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.xmlBase.ServerConfig;
 
 /**
  *
@@ -66,7 +69,7 @@ import pwnbrew.network.ServerPortRouter;
 public class RelayManager extends DataManager {
 
     private static RelayManager theRelayManager;
-    private ServerPortRouter theServerPortRouter = null;
+//    private ServerPortRouter theServerPortRouter = null;
     
     private static final String NAME_Class = RelayManager.class.getSimpleName();
     
@@ -94,11 +97,11 @@ public class RelayManager extends DataManager {
             theRelayManager = new RelayManager( passedCommManager );
         }   
         
-        //Create the port router
-        if( theRelayManager.getServerPorterRouter() == null ){
-            ServerPortRouter theServerPortRouter = new ServerPortRouter( passedCommManager, true );   
-            theRelayManager.setPortRouter(theServerPortRouter);       
-        }
+//        //Create the port router
+//        if( theRelayManager.getServerPorterRouter() == null ){
+//            ServerPortRouter theServerPortRouter = new ServerPortRouter( passedCommManager, true );   
+//            theRelayManager.setPortRouter(theServerPortRouter);       
+//        }
         
         return theRelayManager;
 
@@ -126,19 +129,22 @@ public class RelayManager extends DataManager {
         //Get the dest id
         byte[] dstHostId = Arrays.copyOfRange(msgBytes, Message.DEST_HOST_ID_OFFSET, Message.DEST_HOST_ID_OFFSET + 4);
         int tempId = SocketUtilities.byteArrayToInt(dstHostId);
-               
-        //Get the port router
-        PortRouter thePR;
-        if( tempId == ClientConfig.getConfig().getServerId() ){   
-
-            thePR = theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );    
-            DebugPrinter.printMessage(NAME_Class, "Queueing relay message to server");
-        } else {     
-
-            //If the dest is not the server
-            thePR = theServerPortRouter;  
-            DebugPrinter.printMessage(NAME_Class, "Queueing relay message to client");
-        }
+//               
+//        //Get the port router
+        PortRouter thePR = null;
+//        if( tempId == Constants.SERVER_ID ){   
+            try {
+                thePR = theCommManager.getPortRouter( ServerConfig.getServerConfig().getSocketPort() );    
+                DebugPrinter.printMessage(NAME_Class, "Queueing relay message");
+            } catch (LoggableException ex) {
+                Log.log( Level.SEVERE, NAME_Class, "handleMessage()", ex.getMessage(), ex);        
+            }
+//        } else {     
+//
+//            //If the dest is not the server
+//            thePR = theServerPortRouter;  
+//            DebugPrinter.printMessage(NAME_Class, "Queueing relay message to client");
+//        }
 
         //Queue the message to be sent
         if( thePR != null ){
@@ -156,50 +162,50 @@ public class RelayManager extends DataManager {
         return theDataHandler;
     }  
   
-    //===============================================================
-    /**
-     * Sets the port router
-     *
-    */
-    private void setPortRouter(ServerPortRouter passedRouter) {
-        theServerPortRouter = passedRouter;
-    }
+//    //===============================================================
+//    /**
+//     * Sets the port router
+//     *
+//    */
+//    private void setPortRouter(ServerPortRouter passedRouter) {
+//        theServerPortRouter = passedRouter;
+//    }
 
-    //===========================================================================
-    /**
-     *  Shutdown the relay 
-     */
-    @Override
-    public void shutdown() {
-        theServerPortRouter.shutdown();
-        theServerPortRouter = null;
-    }
+//    //===========================================================================
+//    /**
+//     *  Shutdown the relay 
+//     */
+//    @Override
+//    public void shutdown() {
+//        theServerPortRouter.shutdown();
+//        theServerPortRouter = null;
+//    }
 
-    //===========================================================================
-    /**
-     *  Return the Port Router
-     * @return 
-    */
-    public ServerPortRouter getServerPorterRouter() {
-        return theServerPortRouter;
-    }
+//    //===========================================================================
+//    /**
+//     *  Return the Port Router
+//     * @return 
+//    */
+//    public ServerPortRouter getServerPorterRouter() {
+//        return theServerPortRouter;
+//    }
     
-    //===============================================================
-    /**
-     *   Send the message out the given channel.
-     *
-     * @param passedMessage
-    */
-    public void send( Message passedMessage ) {
-
-        int msgLen = passedMessage.getLength();
-        ByteBuffer aByteBuffer = ByteBuffer.allocate( msgLen );
-        passedMessage.append(aByteBuffer);
-        
-        //Queue the message to be sent
-        theServerPortRouter.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
-        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-              
-    }
+//    //===============================================================
+//    /**
+//     *   Send the message out the given channel.
+//     *
+//     * @param passedMessage
+//    */
+//    public void send( Message passedMessage ) {
+//
+//        int msgLen = passedMessage.getLength();
+//        ByteBuffer aByteBuffer = ByteBuffer.allocate( msgLen );
+//        passedMessage.append(aByteBuffer);
+//        
+//        //Queue the message to be sent
+//        theServerPortRouter.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
+//        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+//              
+//    }
     
 }

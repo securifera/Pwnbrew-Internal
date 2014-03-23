@@ -92,6 +92,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
     private final String startupCmd;
     private final boolean redirect_stderr;
     
+    private int parentId;
     private final CommManager theCommManager;
     private static final String NAME_Class = Shell.class.getSimpleName();
       
@@ -107,10 +108,11 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
      * @param passedBool 
      */
     public Shell( Executor passedExecutor, CommManager passedManager, 
-            String passedEncoding, String[] passedArr, String passedStartupCmd,
-            boolean passedBool ) {
+            int passedSrcId, String passedEncoding, String[] passedArr, 
+            String passedStartupCmd,boolean passedBool ) {
         super(passedExecutor);
         
+        parentId = passedSrcId;
         theCommManager = passedManager;
         encoding = passedEncoding;
         cmdStringArr = passedArr;
@@ -142,10 +144,10 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
             ProcessMessage aMsg;
             switch( passedId ){
                 case Constants.STD_OUT_ID:
-                    aMsg = new StdOutMessage( ByteBuffer.wrap(buffer));
+                    aMsg = new StdOutMessage( parentId, ByteBuffer.wrap(buffer));
                     break;
                 case Constants.STD_ERR_ID:
-                    aMsg = new StdErrMessage( ByteBuffer.wrap(buffer));
+                    aMsg = new StdErrMessage( parentId, ByteBuffer.wrap(buffer));
                     break;
                 default:
                     RemoteLog.log(Level.SEVERE, NAME_Class, "handleBytesRead()", "Unrecognized stream id.", null );        

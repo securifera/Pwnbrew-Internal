@@ -49,6 +49,9 @@ import pwnbrew.network.PortRouter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
@@ -65,7 +68,7 @@ public class ShellMessageManager extends DataManager {
     private static final String NAME_Class = ShellMessageManager.class.getSimpleName();
     
     //The map for relating shells to their ids
-    private Shell theShell = null;
+    private final Map<Integer, Shell> theShellMap = new HashMap<Integer, Shell>();
     
     //===========================================================================
     /*
@@ -166,16 +169,27 @@ public class ShellMessageManager extends DataManager {
     /*
      *  Return the shell
      */
-    public Shell getShell() {
-        return theShell;
+    public Shell getShell( int passedId ) {
+        Shell aShell;
+        synchronized( theShellMap ){
+            aShell = theShellMap.get(passedId);
+        }
+        return aShell;
     }    
     
     //===========================================================================
     /*
      *  Set the shell
      */
-    public void setShell(Shell aShell) {
-        theShell = aShell;
+    public void setShell( int passedId, Shell passedShell ) {
+       
+        synchronized( theShellMap ){
+            Shell aShell = theShellMap.get(passedId);
+            if( aShell != null )
+                aShell.shutdown();
+            
+            theShellMap.put(passedId, passedShell);
+        }
     }
     
     //===========================================================================
@@ -185,9 +199,24 @@ public class ShellMessageManager extends DataManager {
     @Override
     public void shutdown() {
         super.shutdown();
-        if( theShell != null ){
-            theShell.shutdown();
+        synchronized( theShellMap ){
+            for( Shell aShell : theShellMap.values()){
+                aShell.shutdown();
+            }
         }
+    }
+
+    //===========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public Shell removeShell( int passedId ) {
+        Shell aShell;
+        synchronized( theShellMap ){
+            aShell = theShellMap.remove(passedId);
+        }
+        return aShell;
     }
     
     

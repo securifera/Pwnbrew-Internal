@@ -80,7 +80,6 @@ final public class SSLUtilities {
 
     private static final String NAME_Class = "SSLUtilities";
     private static KeyStore theKeystore;
-//    private static SSLContext theSSLContext = null;
     
     //===============================================================
     /**
@@ -133,7 +132,7 @@ final public class SSLUtilities {
        return theKeystore;
     }
 
-    //****************************************************************************
+    //===============================================================
     /**
      * Loads the keystore from the configuration in the conf file
      * @param theConf
@@ -256,7 +255,7 @@ final public class SSLUtilities {
 
     }
 
-    //****************************************************************************
+    //===============================================================
     /**
      *  * Returns a file representing a java keystore
      * 
@@ -279,7 +278,7 @@ final public class SSLUtilities {
         return tempKeystore;
     }
 
-    //****************************************************************************
+    //===============================================================
     /**
      *  
      * 
@@ -316,7 +315,7 @@ final public class SSLUtilities {
         
     }
     
-    //****************************************************************************
+    //===============================================================
     /**
      * Returns a file representing a java keystore
     */

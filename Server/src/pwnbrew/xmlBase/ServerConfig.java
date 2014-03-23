@@ -71,7 +71,7 @@ public class ServerConfig extends XmlBase {
     
     //Configurable Ports
     private static final String ATTRIBUTE_CtrlPort = "ctrlPort";
-    private static final String ATTRIBUTE_DataPort = "dataPort";
+//    private static final String ATTRIBUTE_DataPort = "dataPort";
     
     private static ServerConfig theConf = null;
     
@@ -89,7 +89,7 @@ public class ServerConfig extends XmlBase {
        theAttributeMap.put( ATTRIBUTE_StorePass, "" );
        theAttributeMap.put( ATTRIBUTE_CertAlias, "" );
        theAttributeMap.put( ATTRIBUTE_CtrlPort, Integer.toString(Constants.CONTROL_PORT) );
-       theAttributeMap.put( ATTRIBUTE_DataPort, Integer.toString(Constants.DATA_PORT) );
+//       theAttributeMap.put( ATTRIBUTE_DataPort, Integer.toString(Constants.DATA_PORT) );
 
     }
 
@@ -158,7 +158,7 @@ public class ServerConfig extends XmlBase {
      * Returns the port of the control channel
      * @return 
     */
-    public int getControlPort(){
+    public int getSocketPort(){
 
        //Return the default if the value is empty
        int retPort = Constants.CONTROL_PORT;
@@ -174,34 +174,34 @@ public class ServerConfig extends XmlBase {
      * Sets the port for the control channel
      * @param passedPort
     */
-    public void setControlPort(String passedPort){
+    public void setSocketPort(String passedPort){
        theAttributeMap.put(ATTRIBUTE_CtrlPort, passedPort);
     }
 
-     //****************************************************************************
-    /**
-     * Returns the port of the data channel
-     * @return 
-    */
-    public int getDataPort(){
-
-       //Return the default if the value is empty
-       int retPort = Constants.DATA_PORT;
-       String thePort = theAttributeMap.get(ATTRIBUTE_DataPort);
-       if(!thePort.isEmpty()){ 
-          retPort = Integer.valueOf( thePort );
-       }
-       return retPort;
-    }
-
-    //==========================================================================
-    /**
-     * Sets the port for the data channel
-     * @param passedPort
-    */
-    public void setDataPort(String passedPort){
-       theAttributeMap.put(ATTRIBUTE_DataPort, passedPort);
-    }
+//     //****************************************************************************
+//    /**
+//     * Returns the port of the data channel
+//     * @return 
+//    */
+//    public int getDataPort(){
+//
+//       //Return the default if the value is empty
+//       int retPort = Constants.DATA_PORT;
+//       String thePort = theAttributeMap.get(ATTRIBUTE_DataPort);
+//       if(!thePort.isEmpty()){ 
+//          retPort = Integer.valueOf( thePort );
+//       }
+//       return retPort;
+//    }
+//
+//    //==========================================================================
+//    /**
+//     * Sets the port for the data channel
+//     * @param passedPort
+//    */
+//    public void setDataPort(String passedPort){
+//       theAttributeMap.put(ATTRIBUTE_DataPort, passedPort);
+//    }
 
      //==========================================================================
     /**

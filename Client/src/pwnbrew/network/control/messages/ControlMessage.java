@@ -140,14 +140,14 @@ public abstract class ControlMessage extends Message {
        byte[] theId = new byte[4], clientId = new byte[4], tempHostId = new byte[4];
        ControlMessage aMessage;
 
-       //Copy over the id
-       passedBuffer.get(theId, 0, theId.length);
-
        //Copy over the client id
        passedBuffer.get(clientId, 0, clientId.length);
        
         //Copy over the dest host id
        passedBuffer.get(tempHostId, 0, tempHostId.length);
+       
+        //Copy over the id
+       passedBuffer.get(theId, 0, theId.length);
        
        //Create a message
        aMessage = instatiateMessage(theId, passedBuffer );

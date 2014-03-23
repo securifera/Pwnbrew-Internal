@@ -81,7 +81,7 @@ public class ShellMessageManager extends DataManager {
         try {
             
             ServerConfig theConfig = ServerConfig.getServerConfig();
-            int thePort = theConfig.getControlPort();
+            int thePort = theConfig.getSocketPort();
             setPort( thePort );
             
         } catch (LoggableException ex) {
@@ -154,7 +154,7 @@ public class ShellMessageManager extends DataManager {
         PortRouter thePR = theCommManager.getPortRouter( operatingPort );
                 
         //Queue the message to be sent
-        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getClientId() );
+        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId() );
 //        DebugPrinter.printMessage(this, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
           
     }

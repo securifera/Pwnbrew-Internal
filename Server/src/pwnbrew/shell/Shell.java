@@ -411,7 +411,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
 
                     int dstHostId = Integer.parseInt( theListener.getHost().getId());
                     StdInMessage aMsg = new StdInMessage( ByteBuffer.wrap(theStr.getBytes()), dstHostId);  
-                    aMsg.setClientId( dstHostId );
+//                    aMsg.setClientId( dstHostId );
 
                     ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
                     if( aSMM == null){

@@ -69,6 +69,7 @@ public class ClientConfig implements Serializable {
 
     private String theHostId = "";
     private transient String theServerIp = "0.0.0.0";
+    private transient int theServerId = -1;
     
     //Configurable Ports
     private transient int theSocketPort = 443;
@@ -87,7 +88,7 @@ public class ClientConfig implements Serializable {
      * Constructor
      *
     */
-    public ClientConfig() {      
+    public ClientConfig() {    
     }
 
     //==========================================================================
@@ -146,6 +147,24 @@ public class ClientConfig implements Serializable {
         if( hostIdStr != null ){
             theHostId = hostIdStr;
         }  
+    }
+    
+     //==========================================================================
+    /**
+     * Returns the server id
+     * @return 
+    */
+    public int getServerId(){
+       return theServerId;
+    }
+    
+     //==========================================================================
+    /**
+     * Sets the server id
+     * @param passedId
+    */
+    public void setServerId( int passedId) {
+        theServerId = passedId;
     }
 
     //==========================================================================
@@ -282,5 +301,31 @@ public class ClientConfig implements Serializable {
             theCertAlias = passedAlias;
         }
     }
+    
+    
+    //==========================================================================
+    /**
+     *  Initialize all of the transient fields.
+     */
+    private void initTransients() {
+        theServerIp = "0.0.0.0";
+        theServerId = -1;
+        theSocketPort = 443;
+    }
+
+    //==========================================================================
+    /**
+     * 
+     * @param in
+     * @throws IOException
+     * @throws ClassNotFoundException 
+     */
+    private void readObject(java.io.ObjectInputStream in)
+        throws IOException, ClassNotFoundException {
+
+        in.defaultReadObject();
+        initTransients();
+    }
+
 
 }/* END CLASS ClientConfig */

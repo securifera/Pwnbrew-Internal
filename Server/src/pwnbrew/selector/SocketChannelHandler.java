@@ -306,9 +306,13 @@ public class SocketChannelHandler implements Selectable {
                                 int tempId = SocketUtilities.byteArrayToInt(clientIdArr);
                                 if( !registerId(tempId))    
                                     return;
+                                
+                                //Get dest id
+                                byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
+                                int dstId = SocketUtilities.byteArrayToInt(dstHostId);
 
                                 try{
-                                    DataManager.routeMessage( thePortRouter.getCommManager(), currMsgType, msgByteArr ); 
+                                    DataManager.routeMessage( thePortRouter.getCommManager(), currMsgType, dstId, msgByteArr ); 
                                 } catch(Exception ex ){
                                     Log.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
                                 }

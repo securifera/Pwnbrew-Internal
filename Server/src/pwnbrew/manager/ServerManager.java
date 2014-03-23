@@ -112,8 +112,8 @@ public class ServerManager extends CommManager {
         
         //Get the ports and try to connect
         ServerConfig theConf = ServerConfig.getServerConfig();
-        int theControlPort = theConf.getControlPort();
-        int theDataPort = theConf.getDataPort();
+        int theControlPort = theConf.getSocketPort();
+//        int theDataPort = theConf.getDataPort();
         
         boolean retVal = true;
         try {
@@ -152,14 +152,14 @@ public class ServerManager extends CommManager {
             
         } catch (BindException ex) {
             StringBuilder aSB = new StringBuilder()
-                    .append("Unable to bind to port ").append( theDataPort )
+                    .append("Unable to bind to port ").append( theControlPort )
                     .append(". Please select a new data port. Tools->Options : \"Network\" Tab");
             JOptionPane.showMessageDialog( getServer().getGuiController().getParentJFrame(), aSB.toString());
             retVal = false;
         } catch (IOException ex) {
-            throw new LoggableException(ex, Integer.toString(theDataPort));
+            throw new LoggableException(ex, Integer.toString(theControlPort));
         } catch (GeneralSecurityException ex) {
-            throw new LoggableException(ex, Integer.toString(theDataPort));
+            throw new LoggableException(ex, Integer.toString(theControlPort));
         }
         
         return retVal;

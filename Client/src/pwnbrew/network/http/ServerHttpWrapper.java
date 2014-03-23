@@ -140,7 +140,7 @@ public class ServerHttpWrapper extends HttpWrapper {
                                             }
                                            
                                             DataManager.routeMessage( passedHandler.getPortRouter().getCommManager(), type, dstId, msgBytes );
-                                            return;
+                                        
                                         }
                                         
                                     } else {

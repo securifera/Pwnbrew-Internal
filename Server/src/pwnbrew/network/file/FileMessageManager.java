@@ -88,7 +88,7 @@ public class FileMessageManager extends DataManager {
         try {
             
             ServerConfig theConfig = ServerConfig.getServerConfig();
-            int thePort = theConfig.getDataPort();
+            int thePort = theConfig.getSocketPort();
             setPort( thePort );
             
         } catch (LoggableException ex) {

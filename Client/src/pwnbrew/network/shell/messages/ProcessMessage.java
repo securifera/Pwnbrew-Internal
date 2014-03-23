@@ -50,6 +50,7 @@ import java.util.Arrays;
 import pwnbrew.log.LoggableException;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.Message;
+import static pwnbrew.network.Message.PROCESS_MESSAGE_TYPE;
 
 /**
  *
@@ -79,7 +80,7 @@ abstract public class ProcessMessage extends Message {
           
         setBytes(passedBB);
     }
-
+    
     //==========================================================================
     /**
      * Constructor

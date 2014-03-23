@@ -61,6 +61,9 @@ public abstract class Message {
     public static final byte PROCESS_MESSAGE_TYPE = 89;
     public static final byte FILE_MESSAGE_TYPE = 90;
 
+    public static final int SRC_HOST_ID_OFFSET = 5;
+    public static final int DEST_HOST_ID_OFFSET = 9;
+    
     public static final int MSG_LEN_SIZE = 4;
     
     //Data members

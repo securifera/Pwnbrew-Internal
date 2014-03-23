@@ -136,8 +136,12 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                 return;
                                             }
                                             
+                                            //Get dest id
+                                            byte[] dstHostId = Arrays.copyOfRange(msgBytes, 4, 8);
+                                            int dstId = SocketUtilities.byteArrayToInt(dstHostId);
+                                            
                                             try{
-                                                DataManager.routeMessage( passedHandler.getPortRouter().getCommManager(), type, msgBytes );
+                                                DataManager.routeMessage( passedHandler.getPortRouter().getCommManager(), type, dstId, msgBytes );
                                             } catch(Exception ex ){
                                                 Log.log( Level.SEVERE, NAME_Class, "processHeader()", ex.toString(), ex);
                                             }
@@ -164,11 +168,15 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                     return;
                                                 }
                                                 
+                                                //Get dest id
+                                                byte[] dstHostId = Arrays.copyOfRange(msgBytes, 4, 8);
+                                                int dstId = SocketUtilities.byteArrayToInt(dstHostId);
+                                                
                                                 //Set the marker so the handler will know to send a different stage
                                                 System.arraycopy(Constants.OLD_STAGER_MARKER, 0, msgBytes, 8, Constants.OLD_STAGER_MARKER.length);
 
                                                 try{
-                                                    DataManager.routeMessage( passedHandler.getPortRouter().getCommManager(), type, msgBytes );
+                                                    DataManager.routeMessage( passedHandler.getPortRouter().getCommManager(), type, dstId, msgBytes );
                                                 } catch(Exception ex ){
                                                     Log.log( Level.SEVERE, NAME_Class, "processHeader()", ex.toString(), ex);
                                                 }

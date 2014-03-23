@@ -159,11 +159,12 @@ public class FileSender extends ManagedRunnable implements LockListener {
         
         //Get the port router
 //        int dstHostId = theFileAck.getClientId();
-        int dstHostId = Constants.SERVER_ID;
+        ClientConfig theClientConf = ClientConfig.getConfig();
+        int dstHostId = theClientConf.getServerId();
 //        PortRouter thePR = theCommManager.getPortRouter( thePort );
         
         //Get the client id and dest id
-        int clientId = Integer.parseInt( ClientConfig.getConfig().getHostId() );
+        int clientId = Integer.parseInt( theClientConf.getHostId() );
         byte[] clientIdArr = SocketUtilities.intToByteArray(clientId);
         byte[] destIdArr = SocketUtilities.intToByteArray(dstHostId);
         

@@ -60,8 +60,9 @@ public class StdOutMessage extends ProcessMessage {
      *
      * @param passedBB
     */
-    public StdOutMessage( ByteBuffer passedBB ) {
+    public StdOutMessage( int dstId, ByteBuffer passedBB ) {
         super( STD_OUT, passedBB );
+        setDestHostId(dstId);
     }
     
     //==========================================================================

@@ -90,7 +90,7 @@ public class StdInMessage extends ProcessMessage {
             }
             
             //Get the open shell
-            Shell aShell = aSMM.getShell();
+            Shell aShell = aSMM.getShell( getClientId() );
             if( aShell != null ){
                 aShell.sendInput( new String( getMsgBytes()) );
             }

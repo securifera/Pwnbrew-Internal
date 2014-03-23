@@ -71,7 +71,7 @@ abstract public class Constants {
                
     public static final ExecutorService Executor = Executors.newCachedThreadPool();
     public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");
-    public static final int SERVER_ID = -1;    
+//    public static final int SERVER_ID = -1;    
     
     //Constants for process streams
     public static final int STD_OUT_ID = 41;

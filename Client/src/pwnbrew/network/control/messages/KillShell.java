@@ -99,10 +99,9 @@ public final class KillShell extends ControlMessage{ // NO_UCD (use default)
                 aShellMsgManager = ShellMessageManager.initialize( passedManager );
             }
             
-            Shell aShell = aShellMsgManager.getShell();
+            Shell aShell = aShellMsgManager.removeShell( getClientId() );
             if( aShell != null){            
                 aShell.shutdown();
-                aShellMsgManager.setShell( null );
             }
             
         } catch(IOException ex ){

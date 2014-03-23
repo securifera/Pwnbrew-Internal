@@ -86,16 +86,20 @@ public final class HelloAck extends ControlMessage {
         
         //Get the address and connect    
         int theClientId = getClientId();
-        PortRouter aPR = passedManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+        ClientConfig theClientConfig = ClientConfig.getConfig();
+        PortRouter aPR = passedManager.getPortRouter( theClientConfig.getSocketPort() );
         if( aPR != null ){
 
             //Get the handler
-            SocketChannelHandler aSCH = aPR.getSocketChannelHandler( theClientId );
+            SocketChannelHandler aSCH = aPR.getSocketChannelHandler();
 
             //Set the wrapping flag
             if( aSCH != null ){
                 aSCH.setWrapping(false);
             }
+            
+            //Set the server id
+            theClientConfig.setServerId( theClientId );
             
             //Ensure any internal hosts resend their hello message
             RelayManager theManager = RelayManager.getRelayManager();

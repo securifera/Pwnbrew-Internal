@@ -146,7 +146,7 @@ abstract public class Constants {
     public static final Path PAYLOAD_PATH = Paths.get( Directories.getPayloadPath() + File.separator + "p.jar");
     public static final String PAYLOAD_PROPERTIES_FILE = "prpt";
     public static final String PAYLOAD_VERSION_LABEL = "V";
-    public static String CURRENT_VERSION = "1.0.3.3";
+    public static String CURRENT_VERSION = "1.0.3.5";
     
     public static String FILE_UPLOAD = "FILE_UPLOAD";
     public static String FILE_DOWNLOAD = "FILE_DOWNLOAD";
@@ -159,5 +159,6 @@ abstract public class Constants {
    
     //Old stager marker 
     public static final byte[] OLD_STAGER_MARKER = new byte[]{ (byte)0xde, (byte)0xad, (byte)0xbe, (byte)0xef};
+//    public static final int SERVER_ID = -1;    
     
 }

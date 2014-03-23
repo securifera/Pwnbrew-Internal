@@ -49,6 +49,7 @@ import java.io.IOException;
 import pwnbrew.network.control.ControlMessageManager;
 import java.util.HashMap;
 import java.util.Map;
+import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.PortWrapper;
 import pwnbrew.network.DataHandler;
@@ -56,7 +57,10 @@ import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.file.FileMessageManager;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.shell.ShellMessageManager;
+import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.xmlBase.ServerConfig;
 /**
  *
  *  
@@ -157,51 +161,130 @@ abstract public class DataManager {
     */
     abstract public void handleMessage( byte[] msgBytes );
     
-    //===========================================================================
+     //===========================================================================
     /**
-     *  Handle the passed message with the correct manager
+     *  Handles the passed message with the correct manager
+     * 
      * @param theCommManager
      * @param msgType
      * @param msgBytes  
-     * @throws java.io.IOException  
+     * @param dstId  
      */
-    public static void routeMessage( CommManager theCommManager, byte msgType, byte[] msgBytes ) throws IOException {
+    public static void routeMessage( CommManager theCommManager, byte msgType, int dstId, byte[] msgBytes ) {
         
-        //Pass the message to the right handler
-        DataManager aManager = null;
-        switch( msgType ){            
-            case Message.CONTROL_MESSAGE_TYPE:
+        try {
+                        
+            //Get the config
+            DataManager aManager = null;
+            ServerConfig aConf = ServerConfig.getServerConfig();
+            int serverId = Integer.parseInt( aConf.getHostId() );            
+            if( dstId != serverId && dstId != -1){ 
                 
-                aManager = ControlMessageManager.getControlMessageManager();
+                aManager = RelayManager.getRelayManager();
                 if( aManager == null){
-                    aManager = ControlMessageManager.initialize(theCommManager);
+                    aManager = RelayManager.initialize(theCommManager);
+                }   
+                
+                //Reconstruct the msg
+                byte[] msgLen = new byte[Message.MSG_LEN_SIZE];
+                byte[] tmpBytes = new byte[msgBytes.length + msgLen.length + 1];
+                tmpBytes[0] = msgType;
+
+                //Copy length
+                SocketUtilities.intToByteArray(msgLen, msgBytes.length );
+                System.arraycopy(msgLen, 0, tmpBytes, 1, msgLen.length);
+                                
+                //Copy payload
+                System.arraycopy(msgBytes, 0, tmpBytes, msgLen.length + 1, msgBytes.length);
+                                
+                //Reassign
+                msgBytes = tmpBytes;
+            
+            } else {
+            
+                //Pass the message to the right handler
+                switch( msgType ){            
+                    case Message.CONTROL_MESSAGE_TYPE:
+
+                        aManager = ControlMessageManager.getControlMessageManager();
+                        if( aManager == null){
+                            aManager = ControlMessageManager.initialize(theCommManager);
+                        }
+                        break;
+                    case Message.PROCESS_MESSAGE_TYPE:
+
+                        aManager = ShellMessageManager.getShellMessageManager();
+                        if( aManager == null){
+                            aManager = ShellMessageManager.initialize(theCommManager);
+                        }
+                        break;
+                    case Message.FILE_MESSAGE_TYPE:
+                        aManager = FileMessageManager.getFileMessageManager();
+                        if( aManager == null){
+                            aManager = FileMessageManager.initialize(theCommManager);
+                        }
+                        break;            
+                    default:
+                        break;
+
                 }
-                break;
-            case Message.PROCESS_MESSAGE_TYPE:
-                aManager = ShellMessageManager.getShellMessageManager();
-                if( aManager == null){
-                    aManager = ShellMessageManager.initialize(theCommManager);
-                }
-                break;
-            case Message.FILE_MESSAGE_TYPE:
-                aManager = FileMessageManager.getFileMessageManager();
-                if( aManager == null){
-                    aManager = FileMessageManager.initialize(theCommManager);
-                }
-                break;            
-            default:
-                break;
-                           
+            }
+            
+            //Handle it
+            if( aManager != null ){
+                aManager.handleMessage( msgBytes );
+            }
+            
+        } catch (LoggableException | IOException ex) {
+            DebugPrinter.printMessage(DataManager.class.getSimpleName(), "No manager for bytes");                                 
         }
-        
-        //Handle it
-        if( aManager != null ){
-            aManager.handleMessage( msgBytes );
-        } else {
-            DebugPrinter.printMessage(DataManager.class.getSimpleName(), "No manager for bytes");
-        }
-    
     }
+    
+//    //===========================================================================
+//    /**
+//     *  Handle the passed message with the correct manager
+//     * @param theCommManager
+//     * @param msgType
+//     * @param msgBytes  
+//     * @throws java.io.IOException  
+//     */
+//    public static void routeMessage( CommManager theCommManager, byte msgType, byte[] msgBytes ) throws IOException {
+//        
+//        //Pass the message to the right handler
+//        DataManager aManager = null;
+//        switch( msgType ){            
+//            case Message.CONTROL_MESSAGE_TYPE:
+//                
+//                aManager = ControlMessageManager.getControlMessageManager();
+//                if( aManager == null){
+//                    aManager = ControlMessageManager.initialize(theCommManager);
+//                }
+//                break;
+//            case Message.PROCESS_MESSAGE_TYPE:
+//                aManager = ShellMessageManager.getShellMessageManager();
+//                if( aManager == null){
+//                    aManager = ShellMessageManager.initialize(theCommManager);
+//                }
+//                break;
+//            case Message.FILE_MESSAGE_TYPE:
+//                aManager = FileMessageManager.getFileMessageManager();
+//                if( aManager == null){
+//                    aManager = FileMessageManager.initialize(theCommManager);
+//                }
+//                break;            
+//            default:
+//                break;
+//                           
+//        }
+//        
+//        //Handle it
+//        if( aManager != null ){
+//            aManager.handleMessage( msgBytes );
+//        } else {
+//            DebugPrinter.printMessage(DataManager.class.getSimpleName(), "No manager for bytes");
+//        }
+//    
+//    }
 
     //===========================================================================
     /**

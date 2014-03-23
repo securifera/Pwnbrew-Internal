@@ -158,14 +158,16 @@ public final class CreateShell extends ControlMessage{
                 aShellMsgManager = ShellMessageManager.initialize( passedManager );
             }
             
-            Shell aShell = aShellMsgManager.getShell();
+            int theClientId = getClientId();
+            Shell aShell = aShellMsgManager.getShell( theClientId );
             if( aShell == null){            
             
-                aShell = new Shell( Constants.Executor, passedManager, encoding, cmdString, startupCmd, redirectStderr );
+                aShell = new Shell( Constants.Executor, passedManager, theClientId, encoding, 
+                        cmdString, startupCmd, redirectStderr );
                 aShell.start();                
 
                 //Register the shell
-                aShellMsgManager.setShell( aShell );
+                aShellMsgManager.setShell( theClientId, aShell );
             }
             
         } catch(IOException ex ){
