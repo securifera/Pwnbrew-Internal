@@ -236,3 +236,6 @@ nbproject/*
 #Mr Developer
 .mr.developer.cfg
 /Client/nbproject/private/
+*.xml
+*.properties
+*.mf
