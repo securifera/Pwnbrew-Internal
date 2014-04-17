@@ -187,7 +187,7 @@ public final class Hello extends ControlMessage {
             
 
                 //Register the host
-                Integer theClientId = getClientId();
+                Integer theClientId = getSrcHostId();
                 DebugPrinter.printMessage(NAME_Class, "Accepted connection from host id: " + theClientId);
                 PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort() );
                 SocketChannelHandler aSCH = aPR.getSocketChannelHandler(theClientId);

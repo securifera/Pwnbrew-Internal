@@ -102,7 +102,6 @@ public class JobJListMouseListener extends MouseAdapter {
 
                    //Notify the JTable to start the tool tip timer
                    MouseEvent buttonEvent = new MouseEvent((Component)e.getSource(), e.getID(), e.getWhen(), e.getModifiers(), relEventX, relEventY, e.getClickCount(), e.isPopupTrigger(), e.getButton());
-                   theProgressPanel.setRow(index);
                    theProgressPanel.dispatchEvent(buttonEvent);
                    return;
                }

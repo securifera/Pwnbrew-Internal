@@ -48,12 +48,7 @@ package pwnbrew.utilities;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.logging.Level;
-import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.RuntimeRunnable;
 
@@ -67,52 +62,6 @@ final public class SocketUtilities {
     private static int messageCounter = -1;
     private static String theHostname = null;
     private static final String NAME_Class = SocketUtilities.class.getSimpleName();
-  
-//    
-//    //===============================================================
-//    /**
-//    * Returns the InetAddres of the localhost.  Handles any unknown host exceptions.
-//    *
-//    *
-//    * @return theLocalInet 
-//    */
-//    public static synchronized InetAddress getLocalHost(){
-//
-//        boolean foundInt = false;
-//        InetAddress theLocalInet = null;
-//
-//        try {
-//            theLocalInet = InetAddress.getLocalHost();
-//        } catch(UnknownHostException ex){
-//
-//            //Added to handle the case on Linux boxes where the hostname of the system
-//            //does not match what is in the /etc/hosts file.
-//            try {
-//                List<NetworkInterface> theNIs = NetworkInterfaceUtilities.getAllUpInterfaces();
-//                for(NetworkInterface theNI : theNIs){
-//                    //Get the InetAddresses
-//                    Enumeration<InetAddress> theAddresses = theNI.getInetAddresses();
-//                    while(theAddresses.hasMoreElements()){
-//                        theLocalInet = theAddresses.nextElement();
-//                        if(theLocalInet.isReachable(3)){
-//                            foundInt = true;
-//                            break;
-//                        }
-//                    }
-//                    //Break out if interface is assigned
-//                    if(foundInt){
-//                        break;
-//                    }
-//                }
-//
-//            } catch (IOException ex1) {
-//                Log.log(Level.WARNING, NAME_Class, "getLocalHost()", ex1.getMessage(), ex1 );
-//            }
-//
-//        }
-//
-//        return theLocalInet;
-//    }
     
     //===============================================================
     /**
@@ -222,6 +171,22 @@ final public class SocketUtilities {
         int tempInt = 0;
         for(int i = 0, j = value.length; i < value.length; i++, j-- ){
             tempInt += (value[i] & 0xff) << (8 * (j - 1));
+        }
+        return tempInt;
+
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @param value
+     * @return 
+     */
+    public static int byteArrayToInt2(byte[] value){
+
+        int tempInt = 0;
+        for(int i = 0, j = value.length; i < value.length; i++, j-- ){
+            tempInt += ((int)value[i] << 24) >>> (j*8);
         }
         return tempInt;
 

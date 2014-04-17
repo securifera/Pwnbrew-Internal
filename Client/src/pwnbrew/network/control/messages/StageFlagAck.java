@@ -44,6 +44,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import java.io.UnsupportedEncodingException;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
@@ -55,6 +56,7 @@ import pwnbrew.network.ControlOption;
 public final class StageFlagAck extends ControlMessage{
     
     private static final byte OPTION_CLIENT_ID = 44;
+    private static final byte OPTION_JVM_VERSION = 16;   
     
      //Class name
     private static final String NAME_Class = StageFlagAck.class.getSimpleName();    
@@ -66,13 +68,17 @@ public final class StageFlagAck extends ControlMessage{
      *
      * @param clientId
     */
-    public StageFlagAck( int clientId ) {
+    public StageFlagAck( int clientId, String passedVersion ) throws UnsupportedEncodingException {
         super();
         
         //Add the option
         byte[] clientIdArr = SocketUtilities.intToByteArray(clientId);
         ControlOption aTlv = new ControlOption( OPTION_CLIENT_ID, clientIdArr );
-        addOption(aTlv);        
+        addOption(aTlv);  
+        
+        byte[] tempArr = passedVersion.getBytes("US-ASCII");
+        aTlv = new ControlOption( OPTION_JVM_VERSION, tempArr);
+        addOption(aTlv);
     }
 
 }

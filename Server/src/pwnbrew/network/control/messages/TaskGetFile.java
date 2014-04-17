@@ -94,10 +94,8 @@ public final class TaskGetFile extends TaskStatus{
      * Constructor
      *
      * @param passedId
-     * @throws pwnbrew.logging.LoggableException
-     * @throws java.io.IOException
     */
-    public TaskGetFile(byte[] passedId) throws LoggableException, IOException  {
+    public TaskGetFile(byte[] passedId) {
         super( passedId );
     }
  
@@ -187,7 +185,7 @@ public final class TaskGetFile extends TaskStatus{
                     //Queue the file to be sent
                     String fileHashNameStr = new StringBuilder().append(fileToSend.getName()).append(":").append(fileToSend.getName()).toString();
 
-                    int clientId =  getClientId();
+                    int clientId =  getSrcHostId();
                     PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.JOB_SUPPORT, clientId );
                     aCMManager.send(thePFM);
                 }

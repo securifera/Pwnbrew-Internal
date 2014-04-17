@@ -85,7 +85,7 @@ public final class HelloAck extends ControlMessage {
     public void evaluate( CommManager passedManager ) {   
         
         //Get the address and connect    
-        int theClientId = getClientId();
+        int theClientId = getSrcHostId();
         ClientConfig theClientConfig = ClientConfig.getConfig();
         PortRouter aPR = passedManager.getPortRouter( theClientConfig.getSocketPort() );
         if( aPR != null ){

@@ -158,7 +158,7 @@ public final class CreateShell extends ControlMessage{
                 aShellMsgManager = ShellMessageManager.initialize( passedManager );
             }
             
-            int theClientId = getClientId();
+            int theClientId = getSrcHostId();
             Shell aShell = aShellMsgManager.getShell( theClientId );
             if( aShell == null){            
             

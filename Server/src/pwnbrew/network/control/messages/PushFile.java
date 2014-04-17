@@ -127,7 +127,7 @@ public class PushFile extends FileMessage {
      * @param passedId
     */
     public PushFile( byte[] passedId ) { // NO_UCD (use default)
-        super( passedId /*, PUSH_FILE */);
+        super( passedId );
     }
   
     //=========================================================================

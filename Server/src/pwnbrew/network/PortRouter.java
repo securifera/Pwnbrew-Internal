@@ -156,7 +156,7 @@ abstract public class PortRouter {
      * @param byteArr
      * @param passedClientId
      */
-    public void queueSend( byte[] byteArr, Integer passedClientId ) {
+    public void queueSend( byte[] byteArr, Integer passedClientId ) throws IOException {
         
         SocketChannelHandler theHandler = getSocketChannelHandler( passedClientId );
         if( theHandler != null ){
@@ -178,6 +178,8 @@ abstract public class PortRouter {
             }
             
             theHandler.queueBytes(byteArr);
+        } else {
+            throw new IOException("Not connected to the specified client.");
         }
                 
     }

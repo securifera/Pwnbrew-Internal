@@ -45,6 +45,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import java.io.UnsupportedEncodingException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
@@ -59,7 +60,9 @@ import pwnbrew.utilities.Utilities;
 public final class StageFlagAck extends ControlMessage{
     
     private static final byte OPTION_CLIENT_ID = 44;
+    private static final byte OPTION_JVM_VERSION = 16;   
     
+    private String theJvmVersion;    
     private int theRelayClientId;
     
      //Class name
@@ -91,6 +94,11 @@ public final class StageFlagAck extends ControlMessage{
             case OPTION_CLIENT_ID:
                 theRelayClientId = SocketUtilities.byteArrayToInt(theValue);
                 break;
+            case OPTION_JVM_VERSION:
+                try {
+                    theJvmVersion = new String( theValue, "US-ASCII");
+                } catch (UnsupportedEncodingException ex) {}
+                break;
             default:
                 retVal = false;
                 break;
@@ -109,7 +117,7 @@ public final class StageFlagAck extends ControlMessage{
         
         ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
         if( aCMManager != null ){
-            Payload aPayload = Utilities.getClientPayload(theRelayClientId);
+            Payload aPayload = Utilities.getClientPayload( theRelayClientId, theJvmVersion );
             aCMManager.send(aPayload);  
         }        
     }

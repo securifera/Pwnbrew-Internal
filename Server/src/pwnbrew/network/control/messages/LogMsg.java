@@ -127,7 +127,7 @@ public class LogMsg extends ControlMessage {
        if( passedManager instanceof ServerManager ){
         
             ServerManager theManager = (ServerManager)passedManager;
-            String clientIdStr = Integer.toString( getClientId() );
+            String clientIdStr = Integer.toString( getSrcHostId() );
             
             //Get the host controller
             HostController theController = theManager.getServer().getGuiController().getHostController( clientIdStr );

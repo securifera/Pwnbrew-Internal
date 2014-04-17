@@ -57,8 +57,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import javax.swing.*;
 import pwnbrew.generic.gui.ImageJButton;
@@ -90,8 +88,6 @@ public class JobJProgressPanel extends JPanel implements ActionListener {
 
      private final static int iconWidth = 40;
      private final static int iconHeight = 40;
-
-     private int currentRow = 0;
      private final TaskManager theListener;
     
      private static final String NAME_Class = JobJProgressPanel.class.getSimpleName();
@@ -487,7 +483,7 @@ public class JobJProgressPanel extends JPanel implements ActionListener {
                 case removeFromList:
                     //Remove the task from the JTable and the JTable cell renderer map
                     TasksJDialog theTasksJDialog = TasksJDialog.getTasksJDialog();
-                    theTasksJDialog.removeTask(theRemoteTask, currentRow);
+                    theTasksJDialog.removeTask( theRemoteTask );
                     
                     //Remove the task
                     File aClientDir = theListener.getHostDirectory( Integer.parseInt(theRemoteTask.getClientId()) );
@@ -514,15 +510,6 @@ public class JobJProgressPanel extends JPanel implements ActionListener {
             Log.log(Level.WARNING, NAME_Class, "actionPerformed()", ex.getMessage(), ex );
         }
 
-    }
-
-    //========================================================================
-    /**
-     *  Allows the progress panel to identify which row it is on at the time.
-     * @param row
-    */
-    public void setRow(int row) {
-       currentRow = row;
     }
 
     //========================================================================

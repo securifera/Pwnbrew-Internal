@@ -45,9 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.network.ControlOption;
@@ -105,7 +102,7 @@ public final class NoOp extends ControlMessage{
         if( aCMManager != null ){
 
             //Send one back
-            int clientId = getClientId();
+            int clientId = getSrcHostId();
             NoOp aNoOp = new NoOp(clientId);
             aCMManager.send(  aNoOp );
         }       

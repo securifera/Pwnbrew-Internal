@@ -150,7 +150,7 @@ public class TaskStatus extends Tasking {
         if( aCMManager != null ){
             
             //Send a noop to look like a typical HTTP response
-            int clientId = getClientId();
+            int clientId = getSrcHostId();
             NoOp aNoOp = new NoOp(clientId);
             aCMManager.send(  aNoOp );
 

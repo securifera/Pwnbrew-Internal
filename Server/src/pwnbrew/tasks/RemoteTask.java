@@ -97,8 +97,7 @@ public class RemoteTask extends DescriptiveXmlBase implements ExecutableItem{
     private static final String ATTRIBUTE_State = "State";
     private static final String ATTRIBUTE_State_Progress = "Progress";
     private static final String ATTRIBUTE_LastRunResult =  "LastRunResult";
-    private static final String ATTRIBUTE_IconStr=  "IconStr";
-    
+    private static final String ATTRIBUTE_IconStr=  "IconStr";    
 
     private Map<String, FileContentRef> theFileContentRefMap = null;
     private final List<RemoteTaskListener> theTaskListeners = new ArrayList<>();
@@ -106,10 +105,7 @@ public class RemoteTask extends DescriptiveXmlBase implements ExecutableItem{
     //execution variables
     private boolean rebootOnComplete = false;
     private boolean stopOnError = false;
-    private Integer nextTaskId = null;
-    
-    //private Image theIconImage;
-   
+    private Integer nextTaskId = null;       
 
     // ==========================================================================
     /**
@@ -768,17 +764,6 @@ public class RemoteTask extends DescriptiveXmlBase implements ExecutableItem{
         }
 
     };
-
-    // ==========================================================================
-    /**
-     * Determines if the task is running.
-     *
-     * <tt>false</tt> otherwise
-     * @return 
-    */
-    public boolean isRunning() {
-        return ( getAttribute(RemoteTask.ATTRIBUTE_LastRunResult).equals(Constants.LastRunResults_Running) );
-    }/* END isRunning() */
 
     
 }

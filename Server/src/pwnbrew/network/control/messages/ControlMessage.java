@@ -182,7 +182,7 @@ public abstract class ControlMessage extends Message {
      * @param passedBuffer
      * @return 
      */
-    public static ControlMessage instatiateMessage( byte[] msgId, ByteBuffer passedBuffer ){
+    public static ControlMessage instatiateMessage( byte[] msgId, ByteBuffer passedBuffer ) throws LoggableException{
         
         ControlMessage aMsg = null;
         byte[] classFqnLength = new byte[2];
@@ -203,7 +203,8 @@ public abstract class ControlMessage extends Message {
             aMsg = (ControlMessage)aConstruct.newInstance(msgId);
 
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Log.log(Level.SEVERE, NAME_Class, "instatiateMessage()", ex.getMessage(), ex );       
+            Log.log(Level.SEVERE, NAME_Class, "instatiateMessage()", ex.getMessage(), ex );  
+            throw new LoggableException(ex);
         }
         
         return aMsg;

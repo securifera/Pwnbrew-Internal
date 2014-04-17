@@ -228,7 +228,7 @@ public class FileMessageManager extends DataManager {
         int taskId = passedMessage.getTaskId();
         int fileId = passedMessage.getFileId();
         
-        int clientId = passedMessage.getClientId();
+        int clientId = passedMessage.getSrcHostId();
         File aClientDir = theCommManager.getTaskManager().getHostDirectory( clientId );
         if( aClientDir != null ){
         
@@ -255,7 +255,7 @@ public class FileMessageManager extends DataManager {
                 String hashFileNameStr = passedMessage.getHashFilenameString();
 
                 //Try to begin the file transfer
-                initFileTransfer( passedMessage.getClientId(), taskId, fileId, libDir, hashFileNameStr, passedMessage.getFileSize() );
+                initFileTransfer( passedMessage.getSrcHostId(), taskId, fileId, libDir, hashFileNameStr, passedMessage.getFileSize() );
 
                 //Send an ack to the sender to begin transfer
                 DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);

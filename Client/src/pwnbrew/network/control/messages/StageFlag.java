@@ -45,10 +45,9 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
-import pwnbrew.log.LoggableException;
-import pwnbrew.log.RemoteLog;
+import java.util.logging.Logger;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ControlOption;
@@ -66,7 +65,9 @@ public final class StageFlag extends ControlMessage{
     
     private static final byte OPTION_STAGE_FLAG = 42;
     private static final byte OPTION_CLIENT_ID = 43;
+    private static final byte OPTION_JVM_VERSION = 16;   
     
+    private String theJvmVersion;
     private byte theFlag;
     private int theRelayClientId;
     
@@ -104,6 +105,11 @@ public final class StageFlag extends ControlMessage{
             case OPTION_CLIENT_ID:
                 theRelayClientId = SocketUtilities.byteArrayToInt(theValue);
                 break;
+            case OPTION_JVM_VERSION:
+                try {
+                    theJvmVersion = new String( theValue, "US-ASCII");
+                } catch (UnsupportedEncodingException ex) {}
+                break;
             default:
                 retVal = false;
                 break;
@@ -135,8 +141,11 @@ public final class StageFlag extends ControlMessage{
             //Send the ack
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
             if( aCMManager != null ){
-                StageFlagAck ackFlag = new StageFlagAck( theRelayClientId );
-                aCMManager.send(ackFlag);
+                try {
+                    StageFlagAck ackFlag = new StageFlagAck( theRelayClientId, theJvmVersion );
+                    aCMManager.send(ackFlag);
+                } catch (UnsupportedEncodingException ex) {              
+                }
             }            
             
         }    

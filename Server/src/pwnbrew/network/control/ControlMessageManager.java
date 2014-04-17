@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
@@ -167,9 +168,13 @@ public class ControlMessageManager extends DataManager {
         aByteBuffer = ByteBuffer.allocate( msgLen );
         passedMessage.append(aByteBuffer);
         
-        //Queue the message to be sent
-        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), destClientId );
-//        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+        try {
+            //Queue the message to be sent
+            thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), destClientId );
+    //        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+        } catch (IOException ex) {
+            Log.log( Level.SEVERE, NAME_Class, "send()", ex.getMessage(), ex);           
+        }
         
     }
     

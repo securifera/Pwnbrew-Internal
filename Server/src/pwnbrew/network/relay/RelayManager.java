@@ -47,18 +47,19 @@ package pwnbrew.network.relay;
 
 import pwnbrew.network.PortRouter;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
-import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.RemoteException;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
 
@@ -97,12 +98,6 @@ public class RelayManager extends DataManager {
             theRelayManager = new RelayManager( passedCommManager );
         }   
         
-//        //Create the port router
-//        if( theRelayManager.getServerPorterRouter() == null ){
-//            ServerPortRouter theServerPortRouter = new ServerPortRouter( passedCommManager, true );   
-//            theRelayManager.setPortRouter(theServerPortRouter);       
-//        }
-        
         return theRelayManager;
 
     }/* END initialize() */
@@ -129,26 +124,37 @@ public class RelayManager extends DataManager {
         //Get the dest id
         byte[] dstHostId = Arrays.copyOfRange(msgBytes, Message.DEST_HOST_ID_OFFSET, Message.DEST_HOST_ID_OFFSET + 4);
         int tempId = SocketUtilities.byteArrayToInt(dstHostId);
-//               
-//        //Get the port router
-        PortRouter thePR = null;
-//        if( tempId == Constants.SERVER_ID ){   
-            try {
-                thePR = theCommManager.getPortRouter( ServerConfig.getServerConfig().getSocketPort() );    
-                DebugPrinter.printMessage(NAME_Class, "Queueing relay message");
-            } catch (LoggableException ex) {
-                Log.log( Level.SEVERE, NAME_Class, "handleMessage()", ex.getMessage(), ex);        
-            }
-//        } else {     
-//
-//            //If the dest is not the server
-//            thePR = theServerPortRouter;  
-//            DebugPrinter.printMessage(NAME_Class, "Queueing relay message to client");
-//        }
+               
+        //Get the port router
+        PortRouter thePR = null; 
+        try {
+            thePR = theCommManager.getPortRouter( ServerConfig.getServerConfig().getSocketPort() );    
+            DebugPrinter.printMessage(NAME_Class, "Queueing relay message");
+        } catch (LoggableException ex) {
+            Log.log( Level.SEVERE, NAME_Class, "handleMessage()", ex.getMessage(), ex);        
+        }
 
         //Queue the message to be sent
         if( thePR != null ){
-            thePR.queueSend( msgBytes, tempId ); 
+            try { 
+                thePR.queueSend( msgBytes, tempId );
+            } catch (IOException ex) {
+                
+                //Send an error message back to the sender
+                byte[] srcHostId = Arrays.copyOfRange(msgBytes, Message.SRC_HOST_ID_OFFSET, Message.SRC_HOST_ID_OFFSET + 4);
+                tempId = SocketUtilities.byteArrayToInt(srcHostId);
+                
+                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+                if( aCMManager != null ){
+                    try {
+                        RemoteException reMsg = new RemoteException( tempId, ex.getMessage() );
+                        aCMManager.send(reMsg);
+                    } catch (UnsupportedEncodingException ex1) {
+                        ex1 = null;
+                    }
+                }
+                
+            }
         }      
         
     }
@@ -161,51 +167,5 @@ public class RelayManager extends DataManager {
     public DataHandler getDataHandler() {
         return theDataHandler;
     }  
-  
-//    //===============================================================
-//    /**
-//     * Sets the port router
-//     *
-//    */
-//    private void setPortRouter(ServerPortRouter passedRouter) {
-//        theServerPortRouter = passedRouter;
-//    }
 
-//    //===========================================================================
-//    /**
-//     *  Shutdown the relay 
-//     */
-//    @Override
-//    public void shutdown() {
-//        theServerPortRouter.shutdown();
-//        theServerPortRouter = null;
-//    }
-
-//    //===========================================================================
-//    /**
-//     *  Return the Port Router
-//     * @return 
-//    */
-//    public ServerPortRouter getServerPorterRouter() {
-//        return theServerPortRouter;
-//    }
-    
-//    //===============================================================
-//    /**
-//     *   Send the message out the given channel.
-//     *
-//     * @param passedMessage
-//    */
-//    public void send( Message passedMessage ) {
-//
-//        int msgLen = passedMessage.getLength();
-//        ByteBuffer aByteBuffer = ByteBuffer.allocate( msgLen );
-//        passedMessage.append(aByteBuffer);
-//        
-//        //Queue the message to be sent
-//        theServerPortRouter.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
-//        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-//              
-//    }
-    
 }

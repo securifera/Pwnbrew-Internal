@@ -144,5 +144,4 @@ public class JobUpdater extends Observable implements ActionListener {
         notifyObservers();
     }
 
-
 }

@@ -173,6 +173,7 @@ public final class TaskGetFile extends TaskStatus{
                         String fileHashNameStr = new StringBuilder().append("0").append(":").append(theFilePath).toString();
 
                         PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
+                        thePFM.setDestHostId( getSrcHostId() );
                         aCMManager.send(thePFM);
                     }
                 }

@@ -166,6 +166,7 @@ public final class FileOperation extends Tasking {
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
             if( aCMManager != null ){
                 FileOpResult theResult = new FileOpResult( getTaskId(), retByte);
+                theResult.setDestHostId( getSrcHostId() );
                 aCMManager.send(theResult);
             }
         } catch (UnsupportedEncodingException ex) {

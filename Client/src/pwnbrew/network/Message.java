@@ -182,7 +182,7 @@ public abstract class Message {
      *
      * @return
     */
-    public int getClientId(){
+    public int getSrcHostId(){
         return SocketUtilities.byteArrayToInt(srcHostId);
     }
 

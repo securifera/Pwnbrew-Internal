@@ -47,6 +47,7 @@ package pwnbrew.selector;
 
 import pwnbrew.logging.Log;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
@@ -506,7 +507,11 @@ public class SocketChannelHandler implements Selectable {
                     ex1 = null;
                 }
                 
-                thePortRouter.queueSend( byteArr, getRootHostId() );
+                try {
+                    thePortRouter.queueSend( byteArr, getRootHostId() );
+                } catch (IOException ex) {
+                    Log.log(Level.INFO, NAME_Class, "retrySend()", ex.getMessage(), ex );
+                }
                 
             }
 
@@ -705,7 +710,7 @@ public class SocketChannelHandler implements Selectable {
      * @param passedBool 
      * @return  
      */
-    public synchronized boolean setStaging( int passedClientId, boolean passedBool ) {
+    public synchronized boolean setStaging( int passedClientId, boolean passedBool, String theJreVersion ) throws UnsupportedEncodingException {
         
         boolean retVal = true;
         if( rootHostId == -1 || rootHostId == passedClientId ){
@@ -713,7 +718,7 @@ public class SocketChannelHandler implements Selectable {
         } else if( passedBool ){
             
             //Set stage flag if relaying the message
-            StageFlag aFlag = new StageFlag( rootHostId, passedClientId, passedBool );
+            StageFlag aFlag = new StageFlag( rootHostId, passedClientId, passedBool, theJreVersion );
             ByteBuffer aByteBuffer;
 
             int msgLen = aFlag.getLength();

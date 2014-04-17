@@ -52,7 +52,6 @@ import java.util.Arrays;
 import pwnbrew.ClientConfig;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.DataHandler;
@@ -129,8 +128,7 @@ public class RelayManager extends DataManager {
                
         //Get the port router
         PortRouter thePR;
-        if( tempId == ClientConfig.getConfig().getServerId() ){   
-
+        if( tempId == -1 || tempId == ClientConfig.getConfig().getServerId() ){
             thePR = theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );    
             DebugPrinter.printMessage(NAME_Class, "Queueing relay message to server");
         } else {     

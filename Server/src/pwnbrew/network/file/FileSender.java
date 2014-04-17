@@ -136,7 +136,7 @@ public class FileSender extends ManagedRunnable {
                     }
 
                     //Send message to cleanup the file transfer on the client side
-                    int clientId = theFileAck.getClientId();
+                    int clientId = theFileAck.getSrcHostId();
                     PushFileAbort fileAbortMsg = new PushFileAbort( fileId, clientId );
                     aCMManager.send(fileAbortMsg ); 
                     
@@ -158,7 +158,7 @@ public class FileSender extends ManagedRunnable {
     private void sendFile( File fileToBeSent, int fileId ) throws IOException, LoggableException {
         
         //Get the port router
-        int dstHostId = theFileAck.getClientId();
+        int dstHostId = theFileAck.getSrcHostId();
         DebugPrinter.printMessage(NAME_Class, "Port: " + thePort);
         PortRouter thePR = theCommManager.getPortRouter( thePort );
         SocketChannelHandler aHandler = thePR.getSocketChannelHandler( dstHostId );
@@ -183,7 +183,7 @@ public class FileSender extends ManagedRunnable {
                 tempBuffer.put(theFileId);
 
                 //Send the message
-                thePR.queueSend( Arrays.copyOf( tempBuffer.array(), tempBuffer.position()), theFileAck.getClientId() );
+                thePR.queueSend( Arrays.copyOf( tempBuffer.array(), tempBuffer.position()), theFileAck.getSrcHostId() );
 
             } else {  
 
@@ -228,7 +228,7 @@ public class FileSender extends ManagedRunnable {
                         tempBuffer.put(fileChannelBB);
                         
                         //Send the message
-                        thePR.queueSend( Arrays.copyOf( tempBuffer.array(), tempBuffer.position()), theFileAck.getClientId() );
+                        thePR.queueSend( Arrays.copyOf( tempBuffer.array(), tempBuffer.position()), theFileAck.getSrcHostId() );
 
                     }
 

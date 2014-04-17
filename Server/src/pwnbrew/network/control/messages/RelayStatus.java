@@ -106,7 +106,7 @@ public final class RelayStatus extends ControlMessage{
     public void evaluate( CommManager passedManager ) { 
     
         //Get the host and set the relay information
-        int clientId = getClientId();
+        int clientId = getSrcHostId();
         HostController theController = passedManager.getTaskManager().getHostController( Integer.toString( clientId) );
         if( theController != null ){
             HostDetailsPanel aPanel = theController.getRootPanel().getOverviewPanel();

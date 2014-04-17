@@ -77,7 +77,6 @@ public class FileSender extends ManagedRunnable implements LockListener {
 
     private final CommManager theCommManager;
     private final PushFileAck theFileAck;
-//    private final int thePort;
     
 //    protected static final int CONNECT_RETRY = 3;
 //    private static int maxMsgLen = (256 * 256) - 8; 
@@ -93,11 +92,10 @@ public class FileSender extends ManagedRunnable implements LockListener {
     /*
      *  Constructor
      */
-    public FileSender( CommManager passedExecutor, PushFileAck passedAck /*, int passedPort */ ) {
+    public FileSender( CommManager passedExecutor, PushFileAck passedAck ) {
         super( Constants.Executor);
         theCommManager = passedExecutor;
         theFileAck = passedAck;
-//        thePort = passedPort;
     }   
     
     @Override
@@ -158,10 +156,8 @@ public class FileSender extends ManagedRunnable implements LockListener {
     private void sendFile( PortRouter thePR, File fileToBeSent, int passedId ) throws Exception {
         
         //Get the port router
-//        int dstHostId = theFileAck.getClientId();
+        int dstHostId = theFileAck.getSrcHostId();
         ClientConfig theClientConf = ClientConfig.getConfig();
-        int dstHostId = theClientConf.getServerId();
-//        PortRouter thePR = theCommManager.getPortRouter( thePort );
         
         //Get the client id and dest id
         int clientId = Integer.parseInt( theClientConf.getHostId() );

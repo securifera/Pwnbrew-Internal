@@ -132,6 +132,12 @@ final public class Log {
             Level level, String sourceClass, String sourceMethod, String message, Throwable thrown ) {
       
         if( theLogger != null ) { //If the Logger was created...
+            
+            if( thrown instanceof LoggableException ){
+                thrown = ((LoggableException)thrown).getException();
+                message = thrown.getMessage();
+            }
+            
             LogRecord logRecord = new LogRecord( level, message );
             logRecord.setSourceClassName( sourceClass );
             logRecord.setSourceMethodName( sourceMethod );
@@ -154,7 +160,10 @@ final public class Log {
             } 
         }
         
-        //Print to screen if debugging       
+        //Print to screen if debugging   
+        if( thrown != null )
+            message = thrown.getClass().getSimpleName() + " - " + message;          
+        
         DebugPrinter.printMessage( new StringBuilder().append(sourceClass).append(".")
                 .append(sourceMethod).toString(), message);  
                

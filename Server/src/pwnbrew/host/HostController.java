@@ -1003,7 +1003,7 @@ public final class HostController extends LibraryItemController implements Actio
                     parent.add(node);
 
                     //Set the child count
-                    if (currentNode.isDirectory() || currentNode.isDrive() )
+                    if( (currentNode.isDirectory() || currentNode.isDrive()) && currentNode.getSize() > 0)
                         node.add(new DefaultMutableTreeNode( true));                            
 
                 }
@@ -1085,7 +1085,9 @@ public final class HostController extends LibraryItemController implements Actio
             theTask = theTaskMap.get(taskId);
         }
         
-        theTask.setFileCount(theDirCount);
+        if( theTask != null )
+            theTask.setFileCount(theDirCount);
+        
     }
 
     //=========================================================================

@@ -62,7 +62,7 @@ public class LoaderTest {
 //        /* class path */              };
         byte[] msgByteArr = new byte[]{
             88,
-            0,0,0,56,
+            0,0,0,62,
             0,0,0,0,
             (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff,
             0,0,0,0,
@@ -70,7 +70,8 @@ public class LoaderTest {
             0x70, 0x77, 0x6E, 0x62, 0x72, 0x65, 0x77, 0x2E,
             0x6E, 0x65, 0x74, 0x77, 0x6F, 0x72, 0x6B, 0x2E, 0x63, 0x6F, 0x6E,
             0x74, 0x72, 0x6F, 0x6C, 0x2E, 0x6D, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
-            0x73, 0x2E, 0x53, 0x65, 0x6E, 0x64, 0x53, 0x74, 0x61, 0x67, 0x65 };
+            0x73, 0x2E, 0x53, 0x65, 0x6E, 0x64, 0x53, 0x74, 0x61, 0x67, 0x65, 
+            0x10, 0x00, 0x00, 0x00, 0x01, 0x36};
 
 //        String aStr = "pwnbrew.network.control.messages.SendStage";
 //        byte[] aByteArr = aStr.getBytes();
@@ -95,6 +96,13 @@ public class LoaderTest {
         
         byte[] encodedBytes = xorData(msgByteArr, "PWNZ".getBytes());
         String hexStrArr = bytesToHex( encodedBytes );
+        
+        String aStr = bytesToHex( new byte[]{ (byte)((char)'4' ^ (char)'N')} );
+        aStr = bytesToHex( new byte[]{  (byte)((char)'5' ^ (char)'N')} );
+        aStr = bytesToHex( new byte[]{  (byte)((char)'6' ^ (char)'N')} );
+        aStr = bytesToHex( new byte[]{  (byte)((char)'7' ^ (char)'N')} );
+        aStr = bytesToHex( new byte[]{  (byte)((char)'8' ^ (char)'N')} );
+        
         
 //        String beginStr = hexStrArr.substring(0, 6);
 //        String endStr = hexStrArr.substring(14);
@@ -153,8 +161,10 @@ public class LoaderTest {
     public static byte[] xorData(byte[] bData, byte[] xorString) {
        
         byte bCrypto[] = new byte[bData.length];
+        char theChar = 0x0;
         for(int i = 0 ; i < bData.length; ++i) {
-            bCrypto[i] = (byte)(bData[i] ^ xorString[i % xorString.length]);
+            theChar = (char) xorString[i % xorString.length];
+            bCrypto[i] = (byte)(bData[i] ^ theChar);
         }
  
         return bCrypto;

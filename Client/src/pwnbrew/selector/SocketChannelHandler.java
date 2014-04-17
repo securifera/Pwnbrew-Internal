@@ -391,7 +391,7 @@ public class SocketChannelHandler implements Selectable {
                 
             ClientConfig aConf = ClientConfig.getConfig();
             int localId = Integer.parseInt( aConf.getHostId() );            
-            if( localId != dstId && dstId == aConf.getServerId() ){ 
+            if( localId != dstId && ( dstId == aConf.getServerId() || dstId == -1) ){ 
 
                 RelayManager aManager = RelayManager.getRelayManager();
                 if( aManager == null){

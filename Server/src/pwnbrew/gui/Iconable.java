@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- * Iconable.java
- *
- * Created on June 23, 2013
- */
-
 package pwnbrew.gui;
 
 import javax.swing.Icon;

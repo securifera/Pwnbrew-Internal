@@ -110,7 +110,7 @@ public final class FileOpResult extends Tasking {
     
         //If the return value is true
         if( opRetVal ){
-            String clientIdStr = Integer.toString( getClientId() );
+            String clientIdStr = Integer.toString( getSrcHostId() );
             final ServerManager aSM = (ServerManager) passedManager;
             final HostController theController = aSM.getServer().getGuiController().getHostController( clientIdStr );
             if( theController != null ){   

@@ -149,7 +149,7 @@ public class FileMessageManager extends DataManager implements LockListener {
     * @param fileToTransfer
     * @return
     */
-    private void initFileTransfer(int passedTaskId, int passedFileId, File parentDir, String hashFilenameStr, long passedFileSize) 
+    private void initFileTransfer( int passedSrcHostId, int passedTaskId, int passedFileId, File parentDir, String hashFilenameStr, long passedFileSize) 
             throws LoggableException, NoSuchAlgorithmException, IOException {
 
         //Get the socket router
@@ -167,7 +167,7 @@ public class FileMessageManager extends DataManager implements LockListener {
                 //If the receive flag is not set
                 if( theReceiver == null ){
 
-                    theReceiver = new FileReceiver( this, passedTaskId, passedFileId, passedFileSize, parentDir, hashFilenameStr );
+                    theReceiver = new FileReceiver( this, passedSrcHostId, passedTaskId, passedFileId, passedFileSize, parentDir, hashFilenameStr );
                     theFileReceiverMap.put(passedFileId, theReceiver);
 
                 } else {
@@ -221,6 +221,7 @@ public class FileMessageManager extends DataManager implements LockListener {
         boolean retVal = false;
         int taskId = passedMessage.getTaskId();
         int fileId = passedMessage.getFileId();
+        int srcId = passedMessage.getSrcHostId();
 
         File libDir = null;
         int fileType = passedMessage.getFileType();
@@ -243,11 +244,12 @@ public class FileMessageManager extends DataManager implements LockListener {
                     String hashFileNameStr = passedMessage.getHashFilenameString();
 
                     //Try to begin the file transfer
-                    initFileTransfer( taskId, fileId, libDir, hashFileNameStr, passedMessage.getFileSize() );
+                    initFileTransfer( srcId, taskId, fileId, libDir, hashFileNameStr, passedMessage.getFileSize() );
 
                     //Send an ack to the sender to begin transfer
                     DebugPrinter.printMessage(CommManager.class.getSimpleName(), "Sending ACK for " + hashFileNameStr);
                     PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr);
+                    aSFMA.setDestHostId( passedMessage.getSrcHostId() );
                     aCMManager.send(aSFMA);
                 
                 } catch ( IOException  ex){

@@ -239,52 +239,6 @@ abstract public class DataManager {
             DebugPrinter.printMessage(DataManager.class.getSimpleName(), "No manager for bytes");                                 
         }
     }
-    
-//    //===========================================================================
-//    /**
-//     *  Handle the passed message with the correct manager
-//     * @param theCommManager
-//     * @param msgType
-//     * @param msgBytes  
-//     * @throws java.io.IOException  
-//     */
-//    public static void routeMessage( CommManager theCommManager, byte msgType, byte[] msgBytes ) throws IOException {
-//        
-//        //Pass the message to the right handler
-//        DataManager aManager = null;
-//        switch( msgType ){            
-//            case Message.CONTROL_MESSAGE_TYPE:
-//                
-//                aManager = ControlMessageManager.getControlMessageManager();
-//                if( aManager == null){
-//                    aManager = ControlMessageManager.initialize(theCommManager);
-//                }
-//                break;
-//            case Message.PROCESS_MESSAGE_TYPE:
-//                aManager = ShellMessageManager.getShellMessageManager();
-//                if( aManager == null){
-//                    aManager = ShellMessageManager.initialize(theCommManager);
-//                }
-//                break;
-//            case Message.FILE_MESSAGE_TYPE:
-//                aManager = FileMessageManager.getFileMessageManager();
-//                if( aManager == null){
-//                    aManager = FileMessageManager.initialize(theCommManager);
-//                }
-//                break;            
-//            default:
-//                break;
-//                           
-//        }
-//        
-//        //Handle it
-//        if( aManager != null ){
-//            aManager.handleMessage( msgBytes );
-//        } else {
-//            DebugPrinter.printMessage(DataManager.class.getSimpleName(), "No manager for bytes");
-//        }
-//    
-//    }
 
     //===========================================================================
     /**

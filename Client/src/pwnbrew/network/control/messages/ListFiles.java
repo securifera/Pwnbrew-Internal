@@ -121,20 +121,23 @@ public final class ListFiles extends Tasking {
                
                 File theRemoteFile = new File(theFilePath); 
                 File[] fileList = theRemoteFile.listFiles();
-                if( fileList != null ){
+                if( fileList != null && fileList.length != 0 ){
 
                     //Send the count
                     ControlMessage aMsg = new DirCount(getTaskId(), fileList.length);
+                    aMsg.setDestHostId( getSrcHostId() );
                     aCMManager.send(aMsg);
 
                     //Send a message per file
                     for (File aFile : fileList) {                    
                         aMsg = new FileSystemMsg( getTaskId(), aFile, false );
+                        aMsg.setDestHostId( getSrcHostId() );
                         aCMManager.send(aMsg);
                     }
 
                 } else {
                     FileSystemMsg aMsg = new FileSystemMsg( getTaskId(), null, false );
+                    aMsg.setDestHostId( getSrcHostId() );
                     aCMManager.send(aMsg);                
                 }
             }

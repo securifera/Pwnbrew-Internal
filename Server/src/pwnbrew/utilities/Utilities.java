@@ -173,6 +173,22 @@ public class Utilities {
         return new ArrayList<>(theExtPanelClassList);
     }
 
+    //===========================================================================
+    /**
+     * 
+     * @param theJvmVersion
+     * @return 
+     */
+    
+    public static File getPayloadFile(String theJvmVersion) {
+        File theFile = null;
+        switch( theJvmVersion ){
+            default:
+            theFile = Constants.PAYLOAD_PATH.toFile();
+        }
+        return theFile;
+    }
+
     // ==========================================================================
     /**
      *
@@ -1239,12 +1255,12 @@ public class Utilities {
      * @param clientId
      * @return 
      */
-    public static Payload getClientPayload( int clientId ) {
+    public static Payload getClientPayload( int clientId, String passedVersion ) {
         
         Payload aPayload = null;            
         try{
             
-            File payloadFile = Constants.PAYLOAD_PATH.toFile();
+            File payloadFile = Utilities.getPayloadFile(passedVersion);
             if( payloadFile.exists() ){
 
                 byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];

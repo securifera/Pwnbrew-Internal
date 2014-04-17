@@ -474,7 +474,7 @@ final public class Persistence {
                         aSB.append("net stop \"").append(svcStr).append("\"");
                         
                         if(theSvcPath != null ){
-                            aSB.append(" && ").append(theSvcPath).append(" /u");
+                            aSB.append(" && ").append(theSvcPath).append(" -u");
                             aSB.append(" && del ").append(theSvcPath);
                             aSB.append(" && del ").append( Utilities.getClassPath() );
                         }

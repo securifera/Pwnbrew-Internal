@@ -78,6 +78,7 @@ final public class FileReceiver {
     private long fileSize = 0;
     
     private int sndFileProgress = 0;  
+    private int srcHostId = 0;
     private int taskId = 0;
     private int fileId = 0;
     private String fileHash = null;
@@ -104,10 +105,11 @@ final public class FileReceiver {
      * @throws java.io.IOException 
      * @throws java.security.NoSuchAlgorithmException 
      */
-    public FileReceiver( FileMessageManager passedManager, int passedTaskId, int passedFileId, long passedFileSize, File parentDir, String hashFilenameStr) 
+    public FileReceiver( FileMessageManager passedManager, int passedSrcId, int passedTaskId, int passedFileId, long passedFileSize, File parentDir, String hashFilenameStr) 
             throws LoggableException, NoSuchAlgorithmException, IOException {
         
         theFileMessageManager = passedManager;
+        srcHostId = passedSrcId;
         taskId = passedTaskId;
         fileId = passedFileId;
         fileSize = passedFileSize;
@@ -220,6 +222,7 @@ final public class FileReceiver {
                 if( theCMM != null ){                    
                     try {
                         TaskProgress aProgMsg = new TaskProgress(taskId, sndFileProgress );
+                        aProgMsg.setDestHostId(srcHostId);
                         theCMM.send(aProgMsg);
                     }  catch (IOException ex) {
                         RemoteLog.log(Level.SEVERE, NAME_Class, "receiveFile()", ex.getMessage(), ex);
@@ -254,7 +257,8 @@ final public class FileReceiver {
                 //Send fin message to host
                 try {
                     
-                    PushFileFin finMessage = new PushFileFin( taskId, fileId, hexString );                   
+                    PushFileFin finMessage = new PushFileFin( taskId, fileId, hexString ); 
+                    finMessage.setDestHostId(srcHostId);
                     //Returns if it should unlock or not
                     if( theCMM != null ){
                         theCMM.send(finMessage);

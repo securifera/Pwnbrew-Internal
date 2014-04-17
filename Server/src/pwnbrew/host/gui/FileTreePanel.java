@@ -55,7 +55,6 @@ import java.io.File;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -80,10 +79,6 @@ import pwnbrew.network.control.messages.FileOperation;
  */
 public class FileTreePanel extends JPanel {
     
-//    public static final ImageIcon ICON_DISK = new ImageIcon("disk.gif");
-    public static final ImageIcon ICON_FOLDER = new ImageIcon("folder.gif");
-    public static final ImageIcon ICON_EXPANDEDFOLDER = new ImageIcon("expandedfolder.gif");
-
     protected JTree  theJTree;
     protected DefaultTreeModel theJTreeModel;
     
