@@ -163,7 +163,7 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
                         File aFile = new File( fileLibDir, fileHash);
 
                         //If the file exists, remove it from the list, else request it from the server
-                        if(aFile.exists() && FileUtilities.getFileHash( aFile, true ).equals(aFile.getName())){
+                        if(aFile.exists() && FileUtilities.getFileHash( aFile ).equals(aFile.getName())){
                             hashFilenameList.remove(aStr);
                         } else {
 

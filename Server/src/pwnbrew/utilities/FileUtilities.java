@@ -273,17 +273,17 @@ abstract public class FileUtilities {
     }/* END deleteFile( File ) */
 
 
-    // ==========================================================================
-    /**
-    *    Wrapper function. 
-     * @param aFile
-     * @return 
-     * @throws java.security.NoSuchAlgorithmException 
-     * @throws java.io.IOException 
-    */
-    public static String getFileHash(File aFile) throws NoSuchAlgorithmException, IOException {
-        return getFileHash(aFile, false);
-    }
+//    // ==========================================================================
+//    /**
+//    *    Wrapper function. 
+//     * @param aFile
+//     * @return 
+//     * @throws java.security.NoSuchAlgorithmException 
+//     * @throws java.io.IOException 
+//    */
+//    public static String getFileHash(File aFile) throws NoSuchAlgorithmException, IOException {
+//        return getFileHash(aFile, false);
+//    }
 
    // ==========================================================================
   /**
@@ -300,7 +300,7 @@ abstract public class FileUtilities {
    * @throws NoSuchAlgorithmException if the hash algorithm cannot be found
    * @throws NullPointerException if the given {@code File} is null
    */
-  private static String getFileHash(File aFile, boolean addHeader ) throws NoSuchAlgorithmException, IOException {
+  public static String getFileHash( File aFile ) throws NoSuchAlgorithmException, IOException {
 
     int bytesRead = 0;
     byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
@@ -318,10 +318,10 @@ abstract public class FileUtilities {
 
         try {
 
-            //Add the header to the hash if it was removed
-            if(addHeader){
-                hash.update( Utilities.getFileHeader() );
-            }
+//            //Add the header to the hash if it was removed
+//            if(addHeader){
+//                hash.update( Utilities.getFileHeader() );
+//            }
             
             //Read in the bytes and update the hash
             while( bytesRead != -1){
@@ -350,7 +350,7 @@ abstract public class FileUtilities {
 
     return theHash;
 
-  }/* END createFileContentFromFile( File ) */
+  }/* END getFileHash( File ) */
 
     
 
@@ -597,9 +597,9 @@ abstract public class FileUtilities {
     */
     private static boolean convertLibFile(String fileHash, File destFile, ProgressListener theListener, File fileContentDir ) throws IOException, InvalidLibraryFileException, InvalidFileLengthException {
 
-        byte[] fileHeader = Utilities.getFileHeader();
+//        byte[] fileHeader = Utilities.getFileHeader();
 
-        byte[] headerBytes = new byte[fileHeader.length];
+//        byte[] headerBytes = new byte[fileHeader.length];
         byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
         int marker = 0;
 
@@ -627,14 +627,14 @@ abstract public class FileUtilities {
 
                 try {
 
-                    //Check the header
-                    int bytesRead = theBufferedIS.read(headerBytes, marker, fileHeader.length);
-                    if(bytesRead != 4 && !Arrays.equals(headerBytes, fileHeader)){
-                      throw new InvalidLibraryFileException("This file does not contain the required header.");
-                    }
+//                    //Check the header
+//                    int bytesRead = theBufferedIS.read(headerBytes, marker, fileHeader.length);
+//                    if(bytesRead != 4 && !Arrays.equals(headerBytes, fileHeader)){
+//                      throw new InvalidLibraryFileException("This file does not contain the required header.");
+//                    }
 
                     //Reset bytes read 
-                    bytesRead = 0;
+                    int bytesRead = 0;
                     while( bytesRead != -1){
 
                         writeByteCounter += bytesRead;
@@ -732,25 +732,25 @@ abstract public class FileUtilities {
                 if( bufferedInputStream != null ) { //If the BufferedInputStream was created...
                     
                     //Check the header of the library file...
-                    byte[] fileHeader = Utilities.getFileHeader();
-                    byte[] fileHeaderBytes = new byte[ fileHeader.length ];
+//                    byte[] fileHeader = Utilities.getFileHeader();
+//                    byte[] fileHeaderBytes = new byte[ fileHeader.length ];
                     int bytesRead;
-                    boolean hasHeader = false;
-                    try {
-                        
-                        //Read the bytes of the library file's header
-                        bufferedInputStream.read( fileHeaderBytes, 0, fileHeader.length );
-                        if( Arrays.equals( fileHeaderBytes, fileHeader ) ) {
-                            hasHeader = true; //The library file has the header
-                        } else { //If the library file does not have the header...
-                            errorString = "The library file does not have the header.";
-                        }
-                        
-                    } catch( IOException ex ) {
-                        errorString = "Could not read the library file.";
-                    }
+//                    boolean hasHeader = false;
+//                    try {
+//                        
+//                        //Read the bytes of the library file's header
+//                        bufferedInputStream.read( fileHeaderBytes, 0, fileHeader.length );
+//                        if( Arrays.equals( fileHeaderBytes, fileHeader ) ) {
+//                            hasHeader = true; //The library file has the header
+//                        } else { //If the library file does not have the header...
+//                            errorString = "The library file does not have the header.";
+//                        }
+//                        
+//                    } catch( IOException ex ) {
+//                        errorString = "Could not read the library file.";
+//                    }
 
-                    if( hasHeader ) { //If the library file has the header...
+//                    if( hasHeader ) { //If the library file has the header...
                         
                         BufferedOutputStream bufferedOutputStream = null;
                         try {
@@ -811,7 +811,7 @@ abstract public class FileUtilities {
                             
                         } //End of "if( bufferedOutputStream != null ) { //If the BufferedOutputStream was created..."
                         
-                    } //End of "if( hasActHeader ) { //If the library file has the header..."
+//                    } //End of "if( hasActHeader ) { //If the library file has the header..."
                     
                     //Close the BufferedInputStream...
                     try {
@@ -946,7 +946,7 @@ abstract public class FileUtilities {
         }
 
         File outFile = File.createTempFile("lib_", null);
-        byte[] actHeader = Utilities.getFileHeader();
+//        byte[] actHeader = Utilities.getFileHeader();
 
         ByteArrayInputStream theBytesStream = new ByteArrayInputStream(passedBytes);
         BufferedInputStream theBufferedIS = new BufferedInputStream(theBytesStream);
@@ -958,11 +958,12 @@ abstract public class FileUtilities {
                 
                 MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
 
-                //Setup the header
-                System.arraycopy(actHeader, 0, byteBuffer, 0, actHeader.length);
-                int bytesRead  = theBufferedIS.read(byteBuffer, actHeader.length, byteBuffer.length - actHeader.length);
-                bytesRead += actHeader.length;
+//                //Setup the header
+//                System.arraycopy(actHeader, 0, byteBuffer, 0, actHeader.length);
+//                int bytesRead  = theBufferedIS.read(byteBuffer, actHeader.length, byteBuffer.length - actHeader.length);
+//                bytesRead += actHeader.length;
 
+                int bytesRead = 0;
                 while( bytesRead != -1){
                     
                     //Update the hash
@@ -1027,7 +1028,7 @@ abstract public class FileUtilities {
     */
     private static String createHashedFile( File aFile, ProgressListener theListener, File parentDir ) throws IOException, NoSuchAlgorithmException {
 
-        int bytesRead;
+        int bytesRead = 0;
         byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
         String theHash = null;
 
@@ -1048,7 +1049,7 @@ abstract public class FileUtilities {
 
             File outFile = File.createTempFile("lib_", null);
             MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
-            byte[] fileHeader = Utilities.getFileHeader();
+//            byte[] fileHeader = Utilities.getFileHeader();
 
             FileInputStream theFileStream = new FileInputStream(aFile);
             BufferedInputStream theBufferedIS = new BufferedInputStream(theFileStream);
@@ -1060,9 +1061,9 @@ abstract public class FileUtilities {
                 try {
 
                     //Setup the header
-                    System.arraycopy(fileHeader, 0, byteBuffer, 0, fileHeader.length);
-                    bytesRead = theBufferedIS.read(byteBuffer, fileHeader.length, byteBuffer.length - fileHeader.length);
-                    bytesRead += fileHeader.length;
+//                    System.arraycopy(fileHeader, 0, byteBuffer, 0, fileHeader.length);
+//                    bytesRead = theBufferedIS.read(byteBuffer, fileHeader.length, byteBuffer.length - fileHeader.length);
+//                    bytesRead += fileHeader.length;
 
                     while( bytesRead != -1){
 

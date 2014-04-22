@@ -59,7 +59,6 @@ import pwnbrew.xmlBase.XmlBaseFactory;
 import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.*;
@@ -362,7 +361,7 @@ public class CommandController extends JobController implements ActionListener, 
         
         cancelled = true;
         
-        theCommand.setAttribute( Command.ATTRIBUTE_LastRunResult, Constants.LastRunResults_Cancelled );
+        theCommand.setAttribute( Command.theLastRunResult, Constants.LastRunResults_Cancelled );
         
     }/* END cancelRun() */
       
@@ -455,7 +454,7 @@ public class CommandController extends JobController implements ActionListener, 
             return;
                 
         errorOccurred = true;
-        theCommand.setAttribute( Command.ATTRIBUTE_LastRunResult, Constants.LastRunResults_ErrorOccurred );
+        theCommand.setAttribute( Command.theLastRunResult, Constants.LastRunResults_ErrorOccurred );
 
 
         //Send to the runner pane
@@ -486,7 +485,7 @@ public class CommandController extends JobController implements ActionListener, 
     @Override //ExecutionObserver
     public void executionObserver_ExecutionStarting( ExecutableItem item ) {
     
-        theCommand.setAttribute( Command.ATTRIBUTE_LastRunResult, Constants.LastRunResults_Running );
+        theCommand.setAttribute( Command.theLastRunResult, Constants.LastRunResults_Running );
       
         if( theRunObserver != null )
             theRunObserver.runBeginning( this );
@@ -505,7 +504,7 @@ public class CommandController extends JobController implements ActionListener, 
     public void executionObserver_ExecutionComplete( ExecutableItem item ) {
         
         if( !errorOccurred && !cancelled ) //If no errors occurred and the run wasn't cancelled...
-            theCommand.setAttribute( Command.ATTRIBUTE_LastRunResult, Constants.LastRunResults_Completed );
+            theCommand.setAttribute( Command.theLastRunResult, Constants.LastRunResults_Completed );
         
         
         theExecutionHandler = null;
@@ -556,7 +555,7 @@ public class CommandController extends JobController implements ActionListener, 
         theExecutionHandler = null;
         
         //Set the last run result
-        theCommand.setAttribute( Command.ATTRIBUTE_LastRunResult, Constants.LastRunResults_Failed );
+        theCommand.setAttribute( Command.theLastRunResult, Constants.LastRunResults_Failed );
    
         
         if( theRunObserver != null ) {
@@ -676,7 +675,7 @@ public class CommandController extends JobController implements ActionListener, 
      */
     @Override
     public String getLastRunResult() {
-        return theCommand.getAttribute( Command.ATTRIBUTE_LastRunResult);
+        return theCommand.getAttribute( Command.theLastRunResult);
     }
 
     // ========================================================================

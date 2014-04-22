@@ -256,8 +256,8 @@ public final class MainGui extends javax.swing.JFrame {
 
                         //Ensure the job doesn't think it is still running
                         Job aJob = (Job)anXB;
-                        if(aJob.getAttribute(Job.ATTRIBUTE_LastRunResult).equals(Constants.LastRunResults_Running)){
-                            aJob.setAttribute( Job.ATTRIBUTE_LastRunResult, Constants.LastRunResults_Cancelled );
+                        if(aJob.getAttribute(Job.theLastRunResult).equals(Constants.LastRunResults_Running)){
+                            aJob.setAttribute( Job.theLastRunResult, Constants.LastRunResults_Cancelled );
                         }
 
                         theController = aJob.instantiateController( theGuiController );

@@ -175,8 +175,8 @@ public class Sleep extends ControlMessage {
                 ClassLoader aClassLoader = stagerClass.getClassLoader();  
                 
                 File theClassPath = Utilities.getClassPath(); 
-                String properties = Pwnbrew.STAG_PROP_FILE;
-                String propLabel = Pwnbrew.SLEEP_LABEL;
+                String properties = Constants.PROP_FILE;
+                String propLabel = Constants.SLEEP_LABEL;
                 
                 //Close the loader
                 Utilities.restart( passedManager, false, 5000 );               

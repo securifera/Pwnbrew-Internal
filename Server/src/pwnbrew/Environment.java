@@ -62,7 +62,9 @@ import pwnbrew.controllers.RunnableItemController;
 import pwnbrew.gui.panels.options.OptionsJPanel;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.Utilities;
+import pwnbrew.xmlBase.JarItem;
 import pwnbrew.xmlBase.XmlBase;
+import pwnbrew.xmlBase.XmlBaseFactory;
 
 
 /**
@@ -106,16 +108,31 @@ final public class Environment {
      * Load any extension JARs
      */
     private static void loadExtensions() {
-        File extDir = new File( Directories.getExtPath());
-        File[] extFiles = extDir.listFiles();
-        for( File aFile : extFiles ){
-            if( aFile.getName().endsWith(".jar")){
-                List<Class<?>> theClasses = Utilities.loadJar(aFile);
-                for( Class aClass : theClasses ){
-                    addClassToMap(aClass);
+        
+        //For local 
+        File jarLibDir = new File( Directories.getJarLibPath());
+        File[] fileArr = jarLibDir.listFiles();
+        for( File aFile : fileArr ){
+            XmlBase anObj = XmlBaseFactory.createFromXmlFile(aFile);
+            if( anObj instanceof JarItem ){
+                
+                //Add the jar to the map
+                JarItem aRef = (JarItem)anObj;
+                Utilities.addJarItem(aRef);
+                
+                //If it is a local extension then load it
+                if( aRef.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
+                    
+                    //Load the jar
+                    File libraryFile = new File( Directories.getFileLibraryDirectory(), aRef.getFileHash() ); //Create a File to represent the library file to be copied
+                    List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
+                    for( Class aClass : theClasses ){
+                        addClassToMap(aClass);
+                    }
                 }
-            }
-        }
+            }                    
+        }        
+        
     }
     
     // ==========================================================================
@@ -422,19 +439,6 @@ final public class Environment {
         }  
         
         addClassToMap(aClass);
-
-//        //Determine if the class is an XmlBase
-//        Class parentClass = aClass.getSuperclass();
-//        if( parentClass != null ){
-//            while( parentClass != Object.class){
-//                if( parentClass == XmlBase.class ){
-//                    thePathToClassMap.put( aClass.getSimpleName(), aClass ); //Map the path to the Class
-//                    break;
-//                } else {
-//                    parentClass = parentClass.getSuperclass();
-//                }
-//            }
-//        }
 
     }/* END addClassToMap( String ) */
 

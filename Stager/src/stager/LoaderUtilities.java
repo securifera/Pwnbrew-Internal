@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Properties;
 import java.util.Vector;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
@@ -496,7 +495,7 @@ public class LoaderUtilities {
                         if( theEntryName.equals(properties) ){
 
                             //Get the input stream and modify the value
-                            Properties localProperties = new Properties();
+                            ManifestProperties localProperties = new ManifestProperties();
                             localProperties.load(theZipInputStream);
 
                             //Set the IP to something else
@@ -507,7 +506,7 @@ public class LoaderUtilities {
 
                             //Add the entry
                             theZipOS.putNextEntry(anEntry);
-                            localProperties.store(theZipOS, "");
+                            localProperties.store(theZipOS);
 
                             //Write to zip
                             theZipOS.closeEntry();

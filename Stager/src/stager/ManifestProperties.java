@@ -35,53 +35,56 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
+package stager;
 
-
-/*
-* Constants.java
-*
-* Created on May 12, 2013, 8:22:12PM
-*/
-
-package pwnbrew.misc;
-
-import java.text.SimpleDateFormat;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.Enumeration;
+import java.util.Properties;
 
 /**
  *
- *  
+ * @author Securifera
  */
-abstract public class Constants {
+public class ManifestProperties extends Properties {
 
-    // Network states
-    public static final int DISCONNECTED = 0;
-    public static final int CONNECTED = 2;
- 
-    //File notification messages for the taskruner
-    public static final int FILE_SENT = 1000;
-    public static final int FILE_RECEIVED = 1001;
+    //===================================================================
+    /**
+     * Constructor
+     */
+    public ManifestProperties() {
+        super();
+    }   
     
-    //The hash algorithm used by all message digest functions
-    public static final String HASH_FUNCTION = "SHA-256";
-    
-    public static final int  MAX_MESSAGE_SIZE = 1500;
-    public static final int  GENERIC_BUFFER_SIZE = 4096;
-               
-    public static final ExecutorService Executor = Executors.newCachedThreadPool();
-    public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");
-    
-    //Constants for process streams
-    public static final int STD_OUT_ID = 41;
-    public static final int STD_ERR_ID = 42;    
-    
-    //FileLock variables
-    public static final String URL_LABEL ="U";
-    public static final String SERV_LABEL ="S";
-    public static final String SLEEP_LABEL ="Z";
-    public static final String PORT_LABEL ="P";
-    public static final String DATA_LABEL ="D";
-    public static final String PROP_FILE ="META-INF/MANIFEST.MF";
-    
-}/* END CLASS Constants */
+    //=========================================================================
+    /**
+     * 
+     * After the entries have been written, the output stream is flushed.  
+     * The output stream remains open after this method returns.
+     * <p>
+     * @param   out      an output stream.
+     * @exception  IOException if writing this property list to the specified
+     *             output stream throws an <tt>IOException</tt>.
+     * @exception  ClassCastException  if this <code>Properties</code> object
+     *             contains any keys or values that are not <code>Strings</code>.
+     * @exception  NullPointerException  if <code>out</code> is null.
+     * @since 1.2
+     */
+    public void store(OutputStream out ) throws IOException {
+        
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, "8859_1"));
+        synchronized (this) {
+            for (Enumeration e = keys(); e.hasMoreElements();) {
+                String key = (String)e.nextElement();
+		String val = (String)get(key);
+                
+		bw.write(key + ": " + val);
+                bw.newLine();
+	    }
+	}
+        bw.flush();
+    }
+
+}

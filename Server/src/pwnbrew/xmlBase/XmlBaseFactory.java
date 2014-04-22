@@ -272,16 +272,9 @@ final public class XmlBaseFactory {
     throws XmlBaseCreationException {
 
         XMLReader xmlReader = null;
-//        try {
-//            xmlReader = XMLReaderFactoryWrapper.createXMLReader();
-//        } catch( LoggableException ex ) {
-//            throw new XmlBaseCreationException( "Could not create an XMLReader." );
-//        }
         
         try {
             xmlReader = XMLReaderFactory.createXMLReader();
-//        } catch( LoggableException ex ) {
-//            throw new XmlBaseCreationException( "Could not create an XMLReader." );
         } catch (SAXException ex) {
             throw new XmlBaseCreationException( "Could not create an XMLReader." );
         }

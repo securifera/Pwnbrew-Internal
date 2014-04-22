@@ -189,7 +189,7 @@ public class ExecutionHandler implements Runnable, LibraryFileCopyListener, Stre
 
                 FileContentRef aFCR = anIter.next();
                 theCurrentFileHash = aFCR.getFileHash();
-                theCurrentFileName = aFCR.getFileName();
+                theCurrentFileName = aFCR.getFilename();
                 
                 if( theCurrentFileHash != null ) { //If a file hash was obtained...
 

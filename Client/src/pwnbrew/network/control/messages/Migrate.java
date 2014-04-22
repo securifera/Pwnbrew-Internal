@@ -55,6 +55,7 @@ import pwnbrew.manager.CommManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.misc.Base64Converter;
+import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.LoaderUtilities;
 import pwnbrew.misc.Utilities;
@@ -157,8 +158,8 @@ public class Migrate extends ControlMessage {
                     //Decode the base64   
                     DebugPrinter.printMessage(NAME_Class, "Migrating to " + aSB.toString());
                     connectStr = Base64Converter.encode( aSB.toString().getBytes("US-ASCII") );
-                    properties = Pwnbrew.STAG_PROP_FILE;
-                    propLabel = Pwnbrew.URL_LABEL;    
+                    properties = Constants.PROP_FILE;
+                    propLabel = Constants.URL_LABEL;    
                     
                     //Close the loader
                     Utilities.restart( passedManager, false, 5000 ); 
@@ -172,11 +173,11 @@ public class Migrate extends ControlMessage {
 
                 theClassPath = Utilities.getClassPath(); 
                 aClassLoader = ClassLoader.getSystemClassLoader();
-                properties = Pwnbrew.PROP_FILE;            
+                properties = Constants.PROP_FILE;            
 
                 //Set the IP
                 connectStr = theServerIp;
-                propLabel = Pwnbrew.SERV_LABEL;
+                propLabel = Constants.SERV_LABEL;
                 
                 //Tell it not to reconnect
                 aCPR.setReconnectFlag(false);

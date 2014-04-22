@@ -45,45 +45,43 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.gui.panels.options;
 
+import java.awt.Color;
 import pwnbrew.gui.panels.PanelListener;
-import java.awt.event.ActionEvent;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipInputStream;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.BorderFactory;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JTextPane;
-import pwnbrew.logging.Log;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import static pwnbrew.Environment.addClassToMap;
+import pwnbrew.generic.gui.GenericProgressDialog;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.Constants;
+import pwnbrew.misc.Directories;
 import pwnbrew.misc.FileFilterImp;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.misc.ProgressDriver;
+import pwnbrew.misc.ProgressListener;
+import pwnbrew.utilities.FileUtilities;
+import pwnbrew.utilities.GuiUtilities;
+import pwnbrew.utilities.Utilities;
+import pwnbrew.xmlBase.JarItem;
 
 /**
  *
  */
-public class InterfaceOptionsPanel extends OptionsJPanel {
+public class InterfaceOptionsPanel extends OptionsJPanel implements ProgressDriver, JarTableListener {
 
-//    private final PanelListener theListener;
-    private ActionEvent lastActionEvt = new ActionEvent(new JTextPane(), 0, "");
-//    private volatile boolean dirtyFlag = false;
-    private ServerConfig theConf = null;
-    
-    private JFileChooser theClientJarChooser = null;
+    private JFileChooser theJarChooser = null;    
     private final FileFilterImp theJarFilter = new FileFilterImp();
     private static final String JAR_EXT = "jar";
-
+    private JarTable theJarTable;
+    
     private static final String NAME_Class = InterfaceOptionsPanel.class.getSimpleName();
+    
 
     //===================================================================
     /** Creates new form AdvancedlOptionsPanel
@@ -101,44 +99,29 @@ public class InterfaceOptionsPanel extends OptionsJPanel {
     */
     private void initializeComponents() throws LoggableException{
 
-        theConf = ServerConfig.getServerConfig();
-
-        //Populate the componenets
-        if(theConf != null){
-            editScriptCheckbox.setSelected(theConf.showEditButton());
-        }
-
-        editScriptCheckbox.setIconTextGap(8);
-        editScriptCheckbox.addActionListener(new java.awt.event.ActionListener() {
-            @Override
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                editScriptJCheckboxActionPerformed(evt);
-            }
-        });
-
         //Create a JFileChooser to select wim files...
         theJarFilter.addExt( JAR_EXT);
-        theClientJarChooser = new JFileChooser();
-        theClientJarChooser.setMultiSelectionEnabled(false);
-        theClientJarChooser.setFileFilter(theJarFilter);
-
-        String theVersion = getVersion(Constants.PAYLOAD_PATH);
-        if( theVersion != null && !theVersion.isEmpty() ){
-            versionValue.setText( theVersion);
-        }
-
-    }
-
-    //****************************************************************************
-    /**
-     * Handler for when the checkbox is changed
-    */
-    private void editScriptJCheckboxActionPerformed(ActionEvent evt) {
-
-       if(lastActionEvt != evt ){
-          setSaveButton(true);
-       }
-       lastActionEvt = evt;
+        theJarChooser = new JFileChooser();
+        theJarChooser.setMultiSelectionEnabled(false);
+        theJarChooser.setFileFilter(theJarFilter);
+            
+        
+        GuiUtilities.setComponentIcon(addFile,  15, 15, Constants.ADD_IMAGE_STR);
+        GuiUtilities.setComponentIcon(removeFile, 15, 15, Constants.DELETE_IMG_STR);
+        
+        //Create a file table
+        theJarTable = new JarTable( this );
+        jarScrollPane.setViewportView(theJarTable);
+        jarScrollPane.getViewport().setBackground(Color.WHITE);
+        
+        List<JarItem> jarList = new ArrayList<>();
+        jarList.addAll( Utilities.getJarItems());
+        
+        //Get the table model
+        DefaultTableModel theModel = (DefaultTableModel) theJarTable.getModel();
+        for( JarItem anItem : jarList )
+            theModel.addRow( new Object[]{ anItem, anItem.getType(), 
+                anItem.getJvmMajorVersion(), anItem.getVersion() });
     }
 
     /** This method is called from within the constructor to
@@ -150,108 +133,73 @@ public class InterfaceOptionsPanel extends OptionsJPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        editScriptCheckbox = new javax.swing.JCheckBox();
-        jPanel1 = new javax.swing.JPanel();
-        versionLabel = new javax.swing.JLabel();
-        versionValue = new javax.swing.JLabel();
-        updateButton = new javax.swing.JButton();
+        removeFile = new javax.swing.JButton();
+        addFile = new javax.swing.JButton();
+        jarScrollPane = new javax.swing.JScrollPane();
 
-        editScriptCheckbox.setText("Allow Modification");
-
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Staging"));
-
-        versionLabel.setText("Payload Version:");
-
-        versionValue.setText("N/A");
-
-        updateButton.setText("Update");
-        updateButton.addActionListener(new java.awt.event.ActionListener() {
+        removeFile.setText(" ");
+        removeFile.setIconTextGap(0);
+        removeFile.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        removeFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                updateButtonActionPerformed(evt);
+                removeFileActionPerformed(evt);
             }
         });
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(26, 26, 26)
-                .addComponent(versionLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 112, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(versionValue, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(updateButton)
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(versionLabel)
-                    .addComponent(versionValue)
-                    .addComponent(updateButton))
-                .addContainerGap(19, Short.MAX_VALUE))
-        );
+        addFile.setText(" ");
+        addFile.setIconTextGap(0);
+        addFile.setMargin(new java.awt.Insets(2, 2, 2, 2));
+        addFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addFileActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(editScriptCheckbox)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 209, Short.MAX_VALUE)
+                        .addComponent(addFile)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(removeFile)
+                        .addGap(0, 209, Short.MAX_VALUE))
+                    .addComponent(jarScrollPane))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(19, 19, 19)
-                .addComponent(editScriptCheckbox)
+                .addGap(62, 62, 62)
+                .addComponent(jarScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 224, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(97, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(addFile)
+                    .addComponent(removeFile))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void updateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateButtonActionPerformed
-        selectClientJar();        
-    }//GEN-LAST:event_updateButtonActionPerformed
+    private void removeFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeFileActionPerformed
+        int[] selRowIndexes = theJarTable.getSelectedRows();
+        for( int anInt : selRowIndexes )   
+            deleteJarItem(anInt);
+    }//GEN-LAST:event_removeFileActionPerformed
+
+    private void addFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addFileActionPerformed
+        selectJar();
+    }//GEN-LAST:event_addFileActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JCheckBox editScriptCheckbox;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JButton updateButton;
-    private javax.swing.JLabel versionLabel;
-    private javax.swing.JLabel versionValue;
+    private javax.swing.JButton addFile;
+    private javax.swing.JScrollPane jarScrollPane;
+    private javax.swing.JButton removeFile;
     // End of variables declaration//GEN-END:variables
-
-//    
-//    //****************************************************************************
-//    /**
-//     * Saves any changes that have been performed
-//     * @return 
-//    */
-//    public boolean isDirty() {
-//       return dirtyFlag;
-//    }
-
-//    /**
-//    * Sets the save button enablement
-//     * @param passedBool
-//    */
-//    public void setSaveButton(boolean passedBool){
-//       if(!dirtyFlag){
-//          dirtyFlag = true;
-//          theListener.valueChanged(passedBool);
-//       }
-//    }
 
     //===================================================================
     /**
@@ -259,162 +207,160 @@ public class InterfaceOptionsPanel extends OptionsJPanel {
     */
     @Override
     public void saveChanges(){
-
         //Reset the dirty flag
         setDirtyFlag(false);
-
-        //Write the changes to disk
-        try {
-            
-            if(theConf != null){
-
-                theConf.setShowEditButton(editScriptCheckbox.isSelected());
-                theConf.writeSelfToDisk();
-              
-            }
-
-        } catch (LoggableException ex){
-           Log.log(Level.SEVERE, NAME_Class, "saveChanges()", ex.getMessage(), ex);
-        }
-
     }
     
     // ==========================================================================
     /**
     * Selects the client jar.
     */
-    private void selectClientJar() {
-
-        File userSelectedFile = null;
-
-        int returnVal = theClientJarChooser.showDialog( this, "Select Client JAR File" ); //Show the dialogue
-        switch( returnVal ) {
-
-           case JFileChooser.CANCEL_OPTION: //If the user canceled the selecting...
-              break;
-           case JFileChooser.ERROR_OPTION: //If the dialogue was dismissed or an error occurred...
-              break; //Do nothing
-
-           case JFileChooser.APPROVE_OPTION: //If the user approved the selection...
-              userSelectedFile = theClientJarChooser.getSelectedFile(); //Get the files the user selected
-              break;
-           default:
-              break;
-
-        }
-
-        //Check if the returned file is valid
-        if(userSelectedFile == null  || userSelectedFile.isDirectory()){
-           return;
-        }
-
-        String userPath = userSelectedFile.getAbsolutePath();
-        try {
-            Files.copy(Paths.get(userPath), Constants.PAYLOAD_PATH, StandardCopyOption.REPLACE_EXISTING);
-            String theVersion = getVersion(Constants.PAYLOAD_PATH);
-            versionValue.setText( theVersion );
-            setSaveButton(true);
-        } catch (IOException ex) {
-           Log.log(Level.SEVERE, NAME_Class, "saveChanges()", ex.getMessage(), ex);
-        }
+    private void selectJar() {
         
-    }/* END selectKeystorePath() */
-    
-    //==========================================================================
+        //Have the user manually put in the server ip
+        JComboBox aCB = new JComboBox();
+        aCB.setRenderer(new pwnbrew.generic.gui.DefaultCellBorderRenderer(BorderFactory.createEmptyBorder(0, 4, 0, 0)));
+        List<String> jarTypes = JarItem.getTypes();
+        for( String aJarType : jarTypes )
+            aCB.addItem(aJarType);
+        
+        Object[] objMsg = new Object[]{ "Please select the type of JAR being imported.", " ", aCB};
+        Object retVal = JOptionPane.showOptionDialog(null, objMsg, "Select JAR type",
+               JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+
+        //Check that they clicked ok
+        if((Integer)retVal == JOptionPane.OK_OPTION ) {
+            
+            String selVal = (String) aCB.getSelectedItem();
+            File userSelectedFile = null;
+
+            int returnVal = theJarChooser.showDialog( this, "Select JAR File" ); //Show the dialogue
+            switch( returnVal ) {
+
+               case JFileChooser.CANCEL_OPTION: //If the user canceled the selecting...
+                  break;
+               case JFileChooser.ERROR_OPTION: //If the dialogue was dismissed or an error occurred...
+                  break; //Do nothing
+
+               case JFileChooser.APPROVE_OPTION: //If the user approved the selection...
+                  userSelectedFile = theJarChooser.getSelectedFile(); //Get the files the user selected
+                  break;
+               default:
+                  break;
+
+            }
+
+            //Check if the returned file is valid
+            if(userSelectedFile == null  || userSelectedFile.isDirectory()){
+               return;
+            }
+
+            //Create a list out of the array
+            List theObjList = new ArrayList();
+            theObjList.add(userSelectedFile);
+            theObjList.add(selVal);
+
+            GenericProgressDialog pDialog = new GenericProgressDialog(null, "Importing files to library...", this, false, theObjList);
+            pDialog.setVisible(true);       
+        } 
+                
+    }/* END selectJar() */
+
+    //========================================================================
     /**
-     *  Get version
      * 
-     * @param payloadPath
+     * @param Listener
+     * @param theObjList
      * @return 
      */
-    public String getVersion( Path payloadPath ){
+    @Override
+    public String executeFunction(ProgressListener progressListener, List<?> theObjList) {
         
-        //Remove JAR if that's how we are running
-        File payloadFile = payloadPath.toFile();
-        String retString = "";
-        if( payloadFile != null && payloadFile.getPath().endsWith(".jar")){ 
-
-            try { 
-                
-                //Open the zip
-                ByteArrayOutputStream aBOS = new ByteArrayOutputStream();
-                ByteArrayInputStream aBIS;
-                try{
+        String retVal = null;
+        if( theObjList != null ) { //If the user selected any files...
+            
+            File aFile = (File)theObjList.get(0);
+            String theType = (String)theObjList.get(1);                    
                     
-                    FileInputStream fis = new FileInputStream(payloadFile);
-                    try{
+            if( FileUtilities.verifyCanRead( aFile ) ) { //If the file the File represents can be read...
 
-                        //Read into the buffer
-                        byte[] buf = new byte[1024];                
-                        for (int readNum; (readNum = fis.read(buf)) != -1;) {
-                            aBOS.write(buf, 0, readNum);
-                        }
-
-                    } finally{
-
-                        try {
-                            //Close and delete
-                            fis.close();
-                        } catch (IOException ex) {                        
-                        }
-                    }
-
-                    //Creat an inputstream
-                    aBIS = new ByteArrayInputStream(aBOS.toByteArray());    
-                
-                } finally {
-                    try {
-                        aBOS.close();
-                    } catch (IOException ex) {
-                    }
-                }
-
-                //Open the zip input stream
-                ZipInputStream theZipInputStream = new ZipInputStream(aBIS);
-                ZipEntry anEntry;
                 try {
                     
-                    while((anEntry = theZipInputStream.getNextEntry())!=null){
-                        //Get the entry name
-                        String theEntryName = anEntry.getName();
+                    //Create a FileContentRef
+                    JarItem aJarItem = Utilities.getJavaItem(aFile);
+                    aJarItem.setFilename( aFile.getName() ); //Set the file's name
+                    
+                    //Add the JAR to utilities
+                    if ( Utilities.addJarItem( aJarItem ) ){
+                        
+                        //Write the file to disk
+                        String fileHash = FileUtilities.createHashedFile( aFile, progressListener );
+                        if( fileHash != null ) {
 
-                        //Change the properties file
-                        if( theEntryName.equals( Constants.PAYLOAD_PROPERTIES_FILE ) ){
+                            //Create a FileContentRef
+                            aJarItem.setFileHash( fileHash ); //Set the file's hash
+                            aJarItem.setType(theType);
+                                                
+                            //Write to disk
+                            aJarItem.writeSelfToDisk();
 
-                            //Get the input stream and modify the value
-                            Properties localProperties = new Properties();
-                            localProperties.load(theZipInputStream);
+                            DefaultTableModel theModel = (DefaultTableModel) theJarTable.getModel();
+                            theModel.addRow( new Object[]{ aJarItem, 
+                                    aJarItem.getType(), aJarItem.getJvmMajorVersion(), aJarItem.getVersion() });
 
-                            //Set the IP to something else
-                            String version = localProperties.getProperty(Constants.PAYLOAD_VERSION_LABEL);
-                            if( version != null ){
+                            //If it is a local extension then load it
+                            if( aJarItem.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
 
-                                //Add the entry
-                                retString = version;
-                                break;
-                            }     
-                            continue;
-                        } 
+                                //Load the jar
+                                File libraryFile = new File( Directories.getFileLibraryDirectory(), aJarItem.getFileHash() ); //Create a File to represent the library file to be copied
+                                List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
+                                for( Class aClass : theClasses ){
+                                    addClassToMap(aClass);
+                                }
+                            }
+                            
+                        } else {
+                            
+                            //Display a dialog box explaining the problem...
+                            String errorMsg = "Unable to add the JAR to the library.  Please make sure there aren't any conflicts";                          
+                            JOptionPane.showMessageDialog( this, errorMsg, "Import Failed", JOptionPane.ERROR_MESSAGE );
+                            
+                        }
 
                     }
 
-                //Close the jar
-                } finally {
-                    
-                    try {
-                        theZipInputStream.close();
-                    } catch (IOException ex) {
-                    }
-                    
+                } catch ( NoSuchAlgorithmException | IOException ex) {
+                    JOptionPane.showMessageDialog( this, ex.getMessage(), "Could not add the file to the task.", JOptionPane.ERROR_MESSAGE );
+                    retVal = "Could not add the file to the task.";
                 }
-                
-            } catch (ZipException ex) {  
-                Log.log(Level.SEVERE, NAME_Class, "saveChanges()", ex.getMessage(), ex);
-            } catch (IOException ex) {        
-                Log.log(Level.SEVERE, NAME_Class, "saveChanges()", ex.getMessage(), ex);
-            } 
+
+            } else { //If the file cannot be read...
+               JOptionPane.showMessageDialog( this, new StringBuilder( "\tThis support file could not be read: \"" )
+                        .append( aFile.getAbsolutePath() ).append( "\"" ).toString(), "Could not add the file to the task.", JOptionPane.ERROR_MESSAGE );
+               retVal = "Could not add the file to the task.";
+            }                
+            
         }
-        return retString;
+        return retVal;
+    }
+
+    //========================================================================
+    /**
+     * Delete the file
+     * 
+     * @param aJarItem 
+     */
+    @Override
+    public void deleteJarItem(int anInt ) {
+        
+        //Get the model and remove the item
+        DefaultTableModel theTableModel = (DefaultTableModel) theJarTable.getModel();    
+        JarItem aJarItem = (JarItem)theTableModel.getValueAt(anInt, 0);
+        theTableModel.removeRow(anInt);
+                    
+        Utilities.removeJarItem(aJarItem);
+        aJarItem.deleteSelfFromDirectory( new File( Directories.getJarLibPath() ));
+        
     }
     
 }

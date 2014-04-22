@@ -451,8 +451,8 @@ public class CommandOverviewPanel extends JPanel implements CaretListener, Docum
 
                                 //Create a FileContentRef
                                 FileContentRef aFileContentRef = (FileContentRef)XmlBaseFactory.instantiateClass(FileContentRef.class );
-                                aFileContentRef.setAttribute( FileContentRef.ATTRIBUTE_Name, aFile.getName() ); //Set the file's name
-                                aFileContentRef.setAttribute( FileContentRef.ATTRIBUTE_FileHash, fileHash ); //Set the file's hash
+                                aFileContentRef.setFilename( aFile.getName() ); //Set the file's name
+                                aFileContentRef.setFileHash( fileHash ); //Set the file's hash
 
                                 //If it isn't in the list
                                 if(!theModel.contains(aFileContentRef)){

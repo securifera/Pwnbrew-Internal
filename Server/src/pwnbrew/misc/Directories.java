@@ -73,17 +73,14 @@ final public class Directories {
     // <root>/<home>/...
     private static String PATH_Bin; // <root>/<home>/bin
     private static String PATH_Data; // <root>/<home>/data
-    private static String PATH_Doc; // <root>/<home>/doc
-    private static String PATH_Lib; // <root>/<home>/lib
-    private static String PATH_Ext; // <root>/<home>/lib/ext
-    private static String PATH_Payload; // <root>/<home>/lib/payload
+    private static String PATH_Doc; // <root>/<home>/doc    
     private static String PATH_Log; // <root>/<home>/log
       
     // <root>/<home>/data/...
     private static String PATH_FileLibrary; // <root>/<home>/data/filelib
+    private static String PATH_JarLib; // <root>/<home>/data/jarlib
     private static String PATH_ObjectLibrary; // <root>/<home>/data/objlib
     private static String PATH_LocalObjectLibrary; // <root>/<home>/data/objlib/local
-//    private static String PATH_ScriptLanguageLibrary; // <root>/<home>/data/scriptlanglib
     private static String PATH_Tasks; // <root>/<home>/data/taskarc
     
     
@@ -160,22 +157,17 @@ final public class Directories {
         strBldr.setLength( 0 );
         PATH_Doc = strBldr.append( PATH_Home ).append( DELIM_Path ).append( "doc" ).toString();
         strBldr.setLength( 0 );
-        PATH_Lib = strBldr.append( PATH_Home ).append( DELIM_Path ).append( "lib" ).toString();
-        PATH_Ext = strBldr.append( DELIM_Path ).append( "ext").toString();
-        strBldr.setLength( 0 );
-        PATH_Payload = strBldr.append( PATH_Lib ).append( DELIM_Path ).append( "payload" ).toString();
-        strBldr.setLength( 0 );
         PATH_Log = strBldr.append( PATH_Home ).append( DELIM_Path ).append( "log" ).toString();
         strBldr.setLength( 0 );
         
         // <root>/<home>/data/...
         PATH_FileLibrary = strBldr.append( PATH_Data ).append( DELIM_Path ).append( "filelib" ).toString();
         strBldr.setLength( 0 );
+        PATH_JarLib = strBldr.append( PATH_Data ).append( DELIM_Path ).append( "jarlib" ).toString();
+        strBldr.setLength( 0 );
         PATH_ObjectLibrary = strBldr.append( PATH_Data ).append( DELIM_Path ).append( "objlib" ).toString();
         PATH_LocalObjectLibrary = strBldr.append( DELIM_Path ).append( HostFactory.LOCALHOST ).toString();        
         strBldr.setLength( 0 );
-//        PATH_ScriptLanguageLibrary = strBldr.append( PATH_Data ).append( DELIM_Path ).append( "scriptlanglib" ).toString();
-//        strBldr.setLength( 0 );
         PATH_Tasks = strBldr.append( PATH_Log ).append( DELIM_Path ).append( "taskarc" ).toString();
         strBldr.setLength( 0 );
         
@@ -186,7 +178,7 @@ final public class Directories {
         PATH_RemoteTasks = strBldr.append( PATH_Tasks ).append( DELIM_Path ).append( "remote" ).toString();
         strBldr.setLength( 0 );
 
-    }/* END createDirectoryPaths() */
+    }/* END buildDirectoryPaths() */
 
 
     // ==========================================================================
@@ -204,21 +196,18 @@ final public class Directories {
         ensureDirectoryExists( PATH_Bin );
         ensureDirectoryExists( PATH_Data );
         ensureDirectoryExists( PATH_Doc );
-        ensureDirectoryExists( PATH_Lib );
         ensureDirectoryExists( PATH_Log );
+        ensureDirectoryExists( PATH_JarLib );
         
         // <root>/<home>/data/...
         ensureDirectoryExists( PATH_FileLibrary );
         ensureDirectoryExists( PATH_ObjectLibrary );
         ensureDirectoryExists( PATH_LocalObjectLibrary );
-//        ensureDirectoryExists( PATH_ScriptLanguageLibrary );
         ensureDirectoryExists( PATH_Tasks );
 
         // <root>/<home>/data/taskarc/...
         ensureDirectoryExists( PATH_LocalTasks );
         ensureDirectoryExists( PATH_RemoteTasks );
-        ensureDirectoryExists( PATH_Payload );
-        ensureDirectoryExists( PATH_Ext );
         
     }/* END createDirectories() */
     
@@ -328,10 +317,6 @@ final public class Directories {
     public static String getDataPath() {
         return PATH_Data;
     }/* END getDataPath() */
-
-
-    
-    
     
     // ==========================================================================
     /**
@@ -345,45 +330,14 @@ final public class Directories {
     
      // ==========================================================================
     /**
-     * Returns the path to the payload directory.
+     * Returns the path to the jar library.
      * 
-     * @return the path to the payload directory
+     * @return the path to the JAR library
      */
-    public static String getPayloadPath() {
-        return PATH_Payload;
-    }/* END getPayloadPath() */
-    
-     // ==========================================================================
-    /**
-     * Returns the path to the extension directory.
-     * 
-     * @return the path to the extension directory
-     */
-    public static String getExtPath() {
-        return PATH_Ext;
-    }/* END getExtPath() */
-    
-    // ==========================================================================
-    /**
-     * Returns the path to the lib directory.
-     * 
-     * @return the path to the lib directory
-     */
-    public static String getLibPath() {
-        return PATH_Lib;
-    }/* END getLibPath() */
-    
-     // ==========================================================================
-    /**
-     * Returns a File representing the lib directory.
-     * 
-     * @return the lib directory
-     */
-    public static File getLibPathDirectory() {
-        return new File( getLibPath() );
-    }/* END getLibPathDirectory() */
-    
-    
+    public static String getJarLibPath() {
+        return PATH_JarLib;
+    }/* END getJarLibPath() */
+   
     // ==========================================================================
     /**
      * Returns the path to the log directory.
@@ -461,53 +415,6 @@ final public class Directories {
     public static File getLocalObjectLibraryDirectory() {
         return new File( getLocalObjectLibraryPath() );
     }/* END getObjectLibraryDirectory() */
-//    
-//    // ==========================================================================
-//    /**
-//     * Returns the path to the misc objects directory.
-//     * 
-//     * @return the path to the module library directory
-//     */
-//    public static String getMiscLibraryPath() {
-//        return PATH_MiscLibrary;
-//    }/* END getMiscLibraryPath() */
-    
-//    // ==========================================================================
-//    /**
-//     * Returns the path to the scripting language library directory.
-//     * 
-//     * @return the path to the scripting language library directory
-//     */
-//    public static String getScriptLanguageLibraryPath() {
-//        return PATH_ScriptLanguageLibrary;
-//    }/* END getScriptLanguageLibraryPath() */
-//    
-//    
-//    // ==========================================================================
-//    /**
-//     * Returns a {@link File} representing the scripting language library directory.
-//     * 
-//     * @return a {@code File} representing the scripting language library directory
-//     */
-//    public static File getScriptLanguageLibraryDirectory() {
-//        return new File( getScriptLanguageLibraryPath() );
-//    }/* END getScriptLanguageLibraryDirectory() */
-    
-//    
-//    
-//     // ==========================================================================
-//    /**
-//     * Returns a {@link File} representing the misc library directory.
-//     * 
-//     * @return a {@code File} representing the misc library directory
-//     */
-//    public static File getMiscLibraryDirectory() {
-//        return new File( getMiscLibraryPath() );
-//    }/* END getMiscLibraryDirectory() */
-//    
-//    
-//    
-//    
     
     // ==========================================================================
     /**

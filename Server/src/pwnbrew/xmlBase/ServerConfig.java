@@ -63,16 +63,13 @@ import pwnbrew.utilities.Utilities;
 public class ServerConfig extends XmlBase {
 
     private static final String ATTRIBUTE_HostId = "hostId";
-    private static final String ATTRIBUTE_ShowEditButton = "showEditButton";
     
     //Java keystore variables
     private static final String ATTRIBUTE_StorePass = "storePass";
     private static final String ATTRIBUTE_CertAlias = "certAlias";
     
     //Configurable Ports
-    private static final String ATTRIBUTE_CtrlPort = "ctrlPort";
-//    private static final String ATTRIBUTE_DataPort = "dataPort";
-    
+    private static final String ATTRIBUTE_CommPort = "ctrlPort";    
     private static ServerConfig theConf = null;
     
     private transient static final String aString = "The quick brown fox jumps over the lazy dog.";
@@ -85,42 +82,10 @@ public class ServerConfig extends XmlBase {
     public ServerConfig() {
        // Extend the object's structure
        theAttributeMap.put( ATTRIBUTE_HostId, ""  );
-       theAttributeMap.put( ATTRIBUTE_ShowEditButton, "FALSE" );
        theAttributeMap.put( ATTRIBUTE_StorePass, "" );
        theAttributeMap.put( ATTRIBUTE_CertAlias, "" );
-       theAttributeMap.put( ATTRIBUTE_CtrlPort, Integer.toString(Constants.CONTROL_PORT) );
-//       theAttributeMap.put( ATTRIBUTE_DataPort, Integer.toString(Constants.DATA_PORT) );
+       theAttributeMap.put( ATTRIBUTE_CommPort, Integer.toString(Constants.COMM_PORT) );
 
-    }
-
-    
-    //==========================================================================
-    /**
-     * Returns whether to show the edit button on the overview panel
-     * @return 
-    */
-    public boolean showEditButton(){
-
-       String theVal = theAttributeMap.get(ATTRIBUTE_ShowEditButton);
-       if(theVal.equals("TRUE")){
-          return true;
-       }
-       return false;
-    }
-
-    //==========================================================================
-    /**
-     * Sets the show edit button flag
-     * @param shouldShow
-    */
-    public void setShowEditButton(boolean shouldShow){
-
-       String showFlag = "FALSE";
-       if(shouldShow){
-          showFlag = "TRUE";
-       }
-
-       theAttributeMap.put(ATTRIBUTE_ShowEditButton, showFlag);
     }
 
      //==========================================================================
@@ -129,7 +94,6 @@ public class ServerConfig extends XmlBase {
      * @return 
     */
     public String getHostId(){
-
        return theAttributeMap.get(ATTRIBUTE_HostId);
     }
 
@@ -140,7 +104,6 @@ public class ServerConfig extends XmlBase {
      * @return 
     */
     public String getAlias(){
-
        return theAttributeMap.get(ATTRIBUTE_CertAlias);
     }
 
@@ -161,8 +124,8 @@ public class ServerConfig extends XmlBase {
     public int getSocketPort(){
 
        //Return the default if the value is empty
-       int retPort = Constants.CONTROL_PORT;
-       String thePort = theAttributeMap.get(ATTRIBUTE_CtrlPort);
+       int retPort = Constants.COMM_PORT;
+       String thePort = theAttributeMap.get(ATTRIBUTE_CommPort);
        if(!thePort.isEmpty()){
           retPort = Integer.valueOf( thePort );
        }
@@ -175,33 +138,8 @@ public class ServerConfig extends XmlBase {
      * @param passedPort
     */
     public void setSocketPort(String passedPort){
-       theAttributeMap.put(ATTRIBUTE_CtrlPort, passedPort);
+       theAttributeMap.put(ATTRIBUTE_CommPort, passedPort);
     }
-
-//     //****************************************************************************
-//    /**
-//     * Returns the port of the data channel
-//     * @return 
-//    */
-//    public int getDataPort(){
-//
-//       //Return the default if the value is empty
-//       int retPort = Constants.DATA_PORT;
-//       String thePort = theAttributeMap.get(ATTRIBUTE_DataPort);
-//       if(!thePort.isEmpty()){ 
-//          retPort = Integer.valueOf( thePort );
-//       }
-//       return retPort;
-//    }
-//
-//    //==========================================================================
-//    /**
-//     * Sets the port for the data channel
-//     * @param passedPort
-//    */
-//    public void setDataPort(String passedPort){
-//       theAttributeMap.put(ATTRIBUTE_DataPort, passedPort);
-//    }
 
      //==========================================================================
     /**

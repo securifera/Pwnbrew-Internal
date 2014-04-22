@@ -61,8 +61,8 @@ import pwnbrew.xmlBase.XmlBase;
 abstract public class Job extends DescriptiveXmlBase implements ExecutableItem, LibraryItem {
 
     protected final Map<String, FileContentRef> theFileContentRefMap = new HashMap<>();
-    public static final String ATTRIBUTE_LastRunDate = "LastRunDate";
-    public static final String ATTRIBUTE_LastRunResult = "LastRunResult";
+    public static final String theLastRunDate = "LastRunDate";
+    public static final String theLastRunResult = "LastRunResult";
     
     // ========================================================================
     /**
@@ -70,8 +70,8 @@ abstract public class Job extends DescriptiveXmlBase implements ExecutableItem, 
      */
     public Job() {
         
-        theAttributeMap.put( ATTRIBUTE_LastRunDate, "" );
-        theAttributeMap.put( ATTRIBUTE_LastRunResult, "" );
+        theAttributeMap.put( theLastRunDate, "" );
+        theAttributeMap.put( theLastRunResult, "" );
     
     }/* END CONSTRUCTOR() */
     
@@ -98,9 +98,8 @@ abstract public class Job extends DescriptiveXmlBase implements ExecutableItem, 
     @Override
     public void addUpdateComponent( XmlBase xmlBase ) {
         if( xmlBase instanceof FileContentRef ) { //If the XmlBase is a FileContentRef...
-
             FileContentRef aFCR = (FileContentRef)xmlBase;
-            theFileContentRefMap.put(aFCR.getFileName(), aFCR);
+            theFileContentRefMap.put(aFCR.getFilename(), aFCR);
         } else {
             super.addUpdateComponent( xmlBase );
         }
@@ -120,7 +119,7 @@ abstract public class Job extends DescriptiveXmlBase implements ExecutableItem, 
 
         if( passedGRB instanceof FileContentRef ) { //If the object is a Parameter...
             FileContentRef aFCR = (FileContentRef)passedGRB;
-            theFileContentRefMap.remove( aFCR.getFileName());
+            theFileContentRefMap.remove( aFCR.getFilename());
         } else {
             super.removeComponent(passedGRB);
         }

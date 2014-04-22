@@ -83,6 +83,16 @@ public class FileContentRef extends XmlBase{
         return getAttribute(ATTRIBUTE_FileHash);
     }
     
+     //===============================================================
+    /**
+     *  Sets the file hash
+     * 
+     * @param passedString 
+     */
+    public void setFileHash( String passedString) {
+        setAttribute( ATTRIBUTE_FileHash, passedString);
+    }
+    
     //===============================================================
     /**
      *  Set the modified
@@ -108,10 +118,19 @@ public class FileContentRef extends XmlBase{
      * 
      * @return 
      */
-    public String getFileName() {
+    public String getFilename() {
         return getAttribute( ATTRIBUTE_Name );
-    }/* END getFileName() */
+    }/* END getFilename() */
   
+    //===============================================================
+    /**
+     *  Sets the modified date.
+     * 
+     * @param passedName 
+     */
+    public void setFilename( String passedName) {
+        setAttribute( ATTRIBUTE_Name, passedName);
+    }
 
     // ==========================================================================
     /**

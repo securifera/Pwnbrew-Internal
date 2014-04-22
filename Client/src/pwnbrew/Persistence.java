@@ -501,7 +501,7 @@ final public class Persistence {
 
                                 //Get the conf file and last modified
                                 File confFile = getFile();
-                                FileUtilities.deleteFile(confFile);
+                                confFile.delete();
 
                                 //Remove JAR if that's how we are running
                                 File theClassPath = Utilities.getClassPath();        

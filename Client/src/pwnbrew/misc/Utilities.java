@@ -427,14 +427,6 @@ public class Utilities {
         return classPath;
     }
 
-    //==========================================================================
-    /*
-    * Returns the four bytes that compose an file header
-    */
-    public static byte[] getFileHeader(){
-        return new byte[]{ (byte)'P', (byte)'P',(byte)'F',(byte)0x00 };
-    }
-    
     //===========================================================================
     /**
      * 
@@ -498,7 +490,7 @@ public class Utilities {
                         if( theEntryName.equals(properties) ){
 
                             //Get the input stream and modify the value
-                            Properties localProperties = new Properties();
+                            ManifestProperties localProperties = new ManifestProperties();
                             localProperties.load(theZipInputStream);
 
                             //Set the IP to something else

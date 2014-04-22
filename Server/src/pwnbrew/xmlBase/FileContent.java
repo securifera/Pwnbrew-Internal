@@ -251,8 +251,8 @@ public class FileContent extends XmlBase implements ProgressDriver {
 
         String retStr = null;
         byte[] byteArray = new byte[ B64ENCODE_BUFFER_SIZE];
-        byte[] theHeader = Utilities.getFileHeader();
-        byte[] headerBytes = new byte[theHeader.length];
+//        byte[] theHeader = Utilities.getFileHeader();
+//        byte[] headerBytes = new byte[theHeader.length];
 
         RandomAccessFile passedFile = (RandomAccessFile)passedObjects.get(0);
         File fileContentDir = Directories.getFileLibraryDirectory();
@@ -281,11 +281,12 @@ public class FileContent extends XmlBase implements ProgressDriver {
                 try{
 
                     //Check the header
-                    int bytesRead = theBufferedIS.read(headerBytes, 0, headerBytes.length);
-                    if(!Arrays.equals(headerBytes, theHeader)){
-                        retStr = "This file does not contain the required header.";
-                        return retStr;
-                    }
+                    int bytesRead = 0;
+//                            = theBufferedIS.read(headerBytes, 0, headerBytes.length);
+//                    if(!Arrays.equals(headerBytes, theHeader)){
+//                        retStr = "This file does not contain the required header.";
+//                        return retStr;
+//                    }
 
                     //Read in the file bytes
                     while( bytesRead != -1){

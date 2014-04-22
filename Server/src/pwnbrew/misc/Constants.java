@@ -45,9 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.misc;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -139,13 +136,12 @@ abstract public class Constants {
     public static String SHELL_ENCODING = "US-ASCII";
     
     //NIO socket ports
-    public static final int CONTROL_PORT = 443;
-    public static final int DATA_PORT = 443;
+    public static final int COMM_PORT = 443;
     
-    public static final String IMAGE_PATH_IN_JAR= "pwnbrew/images";
-    public static final Path PAYLOAD_PATH = Paths.get( Directories.getPayloadPath() + File.separator + "p.jar");
-    public static final String PAYLOAD_PROPERTIES_FILE = "prpt";
-    public static final String PAYLOAD_VERSION_LABEL = "V";
+    public static final String IMAGE_PATH_IN_JAR= "pwnbrew/images";   
+    public static final String PROP_FILE ="META-INF/MANIFEST.MF";
+    
+    public static final String PAYLOAD_VERSION_LABEL = "Version";
     public static String CURRENT_VERSION = "1.0.3.6";
     
     public static String FILE_UPLOAD = "FILE_UPLOAD";
@@ -160,5 +156,8 @@ abstract public class Constants {
     //Old stager marker 
     public static final byte[] OLD_STAGER_MARKER = new byte[]{ (byte)0xde, (byte)0xad, (byte)0xbe, (byte)0xef};
 //    public static final int SERVER_ID = -1;    
+        
+    public static final String PAYLOAD_ACTION_COMMAND = "Payload";
+    public static final String STAGER_ACTION_COMMAND = "Stager";
     
 }

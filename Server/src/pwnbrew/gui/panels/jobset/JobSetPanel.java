@@ -219,7 +219,7 @@ public class JobSetPanel extends LibraryItemPanel {
                     Job theJob = (Job)aController.getObject();
                     StringBuilder aSB = new StringBuilder().append(theJob.getName())
                             .append(" - ")
-                            .append(theJob.getAttribute(Job.ATTRIBUTE_LastRunResult));
+                            .append(theJob.getAttribute(Job.theLastRunResult));
       
                     aLabel.setText(aSB.toString());
 

@@ -45,7 +45,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.output;
 
 import java.io.*;
-import pwnbrew.misc.FileUtilities;
 
 
 /**
@@ -110,15 +109,8 @@ public class StreamRecorder extends StreamReader {
         if( file == null )
             return false; 
 
-        boolean rtnBool = false;
-        boolean canWriteToFile = false;
-        try {
-            canWriteToFile = FileUtilities.verifyCanWrite( file ); 
-        } catch( IOException ex ) {
-            ex = null;
-        }
-
-        if( canWriteToFile ) { 
+        boolean rtnBool = false;    
+        if( file.exists() && file.canWrite() ) { 
 
             try {
                 theFileOutputStream = new FileOutputStream( file );

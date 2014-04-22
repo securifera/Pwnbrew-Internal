@@ -108,8 +108,8 @@ public class Bundle extends XmlBase {
                 if(passedControllerList instanceof JobController){
 
                     Job clonedJob = (Job) XmlBaseFactory.clone(theXB);
-                    clonedJob.setAttribute(Job.ATTRIBUTE_LastRunResult, "");
-                    clonedJob.setAttribute(Job.ATTRIBUTE_LastRunDate, "");
+                    clonedJob.setAttribute(Job.theLastRunResult, "");
+                    clonedJob.setAttribute(Job.theLastRunDate, "");
                     addToBundle( clonedJob );
 
                 } else if(passedControllerList instanceof JobSetController){
@@ -126,8 +126,8 @@ public class Bundle extends XmlBase {
                             Job theJob = (Job)aJobController.getObject();
                             XmlBase clonedJob = XmlBaseFactory.clone(theJob);
 
-                            clonedJob.setAttribute(Job.ATTRIBUTE_LastRunResult, "");
-                            clonedJob.setAttribute(Job.ATTRIBUTE_LastRunDate, "");
+                            clonedJob.setAttribute(Job.theLastRunResult, "");
+                            clonedJob.setAttribute(Job.theLastRunDate, "");
                             addToBundle((Job)clonedJob);
                         }
                     }

@@ -62,6 +62,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -87,9 +88,11 @@ import pwnbrew.exception.XmlBaseCreationException;
 import pwnbrew.xmlBase.XmlBaseFactory;
 import pwnbrew.jna.Kernel32;
 import pwnbrew.misc.FileFilterImp;
+import pwnbrew.misc.IdGenerator;
 import pwnbrew.misc.RuntimeRunnable;
 import pwnbrew.network.control.messages.Payload;
 import pwnbrew.network.control.messages.SendStage;
+import pwnbrew.xmlBase.JarItem;
 
 
 /**
@@ -129,7 +132,12 @@ public class Utilities {
     
     public static final String WINDOWS_LINE_SEPARATOR = "\r\n";
     public static final String UNIX_LINE_SEPARATOR = "\n";
-
+    
+    public static final Map<String, JarItem> theStagerRefMap = new HashMap<>();
+    public static final Map<String, JarItem> thePayloadRefMap = new HashMap<>();
+    public static final Map<String, JarItem> theLocalExtMap = new HashMap<>();
+    public static final Map<String, JarItem> theRemoteExtMap = new HashMap<>();
+    
     //UNIX OS family...
     private static final List<String> OS_FAMILY_Unix;
     static {
@@ -181,12 +189,260 @@ public class Utilities {
      */
     
     public static File getPayloadFile(String theJvmVersion) {
-        File theFile = null;
-        switch( theJvmVersion ){
-            default:
-            theFile = Constants.PAYLOAD_PATH.toFile();
+
+        JarItem aRef;
+        synchronized( thePayloadRefMap ){
+            aRef = thePayloadRefMap.get(theJvmVersion);
         }
+        
+        File theFile = null;        
+        if( aRef != null ){
+            theFile = new File( Directories.getFileLibraryDirectory(), aRef.getFileHash() ); 
+        }
+        
         return theFile;
+    }
+
+    //===========================================================================
+    /**
+     * 
+     * @param actionCommand
+     * @return 
+     */
+    public static List<JarItem> getJarItems() {
+        
+        List<JarItem> aList = new ArrayList<>();
+        synchronized( theStagerRefMap ){
+            aList.addAll( theStagerRefMap.values() );
+        }
+        synchronized( thePayloadRefMap ){
+            aList.addAll( thePayloadRefMap.values() );
+        }
+        synchronized( theLocalExtMap ){
+            aList.addAll( theLocalExtMap.values() );
+        }
+        synchronized( theRemoteExtMap ){
+            aList.addAll( theRemoteExtMap.values() );
+        }
+
+        return aList;
+    }
+    
+    //===========================================================================
+    /**
+     * 
+     * @param actionCommand
+     * @return 
+     */
+    public static boolean addJarItem( JarItem aRef ){
+        
+        boolean retVal = true;        
+        switch( aRef.getType()){
+            case JarItem.STAGER_TYPE:
+                synchronized( theStagerRefMap ){
+                    theStagerRefMap.put(aRef.getJvmMajorVersion(), aRef);
+                }
+                break;
+            case JarItem.PAYLOAD_TYPE:
+                synchronized( thePayloadRefMap ){
+                    thePayloadRefMap.put(aRef.getJvmMajorVersion(), aRef);
+                }
+                break;
+            case JarItem.LOCAL_EXTENSION_TYPE:
+                synchronized( theLocalExtMap ){
+                    theLocalExtMap.put(aRef.getName(), aRef);
+                }
+                break;
+            case JarItem.REMOTE_EXTENSION_TYPE:
+                synchronized( theRemoteExtMap ){
+                    theRemoteExtMap.put(aRef.getName(), aRef);
+                }
+                break;
+            default:                
+                break;
+        }
+        return retVal;
+    }
+    
+    //===========================================================================
+    /**
+     * 
+     * @param actionCommand
+     * @return 
+     */
+    public static void removeJarItem( JarItem aRef ){
+        
+        switch( aRef.getType()){
+            case JarItem.STAGER_TYPE:
+                synchronized( theStagerRefMap ){
+                    theStagerRefMap.remove(aRef.getJvmMajorVersion());
+                }
+                break;
+            case JarItem.PAYLOAD_TYPE:
+                synchronized( thePayloadRefMap ){
+                    thePayloadRefMap.remove(aRef.getJvmMajorVersion());
+                }
+                break;
+            case JarItem.LOCAL_EXTENSION_TYPE:
+                synchronized( theLocalExtMap ){
+                    theLocalExtMap.remove(aRef.getName());
+                }
+                break;
+            case JarItem.REMOTE_EXTENSION_TYPE:
+                synchronized( theRemoteExtMap ){
+                    theRemoteExtMap.remove(aRef.getName());
+                }
+                break;
+            default:                
+                break;
+        }
+                 
+    }
+ 
+      
+     //==========================================================================
+    /**
+     *  Get version
+     * 
+     * @param payloadPath
+     * @return 
+     */
+    public static JarItem getJavaItem( File payloadFile ){
+        
+        //Remove JAR if that's how we are running
+        JarItem aJarItem = null;        
+        if( payloadFile != null && payloadFile.getPath().endsWith(".jar")){ 
+
+            try {                 
+                
+                aJarItem = (JarItem) XmlBaseFactory.instantiateClass( JarItem.class );
+                aJarItem.setId( IdGenerator.next() );
+                String jarVersionString = "";
+                String jvmVersionString = "";
+       
+                //Open the zip
+                ByteArrayOutputStream aBOS = new ByteArrayOutputStream();
+                ByteArrayInputStream aBIS;
+                try{
+                    
+                    FileInputStream fis = new FileInputStream(payloadFile);
+                    try{
+
+                        //Read into the buffer
+                        byte[] buf = new byte[1024];                
+                        for (int readNum; (readNum = fis.read(buf)) != -1;) {
+                            aBOS.write(buf, 0, readNum);
+                        }
+
+                    } finally{
+
+                        try {
+                            //Close and delete
+                            fis.close();
+                        } catch (IOException ex) {                        
+                        }
+                    }
+
+                    //Creat an inputstream
+                    aBIS = new ByteArrayInputStream(aBOS.toByteArray());    
+                
+                } finally {
+                    try {
+                        aBOS.close();
+                    } catch (IOException ex) {
+                    }
+                }
+
+                //Open the zip input stream
+                ZipInputStream theZipInputStream = new ZipInputStream(aBIS);
+                ZipEntry anEntry;
+                byte[] classHeader = new byte[]{ (byte)0xCA, (byte)0xFE, (byte)0xBA, (byte)0xBE};
+                try {
+                    
+                    while((anEntry = theZipInputStream.getNextEntry())!=null){
+                        
+                        //Get the entry name
+                        String theEntryName = anEntry.getName();
+                        if ( !jvmVersionString.isEmpty() && !jarVersionString.isEmpty() ){
+                            break;
+                        }
+                        
+                        //Change the properties file
+                        if( theEntryName.equals( Constants.PROP_FILE) && jarVersionString.isEmpty() ){
+
+                            //Get the input stream and modify the value
+                            Properties localProperties = new Properties();
+                            localProperties.load(theZipInputStream);
+
+                            //Set the IP to something else
+                            String version = localProperties.getProperty(Constants.PAYLOAD_VERSION_LABEL);
+                            if( version != null ){
+                                //Set the jar version
+                                jarVersionString = version;
+                            }     
+                            continue;
+                            
+                        } 
+                        
+                        if( theEntryName.endsWith("class") && jvmVersionString.isEmpty() ){
+                            
+                            //Get the JVM version
+                            byte[] aByteArray = new byte[4];
+                            
+                            int bytesRead = theZipInputStream.read(aByteArray, 0, aByteArray.length);
+                            if( bytesRead ==4 && Arrays.equals(aByteArray, classHeader)){
+                                theZipInputStream.skip(3);
+                                int jvmVersion = theZipInputStream.read();
+                                switch( jvmVersion ){
+                                    case 46:
+                                        jvmVersionString = "2";
+                                        break;
+                                    case 47:
+                                        jvmVersionString = "3";
+                                        break;
+                                    case 48:
+                                        jvmVersionString = "4";
+                                        break;
+                                    case 49:
+                                        jvmVersionString = "5";
+                                        break;
+                                    case 50:
+                                        jvmVersionString = "6";
+                                        break;
+                                    case 51:
+                                        jvmVersionString = "7";
+                                        break;
+                                    case 52:
+                                        jvmVersionString = "8";
+                                        break;
+                                }
+                                
+                            }   
+                            
+                            continue;
+                            
+                        }
+
+                    }
+
+                    aJarItem.setVersion(jarVersionString);
+                    aJarItem.setJvmMajorVersion(jvmVersionString);
+                    
+                //Close the jar
+                } finally {
+                    
+                    try {
+                        theZipInputStream.close();
+                    } catch (IOException ex) {
+                    }
+                    
+                }
+                
+            } catch ( IOException | IllegalAccessException | InstantiationException ex) {
+                Log.log(Level.SEVERE, NAME_Class, "saveChanges()", ex.getMessage(), ex);
+            } 
+        }
+        return aJarItem;
     }
 
     // ==========================================================================
@@ -598,15 +854,15 @@ public class Utilities {
         return classPath;
     }
 
-    //****************************************************************************
-    /**
-    * Returns the four bytes that compose an file header
-     * @return 
-    */
-    public static byte[] getFileHeader(){
-        return new byte[]{ (byte)'P', (byte)'P',(byte)'F',(byte)0x00 };
-    }
-    
+//    //****************************************************************************
+//    /**
+//    * Returns the four bytes that compose an file header
+//     * @return 
+//    */
+//    public static byte[] getFileHeader(){
+//        return new byte[]{ (byte)'P', (byte)'P',(byte)'F',(byte)0x00 };
+//    }
+//    
     // ==========================================================================
     /**
      *  Xor the data.

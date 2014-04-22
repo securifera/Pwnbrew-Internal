@@ -185,21 +185,6 @@ final public class FileReceiver {
 
         try {
 
-            if( fileByteCounter == 0 ){
-                //Check the header
-                byte[] fileHeader = Utilities.getFileHeader();
-                if( passedByteArray.length >= fileHeader.length){
-
-                    byte[] firstBytes = Arrays.copyOf(passedByteArray, fileHeader.length);
-                    if( Arrays.equals(firstBytes, fileHeader)){
-                        fileByteCounter += fileHeader.length;
-                        fileDigest.update(firstBytes);
-                        passedByteArray = Arrays.copyOfRange(passedByteArray, 4, passedByteArray.length);
-                    }
-
-                }
-            }
-
             //Copy over the bytes
             aFileStream.write(passedByteArray);
             fileByteCounter += passedByteArray.length;

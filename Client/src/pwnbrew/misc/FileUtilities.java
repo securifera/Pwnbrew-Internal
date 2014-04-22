@@ -59,281 +59,95 @@ import java.security.NoSuchAlgorithmException;
  */
 abstract public class FileUtilities {
   
-  
+ 
+    // ==========================================================================
+    /**
+    * Deletes the directory represented by the given {@link File}.
+    * @param dir
+    * @throws java.io.IOException
+    */
+    public static void deleteDir(File dir) throws IOException{
 
-  // ==========================================================================
-  /**
-   * Verifies that the file represented by the given {@link File} can be read
-   * to by the application.
-   * <p>
-   * If the file doesn't exist, this method <strong>will not</strong> attempt to
-   * create it.
-   * 
-   * @param file a <tt>File</tt> representing the file to verify
-   * 
-   * @return <tt>true</tt> if the file can be read; <tt>false</tt>
-   * otherwise, specifically if the given {@link File} is <tt>NULL</tt>,
-   * represents a directory, or represents a file that doesn't exist or cannot
-   * be read by the application
-   */
-  private static boolean verifyCanRead( File file ) {
-    
-    boolean rtnBool = false;
-    
-    if( file != null ) { //If the File is not NULL...
-      
-      //NOTE: isFile() returns false if the file doesn't not exist
-      if( file.isFile() ) { //If the File represents a "normal" file...
-        rtnBool = file.canRead(); //Check if it can be read
-      }
-      
-    }
-    
-    return rtnBool;
-    
-  }/* END verifyCanRead( File ) */
-   
-  // ==========================================================================
-  /**
-   * Verifies that the file represented by the given {@link File} can be written
-   * to by the application.
-   * <p>
-   * If the file doesn't exist, this method will attempt to create it, but
-   * <strong>will not</strong> attempt to create any parent directories.
-   * 
-   * @param file a <tt>File</tt> representing the file to verify
-   * 
-   * @return <tt>true</tt> if the file can be written ; <tt>false</tt>
-   * otherwise, specifically if the given {@link File} is <tt>NULL</tt>,
-   * represents a directory, or represents a file that cannot be created or
-   * to which the application cannot write
-   * 
-   * @throws IOException If an I/O error occurs
-   */
-  public static boolean verifyCanWrite( File file ) throws IOException {
-    
-    boolean rtnBool = false;
-    
-    if( file != null ) { //If the File is not NULL...
-    
-      if( file.isDirectory() == false ) { //If the File is not a directory...
+        if(!dir.exists())
+            return;
+        else if(!dir.isDirectory())
+            throw new IOException("Not a directory " + dir);        
 
-        boolean fileExists = false;
-        
-        if( file.exists() ) { //If the file exists...
-          fileExists = true;
-        } else { //If the file doesn't exist...
+        File[] files = dir.listFiles();
+        for( File aFile : files){
 
-          File parentDir = file.getParentFile(); //Get the file's parent directory
-          
-          if( parentDir.exists() ) { //If the parent directory exists...
-            fileExists = file.createNewFile(); //Try to create a new file
-          }
-          
-        }
-        
-        if( fileExists ) { //If the file exists...
-          rtnBool = file.canWrite(); //Check if it can be written to
-        }
-        
-      }
-      
-    }
-    
-    return rtnBool;
-    
-  }/* END verifyCanWrite() */
-  
-  // ==========================================================================
-  /**
-   * Deletes the directory represented by the given {@link File}.
-     * @param dir
-     * @throws java.io.IOException
-  */
-  public static void deleteDir(File dir) throws IOException{
-
-     if(!dir.exists()){
-         return;
-     } else if(!dir.isDirectory()){
-        throw new IOException("Not a directory " + dir);
-     }
-
-     File[] files = dir.listFiles();
-     for( File aFile : files){
-
-        if(aFile.isDirectory()){
-           deleteDir(aFile);
-        } else {
-           boolean fileDeleted = aFile.delete();
-           if(!fileDeleted){
-              throw new IOException("Unable to delete file " + aFile);
-           }
-        }
-
-     }
-
-     //If unable to delete throw
-     if(!dir.delete()){
-        throw new IOException("Unable to delete file " + dir);
-     }
-  }
-
-   // ==========================================================================
-  /**
-   * Deletes the file or directory represented by the given {@link File}.
-   * <p>
-   * If the given {@code File} is null or the file/directory it represents does
-   * not exist, this method does nothing and returns null.
-   * <p>
-   * If the given {@code File} represents a directory, all of the directory's
-   * contents will be deleted. If any of the directory's contents cannot be deleted,
-   * this method will delete all of the contents that can be deleted and return
-   * false.
-   * 
-   * @param file a {@code File} representing the file/directory to be deleted
-   *
-   * @return <tt>true</tt> if and only if the file/directory was deleted, <tt>false</tt>
-   * if the file/directory could not be deleted, null if the file/directory represented
-   * by the given {@code File} does not exist
-   */
-  public static boolean deleteFile( File file ) {
-
-    if( file == null ) { //If the File is null...
-      throw new NullPointerException(); //Do nothing
-    }
-
-    boolean rtnBool = false;
-
-    if( file.exists() ) { //If the file exists...
-
-      //Ensure it is not readonly
-      file.setReadable(true);
-
-      if( file.isDirectory() ) { //If the File represents a directory...
-
-        //Attempt to delete all of the files and directories in the directory. If
-        //  any cannot be deleted, return false after deleting all that can be.
-
-        File[] fileList = file.listFiles(); //Get the contents of the directory...
-        
-        boolean allContentsDeleted = true;
-        for( File aFile : fileList ) { //For each file/dir in the directory...
-
-          Boolean fileDeleted = deleteFile( aFile ); //Delete the file/dir
-          if( fileDeleted == false ) { //If the file/dir could not be deleted...
-              allContentsDeleted = false; //Not all of the contents were deleted
-          } //Else, it's already gone / Could this ever occur?
-
-        }
-
-        if( allContentsDeleted ) { //If all of the directory's contents were deleted...
-
-          try {
-            rtnBool = file.delete(); //Delete the directory
-          } catch( SecurityException ex ) {
-            //Do nothing / Return false
-            ex = null;
-          }
-
-        } //Else, some of the directory's contents were not deleted / Return false
-
-      } else { //If the File does not represent a directory...
-
-        try {
-          rtnBool = file.delete(); //Delete the file
-        } catch( SecurityException ex ) {
-          //Do nothing / Return false
-          ex = null;
-        }
-
-      }
-
-    } //End of "if( file.exists() ) { //If the file exists..."
-      //Else, there's nothing to delete / Return null
-
-    return rtnBool;
-
-  }/* END deleteFile( File ) */
-   
-  
-   // ==========================================================================
-  /**
-   *    Wrapper function. 
-     * @param aFile
-     * @return 
-     * @throws java.security.NoSuchAlgorithmException 
-     * @throws java.io.IOException 
-   */
-  public static String getFileHash(File aFile) throws NoSuchAlgorithmException, IOException {
-      return getFileHash(aFile, false);
-  }
-
-   // ==========================================================================
-  /**
-   * Returns the SHA-256 hash for the passed file
-   *
-     * @param aFile
-     * @param addHeader
-   *
-   * @return a {@code String} representing the hash of the file
-   *
-   * @throws FileNotFoundException if the given {@code File} represents a directory,
-   * or represents a file that doesn't exist or cannot be read by the application
-   * @throws IOException if a problem occurs while reading the file
-   * @throws NoSuchAlgorithmException if the hash algorithm cannot be found
-   * @throws NullPointerException if the given {@code File} is null
-   */
-  public static String getFileHash(File aFile, boolean addHeader ) throws NoSuchAlgorithmException, IOException {
-
-    int bytesRead = 0;
-    byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
-    String theHash = "";
-
-    if( aFile == null ) { //If the given File is null...
-      throw new NullPointerException();
-    }
-
-    if( FileUtilities.verifyCanRead( aFile ) ) { //If the file can be read...
-
-        MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
-        FileInputStream theFileStream = new FileInputStream(aFile);
-        BufferedInputStream theBufferedIS = new BufferedInputStream(theFileStream);
-
-        try {
-
-            //Add the header to the hash if it was removed
-            if(addHeader){
-                hash.update( Utilities.getFileHeader() );
+            if(aFile.isDirectory())
+                deleteDir(aFile);
+            else {
+                boolean fileDeleted = aFile.delete();
+                if(!fileDeleted)
+                    throw new IOException("Unable to delete file " + aFile);                
             }
-            
-            //Read in the bytes and update the hash
-            while( bytesRead != -1){
-                bytesRead = theBufferedIS.read(byteBuffer);
-                if(bytesRead > 0){
-                   hash.update(byteBuffer, 0, bytesRead);
+
+        }
+
+        //If unable to delete throw
+        if(!dir.delete())
+            throw new IOException("Unable to delete file " + dir);
+        
+    }
+
+  
+    // ==========================================================================
+    /**
+    * Returns the SHA-256 hash for the passed file
+    *
+    * @param aFile
+    * @param addHeader
+    *
+    * @return a {@code String} representing the hash of the file
+    *
+    * @throws FileNotFoundException if the given {@code File} represents a directory,
+    * or represents a file that doesn't exist or cannot be read by the application
+    * @throws IOException if a problem occurs while reading the file
+    * @throws NoSuchAlgorithmException if the hash algorithm cannot be found
+    */
+    public static String getFileHash(File aFile ) throws NoSuchAlgorithmException, IOException {
+
+        int bytesRead = 0;
+        byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
+        String theHash = "";
+
+        if( aFile.exists() && aFile.canRead() ) { //If the file can be read...
+
+            MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
+            FileInputStream theFileStream = new FileInputStream(aFile);
+            BufferedInputStream theBufferedIS = new BufferedInputStream(theFileStream);
+
+            try {
+
+                //Read in the bytes and update the hash
+                while( bytesRead != -1){
+                    bytesRead = theBufferedIS.read(byteBuffer);
+                    if(bytesRead > 0)
+                        hash.update(byteBuffer, 0, bytesRead);                    
+                }
+
+                byte[] byteHash = hash.digest();
+                theHash = Utilities.byteToHexString(byteHash);
+
+            } finally {
+
+                //Ensure the file is closed
+                try {
+                    theBufferedIS.close();
+                } catch(IOException ex){
+                    ex = null;
                 }
             }
 
-            byte[] byteHash = hash.digest();
-            theHash = Utilities.byteToHexString(byteHash);
-
-        } finally {
-            
-           //Ensure the file is closed
-           try {
-              theBufferedIS.close();
-           } catch(IOException ex){
-              ex = null;
-           }
+        } else { //If the file doesn't exist or is not actually a file...
+            throw new FileNotFoundException();
         }
 
-    } else { //If the file doesn't exist or is not actually a file...
-      throw new FileNotFoundException();
+        return theHash;
+
     }
-
-    return theHash;
-
-  }/* END createFileContentFromFile( File ) */
 
     //===============================================================
     /**
