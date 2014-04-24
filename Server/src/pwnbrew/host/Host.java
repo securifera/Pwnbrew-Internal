@@ -86,6 +86,8 @@ public class Host extends Node {
     private static final String ATTRIBUTE_Os_Name = "osName";
     private static final String ATTRIBUTE_JVM_Arch = "jvmArch";
     private static final String ATTRIBUTE_Relay_Port = "relayPort";
+    private static final String ATTRIBUTE_JAR_Version = "jarVersion";
+    private static final String ATTRIBUTE_JRE_Version = "jreVersion";
     
     // ========================================================================
     /**
@@ -101,6 +103,12 @@ public class Host extends Node {
         
          //Add the attributes
         theAttributeMap.put( ATTRIBUTE_JVM_Arch,  ""  );
+        
+        //Add the attributes
+        theAttributeMap.put( ATTRIBUTE_JAR_Version,  ""  );
+        
+        //Add the attributes
+        theAttributeMap.put( ATTRIBUTE_JRE_Version,  ""  );
         
          //Add the attributes
         theAttributeMap.put( ATTRIBUTE_Relay_Port,  ""  );
@@ -425,6 +433,46 @@ public class Host extends Node {
         setAttribute( ATTRIBUTE_JVM_Arch, passedArch);
     }
     
+    //===============================================================
+    /**
+     *  Get the JAR version.
+     * 
+     * @return 
+     */
+    public String getJarVersion(){
+        return getAttribute( ATTRIBUTE_JAR_Version );
+    }
+    
+    //===============================================================
+    /**
+     *  Sets the JAR version.
+     * 
+     * @param passedString 
+     */
+    public void setJarVersion( String passedString ) {
+        setAttribute( ATTRIBUTE_JAR_Version, passedString);
+    }
+    
+     //===============================================================
+    /**
+     *  Get the JRE version.
+     * 
+     * @return 
+     */
+    public String getJreVersion(){
+        return getAttribute( ATTRIBUTE_JRE_Version );
+    }
+    
+    //===============================================================
+    /**
+     *  Sets the JRE version.
+     * 
+     * @param passedString 
+     */
+    public void setJreVersion( String passedString ) {
+        setAttribute( ATTRIBUTE_JRE_Version, passedString);
+    }
+    
       //===============================================================
     /**
      *  Gets the relay port
@@ -474,6 +522,19 @@ public class Host extends Node {
         }
 
         theAttributeMap.put(ATTRIBUTE_AutoSleep, autoSleepFlag);
+    }
+
+    //===================================================================
+    /**
+     * 
+     * @param passedHost 
+     */
+    public void updateData(Host passedHost) {
+        addNicPairs( passedHost.getNicMap() );
+        setJarVersion( passedHost.getJarVersion());
+        setJvmArch( passedHost.getJvmArch());
+        setJreVersion( passedHost.getJreVersion());
+        setOsName( passedHost.getOsName());
     }
    
    

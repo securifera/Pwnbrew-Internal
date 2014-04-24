@@ -36,82 +36,65 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-/*
-* HelloRepeat.java
-*
-* Created on June 7, 2013, 10:09:02 PM
-*/
-
 package pwnbrew.network.control.messages;
 
-
-import java.io.IOException;
-import java.util.logging.Level;
-import pwnbrew.log.LoggableException;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.CommManager;
-import pwnbrew.misc.SocketUtilities;
-import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.ControlOption;
+import pwnbrew.tasks.TaskManager;
 
 /**
  *
  *  
  */
-@SuppressWarnings("ucd")
-public final class HelloRepeat extends ControlMessage {
-
-    //Class name
-    private static final String NAME_Class = HelloRepeat.class.getSimpleName();
-  
-    // ==========================================================================
-    /**
-     * Constructor
-     *
-     * @param destId
-    */
-    public HelloRepeat( int destId ){
-       super( );
-       
-       setDestHostId(destId);
-    }
+public final class UpgradeStagerComplete extends ControlMessage {    
     
-    // ==========================================================================
+    private static final byte OPTION_JAR_VERSION = 19;    
+
+    private String jar_version = "";
+    
+    //===========================================================================
     /**
-     *  Constructor 
+     *  Constructor
      * 
      * @param passedId 
      */
-    public HelloRepeat( byte[] passedId ) {
-       super(passedId );
+    public UpgradeStagerComplete( byte[] passedId ) {
+        super(passedId);
     }
-      
-    //===============================================================
+    
+      //=========================================================================
+    /**
+     *  Sets the variable in the message related to this TLV
+     * 
+     * @param tempTlv 
+     * @return  
+     */
+    @Override
+    public boolean setOption( ControlOption tempTlv ){        
+
+        boolean retVal = true;
+        byte[] theValue = tempTlv.getValue();
+        switch( tempTlv.getType()){
+            case OPTION_JAR_VERSION:
+                jar_version = new String(theValue);
+                break;
+            default:
+                retVal = false;
+                break;
+        }
+        return retVal;
+    }
+    
+     //===============================================================
     /**
     *   Performs the logic specific to the message.
     *
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {   
-        
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
-            
-            try {
-                //Get the port router
-                String hostname = SocketUtilities.getHostname();
-
-                //Create a hello message and send it
-                Hello helloMessage = new Hello( hostname );
-                aCMManager.send(helloMessage); 
-                
-            } catch ( IOException ex) {
-                RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-            } catch ( LoggableException ex ){
-                RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-            }
-        }  
-
+    public void evaluate( CommManager passedManager ) {
+        TaskManager aManager = passedManager.getTaskManager();
+        aManager.stagerUpgradeComplete( getSrcHostId(), jar_version );
     }
-
+       
 }

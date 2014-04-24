@@ -94,7 +94,7 @@ public class PushFile extends FileMessage {
     public PushFile( int taskId, String fileHashNameStr, long passedLength, int passedType ) throws IOException { // NO_UCD (use default)
         super( taskId );
         
-        byte[] strBytes = fileHashNameStr.getBytes("US-ASCII");
+        byte[] strBytes = fileHashNameStr.getBytes();
         ControlOption aTlv = new ControlOption(OPTION_HASH_FILENAME, strBytes);
         addOption(aTlv);
 

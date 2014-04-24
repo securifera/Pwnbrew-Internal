@@ -95,7 +95,7 @@ public final class TaskGetFile extends TaskStatus{
         fileToRetrieve = passedFile;
 
         String fileHashNameStr = new StringBuilder().append(fileHash).append(":").append(fileToRetrieve.getName()).toString();
-        byte[] strBytes = fileHashNameStr.getBytes("US-ASCII");
+        byte[] strBytes = fileHashNameStr.getBytes();
         ControlOption aTlv = new ControlOption(OPTION_HASH_FILENAME, strBytes);
         addOption(aTlv);
     }

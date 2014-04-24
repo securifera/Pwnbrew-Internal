@@ -45,6 +45,8 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -53,6 +55,10 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Properties;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import pwnbrew.misc.Constants;
 import pwnbrew.misc.NetworkInterfaceUtilities;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ControlOption;
@@ -66,6 +72,8 @@ public final class Hello extends ControlMessage {
     private static final byte OPTION_OS_NAME = 14;    
     private static final byte OPTION_JAVA_ARCH = 15;   
     private static final byte OPTION_NIC_INFO = 18;
+    private static final byte OPTION_JAR_VERSION = 19;
+    private static final byte OPTION_JRE_VERSION = 20;
    
     // ==========================================================================
     /**
@@ -79,20 +87,25 @@ public final class Hello extends ControlMessage {
         super();
 
         //Add hostname
-        byte[] strBytes = passedHostname.getBytes("US-ASCII");
+        byte[] strBytes = passedHostname.getBytes();
         ControlOption aTlv = new ControlOption( OPTION_HOSTNAME, strBytes);
         addOption(aTlv);
         
         //Add the OS Name
-        strBytes = Utilities.getOsName().getBytes("US-ASCII");
+        strBytes = Utilities.getOsName().getBytes();
         aTlv = new ControlOption( OPTION_OS_NAME, strBytes);
         addOption(aTlv);
         
         //Add the Java Arch
-        strBytes = Utilities.getOsArch().getBytes("US-ASCII");
+        strBytes = Utilities.getOsArch().getBytes();
         aTlv = new ControlOption( OPTION_JAVA_ARCH, strBytes);
         addOption(aTlv);
-
+        
+        //Add the Java Version
+        String theVersion = System.getProperty("java.version");
+        aTlv = new ControlOption( OPTION_JRE_VERSION, theVersion.getBytes());
+        addOption(aTlv);
+        
         //Get the network interface for the ip address and then the mac address from it
         StringBuilder aSB;
         Enumeration<NetworkInterface> anEnum = NetworkInterface.getNetworkInterfaces();
@@ -131,7 +144,7 @@ public final class Hello extends ControlMessage {
                         aSB.append(Integer.toString(subnet));
                         
                         //Add the mac
-                        strBytes = aSB.toString().getBytes("US-ASCII");
+                        strBytes = aSB.toString().getBytes();
                         aTlv = new ControlOption(OPTION_NIC_INFO, strBytes);
                         addOption(aTlv);
                         
@@ -141,6 +154,45 @@ public final class Hello extends ControlMessage {
              
             }
 
+        }
+        
+        //Add Stager version
+        File theClassPath = Utilities.getClassPath();
+        //Open the zip input stream
+        ZipInputStream theZipInputStream = new ZipInputStream( new FileInputStream(theClassPath));        
+        try {
+            ZipEntry anEntry;
+            while((anEntry = theZipInputStream.getNextEntry())!=null){
+
+                //Get the entry name
+                String theEntryName = anEntry.getName();
+
+
+                //Change the properties file
+                if( theEntryName.equals( Constants.PROP_FILE) ){
+
+                    //Get the input stream and modify the value
+                    Properties localProperties = new Properties();
+                    localProperties.load(theZipInputStream);
+
+                    //Set the IP to something else
+                    String version = localProperties.getProperty(Constants.PAYLOAD_VERSION_LABEL);
+                    if( version != null ){
+                        //Set the jar version
+                        String jarVersionString = version;
+                        strBytes = jarVersionString.getBytes();
+                        aTlv = new ControlOption( OPTION_JAR_VERSION, strBytes);
+                        addOption(aTlv);
+                        break;
+                    }     
+
+                } 
+            }
+
+        } finally {
+            try {
+                theZipInputStream.close();
+            } catch (IOException ex) { ex = null; }
         }
 
     }

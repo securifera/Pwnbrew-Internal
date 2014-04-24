@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
 X-COMMENT: Main-Class will be added automatically by build
-Version: 1.0.3.6
-U: aHR0cHM6Ly8xOTIuMTY4LjIzNi4xOjQ0MyAg
+Version: 1.0.3.4
+Private: aHR0cHM6Ly8xOTIuMTY4LjIzNi4xOjQ0MyAg
 

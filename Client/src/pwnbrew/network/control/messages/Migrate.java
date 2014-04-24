@@ -157,7 +157,7 @@ public class Migrate extends ControlMessage {
 
                     //Decode the base64   
                     DebugPrinter.printMessage(NAME_Class, "Migrating to " + aSB.toString());
-                    connectStr = Base64Converter.encode( aSB.toString().getBytes("US-ASCII") );
+                    connectStr = Base64Converter.encode( aSB.toString().getBytes() );
                     properties = Constants.PROP_FILE;
                     propLabel = Constants.URL_LABEL;    
                     

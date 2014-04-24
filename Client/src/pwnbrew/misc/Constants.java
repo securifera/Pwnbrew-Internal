@@ -77,11 +77,12 @@ abstract public class Constants {
     public static final int STD_ERR_ID = 42;    
     
     //FileLock variables
-    public static final String URL_LABEL ="U";
+    public static final String URL_LABEL ="Private";
     public static final String SERV_LABEL ="S";
-    public static final String SLEEP_LABEL ="Z";
+    public static final String SLEEP_LABEL ="JVM-ID";
     public static final String PORT_LABEL ="P";
     public static final String DATA_LABEL ="D";
     public static final String PROP_FILE ="META-INF/MANIFEST.MF";
+    public static final String PAYLOAD_VERSION_LABEL = "Version";
     
 }/* END CLASS Constants */

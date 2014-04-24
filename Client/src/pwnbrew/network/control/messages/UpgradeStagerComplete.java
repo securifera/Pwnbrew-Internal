@@ -36,82 +36,31 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-/*
-* HelloRepeat.java
-*
-* Created on June 7, 2013, 10:09:02 PM
-*/
-
 package pwnbrew.network.control.messages;
 
-
-import java.io.IOException;
-import java.util.logging.Level;
-import pwnbrew.log.LoggableException;
-import pwnbrew.log.RemoteLog;
-import pwnbrew.manager.CommManager;
-import pwnbrew.misc.SocketUtilities;
-import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-@SuppressWarnings("ucd")
-public final class HelloRepeat extends ControlMessage {
+public final class UpgradeStagerComplete extends ControlMessage{
+    
+    
+    private static final byte OPTION_JAR_VERSION = 19;    
 
-    //Class name
-    private static final String NAME_Class = HelloRepeat.class.getSimpleName();
-  
     // ==========================================================================
     /**
      * Constructor
      *
-     * @param destId
     */
-    public HelloRepeat( int destId ){
-       super( );
-       
-       setDestHostId(destId);
-    }
-    
-    // ==========================================================================
-    /**
-     *  Constructor 
-     * 
-     * @param passedId 
-     */
-    public HelloRepeat( byte[] passedId ) {
-       super(passedId );
-    }
-      
-    //===============================================================
-    /**
-    *   Performs the logic specific to the message.
-    *
-     * @param passedManager
-    */
-    @Override
-    public void evaluate( CommManager passedManager ) {   
+    public UpgradeStagerComplete( String passedVersion ) {
+        super();
         
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
-            
-            try {
-                //Get the port router
-                String hostname = SocketUtilities.getHostname();
-
-                //Create a hello message and send it
-                Hello helloMessage = new Hello( hostname );
-                aCMManager.send(helloMessage); 
-                
-            } catch ( IOException ex) {
-                RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-            } catch ( LoggableException ex ){
-                RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-            }
-        }  
-
+        //Add the version
+        byte[] strBytes = passedVersion.getBytes();
+        ControlOption aTlv = new ControlOption( OPTION_JAR_VERSION, strBytes);
+        addOption(aTlv);
     }
-
+       
 }

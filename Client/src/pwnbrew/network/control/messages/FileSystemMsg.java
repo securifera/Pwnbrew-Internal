@@ -111,13 +111,13 @@ public final class FileSystemMsg extends Tasking {
             //Add last modified
             long lastModified = passedFile.lastModified();
             String dateStr = Constants.CHECKIN_DATE_FORMAT.format( new Date(lastModified));
-            tempBytes = dateStr.getBytes("US-ASCII");
+            tempBytes = dateStr.getBytes();
             aTlv = new ControlOption( OPTION_LAST_MODIFIED, tempBytes);
             addOption(aTlv);
 
             //Add file path
             String path = passedFile.getAbsolutePath();        
-            tempBytes = path.getBytes("US-ASCII");
+            tempBytes = path.getBytes();
             aTlv = new ControlOption( OPTION_PATH, tempBytes);
             addOption(aTlv);
 

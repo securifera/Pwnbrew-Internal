@@ -47,7 +47,6 @@ package pwnbrew;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -363,23 +362,19 @@ final public class Persistence {
             }
 
             //Parse the png
-            Png theLogoPNG = PngParser.parse(confFile);
-            try {
+            Png theLogoPNG = PngParser.parse(confFile);          
 
-                //Create a new PNGChunk
-                byte[] byteLen = SocketUtilities.intToByteArray( passedBytes.length );
-                Png.PngChunk aChunk = new Png.PngChunk(byteLen, passedLabel.getBytes("US-ASCII"), passedBytes, null );
-                theLogoPNG.replaceChunk( passedLabel, aChunk);
+            //Create a new PNGChunk
+            byte[] byteLen = SocketUtilities.intToByteArray( passedBytes.length );
+            Png.PngChunk aChunk = new Png.PngChunk(byteLen, passedLabel.getBytes(), passedBytes, null );
+            theLogoPNG.replaceChunk( passedLabel, aChunk);
 
-                //Write to disk
-                theLogoPNG.writeToDisk();
+            //Write to disk
+            theLogoPNG.writeToDisk();
 
-                //Set the date to the previous date
-                confFile.setLastModified(lastModified);
+            //Set the date to the previous date
+            confFile.setLastModified(lastModified);
 
-            } catch (UnsupportedEncodingException ex) {
-                throw new LoggableException(ex);
-            }
         }
         
     }

@@ -100,6 +100,7 @@ import pwnbrew.network.control.messages.Reload;
 import pwnbrew.network.control.messages.TaskNew;
 import pwnbrew.network.control.messages.TaskStatus;
 import pwnbrew.network.control.messages.Uninstall;
+import pwnbrew.network.control.messages.UpgradeStager;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.tasks.RemoteTask;
 import pwnbrew.tasks.RemoteTaskListener;
@@ -108,6 +109,7 @@ import pwnbrew.utilities.GuiUtilities;
 import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.validation.StandardValidation;
+import pwnbrew.xmlBase.JarItem;
 
 /**
  *
@@ -1059,6 +1061,37 @@ final public class MainGuiController extends Controller implements ActionListene
                         }
                     }
                     break;
+                    
+                 case Constants.ACTION_UPGRADE:
+                    
+                     //Upgrade the client stager
+                    aCMManager = ControlMessageManager.getControlMessageManager();
+                    if( aCMManager == null ){
+                        aCMManager = ControlMessageManager.initialize( getServer().getServerManager());
+                    }
+
+                    //Send reload message
+                    theControllerList = theMainGui.getJTree().getSelectedObjectControllers();
+                    for( LibraryItemController aController : theControllerList){
+                        if( aController instanceof HostController){
+
+                            //Get the host
+                            Host aHost = ((HostController)aController).getHost();
+                            String jreVersion = aHost.getJreVersion();
+                            
+                            if( jreVersion.length() > 2 ){
+                                char theChar = jreVersion.charAt(2);
+                                //Get the jar item
+                                JarItem theItem = Utilities.getStagerJarItem( String.valueOf(theChar));
+                                int hostId = Integer.parseInt(((HostController)aController).getId());
+
+                                //Send the new stager
+                                UpgradeStager upgradeMsg = new UpgradeStager(hostId, theItem); 
+                                aCMManager.send(upgradeMsg );
+                            }
+                        }
+                    }
+                    break;
 
                 case Constants.ACTION_CREATE_RELAY:
                     
@@ -1442,8 +1475,8 @@ final public class MainGuiController extends Controller implements ActionListene
             Host theHost = (Host) theController.getObject();
             theHost.setConnected(true);
                                        
-            //Add the new connections to the host
-            theHost.addNicPairs( passedHost.getNicMap() );
+            //Update all data
+            theHost.updateData(passedHost);
 
             //Set time
             Session aSession = new Session();
@@ -1848,6 +1881,26 @@ final public class MainGuiController extends Controller implements ActionListene
         }
         
     }
+     //===============================================================
+    /**
+     * Handles the completion of a task
+     *
+     * @param passedMsg
+    */
+    @Override
+    public void stagerUpgradeComplete( int clientId, String passedVersion ) {
+        
+        //Get the host
+        HostController theController = getHostController( Integer.toString( clientId) );
+        Host theHost = theController.getHost();
+        
+        //Set the new version and save
+        theHost.setJreVersion( passedVersion );
+        theController.saveToDisk();
+        
+        JOptionPane.showMessageDialog(theMainGui, "Stager upgrade complete for " + theController.getItemName());
+    }
+    
     
     //===============================================================
     /**

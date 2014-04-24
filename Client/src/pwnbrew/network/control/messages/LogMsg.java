@@ -69,7 +69,7 @@ public class LogMsg extends ControlMessage {
 
         //Add the message  
         theMessage = passedMsg;
-        byte[] strBytes = theMessage.getBytes("US-ASCII");
+        byte[] strBytes = theMessage.getBytes();
         
         ControlOption aTlv = new ControlOption(OPTION_LOG_MSG, strBytes);
         addOption(aTlv);

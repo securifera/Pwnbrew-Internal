@@ -108,6 +108,7 @@ import pwnbrew.shell.Shell;
 import pwnbrew.shell.ShellListener;
 import pwnbrew.tasks.RemoteTask;
 import pwnbrew.utilities.Utilities;
+import pwnbrew.xmlBase.JarItem;
 
 /**
  *
@@ -378,6 +379,32 @@ public final class HostController extends LibraryItemController implements Actio
                 menuItem.setEnabled( true );
                 popup.add(menuItem);
                 
+            }
+            
+            
+            //See if the JAR needs upgrading
+            String theJarVersion = theHost.getJarVersion();
+            String theJreVersion = theHost.getJreVersion();     
+            if( theJreVersion.length() > 2 ){
+                char theChar = theJreVersion.charAt(2);
+
+                //Get the current library for that jre version
+                JarItem aJarItem = Utilities.getStagerJarItem( String.valueOf(theChar) );
+                if( aJarItem != null ){
+                    String stagerJarVersion = aJarItem.getVersion();
+                    if( stagerJarVersion.compareTo( theJarVersion ) > 0){
+                        
+                        popup.addSeparator();
+                        //Add upgrade
+                        menuItem = new JMenuItem( Constants.ACTION_UPGRADE );
+                        menuItem.setActionCommand( Constants.ACTION_UPGRADE );
+                        menuItem.addActionListener(theMainGuiController);
+                        menuItem.setEnabled( true );
+                        popup.add(menuItem);
+                        
+                        popup.addSeparator();
+                    }
+                }
             }
             
              //If a relay isn't setup

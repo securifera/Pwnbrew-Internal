@@ -115,5 +115,13 @@ public interface TaskManager {
      * @param passedHost
     */
     public void registerHost( Host passedHost );
+    
+    //===============================================================
+    /**
+     * 
+     * @param clientId 
+     */
+    public void stagerUpgradeComplete( int clientId, String passedVersion );
+    
 
 }

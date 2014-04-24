@@ -36,48 +36,83 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
+
 /*
-* StageFlagAck.java
+* Payload.java
 *
-* Created on Feb 3, 2014, 7:34:22 PM
+* Created on Feb 2, 2014, 7:21:29 PM
 */
 
 package pwnbrew.network.control.messages;
 
-import java.io.UnsupportedEncodingException;
-import pwnbrew.misc.SocketUtilities;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.logging.Level;
+import pwnbrew.logging.Log;
+import pwnbrew.misc.Directories;
 import pwnbrew.network.ControlOption;
+import pwnbrew.xmlBase.JarItem;
 
 /**
  *
  *  
  */
 @SuppressWarnings("ucd")
-public final class StageFlagAck extends ControlMessage{
+public final class UpgradeStager extends ControlMessage{
     
-    private static final byte OPTION_CLIENT_ID = 44;
-    private static final byte OPTION_JVM_VERSION = 16;   
+    private static final byte OPTION_STAGER = 34;
+    private static final byte OPTION_JAR_VERSION = 19;    
     
      //Class name
-    private static final String NAME_Class = StageFlagAck.class.getSimpleName();    
+    private static final String NAME_Class = UpgradeStager.class.getSimpleName();    
 
 
     // ==========================================================================
     /**
      * Constructor
      *
-     * @param clientId
+     * @param dstHostId
+     * @param passedPayloadBytes
     */
-    public StageFlagAck( int clientId, String passedVersion ) throws UnsupportedEncodingException {
-        super();
+    public UpgradeStager( int dstHostId, JarItem passedJarItem ) {
+        super( dstHostId );
         
-        //Add the option
-        byte[] clientIdArr = SocketUtilities.intToByteArray(clientId);
-        ControlOption aTlv = new ControlOption( OPTION_CLIENT_ID, clientIdArr );
-        addOption(aTlv);  
+        //Get the jar file and read into a byte array
+        File libraryFile = new File( Directories.getFileLibraryDirectory(), passedJarItem.getFileHash() ); //Create a File to represent the library file to be copied
         
-        byte[] tempArr = passedVersion.getBytes();
-        aTlv = new ControlOption( OPTION_JVM_VERSION, tempArr);
+        //Read the file
+        ByteArrayOutputStream aBOS = new ByteArrayOutputStream();
+        try {
+
+            FileInputStream fis = new FileInputStream(libraryFile);
+            try{
+
+                //Read into the buffer
+                byte[] buf = new byte[1024];                
+                for (int readNum; (readNum = fis.read(buf)) != -1;) 
+                    aBOS.write(buf, 0, readNum);                
+
+            //Close
+            } finally {
+                try {
+                    fis.close();
+                } catch (IOException ex) {
+                    ex = null;
+                }
+            }
+        } catch (IOException ex) {
+            Log.log(Level.INFO, NAME_Class, "UpgradeStager()", ex.getMessage(), ex );   
+        }
+        
+        //Add the stager
+        ControlOption aTlv = new ControlOption( OPTION_STAGER, aBOS.toByteArray());
+        addOption(aTlv);
+        
+        //Add the version        
+        String jarVersion = passedJarItem.getVersion();
+        aTlv = new ControlOption( OPTION_JAR_VERSION, jarVersion.getBytes());
         addOption(aTlv);
     }
 

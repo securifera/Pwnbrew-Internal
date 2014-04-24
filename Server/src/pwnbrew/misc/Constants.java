@@ -92,6 +92,7 @@ abstract public class Constants {
     public final static String ACTION_UNINSTALL = "Uninstall"; 
     public static final String ACTION_REMOVE = "Remove";
     public static final String ACTION_CREATE_RELAY = "Create Relay";
+    public static final String ACTION_UPGRADE = "Upgrade";
     public static final String ACTION_REMOVE_RELAY = "Remove Relay";
     
     //Stdout & Stderr file names

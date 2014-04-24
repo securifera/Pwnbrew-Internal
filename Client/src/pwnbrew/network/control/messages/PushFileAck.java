@@ -81,7 +81,7 @@ public final class PushFileAck extends FileMessage {
     public PushFileAck(int passedId, int passedFileId, String hashFileNameStr ) throws IOException  {
        super(passedId, passedFileId );
 
-       byte[] strBytes = hashFileNameStr.getBytes("US-ASCII");
+       byte[] strBytes = hashFileNameStr.getBytes();
        ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);
        addOption(aTlv);
     }

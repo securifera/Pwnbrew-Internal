@@ -73,10 +73,14 @@ public final class Hello extends ControlMessage {
     private static final byte OPTION_OS_NAME = 14;    
     private static final byte OPTION_JAVA_ARCH = 15; 
     private static final byte OPTION_NIC_INFO = 18;
+    private static final byte OPTION_JAR_VERSION = 19;    
+    private static final byte OPTION_JRE_VERSION = 20;
     
     private String clientHostname = null;
     private final List<String> theNicInfoList = new ArrayList();
     private String os_name = null;
+    private String jar_version = null;
+    private String jre_version = null;
     private String java_arch = null;
     
     //Class name
@@ -111,6 +115,12 @@ public final class Hello extends ControlMessage {
                     break;
                 case OPTION_OS_NAME:
                     os_name = new String(theValue, "US-ASCII");
+                    break;
+                case OPTION_JAR_VERSION:
+                    jar_version = new String(theValue, "US-ASCII");
+                    break;
+                 case OPTION_JRE_VERSION:
+                    jre_version = new String(theValue, "US-ASCII");
                     break;
                 case OPTION_JAVA_ARCH:
                     java_arch = new String(theValue, "US-ASCII");
@@ -241,6 +251,12 @@ public final class Hello extends ControlMessage {
 
                     //Set the OS Name and arch
                     aHost.setJvmArch( getJavaArch() );
+                    
+                    //Set the OS Name and arch
+                    aHost.setJarVersion(jar_version);
+                    
+                    //Set the OS Name and arch
+                    aHost.setJreVersion(jre_version);
 
                     //Notify the task manager
                     theTaskManager.registerHost( aHost );

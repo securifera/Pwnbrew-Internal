@@ -120,6 +120,91 @@ public class LoaderUtilities {
         }
                     
     }
+    
+    // ========================================================================
+    /**
+     *  Adds the JAR to the class loader lib
+     * 
+     * @param aJarFile 
+    */
+    public static void reloadLib( File aJarFile ){
+        
+        try {
+            
+            URL jarURL = aJarFile.toURI().toURL();
+            URLClassLoader systemLoader = new URLClassLoader( new URL[]{ jarURL});           
+            
+            replaceUcp(systemLoader);
+
+        } catch (IllegalArgumentException ex) {   
+            ex = null;
+        } catch (SecurityException ex) {  
+            ex = null;
+        } catch (IOException ex) {      
+            ex = null;
+        }
+                    
+    }
+    
+     // ========================================================================
+    /**
+    *   Close jar files of the passed ClassLoader
+    * 
+    * @param passedLoader
+    * @return
+    */
+    private static boolean replaceUcp( ClassLoader passedLoader ) {
+        
+        boolean retVal = false;
+        if (passedLoader == null) {
+            return retVal;
+        }
+        
+        Class classURLClassLoader = URLClassLoader.class;
+        Field aField = null;
+        try {
+            aField = classURLClassLoader.getDeclaredField("ucp");
+        } catch (NoSuchFieldException ex) {
+            ex = null;
+        }
+        
+        if (aField != null) {
+            
+            aField.setAccessible(true);
+            Object obj = null;
+            try {
+                obj = aField.get(passedLoader);
+            } catch (IllegalAccessException ex) {
+                ex = null;
+            }
+            
+            if (obj != null) {
+                
+                Object replacementUCP = obj;               
+                aField.setAccessible(true);
+                
+                try {
+                    obj = aField.get(ClassLoader.getSystemClassLoader());
+                } catch (IllegalAccessException ex) {
+                    ex = null;
+                }
+
+                if (obj != null) {
+                    
+                    
+                    try {
+                        aField.set(ClassLoader.getSystemClassLoader(), replacementUCP);
+                    } catch (IllegalArgumentException ex) {
+                        ex = null;
+                    } catch (IllegalAccessException ex) {
+                        ex = null;
+                    }
+                }
+            }
+        }
+
+        return retVal;
+    }
  
     // ========================================================================
     /**

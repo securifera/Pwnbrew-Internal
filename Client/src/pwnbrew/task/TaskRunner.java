@@ -318,20 +318,14 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
 
             try {
                 theProcess = theProcessBuilder.start(); //Start a new process
-            } catch( IOException ex ) {
+            } catch( IOException ex ) {                
 
-                try {
+                String retStr = "Please ensure this machine has the necessary software to run a task of this type.";
+                byte[] strBytes = retStr.getBytes();
+                theStdErrRecorder.handleBytesRead(strBytes, strBytes.length);
+                theStdErrRecorder.handleEndOfStream();
 
-                    String retStr = "Please ensure this machine has the necessary software to run a task of this type.";
-                    byte[] strBytes = retStr.getBytes("US-ASCII");
-                    theStdErrRecorder.handleBytesRead(strBytes, strBytes.length);
-                    theStdErrRecorder.handleEndOfStream();
-
-                    return;
-
-                } catch (UnsupportedEncodingException ex1) {
-                    ex1 = null;
-                }
+                return;
             }
 
             OutputStream theirStdin = theProcess.getOutputStream();

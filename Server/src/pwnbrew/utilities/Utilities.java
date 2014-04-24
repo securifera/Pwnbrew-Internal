@@ -190,9 +190,14 @@ public class Utilities {
     
     public static File getPayloadFile(String theJvmVersion) {
 
-        JarItem aRef;
+        JarItem aRef = null;
         synchronized( thePayloadRefMap ){
-            aRef = thePayloadRefMap.get(theJvmVersion);
+            int version = Integer.parseInt(theJvmVersion);
+            while( aRef == null && version > 0 ){
+                aRef = thePayloadRefMap.get(theJvmVersion);
+                version--;
+                theJvmVersion = Integer.toString(version);
+            }
         }
         
         File theFile = null;        
@@ -203,6 +208,28 @@ public class Utilities {
         return theFile;
     }
 
+     //===========================================================================
+    /**
+     * 
+     * @param theJvmVersion
+     * @return 
+     */
+    
+    public static JarItem getStagerJarItem(String theJvmVersion) {
+
+        JarItem aRef = null;
+        synchronized( theStagerRefMap ){
+            int version = Integer.parseInt(theJvmVersion);
+            while( aRef == null && version > 0 ){
+                aRef = theStagerRefMap.get(theJvmVersion);
+                version--;
+                theJvmVersion = Integer.toString(version);
+            }
+        }
+             
+        return aRef;
+    }
+    
     //===========================================================================
     /**
      * 
@@ -234,9 +261,8 @@ public class Utilities {
      * @param actionCommand
      * @return 
      */
-    public static boolean addJarItem( JarItem aRef ){
+    public static void addJarItem( JarItem aRef ){
         
-        boolean retVal = true;        
         switch( aRef.getType()){
             case JarItem.STAGER_TYPE:
                 synchronized( theStagerRefMap ){
@@ -261,7 +287,6 @@ public class Utilities {
             default:                
                 break;
         }
-        return retVal;
     }
     
     //===========================================================================

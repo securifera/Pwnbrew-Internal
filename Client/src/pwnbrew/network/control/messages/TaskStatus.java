@@ -84,7 +84,7 @@ public class TaskStatus extends Tasking {
         super( passedId );
 
         taskStatus = passedStatus;
-        byte[] strBytes = passedStatus.getBytes("US-ASCII");
+        byte[] strBytes = passedStatus.getBytes();
 
         ControlOption aTlv = new ControlOption(OPTION_TASK_STATUS, strBytes);
         addOption(aTlv);
