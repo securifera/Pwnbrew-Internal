@@ -233,9 +233,7 @@ public class ClientConfig implements Serializable {
                     return (ClientConfig) theInput.readObject();
                 }
                 
-            } catch ( ClassNotFoundException ex ){
-                RemoteLog.log(Level.WARNING, NAME_Class, "loadConfiguration()", ex.getMessage(), ex);
-            } catch (IOException ex) {
+            } catch ( ClassNotFoundException | IOException ex ){
                 RemoteLog.log(Level.WARNING, NAME_Class, "loadConfiguration()", ex.getMessage(), ex);
             }
 
