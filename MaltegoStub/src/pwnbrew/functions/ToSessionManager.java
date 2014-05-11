@@ -321,7 +321,13 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
      */
     @Override
     public synchronized void setCount(int passedCount, int countType, int optionalHostId ) {
-        theClientCount = passedCount;
+        switch( countType){
+            case GetCount.HOST_COUNT:
+                theClientCount = passedCount;
+                break;
+            case GetCount.SESSION_COUNT:
+                
+        }
         beNotified();
     }
     
