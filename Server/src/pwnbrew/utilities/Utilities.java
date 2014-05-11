@@ -355,9 +355,8 @@ public class Utilities {
 
                         //Read into the buffer
                         byte[] buf = new byte[1024];                
-                        for (int readNum; (readNum = fis.read(buf)) != -1;) {
-                            aBOS.write(buf, 0, readNum);
-                        }
+                        for (int readNum; (readNum = fis.read(buf)) != -1;)
+                            aBOS.write(buf, 0, readNum);                        
 
                     } finally{
 
@@ -388,10 +387,9 @@ public class Utilities {
                         
                         //Get the entry name
                         String theEntryName = anEntry.getName();
-                        if ( !jvmVersionString.isEmpty() && !jarVersionString.isEmpty() ){
+                        if ( !jvmVersionString.isEmpty() && !jarVersionString.isEmpty() )
                             break;
-                        }
-                        
+                                                
                         //Change the properties file
                         if( theEntryName.equals( Constants.PROP_FILE) && jarVersionString.isEmpty() ){
 
@@ -520,12 +518,8 @@ public class Utilities {
      * @param passedOs
      * @return 
     */
-    static public String getLineEnding( String passedOs ) {
-        if( Utilities.isWindows(passedOs)){
-            return WINDOWS_LINE_SEPARATOR;
-        } else {
-            return UNIX_LINE_SEPARATOR;
-        }
+    static public String getLineEnding( String passedOs ) {        
+        return Utilities.isWindows(passedOs) ? WINDOWS_LINE_SEPARATOR : UNIX_LINE_SEPARATOR ;
     }
     
     // ==========================================================================
@@ -547,8 +541,7 @@ public class Utilities {
     */
     static public boolean isWindows( String passedOsName ) {
         return passedOsName.contains( OS_NAME_Windows );
-
-    }/* END isWindows() */
+    }
 
 
     // ==========================================================================
@@ -561,7 +554,7 @@ public class Utilities {
     */
     static public boolean isUnix( String passedOsName ) {
         return OS_FAMILY_Unix.contains( passedOsName );
-    }/* END isUnix() */
+    }
  
     static {
         try {
@@ -587,93 +580,84 @@ public class Utilities {
 
         if ( classPath != null && passedRelativePathInJar!= null && passedJarElementName!=null ) {
 
-        JarFile tmpJarFile = null;
-        try {
-
-            BufferedInputStream theBIS = null;
-            if ( classPath.isDirectory() ) {
-
-                //Running in IDE
-                String tmpFullFilenameWithPath;
-
-                tmpFullFilenameWithPath = ourUrl.toURI().getPath() + passedRelativePathInJar;
-                File testFile = new File( tmpFullFilenameWithPath, passedJarElementName );
-
-                if( testFile.exists() ) {
-
-                    //Open the stream
-                    FileInputStream tmpFileInputStream= new FileInputStream( testFile );
-                    theBIS = new BufferedInputStream(tmpFileInputStream);
-
-                } else {
-                    throw new LoggableException("File does not exist in build directory.");
-                }
-
-            } else {
-
-                //The path points to the JAR
-                tmpJarFile= new JarFile( classPath );
-
-                // These exist too, but not needed: JarEntry tmpJarEntry= tmpJarFile.getJarEntry( ImagePathWithinJar +passedImageName);
-                String tmpIntraJarPathAndFilename= passedRelativePathInJar + "/" +passedJarElementName;
-
-                ZipEntry tmpZipEntry= tmpJarFile.getEntry( tmpIntraJarPathAndFilename );
-                if ( tmpZipEntry != null ) {
-                    //Open the stream
-                    InputStream tmpInputStream= tmpJarFile.getInputStream( tmpZipEntry );
-                    theBIS = new BufferedInputStream(tmpInputStream);
-                } else {
-                    throw new LoggableException("Class does not exist in jar.");
-                }
-
-            }
-
+            JarFile tmpJarFile = null;
             try {
 
-                if(filePath != null){
+                BufferedInputStream theBIS = null;
+                if ( classPath.isDirectory() ) {
 
-                    byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
-                    FileOutputStream theOutStream = new FileOutputStream(filePath);
-                    BufferedOutputStream theBOS = new BufferedOutputStream(theOutStream);
+                    //Running in IDE
+                    String tmpFullFilenameWithPath;
 
-                    try {
+                    tmpFullFilenameWithPath = ourUrl.toURI().getPath() + passedRelativePathInJar;
+                    File testFile = new File( tmpFullFilenameWithPath, passedJarElementName );
 
-                        //Read to the end
-                        while( bytesRead != -1){
-                            bytesRead = theBIS.read(byteBuffer);
-                            if(bytesRead != -1){
-                                theBOS.write(byteBuffer, 0, bytesRead);
-                            }
-                        }
+                    if( testFile.exists() ) {
 
-                        theBOS.flush();
+                        //Open the stream
+                        FileInputStream tmpFileInputStream= new FileInputStream( testFile );
+                        theBIS = new BufferedInputStream(tmpFileInputStream);
 
-                    } finally {
+                    } else
+                        throw new LoggableException("File does not exist in build directory.");                
 
-                    //Close output stream
-                    theBOS.close();
-                    }
+                } else {
+
+                    //The path points to the JAR
+                    tmpJarFile= new JarFile( classPath );
+
+                    // These exist too, but not needed: JarEntry tmpJarEntry= tmpJarFile.getJarEntry( ImagePathWithinJar +passedImageName);
+                    String tmpIntraJarPathAndFilename= passedRelativePathInJar + "/" +passedJarElementName;
+
+                    ZipEntry tmpZipEntry= tmpJarFile.getEntry( tmpIntraJarPathAndFilename );
+                    if ( tmpZipEntry != null ) {
+                        //Open the stream
+                        InputStream tmpInputStream= tmpJarFile.getInputStream( tmpZipEntry );
+                        theBIS = new BufferedInputStream(tmpInputStream);
+                    } else
+                        throw new LoggableException("Class does not exist in jar.");                
+
                 }
 
+                try {
+
+                    if(filePath != null){
+
+                        byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
+                        FileOutputStream theOutStream = new FileOutputStream(filePath);
+                        try (BufferedOutputStream theBOS = new BufferedOutputStream(theOutStream)) {
+
+                            //Read to the end
+                            while( bytesRead != -1){
+                                bytesRead = theBIS.read(byteBuffer);
+                                if(bytesRead != -1)
+                                    theBOS.write(byteBuffer, 0, bytesRead);                            
+                            }
+
+                            theBOS.flush();
+
+                        }
+                    }
+
+                } finally {
+
+                    //Make sure an close the input stream
+                    theBIS.close();
+                }
+
+            } catch (    URISyntaxException | IOException ex) {
+                throw new LoggableException(ex);
             } finally {
 
-                //Make sure an close the input stream
-                theBIS.close();
-            }
-
-        } catch (    URISyntaxException | IOException ex) {
-            throw new LoggableException(ex);
-        } finally {
-
-            //Close the jar file
-            if(tmpJarFile != null){
-                try {
-                    tmpJarFile.close();
-                } catch (IOException ex) {
-                    Log.log(Level.WARNING, NAME_Class, "writeJarElementToDisk()", ex.getMessage(), ex );
+                //Close the jar file
+                if(tmpJarFile != null){
+                    try {
+                        tmpJarFile.close();
+                    } catch (IOException ex) {
+                        Log.log(Level.WARNING, NAME_Class, "writeJarElementToDisk()", ex.getMessage(), ex );
+                    }
                 }
             }
-        }
 
         } else {
             throw new LoggableException("Unable to retrieve JAR element.");
@@ -916,44 +900,48 @@ public class Utilities {
         
         List<Class<?>> theClasses = new ArrayList<>(); 
         
-        JarFile jarFile = null;
-        try {
-            
-            URL jarURL = aJarFile.toURI().toURL();
-            URLClassLoader systemLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-            
-            Class systemClass = URLClassLoader.class;
-            Method systemMethod = systemClass.getDeclaredMethod("addURL",  new Class[]{URL.class});
-            systemMethod.setAccessible(true);
-            systemMethod.invoke(systemLoader, new Object[]{ jarURL });
-            
-            jarFile = new JarFile(aJarFile);
-            Enumeration<JarEntry> entries = jarFile.entries();            
+        if( aJarFile.exists() ){
+            JarFile jarFile = null;
+            try {
 
-            //Add the classes to the list
-            while(entries.hasMoreElements()) {
-                JarEntry entry = entries.nextElement();
-                String entryName = entry.getName();
-                if(entryName.endsWith("class")) {
-                    String className = entryName.replace('/', '.').replace('\\', '.').replace(".class", "");
-                    try {
-                        theClasses.add(Class.forName(className));
-                    } catch (ClassNotFoundException e) {
-                        continue;
+                URL jarURL = aJarFile.toURI().toURL();
+                URLClassLoader systemLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+
+                Class systemClass = URLClassLoader.class;
+                Method systemMethod = systemClass.getDeclaredMethod("addURL",  new Class[]{URL.class});
+                systemMethod.setAccessible(true);
+                systemMethod.invoke(systemLoader, new Object[]{ jarURL });
+
+                jarFile = new JarFile(aJarFile);
+                Enumeration<JarEntry> entries = jarFile.entries();            
+
+                //Add the classes to the list
+                while(entries.hasMoreElements()) {
+                    JarEntry entry = entries.nextElement();
+                    String entryName = entry.getName();
+                    if(entryName.endsWith("class")) {
+                        String className = entryName.replace('/', '.').replace('\\', '.').replace(".class", "");
+                        try {
+                            theClasses.add(Class.forName(className));
+                        } catch (ClassNotFoundException e) {
+                            continue;
+                        }
                     }
                 }
-            }
-            
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | IOException ex) {
-            Log.log(Level.SEVERE, NAME_Class, "loadJar()", ex.getMessage(), ex );
-        } finally {
-            try {
-                if(jarFile != null){
-                    jarFile.close();
-                }
-            } catch (IOException ex) {
+
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | IOException ex) {
                 Log.log(Level.SEVERE, NAME_Class, "loadJar()", ex.getMessage(), ex );
+            } finally {
+                try {
+                    if(jarFile != null){
+                        jarFile.close();
+                    }
+                } catch (IOException ex) {
+                    Log.log(Level.SEVERE, NAME_Class, "loadJar()", ex.getMessage(), ex );
+                }
             }
+        } else {
+            Log.log(Level.SEVERE, NAME_Class, "loadJar()", "JAR file does not exist.", null );
         }
         
         return theClasses;
@@ -1028,7 +1016,7 @@ public class Utilities {
         
     }
     
-     //****************************************************************************
+    //=====================================================================
     /**
     * Reads the bytes from an element in the jar or build path.
     * 
@@ -1089,13 +1077,11 @@ public class Utilities {
 
                         ZipEntry tmpZipEntry= tmpJarFile.getEntry( tmpIntraJarPathAndFilename );
                         if ( tmpZipEntry != null ) {
-                            // OK, read the image "file" into a byte array
-                            //
+                            
                             int btyeSizeOfEntry= (int)tmpZipEntry.getSize();
                             theBytesForJarEntry= new byte[btyeSizeOfEntry];
-                            //
-                            InputStream tmpInputStream= tmpJarFile.getInputStream( tmpZipEntry );
-                            try {
+                            
+                            try (InputStream tmpInputStream = tmpJarFile.getInputStream( tmpZipEntry )) {
 
                                 int totalQtyReadAlready= 0;
                                 int qtyStillNeeded= btyeSizeOfEntry;
@@ -1112,8 +1098,6 @@ public class Utilities {
                                     qtyStillNeeded-= qtyJustRead;
                                 }
                             // if totalQtyread != btyeSizeOfEntry then an error has occurred
-                            } finally {
-                                tmpInputStream.close();
                             }
                         }
 

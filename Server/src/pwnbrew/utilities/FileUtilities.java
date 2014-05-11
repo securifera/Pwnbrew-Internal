@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- * FileUtilities.java
- *
- * Created on June 23, 2013, 11:21 PM
- */
-
 package pwnbrew.utilities;
 
 import java.awt.Desktop;
@@ -95,18 +88,12 @@ abstract public class FileUtilities {
 
         boolean rtnBool = false;
 
-        if( file != null ) { //If the File is not NULL...
-
-            //NOTE: isFile() returns false if the file doesn't not exist
-            if( file.isFile() ) { //If the File represents a "normal" file...
-                rtnBool = file.canRead(); //Check if it can be read
-            }
-
-        }
+        if( file != null && file.isFile() )
+            rtnBool = file.canRead();      
 
         return rtnBool;
 
-    }/* END verifyCanRead( File ) */
+    }
 
     // ==========================================================================
     /**
@@ -129,35 +116,29 @@ abstract public class FileUtilities {
 
         boolean rtnBool = false;
 
-        if( file != null ) { //If the File is not NULL...
+        if( file != null && file.isDirectory() == false ) {
 
-            if( file.isDirectory() == false ) { //If the File is not a directory...
+            boolean fileExists = false;
 
-                boolean fileExists = false;
+            if( file.exists() )
+                fileExists = true;
+            else { 
 
-                if( file.exists() ) { //If the file exists...
-                    fileExists = true;
-                } else { //If the file doesn't exist...
+                File parentDir = file.getParentFile(); 
 
-                    File parentDir = file.getParentFile(); //Get the file's parent directory
-
-                    if( parentDir.exists() ) { //If the parent directory exists...
-                        fileExists = file.createNewFile(); //Try to create a new file
-                    }
-
-                }
-
-                if( fileExists ) { //If the file exists...
-                    rtnBool = file.canWrite(); //Check if it can be written to
-                }
-
+                if( parentDir.exists() )
+                    fileExists = file.createNewFile(); 
+                
             }
+
+            if( fileExists )
+                rtnBool = file.canWrite();            
 
         }
 
         return rtnBool;
 
-    }/* END verifyCanWrite() */
+    }
 
     // ==========================================================================
     /**
@@ -172,24 +153,22 @@ abstract public class FileUtilities {
             if(!dir.isDirectory())
                 throw new IOException("Not a directory " + dir);            
             
-             File[] files = dir.listFiles();
+            File[] files = dir.listFiles();
             for( File aFile : files){
 
-                if(aFile.isDirectory()){
+                if(aFile.isDirectory())
                     deleteDir(aFile);
-                } else {
+                else {
                     boolean fileDeleted = aFile.delete();
-                    if(!fileDeleted){
-                        throw new IOException("Unable to delete file " + aFile);
-                    }
+                    if(!fileDeleted)
+                        throw new IOException("Unable to delete file " + aFile);                    
                 }
 
             }
 
             //If unable to delete throw
-            if(!dir.delete()){
-                throw new IOException("Unable to delete file " + dir);
-            }
+            if(!dir.delete())
+                throw new IOException("Unable to delete file " + dir);            
             
         }
         
@@ -215,10 +194,6 @@ abstract public class FileUtilities {
     */
     public static boolean deleteFile( File file ) {
 
-        if( file == null ) { //If the File is null...
-            throw new NullPointerException(); //Do nothing
-        }
-
         boolean rtnBool = false;
 
         if( file.exists() ) { //If the file exists...
@@ -237,9 +212,8 @@ abstract public class FileUtilities {
                 for( File aFile : fileList ) { //For each file/dir in the directory...
 
                     Boolean fileDeleted = deleteFile( aFile ); //Delete the file/dir
-                    if( fileDeleted == false ) { //If the file/dir could not be deleted...
-                        allContentsDeleted = false; //Not all of the contents were deleted
-                    } //Else, it's already gone / Could this ever occur?
+                    if( fileDeleted == false )
+                        allContentsDeleted = false;                   
 
                 }
 
@@ -265,92 +239,69 @@ abstract public class FileUtilities {
 
             }
 
-        } //End of "if( file.exists() ) { //If the file exists..."
-        //Else, there's nothing to delete / Return null
+        } 
 
         return rtnBool;
 
-    }/* END deleteFile( File ) */
-
-
-//    // ==========================================================================
-//    /**
-//    *    Wrapper function. 
-//     * @param aFile
-//     * @return 
-//     * @throws java.security.NoSuchAlgorithmException 
-//     * @throws java.io.IOException 
-//    */
-//    public static String getFileHash(File aFile) throws NoSuchAlgorithmException, IOException {
-//        return getFileHash(aFile, false);
-//    }
-
-   // ==========================================================================
-  /**
-   * Returns the SHA-256 hash for the passed file
-   *
-   * @param file a {@code File} representing the file from which the {@code FileContent}
-   * is to be created
-   *
-   * @return a {@code String} representing the hash of the file
-   *
-   * @throws FileNotFoundException if the given {@code File} represents a directory,
-   * or represents a file that doesn't exist or cannot be read by the application
-   * @throws IOException if a problem occurs while reading the file
-   * @throws NoSuchAlgorithmException if the hash algorithm cannot be found
-   * @throws NullPointerException if the given {@code File} is null
-   */
-  public static String getFileHash( File aFile ) throws NoSuchAlgorithmException, IOException {
-
-    int bytesRead = 0;
-    byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
-    String theHash = "";
-
-    if( aFile == null ) { //If the given File is null...
-      throw new NullPointerException();
     }
 
-    if( FileUtilities.verifyCanRead( aFile ) ) { //If the file can be read...
 
-        MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
-        FileInputStream theFileStream = new FileInputStream(aFile);
-        BufferedInputStream theBufferedIS = new BufferedInputStream(theFileStream);
+    // ==========================================================================
+    /**
+    * Returns the SHA-256 hash for the passed file
+    *
+    * @param file a {@code File} representing the file from which the {@code FileContent}
+    * is to be created
+    *
+    * @return a {@code String} representing the hash of the file
+    *
+    * @throws FileNotFoundException if the given {@code File} represents a directory,
+    * or represents a file that doesn't exist or cannot be read by the application
+    * @throws IOException if a problem occurs while reading the file
+    * @throws NoSuchAlgorithmException if the hash algorithm cannot be found
+    * @throws NullPointerException if the given {@code File} is null
+    */
+    public static String getFileHash( File aFile ) throws NoSuchAlgorithmException, IOException {
 
-        try {
+        int bytesRead = 0;
+        byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
+        String theHash = "";
 
-//            //Add the header to the hash if it was removed
-//            if(addHeader){
-//                hash.update( Utilities.getFileHeader() );
-//            }
-            
-            //Read in the bytes and update the hash
-            while( bytesRead != -1){
-                bytesRead = theBufferedIS.read(byteBuffer);
-                if(bytesRead > 0){
-                   hash.update(byteBuffer, 0, bytesRead);
+        if( FileUtilities.verifyCanRead( aFile ) ) { //If the file can be read...
+
+            MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
+            FileInputStream theFileStream = new FileInputStream(aFile);
+            BufferedInputStream theBufferedIS = new BufferedInputStream(theFileStream);
+
+            try {
+
+                //Read in the bytes and update the hash
+                while( bytesRead != -1){    
+                    bytesRead = theBufferedIS.read(byteBuffer);
+                    if(bytesRead > 0)
+                        hash.update(byteBuffer, 0, bytesRead);                    
+                }
+
+                byte[] byteHash = hash.digest();
+                theHash = Utilities.byteToHexString(byteHash);
+
+            } finally {
+
+                //Ensure the file is closed
+                try {
+                    theBufferedIS.close();
+                } catch(IOException ex){
+                    ex = null;
                 }
             }
 
-            byte[] byteHash = hash.digest();
-            theHash = Utilities.byteToHexString(byteHash);
+        } else
+            throw new FileNotFoundException();
+        
 
-        } finally {
-            
-           //Ensure the file is closed
-           try {
-              theBufferedIS.close();
-           } catch(IOException ex){
-              ex = null;
-           }
-        }
+        return theHash;
 
-    } else { //If the file doesn't exist or is not actually a file...
-      throw new FileNotFoundException();
-    }
-
-    return theHash;
-
-  }/* END getFileHash( File ) */
+    }/* END getFileHash( File ) */
 
     
 
@@ -368,23 +319,12 @@ abstract public class FileUtilities {
     */
     public static void moveFile( File srcFile, File dstFile ) throws IOException {
         
-        FileInputStream aFIS = new FileInputStream(srcFile);
-        try{
-            FileOutputStream aFOS = new FileOutputStream(dstFile);
-            try{
+        try( FileInputStream aFIS = new FileInputStream(srcFile); 
+             FileOutputStream aFOS = new FileOutputStream(dstFile)) {
+            FileChannel inputChannel = aFIS.getChannel();
+            FileChannel outputChannel = aFOS.getChannel();
+            inputChannel.transferTo(0, inputChannel.size(), outputChannel);         
 
-                //Copy the file manually
-                FileChannel inputChannel = aFIS.getChannel();
-                FileChannel outputChannel = aFOS.getChannel();
-
-                inputChannel.transferTo(0, inputChannel.size(), outputChannel);
-
-            } finally {
-                aFOS.close();
-            }         
-
-        } finally {
-            aFIS.close();
         }
         
         //Delete the file later
@@ -408,9 +348,8 @@ abstract public class FileUtilities {
             String fileName = fileHashFileNameArr[1];
 
             File localFile = new File( passedParentDir, fileName);
-            if(localFile.exists() && !localFile.delete()){
-                throw new IOException("File already exists, the hash does not matach, and was unable to remove it.");
-            }
+            if(localFile.exists() && !localFile.delete())
+                throw new IOException("File already exists, the hash does not matach, and was unable to remove it.");            
 
             //Try to open a file stream to the file and then close it
             FileOutputStream aFileStream = new FileOutputStream(localFile, true);
@@ -442,54 +381,52 @@ abstract public class FileUtilities {
     */
     public static List<String> readFileLines( File file ) throws IOException {
 
-        if( verifyCanRead( file ) == false ) { //If the file cannot be read...
-            return null; //Do nothing
-        }
-
         ArrayList<String> rtnList = new ArrayList<>();
         char[] theByteArray = new char[2];
-        InputStreamReader theFileReader = new InputStreamReader( new FileInputStream( file), "UTF-8");
-        try {
-            int charsRead = theFileReader.read(theByteArray, 0, theByteArray.length);
-
-            if(charsRead > 0){
-                if(theByteArray[0] == '\ufffd' && theByteArray[1] == '\ufffd'){
-                    theFileReader.close();
-                    theFileReader = new InputStreamReader( new FileInputStream( file), "UTF-16");
-                } else {
-                    theFileReader.close();
-                    theFileReader = new InputStreamReader( new FileInputStream( file), "US-ASCII");
-                }
-
-                String aFileLine;
-                BufferedReader theBufferedReader = new BufferedReader( theFileReader );
-                try {
-
-                    while( ( aFileLine = theBufferedReader.readLine() ) != null ) { //While there is a line to process...
-                    rtnList.add( aFileLine ); //Add the line to the list
-                    }
-
-                } finally {
-
-                    try {
-                        theBufferedReader.close();
-                    } catch( IOException ex ) {
-                        ex = null;
-                    }
-
-                }
-
-            }
-
-        } finally {
-
-            //Close the file reader
+        if( verifyCanRead( file )){
+            
+            InputStreamReader theFileReader = new InputStreamReader( new FileInputStream( file), "UTF-8");
             try {
-                theFileReader.close();
-            } catch (IOException ex){
-                ex = null;
-            }
+                int charsRead = theFileReader.read(theByteArray, 0, theByteArray.length);
 
+                if(charsRead > 0){
+                    if(theByteArray[0] == '\ufffd' && theByteArray[1] == '\ufffd'){
+                        theFileReader.close();
+                        theFileReader = new InputStreamReader( new FileInputStream( file), "UTF-16");
+                    } else {
+                        theFileReader.close();
+                        theFileReader = new InputStreamReader( new FileInputStream( file), "US-ASCII");
+                    }
+
+                    String aFileLine;
+                    BufferedReader theBufferedReader = new BufferedReader( theFileReader );
+                    try {
+
+                        while( ( aFileLine = theBufferedReader.readLine() ) != null )
+                            rtnList.add( aFileLine ); 
+
+                    } finally {
+
+                        try {
+                            theBufferedReader.close();
+                        } catch( IOException ex ) {
+                            ex = null;
+                        }
+
+                    }
+
+                }
+
+            } finally {
+
+                //Close the file reader
+                try {
+                    theFileReader.close();
+                } catch (IOException ex){
+                    ex = null;
+                }
+
+            }
         }
 
         return rtnList;
@@ -517,177 +454,57 @@ abstract public class FileUtilities {
     */
     public static byte[] readFile( File file ) throws IOException {
 
-        if( verifyCanRead( file ) == false ) { //If the file cannot be read...
-            return null; //Do nothing
-        }
-
         ByteBuffer aBB = ByteBuffer.allocate(1048576);
         char[] theByteArray = new char[2];
-        InputStreamReader theFileReader = new InputStreamReader( new FileInputStream( file), "UTF-8");
-        try {
-            int charsRead = theFileReader.read(theByteArray, 0, theByteArray.length);
-
-            if(charsRead > 0){
-                if(theByteArray[0] == '\ufffd' && theByteArray[1] == '\ufffd'){
-                    theFileReader.close();
-                    theFileReader = new InputStreamReader( new FileInputStream( file), "UTF-16");
-                } else {
-                    theFileReader.close();
-                    theFileReader = new InputStreamReader( new FileInputStream( file), "US-ASCII");
-                }
-
-                int aByte;
-                BufferedReader theBufferedReader = new BufferedReader( theFileReader );
-                try {
-
-                    while( ( aByte = theBufferedReader.read() ) != -1 ) { //While there is a line to process...
-                        aBB.put( (byte)aByte ); //Add the line to the list
-                    }
-
-                } finally {
-
-                    try {
-                        theBufferedReader.close();
-                    } catch( IOException ex ) {
-                        ex = null;
-                    }
-
-                }
-
-            }
-
-        } finally {
-
-            //Close the file reader
+        if( verifyCanRead( file )){
+            InputStreamReader theFileReader = new InputStreamReader( new FileInputStream( file), "UTF-8");
             try {
-                theFileReader.close();
-            } catch (IOException ex){
-                ex = null;
-            }
+                int charsRead = theFileReader.read(theByteArray, 0, theByteArray.length);
 
+                if(charsRead > 0){
+                    if(theByteArray[0] == '\ufffd' && theByteArray[1] == '\ufffd'){
+                        theFileReader.close();
+                        theFileReader = new InputStreamReader( new FileInputStream( file), "UTF-16");
+                    } else {
+                        theFileReader.close();
+                        theFileReader = new InputStreamReader( new FileInputStream( file), "US-ASCII");
+                    }
+
+                    int aByte;
+                    BufferedReader theBufferedReader = new BufferedReader( theFileReader );
+                    try {
+
+                        while( ( aByte = theBufferedReader.read() ) != -1 )
+                            aBB.put( (byte)aByte ); 
+
+                    } finally {
+
+                        try {
+                            theBufferedReader.close();
+                        } catch( IOException ex ) {
+                            ex = null;
+                        }
+
+                    }
+
+                }
+
+            } finally {
+
+                //Close the file reader
+                try {
+                    theFileReader.close();
+                } catch (IOException ex){
+                    ex = null;
+                }
+
+            }
         }
 
         return Arrays.copyOf(aBB.array(), aBB.position());
 
     }/* END readFile() */
-    
-     //===============================================================
-    /**
-     * Converts the library file to the File path passed
-     *
-     * @param fileHash
-     * @param destFile
-     * @param theListener
-     * @return
-     * @throws java.io.IOException
-     * @throws pwnbrew.utilities.FileUtilities.InvalidFileLengthException
-     * @throws pwnbrew.utilities.FileUtilities.InvalidLibraryFileException
-    */
-    public static boolean convertLibFile(String fileHash, File destFile, ProgressListener theListener) throws IOException, InvalidLibraryFileException, InvalidFileLengthException{
-        return convertLibFile(fileHash, destFile, theListener, Directories.getFileLibraryDirectory());
-    }
-
-    //===============================================================
-    /**
-     * Converts the library file to the File path passed
-     *
-     * @param fileHash
-     * @param destFile
-     * @return
-    */
-    private static boolean convertLibFile(String fileHash, File destFile, ProgressListener theListener, File fileContentDir ) throws IOException, InvalidLibraryFileException, InvalidFileLengthException {
-
-//        byte[] fileHeader = Utilities.getFileHeader();
-
-//        byte[] headerBytes = new byte[fileHeader.length];
-        byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
-        int marker = 0;
-
-        //Variables for progress updates
-        int sndFileProgress = 0;
-        int tempProgressInt = 0;
-        double tempProgressDouble;
-        long writeByteCounter = 0;
-        long tempFileSize;
- 
-        File aFile = new File(fileContentDir, fileHash);
-        if( FileUtilities.verifyCanRead( aFile ) ) { //If the file can be read...
-
-            tempFileSize = aFile.length();
-            if(tempFileSize == 0){
-               throw new InvalidFileLengthException("This file contains 0 bytes.");
-            }
-
-            FileInputStream theFileStream = new FileInputStream(aFile);
-            BufferedInputStream theBufferedIS = new BufferedInputStream(theFileStream);
-            try {
-
-                FileOutputStream theOutStream = new FileOutputStream(destFile);
-                BufferedOutputStream theBOS = new BufferedOutputStream(theOutStream);
-
-                try {
-
-//                    //Check the header
-//                    int bytesRead = theBufferedIS.read(headerBytes, marker, fileHeader.length);
-//                    if(bytesRead != 4 && !Arrays.equals(headerBytes, fileHeader)){
-//                      throw new InvalidLibraryFileException("This file does not contain the required header.");
-//                    }
-
-                    //Reset bytes read 
-                    int bytesRead = 0;
-                    while( bytesRead != -1){
-
-                        writeByteCounter += bytesRead;
-
-                        //Calculate the progress
-                        //Check for divide by zero
-                        if(theListener != null){
-                            if(tempFileSize != 0){
-                               tempProgressDouble = (1.0 * writeByteCounter) / (1.0 * tempFileSize );
-                               tempProgressInt = (int)Math.round(tempProgressDouble * 100.0);
-                            }
-
-                            if(tempProgressInt != sndFileProgress){
-                               theListener.progressChanged(0, tempProgressInt);
-                               sndFileProgress = tempProgressInt;
-                            }
-                        }
-
-                        theBOS.write(byteBuffer, 0, bytesRead);
-                        bytesRead = theBufferedIS.read(byteBuffer);
-                    }
-
-                    theBOS.flush();
-
-                } finally {
-
-                   //Close output stream
-                   try{
-                      theBOS.close();
-                   } catch(IOException ex){
-                      ex = null;
-                   }
-                }
-                
-
-            //Make sure to clean up the file streams
-            } finally {
-
-                //Close input stream
-                try {
-                   theBufferedIS.close();
-                } catch(IOException ex){
-                   ex = null;
-                }
-            }
-            
-        } else {
-            return false;
-        }
-        
-        return true;
-    }
-    
+     
     // ==========================================================================
     /**
      * Creates a copy of the library file identified by the given name at the location
@@ -731,87 +548,66 @@ abstract public class FileUtilities {
                 
                 if( bufferedInputStream != null ) { //If the BufferedInputStream was created...
                     
-                    //Check the header of the library file...
-//                    byte[] fileHeader = Utilities.getFileHeader();
-//                    byte[] fileHeaderBytes = new byte[ fileHeader.length ];
                     int bytesRead;
-//                    boolean hasHeader = false;
-//                    try {
-//                        
-//                        //Read the bytes of the library file's header
-//                        bufferedInputStream.read( fileHeaderBytes, 0, fileHeader.length );
-//                        if( Arrays.equals( fileHeaderBytes, fileHeader ) ) {
-//                            hasHeader = true; //The library file has the header
-//                        } else { //If the library file does not have the header...
-//                            errorString = "The library file does not have the header.";
-//                        }
-//                        
-//                    } catch( IOException ex ) {
-//                        errorString = "Could not read the library file.";
-//                    }
-
-//                    if( hasHeader ) { //If the library file has the header...
                         
-                        BufferedOutputStream bufferedOutputStream = null;
-                        try {
-                            bufferedOutputStream = new BufferedOutputStream( new FileOutputStream( destination ) );
-                        } catch( FileNotFoundException ex ) {
-                            errorString = "The destination file could not be found.";
-                        }
+                    BufferedOutputStream bufferedOutputStream = null;
+                    try {
+                        bufferedOutputStream = new BufferedOutputStream( new FileOutputStream( destination ) );
+                    } catch( FileNotFoundException ex ) {
+                        errorString = "The destination file could not be found.";
+                    }
                         
-                        if( bufferedOutputStream != null ) { //If the BufferedOutputStream was created...
-                            
-                            //Copy the bytes from the library file to the destination file...
-                            long copiedBytesCounter = 0;
-                            bytesRead = 0; //Reset
-                            byte[] byteBuffer = new byte[ Constants.GENERIC_BUFFER_SIZE ];
-                            
-                            if( listener != null ) //If a LibraryFileCopyListener was given...
-                                listener.libraryFileCopyProgress( libFileName, copiedBytesCounter, libFileLength );
+                    if( bufferedOutputStream != null ) { //If the BufferedOutputStream was created...
 
-                            while( bytesRead > -1 ) { //Until the end of the library file is reached...
+                        //Copy the bytes from the library file to the destination file...
+                        long copiedBytesCounter = 0;
+                        bytesRead = 0; //Reset
+                        byte[] byteBuffer = new byte[ Constants.GENERIC_BUFFER_SIZE ];
 
-                                if( bytesRead > 0 ) { //If any bytes have been read...
-                                    
-                                    //Write the bytes to the destination file...
-                                    try {
-                                        bufferedOutputStream.write( byteBuffer, 0, bytesRead );
-                                        bufferedOutputStream.flush();
-                                    } catch( IOException ex ) {
-                                        errorString = "An error occured while writing to the destination file.";
-                                        break; //Stop copying the file
-                                    }
-                                    
-                                    copiedBytesCounter += bytesRead; //Update the counter
-                                
-                                    if( listener != null ) //If a LibraryFileCopyListener was given...
-                                        listener.libraryFileCopyProgress( libFileName, copiedBytesCounter, libFileLength );
+                        if( listener != null ) //If a LibraryFileCopyListener was given...
+                            listener.libraryFileCopyProgress( libFileName, copiedBytesCounter, libFileLength );
 
-                                }
-                                
+                        while( bytesRead > -1 ) { //Until the end of the library file is reached...
+
+                            if( bytesRead > 0 ) { //If any bytes have been read...
+
+                                //Write the bytes to the destination file...
                                 try {
-                                    bytesRead = bufferedInputStream.read( byteBuffer );
+                                    bufferedOutputStream.write( byteBuffer, 0, bytesRead );
+                                    bufferedOutputStream.flush();
                                 } catch( IOException ex ) {
-                                    errorString = "An error occured while reading from the library file.";
+                                    errorString = "An error occured while writing to the destination file.";
                                     break; //Stop copying the file
                                 }
-                                
-                                if( bytesRead == -1 ) { //If the end of the library file was reached...
-                                    fileCopyCompleted = true; //The file copy was completed
-                                }
-                                
+
+                                copiedBytesCounter += bytesRead; //Update the counter
+
+                                if( listener != null ) //If a LibraryFileCopyListener was given...
+                                    listener.libraryFileCopyProgress( libFileName, copiedBytesCounter, libFileLength );
+
                             }
 
-                            //Close the BufferedOutputStream...
-                            try{
-                                bufferedOutputStream.close();
+                            try {
+                                bytesRead = bufferedInputStream.read( byteBuffer );
                             } catch( IOException ex ) {
-                                ex = null;
+                                errorString = "An error occured while reading from the library file.";
+                                break; //Stop copying the file
                             }
-                            
-                        } //End of "if( bufferedOutputStream != null ) { //If the BufferedOutputStream was created..."
-                        
-//                    } //End of "if( hasActHeader ) { //If the library file has the header..."
+
+                            if( bytesRead == -1 ) { //If the end of the library file was reached...
+                                fileCopyCompleted = true; //The file copy was completed
+                            }
+
+                        }
+
+                        //Close the BufferedOutputStream...
+                        try{
+                            bufferedOutputStream.close();
+                        } catch( IOException ex ) {
+                            ex = null;
+                        }
+
+                    } //End of "if( bufferedOutputStream != null ) { //If the BufferedOutputStream was created..."
                     
                     //Close the BufferedInputStream...
                     try {
@@ -851,9 +647,8 @@ abstract public class FileUtilities {
 
         boolean rtnVal = true;
 
-        if(!passedFile.exists() && passedFile.length() < 0){
-            System.err.println( "FileUtilities.openFileInEditor() - " + passedFile.getAbsolutePath() + ": does not exist.");
-        }
+        if(!passedFile.exists() && passedFile.length() < 0)
+            System.err.println( "FileUtilities.openFileInEditor() - " + passedFile.getAbsolutePath() + ": does not exist.");        
 
         //If the desktop object is supported
         if (Desktop.isDesktopSupported()) {
@@ -863,28 +658,27 @@ abstract public class FileUtilities {
 
             try {
                 if(desktop.isSupported(passedAction)){
-                    if(passedAction.equals(Desktop.Action.OPEN)){
+                    if(passedAction.equals(Desktop.Action.OPEN))
                         desktop.open(passedFile);
-                    } else if(passedAction.equals(Desktop.Action.EDIT)){
-                        desktop.edit(passedFile);
-                    }
-                } else {
+                    else if(passedAction.equals(Desktop.Action.EDIT))
+                        desktop.edit(passedFile);                    
+                } else
                     rtnVal = false;
-                }
+                
             } catch (IOException ex) {
 
                 //Try to just open the file
-                if(passedAction.equals(Desktop.Action.EDIT)){
+                if(passedAction.equals(Desktop.Action.EDIT))
                     openFileInEditor(passedFile, Desktop.Action.OPEN);
-                } else {
+                else {
                     Log.log(Level.WARNING, NAME_Class, "openFileInEditor()", ex.getMessage(), ex );
                     rtnVal = false;
                 }
             }
 
-        } else {
+        } else
             rtnVal = false;       
-        }
+        
         
         //Try to open with gedit
         if( rtnVal == false && Utilities.isUnix( Utilities.getOsName() ) ){
@@ -941,12 +735,7 @@ abstract public class FileUtilities {
         byte[] byteBuffer = new byte[4096];
         String theHash = "";
 
-        if( passedBytes == null ) { //If the given File is null...
-            throw new NullPointerException();
-        }
-
         File outFile = File.createTempFile("lib_", null);
-//        byte[] actHeader = Utilities.getFileHeader();
 
         ByteArrayInputStream theBytesStream = new ByteArrayInputStream(passedBytes);
         BufferedInputStream theBufferedIS = new BufferedInputStream(theBytesStream);
@@ -957,11 +746,6 @@ abstract public class FileUtilities {
             try {
                 
                 MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
-
-//                //Setup the header
-//                System.arraycopy(actHeader, 0, byteBuffer, 0, actHeader.length);
-//                int bytesRead  = theBufferedIS.read(byteBuffer, actHeader.length, byteBuffer.length - actHeader.length);
-//                bytesRead += actHeader.length;
 
                 int bytesRead = 0;
                 while( bytesRead != -1){
@@ -997,19 +781,12 @@ abstract public class FileUtilities {
 
         //Rename the file flush the stream and close it
         File finFile = new File(fileDir, theHash);
-        if(!finFile.exists()){
-
-           //Rename the file that already exists
-           if(!outFile.renameTo(finFile)){
-               //throw new IOException("Unable to rename file with the same hash.");
-               moveFile(outFile, finFile);
-           }
-
-        }
+        if(!finFile.exists() && !outFile.renameTo(finFile))
+            moveFile(outFile, finFile);        
 
         return theHash;
 
-    }/* END createFileContentFromFile( byte[] ) */
+    }
   
     // ==========================================================================
     /**
@@ -1038,10 +815,6 @@ abstract public class FileUtilities {
         double tempProgressDouble;
         long writeByteCounter = 0;
 
-        if( aFile == null ) { //If the given File is null...
-            throw new NullPointerException();
-        }
-
         //Get file size
         long tempFileSize = aFile.length();
 
@@ -1049,7 +822,6 @@ abstract public class FileUtilities {
 
             File outFile = File.createTempFile("lib_", null);
             MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
-//            byte[] fileHeader = Utilities.getFileHeader();
 
             FileInputStream theFileStream = new FileInputStream(aFile);
             BufferedInputStream theBufferedIS = new BufferedInputStream(theFileStream);
@@ -1060,10 +832,6 @@ abstract public class FileUtilities {
 
                 try {
 
-                    //Setup the header
-//                    System.arraycopy(fileHeader, 0, byteBuffer, 0, fileHeader.length);
-//                    bytesRead = theBufferedIS.read(byteBuffer, fileHeader.length, byteBuffer.length - fileHeader.length);
-//                    bytesRead += fileHeader.length;
 
                     while( bytesRead != -1){
 
@@ -1112,15 +880,8 @@ abstract public class FileUtilities {
 
             //Rename the file flush the stream and close it
             File finFile = new File(parentDir, theHash);
-            if(!finFile.exists()){
-
-                //Rename the file that already exists
-                if(!outFile.renameTo(finFile)){
-                    //throw new IOException("Unable to rename file with the same hash.");
-                    moveFile(outFile, finFile);
-                }
-
-            }
+            if(!finFile.exists() && !outFile.renameTo(finFile))
+                    moveFile(outFile, finFile);                
 
 
         } else { //If the file doesn't exist or is not actually a file...
@@ -1130,30 +891,6 @@ abstract public class FileUtilities {
         return theHash;
 
     }/* END createFileContentFromFile( File ) */
-    
-     //===============================================================
-    /**
-    * Inner Exception class for invalid library files
-    *
-    */
-    public static class InvalidLibraryFileException extends Exception{
-
-        private InvalidLibraryFileException(String string) {
-           super(string);
-        }
-    }
-
-     //===============================================================
-    /**
-    * Inner Exception class for invalid library files
-    *
-    */
-    public static class InvalidFileLengthException extends Exception{
-
-        private InvalidFileLengthException(String string) {
-           super(string);
-        }
-    }
-  
+     
 
 }/* END CLASS FileUtilities */

@@ -331,99 +331,42 @@ public class InterfaceOptionsPanel extends OptionsJPanel implements ProgressDriv
             
             File aFile = (File)theObjList.get(0);
             JarItem aJarItem = (JarItem)theObjList.get(1);                    
-                    
-//            if( FileUtilities.verifyCanRead( aFile ) ) { //If the file the File represents can be read...
 
-                try {
-                    
+            try {
+
+                //Add the jar
+                Utilities.addJarItem( aJarItem );
+
+                //Write the file to disk
+                String fileHash = FileUtilities.createHashedFile( aFile, progressListener );
+                if( fileHash != null ) {
+
                     //Create a FileContentRef
-//                    JarItem aJarItem = Utilities.getJavaItem(aFile);
-//                    aJarItem.setFilename( aFile.getName() );
-//                    aJarItem.setType(theType);
-//                    
-//                    //See if the table already contains the entry
-//                    DefaultTableModel theModel = (DefaultTableModel) theJarTable.getModel();
-//                    JarItem currentItem = null;
-//                    int rowToDelete = -1;
-//                    for( int i =0; i < theModel.getRowCount(); i++ ){
-//                        
-//                        //Set the JarItem
-//                        currentItem = (JarItem)theModel.getValueAt(i, 0);
-//                        
-//                        //Check if the jvm version is the same first
-//                        if( aJarItem.getJvmMajorVersion().equals(currentItem.getJvmMajorVersion()) && 
-//                                aJarItem.getType().equals( currentItem.getType()) ){
-//                            
-//                            //Only one Stager and Payload are allowed
-//                            if( aJarItem.getType().equals(JarItem.STAGER_TYPE) || aJarItem.getType().equals(JarItem.PAYLOAD_TYPE)){
-//                                rowToDelete = i;
-//                                break;
-//                            //Check if one with the same name exists
-//                            } else if( aJarItem.getName().equals(currentItem.getName() )) {
-//                                rowToDelete = i;
-//                                break;
-//                            }
-//                            
-//                        }
-//                        
-//                        //Reset value
-//                        currentItem = null;
-//                    }
-//                    
-//                    //If a similar library already exist
-//                    if( currentItem != null ){                        
-//                        String theMessage = new StringBuilder("Would you like to replace the existing ")
-//                                .append(currentItem.getType()).append(" named \"")
-//                                .append(currentItem.getName()).append("\" versioned \"")
-//                                .append(currentItem.getVersion()).append("\"?").toString();
-//                        int dialogValue = JOptionPane.showConfirmDialog(this, theMessage, "Replace JAR Library?", JOptionPane.YES_NO_OPTION);
-//                        
-//                        //Add the JAR to utilities
-//                        if ( dialogValue == JOptionPane.YES_OPTION ){
-//                            deleteJarItem(rowToDelete);
-//                        }
-//                    }
-                                          
-                    //Add the jar
-                    Utilities.addJarItem( aJarItem );
+                    aJarItem.setFileHash( fileHash ); //Set the file's hash
 
-                    //Write the file to disk
-                    String fileHash = FileUtilities.createHashedFile( aFile, progressListener );
-                    if( fileHash != null ) {
+                    //Write to disk
+                    aJarItem.writeSelfToDisk();
 
-                        //Create a FileContentRef
-                        aJarItem.setFileHash( fileHash ); //Set the file's hash
+                    DefaultTableModel theModel = (DefaultTableModel) theJarTable.getModel();
+                    theModel.addRow( new Object[]{ aJarItem, 
+                            aJarItem.getType(), aJarItem.getJvmMajorVersion(), aJarItem.getVersion() });
 
-                        //Write to disk
-                        aJarItem.writeSelfToDisk();
+                    //If it is a local extension then load it
+                    if( aJarItem.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
 
-                        DefaultTableModel theModel = (DefaultTableModel) theJarTable.getModel();
-                        theModel.addRow( new Object[]{ aJarItem, 
-                                aJarItem.getType(), aJarItem.getJvmMajorVersion(), aJarItem.getVersion() });
+                        //Load the jar
+                        File libraryFile = new File( Directories.getFileLibraryDirectory(), aJarItem.getFileHash() ); //Create a File to represent the library file to be copied
+                        List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
+                        for( Class aClass : theClasses )
+                            addClassToMap(aClass);                            
+                    }
 
-                        //If it is a local extension then load it
-                        if( aJarItem.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
+                } 
 
-                            //Load the jar
-                            File libraryFile = new File( Directories.getFileLibraryDirectory(), aJarItem.getFileHash() ); //Create a File to represent the library file to be copied
-                            List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
-                            for( Class aClass : theClasses ){
-                                addClassToMap(aClass);
-                            }
-                        }
-
-                    } 
-
-                } catch ( NoSuchAlgorithmException | IOException ex) {
-                    JOptionPane.showMessageDialog( this, ex.getMessage(), "Could not import the JAR library.", JOptionPane.ERROR_MESSAGE );
-                    retVal = "Could not import the JAR library.";
-                }
-
-//            } else { //If the file cannot be read...
-//               JOptionPane.showMessageDialog( this, new StringBuilder( "\tThis support file could not be read: \"" )
-//                        .append( aFile.getAbsolutePath() ).append( "\"" ).toString(), "Could not add the file to the task.", JOptionPane.ERROR_MESSAGE );
-//               retVal = "Could not add the file to the task.";
-//            }                
+            } catch ( NoSuchAlgorithmException | IOException ex) {
+                JOptionPane.showMessageDialog( this, ex.getMessage(), "Could not import the JAR library.", JOptionPane.ERROR_MESSAGE );
+                retVal = "Could not import the JAR library.";
+            }
             
         }
         return retVal;

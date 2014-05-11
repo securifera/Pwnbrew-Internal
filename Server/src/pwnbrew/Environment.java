@@ -74,13 +74,11 @@ final public class Environment {
 
     private static final String NAME_Class = Environment.class.getSimpleName();
 
-    private static final TreeMap<String, Class<? extends Object>> thePathToClassMap =
-      new TreeMap<>();
+    private static final TreeMap<String, Class<? extends Object>> thePathToClassMap = new TreeMap<>();
 
-    private static final String ClassNameDiscriminator = ".class";    
-    
+    private static final String ClassNameDiscriminator = ".class";       
 
-    private static final String theArch = System.getProperty("os.arch");
+    //private static final String theArch = System.getProperty("os.arch");
     private static final ProtectionDomain theProtectionDomain = Environment.class.getProtectionDomain();
     private static final CodeSource theCodeSource = theProtectionDomain.getCodeSource();
     private static final URL theCodeSourceLocationUrl = theCodeSource.getLocation();
@@ -101,7 +99,7 @@ final public class Environment {
     * Prevents instantiation of {@link Environment} outside of itself.
     */
     private Environment() {
-    }/* END CONSTRUCTOR() */
+    }
 
     // ==========================================================================
     /**
@@ -124,7 +122,7 @@ final public class Environment {
                 if( aRef.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
                     
                     //Load the jar
-                    File libraryFile = new File( Directories.getFileLibraryDirectory(), aRef.getFileHash() ); //Create a File to represent the library file to be copied
+                    File libraryFile = new File( Directories.getFileLibraryDirectory(), aRef.getFileHash() ); 
                     List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
                     for( Class aClass : theClasses ){
                         addClassToMap(aClass);
@@ -172,52 +170,14 @@ final public class Environment {
 
     }/* END determineRunLocation() */
 
-//
-//    // ==========================================================================
-//    /**
-//    * Determines if the program is running within an IDE.
-//    * <p>
-//    * NOTE: This method used to make this determination is known to work only for
-//    * NetBeans.
-//    *
-//    * @return <tt>true</tt> if the program is running within an IDE; <tt>false</tt>
-//    * otherwise (e.g. from a jar file)
-//    */
-//    public static boolean isRunningWithinIde() {
-//        return isRunningWithinIde;
-//    }/* END isRunningWithinIde() */
-//
-//
-//    // ==========================================================================
-//    /**
-//    * Determines if the program is running from a jar file.
-//    *
-//    * @return <tt>true</tt> if the program is running from a jar file; <tt>false</tt>
-//    * otherwise (e.g. from within an IDE)
-//    */
-//    public static boolean isRunningFromJar() {
-//        return isRunningFromJar;
-//    }/* END isRunningFromJar() */
-
-
     // ==========================================================================
     /**
     *
      * @return 
     */
     public static URL getCodeSourceLocation() {
-    return theCodeSourceLocationUrl;
-    }/* END getCodeSourceLocation() */
-
-//    // ==========================================================================
-//    /**
-//    *  Returns the architecture of the CPU
-//     * @return 
-//    */
-//    public static String getArchitecture() {
-//    return theArch;
-//    }/* END getArchitecture() */
-
+        return theCodeSourceLocationUrl;
+    }
 
     // ==========================================================================
     /**
@@ -262,8 +222,7 @@ final public class Environment {
             Log.log( LogLevel.SEVERE, NAME_Class, "populateNameToClassMap()", "Cannot determine where the program is running.", null );
         }
 
-    }/* END populateNameToClassMap() */
-
+    }
 
     // ==========================================================================
     /**
@@ -309,24 +268,20 @@ final public class Environment {
                     //Replace "\\" with File.separator because "\\" is operating system dependant
                     slashAtIndex = strBldr.indexOf( File.separator ); //Find the first occuring backslash
                     while( slashAtIndex > -1 ) { //While a backslash is found...
-                        if(slashAtIndex == 0){
+                        if(slashAtIndex == 0)
                             strBldr.deleteCharAt(slashAtIndex);
-                        } else {
+                        else
                             strBldr.setCharAt( slashAtIndex, '.' ); //Replace the backslash with a period
-                        }
+                        
                         slashAtIndex = strBldr.indexOf( File.separator ); //Find the next backslash
                     }
 
                     addClassToMap( strBldr.toString() ); //Add the Class to the map
 
-                } //End of "if( fullPathStr.endsWith( ClassNameDiscriminator ) ) { //If the path (file name) ends with ".class"..."
-
-            } //End of "} else { //If the File represents file..."
-
-        } //End of "for( File aFile : fileList ) { //For each File..."
-
-    }/* END populateNameToClassMapFromDirectory( int, File ) */
-
+                }
+            } 
+        } 
+    }
 
     // ==========================================================================
     /**
@@ -339,10 +294,6 @@ final public class Environment {
     * @throws IllegalArgumentException if the given {@code File} is null
     */
     private static void populateNameToClassMapFromJarFile( JarFile jarFile ) {
-
-        if( jarFile == null ) { 
-            throw new IllegalArgumentException( "The JarFile cannot be null." );
-        }
 
         Enumeration<JarEntry> jarEntryEnum = jarFile.entries(); //Get an Enumeration of the JarEntrys
         JarEntry aJarEntry;
@@ -370,12 +321,9 @@ final public class Environment {
 
                 addClassToMap( strBldr.toString() ); //Add the Class to the map
 
-            } //End of "if( jarEntryName.endsWith( ClassNameDiscriminator ) ) { //If the JarEntry's name ends with ".class"..."
-
-        } //End of "while( jarEntryEnum.hasMoreElements() ) { //While the Enumeration has another JarEntry..."
-
-    }/* END populateNameToClassMapFromJarFile() */
-
+            }
+        }
+    }
     // ==========================================================================
     /**
     * Finds the {@link Class} that has the given path and adds the path/{@code Class}
@@ -388,25 +336,23 @@ final public class Environment {
     */
     public static void addClassToMap( Class aClass ) {
 
-        if( aClass == null ) { 
-            return; 
-        }
-
-        //Determine if the class is an XmlBase
-        Class parentClass = aClass.getSuperclass();
-        if( parentClass != null ){
-            while( parentClass != Object.class){
-                if( parentClass == XmlBase.class ){
-                    thePathToClassMap.put( aClass.getSimpleName(), aClass ); //Map the path to the Class
-                    break;
-                } else if( parentClass == RunnableItemController.class ){
-                    Utilities.addRunnableController( aClass.getCanonicalName() );
-                    break;
-                } else if( parentClass == OptionsJPanel.class ){
-                    Utilities.addOptionsJPanel( aClass.getCanonicalName() );
-                    break;
-                }else {
-                    parentClass = parentClass.getSuperclass();
+        if( aClass != null ){
+            //Determine if the class is an XmlBase
+            Class parentClass = aClass.getSuperclass();
+            if( parentClass != null ){
+                while( parentClass != Object.class){
+                    if( parentClass == XmlBase.class ){
+                        thePathToClassMap.put( aClass.getSimpleName(), aClass ); //Map the path to the Class
+                        break;
+                    } else if( parentClass == RunnableItemController.class ){
+                        Utilities.addRunnableController( aClass.getCanonicalName() );
+                        break;
+                    } else if( parentClass == OptionsJPanel.class ){
+                        Utilities.addOptionsJPanel( aClass.getCanonicalName() );
+                        break;
+                    }else {
+                        parentClass = parentClass.getSuperclass();
+                    }
                 }
             }
         }
@@ -424,10 +370,9 @@ final public class Environment {
     */
     public static void addClassToMap( String path ) {
 
-        if( path == null || path.isEmpty() ) { //If the String is null or empty...
-            return; //Do nothing
-        }
-
+        if( path == null || path.isEmpty() )
+            return; 
+        
         //Get the Class with the path...
         Class aClass;
         try {
@@ -458,14 +403,13 @@ final public class Environment {
     */
     public static Class getClassByName( String className ) {
 
-        if( className == null ) { //If the String is null...
+        if( className == null )
             throw new IllegalArgumentException( "The String cannot be null." );
-        } else if( className.isEmpty() ) { //If the String is empty...
+        else if( className.isEmpty() )
             throw new IllegalArgumentException( "The String cannot be empty." );
-        }
-
+        
         return thePathToClassMap.get( className );
 
-    }/* END getClassByName( String ) */
+    }
 
 }/* END CLASS Environment */

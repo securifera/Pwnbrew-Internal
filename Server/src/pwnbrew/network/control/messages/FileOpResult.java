@@ -113,9 +113,9 @@ public final class FileOpResult extends Tasking {
             String clientIdStr = Integer.toString( getSrcHostId() );
             final ServerManager aSM = (ServerManager) passedManager;
             final HostController theController = aSM.getServer().getGuiController().getHostController( clientIdStr );
-            if( theController != null ){   
+            if( theController != null )   
                 theController.refreshFileSystemJTree();
-            }
+            
         }
     }
    
