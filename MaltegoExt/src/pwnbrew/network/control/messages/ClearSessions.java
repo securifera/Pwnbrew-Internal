@@ -36,34 +36,27 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
-* CountReply.java
-*/
-
 package pwnbrew.network.control.messages;
 
-import pwnbrew.MaltegoStub;
-import pwnbrew.functions.Function;
-import pwnbrew.manager.PortManager;
-import pwnbrew.misc.CountSeeker;
-import pwnbrew.misc.SocketUtilities;
+import java.util.ArrayList;
+import pwnbrew.controllers.MainGuiController;
+import pwnbrew.host.Host;
+import pwnbrew.host.HostController;
+import pwnbrew.host.Session;
+import pwnbrew.logging.LoggableException;
+import pwnbrew.manager.CommManager;
 import pwnbrew.network.ControlOption;
+import pwnbrew.tasks.TaskManager;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
  *  
  */
-public final class CountReply extends Tasking {
+public final class ClearSessions extends ControlMessage{ 
     
-    private static final byte OPTION_COUNT = 70;        
-    private static final byte OPTION_COUNT_ID = 80;
-    private static final byte OPTION_OPTIONAL_ID = 81;
-    private int theCount = 0;
-    private int countType;
-    private int optionalId;
-    
-    private static final String NAME_Class = CountReply.class.getSimpleName();
+    private static final byte OPTION_HOST_ID = 124;
+    private int hostId;
 
     // ==========================================================================
     /**
@@ -71,7 +64,7 @@ public final class CountReply extends Tasking {
      *
      * @param passedId
     */
-    public CountReply(byte[] passedId ) {
+    public ClearSessions(byte[] passedId ) {
         super( passedId );
     }
     
@@ -85,25 +78,18 @@ public final class CountReply extends Tasking {
     @Override
     public boolean setOption( ControlOption tempTlv ){        
 
-        boolean retVal = true;    
-        if( !super.setOption(tempTlv)){
-            
-            byte[] theValue = tempTlv.getValue();
-            switch( tempTlv.getType()){
-                case OPTION_COUNT:
-                    theCount = SocketUtilities.byteArrayToInt(theValue);
-                    break;
-                case OPTION_COUNT_ID:
-                    countType = SocketUtilities.byteArrayToInt(theValue);
-                    break;
-                case OPTION_OPTIONAL_ID:
-                    optionalId = SocketUtilities.byteArrayToInt(theValue);
-                    break;
-                default:
-                    retVal = false;
-                    break;
-            }           
+        boolean retVal = true;
+        
+        byte[] theValue = tempTlv.getValue();
+        switch( tempTlv.getType()){
+            case OPTION_HOST_ID:
+                hostId = SocketUtilities.byteArrayToInt(theValue);
+                break;
+            default:
+                retVal = false;
+                break;
         }
+        
         return retVal;
     }
     
@@ -112,20 +98,27 @@ public final class CountReply extends Tasking {
     *   Performs the logic specific to the message.
     *
      * @param passedManager
+     * @throws pwnbrew.logging.LoggableException
     */
     @Override
-    public void evaluate( PortManager passedManager ) {   
-    
-        if( passedManager instanceof MaltegoStub ){
-            MaltegoStub theStub = (MaltegoStub)passedManager;
-            Function aFunction = theStub.getFunction(); 
+    public void evaluate( CommManager passedManager ) throws LoggableException {     
             
-            if( aFunction instanceof CountSeeker ){
-                CountSeeker aCS = (CountSeeker)aFunction;
-                aCS.setCount(theCount, countType, optionalId);
+        TaskManager theTaskManager = passedManager.getTaskManager();        
+        if( theTaskManager instanceof MainGuiController ){
+
+            String hostIdStr = Integer.toString( hostId );
+      
+            //Get the host controller 
+            MainGuiController theGuiController = (MainGuiController)theTaskManager;
+            HostController theHostController = theGuiController.getHostController( hostIdStr );
+            if( theHostController != null ){
+                Host theHost = theHostController.getObject();
+                theHost.setSessionList( new ArrayList<Session>());
             }
-            
-        }    
-    }
-   
+
+        }        
+
+    }        
+    
+
 }

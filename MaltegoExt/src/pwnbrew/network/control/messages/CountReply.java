@@ -55,19 +55,35 @@ import pwnbrew.utilities.SocketUtilities;
 public final class CountReply extends ControlMessage{ 
     
     private static final byte OPTION_COUNT = 70;    
+    private static final byte OPTION_COUNT_ID = 80;
+    private static final byte OPTION_OPTIONAL_ID = 81;
     
     // ==========================================================================
     /**
      * Constructor
      *
      * @param dstHostId
+     * @param passedCount the count
+     * @param passedType Id for the thing being counted
+     * @param passedId Id for the object that has the thing being counted
+     * @throws java.io.UnsupportedEncodingException
     */
-    public CountReply( int dstHostId, int passedCount ) throws UnsupportedEncodingException {
+    public CountReply( int dstHostId, int passedCount, int passedType, int passedId ) throws UnsupportedEncodingException {
         super( dstHostId );
         
         byte[] tempBytes = SocketUtilities.intToByteArray(passedCount);
         ControlOption aTlv = new ControlOption(OPTION_COUNT, tempBytes);
         addOption(aTlv); 
+        
+        //Add file type
+        tempBytes = SocketUtilities.intToByteArray(passedType);
+        aTlv = new ControlOption( OPTION_COUNT_ID, tempBytes);
+        addOption(aTlv);
+        
+        //Add file type
+        tempBytes = SocketUtilities.intToByteArray(passedId);
+        aTlv = new ControlOption( OPTION_OPTIONAL_ID, tempBytes);
+        addOption(aTlv);
     }
 
 }/* END CLASS CountReply */

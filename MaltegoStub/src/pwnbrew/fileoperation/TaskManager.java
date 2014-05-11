@@ -66,7 +66,6 @@ public interface TaskManager {
     /**
      * Returns the client directory
      *
-     * @param clientId
      * @return
     */
     public File getDownloadDirectory();

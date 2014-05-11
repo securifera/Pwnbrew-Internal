@@ -35,18 +35,34 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-package pwnbrew.sessions;
+
+package pwnbrew.network.control.messages;
+
+import pwnbrew.misc.SocketUtilities;
+import pwnbrew.network.ControlOption;
 
 /**
  *
- * @author Securifera
+ *  
  */
-public interface SessionJFrameListener extends HostCheckInListListener {
+public final class ClearSessions extends ControlMessage{ 
+    
+    private static final byte OPTION_HOST_ID = 124;
 
-    public void setAutoSleepFlag(boolean selected);
-
-    public void clearSessionList( String hostIdStr );
-
-    public void hostSelected(String hostIdStr);
+    // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param dstHostId
+     * @param passedHostId
+    */
+    public ClearSessions( int dstHostId, String passedHostId ) {
+        super( dstHostId );
+        
+        //Add file type
+        byte[] tempBytes = SocketUtilities.intToByteArray( Integer.parseInt(passedHostId));
+        ControlOption aTlv = new ControlOption( OPTION_HOST_ID, tempBytes);
+        addOption(aTlv);
+    }
 
 }

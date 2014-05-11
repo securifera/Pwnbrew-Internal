@@ -55,7 +55,7 @@ public class IpV4Address extends Entity {
     /**
      * Constructor
      * 
-     * @param passedType 
+     * @param passedIp 
      */
     public IpV4Address( String passedIp ) {
         super( MALTEGO_IPV4_ADDRESS );

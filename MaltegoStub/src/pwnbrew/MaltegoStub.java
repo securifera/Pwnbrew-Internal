@@ -39,14 +39,15 @@ package pwnbrew;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.fileoperation.TaskManager;
 import pwnbrew.functions.Function;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Utilities;
@@ -149,7 +150,7 @@ public class MaltegoStub extends PortManager  implements LockListener {
 //            System.out.println(testStr);
 //                   
             
-//            System.err.println(Arrays.asList(args).toString());
+            System.err.println(Arrays.asList(args).toString());
             if( args.length > 0 && args.length < 4 ){
                 
                 //Instantiate the manager and start it up
@@ -177,7 +178,6 @@ public class MaltegoStub extends PortManager  implements LockListener {
     // ========================================================================
     /**
      *  Handles any functions that need to be executed before the program starts.
-     * @throws pwnbrew.log.LoggableException
      */
     public void initialize() {
 

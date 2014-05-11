@@ -131,7 +131,7 @@ public abstract class ControlMessage extends Message {
      *
      * @param passedBuffer
      * @return msgAddress
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
      * @throws java.io.IOException
     */
     public static ControlMessage getMessage( ByteBuffer passedBuffer ) throws LoggableException, IOException {
@@ -172,6 +172,7 @@ public abstract class ControlMessage extends Message {
      * @param msgId
      * @param passedBuffer
      * @return 
+     * @throws pwnbrew.log.LoggableException 
      */
     public static ControlMessage instatiateMessage( byte[] msgId, ByteBuffer passedBuffer ) throws LoggableException{
         

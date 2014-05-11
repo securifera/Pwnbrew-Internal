@@ -58,6 +58,7 @@ abstract public class Entity extends XmlObject {
     // ==========================================================================
     /**
     * Constructor
+     * @param passedType
     */
     public Entity( String passedType ) {
         theAttributeMap.put( ATTRIBUTE_Type, passedType  );
@@ -77,7 +78,7 @@ abstract public class Entity extends XmlObject {
     /**
     * Add the field to the entity
     *
-    * @return the type of entity
+     * @param aField
     */
     public void addField( Field aField ) {
         
@@ -88,10 +89,27 @@ abstract public class Entity extends XmlObject {
         fieldList.addField(aField);
     }
     
+    // ==========================================================================
+    /**
+    * Add the field to the entity
+    *
+     * @param fieldName
+     * @return 
+    */
+    public Field getField( String fieldName ) {
+        
+        //If the object is null then create it
+        Field aField = null;
+        if( fieldList != null )
+            fieldList.getField(fieldName);
+        
+        return aField;
+    }
+    
      //===========================================================================
     /**
      * 
-     * @param passedValue 
+     * @return  
      */
     public String getDisplayValue() {
         return mainPropertyValue.getXmlObjectContent();

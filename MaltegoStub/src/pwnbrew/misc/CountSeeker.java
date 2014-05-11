@@ -47,7 +47,9 @@ public interface CountSeeker {
     /**
      * 
      * @param passedCount 
+     * @param countType 
+     * @param optionalObjId 
      */
-    public void setCount(int passedCount);
+    public void setCount(int passedCount, int countType, int optionalObjId );
 
 }

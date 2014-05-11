@@ -110,7 +110,7 @@ public class PushFile extends FileMessage {
      *
      * @param taskId
      * @param dstHostId
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public PushFile( int taskId , int dstHostId ) throws LoggableException { // NO_UCD (use default)
         super( taskId, dstHostId );

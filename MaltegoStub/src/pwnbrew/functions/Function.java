@@ -55,6 +55,7 @@ abstract public class Function {
     //===================================================================
     /**
      * Base Constructor
+     * @param passedManager
      */
     public Function( MaltegoStub passedManager ) {
         theManager = passedManager;
@@ -63,6 +64,7 @@ abstract public class Function {
     //==================================================================
     /**
      * Runs the function and returns an XML string as output
+     * @param passedObjectStr
      * @return 
      */
     abstract public String run( String passedObjectStr );

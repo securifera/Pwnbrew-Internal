@@ -56,7 +56,11 @@ public class Host extends Entity {
     /**
      * Constructor
      * 
-     * @param passedType 
+     * @param connected
+     * @param passedHostname
+     * @param passedArch 
+     * @param passedOS 
+     * @param passedId 
      */
     public Host( boolean connected, String passedHostname, String passedArch, String passedOS, String passedId ) {
         super( connected ? PWNBREW_HOST_CONNECTED : PWNBREW_HOST_DISCONNECTED );

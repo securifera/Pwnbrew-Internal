@@ -77,6 +77,7 @@ public class ShellJPanel extends javax.swing.JPanel {
     //===============================================================
     /**
      * Constructor
+     * @param passedListener
      */
     public ShellJPanel( ShellJPanelListener passedListener ) {
         

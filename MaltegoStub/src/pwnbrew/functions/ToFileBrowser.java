@@ -121,6 +121,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     //==================================================================
     /**
      * Constructor
+     * @param passedManager
      */
     public ToFileBrowser( MaltegoStub passedManager ) {
         super(passedManager);
@@ -653,7 +654,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     //=========================================================================
     /**
      * 
-     * @param anObj 
+     * @param passedNode 
      */
     @Override
     public void getChildren( DefaultMutableTreeNode passedNode ) {
@@ -723,7 +724,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     //=================================================================
     /**
      * 
-     * @param theTaskId 
+     * @param passedId 
      */
     @Override
     public void cancelTask( int passedId ) {
@@ -775,7 +776,6 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     //=================================================================
     /**
      * 
-     * @param clientId
      * @return 
      */
     @Override
@@ -796,8 +796,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     //=================================================================
     /**
      * 
-     * @param theRemoteTask
-     * @param currentRow 
+     * @param theRemoteTask 
      */
     @Override
     public void removeTask(RemoteFileIO theRemoteTask) {
@@ -850,7 +849,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
      //=================================================================
     /**
      * 
-     * @param e 
+     * @param anEvent 
      */
     @Override
     public void fileTreePanelValueChanged(TreeSelectionEvent anEvent) {
@@ -879,7 +878,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     //=================================================================
     /**
      * 
-     * @param aFileNode 
+     * @param passedFileNode 
      */
     @Override
     public void selectNodeInTree(FileNode passedFileNode) {

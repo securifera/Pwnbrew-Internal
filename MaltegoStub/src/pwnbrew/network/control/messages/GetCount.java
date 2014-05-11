@@ -57,12 +57,16 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
     
     public static final byte HOST_COUNT = 20;
     public static final byte NIC_COUNT = 21;
+    public static final byte SESSION_COUNT = 22;
+    public static final byte CHECKIN_COUNT = 23;
 
     // ==========================================================================
     /**
      * Constructor
      *
      * @param dstHostId
+     * @param passedType
+     * @param passedId
     */
     public GetCount( int dstHostId, int passedType, int passedId ) {
         super( dstHostId );

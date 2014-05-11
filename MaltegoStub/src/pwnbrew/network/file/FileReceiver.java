@@ -51,7 +51,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import pwnbrew.Persistence;
 import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
@@ -121,7 +120,7 @@ final public class FileReceiver {
         fileDigest = MessageDigest.getInstance(Constants.HASH_FUNCTION);
         
         //Ensure the parent directory exists
-        Persistence.ensureDirectoryExists(parentDir);
+        Utilities.ensureDirectoryExists(parentDir);
 
         String filePath = new File( fileHashFileNameArr[1] ).getName();        
         fileLoc = new File( parentDir,  filePath);

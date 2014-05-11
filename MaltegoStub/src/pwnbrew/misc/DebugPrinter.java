@@ -81,7 +81,9 @@ public class DebugPrinter implements Runnable {
      *  Queues a message to be handled
      *
      * @param sourceClassName
+     * @param functionName
      * @param passedMessage
+     * @param thrown
      */
       public static synchronized void printMessage( String sourceClassName, String functionName, String passedMessage, Throwable thrown ) { 
 

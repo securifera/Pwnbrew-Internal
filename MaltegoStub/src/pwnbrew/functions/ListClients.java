@@ -72,6 +72,7 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
     //==================================================================
     /**
      * Constructor
+     * @param passedManager
      */
     public ListClients( MaltegoStub passedManager ) {
         super(passedManager);
@@ -216,10 +217,11 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
     //===============================================================
     /**
      * 
-     * @param theClientCount 
+     * @param countType
+     * @param objId
      */
     @Override
-    public synchronized void setCount(int passedCount) {
+    public synchronized void setCount(int passedCount, int countType, int objId ) {
         theClientCount = passedCount;
         beNotified();
     }

@@ -89,7 +89,7 @@ public class FileTreePanel extends JPanel {
     //=========================================================================
     /**
      * Constructor 
-     * @param passedHandler
+     * @param passeFileBrowserListener
      */
     public FileTreePanel( FileBrowserListener passeFileBrowserListener ) {
         

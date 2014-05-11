@@ -54,6 +54,7 @@ public class Label extends XmlObject {
     // ==========================================================================
     /**
     * Constructor
+     * @param passedName
     */
     public Label( String passedName ) {
         theAttributeMap.put( ATTRIBUTE_Name, passedName  );
@@ -63,7 +64,6 @@ public class Label extends XmlObject {
      //===========================================================================
     /**
      * 
-     * @param passedValue 
      */
     public void setHtmlText() {
         setAttribute(ATTRIBUTE_Type, TEXT_HTML);
@@ -72,7 +72,6 @@ public class Label extends XmlObject {
      //===========================================================================
     /**
      * 
-     * @param passedValue 
      */
     public void setPlainText() {
         setAttribute(ATTRIBUTE_Type, TEXT_PLAIN);

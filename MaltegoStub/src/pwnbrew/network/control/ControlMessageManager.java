@@ -88,7 +88,6 @@ public class ControlMessageManager extends DataManager {
      * @param passedCommManager
      * @return 
      * @throws java.io.IOException 
-     * @throws pwnbrew.log.LoggableException 
      */
     public synchronized static ControlMessageManager initialize( PortManager passedCommManager ) throws IOException {
 

@@ -43,7 +43,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javax.swing.event.ListSelectionEvent;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.misc.Constants;
@@ -54,6 +53,7 @@ import pwnbrew.misc.SocketUtilities;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.ClearSessions;
 import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.network.control.messages.GetCount;
 import pwnbrew.sessions.SessionJFrameListener;
@@ -85,6 +85,7 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
     //==================================================================
     /**
      * Constructor
+     * @param passedManager
      */
     public ToSessionManager( MaltegoStub passedManager ) {
         super(passedManager);
@@ -116,26 +117,26 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
             return retStr;
         }
         
-        //Get host id
-        String hostIdStr = objectMap.get( Constants.HOST_ID);
-        if( hostIdStr == null ){
-            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
-            return retStr;
-        }
+//        //Get host id
+//        String hostIdStr = objectMap.get( Constants.HOST_ID);
+//        if( hostIdStr == null ){
+//            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
+//            return retStr;
+//        }
         
-        //Get host id
-        String tempOs = objectMap.get( Constants.HOST_OS);
-        if( tempOs == null ){
-            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
-            return retStr;
-        }
+//        //Get host id
+//        String tempOs = objectMap.get( Constants.HOST_OS);
+//        if( tempOs == null ){
+//            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
+//            return retStr;
+//        }
         
-        //Get host id
-        String tempName = objectMap.get( Constants.HOST_NAME);
-        if( tempName == null ){
-            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
-            return retStr;
-        }
+//        //Get host id
+//        String tempName = objectMap.get( Constants.HOST_NAME);
+//        if( tempName == null ){
+//            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
+//            return retStr;
+//        }
          
         //Create the connection
         try {
@@ -189,10 +190,6 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
                     waitToBeNotified( 180 * 1000);
 
                     if( theClientCount == 0 ){ 
-                        //Set the host id
-                        theHostId = Integer.parseInt( hostIdStr);
-                        theOS = tempOs;
-                        theHostName = tempName;
 
                          //Create the file browser frame
                         theSessionsJFrame = new SessionsJFrame( this, theHostList );
@@ -219,11 +216,11 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
                 StringBuilder aSB = new StringBuilder()
                         .append("Unable to connect to the Pwnbrew server at \"")
                         .append(serverIp).append(":").append(serverPort).append("\"");
-                DebugPrinter.printMessage( NAME_Class, "listclients", aSB.toString(), null);
+                DebugPrinter.printMessage( NAME_Class, "run", aSB.toString(), null);
             }
             
         } catch (IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex );
+            DebugPrinter.printMessage( NAME_Class, "run", ex.getMessage(), ex );
         }
         
         return retStr;
@@ -293,12 +290,15 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
     //===============================================================
     /**
      * 
+     * @param passedHostId
      */
     @Override
-    public void clearSessionList() {
+    public void clearSessionList( String passedHostId ) {
         
         //Send message to server to clear the session list
-        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
+        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();      
+        ControlMessage aMsg = new ClearSessions( Constants.SERVER_ID, passedHostId);
+        aCMM.send(aMsg);
         
         theSessionsJFrame.repaint();
     }
@@ -316,10 +316,11 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
     //===============================================================
     /**
      * 
-     * @param theClientCount 
+     * @param countType
+     * @param optionalHostId
      */
     @Override
-    public synchronized void setCount(int passedCount) {
+    public synchronized void setCount(int passedCount, int countType, int optionalHostId ) {
         theClientCount = passedCount;
         beNotified();
     }
@@ -344,11 +345,20 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
     //===============================================================
     /**
      * 
-     * @param e 
+     * @param hostIdStr
      */
     @Override
-    public void hostJListValueChanged(ListSelectionEvent e) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void hostSelected(String hostIdStr) {
+        //Get the client count
+        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();    
+        
+        //Get session count
+        ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.SESSION_COUNT, Integer.parseInt(hostIdStr) );
+        aCMM.send(aMsg);
+        
+         //Get checkin count
+        aMsg = new GetCount( Constants.SERVER_ID, GetCount.CHECKIN_COUNT, Integer.parseInt(hostIdStr) );
+        aCMM.send(aMsg);
     }
 
 

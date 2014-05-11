@@ -68,6 +68,7 @@ abstract public class XmlObject {
     // ==========================================================================
     /**
     * Constructor 
+     * @param passedContent
     */
     public XmlObject( String passedContent ) {
         theXmlObjectContent = passedContent;

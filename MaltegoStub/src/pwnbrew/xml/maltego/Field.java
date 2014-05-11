@@ -54,6 +54,7 @@ public class Field extends XmlObject {
     // ==========================================================================
     /**
     * Constructor
+     * @param passedName
     */
     public Field( String passedName ) {
         theAttributeMap.put( ATTRIBUTE_Name, passedName  );
@@ -63,7 +64,6 @@ public class Field extends XmlObject {
      //===========================================================================
     /**
      * 
-     * @param passedValue 
      */
     public void setStrictMatching() {
         String attr = getAttribute( ATTRIBUTE_MatchingRule );

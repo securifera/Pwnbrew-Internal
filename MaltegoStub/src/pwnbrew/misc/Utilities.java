@@ -133,6 +133,31 @@ public class Utilities {
         }
     }
     
+     // ==========================================================================
+    /**
+     * Ensures the directory represented by the given {@link File} exists.
+     * <p>
+     * If the directory already exists this method does nothing; otherwise this
+     * method will attempt to create it. This method will also attempt to create
+     * any necessary but non-existing parents of the given directory.
+     * 
+     * @param directory a {@code File} representing the directory
+     * 
+     * @throws IOException if the directory did not exist and could not be created
+     */
+    public static void ensureDirectoryExists( File directory ) throws IOException {
+      
+        if( directory == null )
+            throw new IOException( "Could not create a directory, the given File is null." );
+      
+        if( !directory.exists() ) 
+            if( !directory.mkdirs() ) 
+                throw new IOException(
+                        new StringBuilder( "Could not create the directory \"" )
+                        .append( directory ).append( "\"" ).toString() );
+
+    }
+    
     // ==========================================================================
     /**
     * Determines if the local host is running an OS that is in the UNIX family.
@@ -349,7 +374,7 @@ public class Utilities {
      * @param encryptedText
      * @param preSharedKey
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
     */
     public static String simpleDecrypt ( String encryptedText, String preSharedKey ) throws LoggableException {
 

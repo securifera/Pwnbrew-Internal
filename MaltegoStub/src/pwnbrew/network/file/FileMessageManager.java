@@ -145,29 +145,21 @@ public class FileMessageManager extends DataManager {
     private void initFileTransfer( int clientId, int passedTaskId, int passedFileId, 
             File parentDir, String hashFilenameStr, long passedFileSize) 
             throws LoggableException, NoSuchAlgorithmException, IOException {
-
-        //Get the socket router
-//        ServerPortRouter aPR = (ServerPortRouter) theCommManager.getPortRouter( operatingPort );
-                       
-//        //Initiate the file transfer
-//        if(aPR != null){
             
-            //Initialize the file transfer
-            synchronized( theFileReceiverMap ){
-                
-                FileReceiver theReceiver = theFileReceiverMap.get(passedFileId);
-                //If the receive flag is not set
-                if( theReceiver == null ){
+        //Initialize the file transfer
+        synchronized( theFileReceiverMap ){
 
-                    theReceiver = new FileReceiver( this, clientId, passedTaskId, passedFileId, passedFileSize, parentDir, hashFilenameStr );
-                    theFileReceiverMap.put(passedFileId, theReceiver);
+            FileReceiver theReceiver = theFileReceiverMap.get(passedFileId);
+            //If the receive flag is not set
+            if( theReceiver == null ){
 
-                } else {
-                    throw new LoggableException("A file receive is already in progress.");
-                } 
-            }
+                theReceiver = new FileReceiver( this, clientId, passedTaskId, passedFileId, passedFileSize, parentDir, hashFilenameStr );
+                theFileReceiverMap.put(passedFileId, theReceiver);
 
-//        }
+            } else
+                throw new LoggableException("A file receive is already in progress.");
+             
+        }
         
     }
     

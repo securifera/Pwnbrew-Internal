@@ -150,6 +150,7 @@ public class FileNode implements Comparable{
      //=========================================================================
     /**
      *  Clears the child node list
+     * @return 
      */
     public List<FileNode> getChildNodes(){
         synchronized(childrenFileNodes){
@@ -160,7 +161,7 @@ public class FileNode implements Comparable{
     //=========================================================================
     /**
      * 
-     * @param a 
+     * @param passedNode 
      */
     public void addChildNode( FileNode passedNode ){
         synchronized(childrenFileNodes){

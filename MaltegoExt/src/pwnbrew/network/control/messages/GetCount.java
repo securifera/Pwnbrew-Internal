@@ -66,6 +66,8 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
     
     public static final byte HOST_COUNT = 20;
     public static final byte NIC_COUNT = 21;
+    public static final byte SESSION_COUNT = 22;
+    public static final byte CHECKIN_COUNT = 23;
     
     private int countType;
     private int optionalId;
@@ -113,6 +115,7 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
     *   Performs the logic specific to the message.
     *
      * @param passedManager
+     * @throws pwnbrew.logging.LoggableException
     */
     @Override
     public void evaluate( CommManager passedManager ) throws LoggableException {     
@@ -130,7 +133,7 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
                         List<LibraryItemController> theHostControllers = theGuiController.getHostControllers();
 
                         try {
-                            CountReply aHostMsg = new CountReply( getSrcHostId(), theHostControllers.size() - 1);
+                            CountReply aHostMsg = new CountReply( getSrcHostId(), theHostControllers.size() - 1, countType, optionalId);
                             aCMManager.send(aHostMsg);
                         } catch (UnsupportedEncodingException ex) {
                             Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
@@ -155,7 +158,7 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
                         }
 
                         try {
-                            CountReply aHostMsg = new CountReply( getSrcHostId(), numOfNics);
+                            CountReply aHostMsg = new CountReply( getSrcHostId(), numOfNics, countType, optionalId);
                             aCMManager.send(aHostMsg);
                         } catch (UnsupportedEncodingException ex) {
                             Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                

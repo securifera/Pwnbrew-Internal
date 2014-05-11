@@ -84,7 +84,7 @@ public final class PushFileFin extends FileMessage {
      * Constructor
      *
      * @param msgId
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public PushFileFin( byte[] msgId ) throws LoggableException  {
        super( msgId );

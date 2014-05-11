@@ -89,6 +89,7 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
     //==================================================================
     /**
      * Constructor
+     * @param passedManager
      */
     public ToShell( MaltegoStub passedManager ) {
         super(passedManager);

@@ -72,6 +72,7 @@ public class ToIP extends Function implements CountSeeker {
     //==================================================================
     /**
      * Constructor
+     * @param passedManager
      */
     public ToIP( MaltegoStub passedManager ) {
         super(passedManager);
@@ -225,9 +226,11 @@ public class ToIP extends Function implements CountSeeker {
     /**
      * 
      * @param passedCount 
+     * @param countType 
+     * @param objId 
      */
     @Override
-    public synchronized void setCount(int passedCount) {
+    public synchronized void setCount(int passedCount, int countType, int objId ) {
         theIpCount = passedCount;
         beNotified();
     }
@@ -235,7 +238,7 @@ public class ToIP extends Function implements CountSeeker {
     //===============================================================
     /**
      * 
-     * @param aHost 
+     * @param anIp 
      */
     public synchronized void addIp( IpV4Address anIp) {
         

@@ -38,6 +38,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.xml.maltego;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import pwnbrew.xml.XmlObject;
 
@@ -47,7 +48,7 @@ import pwnbrew.xml.XmlObject;
  */
 public class AdditionalFields extends XmlObject {
     
-    private final List<Field> theFieldList = new ArrayList<>();
+    private final LinkedHashMap<String, Field> theFieldMap = new LinkedHashMap<>();
 
     //===========================================================================
     /**
@@ -63,10 +64,10 @@ public class AdditionalFields extends XmlObject {
      * @param passedEntity 
      */
     public void addField( Field passedEntity){
-        synchronized( theFieldList ){
-            theFieldList.add(passedEntity);
+        synchronized( theFieldMap ){
+            theFieldMap.put(passedEntity.getXmlObjectContent(), passedEntity);
         }
-    }
+    };
     
      // ==========================================================================
     /**
@@ -83,13 +84,23 @@ public class AdditionalFields extends XmlObject {
 
         List<XmlObject> rtnList = super.getXmlComponents();
 
-        synchronized( theFieldList ){
-            if( theFieldList.size() > 0 ) //Add the entities
-                rtnList.addAll( theFieldList ); 
+        synchronized( theFieldMap ){
+            if( theFieldMap.size() > 0 ) //Add the entities
+                rtnList.addAll( theFieldMap.values() ); 
         }
         
         return rtnList;
 
+    }
+
+    // ==========================================================================
+    /**
+     * 
+     * @param fieldName 
+     * @return  
+     */
+    public Field getField(String fieldName) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

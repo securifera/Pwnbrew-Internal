@@ -61,7 +61,6 @@ public class IconData {
     /**
      *  Constructor
      * @param icon
-     * @param disabledIcon
      * @param expandedIcon
      * @param data 
      */

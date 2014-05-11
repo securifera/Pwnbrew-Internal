@@ -53,6 +53,7 @@ public class GetIPs extends ControlMessage{ // NO_UCD (use default)
      * Constructor
      *
      * @param dstHostId
+     * @param hostId
     */
     public GetIPs( int dstHostId, int hostId ) {
         super( dstHostId );

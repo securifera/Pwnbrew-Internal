@@ -51,6 +51,7 @@ import javax.swing.table.DefaultTableModel;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Iconable;
 import pwnbrew.misc.Utilities;
+import pwnbrew.xml.maltego.Field;
 import pwnbrew.xml.maltego.custom.Host;
 
 /**
@@ -65,6 +66,7 @@ public class SessionsJFrame extends javax.swing.JFrame {
     /**
      * Constructor
      * @param passedListener 
+     * @param passedHostList 
      */
     public SessionsJFrame( SessionJFrameListener passedListener, List<Host> passedHostList ) {
         theListener = passedListener;
@@ -249,7 +251,14 @@ public class SessionsJFrame extends javax.swing.JFrame {
             sessionTable.setModel(aModel);
 
             //Clear the times
-            theListener.clearSessionList();            
+            //Get the selected Host
+            Object anObj = hostJList.getSelectedValue();
+            if( anObj != null && anObj instanceof Host ){
+                Host aHost = (Host)anObj;
+                Field hostIdField = aHost.getField( Constants.HOST_ID );
+                String hostIdStr = hostIdField.getXmlObjectContent();
+                theListener.clearSessionList(hostIdStr);  
+            }         
 
     }//GEN-LAST:event_clearButtonActionPerformed
 
@@ -314,8 +323,17 @@ public class SessionsJFrame extends javax.swing.JFrame {
         hostJList.addListSelectionListener( new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                if( !e.getValueIsAdjusting())
-                    theListener.hostJListValueChanged(e);
+                if( !e.getValueIsAdjusting()){
+
+                    //Get the selected Host
+                    Object anObj = hostJList.getSelectedValue();
+                    if( anObj != null && anObj instanceof Host ){
+                        Host aHost = (Host)anObj;
+                        Field hostIdField = aHost.getField( Constants.HOST_ID );
+                        String hostIdStr = hostIdField.getXmlObjectContent();
+                        theListener.hostSelected(hostIdStr);
+                    }
+                }
             }
         });
         
@@ -323,5 +341,14 @@ public class SessionsJFrame extends javax.swing.JFrame {
         if( theModel.size() > 0)
             hostJList.setSelectedIndex(0);
         
+    }
+
+    //=================================================================
+    /**
+     * Get the Host list
+     * @return 
+     */
+    public JList getHostJList() {
+        return hostJList;
     }
 }
