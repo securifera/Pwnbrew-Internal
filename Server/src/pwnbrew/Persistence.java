@@ -89,7 +89,6 @@ final public class Persistence {
 
         File dataDir = new File( Directories.getRoot(), "data");
         File theLogo = new File(dataDir, Constants.EDITOR_IMG_STR);
-
         
         return theLogo;
     }

@@ -143,7 +143,7 @@ abstract public class Constants {
     public static final String PROP_FILE ="META-INF/MANIFEST.MF";
     
     public static final String PAYLOAD_VERSION_LABEL = "Version";
-    public static String CURRENT_VERSION = "1.0.3.6";
+    public static String CURRENT_VERSION = "1.0.4.0";
     
     public static String FILE_UPLOAD = "FILE_UPLOAD";
     public static String FILE_DOWNLOAD = "FILE_DOWNLOAD";

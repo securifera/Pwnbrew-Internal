@@ -39,10 +39,7 @@ package pwnbrew;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.fileoperation.TaskManager;
@@ -70,7 +67,8 @@ public class MaltegoStub extends PortManager  implements LockListener {
     private final String entityProperties;   
         
     private int lockVal = 0;
-    private Function theFunction = null;    
+    private Function theFunction = null;   
+    private static boolean debug = true;
     
     private static final String BASE_FUNCTION_CLASSPATH = "pwnbrew.functions.";
     private static final String NAME_Class = MaltegoStub.class.getSimpleName();   
@@ -124,7 +122,9 @@ public class MaltegoStub extends PortManager  implements LockListener {
      */
     public static void main(String[] args) {
         
-        try {
+        
+            
+            
             
 //            String testStr = "<MaltegoMessage>" +
 //"<MaltegoTransformResponseMessage>" +
@@ -170,10 +170,7 @@ public class MaltegoStub extends PortManager  implements LockListener {
             } else {            
                 System.err.println("Incorrect parameters.");
             }
-           
-        } catch (Throwable ex) {           
-            DebugPrinter.printMessage( MaltegoStub.class.getSimpleName(), "main()", ex.getMessage(), ex);            
-        } 
+       
         
     }
 
