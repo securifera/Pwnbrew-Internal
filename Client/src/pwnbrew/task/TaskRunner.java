@@ -48,7 +48,6 @@ package pwnbrew.task;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -154,7 +153,7 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
 
                     int requestedFileCount = 0;
 
-                    List<String> clonedFileList = new ArrayList<String>(hashFilenameList);
+                    List<String> clonedFileList = new ArrayList<>(hashFilenameList);
                     for(String hashFilename : clonedFileList){
                         String aStr = hashFilename;
                         String fileHash = aStr.split(":")[0];
@@ -205,7 +204,7 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
                     if(!runCancelled){
 
                         //Get the results from the run and remove the original ones
-                        List<File> resultFiles = new ArrayList<File>(Arrays.asList(taskDir.listFiles()));
+                        List<File> resultFiles = new ArrayList<>(Arrays.asList(taskDir.listFiles()));
                         for( String aHashFilenameStr : hashFilenameList ){
                             File aFile = new File(taskDir, aHashFilenameStr.split(":")[1]);
                             resultFiles.remove(aFile);
@@ -245,13 +244,7 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
                 }
             }
         
-        } catch (NoSuchAlgorithmException ex) {
-            resultStatus = TaskStatus.TASK_FAILED;
-            RemoteLog.log(Level.INFO, NAME_Class, "run()", ex.getMessage(), ex );
-        } catch (IOException ex ){
-            resultStatus = TaskStatus.TASK_FAILED;
-            RemoteLog.log(Level.INFO, NAME_Class, "run()", ex.getMessage(), ex );
-        } catch (LoggableException ex ){
+        } catch (NoSuchAlgorithmException | IOException | LoggableException ex) {
             resultStatus = TaskStatus.TASK_FAILED;
             RemoteLog.log(Level.INFO, NAME_Class, "run()", ex.getMessage(), ex );
         }

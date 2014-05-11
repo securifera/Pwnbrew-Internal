@@ -58,7 +58,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class NetworkInterfaceUtilities {
 
-    private static final Map<String, Byte[]> theMacMap= new HashMap<String, Byte[]>();
+    private static final Map<String, Byte[]> theMacMap= new HashMap<>();
     private static final ReentrantLock theReentrantLock = new ReentrantLock();
 
 
@@ -79,7 +79,7 @@ public class NetworkInterfaceUtilities {
     */
     private static ArrayList<NetworkInterface> getAllNetworkInterfaces() throws SocketException {
 
-        ArrayList<NetworkInterface> rtnList = new ArrayList<NetworkInterface>();
+        ArrayList<NetworkInterface> rtnList = new ArrayList<>();
         Enumeration<NetworkInterface> niEnum = null;
 
         try {
@@ -93,9 +93,8 @@ public class NetworkInterfaceUtilities {
             while( niEnum.hasMoreElements() ) { //While there are more NetworkInterfaces...
 
                 NetworkInterface aNI = niEnum.nextElement(); //Get the next NetworkInterface
-                if( aNI != null ) { //If the NetworkInterface is not NULL...
-                    rtnList.add( aNI ); //Add the NetworkInterface to the list
-                }
+                if( aNI != null )
+                    rtnList.add( aNI );
 
             }
 
@@ -139,7 +138,7 @@ public class NetworkInterfaceUtilities {
                 
                     Byte [] theByteObjList= new Byte[ rtnBytes.length ];
                     for ( int q= 0; q < rtnBytes.length; q++ )
-                        theByteObjList[ q ] = Byte.valueOf( rtnBytes[ q ] );
+                        theByteObjList[ q ] = rtnBytes[ q ];
                     
                     theMacMap.put( tmpName, theByteObjList );                 
                 }
@@ -150,7 +149,7 @@ public class NetworkInterfaceUtilities {
                     int theQty= lookupResultBytes.length;
                     rtnBytes= new byte[ theQty ];
                     for ( int q= 0; q < theQty; q++ )
-                        rtnBytes[ q ]= lookupResultBytes[ q ].byteValue();
+                        rtnBytes[ q ]= lookupResultBytes[ q ];
                 }
             }
         
@@ -202,22 +201,18 @@ public class NetworkInterfaceUtilities {
     */
     public static ArrayList<NetworkInterface> getAllUpInterfaces() throws SocketException {
 
-        ArrayList<NetworkInterface> rtnList = new ArrayList<NetworkInterface>();
+        ArrayList<NetworkInterface> rtnList = new ArrayList<>();
         ArrayList<NetworkInterface> allNIs = getAllNetworkInterfaces(); //Get all of the NetworkInterfaces
-        for( int i = 0; i < allNIs.size(); i++ ) { 
-            
-            NetworkInterface aNI = allNIs.get( i );
-
+        for (NetworkInterface aNI : allNIs) {
             //Remove the loopback NetworkInterface...
-            if( aNI.isLoopback() ) 
-                continue;             
-
+            if( aNI.isLoopback() )
+                continue;
+            
             //Remove any down NetworkInterfaces...
-            if( aNI.isUp() == false )   
+            if( aNI.isUp() == false )
                 continue; 
             
             rtnList.add( aNI );
-
         }
 
         return rtnList;

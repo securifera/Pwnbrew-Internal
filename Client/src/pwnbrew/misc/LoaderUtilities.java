@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -69,8 +70,7 @@ import sun.net.www.protocol.jar.JarURLConnection;
  */
 public class LoaderUtilities {
 
-    private static HashSet<String> setJarFileNames2Close = new HashSet<String>();
-    
+    private static final HashSet<String> setJarFileNames2Close = new HashSet<>();    
     private static final String NAME_Class = LoaderUtilities.class.getSimpleName();
     
 
@@ -105,17 +105,7 @@ public class LoaderUtilities {
             systemMethod.setAccessible(true);
             systemMethod.invoke(systemLoader, new Object[]{ jarURL });
                           
-        } catch (IllegalAccessException ex) {
-            RemoteLog.log(Level.SEVERE, NAME_Class, "loadJar()", ex.getMessage(), ex );
-        } catch (IllegalArgumentException ex) {
-            RemoteLog.log(Level.SEVERE, NAME_Class, "loadJar()", ex.getMessage(), ex );
-        } catch (InvocationTargetException ex) {
-            RemoteLog.log(Level.SEVERE, NAME_Class, "loadJar()", ex.getMessage(), ex );
-        } catch (NoSuchMethodException ex) {
-            RemoteLog.log(Level.SEVERE, NAME_Class, "loadJar()", ex.getMessage(), ex );
-        } catch (SecurityException ex) {
-            RemoteLog.log(Level.SEVERE, NAME_Class, "loadJar()", ex.getMessage(), ex );
-        } catch (IOException ex) {
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | IOException ex) {
             RemoteLog.log(Level.SEVERE, NAME_Class, "loadJar()", ex.getMessage(), ex );
         }
                     
@@ -136,12 +126,7 @@ public class LoaderUtilities {
             
             replaceUcp(systemLoader);
 
-        } catch (IllegalArgumentException ex) {   
-            ex = null;
-        } catch (SecurityException ex) {  
-            ex = null;
-        } catch (IOException ex) {      
-            ex = null;
+        } catch (IllegalArgumentException | SecurityException | MalformedURLException ex ) {      
         }
                     
     }
@@ -214,10 +199,9 @@ public class LoaderUtilities {
         
         boolean retVal = false;
         Class classJarURLConnection = JarURLConnection.class;
-        if (classJarURLConnection == null) {
+        if (classJarURLConnection == null)
             return retVal;
-        }
-        
+                
         Field aField = null;
         try {
             aField = classJarURLConnection.getDeclaredField("factory");
@@ -225,9 +209,9 @@ public class LoaderUtilities {
         //ignore
         }
         
-        if (aField == null) {
+        if (aField == null)
             return retVal;
-        }
+        
         
         aField.setAccessible(true);
         Object anObj = null;
@@ -237,9 +221,9 @@ public class LoaderUtilities {
         //ignore
         }
         
-        if (anObj == null) {
+        if (anObj == null)
             return retVal;
-        }
+        
         
         Class classJarFileFactory = anObj.getClass();
         //
@@ -248,12 +232,10 @@ public class LoaderUtilities {
             aField = classJarFileFactory.getDeclaredField("fileCache");
             aField.setAccessible(true);
             anObj = aField.get(null);
-            if (anObj instanceof HashMap) {
+            if (anObj instanceof HashMap)
                 fileCache = (HashMap)anObj;
-            }
-        } catch (NoSuchFieldException e) {
-        } catch (IllegalAccessException e) {
-        //ignore
+            
+        } catch (NoSuchFieldException | IllegalAccessException e) {
         }
         
         HashMap urlCache = null;
@@ -261,12 +243,10 @@ public class LoaderUtilities {
             aField = classJarFileFactory.getDeclaredField("urlCache");
             aField.setAccessible(true);
             anObj = aField.get(null);
-            if (anObj instanceof HashMap) {
+            if (anObj instanceof HashMap)
                 urlCache = (HashMap)anObj;
-            }
-        } catch (NoSuchFieldException e) {
-        } catch (IllegalAccessException e) {
-        //ignore
+            
+        } catch (NoSuchFieldException | IllegalAccessException e) {
         }
         
         if (urlCache != null) {
@@ -275,10 +255,9 @@ public class LoaderUtilities {
             Iterator it = urlCacheTmp.keySet().iterator();
             while (it.hasNext()) {
                 anObj = it.next();
-                if (!(anObj instanceof JarFile)) {
+                if (!(anObj instanceof JarFile))
                     continue;
-                }
-                
+                                
                 JarFile aJarFile = (JarFile)anObj;
                 if (setJarFileNames2Close.contains(aJarFile.getName())) {
                     try {
@@ -286,9 +265,9 @@ public class LoaderUtilities {
                     } catch (IOException e) {
                     //ignore
                     }
-                    if (fileCache != null) {
+                    if (fileCache != null)
                         fileCache.remove(urlCache.get(aJarFile));
-                    }
+                    
                     urlCache.remove(aJarFile);
                 }
             }
@@ -303,9 +282,9 @@ public class LoaderUtilities {
                 
                 Object key = it.next();
                 anObj = fileCache.get(key);
-                if (!(anObj instanceof JarFile)) {
+                if (!(anObj instanceof JarFile))
                     continue;
-                }
+                
                 JarFile jarFile = (JarFile)anObj;
                 if (setJarFileNames2Close.contains(jarFile.getName())) {
                     try {
@@ -332,10 +311,9 @@ public class LoaderUtilities {
     private static boolean closeClassLoader( ClassLoader passedLoader ) {
         
         boolean retVal = false;
-        if (passedLoader == null) {
+        if (passedLoader == null)
             return retVal;
-        }
-        
+                
         Class classURLClassLoader = URLClassLoader.class;
         Field aField = null;
         try {
@@ -430,9 +408,9 @@ public class LoaderUtilities {
         } catch (NoSuchFieldException e1) {
         //ignore
         }
-        if (nativeLibraries == null) {
+        if (nativeLibraries == null)
             return retVal;
-        }
+        
         nativeLibraries.setAccessible(true);
         Object obj = null;
         try {
@@ -440,10 +418,9 @@ public class LoaderUtilities {
         } catch (IllegalAccessException e1) {
         //ignore
         }
-        if (!(obj instanceof Vector)) {
+        if (!(obj instanceof Vector)) 
             return retVal;
-        }
-        
+                
         retVal = true;
         Vector vectorLib = (Vector)obj;
         for (Object lib : vectorLib) {
@@ -459,9 +436,7 @@ public class LoaderUtilities {
                 finalize.setAccessible(true);
                 try {
                     finalize.invoke(lib, new Object[0]);
-                } catch (IllegalAccessException e) {
-                } catch (InvocationTargetException e) {
-                //ignore
+                } catch (IllegalAccessException | InvocationTargetException e) {
                 }
             }
         }

@@ -67,6 +67,8 @@ public final class StageFlagAck extends ControlMessage{
      * Constructor
      *
      * @param clientId
+     * @param passedVersion
+     * @throws java.io.UnsupportedEncodingException
     */
     public StageFlagAck( int clientId, String passedVersion ) throws UnsupportedEncodingException {
         super();

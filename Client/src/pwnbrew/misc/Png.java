@@ -73,7 +73,7 @@ public class Png {
 
     //TODO This should be changed to a list for PNGs that have multiple chunks
     //with the same name.  Fortunately the splash screen does not.
-    private final List<PngChunk> theChunks = new LinkedList<PngChunk>();
+    private final List<PngChunk> theChunks = new LinkedList<>();
     private final File thePNGFile;
 
     //===============================================================
@@ -104,7 +104,7 @@ public class Png {
     */
     public Set<PngChunk> getChunks( String theName ) {
 
-        Set<PngChunk> theChunkSet = new HashSet<PngChunk>();        
+        Set<PngChunk> theChunkSet = new HashSet<>();        
         for(PngChunk aChunk : theChunks ){
             if( aChunk.getLabel().equals(theName) ){
                 theChunkSet.add(aChunk);
@@ -201,7 +201,7 @@ public class Png {
      */
     public void removeChunks(String passedLabel) {
         
-        List<PngChunk> tempList = new ArrayList<PngChunk>(theChunks);
+        List<PngChunk> tempList = new ArrayList<>(theChunks);
         for( PngChunk aChunk : tempList ){
             if( aChunk.getLabel().equals(passedLabel )){
                 theChunks.remove(aChunk);
@@ -334,7 +334,7 @@ public class Png {
            String theStr = "";
            try {
               return new String(label, "US-ASCII");
-           } catch (IOException ex) {
+           } catch (UnsupportedEncodingException ex) {
               ex = null;
            }
            return theStr;

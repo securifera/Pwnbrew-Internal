@@ -71,7 +71,7 @@ abstract public class DataManager {
     protected DataHandler theDataHandler;
     protected final CommManager theCommManager;
     
-    private static final Map<Integer, PortWrapper> thePortWrapperMap = new HashMap<Integer, PortWrapper>();
+    private static final Map<Integer, PortWrapper> thePortWrapperMap = new HashMap<>();
     private transient static final String NAME_Class = DataManager.class.getSimpleName();
     
 
@@ -235,9 +235,7 @@ abstract public class DataManager {
                 aManager.handleMessage( msgBytes );
             }
             
-        } catch (LoggableException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "routeMessage()", ex.getMessage(), ex );                                    
-        } catch (IOException ex) {
+        } catch (LoggableException | IOException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "routeMessage()", ex.getMessage(), ex );                                    
         }
     }

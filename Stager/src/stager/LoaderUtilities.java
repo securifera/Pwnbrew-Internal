@@ -72,7 +72,7 @@ import sun.net.www.protocol.jar.JarURLConnection;
  */
 public class LoaderUtilities {
 
-    private static HashSet<String> setJarFileNames2Close = new HashSet<String>();    
+    private static final HashSet<String> setJarFileNames2Close = new HashSet<>();    
 
     // ========================================================================
     /**
@@ -157,9 +157,7 @@ public class LoaderUtilities {
             if (anObj instanceof HashMap) {
                 fileCache = (HashMap)anObj;
             }
-        } catch (NoSuchFieldException e) {
-        } catch (IllegalAccessException e) {
-        //ignore
+        } catch (NoSuchFieldException | IllegalAccessException e) {
         }
         
         HashMap urlCache = null;
@@ -170,9 +168,7 @@ public class LoaderUtilities {
             if (anObj instanceof HashMap) {
                 urlCache = (HashMap)anObj;
             }
-        } catch (NoSuchFieldException e) {
-        } catch (IllegalAccessException e) {
-        //ignore
+        } catch (NoSuchFieldException | IllegalAccessException e) {
         }
         
         if (urlCache != null) {
@@ -425,9 +421,7 @@ public class LoaderUtilities {
                 finalize.setAccessible(true);
                 try {
                     finalize.invoke(lib, new Object[0]);
-                } catch (IllegalAccessException e) {
-                } catch (InvocationTargetException e) {
-                //ignore
+                } catch (IllegalAccessException | InvocationTargetException e) {
                 }
             }
         }
@@ -547,7 +541,7 @@ public class LoaderUtilities {
     /**
     *   Performs the logic specific to the message.
     *
-     * @param passedManager
+     * @param killTime
     */
     public static void updateKillTime( Date killTime ) {
         
@@ -572,9 +566,7 @@ public class LoaderUtilities {
             LoaderUtilities.updateJarProperties( theClassPath, STAG_PROP_FILE, DEATH_LABEL, dateStr ); 
             LoaderUtilities.loadLib(theClassPath);            
 
-        } catch (IllegalArgumentException ex) {
-        } catch (IOException ex) {
-        } catch (URISyntaxException ex) {
+        } catch (IllegalArgumentException | IOException | URISyntaxException ex) {
         }
 
     }

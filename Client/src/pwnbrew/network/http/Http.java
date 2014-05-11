@@ -62,7 +62,7 @@ import java.util.Map;
 public class Http {
        
     private final ExchangeDetails operation;     
-    private final HashMap<String, String> optionList = new LinkedHashMap<String, String>();
+    private final HashMap<String, String> optionList = new LinkedHashMap<>();
     private byte[] thePayLoadBytes = new byte[0];
     
     //REQUEST
@@ -267,7 +267,7 @@ public class Http {
 
         private String requestMethod = "";
         private String requestURI = "";
-        private String requestVersion = "HTTP/1.1";
+        private final String requestVersion = "HTTP/1.1";
         private String statusCode = "";
         private String responsePhrase = "";
         
@@ -279,7 +279,7 @@ public class Http {
         public ExchangeDetails( String... headerParts ) {            
 
             //Convert to list
-            List<String> stringList = new ArrayList<String>( Arrays.asList(headerParts));
+            List<String> stringList = new ArrayList<>( Arrays.asList(headerParts));
 
             //Get the version
             try { 

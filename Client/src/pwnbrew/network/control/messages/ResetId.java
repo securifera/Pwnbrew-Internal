@@ -101,9 +101,7 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
                 aCMManager.send(helloMessage);
             }              
                        
-        } catch (IOException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        } catch (LoggableException ex) {
+        } catch (IOException | LoggableException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
         }
         

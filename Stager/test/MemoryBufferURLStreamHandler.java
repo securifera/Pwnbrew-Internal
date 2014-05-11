@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class MemoryBufferURLStreamHandler extends URLStreamHandler {
 
-	private List files = new ArrayList();
+	private final List files = new ArrayList();
 
 	protected URLConnection openConnection(URL u) throws IOException {
 		return new MemoryBufferURLConnection(u);

@@ -56,7 +56,7 @@ import java.util.Queue;
 public class DebugPrinter implements Runnable {
     
     private static volatile boolean shutdownRequested = false;
-    private static final Queue<String> queue = new LinkedList<String>();
+    private static final Queue<String> queue = new LinkedList<>();
     private static DebugPrinter staticSelf = null;
     private static volatile boolean enabled = false;
     

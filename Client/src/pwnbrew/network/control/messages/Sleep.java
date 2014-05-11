@@ -52,7 +52,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.Pwnbrew;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.Constants;
@@ -202,11 +201,7 @@ public class Sleep extends ControlMessage {
             }             
             
 
-        } catch (ParseException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        
-        } catch (ClassNotFoundException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        
-        } catch (IllegalArgumentException ex) {
+        } catch (ParseException | ClassNotFoundException | IllegalArgumentException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        
         }
 

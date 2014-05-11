@@ -71,8 +71,7 @@ public class PngParser {
 
                 //Open the file
                 FileInputStream theFileStream = new FileInputStream(passedFile);
-                BufferedInputStream theBufferedIS = new BufferedInputStream(theFileStream);
-                try{
+                try(BufferedInputStream theBufferedIS = new BufferedInputStream(theFileStream)) {
 
                    int chunkBytes = 0;
                    byte[] chunkLenArr = new byte[4];
@@ -135,8 +134,6 @@ public class PngParser {
 
                    }
 
-                } finally {
-                   theBufferedIS.close();
                 }
             }
 

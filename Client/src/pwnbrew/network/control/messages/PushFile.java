@@ -279,9 +279,7 @@ public class PushFile extends FileMessage {
             DebugPrinter.printMessage(  this.getClass().getSimpleName(), "Received push file.");
             theFileMM.prepFilePush( this );
 
-        } catch ( LoggableException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        } catch ( IOException ex) {
+        } catch ( LoggableException | IOException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
         }
         

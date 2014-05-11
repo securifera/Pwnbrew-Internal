@@ -51,7 +51,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.Persistence;
 import pwnbrew.log.RemoteLog;
@@ -96,6 +95,7 @@ final public class FileReceiver {
      *  Constructor
      * 
      * @param passedManager
+     * @param passedSrcId
      * @param passedTaskId
      * @param passedFileId
      * @param passedFileSize

@@ -49,7 +49,6 @@ import pwnbrew.network.PortRouter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import pwnbrew.ClientConfig;
@@ -68,7 +67,7 @@ public class ShellMessageManager extends DataManager {
     private static final String NAME_Class = ShellMessageManager.class.getSimpleName();
     
     //The map for relating shells to their ids
-    private final Map<Integer, Shell> theShellMap = new HashMap<Integer, Shell>();
+    private final Map<Integer, Shell> theShellMap = new HashMap<>();
     
     //===========================================================================
     /*
@@ -209,6 +208,7 @@ public class ShellMessageManager extends DataManager {
     //===========================================================================
     /**
      * 
+     * @param passedId
      * @return 
      */
     public Shell removeShell( int passedId ) {

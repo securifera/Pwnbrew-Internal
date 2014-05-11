@@ -139,11 +139,7 @@ public class ConnectHandler implements Selectable {
             //Notify the comm
             theClientPortRouter.getSelRouter().changeOps(theSCW.getSocketChannel(), SelectionKey.OP_READ | SelectionKey.OP_WRITE );                        
         
-        } catch ( IOException ex) {
-             RemoteLog.log(Level.WARNING, NAME_Class, "handle()", ex.getMessage(), ex);
-        } catch (LoggableException ex) {
-             RemoteLog.log(Level.WARNING, NAME_Class, "handle()", ex.getMessage(), ex);
-        } catch (InterruptedException ex) {
+        } catch ( IOException | LoggableException | InterruptedException ex) {
              RemoteLog.log(Level.WARNING, NAME_Class, "handle()", ex.getMessage(), ex);
         }
      

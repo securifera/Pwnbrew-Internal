@@ -95,9 +95,7 @@ public class StdInMessage extends ProcessMessage {
                 aShell.sendInput( new String( getMsgBytes()) );
             }
             
-        } catch(IOException ex ){
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), null);        
-        } catch (LoggableException ex) {
+        } catch(IOException | LoggableException ex ){
             RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), null);        
         }
     }

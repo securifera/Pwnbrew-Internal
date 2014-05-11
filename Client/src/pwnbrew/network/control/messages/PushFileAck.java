@@ -191,9 +191,7 @@ public final class PushFileAck extends FileMessage {
             //Queue the file send
             theFileMM.sendFile( this );        
               
-        } catch (IOException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        } catch (LoggableException ex) {
+        } catch (IOException | LoggableException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
         }
         

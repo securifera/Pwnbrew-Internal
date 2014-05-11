@@ -44,7 +44,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.log;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -95,8 +94,6 @@ final public class RemoteLog {
             DebugPrinter.printMessage(RemoteLog.class.getSimpleName(), aSB.toString());
             
         } catch (UnsupportedEncodingException ex) {
-            ex = null;
-        } catch (IOException ex) {
             ex = null;
         }
         

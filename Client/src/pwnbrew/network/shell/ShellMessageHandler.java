@@ -62,7 +62,7 @@ import pwnbrew.network.shell.messages.ProcessMessage;
  */
 public class ShellMessageHandler extends DataHandler {
 
-    private final Queue<byte[]> recByteQueue = new LinkedList<byte[]>();
+    private final Queue<byte[]> recByteQueue = new LinkedList<>();
     private volatile boolean sendFileFlag = false;
 
     private static final String NAME_Class = ShellMessageHandler.class.getSimpleName();

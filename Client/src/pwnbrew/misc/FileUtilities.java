@@ -98,7 +98,6 @@ abstract public class FileUtilities {
     * Returns the SHA-256 hash for the passed file
     *
     * @param aFile
-    * @param addHeader
     *
     * @return a {@code String} representing the hash of the file
     *
@@ -186,23 +185,13 @@ abstract public class FileUtilities {
     */
     public static boolean moveFile( File srcFile, File dstFile ) throws IOException {
         
-        FileInputStream aFIS = new FileInputStream(srcFile);
-        try{
-            FileOutputStream aFOS = new FileOutputStream(dstFile);
-            try{
-
-                //Copy the file manually
-                FileChannel inputChannel = aFIS.getChannel();
+        try(    FileInputStream aFIS = new FileInputStream(srcFile); 
+                FileOutputStream aFOS = new FileOutputStream(dstFile)) {
+            //Copy the file manually
+            FileChannel inputChannel = aFIS.getChannel();
                 FileChannel outputChannel = aFOS.getChannel();
+            inputChannel.transferTo(0, inputChannel.size(), outputChannel);         
 
-                inputChannel.transferTo(0, inputChannel.size(), outputChannel);
-
-            } finally {
-                aFOS.close();
-            }         
-
-        } finally {
-            aFIS.close();
         }
         
         //Delete the file later

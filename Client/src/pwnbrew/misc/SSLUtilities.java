@@ -110,9 +110,7 @@ final public class SSLUtilities {
             aContext = SSLContext.getInstance("TLS");
             aContext.init( null, trustAllCerts, new SecureRandom());
 
-        } catch (KeyManagementException ex) {
-            throw new LoggableException(ex);
-        } catch (NoSuchAlgorithmException ex) {
+        } catch (KeyManagementException | NoSuchAlgorithmException ex) {
             throw new LoggableException(ex);
         }
 
@@ -235,13 +233,7 @@ final public class SSLUtilities {
                createSelfSignedCertificate(tempKeystore, keyStorePass, theAlias);
             }
 
-        } catch (NoSuchAlgorithmException ex) {
-           throw new LoggableException(ex);
-        } catch (CertificateException ex) {
-           throw new LoggableException(ex);
-        } catch (KeyStoreException ex) {
-           throw new LoggableException(ex);
-        } catch (IOException ex){
+        } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException ex) {
            throw new LoggableException(ex);
         } finally {
 
@@ -303,13 +295,7 @@ final public class SSLUtilities {
             byte[] objectBytes = theOS.toByteArray();
             Persistence.writeLabel( Persistence.SSL_CHUNK, objectBytes);
             
-        } catch (KeyStoreException ex) {
-           throw new LoggableException(ex);
-        } catch (CertificateException ex) {
-           throw new LoggableException(ex);
-        } catch (NoSuchAlgorithmException ex) {
-           throw new LoggableException(ex);
-        } catch (IOException ex){
+        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException ex) {
            throw new LoggableException(ex);
         }
         
@@ -333,19 +319,7 @@ final public class SSLUtilities {
             //Save it
             saveKeyStore( passedKeyStore, keystorePass ); 
 
-        } catch (KeyStoreException ex) {
-           throw new LoggableException(ex);
-        } catch (CertificateException ex) {
-           throw new LoggableException(ex);
-        } catch (InvalidKeyException ex) {
-           throw new LoggableException(ex);
-        } catch (NoSuchAlgorithmException ex) {
-           throw new LoggableException(ex);
-        } catch (NoSuchProviderException ex) {
-           throw new LoggableException(ex);
-        } catch (SignatureException ex) {
-           throw new LoggableException(ex);
-        } catch (IOException ex){
+        } catch (KeyStoreException | CertificateException | InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | IOException ex) {
            throw new LoggableException(ex);
         }
     }
@@ -392,13 +366,7 @@ final public class SSLUtilities {
                 aContext = SSLContext.getInstance("TLS");
                 aContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
-            } catch (    KeyManagementException ex ){
-                throw new LoggableException(ex);
-            } catch( KeyStoreException ex ){
-                throw new LoggableException(ex);
-            } catch( UnrecoverableKeyException ex ){
-                throw new LoggableException(ex);
-            } catch( NoSuchAlgorithmException ex ){
+            } catch ( KeyManagementException | KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException ex ){
                 throw new LoggableException(ex);
             }
 

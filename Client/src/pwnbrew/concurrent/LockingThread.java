@@ -64,7 +64,7 @@ public class LockingThread extends ManagedRunnable {
     public static final int LOCK = 1;
     private static final int UNLOCK = 2;
     
-    private final Map<LockListener, Integer> lockListenerMap = new LinkedHashMap<LockListener, Integer>();
+    private final Map<LockListener, Integer> lockListenerMap = new LinkedHashMap<>();
 
     //===============================================================
     /**
@@ -156,7 +156,6 @@ public class LockingThread extends ManagedRunnable {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ex) {
-                        continue;
                     }
                 }
             }

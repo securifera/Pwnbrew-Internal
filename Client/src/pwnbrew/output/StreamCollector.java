@@ -60,7 +60,7 @@ import java.io.UnsupportedEncodingException;
 public class StreamCollector extends StreamReader {
   
     
-    private StringBuilder theStringBuilder = new StringBuilder();
+    private final StringBuilder theStringBuilder = new StringBuilder();
     private int maxLength = 1024 * 1000;
 
     // ==========================================================================

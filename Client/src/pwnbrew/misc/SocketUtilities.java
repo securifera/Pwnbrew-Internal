@@ -198,6 +198,12 @@ final public class SocketUtilities {
         return(aChar > 9 ? (char)(aChar - 10 + 'a') : (char)(aChar + '0')); // int to hex char
     }
     
+    //===================================================================
+    /**
+     * 
+     * @param s
+     * @return 
+     */    
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();
         byte[] data = new byte[len / 2];
@@ -209,15 +215,5 @@ final public class SocketUtilities {
 
         return data;
     }
-
     
-
-    
-
-    
-    
-    
-
-    
-  
 }/* END CLASS SocketUtilities */

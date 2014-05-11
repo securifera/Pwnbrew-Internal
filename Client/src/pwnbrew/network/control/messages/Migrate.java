@@ -50,7 +50,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.Pwnbrew;
 import pwnbrew.manager.CommManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.log.RemoteLog;

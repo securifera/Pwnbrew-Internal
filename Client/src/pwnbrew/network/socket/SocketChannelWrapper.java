@@ -54,7 +54,7 @@ public class SocketChannelWrapper {
     protected final SocketChannelHandler theSocketHandler;
 
     protected ByteBuffer requestBB;
-    private static int requestBBSize = Constants.GENERIC_BUFFER_SIZE;
+    private static final int requestBBSize = Constants.GENERIC_BUFFER_SIZE;
 
     //===============================================================
     /**

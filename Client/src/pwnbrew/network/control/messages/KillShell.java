@@ -104,9 +104,7 @@ public final class KillShell extends ControlMessage{ // NO_UCD (use default)
                 aShell.shutdown();
             }
             
-        } catch(IOException ex ){
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null);        
-        } catch (LoggableException ex) {
+        } catch(IOException | LoggableException ex ){
             RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null);        
         }
     }

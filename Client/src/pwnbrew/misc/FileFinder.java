@@ -37,8 +37,6 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.misc;
 
-import java.io.File;
-
 /**
  *
  * @author Securifera

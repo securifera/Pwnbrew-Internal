@@ -90,7 +90,7 @@ public class SocketChannelHandler implements Selectable {
     private int clientId = -1;
     private int state = 0;
     
-    private final Queue< byte[] > pendingByteArrs = new LinkedList<byte[]>();
+    private final Queue< byte[] > pendingByteArrs = new LinkedList<>();
     
     //The byte buffer for holding received bytes
     private byte currMsgType = 0;
@@ -134,16 +134,7 @@ public class SocketChannelHandler implements Selectable {
                 passedSelKey.cancel();
             }
             
-        } catch ( CancelledKeyException ex ){
-            
-            //Cancel the key
-            passedSelKey.cancel();
-            
-            //Flush any remaining packets from the queue in the handler
-            shutdown();
-            thePortRouter.socketClosed( this );
-            
-        } catch ( IOException ex ){
+        } catch ( CancelledKeyException | IOException ex ){
             
             //Cancel the key
             passedSelKey.cancel();

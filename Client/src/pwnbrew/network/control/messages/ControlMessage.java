@@ -64,7 +64,7 @@ import pwnbrew.network.Message;
 public abstract class ControlMessage extends Message {
     
     //Data members
-    protected List<ControlOption> optionList = new ArrayList<ControlOption>();
+    protected List<ControlOption> optionList = new ArrayList<>();
 
     //=========================================================================
     /*
@@ -198,19 +198,7 @@ public abstract class ControlMessage extends Message {
             Constructor aConstruct = aClass.getConstructor( byte[].class);
             aMsg = (ControlMessage)aConstruct.newInstance(msgId);
 
-        } catch (ClassNotFoundException ex) {
-            throw new LoggableException(ex);
-        } catch (NoSuchMethodException ex) {
-            throw new LoggableException(ex);
-        } catch (SecurityException ex) {
-            throw new LoggableException(ex);
-        } catch (InstantiationException ex) {
-            throw new LoggableException(ex);
-        } catch (IllegalAccessException ex) {
-            throw new LoggableException(ex);
-        } catch (IllegalArgumentException ex) {
-            throw new LoggableException(ex);
-        } catch (InvocationTargetException ex) {
+        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             throw new LoggableException(ex);
         }
         

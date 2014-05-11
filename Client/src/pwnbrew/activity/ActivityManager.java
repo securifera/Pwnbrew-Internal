@@ -92,19 +92,7 @@ public class ActivityManager {
                 
             }
             
-        } catch (ClassNotFoundException ex) {
-            RemoteLog.log(Level.WARNING, NAME_Class, "loadActivity()", ex.getMessage(), ex);        
-        } catch (NoSuchMethodException ex) {
-            RemoteLog.log(Level.WARNING, NAME_Class, "loadActivity()", ex.getMessage(), ex);        
-        } catch (SecurityException ex) {
-            RemoteLog.log(Level.WARNING, NAME_Class, "loadActivity()", ex.getMessage(), ex);        
-        } catch (IllegalAccessException ex) {
-            RemoteLog.log(Level.WARNING, NAME_Class, "loadActivity()", ex.getMessage(), ex);        
-        } catch (IllegalArgumentException ex) {
-            RemoteLog.log(Level.WARNING, NAME_Class, "loadActivity()", ex.getMessage(), ex);        
-        } catch (InvocationTargetException ex) {
-            RemoteLog.log(Level.WARNING, NAME_Class, "loadActivity()", ex.getMessage(), ex);        
-        } catch (IntrospectionException ex) {
+        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | IntrospectionException ex) {
             RemoteLog.log(Level.WARNING, NAME_Class, "loadActivity()", ex.getMessage(), ex);        
         }
         

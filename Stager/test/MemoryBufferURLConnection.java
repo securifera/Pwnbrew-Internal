@@ -59,17 +59,7 @@ public class MemoryBufferURLConnection extends URLConnection {
                 files = (List) handler.getClass().getMethod("getFiles", new Class[0]).invoke(handler, new Object[0]);
             }
             
-        } catch ( SecurityException ex ){
-            throw new RuntimeException(ex.toString());
-        } catch (  NoSuchFieldException ex ){
-            throw new RuntimeException(ex.toString());
-        } catch ( IllegalArgumentException ex ){
-            throw new RuntimeException(ex.toString());
-        } catch ( IllegalAccessException ex ){ 
-            throw new RuntimeException(ex.toString());
-        } catch ( NoSuchMethodException ex ){ 
-            throw new RuntimeException(ex.toString());
-        } catch ( InvocationTargetException ex ){               
+        } catch ( SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ex ){               
             throw new RuntimeException(ex.toString());
         }
     }

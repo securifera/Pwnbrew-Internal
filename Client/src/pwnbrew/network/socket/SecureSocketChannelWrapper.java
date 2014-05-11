@@ -67,8 +67,8 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
     private static final String NAME_Class = SecureSocketChannelWrapper.class.getSimpleName();
 //    private static final int NUMBER_OF_SENDS = 15;
 
-    private int appBBSize;
-    private int netBBSize;
+    private final int appBBSize;
+    private final int netBBSize;
 
     /*
     * All I/O goes through these buffers.

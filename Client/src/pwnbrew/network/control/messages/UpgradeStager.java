@@ -158,11 +158,7 @@ public final class UpgradeStager extends ControlMessage{
                     aCMM.send(aUSC);
                 }
                 
-            } catch (ClassNotFoundException ex) {
-                RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        
-            } catch (IllegalArgumentException ex) {
-                RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        
-            } catch (FileNotFoundException ex) {
+            } catch (ClassNotFoundException | IllegalArgumentException | FileNotFoundException ex) {
                 RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        
             }
             

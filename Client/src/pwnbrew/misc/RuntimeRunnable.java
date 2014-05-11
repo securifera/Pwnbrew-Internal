@@ -95,9 +95,7 @@ public class RuntimeRunnable implements Runnable {
             //Wait for the exit value
             exitValue = aProc.waitFor();           
             
-        } catch (InterruptedException ex) {
-           RemoteLog.log(Level.SEVERE, NAME_Class, "run()", ex.getMessage(), ex );
-        } catch (IOException ex) {
+        } catch (InterruptedException | IOException ex) {
            RemoteLog.log(Level.SEVERE, NAME_Class, "run()", ex.getMessage(), ex );
         }
         

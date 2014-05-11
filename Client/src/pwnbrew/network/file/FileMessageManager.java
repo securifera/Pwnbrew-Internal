@@ -73,8 +73,8 @@ import pwnbrew.selector.SocketChannelHandler;
 public class FileMessageManager extends DataManager implements LockListener {
 
     private static FileMessageManager theFileManager;
-    private final Map<Integer, FileReceiver> theFileReceiverMap = new HashMap<Integer, FileReceiver>();
-    private final Map<Integer, Map<Integer, FileSender>> theFileSenderMap = new HashMap<Integer, Map<Integer, FileSender>>();
+    private final Map<Integer, FileReceiver> theFileReceiverMap = new HashMap<>();
+    private final Map<Integer, Map<Integer, FileSender>> theFileSenderMap = new HashMap<>();
     
     private static final String NAME_Class = FileMessageManager.class.getSimpleName();    
     private int lockVal = 0;
@@ -252,9 +252,7 @@ public class FileMessageManager extends DataManager implements LockListener {
                     aSFMA.setDestHostId( passedMessage.getSrcHostId() );
                     aCMManager.send(aSFMA);
                 
-                } catch ( IOException  ex){
-                    throw new LoggableException(ex);
-                } catch ( NoSuchAlgorithmException ex){
+                } catch ( IOException | NoSuchAlgorithmException  ex){
                     throw new LoggableException(ex);
                 }
                 retVal = true;
@@ -301,7 +299,7 @@ public class FileMessageManager extends DataManager implements LockListener {
         synchronized( theFileSenderMap ){
             Map<Integer, FileSender> senderMap = theFileSenderMap.get(taskId);
             if( senderMap == null){
-                senderMap = new HashMap<Integer, FileSender>();
+                senderMap = new HashMap<>();
                 theFileSenderMap.put(taskId, senderMap);
             }            
             senderMap.put(fileId, aSender);
@@ -323,7 +321,7 @@ public class FileMessageManager extends DataManager implements LockListener {
         //Cancel file receives
         synchronized( theFileReceiverMap ){
             
-            List<Integer> fileIds = new ArrayList<Integer>(theFileReceiverMap.keySet());
+            List<Integer> fileIds = new ArrayList<>(theFileReceiverMap.keySet());
             for( Integer anId : fileIds ){
                 
                 FileReceiver aReceiver = theFileReceiverMap.get(anId);
@@ -339,11 +337,11 @@ public class FileMessageManager extends DataManager implements LockListener {
         //Cancel file sends
         synchronized( theFileSenderMap ){
             
-            List<Integer> taskIds = new ArrayList<Integer>(theFileSenderMap.keySet());
+            List<Integer> taskIds = new ArrayList<>(theFileSenderMap.keySet());
             for( Integer aTaskId : taskIds ){
                 
                 Map<Integer, FileSender> aSenderMap = theFileSenderMap.get(aTaskId);
-                List<Integer> aFileId = new ArrayList<Integer>(aSenderMap.keySet());
+                List<Integer> aFileId = new ArrayList<>(aSenderMap.keySet());
                 for( Integer anId : aFileId ){
                     FileSender aSender = aSenderMap.get(anId);
                     aSender.shutdown();

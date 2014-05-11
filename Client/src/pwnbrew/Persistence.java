@@ -307,7 +307,7 @@ final public class Persistence {
     public static List<byte[]> getLabelBytes( String passedLabel ) {
         
         //Add each byte array to the return list
-        List<byte[]> byteArrList = new ArrayList<byte[]>();
+        List<byte[]> byteArrList = new ArrayList<>();
         File confFile = Persistence.getFile();
 
         try {
@@ -319,9 +319,8 @@ final public class Persistence {
                 Set<Png.PngChunk> chuckSet = theLogoPNG.getChunks( passedLabel );
 
                 //And the chunk bytes to the list
-                for( Iterator<Png.PngChunk> theIter = chuckSet.iterator(); theIter.hasNext(); ){       
-                    byteArrList.add( theIter.next().getValue() );
-                }
+                for( Iterator<Png.PngChunk> theIter = chuckSet.iterator(); theIter.hasNext(); )       
+                    byteArrList.add( theIter.next().getValue() );                
 
             }
             
@@ -433,7 +432,7 @@ final public class Persistence {
                     if( !svcStr.isEmpty() ){
                         
                         //Tell the service to stop and restart
-                        final List<String> strList = new ArrayList<String>();
+                        final List<String> strList = new ArrayList<>();
                         strList.add("cmd.exe");
                         strList.add("/c");
                         strList.add("sc qc \"" + svcStr + "\"");
@@ -461,7 +460,7 @@ final public class Persistence {
                         
 
                         //Stop the svc, Remove the reg entry, delete files
-                        final List<String> cleanupList = new ArrayList<String>();
+                        final List<String> cleanupList = new ArrayList<>();
                         cleanupList.add("cmd.exe");
                         cleanupList.add("/c");
                         
@@ -521,11 +520,7 @@ final public class Persistence {
                     
                 }
                 
-            } catch (ClassNotFoundException ex) {
-            } catch (NoSuchFieldException ex) {
-            } catch (SecurityException ex) {
-            } catch (IllegalArgumentException ex) {
-            } catch (IllegalAccessException ex) {
+            } catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
             }
             
         }      

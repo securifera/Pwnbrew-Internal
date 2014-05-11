@@ -57,7 +57,7 @@ import pwnbrew.network.PortRouter;
 public abstract class CommManager {
 
     //The map that relates the port to the port router
-    private final Map<Integer, PortRouter> thePortRouterMap = new HashMap<Integer, PortRouter>();
+    private final Map<Integer, PortRouter> thePortRouterMap = new HashMap<>();
 
     //===========================================================================
     /*

@@ -68,7 +68,7 @@ abstract public class HttpWrapper extends PortWrapper {
     protected static final String XOR_STRING = "PWNZ";
     
     //The stringbuilder
-    private StringBuilder aSB = new StringBuilder();
+    private final StringBuilder aSB = new StringBuilder();
     
     //==========================================================================
     /**

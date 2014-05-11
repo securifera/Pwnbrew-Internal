@@ -53,6 +53,7 @@ public final class UpgradeStagerComplete extends ControlMessage{
     /**
      * Constructor
      *
+     * @param passedVersion
     */
     public UpgradeStagerComplete( String passedVersion ) {
         super();

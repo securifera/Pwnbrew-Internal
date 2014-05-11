@@ -431,10 +431,7 @@ public class ClientPortRouter extends PortRouter {
         
             }
      
-        } catch ( UnknownHostException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "checkConnection()", ex.getMessage(), ex );
-            isConnected = false;
-        } catch ( LoggableException ex) {
+        } catch ( UnknownHostException | LoggableException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "checkConnection()", ex.getMessage(), ex );
             isConnected = false;
         }

@@ -80,7 +80,7 @@ public class FileSender extends ManagedRunnable implements LockListener {
     
 //    protected static final int CONNECT_RETRY = 3;
 //    private static int maxMsgLen = (256 * 256) - 8; 
-    private static int maxMsgLen = 14982 - 7;
+    private static final int maxMsgLen = 14982 - 7;
     
     //Class name
     private static final String NAME_Class = FileSender.class.getSimpleName();

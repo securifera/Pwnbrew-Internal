@@ -103,9 +103,7 @@ public final class PushFileAbort extends FileMessage {
             //Cleanup the file transfer
             theFileMM.abortFileReceive( fileId );
             
-        } catch (IOException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        } catch (LoggableException ex) {
+        } catch (IOException | LoggableException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
         }
                     

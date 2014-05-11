@@ -70,7 +70,7 @@ import pwnbrew.selector.SocketChannelHandler;
 public class ServerPortRouter extends PortRouter {
 
     private ServerSocketChannel theServerSocketChannel = null;
-    private final Map<Integer, SocketChannelHandler> hostHandlerMap = new HashMap<Integer, SocketChannelHandler>();
+    private final Map<Integer, SocketChannelHandler> hostHandlerMap = new HashMap<>();
     
     private static final String NAME_Class = ServerPortRouter.class.getSimpleName();
   
@@ -140,7 +140,7 @@ public class ServerPortRouter extends PortRouter {
         
         Map<Integer, SocketChannelHandler> retMap;
         synchronized(hostHandlerMap){
-            retMap = new HashMap<Integer, SocketChannelHandler>(hostHandlerMap);
+            retMap = new HashMap<>(hostHandlerMap);
         }
         return retMap;
     }
@@ -185,9 +185,7 @@ public class ServerPortRouter extends PortRouter {
             RelayDisconnect aMsg = new RelayDisconnect( theHandler.getClientId() );
             aCMManager.send(aMsg);
             
-        } catch( LoggableException ex ){
-            RemoteLog.log(Level.INFO, NAME_Class, "socketClosed()", ex.getMessage(), null );                    
-        } catch (IOException ex) {
+        } catch( LoggableException | IOException ex ){
             RemoteLog.log(Level.INFO, NAME_Class, "socketClosed()", ex.getMessage(), null );                    
         }
         

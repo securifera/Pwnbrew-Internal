@@ -136,11 +136,7 @@ final public class AcceptHandler implements Selectable {
                 theSCH.setState(Constants.CONNECTED);
             }           
 
-        } catch (IOException ex) {
-            RemoteLog.log(Level.WARNING, NAME_Class, "handle()", ex.getMessage(), ex);
-        } catch (LoggableException ex) {
-            RemoteLog.log(Level.WARNING, NAME_Class, "handle()", ex.getMessage(), ex);
-        } catch (InterruptedException ex) {
+        } catch (IOException | LoggableException | InterruptedException ex) {
             RemoteLog.log(Level.WARNING, NAME_Class, "handle()", ex.getMessage(), ex);
         }
 

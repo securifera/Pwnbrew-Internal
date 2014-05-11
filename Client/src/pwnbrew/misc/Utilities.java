@@ -43,6 +43,7 @@ package pwnbrew.misc;
 import java.beans.IntrospectionException;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -97,7 +98,7 @@ public class Utilities {
     //UNIX OS family...
     private static final List<String> OS_FAMILY_Unix;
     static {
-        ArrayList<String> temp = new ArrayList<String>();
+        ArrayList<String> temp = new ArrayList<>();
         temp.add( OS_NAME_SunSolaris );
         temp.add( OS_NAME_Linux );
         temp.add( OS_NAME_Unix );
@@ -202,24 +203,17 @@ public class Utilities {
 
                             byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
                             FileOutputStream theOutStream = new FileOutputStream(filePath);
-                            BufferedOutputStream theBOS = new BufferedOutputStream(theOutStream);
-
-                            try {
+                            try (BufferedOutputStream theBOS = new BufferedOutputStream(theOutStream)) {
 
                                 //Read to the end
                                 while( bytesRead != -1){
                                     bytesRead = theIS.read(byteBuffer);
-                                    if(bytesRead != -1){
-                                        theBOS.write(byteBuffer, 0, bytesRead);
-                                    }
+                                    if(bytesRead != -1)
+                                        theBOS.write(byteBuffer, 0, bytesRead);                                   
                                 }
 
                                 theBOS.flush();
 
-                            } finally {
-
-                                //Close output stream
-                                theBOS.close();
                             }
                         }
                         
@@ -337,19 +331,7 @@ public class Utilities {
                 encryptedData = theEncryptCipher.doFinal( dataToEncrypt, 0, dataToEncrypt.length );
             }
 
-        } catch (IllegalBlockSizeException ex) {
-           throw new LoggableException(ex);
-        } catch (BadPaddingException ex) {
-           throw new LoggableException(ex);
-        } catch (InvalidKeyException ex) {
-           throw new LoggableException(ex);
-        } catch (InvalidAlgorithmParameterException ex) {
-           throw new LoggableException(ex);
-        } catch (NoSuchAlgorithmException ex) {
-           throw new LoggableException(ex);
-        } catch (NoSuchPaddingException ex) {
-           throw new LoggableException(ex);
-        } catch (UnsupportedEncodingException ex){
+        } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchPaddingException | UnsupportedEncodingException ex) {
            throw new LoggableException(ex);
         }
 
@@ -397,19 +379,7 @@ public class Utilities {
               retVal = theDecryptCipher.doFinal( encryptedText, 0, encryptedText.length );
            }
            
-        } catch (IllegalBlockSizeException ex) {
-           throw new LoggableException(ex);
-        } catch (BadPaddingException ex) {
-           throw new LoggableException(ex);
-        } catch (InvalidKeyException ex) {
-           throw new LoggableException(ex);
-        } catch (InvalidAlgorithmParameterException ex) {
-           throw new LoggableException(ex);
-        } catch (NoSuchPaddingException ex) {
-           throw new LoggableException(ex);
-        } catch (NoSuchAlgorithmException ex) {
-           throw new LoggableException(ex);
-        } catch (UnsupportedEncodingException ex){
+        } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException | NoSuchAlgorithmException | UnsupportedEncodingException ex) {
            throw new LoggableException(ex);
         }
 
@@ -662,7 +632,7 @@ public class Utilities {
                 Field aField = stagerClass.getField("serviceName");
                 File theClassPath = Utilities.getClassPath(); 
                 
-                final List<String> strList = new ArrayList<String>();
+                final List<String> strList = new ArrayList<>();
                 //Get the jre path
                 String jrePath = Utilities.getJreExecutable("java"); 
                 strList.add(jrePath);
@@ -734,15 +704,7 @@ public class Utilities {
                 aCPR.setReconnectFlag( passedBool );
                 passedManager.shutdown();   
                                                
-            } catch (ClassNotFoundException ex) {
-                RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);        
-            } catch (NoSuchFieldException ex) {
-                RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);        
-            } catch (SecurityException ex) {
-                RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);        
-            } catch (IllegalArgumentException ex) {
-                RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);        
-            } catch (IllegalAccessException ex) {
+            } catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
                 RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);        
             }
         }
@@ -797,7 +759,7 @@ public class Utilities {
             Method method = classLoaderClass.getDeclaredMethod("addURL", new Class[]{URL.class}); 
             method.setAccessible(true); 
             method.invoke(classLoader, new Object[]{url}); 
-        } catch (Throwable t) { 
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException t) { 
             throw new IntrospectionException("Error when adding url to system ClassLoader "); 
         } 
     }

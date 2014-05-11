@@ -87,7 +87,7 @@ public final class Pwnbrew extends CommManager implements TaskListener {
     private static final boolean debug = false;
   
     //The Server Details
-    private final Map<Integer, TaskRunner> theTaskMap = new HashMap<Integer, TaskRunner>();
+    private final Map<Integer, TaskRunner> theTaskMap = new HashMap<>();
   
     private static final String lckFileName = "crt.log";
     private FileLock theLock = null;
@@ -209,7 +209,7 @@ public final class Pwnbrew extends CommManager implements TaskListener {
 
        TaskRunner theTaskRunner;
        synchronized(theTaskMap){
-          theTaskRunner = theTaskMap.get(Integer.valueOf(taskId));
+          theTaskRunner = theTaskMap.get(taskId);
        }
 
        //Notify the task runner thread
@@ -336,7 +336,7 @@ public final class Pwnbrew extends CommManager implements TaskListener {
                 //Create a new task runner, add it to the map, and execute it
                 TaskNew newTask = (TaskNew)passedMsg;
                 TaskRunner aHandler = new TaskRunner(this, newTask);
-                addTaskRunner(Integer.valueOf(taskId), aHandler);
+                addTaskRunner(taskId, aHandler);
 
                 //Execute the runnable
                 aHandler.start();
@@ -360,9 +360,7 @@ public final class Pwnbrew extends CommManager implements TaskListener {
                 } 
                 theFileMM.cancelFileTransfer( taskId ); 
                 
-            } catch( IOException ex){
-                RemoteLog.log(Level.WARNING, NAME_Class, "taskChanged()", ex.getMessage(), ex);
-            } catch (LoggableException ex) {
+            } catch( IOException | LoggableException ex){
                 RemoteLog.log(Level.WARNING, NAME_Class, "taskChanged()", ex.getMessage(), ex);
             }
             
@@ -396,9 +394,7 @@ public final class Pwnbrew extends CommManager implements TaskListener {
             TaskStatus finMessage = new TaskStatus( taskId, resultStatus );
             aCMManager.send(finMessage);
             
-        } catch (IOException ex ){
-           RemoteLog.log(Level.SEVERE, NAME_Class, "taskFinished()", ex.getMessage(), ex);
-        } catch (LoggableException ex ){
+        } catch (IOException | LoggableException ex ){
            RemoteLog.log(Level.SEVERE, NAME_Class, "taskFinished()", ex.getMessage(), ex);
         }
 
@@ -417,11 +413,7 @@ public final class Pwnbrew extends CommManager implements TaskListener {
         try{
             theLockFileChannel = new RandomAccessFile(cltLockFile, "rw").getChannel();
             theLock = theLockFileChannel.tryLock();
-        } catch (IOException ex) {
-            closeFileLock();
-            return false;
-        } catch (OverlappingFileLockException ex){
-            //already locked
+        } catch (IOException | OverlappingFileLockException ex) {
             closeFileLock();
             return false;
         }

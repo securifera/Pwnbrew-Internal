@@ -106,7 +106,7 @@ public final class CreateShell extends ControlMessage{
                 case OPTION_CMD_STRING:
                     
                     String currStr = new String( theValue, "US-ASCII");
-                    List<String> cmdLineStringList = new ArrayList<String>();
+                    List<String> cmdLineStringList = new ArrayList<>();
 
                     //Split the strings out of the null byte delimited string
                     while(currStr.length() > 0){
@@ -170,9 +170,7 @@ public final class CreateShell extends ControlMessage{
                 aShellMsgManager.setShell( theClientId, aShell );
             }
             
-        } catch(IOException ex ){
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null);        
-        } catch (LoggableException ex) {
+        } catch(IOException | LoggableException ex ){
             RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null);        
         }
         

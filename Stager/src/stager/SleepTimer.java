@@ -62,7 +62,7 @@ import static stager.Stager.hexArray;
 public class SleepTimer implements Runnable {
     
     //Static instance
-    private final Queue<Date> theReconnectTimeList = new LinkedList<Date>();
+    private final Queue<Date> theReconnectTimeList = new LinkedList<>();
     private final String decodedURL;
     private URLConnection theConnection = null;
     private InputStream theInputStream = null;

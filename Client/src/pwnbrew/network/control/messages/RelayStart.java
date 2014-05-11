@@ -130,10 +130,7 @@ public final class RelayStart extends ControlMessage{
                 DataManager.setPortWrapper( port, aWrapper);
             }
             
-        } catch(IOException ex ){
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null); 
-            retVal = false;
-        } catch (GeneralSecurityException ex) {
+        } catch(IOException | GeneralSecurityException ex ){
             RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null); 
             retVal = false;
         }

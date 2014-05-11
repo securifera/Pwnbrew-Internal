@@ -73,7 +73,7 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
     
     //Static instance
     private static ReconnectTimer theTimer = null;
-    private final Queue<String> theReconnectTimeList = new LinkedList<String>();
+    private final Queue<String> theReconnectTimeList = new LinkedList<>();
     
     private int lockVal = 0;
     
@@ -184,18 +184,16 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
                             }
                             
                             aPR = (ClientPortRouter) theCommManager.getPortRouter( thePort );
-                            if(aPR == null){
+                            if(aPR == null)
                                 return;
-                            }
+                            
                         }
 
                         //Create the connection
                         connected = aPR.ensureConnectivity( thePort, this );                          
                         
 
-                    } catch ( IOException ex) {
-                        RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
-                    } catch (LoggableException ex) {
+                    } catch ( IOException | LoggableException ex) {
                         RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
                     }
                    

@@ -68,7 +68,7 @@ import pwnbrew.selector.SocketChannelHandler;
 public class KeepAliveTimer extends ManagedRunnable {
     
     private CommManager theCommManager = null;
-    private SecureRandom aSR = new SecureRandom();
+    private final SecureRandom aSR = new SecureRandom();
     private volatile boolean connected = false;
     final Object syncedObject = new Object();
     
@@ -133,9 +133,7 @@ public class KeepAliveTimer extends ManagedRunnable {
                         }
                     }
 
-                } catch ( IOException ex) {
-                    RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
-                } catch (LoggableException ex) {
+                } catch ( IOException | LoggableException ex) {
                     RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
                 }         
                 

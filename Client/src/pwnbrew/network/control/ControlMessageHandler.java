@@ -64,7 +64,7 @@ import pwnbrew.network.Message;
 public class ControlMessageHandler extends DataHandler {
 
    private static final String NAME_Class = ControlMessageHandler.class.getSimpleName();
-   private final Queue<Message> incomingMsgQueue = new LinkedList<Message>();
+   private final Queue<Message> incomingMsgQueue = new LinkedList<>();
     
    //===============================================================
      /**
@@ -141,9 +141,7 @@ public class ControlMessageHandler extends DataHandler {
            Message aMessage = ControlMessage.getMessage( ByteBuffer.wrap( passedByteArray ) );                           
            processIncoming(aMessage);
        
-       } catch (LoggableException ex) {
-           RemoteLog.log(Level.INFO, NAME_Class, "processData()", ex.getMessage(), ex );
-       } catch (IOException ex) {
+       } catch (LoggableException | IOException ex) {
            RemoteLog.log(Level.INFO, NAME_Class, "processData()", ex.getMessage(), ex );
        }
         
