@@ -215,12 +215,6 @@ pip-log.txt
 dist/
 build/
  
-#netbeans specific
-core
-nbproject/*
-!nbproject/project.properties
-!nbproject/project.xml
- 
 #java specific
 *.class
  
@@ -235,7 +229,3 @@ nbproject/*
 
 #Mr Developer
 .mr.developer.cfg
-/Client/nbproject/private/
-*.xml
-*.properties
-*.mf
