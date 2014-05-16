@@ -46,7 +46,6 @@ package pwnbrew.network.control.messages;
 import java.io.UnsupportedEncodingException;
 import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
-import pwnbrew.functions.ListClients;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.HostHandler;
 import pwnbrew.misc.SocketUtilities;

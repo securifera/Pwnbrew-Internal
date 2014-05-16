@@ -65,7 +65,7 @@ public class AdditionalFields extends XmlObject {
      */
     public void addField( Field passedEntity){
         synchronized( theFieldMap ){
-            theFieldMap.put(passedEntity.getXmlObjectContent(), passedEntity);
+            theFieldMap.put(passedEntity.getName(), passedEntity);
         }
     };
     
@@ -100,7 +100,7 @@ public class AdditionalFields extends XmlObject {
      * @return  
      */
     public Field getField(String fieldName) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return theFieldMap.get( fieldName );
     }
 
 }

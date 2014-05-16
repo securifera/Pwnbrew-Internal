@@ -71,6 +71,8 @@ public final class StageFlag extends ControlMessage{
      * @param dstHostId
      * @param clientId
      * @param isStaged
+     * @param passedVersion
+     * @throws java.io.UnsupportedEncodingException
     */
     public StageFlag( int dstHostId, int clientId, boolean isStaged, String passedVersion ) throws UnsupportedEncodingException {
         super( dstHostId );

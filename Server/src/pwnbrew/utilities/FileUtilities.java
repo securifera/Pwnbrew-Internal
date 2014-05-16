@@ -250,8 +250,7 @@ abstract public class FileUtilities {
     /**
     * Returns the SHA-256 hash for the passed file
     *
-    * @param file a {@code File} representing the file from which the {@code FileContent}
-    * is to be created
+     * @param aFile
     *
     * @return a {@code String} representing the hash of the file
     *

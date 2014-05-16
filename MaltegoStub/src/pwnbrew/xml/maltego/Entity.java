@@ -101,7 +101,7 @@ abstract public class Entity extends XmlObject {
         //If the object is null then create it
         Field aField = null;
         if( fieldList != null )
-            fieldList.getField(fieldName);
+            aField = fieldList.getField(fieldName);
         
         return aField;
     }

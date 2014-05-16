@@ -36,14 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- * Gradiant Panel
- *
- * Created on Aug 9, 2013, 7:22 PM
- *
- */
-
 package pwnbrew.gui.panels;
 
 import java.awt.Color;

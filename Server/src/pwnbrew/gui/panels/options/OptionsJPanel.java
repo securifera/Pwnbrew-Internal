@@ -91,8 +91,7 @@ import pwnbrew.gui.panels.PanelListener;
     //===============================================================
     /**
      * 
-     * @param passedBool
-     * @return 
+     * @param passedBool 
      */
     public void setDirtyFlag( boolean passedBool ){
         dirtyFlag = passedBool;

@@ -41,8 +41,10 @@ import java.awt.Component;
 import java.awt.Image;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JList;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.misc.Constants;
@@ -55,7 +57,9 @@ import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.ClearSessions;
 import pwnbrew.network.control.messages.ControlMessage;
+import pwnbrew.network.control.messages.GetCheckInSchedule;
 import pwnbrew.network.control.messages.GetCount;
+import pwnbrew.network.control.messages.GetSessions;
 import pwnbrew.sessions.SessionJFrameListener;
 import pwnbrew.sessions.SessionsJFrame;
 import pwnbrew.xml.maltego.MaltegoMessage;
@@ -69,15 +73,12 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
     
     private static final String NAME_Class = MaltegoStub.class.getSimpleName();
     
-    private volatile boolean notified = false;
-    private int theHostId = 0;   
-    private String theOS;
-    private String theHostName;
-    
+    private volatile boolean notified = false;    
     private final List<Host> theHostList = new ArrayList<>();
+    
     private volatile int theClientCount = 0;  
     private SessionsJFrame theSessionsJFrame = null;
-    
+        
     //Create the return msg
     private MaltegoMessage theReturnMsg = new MaltegoMessage();
     
@@ -116,27 +117,6 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
             DebugPrinter.printMessage( NAME_Class, "listclients", "No pwnbrew server port provided", null);
             return retStr;
         }
-        
-//        //Get host id
-//        String hostIdStr = objectMap.get( Constants.HOST_ID);
-//        if( hostIdStr == null ){
-//            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
-//            return retStr;
-//        }
-        
-//        //Get host id
-//        String tempOs = objectMap.get( Constants.HOST_OS);
-//        if( tempOs == null ){
-//            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
-//            return retStr;
-//        }
-        
-//        //Get host id
-//        String tempName = objectMap.get( Constants.HOST_NAME);
-//        if( tempName == null ){
-//            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
-//            return retStr;
-//        }
          
         //Create the connection
         try {
@@ -193,6 +173,11 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
 
                          //Create the file browser frame
                         theSessionsJFrame = new SessionsJFrame( this, theHostList );
+                        
+                        //Set to the first element
+                        JList hostList = theSessionsJFrame.getHostJList();
+                        if( hostList.getModel().getSize() > 0)
+                            hostList.setSelectedIndex(0);
 
                         //Set the title
                         theSessionsJFrame.setTitle("Session Manager - "+serverIp);
@@ -321,12 +306,11 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
      */
     @Override
     public synchronized void setCount(int passedCount, int countType, int optionalHostId ) {
+        
         switch( countType){
             case GetCount.HOST_COUNT:
                 theClientCount = passedCount;
-                break;
-            case GetCount.SESSION_COUNT:
-                
+                break;            
         }
         beNotified();
     }
@@ -355,16 +339,53 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
      */
     @Override
     public void hostSelected(String hostIdStr) {
+        
         //Get the client count
         ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();    
         
-        //Get session count
-        ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.SESSION_COUNT, Integer.parseInt(hostIdStr) );
+        //Send a msg to get the sessions
+        int hostId = Integer.parseInt(hostIdStr);
+        ControlMessage aMsg = new GetSessions( Constants.SERVER_ID, hostId);
         aCMM.send(aMsg);
         
-         //Get checkin count
-        aMsg = new GetCount( Constants.SERVER_ID, GetCount.CHECKIN_COUNT, Integer.parseInt(hostIdStr) );
+        //Send a msg to get the checkins
+        aMsg = new GetCheckInSchedule(  Constants.SERVER_ID, hostId);
         aCMM.send(aMsg);
+
+    }
+
+    //===============================================================
+    /**
+     * Add the check in time
+     * 
+     * @param hostId
+     * @param checkInDatStr 
+     */
+    public void addCheckInTime(int hostId, String checkInDatStr) {
+        if( theSessionsJFrame != null )
+            theSessionsJFrame.addCheckInDate(hostId, checkInDatStr); 
+    }
+
+    //===============================================================
+    /**
+     * Add the session 
+     * 
+     * @param hostId
+     * @param checkInDatStr
+     * @param checkOutDatStr 
+     */
+    public void addSession(int hostId, String checkInDatStr, String checkOutDatStr) {
+        if( theSessionsJFrame != null )
+            theSessionsJFrame.addSession( hostId, checkInDatStr, checkOutDatStr);  
+    }
+
+    //===============================================================
+    /**
+     * 
+     */
+    @Override
+    public void showScheduler() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 

@@ -55,7 +55,6 @@ import pwnbrew.library.LibraryItemController;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.tasks.TaskManager;
 
 /**

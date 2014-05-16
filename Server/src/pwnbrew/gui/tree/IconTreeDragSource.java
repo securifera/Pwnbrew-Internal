@@ -73,6 +73,7 @@ public class IconTreeDragSource extends DragSource implements DragSourceListener
     /**
     * Creates a new <code>DragGestureRecognizer</code>
     * 
+     * @param actions
      * @return 
     */
     public DragGestureRecognizer createDefaultDragGestureRecognizer( int actions ) {

@@ -46,9 +46,7 @@ package pwnbrew.network.control.messages;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 
 /**
  *

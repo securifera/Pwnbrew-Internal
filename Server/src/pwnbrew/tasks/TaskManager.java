@@ -120,6 +120,7 @@ public interface TaskManager {
     /**
      * 
      * @param clientId 
+     * @param passedVersion 
      */
     public void stagerUpgradeComplete( int clientId, String passedVersion );
     

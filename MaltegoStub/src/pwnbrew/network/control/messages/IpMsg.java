@@ -46,11 +46,9 @@ package pwnbrew.network.control.messages;
 import java.io.UnsupportedEncodingException;
 import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
-import pwnbrew.functions.ListClients;
 import pwnbrew.functions.ToIP;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.xml.maltego.custom.Host;
 import pwnbrew.xml.maltego.custom.IpV4Address;
 
 /**

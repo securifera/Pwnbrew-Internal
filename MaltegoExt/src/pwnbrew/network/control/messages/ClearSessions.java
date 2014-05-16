@@ -114,6 +114,7 @@ public final class ClearSessions extends ControlMessage{
             if( theHostController != null ){
                 Host theHost = theHostController.getObject();
                 theHost.setSessionList( new ArrayList<Session>());
+                theHostController.saveToDisk();
             }
 
         }        

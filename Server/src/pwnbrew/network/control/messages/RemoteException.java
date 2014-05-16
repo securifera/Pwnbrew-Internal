@@ -54,6 +54,8 @@ public final class RemoteException extends ControlMessage{ // NO_UCD (use defaul
      * Constructor
      *
      * @param dstHostId
+     * @param passedExceptionMsg
+     * @throws java.io.UnsupportedEncodingException
     */
     public RemoteException( int dstHostId, String passedExceptionMsg ) throws UnsupportedEncodingException {
         super( dstHostId );

@@ -74,7 +74,7 @@ public final class UpgradeStager extends ControlMessage{
      * Constructor
      *
      * @param dstHostId
-     * @param passedPayloadBytes
+     * @param passedJarItem
     */
     public UpgradeStager( int dstHostId, JarItem passedJarItem ) {
         super( dstHostId );

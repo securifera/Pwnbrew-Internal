@@ -78,11 +78,10 @@ public class X509CertificateFactory {
      * 
      * 
      * @param name the X.509 Distinguished Name, eg "CN=Test, L=London, C=GB"
-     * @param pair the KeyPair
+     * @param issuer
      * @param algorithm
      * @param days how many days from now the Certificate is valid for
      * @param KeySize
-     * @param Algorithm_RSA the signing Algorithm_RSA, eg "SHA1withRSA"
      * 
      * @return
      * @throws java.security.cert.CertificateException

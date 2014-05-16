@@ -81,7 +81,7 @@ public class JarItem extends FileContentRef {
     //=====================================================================
     /**
      * 
-     * @param passedVersion 
+     * @param passedString 
      */
     public void setJvmMajorVersion( String passedString ) {
         setAttribute(theJavaMajorVersion, passedString );
@@ -108,7 +108,7 @@ public class JarItem extends FileContentRef {
     //=====================================================================
     /**
      * 
-     * @param passedVersion 
+     * @param passedString 
      */
     public void setType( String passedString ) {
         setAttribute(theJarType, passedString );
@@ -145,6 +145,7 @@ public class JarItem extends FileContentRef {
     //=====================================================================
     /**
      * 
+     * @throws java.io.IOException
      */    
     public void writeSelfToDisk() throws IOException{        
         File saveDir = new File( Directories.getJarLibPath() );

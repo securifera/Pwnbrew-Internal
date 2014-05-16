@@ -319,7 +319,7 @@ public class InterfaceOptionsPanel extends OptionsJPanel implements ProgressDriv
     //========================================================================
     /**
      * 
-     * @param Listener
+     * @param progressListener
      * @param theObjList
      * @return 
      */
@@ -376,7 +376,7 @@ public class InterfaceOptionsPanel extends OptionsJPanel implements ProgressDriv
     /**
      * Delete the file
      * 
-     * @param aJarItem 
+     * @param anInt 
      */
     @Override
     public void deleteJarItem(int anInt ) {

@@ -155,6 +155,7 @@ abstract public class PortRouter {
      *  Queues the byte array to be sent
      * @param byteArr
      * @param passedClientId
+     * @throws java.io.IOException
      */
     public void queueSend( byte[] byteArr, Integer passedClientId ) throws IOException {
         

@@ -37,10 +37,7 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.xml.maltego.custom;
 
-import pwnbrew.StubConfig;
-import pwnbrew.misc.Constants;
 import pwnbrew.xml.maltego.Entity;
-import pwnbrew.xml.maltego.Field;
 
 /**
  *

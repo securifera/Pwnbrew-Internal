@@ -327,7 +327,6 @@ public final class TasksJDialog extends JDialog implements Observer{
     /**
      *  Removes the task from the JTable model
      * @param theTask
-     * @param currentRow
     */
     public void removeTask( RemoteTask theTask ) {
         DefaultListModel theListModel = (DefaultListModel)theTaskJList.getModel();

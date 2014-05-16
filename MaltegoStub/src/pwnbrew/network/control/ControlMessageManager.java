@@ -49,10 +49,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import pwnbrew.StubConfig;
-import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.Message;
 
 /**

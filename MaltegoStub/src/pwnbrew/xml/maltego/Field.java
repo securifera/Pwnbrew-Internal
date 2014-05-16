@@ -75,6 +75,14 @@ public class Field extends XmlObject {
 
     //===========================================================================
     /**
+     *  Gets the name
+     * @return 
+     */
+    public String getName(){
+        return theAttributeMap.get( ATTRIBUTE_Name );
+    }
+    //===========================================================================
+    /**
      * Sets the display name
      * @param passedStr 
      */

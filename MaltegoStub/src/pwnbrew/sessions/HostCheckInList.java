@@ -37,12 +37,6 @@ The copyright on this package is held by Securifera, Inc
 */
 
 
-/*
-* HostCheckInList.java
-*
-* Created on June 24, 2013, 9:23:48 PM
-*/
-
 package pwnbrew.sessions;
 
 import java.awt.Color;
@@ -70,7 +64,7 @@ public class HostCheckInList extends MutableJList implements ActionListener {
     /**
      *  Constructor
     */
-    HostCheckInList(HostCheckInListListener passedListener) {
+    public HostCheckInList(HostCheckInListListener passedListener) {
         
         super( new HostCheckInListModel( passedListener ) );
         theListener = passedListener;
@@ -211,4 +205,4 @@ public class HostCheckInList extends MutableJList implements ActionListener {
     }
 
 
-}/* END CLASS ScriptLangList */
+}

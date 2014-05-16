@@ -76,6 +76,7 @@ public class JarTable extends JTable {
     //====================================================================
     /**
      * Constructor
+     * @param passedListener
      */
     public JarTable( JarTableListener passedListener ) {
         

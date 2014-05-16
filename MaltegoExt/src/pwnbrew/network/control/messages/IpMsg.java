@@ -40,7 +40,6 @@ package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.messages.ControlMessage;
 
 /**
  *
@@ -55,6 +54,8 @@ public final class IpMsg extends ControlMessage{
      * Constructor
      *
      * @param dstHostId
+     * @param passedIP
+     * @throws java.io.UnsupportedEncodingException
     */
     public IpMsg( int dstHostId, String passedIP ) throws UnsupportedEncodingException {
         super( dstHostId );

@@ -66,8 +66,6 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
     
     public static final byte HOST_COUNT = 20;
     public static final byte NIC_COUNT = 21;
-    public static final byte SESSION_COUNT = 22;
-    public static final byte CHECKIN_COUNT = 23;
     
     private int countType;
     private int optionalId;
@@ -123,6 +121,7 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
         ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
         if( aCMManager != null ){
             
+            int retCount = 0;
             TaskManager theTaskManager = passedManager.getTaskManager();
             switch( countType ){
                 case HOST_COUNT:
@@ -131,13 +130,7 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
                         //Get the host controllers 
                         MainGuiController theGuiController = (MainGuiController)theTaskManager;
                         List<LibraryItemController> theHostControllers = theGuiController.getHostControllers();
-
-                        try {
-                            CountReply aHostMsg = new CountReply( getSrcHostId(), theHostControllers.size() - 1, countType, optionalId);
-                            aCMManager.send(aHostMsg);
-                        } catch (UnsupportedEncodingException ex) {
-                            Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                        }                    
+                        retCount = theHostControllers.size() - 1;
 
                     }
                     break;
@@ -149,28 +142,27 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
                             hostIdStr  = ServerConfig.getServerConfig().getHostId();                            
                             
                         //Get the host controller 
-                        int numOfNics = 0;
                         MainGuiController theGuiController = (MainGuiController)theTaskManager;
                         HostController theHostController = theGuiController.getHostController( hostIdStr );
                         if( theHostController != null ){
                             Host theHost = theHostController.getObject();
-                            numOfNics = theHost.getNicMap().size();
-                        }
-
-                        try {
-                            CountReply aHostMsg = new CountReply( getSrcHostId(), numOfNics, countType, optionalId);
-                            aCMManager.send(aHostMsg);
-                        } catch (UnsupportedEncodingException ex) {
-                            Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                        }  
-                                   
+                            retCount = theHost.getNicMap().size();
+                        }       
 
                     }
                     break;
+                
                 default:
                     Log.log(Level.WARNING, NAME_Class, "evaluate()", "Unknown count id type.", null );    
-                    break;
+                    return;                    
             }
+            
+            try {
+                CountReply aHostMsg = new CountReply( getSrcHostId(), retCount, countType, optionalId);
+                aCMManager.send(aHostMsg);
+            } catch (UnsupportedEncodingException ex) {
+                Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
+            }  
                         
         }        
     }

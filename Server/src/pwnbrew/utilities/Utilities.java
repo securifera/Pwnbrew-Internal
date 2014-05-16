@@ -233,7 +233,6 @@ public class Utilities {
     //===========================================================================
     /**
      * 
-     * @param actionCommand
      * @return 
      */
     public static List<JarItem> getJarItems() {
@@ -258,8 +257,7 @@ public class Utilities {
     //===========================================================================
     /**
      * 
-     * @param actionCommand
-     * @return 
+     * @param aRef 
      */
     public static void addJarItem( JarItem aRef ){
         
@@ -292,8 +290,7 @@ public class Utilities {
     //===========================================================================
     /**
      * 
-     * @param actionCommand
-     * @return 
+     * @param aRef 
      */
     public static void removeJarItem( JarItem aRef ){
         
@@ -329,7 +326,7 @@ public class Utilities {
     /**
      *  Get version
      * 
-     * @param payloadPath
+     * @param payloadFile
      * @return 
      */
     public static JarItem getJavaItem( File payloadFile ){
@@ -1518,6 +1515,7 @@ public class Utilities {
     /**
      *  Get the client payload
      * @param clientId
+     * @param passedVersion
      * @return 
      */
     public static Payload getClientPayload( int clientId, String passedVersion ) {

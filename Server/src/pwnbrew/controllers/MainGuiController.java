@@ -1885,7 +1885,7 @@ final public class MainGuiController extends Controller implements ActionListene
     /**
      * Handles the completion of a task
      *
-     * @param passedMsg
+     * @param passedVersion
     */
     @Override
     public void stagerUpgradeComplete( int clientId, String passedVersion ) {
@@ -2111,7 +2111,6 @@ final public class MainGuiController extends Controller implements ActionListene
     /**
      *  Get all of the host controllers
      * 
-     * @param clientIdStr
      * @return 
      */
     public List<LibraryItemController> getHostControllers() {

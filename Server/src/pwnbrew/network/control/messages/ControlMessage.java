@@ -181,6 +181,7 @@ public abstract class ControlMessage extends Message {
      * @param msgId
      * @param passedBuffer
      * @return 
+     * @throws pwnbrew.logging.LoggableException 
      */
     public static ControlMessage instatiateMessage( byte[] msgId, ByteBuffer passedBuffer ) throws LoggableException{
         

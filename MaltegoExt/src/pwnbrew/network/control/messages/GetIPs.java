@@ -39,21 +39,17 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import pwnbrew.controllers.MainGuiController;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
-import pwnbrew.library.LibraryItemController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Nic;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.tasks.TaskManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
@@ -129,10 +125,7 @@ public final class GetIPs extends ControlMessage{ // NO_UCD (use default)
                     //Get the host
                     Host theHost = theHostController.getHost();
                     Map<String, Nic> nicMap = theHost.getNicMap();     
-                    for( Iterator<Nic> anIter = nicMap.values().iterator(); anIter.hasNext(); ){
-
-                        //Add an entry
-                        Nic anEntry = anIter.next();
+                    for (Nic anEntry : nicMap.values()) {
                         String anIP = anEntry.getIpAddress();
                         try {
                             IpMsg anIpMsg = new IpMsg( getSrcHostId(), anIP);

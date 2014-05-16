@@ -331,6 +331,9 @@ final public class SSLUtilities {
     //===============================================================
     /**
      * Returns the certificate for the localhost
+     * @return 
+     * @throws java.security.KeyStoreException 
+     * @throws pwnbrew.logging.LoggableException 
     */
     public static Certificate getCertificate() throws KeyStoreException, LoggableException {
 
@@ -479,9 +482,12 @@ final public class SSLUtilities {
     /**
      *  Wrapper for creating a self signed certificate
      * 
+     * @param issueeDN
      * @param sueeDN
+     * @param issuerDN
      * @param suerDN
      * @param days 
+     * @throws pwnbrew.logging.LoggableException 
      */
     public static void createSelfSignedCertificate(String issueeDN, String issuerDN, int days) throws LoggableException {
         

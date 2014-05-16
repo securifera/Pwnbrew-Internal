@@ -332,7 +332,6 @@ final public class Environment {
     * If the given {@code String} is null or empty, this method does nothing.
     *
      * @param aClass
-    * @param path the class path
     */
     public static void addClassToMap( Class aClass ) {
 

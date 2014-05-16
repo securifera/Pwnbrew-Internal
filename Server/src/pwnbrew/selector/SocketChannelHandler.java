@@ -708,7 +708,9 @@ public class SocketChannelHandler implements Selectable {
      * 
      * @param passedClientId
      * @param passedBool 
+     * @param theJreVersion 
      * @return  
+     * @throws java.io.UnsupportedEncodingException  
      */
     public synchronized boolean setStaging( int passedClientId, boolean passedBool, String theJreVersion ) throws UnsupportedEncodingException {
         

@@ -46,7 +46,6 @@ package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.utilities.SocketUtilities;
 
 /**

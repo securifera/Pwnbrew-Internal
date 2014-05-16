@@ -49,4 +49,6 @@ public interface SessionJFrameListener extends HostCheckInListListener {
 
     public void hostSelected(String hostIdStr);
 
+    public void showScheduler();
+
 }

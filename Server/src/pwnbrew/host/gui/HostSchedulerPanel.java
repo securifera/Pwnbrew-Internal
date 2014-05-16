@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- * HostSchedulerPanel.java
- *
- * Created on Jun 24, 2013, 10:24:17 PM
- */
-
 package pwnbrew.host.gui;
 
 import java.awt.event.KeyAdapter;
@@ -55,7 +48,6 @@ import java.security.SecureRandom;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;

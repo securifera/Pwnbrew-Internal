@@ -45,7 +45,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.fileoperation.TaskManager;
 import pwnbrew.functions.Function;
-import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
