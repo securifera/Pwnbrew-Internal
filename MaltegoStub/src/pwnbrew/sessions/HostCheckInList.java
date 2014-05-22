@@ -127,6 +127,7 @@ public class HostCheckInList extends MutableJList implements ActionListener {
         JPopupMenu popup = new JPopupMenu();
 
         JMenuItem menuItem = new JMenuItem( Constants.DELETE );
+        menuItem.setIcon(null);
         menuItem.setActionCommand( Constants.DELETE );
         menuItem.addActionListener(this);
         menuItem.setEnabled( true );

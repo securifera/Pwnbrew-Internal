@@ -75,16 +75,16 @@ public class HostCheckInWizardPanel extends GradientPanel {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(30)
                 .addComponent(headerTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 41, Short.MAX_VALUE)
-                .addContainerGap())
+                )
             .addComponent(innerListPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(headerTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 35, 35))
+                .addGap(5,5,5)
+                .addComponent(headerTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 35, 35)
                 .addGap(5,5,5)
                 .addComponent(innerListPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -120,10 +120,10 @@ public class HostCheckInWizardPanel extends GradientPanel {
 
         headerTitle.setFont(new java.awt.Font("Tahoma", 1, 16)); // NOI18N
         headerTitle.setForeground(new java.awt.Color(255, 255, 255));
-        headerTitle.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        headerTitle.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         headerTitle.setText("    Client Selection");
         add(headerTitle);
-        headerTitle.setBounds(0, 0, 180, 49);
+        headerTitle.setBounds(20, 0, 330, 49);
     }// </editor-fold>//GEN-END:initComponents
 
 

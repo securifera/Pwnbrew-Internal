@@ -77,6 +77,7 @@ public class SessionsJFrame extends javax.swing.JFrame {
         
         initComponents();
         initializeComponents( passedHostList );
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -295,6 +296,7 @@ public class SessionsJFrame extends javax.swing.JFrame {
         JDialog aDialog = new JDialog( this, true);
         aDialog.add(remoteWizard);
         aDialog.pack();
+        aDialog.setLocationRelativeTo(null);
         aDialog.setVisible(true);  
         
     }//GEN-LAST:event_scheduleButtonActionPerformed
