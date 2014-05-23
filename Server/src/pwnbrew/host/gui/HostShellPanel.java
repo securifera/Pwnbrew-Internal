@@ -143,42 +143,14 @@ public class HostShellPanel extends javax.swing.JPanel {
     private boolean updateCaret( RunnerPane theTextPane, int offset, String passedStr ) throws BadLocationException{
 
         boolean retVal = true;
-        if( !theTextPane.isEnabled()){
-            return retVal;
-        }
-        
-//        //Get the prompt
-//        String thePrompt = theListener.getShell().getShellPrompt();
-//        StyledDocument theDoc = theTextPane.getStyledDocument();
-//        Element rootElement = theDoc.getDefaultRootElement();
-//        if( rootElement != null ){
-//
-//            //find the prompt working backwords
-//            int docElements = rootElement.getElementCount();
-//            for( int i = 1; i <= docElements; i++){
-//                
-//                //Get the element
-//                Element anElement = rootElement.getElement( rootElement.getElementCount() - i );
-//                int startPos = anElement.getStartOffset();
-//                int endPos = anElement.getEndOffset();
-//                
-//                //Get the string for that element
-//                String theStr = theDoc.getText(startPos, (endPos - startPos) - 1);
-//                int promptIndex = theStr.indexOf(thePrompt);
-//                if( promptIndex != -1){
+        if( !theTextPane.isEnabled())
+            return retVal;     
                     
-                    int promptEndOff = getPromptEndOffset(theTextPane);
-                    if( promptEndOff != -1 && offset < promptEndOff ) {
-                        theTextPane.setCaretPosition( promptEndOff );
-                        retVal = false;
-//                        break;
-                    }
-//                }
-//            }
-
-//        } else {
-//            retVal = false;
-//        }
+        int promptEndOff = getPromptEndOffset(theTextPane);
+        if( promptEndOff != -1 && offset < promptEndOff ) {
+            theTextPane.setCaretPosition( promptEndOff );
+            retVal = false;
+        }
         
         return retVal;
     }
@@ -234,7 +206,11 @@ public class HostShellPanel extends javax.swing.JPanel {
     private void openButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openButtonActionPerformed
         
         if(openButton.getText().equals("Open Shell")){
-            getShellTextPane().setEnabled( true );
+            
+            
+            RunnerPane thePane = getShellTextPane();
+            thePane.setEnabled( true );
+            thePane.requestFocus();
         
             //Spawn the shell
             ClassWrapper aClassWrapper = (ClassWrapper)shellCombo.getSelectedItem();
@@ -243,11 +219,9 @@ public class HostShellPanel extends javax.swing.JPanel {
             //Set to stop shell
             openButton.setText("Kill Shell");
             
-        } else {
-            
+        } else
             disablePanel( true );
 
-        }
 
     }//GEN-LAST:event_openButtonActionPerformed
 
@@ -263,9 +237,9 @@ public class HostShellPanel extends javax.swing.JPanel {
      * @param shellPane
     */
     public void setShellTextPane( JTextPane shellPane ) {
-        if(shellPane != null){
+        if(shellPane != null)
            shellScrollPane.setViewportView( shellPane );
-        }
+        
     }
     
     //===============================================================
@@ -283,9 +257,8 @@ public class HostShellPanel extends javax.swing.JPanel {
         theTextPane.setText(" ");
 
         //Kill the shell
-        if( passedBool ){
+        if( passedBool )
             theListener.killShell();
-        }
 
          //Set to stop shell
         openButton.setText("Open Shell");
@@ -311,10 +284,9 @@ public class HostShellPanel extends javax.swing.JPanel {
         
         boolean retVal = true;
         RunnerPane theTextPane = getShellTextPane();
-        if( !theTextPane.isEnabled()){
+        if( !theTextPane.isEnabled())
             return true;
-        }
-        
+                
         StyledDocument theDoc = theTextPane.getStyledDocument();
         Element rootElement = theDoc.getDefaultRootElement();
         if( rootElement != null ){
@@ -383,47 +355,6 @@ public class HostShellPanel extends javax.swing.JPanel {
                             }
                             
                         }
-//                        StyledDocument aSD = theTextPane.getStyledDocument();
-//                        Element rootElement = aSD.getDefaultRootElement();
-//                        if( rootElement != null ){
-//
-//                            int elementCount = rootElement.getElementCount();
-////                            if( elementCount > 1 ){
-//                                Element anElement = rootElement.getElement( elementCount - 2);
-//                                int startPos = anElement.getStartOffset();
-//                                int endPos = anElement.getEndOffset();
-                            
-//                            String theStr = aSD.getText(promptEndOff, WIDTH);
-
-//                                String theStr = aSD.getText(startPos, endPos - startPos);
-//                                String osName = ((HostController)theListener).getOsName();
-//                                if( Utilities.isWindows( osName )){
-//                                    int pathPos = theStr.indexOf(">");
-//                                    if( pathPos == -1 ){
-//                                        pathPos = theStr.indexOf("?");
-//                                        if( pathPos == -1 ){
-//                                            pathPos = theStr.indexOf(":");
-//                                        } 
-//                                    }
-
-                                    //Get the command
-//                                    theStr = theStr.substring(pathPos + 1).trim().concat("\n");
-//                                } else if( Utilities.isUnix(osName)){
-//                                    
-//                                }
-
-//                                theListener.sendInput( theStr );
-//
-//                                //Add the command to the history
-//                                lastCommand = theStr.replace("\n", "");
-//                                if( !lastCommand.isEmpty() ){
-//                                    history.remove(lastCommand);
-//                                    history.add(lastCommand);
-//                                    historyIterator = null;
-//                                }
-//                            }
-
-//                        }                    
 
                     } else if( e.getKeyCode() == KeyEvent.VK_TAB ){
 
@@ -539,9 +470,8 @@ public class HostShellPanel extends javax.swing.JPanel {
              */
             @Override
             public void insertString( int offset, String str, AttributeSet a) throws BadLocationException{
-                if( updateCaret( theTextPane, offset, str ) ){
-                    super.insertString(offset, str, a);
-                }
+                if( updateCaret( theTextPane, offset, str ) )
+                    super.insertString(offset, str, a);                
             }
             
             //============================================================
@@ -550,9 +480,8 @@ public class HostShellPanel extends javax.swing.JPanel {
              */
             @Override
             public void remove( int theOffset, int len) throws BadLocationException{
-                if( canRemove() ){
+                if( canRemove() )
                     super.remove(theOffset, len);
-                }
             }
             
         });
@@ -562,9 +491,8 @@ public class HostShellPanel extends javax.swing.JPanel {
         
         //Add the command prompt
         List<Class> shellList = theListener.getShellList();
-        for( Class aClass : shellList ){
+        for( Class aClass : shellList )
             shellCombo.addItem( new ClassWrapper( aClass ) );
-        }
         
         //Center the items
         ((JLabel)shellCombo.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);

@@ -76,8 +76,6 @@ public class ClientConfig implements Serializable {
   
     //The time to sleep between connections
     private transient static ClientConfig theConf = null;
-    private String theKeyStorePass = "";
-    private String theCertAlias = "";
        
     private static final long serialVersionUID = 1L;
     private transient static final String NAME_Class = ClientConfig.class.getSimpleName();
@@ -255,51 +253,6 @@ public class ClientConfig implements Serializable {
        
         return localConf;
     }
-    
-    
-    //==========================================================================
-    /**
-     * Returns the password to the java keystore for encryption
-     * @return 
-     * @throws pwnbrew.log.LoggableException 
-    */
-    public String getKeyStorePass() throws LoggableException {
-        return theKeyStorePass;
-    }
-
-    //==========================================================================
-    /**
-     * Sets the password to the java keystore in the configuration file
-     * @param passedKey
-     * @throws pwnbrew.log.LoggableException
-    */
-    public void setKeyStorePass( String passedKey ) throws LoggableException {
-        //Make sure the passed key pass is not empty
-        if(passedKey != null ){
-            theKeyStorePass = passedKey;
-        }
-    }
-    
-    //==========================================================================
-    /**
-     * Returns the alias for the local certificate
-     * @return 
-    */
-    public String getAlias(){
-       return theCertAlias;
-    }
-
-    //==========================================================================
-    /**
-     * Sets the alias for the local certificate
-     * @param passedAlias
-    */
-    public void setAlias(String passedAlias){
-        if( passedAlias != null ){
-            theCertAlias = passedAlias;
-        }
-    }
-    
     
     //==========================================================================
     /**

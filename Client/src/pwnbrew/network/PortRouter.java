@@ -73,7 +73,7 @@ abstract public class PortRouter {
     
     private SSLContext theSSLContext = null;
     
-    //private static final String NAME_Class = PortRouter.class.getSimpleName();
+    private static final String NAME_Class = PortRouter.class.getSimpleName();
   
     //===============================================================
     /**
@@ -158,9 +158,8 @@ abstract public class PortRouter {
     public synchronized void closeConnection( int passedId ) { // NO_UCD (use default)
     
         SocketChannelHandler theHandler = getSocketChannelHandler(passedId);
-        if( theHandler != null){               
-            theHandler.shutdown();
-        }
+        if( theHandler != null)              
+            theHandler.shutdown();       
     }
     
     //===============================================================
@@ -264,11 +263,10 @@ abstract public class PortRouter {
 
         //If the context has not be created than create it
         if ( theSSLContext == null ){       
-            if( client ){
+            if( client )
                 theSSLContext = SSLUtilities.createSSLContext();    
-            } else {
-                theSSLContext = SSLUtilities.createServerSSLContext();
-            } 
+            else
+                theSSLContext = SSLUtilities.createServerSSLContext();            
         }
 
         return theSSLContext;
@@ -282,9 +280,9 @@ abstract public class PortRouter {
     public synchronized void closeConnection() { // NO_UCD (use default)
     
         SocketChannelHandler theHandler = getSocketChannelHandler();
-        if( theHandler != null){               
+        if( theHandler != null)            
             theHandler.shutdown();
-        }
+        
     }
      
 

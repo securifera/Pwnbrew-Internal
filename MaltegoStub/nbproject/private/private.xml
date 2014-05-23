@@ -16,12 +16,12 @@
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/sessions/wizard/ConfirmationPanel.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/network/control/messages/IpMsg.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/functions/ToSessionManager.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/sessions/wizard/HostCheckInWizardPanel.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/sessions/wizard/HostCheckInWizard.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/sessions/wizard/HostCheckInWizardController.java</file>
+            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/sessions/wizard/HostCheckInWizardPanel.java</file>
+            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/network/ClientPortRouter.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/network/control/messages/CheckInTimeMsg.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/generic/gui/wizard/Wizard.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/network/control/messages/SessionMsg.java</file>
         </group>
     </open-files>
 </project-private>

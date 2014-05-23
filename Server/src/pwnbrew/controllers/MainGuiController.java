@@ -1587,7 +1587,8 @@ final public class MainGuiController extends Controller implements ActionListene
         List<Session> sessionList = passedHost.getSessionList();
         Session aSession = sessionList.get(sessionList.size() - 1);
         aSession.setDisconnectedTime(Constants.CHECKIN_DATE_FORMAT.format( new Date() ));
-
+        
+       
         passedHost.setConnected( false );
         getJTree().repaint();
 

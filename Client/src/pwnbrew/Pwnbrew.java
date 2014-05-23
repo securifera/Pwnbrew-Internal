@@ -39,20 +39,9 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew;
 
-/*
-* Pwnbrew.java
-*
-* Created on June 7, 2013, 9:33:23 PM
-*/
-
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.net.UnknownHostException;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -88,10 +77,6 @@ public final class Pwnbrew extends CommManager implements TaskListener {
   
     //The Server Details
     private final Map<Integer, TaskRunner> theTaskMap = new HashMap<>();
-  
-    private static final String lckFileName = "crt.log";
-    private FileLock theLock = null;
-    private FileChannel theLockFileChannel = null;
      
     //===============================================================
     /**
@@ -100,11 +85,7 @@ public final class Pwnbrew extends CommManager implements TaskListener {
     private Pwnbrew( String[] connectStrArr ) throws LoggableException, IOException {
         
         //Make sure the we aren't running already
-        DebugPrinter.enable( debug );  
-        if(!canRun()){
-            throw new LoggableException("Unable to start.  The application is already running.");
-        }
-        
+        DebugPrinter.enable( debug );       
         if( connectStrArr.length == 2 ){
 
             //Get the control port
@@ -398,61 +379,6 @@ public final class Pwnbrew extends CommManager implements TaskListener {
            RemoteLog.log(Level.SEVERE, NAME_Class, "taskFinished()", ex.getMessage(), ex);
         }
 
-    }
-    
-    //===============================================================
-    /**
-     *  Determines if an instance of a competing entry point is already running.
-     *
-     * @return 
-    */
-    public boolean canRun() {    
-
-        File parentDir = Utilities.getClassPath().getParentFile();
-        final File cltLockFile = new File( parentDir, lckFileName );
-        try{
-            theLockFileChannel = new RandomAccessFile(cltLockFile, "rw").getChannel();
-            theLock = theLockFileChannel.tryLock();
-        } catch (IOException | OverlappingFileLockException ex) {
-            closeFileLock();
-            return false;
-        }
-
-        if(theLock == null){
-            return false;
-        }
-
-        //Add a hook to close the lock on shutdown
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run(){
-                closeFileLock();
-                cltLockFile.delete();
-            }
-        });
-
-        return true;
-    
-    }
-    
-    //===============================================================
-    /**
-    *  This function closes the file lock and channel.
-    *
-    */
-    public void closeFileLock(){
-        try {
-            //Release the lock
-            if( theLock != null ){
-                theLock.release();                
-            }
-            
-            if( theLockFileChannel != null && theLockFileChannel.isOpen() ){
-                theLockFileChannel.close();
-            }
-        } catch (IOException ex) {
-            RemoteLog.log(Level.SEVERE, NAME_Class, "closeLock()", ex.getMessage(), ex);
-        }
     }
 
     //===============================================================

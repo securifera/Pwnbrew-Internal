@@ -90,7 +90,13 @@ public class Stager extends ClassLoader {
         ManifestProperties localProperties = new ManifestProperties();
         Class localClass = Stager.class;
         
-        InputStream localInputStream = localClass.getResourceAsStream("/" + STAG_PROP_FILE);
+        URL ourUrl = localClass.getProtectionDomain().getCodeSource().getLocation();
+        String aStr = ourUrl.toExternalForm();
+        
+        final URL manifest =  new URL("jar:" + aStr + "!/" + STAG_PROP_FILE);
+        URLConnection theConnection = manifest.openConnection();
+        InputStream localInputStream = theConnection.getInputStream();
+        
         if (localInputStream != null) {
             
             //Load the properties
@@ -139,8 +145,8 @@ public class Stager extends ClassLoader {
                     aTimer.run();
 
                     //Get the connection
-                    URLConnection theConnection = aTimer.getUrlConnection();   
-                    if( theConnection != null ){
+                    URLConnection connection2 = aTimer.getUrlConnection();   
+                    if( connection2 != null ){
 
                         //Get the input stream
                         InputStream theIS = aTimer.getInputStream();
@@ -160,6 +166,7 @@ public class Stager extends ClassLoader {
         }
 
     }
+
 
     //==========================================================================
     /**

@@ -155,7 +155,7 @@ public class Utilities {
 
 //    static final SecureRandom SecureRandomGen = new SecureRandom();
 
-    private static URL ourUrl;
+    private static URL theURL;
     private static File classPath;
 
     static {
@@ -164,13 +164,13 @@ public class Utilities {
             
             try {
                 //Check if we are staging first
-                ourUrl = Class.forName("stager.Stager").getProtectionDomain().getCodeSource().getLocation();
+                theURL = Class.forName("stager.Stager").getProtectionDomain().getCodeSource().getLocation();
             } catch (ClassNotFoundException ex) {
-                ourUrl = Utilities.class.getProtectionDomain().getCodeSource().getLocation();
+                theURL = Utilities.class.getProtectionDomain().getCodeSource().getLocation();
             }
             
             //Check for null
-            classPath = new File( ourUrl.toURI() );            
+            classPath = new File( theURL.toURI() );            
         
         } catch( URISyntaxException ex1) {
             ex1 = null;
@@ -387,7 +387,17 @@ public class Utilities {
 
     }
     
-    //****************************************************************************
+    //======================================================================
+    /**
+     *   Returns the class path for the application.
+     * 
+     * @return 
+    */   
+    public static URL getURL(){
+        return theURL;
+    }
+    
+    //======================================================================
     /**
      *   Returns the class path for the application.
      * 
