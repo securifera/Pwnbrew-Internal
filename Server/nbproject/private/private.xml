@@ -3,13 +3,8 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/host/gui/HostShellPanel.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/gui/panels/options/NetworkOptionsPanel.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/utilities/LoaderUtilities.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/network/control/messages/RelayStart.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/Environment.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/host/HostController.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/controllers/MainGuiController.java</file>
+            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/selector/SocketChannelHandler.java</file>
+            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/Server.java</file>
         </group>
     </open-files>
 </project-private>
