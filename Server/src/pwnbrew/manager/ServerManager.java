@@ -187,8 +187,19 @@ public class ServerManager extends CommManager {
             //If the connection was closed
             String clientIdStr = Integer.toString( clientId );
             aSPR.removeHandler(clientId);
-            final HostController theController = theServer.getGuiController().getHostController(clientIdStr);
+            HostController theController = theServer.getGuiController().getHostController(clientIdStr);
 
+            final List<HostController> theHostList = new ArrayList<>();
+            theHostList.add(theController);
+            
+            //Add any pivoting hosts
+            List<Integer> theInternalHosts = theHandler.getInternalHosts();
+            for( Integer anId : theInternalHosts ){
+                String idStr = Integer.toString( anId );
+                HostController aController = theServer.getGuiController().getHostController(idStr);
+                theHostList.add(aController);
+            }         
+            
             if( theController != null ){
 
                 SwingUtilities.invokeLater( new Runnable() {
@@ -196,14 +207,16 @@ public class ServerManager extends CommManager {
                     @Override
                     public void run() {                    
 
-                        List<HostListener> theListenerList = getDetectListenerList();
-                        for(HostListener aListener : theListenerList){
-                            aListener.hostDisconnected( (Host) theController.getObject() );
-                        }                    
+                        for( HostController nextController: theHostList ){
+                            List<HostListener> theListenerList = getDetectListenerList();
+                            for(HostListener aListener : theListenerList){
+                                aListener.hostDisconnected( (Host) nextController.getObject() );
+                            }                    
 
-                        theController.getRootPanel().getShellPanel().disablePanel( false );
-                        theController.updateComponents();
-                        theController.saveToDisk();
+                            nextController.getRootPanel().getShellPanel().disablePanel( false );
+                            nextController.updateComponents();
+                            nextController.saveToDisk();
+                        }
                     }
                 });
 

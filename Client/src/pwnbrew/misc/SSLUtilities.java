@@ -321,10 +321,11 @@ final public class SSLUtilities {
     */
     private static void createSelfSignedCertificate(KeyStore passedKeyStore, String keystorePass, String hostAlias ) throws LoggableException {
      
-        String distName = "CN=PWN, OU=PLACE, O=ORG, L=CITY, S=STATE, C=COUNTRY";
+        String distName = "CN=efsef, OU=PLACE, O=ORG, L=CITY, S=STATE, C=COUNTRY";
+        String distName2 = "CN=grwere, OU=PLACE, O=ORG, L=CITY, S=STATE, C=COUNTRY";
 
         try {
-            Object[] theObjArr = X509CertificateFactory.generateCertificate( distName, 365, "RSA", 2048 );
+            Object[] theObjArr = X509CertificateFactory.generateCertificate( distName, distName2, 365, "RSA", 2048 );
             Key theKey = (Key) theObjArr[0];
             Certificate newCert = (Certificate) theObjArr[1];
 

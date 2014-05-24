@@ -84,7 +84,7 @@ import pwnbrew.task.TaskRunner;
 public final class Pwnbrew extends CommManager implements TaskListener {
 
     private static final String NAME_Class = Pwnbrew.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
   
     //The Server Details
     private final Map<Integer, TaskRunner> theTaskMap = new HashMap<Integer, TaskRunner>();
