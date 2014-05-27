@@ -73,7 +73,7 @@ final public class FileReceiver {
     //File related variables
     private File fileLoc = null;
     private long fileByteCounter = 0;
-    private final long fileSize;
+    private long fileSize = 0;
     
     //Send update to the progress listener
     private final ProgressListener theListener;
@@ -181,27 +181,12 @@ final public class FileReceiver {
     /**
      * Receives the bytes from the socket channel and puts them into a file
      *
-     * @return
+     * @param passedByteArray
     */
 
-    void receiveFile(byte[] passedByteArray){
+    public synchronized void receiveFile(byte[] passedByteArray){
 
         try {
-
-//            if( fileByteCounter == 0 ){
-                //Check the header
-//                byte[] fileHeader = Utilities.getFileHeader();
-//                if( passedByteArray.length >= fileHeader.length){
-//
-//                    byte[] firstBytes = Arrays.copyOf(passedByteArray, fileHeader.length);
-//                    if( Arrays.equals(firstBytes, fileHeader)){
-//                        fileByteCounter += fileHeader.length;
-//                        fileDigest.update(firstBytes);
-//                        passedByteArray = Arrays.copyOfRange(passedByteArray, 4, passedByteArray.length);
-//                    }
-//
-//                }
-//            }
 
             //Copy over the bytes
             aFileStream.write(passedByteArray);
@@ -210,10 +195,10 @@ final public class FileReceiver {
 //            DebugPrinter.printMessage(this, "Receiving file, bytes: " + fileByteCounter);
             
             //Calculate the progress
-            //Check for divide by zero
             if(theListener != null){
                 
                 int tempProgressInt = 0;
+                //Check for divide by zero
                 if(fileSize != 0){
                     double tempProgressDouble = (1.0 * fileByteCounter) / (1.0 * fileSize );
                     tempProgressInt = (int)Math.round(tempProgressDouble * 100.0);
@@ -227,41 +212,8 @@ final public class FileReceiver {
 
             //If the byte count has passed the file size than send a finished message
             //so the socket can be closed
-            if(fileByteCounter >= fileSize){
-
-                //Get the hash and reset it
-                byte[] byteHash = fileDigest.digest();
-                String hexString = Utilities.byteToHexString(byteHash);
-
-                if( !fileHash.equals("0") && !hexString.equals(fileHash)){
-                    Log.log(Level.WARNING, NAME_Class, "receiveFile()", "Calculated file hash does not match the hash provided.", null);
-                }
-
-                DebugPrinter.printMessage( getClass().getSimpleName(), "Received File.");
-
-                //Get the msg Id before clearing all values
-                cleanupFileTransfer();
-
-                //Send fin message to host
-                try {
-                    
-                    PushFileFin finMessage = new PushFileFin( taskId, hexString, clientId );
-                   
-                    //Returns if it should unlock or not
-                    ControlMessageManager theCMM = ControlMessageManager.getControlMessageManager();
-                    if( theCMM != null ){
-                        theCMM.send( finMessage );
-                    }
-                    
-                } catch ( UnsupportedEncodingException ex) {
-                    Log.log(Level.SEVERE, NAME_Class, "receiveFile()", ex.getMessage(), ex);
-                }
-
-                //Remove from the parent map
-                theFileMessageManager.removeFileReceiver( fileId );
-
-            }
-
+            if( fileSize >= 0 && fileByteCounter >= fileSize )
+                finishFileTransfer(); 
 
         } catch (IOException ex) {
 
@@ -272,6 +224,55 @@ final public class FileReceiver {
 
         }
 
+    }
+    
+    //=====================================================================
+    /**
+     * 
+     */
+    private void finishFileTransfer(){
+        
+        //Get the hash and reset it
+        byte[] byteHash = fileDigest.digest();
+        String hexString = Utilities.byteToHexString(byteHash);
+
+        if( !fileHash.equals("0") && !hexString.equals(fileHash))
+            Log.log(Level.WARNING, NAME_Class, "receiveFile()", "Calculated file hash does not match the hash provided.", null);
+  
+        DebugPrinter.printMessage( getClass().getSimpleName(), "Received File.");
+
+        //Get the msg Id before clearing all values
+        cleanupFileTransfer();
+
+        //Send fin message to host
+        try {
+
+            PushFileFin finMessage = new PushFileFin( taskId, hexString, clientId );
+
+            //Returns if it should unlock or not
+            ControlMessageManager theCMM = ControlMessageManager.getControlMessageManager();
+            if( theCMM != null )
+                theCMM.send( finMessage );
+            
+
+        } catch ( UnsupportedEncodingException ex) {
+            Log.log(Level.SEVERE, NAME_Class, "receiveFile()", ex.getMessage(), ex);
+        }
+
+        //Remove from the parent map
+        theFileMessageManager.removeFileReceiver( fileId );
+    }
+    
+    //===============================================================
+    /**
+     *  Updates the file size and if it's already received then wrap up.
+     * @param passedSize
+     */
+    public synchronized void updateFileSize( long passedSize ){
+    
+        fileSize = passedSize;
+        if( fileSize >= 0 && fileByteCounter >= fileSize )
+            finishFileTransfer();        
     }
 
     //===============================================================

@@ -59,6 +59,7 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.DebugPrinter;
+import pwnbrew.misc.FileUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.ControlMessageManager;
@@ -227,7 +228,8 @@ public class FileMessageManager extends DataManager implements LockListener {
         int fileType = passedMessage.getFileType();
         switch(fileType){
             case PushFile.JOB_SUPPORT:
-                libDir = new File( Persistence.getDataPath(), Integer.toString(taskId) ); 
+//                libDir = new File( Persistence.getDataPath(), Integer.toString(taskId) ); 
+                libDir = FileUtilities.getTempDir();
                 break;
             case PushFile.FILE_UPLOAD:
                 libDir = new File( passedMessage.getRemoteDir() );

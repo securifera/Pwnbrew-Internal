@@ -255,12 +255,16 @@ public class FileMessageManager extends DataManager {
                 String hashFileNameStr = passedMessage.getHashFilenameString();
 
                 //Try to begin the file transfer
-                initFileTransfer( passedMessage.getSrcHostId(), taskId, fileId, libDir, hashFileNameStr, passedMessage.getFileSize() );
+                long fileSize = passedMessage.getFileSize();
+                initFileTransfer( passedMessage.getSrcHostId(), taskId, fileId, libDir, hashFileNameStr, fileSize );
 
-                //Send an ack to the sender to begin transfer
-                DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);
-                PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr, clientId );
-                aCMManager.send( aSFMA );
+                //If filesize == -1 then it is streaming
+                if( fileSize >= 0 ){
+                    //Send an ack to the sender to begin transfer
+                    DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);
+                    PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr, clientId );
+                    aCMManager.send( aSFMA );
+                } 
 
             } catch (IOException | NoSuchAlgorithmException ex){
                 throw new LoggableException(ex);
@@ -287,9 +291,8 @@ public class FileMessageManager extends DataManager {
         }
         
         //Clean up
-        if( theReceiver != null ){
-            theReceiver.cleanupFileTransfer();
-        }
+        if( theReceiver != null )
+            theReceiver.cleanupFileTransfer();        
           
     }
 
@@ -368,9 +371,26 @@ public class FileMessageManager extends DataManager {
         SocketChannelHandler aSCH = aPR.getSocketChannelHandler(clientId);
 
         //Set the wrapper
-        if( aSCH != null ){
-            aSCH.clearQueue();
-        }   
+        if( aSCH != null )
+            aSCH.clearQueue();          
+        
+    }
+
+    //===============================================================
+    /**
+     *  Updates the file size
+     * @param passedFileId
+     * @param fileSize 
+     */
+    public void updateFileSize(int passedFileId, long fileSize) {
+        FileReceiver theReceiver;
+        synchronized( theFileReceiverMap ){
+            theReceiver = theFileReceiverMap.remove(passedFileId );  
+        }
+        
+        //Update the size
+        if( theReceiver != null )
+            theReceiver.updateFileSize(fileSize);
         
     }
     

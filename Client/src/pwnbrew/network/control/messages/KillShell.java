@@ -109,4 +109,4 @@ public final class KillShell extends ControlMessage{ // NO_UCD (use default)
         }
     }
 
-}/* END CLASS CertAck */
+}

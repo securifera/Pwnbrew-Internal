@@ -201,7 +201,11 @@ public class ShellJPanel extends javax.swing.JPanel {
     private void openButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openButtonActionPerformed
         
         if(openButton.getText().equals("Open Shell")){
-            getShellTextPane().setEnabled( true );
+            getShellTextPane().setEnabled( true );            
+            
+            ShellJTextPane thePane = getShellTextPane();
+            thePane.setEnabled( true );
+            thePane.requestFocus();
         
             //Spawn the shell
             ClassWrapper aClassWrapper = (ClassWrapper)shellCombo.getSelectedItem();

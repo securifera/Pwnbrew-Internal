@@ -36,7 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
 /*
  * HostController.java
  *

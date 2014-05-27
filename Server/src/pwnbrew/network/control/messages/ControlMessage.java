@@ -83,7 +83,7 @@ public abstract class ControlMessage extends Message {
     /*
      *  Contructor
      */
-    public ControlMessage( byte[] passedId/*, byte passedFunction */ ) {
+    public ControlMessage( byte[] passedId ) {
         //Set id
         super( CONTROL_MESSAGE_TYPE, passedId);
     }

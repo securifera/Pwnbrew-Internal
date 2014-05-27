@@ -6,13 +6,11 @@
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Client/src/pwnbrew/Pwnbrew.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Client/src/pwnbrew/network/control/messages/RelayStatus.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Client/src/pwnbrew/network/socket/SecureSocketChannelWrapper.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Client/src/pwnbrew/ClientConfig.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Client/src/pwnbrew/network/control/messages/RelayStart.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Client/src/pwnbrew/network/PortRouter.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Client/src/pwnbrew/network/control/messages/StageFlagAck.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Client/src/pwnbrew/network/SSLTaskListener.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Client/src/pwnbrew/network/control/messages/StageFlag.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Client/src/pwnbrew/misc/Utilities.java</file>
         </group>
     </open-files>
 </project-private>

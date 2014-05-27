@@ -153,8 +153,6 @@ public class Utilities {
   
     private static final String NAME_Class = Utilities.class.getSimpleName();
 
-//    static final SecureRandom SecureRandomGen = new SecureRandom();
-
     private static URL theURL;
     private static File classPath;
 
@@ -481,7 +479,7 @@ public class Utilities {
 
                             //Add the entry
                             theZipOS.putNextEntry(anEntry);
-                            localProperties.store(theZipOS, "");
+                            localProperties.store(theZipOS);
 
                             //Write to zip
                             theZipOS.closeEntry();

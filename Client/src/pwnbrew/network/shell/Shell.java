@@ -195,7 +195,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
      * @param passedId
      */
      @Override
-     public synchronized void handleEndOfStream( int passedId ) {
+     public synchronized void handleEndOfStream( int passedId, long bytesRead ) {
 
         switch( passedId ){
             case Constants.STD_OUT_ID:
@@ -230,7 +230,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
      */
     @Override
     public synchronized void handleIOException( int passedId, IOException ex ) {
-        handleEndOfStream(passedId);
+        handleEndOfStream(passedId, 0);
         RemoteLog.log(Level.INFO, NAME_Class, "receiveByteArray()", ex.getMessage(), ex );        
     }
     

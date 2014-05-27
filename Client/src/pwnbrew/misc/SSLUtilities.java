@@ -64,7 +64,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
 /**
  *
@@ -119,7 +118,7 @@ final public class SSLUtilities {
      */
     public static synchronized KeyStore getKeystore() throws LoggableException {
         if(theKeystore == null)
-            theKeystore = loadKeystore( ClientConfig.getConfig() );
+            theKeystore = loadKeystore();
 
         return theKeystore;
     }
@@ -131,11 +130,9 @@ final public class SSLUtilities {
      * @return 
      * @throws pwnbrew.log.LoggableException 
     */
-    public static KeyStore loadKeystore( ClientConfig theConf ) throws LoggableException {
+    public static KeyStore loadKeystore() throws LoggableException {
 
         KeyStore tempKeystore = null;
-        boolean saveConf = false;     
-
         try{
             
             tempKeystore = KeyStore.getInstance("JKS");
@@ -152,13 +149,7 @@ final public class SSLUtilities {
 
         } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException ex) {
            throw new LoggableException(ex);
-        } finally {
-
-            //Write to disk if needed
-            if( saveConf )
-                theConf.writeSelfToDisk();
-               
-        }
+        } 
 
         return tempKeystore;
 

@@ -135,7 +135,9 @@ final public class Log {
             
             if( thrown instanceof LoggableException ){
                 thrown = ((LoggableException)thrown).getException();
-                message = thrown.getMessage();
+                if( thrown != null ){
+                    message = thrown.getMessage();
+                }
             }
             
             LogRecord logRecord = new LogRecord( level, message );

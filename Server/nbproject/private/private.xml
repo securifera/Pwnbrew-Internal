@@ -3,7 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/shell/CommandPrompt.java</file>
+            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/host/gui/HostShellPanelListener.java</file>
+            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/host/gui/HostShellPanel.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/selector/SocketChannelHandler.java</file>
+            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/shell/Bash.java</file>
+            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/host/HostController.java</file>
+            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/shell/Shell.java</file>
+            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/controllers/MainGuiController.java</file>
+            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/shell/Powershell.java</file>
             <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/Server/src/pwnbrew/Server.java</file>
         </group>
     </open-files>

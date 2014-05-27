@@ -89,9 +89,8 @@ public class PushFile extends FileMessage {
      * @param passedType
      * @param fileHashNameStr
      * @param passedLength
-     * @throws java.io.IOException
     */
-    public PushFile( int taskId, String fileHashNameStr, long passedLength, int passedType ) throws IOException { // NO_UCD (use default)
+    public PushFile( int taskId, String fileHashNameStr, long passedLength, int passedType ) { // NO_UCD (use default)
         super( taskId );
         
         byte[] strBytes = fileHashNameStr.getBytes();

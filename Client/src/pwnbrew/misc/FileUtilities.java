@@ -91,6 +91,23 @@ abstract public class FileUtilities {
             throw new IOException("Unable to delete file " + dir);
         
     }
+    
+    // ==========================================================================
+    /**
+     * Returns the os temp dir
+     * <p>
+     * 
+     * @return a {@link File} representing the os temp dir
+     * @throws java.io.IOException
+    */
+    public static File getTempDir() throws IOException {
+
+        File aFile = File.createTempFile("ttf", null);
+        File rtnFile = aFile.getParentFile();
+        aFile.delete();
+
+        return rtnFile;
+    }
 
   
     // ==========================================================================

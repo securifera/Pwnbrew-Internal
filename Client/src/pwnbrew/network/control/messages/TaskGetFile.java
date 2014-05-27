@@ -36,21 +36,12 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
-* TaskGetFile.java
-*
-* Created on June 7, 2013, 6:52:10 PM
-*/
-
 package pwnbrew.network.control.messages;
 
 import pwnbrew.log.LoggableException;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
@@ -150,38 +141,32 @@ public final class TaskGetFile extends TaskStatus{
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {
-        
-        try {
+    public void evaluate( CommManager passedManager ) {       
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
-                 
-                //Get the filename hash 
-                String theHashFilenameStr = getHashFilenameString();
-                String[] theFilePathArr = theHashFilenameStr.split(":", 2);
-                if( theFilePathArr.length > 1 ){
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager != null ){
 
-                    String theFilePath = theFilePathArr[1];
-                    //Debug
-                    DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received TaskGetFile for " + theFilePath);
+            //Get the filename hash 
+            String theHashFilenameStr = getHashFilenameString();
+            String[] theFilePathArr = theHashFilenameStr.split(":", 2);
+            if( theFilePathArr.length > 1 ){
 
-                    File fileToSend = new File(theFilePath);
-                    if(fileToSend.exists()){
+                String theFilePath = theFilePathArr[1];
+                //Debug
+                DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received TaskGetFile for " + theFilePath);
 
-                        //Queue the file to be sent
-                        String fileHashNameStr = new StringBuilder().append("0").append(":").append(theFilePath).toString();
+                File fileToSend = new File(theFilePath);
+                if(fileToSend.exists()){
 
-                        PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
-                        thePFM.setDestHostId( getSrcHostId() );
-                        aCMManager.send(thePFM);
-                    }
+                    //Queue the file to be sent
+                    String fileHashNameStr = new StringBuilder().append("0").append(":").append(theFilePath).toString();
+
+                    PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
+                    thePFM.setDestHostId( getSrcHostId() );
+                    aCMManager.send(thePFM);
                 }
             }
-        
-        } catch (IOException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        }
+        }     
     }
 
 }/* END CLASS TaskGetFile */
