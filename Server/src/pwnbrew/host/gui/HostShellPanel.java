@@ -52,10 +52,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.regex.Pattern;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JTextPane;
@@ -95,7 +92,7 @@ public class HostShellPanel extends javax.swing.JPanel {
     /*
      *  Check if the document should be altered
      */
-    private boolean updateCaret( RunnerPane theTextPane, int offset, String passedStr ) throws BadLocationException{
+    private boolean updateCaret( RunnerPane theTextPane, int offset ){
 
         boolean retVal = true;
         if( !theTextPane.isEnabled())
@@ -272,7 +269,7 @@ public class HostShellPanel extends javax.swing.JPanel {
                 
                 try {
                     
-                    updateCaret( theTextPane, theTextPane.getCaretPosition(), String.valueOf( e.getKeyChar() ));     
+                    updateCaret( theTextPane, theTextPane.getCaretPosition());     
                     if( e.getKeyChar() == KeyEvent.VK_ENTER ){
 
                         StyledDocument aSD = theTextPane.getStyledDocument();
@@ -349,12 +346,8 @@ public class HostShellPanel extends javax.swing.JPanel {
                 
                 if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1){
                     String selText = theTextPane.getSelectedText();
-                    if( selText == null ){
-                        try {   
-                            updateCaret( theTextPane, theTextPane.getCaretPosition(), "");
-                        } catch (BadLocationException ex) {                        
-                        }
-                    }
+                    if( selText == null )                     
+                        updateCaret( theTextPane, theTextPane.getCaretPosition());                   
                 }
 
             } 
@@ -368,7 +361,7 @@ public class HostShellPanel extends javax.swing.JPanel {
              */
             @Override
             public void insertString( int offset, String str, AttributeSet a) throws BadLocationException{
-                if( updateCaret( theTextPane, offset, str ) )
+                if( updateCaret( theTextPane, offset ) )
                     super.insertString(offset, str, a);                
             }
             

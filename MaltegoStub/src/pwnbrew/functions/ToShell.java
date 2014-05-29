@@ -65,6 +65,7 @@ import pwnbrew.shell.Powershell;
 import pwnbrew.shell.Shell;
 import pwnbrew.shell.ShellJPanel;
 import pwnbrew.shell.ShellJPanelListener;
+import pwnbrew.shell.ShellJTextPane;
 import pwnbrew.shell.ShellListener;
 import pwnbrew.xml.maltego.MaltegoMessage;
 
@@ -438,6 +439,16 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
     @Override
     public int getHostId() {
         return theHostId;
+    }
+
+    //=======================================================================
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public ShellJTextPane getShellTextPane() {
+        return theShellPanel.getShellTextPane();
     }
 
 

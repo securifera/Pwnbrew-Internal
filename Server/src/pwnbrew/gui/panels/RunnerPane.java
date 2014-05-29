@@ -162,23 +162,25 @@ public class RunnerPane extends JTextPane implements CaretListener, StreamReceiv
 
                         //Get the current length of the document
                         StyledDocument theSD = theRunnerPane.getStyledDocument(); 
-                        int totalLength = theSD.getLength();
-                        
-                        //Get the length of the passed string and remove any backspaces
-                        int strLen = passedStr.length();
-                        String newStr = passedStr.replaceAll("\b", "");
-                        
-                        //Number of backspaces
-                        int numBack = strLen - newStr.length();                       
-                        if( numBack > 0){  
+                        String newStr = passedStr;
+                        if( passedStr.contains("\b")){
+                            int totalLength = theSD.getLength();
+
+                            //Get the length of the passed string and remove any backspaces
+                            int strLen = passedStr.length();
+                            newStr = passedStr.replaceAll("\b", "");
+
+                            //Number of backspaces
+                            int numBack = strLen - newStr.length();                       
+                             
                             //Set the new offset
                             theRunnerPane.setEndOffset( totalLength - numBack);
-                            
+
                             //Remove the previous one
                             theRunnerPane.setUpdatingFlag(true);
                             theSD.remove(totalLength - numBack, numBack);
-                            theRunnerPane.setUpdatingFlag(false);
-                        }       
+                            theRunnerPane.setUpdatingFlag(false);                            
+                        }      
                         
                         //Insert the string
                         theSD.insertString(theSD.getLength(), newStr, aSet);

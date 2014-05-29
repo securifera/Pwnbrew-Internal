@@ -73,7 +73,7 @@ public class Powershell extends Shell {
         super(passedExecutor, passedListener);
     }
     
-     // ==========================================================================
+      // ==========================================================================
     /**
      * Handles the bytes read
      *
@@ -82,12 +82,7 @@ public class Powershell extends Shell {
      */
     @Override
     public void handleBytesRead( int passedId, byte[] buffer ) {
-
-        super.handleBytesRead(passedId, buffer);
-        
-        //Get runner pane
-        StreamReceiver theReceiver = theListener.getStreamReceiver(); 
-        String aStr = null;
+           
         
         //Add the bytes to the string builder
         switch( passedId ){
@@ -103,13 +98,13 @@ public class Powershell extends Shell {
                         Matcher m = PROMPT_PATTERN.matcher(tempStr);
                         if( m.find()){
                             int matchEnd = m.end();
-                            aStr = tempStr.substring(0, matchEnd);
-                            setShellPrompt( m.group() );
+                            String aStr = tempStr.substring(0, matchEnd);
+                            buffer = aStr.getBytes();
                             promptFlag = true;
-                        } else{
-                            aStr = tempStr;
-                        }
+                        } 
                         
+                    } else {
+                        return;
                     }
                     
                     //Reset the string builder
@@ -117,24 +112,10 @@ public class Powershell extends Shell {
                     
                 }
                 break;
-            case Constants.STD_ERR_ID:
-                synchronized(theStdErrStringBuilder) {
-                    theStdErrStringBuilder.append( new String( buffer )); 
-                    aStr = theStdErrStringBuilder.toString();
-                    
-                    //Reset the string builder
-                    theStdErrStringBuilder.setLength(0);
-                }
-                break;
-            default:
-                DebugPrinter.printMessage( NAME_Class, "routeMessage", "Unrecognized stream id.", null);   
-                break;
         }          
         
         //Send to the runner pane
-        if( aStr != null ){
-            theReceiver.handleStreamBytes(passedId, aStr);
-        }
+        super.handleBytesRead(passedId, buffer);        
 
     }
     
@@ -190,6 +171,6 @@ public class Powershell extends Shell {
      */
     @Override
     public String getStartupCommand(){
-        return "\r\n";    
+        return promptCmd;    
     }
 }

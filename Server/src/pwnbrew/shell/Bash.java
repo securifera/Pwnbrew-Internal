@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- *  Bash.java
- *
- *  Created on Feb 11, 2014
- */
-
 package pwnbrew.shell;
 
 import java.util.concurrent.Executor;
@@ -57,10 +50,8 @@ import pwnbrew.gui.panels.RunnerPane;
 public class Bash extends Shell {
     
 //    private static final String[] BASH_EXE_STR = new String[]{ "/bin/bash", "-i"};
-//    private static final String[] BASH_EXE_STR = new String[]{ "/bin/bash", "-c", "python -c 'import pty;pty.spawn(\"/bin/bash\")'"};
-    private static final String[] BASH_EXE_STR = new String[]{ "/bin/sh", "-c", "python -c 'import pty;pty.spawn(\"/bin/bash\")'"};
+    private static final String[] BASH_EXE_STR = new String[]{ "python", "-c", "import pty;pty.spawn(\"/bin/bash\")"};
     private static final String encoding = "UTF-8";
-    //private static final String PROMPT_REGEX_BASH = "\\w+@\\w+:\\S.*[$#]";
     private static final String PROMPT_REGEX_BASH = "\\x1b.*[$#]";
     private static final Pattern PROMPT_PATTERN = Pattern.compile(PROMPT_REGEX_BASH);
    
@@ -74,7 +65,6 @@ public class Bash extends Shell {
      */
     public Bash(Executor passedExecutor, ShellListener passedListener) {
         super(passedExecutor, passedListener);
-//        setStderrRedirectFlag(true);
     }
     
     // ==========================================================================
@@ -100,9 +90,11 @@ public class Bash extends Shell {
 
         //Remove ansi codes
         String aStr = new String(buffer);
-        aStr = aStr.replaceAll("\u001B\\[[;\\d]*[ -/]*[@-~]", "");
-        aStr = aStr.replaceAll("\u001B.*\u0007", "");
-        aStr = aStr.replaceAll("\u0007", "");
+        if( !aStr.equals("\r\n")){
+            aStr = aStr.replaceAll("\u001B\\[[;\\d]*[ -/]*[@-~]", "");
+            aStr = aStr.replaceAll("\u001B.*\u0007", "");
+            aStr = aStr.replaceAll("\u0007", "");
+        }
         super.handleBytesRead(passedId, aStr.getBytes());
        
     }

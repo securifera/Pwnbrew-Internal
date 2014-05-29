@@ -81,66 +81,7 @@ public class CommandPrompt extends Shell {
     public String[] getCommandStringArray(){                
         return CMD_EXE_STR;
     }
-    
-    // ==========================================================================
-    /**
-     * Handles the bytes read
-     *
-     * @param passedId
-     * @param buffer the buffer into which the bytes were read
-     */
-    @Override
-    public void handleBytesRead( int passedId, byte[] buffer ) {
 
-        super.handleBytesRead(passedId, buffer);
-        
-        //Get runner pane
-        StreamReceiver theReceiver = theListener.getStreamReceiver(); 
-        String aStr = null;
-        
-        //Add the bytes to the string builder
-        switch( passedId ){
-            case Constants.STD_OUT_ID:
-                synchronized(theStdOutStringBuilder) {
-                    theStdOutStringBuilder.append( new String( buffer ));
-                    String tempStr = theStdOutStringBuilder.toString();
-                    
-                    //Set the prompt
-                    if( !promptFlag ){
-                        if( tempStr.trim().matches(PROMPT_REGEX) ){
-                            aStr = tempStr.trim();
-                            setShellPrompt( aStr );
-                            promptFlag = true;
-                        } else{
-                            aStr = tempStr;
-                        }
-                        
-                        //Reset the string builder
-                        theStdOutStringBuilder.setLength(0);
-                    }                    
-                }
-                break;
-            case Constants.STD_ERR_ID:
-                synchronized(theStdErrStringBuilder) {
-                    theStdErrStringBuilder.append( new String( buffer )); 
-                    aStr = theStdErrStringBuilder.toString();
-                    
-                    //Reset the string builder
-                    theStdErrStringBuilder.setLength(0);
-                }
-                break;
-            default:
-                DebugPrinter.printMessage( NAME_Class, "routeMessage", "Unrecognized stream id.", null);   
-                break;
-        }          
-        
-        //Send to the runner pane
-        if( aStr != null ){
-            theReceiver.handleStreamBytes(passedId, aStr);
-        }
-
-    }
-    
     // ==========================================================================
     /**
      *  Get character encoding.

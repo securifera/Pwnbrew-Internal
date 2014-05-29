@@ -44,6 +44,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.shell;
 
+import java.awt.Color;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -51,9 +52,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.ListIterator;
 import java.util.concurrent.Executor;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.ManagedRunnable;
@@ -86,7 +94,6 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     private BufferedOutputStream theOsStream;
     
     //The input stream
-    private String thePrompt = "";
     protected final StringBuilder theStdOutStringBuilder = new StringBuilder();
     protected final StringBuilder theStdErrStringBuilder = new StringBuilder();
     
@@ -98,6 +105,9 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     
     //Logging for remote shells
     private FileOutputStream theFileOutputStream = null;
+    
+    private final ArrayList<String> history = new ArrayList<>();
+    private ListIterator<String> historyIterator = null;
 
     //===========================================================================
     /**
@@ -109,7 +119,84 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     Shell( Executor passedExecutor, ShellListener passedListener ) {
         super(passedExecutor);
         theListener = passedListener;        
+    }  
+    
+    //===============================================================
+    /*
+    *
+    */
+    public void addCommandToHistory(String theStr) {
+        if( theStr != null && !theStr.isEmpty() ){
+            history.remove(theStr);
+            history.add(theStr);
+            historyIterator = null;
+        }
     }    
+        
+    //===============================================================
+    /*
+    *
+    */
+    public void printPreviousCommand(){
+        
+        final MutableAttributeSet aSet = new SimpleAttributeSet();
+        StyleConstants.setForeground(aSet, Color.WHITE); 
+        
+        //Create an iterator
+        if( historyIterator == null )
+            historyIterator = history.listIterator( history.size() );                        
+
+        int nextIndex = historyIterator.previousIndex();
+        if( nextIndex != -1){
+
+            String nextCommand = historyIterator.previous();
+            ShellJTextPane thePane = theListener.getShellTextPane();
+            StyledDocument theDoc = thePane.getStyledDocument();
+
+
+            //remove whatever is there and insert this
+            int promptLoc = thePane.getEndOffset();
+            try {
+                theDoc.remove(promptLoc, theDoc.getLength() - promptLoc);
+                theDoc.insertString( theDoc.getLength(), nextCommand, aSet); 
+                thePane.setCaretPosition( theDoc.getLength() );  
+            } catch (BadLocationException ex) {
+                DebugPrinter.printMessage( NAME_Class, "previousInput()", ex.getMessage(), ex );  
+            }
+
+        }
+    }    
+    
+    //===============================================================
+    /*
+    *
+    */
+    public void printNextCommand(){
+        //Make sure we are at the right place
+        if( historyIterator != null ){
+            final MutableAttributeSet aSet = new SimpleAttributeSet();
+            StyleConstants.setForeground(aSet, Color.WHITE); 
+
+            int nextIndex = historyIterator.nextIndex();
+            if( nextIndex != history.size()){
+                
+                String nextCommand = historyIterator.next();
+                ShellJTextPane thePane = theListener.getShellTextPane();
+                StyledDocument theDoc = thePane.getStyledDocument();
+                
+                int promptLoc = thePane.getEndOffset();
+                try {
+                    theDoc.remove(promptLoc, theDoc.getLength() - promptLoc);
+                    theDoc.insertString( theDoc.getLength(), nextCommand, aSet); 
+                    thePane.setCaretPosition( theDoc.getLength() );  
+                } catch (BadLocationException ex) {
+                    DebugPrinter.printMessage( NAME_Class, "previousInput()", ex.getMessage(), ex );  
+                }
+            }
+        }
+    
+    }
+ 
     
     //===============================================================
     /**
@@ -128,40 +215,31 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         } catch (FileNotFoundException ex) {
             DebugPrinter.printMessage( NAME_Class, "start", ex.getMessage(), ex); 
         }
-        
-//        if( theListener.isLocalHost() ){
-//            
-//            if( !isRunning() ){           
-//                theExecutor.execute( this );
-//            }
-//            
-//        } else {
             
-            try {
-                        
-                //Get the control message manager
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager == null ){
-                    aCMManager = ControlMessageManager.initialize(theListener.getCommManager());
-                }
+        try {
 
-                //Add the command terminator
-                String startupStr = getStartupCommand();
-                String inputTerm = getInputTerminator();
-                if( !inputTerm.isEmpty() ){
-                    startupStr = startupStr.concat( inputTerm );
-                }
-                
-                //Create the message
-                int clientId = theListener.getHostId();
-                CreateShell aShellMsg = new CreateShell( clientId, getCommandStringArray(),
-                        getEncoding(), startupStr, getStderrRedirectFlag() );
-                aCMManager.send( aShellMsg );
+            //Get the control message manager
+            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            if( aCMManager == null ){
+                aCMManager = ControlMessageManager.initialize(theListener.getCommManager());
+            }
 
-            } catch ( IOException ex) {
-                DebugPrinter.printMessage( NAME_Class, "start", ex.getMessage(), ex); 
-            }     
-//        }
+            //Add the command terminator
+            String startupStr = getStartupCommand();
+            String inputTerm = getInputTerminator();
+            if( !startupStr.isEmpty() && !inputTerm.isEmpty() )
+                startupStr = startupStr.concat( inputTerm );
+            
+            //Create the message
+            int clientId = theListener.getHostId();
+            CreateShell aShellMsg = new CreateShell( clientId, getCommandStringArray(),
+                    getEncoding(), startupStr, getStderrRedirectFlag() );
+            aCMManager.send( aShellMsg );
+
+        } catch ( IOException ex) {
+            DebugPrinter.printMessage( NAME_Class, "start", ex.getMessage(), ex); 
+        }     
+
     }
 
     // ==========================================================================
@@ -191,24 +269,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         logging = passedBool;
     } 
 
-    // ==========================================================================
-    /**
-     * 
-     * @return 
-     */
-    public String getShellPrompt() {
-        return thePrompt;
-    }
-
-    // ==========================================================================
-    /**
-     * 
-     * @param passedStr
-     */
-    public void setShellPrompt(String passedStr ) {
-        thePrompt = passedStr;
-    }
-    
+     
     // ==========================================================================
     /**
     * Called by a {@link StreamReader} each time it reads bytes from its {@link InputStream}.

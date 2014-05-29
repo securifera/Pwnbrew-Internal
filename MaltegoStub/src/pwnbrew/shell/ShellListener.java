@@ -60,6 +60,14 @@ public interface ShellListener {
      *
      * @return 
     */
+    public ShellJTextPane getShellTextPane();
+    
+     //===============================================================
+    /**
+     * Returns the runner text pane
+     *
+     * @return 
+    */
     public StreamReceiver getStreamReceiver();
 
      //===============================================================
@@ -77,13 +85,6 @@ public interface ShellListener {
      * @return 
     */
     public String getOsName();
-
-//    //===============================================================
-//    /**
-//     * Returns
-//     * @return 
-//     */
-//    public boolean isLocalHost();
     
     
     //===============================================================

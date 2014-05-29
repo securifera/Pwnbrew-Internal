@@ -46,6 +46,7 @@ import java.util.List;
  */
 public interface ShellJPanelListener {
     
+    
     // ==========================================================================
     /**
      *  Spawns a shell given the cmd line string.

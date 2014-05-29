@@ -36,20 +36,11 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-/*
- *  Bash.java
- *
- */
-
 package pwnbrew.shell;
 
 import java.util.concurrent.Executor;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.DebugPrinter;
-import pwnbrew.output.StreamReceiver;
-import static pwnbrew.shell.Shell.NAME_Class;
+import javax.swing.text.StyledDocument;
 
 /**
  *
@@ -57,9 +48,9 @@ import static pwnbrew.shell.Shell.NAME_Class;
  */
 public class Bash extends Shell {
     
-    private static final String[] BASH_EXE_STR = new String[]{ "/bin/bash", "-i"};
+//    private static final String[] BASH_EXE_STR = new String[]{ "/bin/bash", "-i"};
+    private static final String[] BASH_EXE_STR = new String[]{ "python", "-c", "import pty;pty.spawn(\"/bin/bash\")"};
     private static final String encoding = "UTF-8";
-    //private static final String PROMPT_REGEX_BASH = "\\w+@\\w+:\\S.*[$#]";
     private static final String PROMPT_REGEX_BASH = "\\x1b.*[$#]";
     private static final Pattern PROMPT_PATTERN = Pattern.compile(PROMPT_REGEX_BASH);
    
@@ -73,7 +64,6 @@ public class Bash extends Shell {
      */
     public Bash(Executor passedExecutor, ShellListener passedListener) {
         super(passedExecutor, passedListener);
-        setStderrRedirectFlag(true);
     }
     
     // ==========================================================================
@@ -97,75 +87,51 @@ public class Bash extends Shell {
     @Override
     public void handleBytesRead( int passedId, byte[] buffer ) {
 
-        super.handleBytesRead(passedId, buffer);
-        
-        //Get runner pane
-        StreamReceiver theReceiver = theListener.getStreamReceiver(); 
-        String aStr = null;
-        
-        
-        //Add the bytes to the string builder
-        switch( passedId ){
-            case Constants.STD_OUT_ID:
-                synchronized(theStdOutStringBuilder) {
-                    theStdOutStringBuilder.append( new String( buffer ));
-                    String tempStr = theStdOutStringBuilder.toString();                   
-                    
-                    //Set the prompt
-                    if( !promptFlag ){
-                        
-                        //See if it matches the prompt
-                        Matcher m = PROMPT_PATTERN.matcher(tempStr);
-                        if( m.find()){
-                            
-                            //Split on funky byte
-                            String[] theStrArr = m.group().split("\u0007");
-                            
-                            if(theStrArr.length > 0 ){
-                                //Construct the prompt
-                                int promptIndex = 0;
-                                if( theStrArr[promptIndex].isEmpty() ){
-                                    promptIndex++;
-                                }
-
-                                //Get the prompt
-                                String[] promptArr = theStrArr[promptIndex].split(";");
-                                if(promptArr.length > 1){
-
-                                    //Get first part of prompt
-                                    String prompt = promptArr[1].trim();
-                                    
-                                    //Get prompt terminator
-                                    String termSec = theStrArr[ theStrArr.length - 1];
-                                    aStr = prompt.concat( termSec.substring( termSec.length() - 1));
-                                    
-                                    promptFlag = true;
-                                    setShellPrompt( aStr );                                 
-
-                                }     
-                            }                                                
-                                                        
-                        } else{
-                            aStr = tempStr;
-                        }
-                        
-                    }   
-                    
-                    //Reset the string builder
-                    theStdOutStringBuilder.setLength(0);
-                    
-                }
-                break;
-            default:
-                DebugPrinter.printMessage( NAME_Class, "routeMessage", "Unrecognized stream id.", null);   
-                break;
-        }          
-        
-        //Send to the runner pane
-        if( aStr != null ){
-            theReceiver.handleStreamBytes(Constants.STD_OUT_ID, aStr);
+        //Remove ansi codes
+        String aStr = new String(buffer);
+        if( !aStr.equals("\r\n")){
+            aStr = aStr.replaceAll("\u001B\\[[;\\d]*[ -/]*[@-~]", "");
+            aStr = aStr.replaceAll("\u001B.*\u0007", "");
+            aStr = aStr.replaceAll("\u0007", "");
         }
-
+        super.handleBytesRead(passedId, aStr.getBytes());
+       
+    }
+    
+    //===============================================================
+    /**
+     *
+    */
+    @Override
+    public void printPreviousCommand(){
+        
+        ShellJTextPane thePane = theListener.getShellTextPane();
+        StyledDocument theSD = thePane.getStyledDocument();
+            
+        //Set the new length
+        int newLength = theSD.getLength();
+        thePane.setCaretPosition( newLength ); 
+        
+        char escape = (byte)0x1b;
+        sendInput( escape + "[A" );
+    }
+    
+    //===============================================================
+    /**
+     *
+    */
+    @Override
+    public void printNextCommand(){
+        
+        ShellJTextPane thePane = theListener.getShellTextPane();
+        StyledDocument theSD = thePane.getStyledDocument();
+        
+        //Set the new length
+        int newLength = theSD.getLength();
+        thePane.setCaretPosition( newLength ); 
+        
+        char escape = 0x1b;
+        sendInput( escape + "[B" );
     }
     
     // ==========================================================================

@@ -36,21 +36,12 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-/*
- * RunnerPane
- *
- * Created on June 25, 2013, 8:32 PM
- *
- */
-
 package pwnbrew.shell;
 
 import java.awt.Color;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
 import javax.swing.text.*;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
@@ -60,9 +51,11 @@ import pwnbrew.output.StreamReceiver;
  *
  *  
  */
-public class ShellJTextPane extends JTextPane implements CaretListener, StreamReceiver {
+public class ShellJTextPane extends JTextPane implements StreamReceiver {
 
    private static final String NAME_Class = ShellJTextPane.class.getSimpleName();
+   private volatile int outputOffset = -1;
+   private boolean updating = false;
       
    /**
    * This constructor sets the default mode used for displaying this object as
@@ -78,10 +71,7 @@ public class ShellJTextPane extends JTextPane implements CaretListener, StreamRe
       theBorder.setTitleColor(Color.WHITE);
       setBorder(theBorder);
       
-
-      addCaretListener( this );
-
-   }
+    }
 
     // ==========================================================================
     /**
@@ -91,6 +81,24 @@ public class ShellJTextPane extends JTextPane implements CaretListener, StreamRe
         setBackground(Color.BLACK);
         setForeground(Color.WHITE);
 
+    }
+    
+     //=======================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getEndOffset(){
+        return outputOffset;
+    }
+    
+    //=======================================================================
+    /**
+     * 
+     * @param passedOffset 
+     */
+    public void setEndOffset( int passedOffset ){
+        outputOffset = -1;
     }
     
     //========================================================================
@@ -111,7 +119,7 @@ public class ShellJTextPane extends JTextPane implements CaretListener, StreamRe
                 StyleConstants.setForeground(aSet, Color.RED);
                 break;
             default:
-                DebugPrinter.printMessage( NAME_Class, "listclients", "Unrecognized stream id.", null);
+                DebugPrinter.printMessage( NAME_Class, "handleEndOfStream()", "Unrecognized stream id.", null );    
                 return;
         } 
         
@@ -131,18 +139,45 @@ public class ShellJTextPane extends JTextPane implements CaretListener, StreamRe
 
         if(passedStr != null && !passedStr.isEmpty() ){
 
-            final StyledDocument theSD = getStyledDocument();
+            final ShellJTextPane theRunnerPane = this;
             SwingUtilities.invokeLater(new Runnable(){
 
                 @Override
                 public void run() {
                     try {
 
-                        theSD.insertString(theSD.getLength(), passedStr, aSet);
-                        setCaretPosition( theSD.getLength() );                       
+                        //Get the current length of the document
+                        StyledDocument theSD = theRunnerPane.getStyledDocument(); 
+                        String newStr = passedStr;
+                        if( passedStr.contains("\b")){
+                            int totalLength = theSD.getLength();
+
+                            //Get the length of the passed string and remove any backspaces
+                            int strLen = passedStr.length();
+                            newStr = passedStr.replaceAll("\b", "");
+
+                            //Number of backspaces
+                            int numBack = strLen - newStr.length();                       
+                             
+                            //Set the new offset
+                            theRunnerPane.setEndOffset( totalLength - numBack);
+
+                            //Remove the previous one
+                            theRunnerPane.setUpdatingFlag(true);
+                            theSD.remove(totalLength - numBack, numBack);
+                            theRunnerPane.setUpdatingFlag(false);                            
+                        }      
+                        
+                        //Insert the string
+                        theSD.insertString(theSD.getLength(), newStr, aSet);
+                        
+                        //Set the new length
+                        int newLength = theSD.getLength();
+                        setCaretPosition( newLength );   
+                        outputOffset = newLength;
 
                     } catch ( BadLocationException ex) {
-                        DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex);
+                        DebugPrinter.printMessage( NAME_Class, "handleStdOut()", ex.getMessage(), ex );
                     }
                 }
             });
@@ -151,31 +186,23 @@ public class ShellJTextPane extends JTextPane implements CaretListener, StreamRe
 
     }
 
-    // ==========================================================================
+    //===================================================================
     /**
-     * Updates the edit menu in response to the given {@link CaretEvent}.
-     * <p>
-     * If the argument is null this method does nothing.
-     *
-     * @param event
-     * @event the {@code CaretEvent}
+     * 
+     * @param passedBool
      */
-    @Override 
-    public void caretUpdate( CaretEvent event ) {
-
-        if( event == null ) //If the CaretEvent is null...
-            return; 
-
-        Object eventSource = event.getSource();
-        if( eventSource instanceof JTextComponent ) {
-            String selectedText = ( (JTextComponent)eventSource ).getSelectedText();
-            boolean enableCopy = ( selectedText != null );
-//            EditMenuUpdater.updateEditMenu( false, enableCopy, !enableCopy, true );
-        } else {
-//            EditMenuUpdater.updateEditMenu( false, false, false, false );
-        }
+    public synchronized void setUpdatingFlag( boolean passedBool ) {
+        updating = passedBool;
+    }
     
-    }/* END caretUpdate( CaretEvent ) */
+    //===================================================================
+    /**
+     * 
+     * @return 
+     */
+    public synchronized boolean isUpdating() {
+        return updating;
+    }
 
 
 }/* END CLASS RunnerPane */
