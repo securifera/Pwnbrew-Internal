@@ -52,17 +52,17 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
+import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.ManagedRunnable;
-import pwnbrew.output.StreamReader;
-import pwnbrew.output.StreamReaderListener;
-import pwnbrew.output.StreamRecorder;
 import pwnbrew.network.shell.messages.ProcessMessage;
 import pwnbrew.network.shell.messages.StdErrMessage;
 import pwnbrew.network.shell.messages.StdOutMessage;
+import pwnbrew.output.StreamReader;
+import pwnbrew.output.StreamReaderListener;
+import pwnbrew.output.StreamRecorder;
 
 /**
  *
@@ -438,5 +438,4 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
         return aFile;        
         
     }
-
 }

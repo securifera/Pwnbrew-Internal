@@ -246,7 +246,9 @@ public class ClientConfig {
                 
             }
             
-        } catch ( LoggableException | IOException ex ){
+        } catch ( LoggableException ex ){
+            RemoteLog.log(Level.WARNING, NAME_Class, "loadConfiguration()", ex.getMessage(), ex);
+        } catch ( IOException ex ){
             RemoteLog.log(Level.WARNING, NAME_Class, "loadConfiguration()", ex.getMessage(), ex);
         }
 
