@@ -120,8 +120,24 @@ public interface TaskManager {
     /**
      * 
      * @param clientId 
+     * @param passedVersion 
      */
     public void stagerUpgradeComplete( int clientId, String passedVersion );
+    
+    //=================================================================
+    /*
+     *  Write the output to the runner panel
+     */
+    public void populateRunnerPanel( RemoteTask passedTask );
+    
+     //======================================================================
+    /**
+     *  Get the remote task
+     * 
+     * @param passedTaskId
+     * @return 
+     */
+    public RemoteTask getRemoteTask(int passedTaskId );
     
 
 }

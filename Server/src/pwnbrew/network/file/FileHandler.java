@@ -154,11 +154,11 @@ public class FileHandler extends DataHandler {
             //Get the file id and the file receiver
             int theFileId = aMessage.getFileId();
             FileReceiver aReceiver = theFileManager.getFileReceiver( theFileId );
-            if( aReceiver != null ){
+            if( aReceiver != null )
                 aReceiver.receiveFile( aMessage.getFileBytes() );
-            } else {
+             else 
                 DebugPrinter.printMessage(this.getClass().getSimpleName(), "No file receiver for the specified id.");
-            }
+            
             
         } catch (LoggableException ex) {
             Log.log(Level.INFO, NAME_Class, "receiveByteArray()", ex.getMessage(), ex );

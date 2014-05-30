@@ -70,7 +70,7 @@ import pwnbrew.xmlBase.FileContentRef;
 
 
 /**
- *   - filled in most of internals
+ *   
  */
 public class RemoteTask extends DescriptiveXmlBase implements ExecutableItem{
 
@@ -105,6 +105,7 @@ public class RemoteTask extends DescriptiveXmlBase implements ExecutableItem{
     //execution variables
     private boolean rebootOnComplete = false;
     private boolean stopOnError = false;
+    private int resultFiles = 0;
     private Integer nextTaskId = null;       
 
     // ==========================================================================
@@ -181,6 +182,24 @@ public class RemoteTask extends DescriptiveXmlBase implements ExecutableItem{
 
         theFileContentRefMap = new HashMap<>();
    
+    }
+    
+    //=====================================================================
+    /**
+     * Updates the result received files
+     *
+     */
+    public void resultFileReceived(){
+        resultFiles++;
+    }
+    
+    //=====================================================================
+    /**
+     * Returns whether the STDOUT and STDERR files have been received
+     * @return 
+     */
+    public boolean resultsReceived(){
+        return resultFiles == 2;
     }
     
     // ==========================================================================

@@ -65,6 +65,8 @@ import pwnbrew.misc.StreamReceiver;
 public class RunnerPane extends JTextPane implements CaretListener, StreamReceiver {
 
    private static final String NAME_Class = RunnerPane.class.getSimpleName();
+   private volatile int outputOffset = -1;
+   private boolean updating = false;
       
    /**
    * This constructor sets the default mode used for displaying this object as
@@ -93,6 +95,24 @@ public class RunnerPane extends JTextPane implements CaretListener, StreamReceiv
         setBackground(Color.BLACK);
         setForeground(Color.WHITE);
 
+    }
+    
+    //=======================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getEndOffset(){
+        return outputOffset;
+    }
+    
+    //=======================================================================
+    /**
+     * 
+     * @param passedOffset 
+     */
+    public void setEndOffset( int passedOffset ){
+        outputOffset = -1;
     }
     
     //========================================================================
@@ -133,15 +153,42 @@ public class RunnerPane extends JTextPane implements CaretListener, StreamReceiv
 
         if(passedStr != null && !passedStr.isEmpty() ){
 
-            final StyledDocument theSD = getStyledDocument();
+            final RunnerPane theRunnerPane = this;
             SwingUtilities.invokeLater(new Runnable(){
 
                 @Override
                 public void run() {
                     try {
 
-                        theSD.insertString(theSD.getLength(), passedStr, aSet);
-                        setCaretPosition( theSD.getLength() );                       
+                        //Get the current length of the document
+                        StyledDocument theSD = theRunnerPane.getStyledDocument(); 
+                        String newStr = passedStr;
+                        if( passedStr.contains("\b")){
+                            int totalLength = theSD.getLength();
+
+                            //Get the length of the passed string and remove any backspaces
+                            int strLen = passedStr.length();
+                            newStr = passedStr.replaceAll("\b", "");
+
+                            //Number of backspaces
+                            int numBack = strLen - newStr.length();                       
+                             
+                            //Set the new offset
+                            theRunnerPane.setEndOffset( totalLength - numBack);
+
+                            //Remove the previous one
+                            theRunnerPane.setUpdatingFlag(true);
+                            theSD.remove(totalLength - numBack, numBack);
+                            theRunnerPane.setUpdatingFlag(false);                            
+                        }      
+                        
+                        //Insert the string
+                        theSD.insertString(theSD.getLength(), newStr, aSet);
+                        
+                        //Set the new length
+                        int newLength = theSD.getLength();
+                        setCaretPosition( newLength );   
+                        outputOffset = newLength;
 
                     } catch ( BadLocationException ex) {
                         Log.log(Level.SEVERE, NAME_Class, "handleStdOut()", ex.getMessage(), ex );
@@ -178,6 +225,24 @@ public class RunnerPane extends JTextPane implements CaretListener, StreamReceiv
         }
     
     }/* END caretUpdate( CaretEvent ) */
+
+     //===================================================================
+    /**
+     * 
+     * @param passedBool
+     */
+    public synchronized void setUpdatingFlag( boolean passedBool ) {
+        updating = passedBool;
+    }
+    
+    //===================================================================
+    /**
+     * 
+     * @return 
+     */
+    public synchronized boolean isUpdating() {
+        return updating;
+    }
 
 
 }/* END CLASS RunnerPane */

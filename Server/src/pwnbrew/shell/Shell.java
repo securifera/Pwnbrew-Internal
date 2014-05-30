@@ -45,7 +45,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.shell;
 
-import pwnbrew.execution.ManagedRunnable;
+import java.awt.Color;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -53,10 +53,21 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.ListIterator;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import pwnbrew.execution.ManagedRunnable;
+import pwnbrew.gui.panels.RunnerPane;
 import pwnbrew.logging.Log;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.control.ControlMessageManager;
@@ -88,7 +99,6 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     private BufferedOutputStream theOsStream;
     
     //The input stream
-    private String thePrompt = "";
     protected final StringBuilder theStdOutStringBuilder = new StringBuilder();
     protected final StringBuilder theStdErrStringBuilder = new StringBuilder();
     
@@ -100,7 +110,11 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     
     //Logging for remote shells
     private FileOutputStream theFileOutputStream = null;
-
+    
+    //Logging for remote shells
+    private final ArrayList<String> history = new ArrayList<>();
+    private ListIterator<String> historyIterator = null;
+    
     //===========================================================================
     /**
      *  Constructor
@@ -150,9 +164,8 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
                 //Add the command terminator
                 String startupStr = getStartupCommand();
                 String inputTerm = getInputTerminator();
-                if( !inputTerm.isEmpty() ){
-                    startupStr = startupStr.concat( inputTerm );
-                }
+                if( !startupStr.isEmpty() && !inputTerm.isEmpty() )
+                    startupStr = startupStr.concat( inputTerm );                
                 
                 //Create the message
                 int dstHostId = Integer.parseInt( theListener.getHost().getId());
@@ -192,24 +205,6 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     public void setLoggingFlag(boolean passedBool ){
         logging = passedBool;
     } 
-
-    // ==========================================================================
-    /**
-     * 
-     * @return 
-     */
-    public String getShellPrompt() {
-        return thePrompt;
-    }
-
-    // ==========================================================================
-    /**
-     * 
-     * @param passedStr
-     */
-    public void setShellPrompt(String passedStr ) {
-        thePrompt = passedStr;
-    }
     
     // ==========================================================================
     /**
@@ -231,6 +226,13 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
                 Log.log(Level.WARNING, NAME_Class, "handleBytesRead()", ex.getMessage(), ex );
             }
         }
+        
+        //Get runner pane
+        RunnerPane thePane = theListener.getShellTextPane(); 
+        String aStr = new String( buffer );                    
+        if( !aStr.isEmpty() )
+            thePane.handleStreamBytes(theStreamId, aStr);
+
     }
 
     // ==========================================================================
@@ -368,6 +370,82 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         }
 
     }
+    
+    //===============================================================
+    /*
+    *
+    */
+    public void addCommandToHistory(String theStr) {
+        if( theStr != null && !theStr.isEmpty() ){
+            history.remove(theStr);
+            history.add(theStr);
+            historyIterator = null;
+        }
+    }
+    
+    //===============================================================
+    /*
+    *
+    */
+    public void printPreviousCommand(){
+        
+        final MutableAttributeSet aSet = new SimpleAttributeSet();
+        StyleConstants.setForeground(aSet, Color.WHITE); 
+        
+        //Create an iterator
+        if( historyIterator == null )
+            historyIterator = history.listIterator( history.size() );                        
+
+        int nextIndex = historyIterator.previousIndex();
+        if( nextIndex != -1){
+
+            String nextCommand = historyIterator.previous();
+            RunnerPane thePane = theListener.getShellTextPane();
+            StyledDocument theDoc = thePane.getStyledDocument();
+
+
+            //remove whatever is there and insert this
+            int promptLoc = thePane.getEndOffset();
+            try {
+                theDoc.remove(promptLoc, theDoc.getLength() - promptLoc);
+                theDoc.insertString( theDoc.getLength(), nextCommand, aSet); 
+                thePane.setCaretPosition( theDoc.getLength() );  
+            } catch (BadLocationException ex) {
+                Log.log(Level.INFO, NAME_Class, "previousInput()", ex.getMessage(), ex );  
+            }
+
+        }
+    }    
+    
+    //===============================================================
+    /*
+    *
+    */
+    public void printNextCommand(){
+        //Make sure we are at the right place
+        if( historyIterator != null ){
+            final MutableAttributeSet aSet = new SimpleAttributeSet();
+            StyleConstants.setForeground(aSet, Color.WHITE); 
+
+            int nextIndex = historyIterator.nextIndex();
+            if( nextIndex != history.size()){
+                
+                String nextCommand = historyIterator.next();
+                RunnerPane thePane = theListener.getShellTextPane();
+                StyledDocument theDoc = thePane.getStyledDocument();
+                
+                int promptLoc = thePane.getEndOffset();
+                try {
+                    theDoc.remove(promptLoc, theDoc.getLength() - promptLoc);
+                    theDoc.insertString( theDoc.getLength(), nextCommand, aSet); 
+                    thePane.setCaretPosition( theDoc.getLength() );  
+                } catch (BadLocationException ex) {
+                    Log.log(Level.INFO, NAME_Class, "previousInput()", ex.getMessage(), ex );  
+                }
+            }
+        }
+    
+    }
  
     //===============================================================
     /*
@@ -378,15 +456,8 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         try {
         
             if( theStr != null ){
-                    
-                //Set the flag
+                
                 setPromptFlag(false);
-
-                //Add the command terminator
-                String inputTerm = getInputTerminator();
-                if( !inputTerm.isEmpty() ){
-                    theStr = theStr.concat( inputTerm );
-                }
                 
                  //Log it
                 byte[] outStream = theStr.getBytes(  getEncoding() );
@@ -411,8 +482,6 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
 
                     int dstHostId = Integer.parseInt( theListener.getHost().getId());
                     StdInMessage aMsg = new StdInMessage( ByteBuffer.wrap(theStr.getBytes()), dstHostId);  
-//                    aMsg.setClientId( dstHostId );
-
                     ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
                     if( aSMM == null){
                         aSMM = ShellMessageManager.initialize( theListener.getCommManager() );

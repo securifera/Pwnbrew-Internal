@@ -46,10 +46,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.shell;
 
 import java.util.concurrent.Executor;
-import java.util.logging.Level;
-import pwnbrew.gui.panels.RunnerPane;
-import pwnbrew.logging.Log;
-import pwnbrew.misc.Constants;
 
 /**
  *
@@ -81,65 +77,6 @@ public class CommandPrompt extends Shell {
     @Override
     public String[] getCommandStringArray(){                
         return CMD_EXE_STR;
-    }
-    
-    // ==========================================================================
-    /**
-     * Handles the bytes read
-     *
-     * @param passedId
-     * @param buffer the buffer into which the bytes were read
-     */
-    @Override
-    public void handleBytesRead( int passedId, byte[] buffer ) {
-
-        super.handleBytesRead(passedId, buffer);
-        
-        //Get runner pane
-        RunnerPane thePane = theListener.getShellTextPane(); 
-        String aStr = null;
-        
-        //Add the bytes to the string builder
-        switch( passedId ){
-            case Constants.STD_OUT_ID:
-                synchronized(theStdOutStringBuilder) {
-                    theStdOutStringBuilder.append( new String( buffer ));
-                    String tempStr = theStdOutStringBuilder.toString();
-                    
-                    //Set the prompt
-                    if( !promptFlag ){
-                        if( tempStr.trim().matches(PROMPT_REGEX) ){
-                            aStr = tempStr.trim();
-                            setShellPrompt( aStr );
-                            promptFlag = true;
-                        } else{
-                            aStr = tempStr;
-                        }
-                        
-                        //Reset the string builder
-                        theStdOutStringBuilder.setLength(0);
-                    }                    
-                }
-                break;
-            case Constants.STD_ERR_ID:
-                synchronized(theStdErrStringBuilder) {
-                    theStdErrStringBuilder.append( new String( buffer )); 
-                    aStr = theStdErrStringBuilder.toString();
-                    
-                    //Reset the string builder
-                    theStdErrStringBuilder.setLength(0);
-                }
-                break;
-            default:
-                Log.log(Level.SEVERE, NAME_Class, "handleBytesRead()", "Unrecognized stream id.", null );    
-                break;
-        }          
-        
-        //Send to the runner pane
-        if( aStr != null ){
-            thePane.handleStreamBytes(passedId, aStr);
-        }
-
     }
     
     // ==========================================================================

@@ -70,8 +70,9 @@ public interface StreamReaderListener {
     * Called by a {@link StreamReader} when it detects the end of file in its {@link InputStream}.
     *
      * @param theStreamId
+     * @param bytesRead
     */
-    public void handleEndOfStream( int theStreamId );
+    public void handleEndOfStream( int theStreamId, long bytesRead );
 
 
     // ==========================================================================

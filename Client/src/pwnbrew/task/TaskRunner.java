@@ -36,26 +36,16 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
-* TaskRunner.java
-*
-* Created on Aug 27, 2013, 11:27:31 PM
-*/
-
 package pwnbrew.task;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
-import pwnbrew.Persistence;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
@@ -65,9 +55,11 @@ import pwnbrew.misc.FileUtilities;
 import pwnbrew.misc.ManagedRunnable;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFile;
+import pwnbrew.network.control.messages.PushFileUpdate;
 import pwnbrew.network.control.messages.TaskGetFile;
 import pwnbrew.network.control.messages.TaskNew;
 import pwnbrew.network.control.messages.TaskStatus;
+import pwnbrew.network.file.FileData;
 import pwnbrew.output.StreamReader;
 import pwnbrew.output.StreamReaderListener;
 import pwnbrew.output.StreamRecorder;
@@ -85,20 +77,21 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
 
     //Stdout reading mechanisms...
     private StreamRecorder theStdOutRecorder = null;
-    private volatile boolean stdOutRecorderFinished = false;
 
     //Stderr reading mechanisms...
     private StreamRecorder theStdErrRecorder = null;
-    private volatile boolean stdErrRecorderFinished = false;
     
     private volatile boolean runCancelled = false;
-
     private volatile int fileCounter = 0;
     private volatile int limit = 0;
     private Integer theTaskId = 0;
 
     private final ReentrantLock TheCancelLock = new ReentrantLock();
     private static final String NAME_Class = TaskRunner.class.getSimpleName();
+    
+    //The fileid for stdout, stderr
+    private int stdOutFileId;
+    private int stdErrFileId;
 
     //=========================================================================
     /**
@@ -133,9 +126,8 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
         try {
             
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( theCommManager);
-            }
+            if( aCMManager == null )
+                aCMManager = ControlMessageManager.initialize( theCommManager);            
 
             //Get the support file list
             List<String> hashFilenameList = theTask.getSupportFiles();
@@ -144,10 +136,8 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
             String[] cmdLineArr = theTask.getCmdLine();
             if(cmdLineArr.length > 0){
 
-                //Get the file library
-                File fileLibDir = new File( Persistence.getDataPath(), Integer.toString(theTaskId) );
-                String taskId = theTaskId.toString();
-                File taskDir = createWorkingDirectory(taskId);
+                //Get temp dir
+                File taskDir = FileUtilities.getTempDir();
 
                 //If the files aren't all present, wait until they arrive
                 while(!shutdownRequested && !runCancelled && !filesPresent) {
@@ -160,7 +150,7 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
                         String fileHash = aStr.split(":")[0];
                         String fileName = aStr.split(":")[1];
 
-                        File aFile = new File( fileLibDir, fileHash);
+                        File aFile = new File( taskDir, fileHash);
 
                         //If the file exists, remove it from the list, else request it from the server
                         if(aFile.exists() && FileUtilities.getFileHash( aFile ).equals(aFile.getName())){
@@ -196,62 +186,20 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
 
                     //Copy over the needed files to the dir
                     hashFilenameList = theTask.getSupportFiles();
-                    if(populateWorkingDir(taskDir, hashFilenameList)){
+                    if(renameSupportFiles(taskDir, hashFilenameList)){
                         execute(cmdLineArr, taskDir);
                         DebugPrinter.printMessage(this.getClass().getSimpleName(), "Executed the task.");
-                    }
-
-                    //If the process was cancelled then exit
-                    if(!runCancelled){
-
-                        //Get the results from the run and remove the original ones
-                        List<File> resultFiles = new ArrayList<File>(Arrays.asList(taskDir.listFiles()));
-                        for( String aHashFilenameStr : hashFilenameList ){
-                            File aFile = new File(taskDir, aHashFilenameStr.split(":")[1]);
-                            resultFiles.remove(aFile);
-                        }
-
-                        //Send back the files
-                        int resultFileCount = resultFiles.size();
-                        for( File resultFile : resultFiles){
-
-                            //Check if the run failed.
-                            if(resultFile.getName().equals("stderr.txt") && resultFile.length() > 0){
-                                resultStatus = TaskStatus.TASK_FAILED;
-                            }
-
-                            String fileHash = FileUtilities.getFileHash(resultFile);
-                            String fileHashNameStr = new StringBuilder().append(fileHash).append(":").append(resultFile.getName()).toString();
-
-                            PushFile newResult = new PushFile( theTaskId, fileHashNameStr, resultFile.length(), PushFile.JOB_RESULT );
-                            aCMManager.send(newResult);
-
-                        }
-
-                        //Wait until the output files are sent back successfully.
-                        waitForFiles(resultFileCount);
-
-                        if(!runCancelled && !shutdownRequested){
-                            try {
-
-                                //Remove task folder on client machine
-                                FileUtilities.deleteDir(taskDir);
-
-                            } catch (IOException ex) {
-                                RemoteLog.log(Level.INFO, NAME_Class, "run()", ex.getMessage(), ex );
-                            }
-                        }
                     }
                 }
             }
         
-        } catch (NoSuchAlgorithmException ex) {
+        } catch ( NoSuchAlgorithmException ex){
             resultStatus = TaskStatus.TASK_FAILED;
             RemoteLog.log(Level.INFO, NAME_Class, "run()", ex.getMessage(), ex );
-        } catch (IOException ex ){
+        } catch ( IOException ex){
             resultStatus = TaskStatus.TASK_FAILED;
             RemoteLog.log(Level.INFO, NAME_Class, "run()", ex.getMessage(), ex );
-        } catch (LoggableException ex ){
+        } catch (  LoggableException ex ) {
             resultStatus = TaskStatus.TASK_FAILED;
             RemoteLog.log(Level.INFO, NAME_Class, "run()", ex.getMessage(), ex );
         }
@@ -265,33 +213,6 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
 
     // ==========================================================================
     /**
-     * Constructs the working directory for the task.
-     * <p>
-     * This method creates a directory in which to place the task, its support files,
-     * and text files containing the data from stdout and stderr. 
-     * 
-     * @return a {@link File} representing the working directory, null if the
-     * directory could not be created
-    */
-    private File createWorkingDirectory(String passedId) throws IOException {
-
-        //Create the File for the directory
-        File rtnFile = new File( Persistence.getDataPath(), passedId );
-
-        //Delete the directory if it exists
-        if(rtnFile.exists()){
-            FileUtilities.deleteDir(rtnFile);
-        }
-
-        //Create the directory
-        Persistence.ensureDirectoryExists(rtnFile);
-
-        return rtnFile;
-
-    }
-
-    // ==========================================================================
-    /**
      * Executes the task in the directory represented by the given {@link File}.
      * <p>
      * @param workingDirectory the directory in which to run the task
@@ -299,13 +220,11 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
     */
     private void execute( String[] cmdLineArgs, File workingDirectory ) {
 
-        if( theProcess != null || runCancelled) { //If the task is already executing...
-            return; //Do nothing
-        }
+        if( theProcess != null || runCancelled)
+            return;     
 
-        if( workingDirectory == null ) { //If the File is null...
-            return; //Do nothing
-        }
+        if( workingDirectory == null )
+            return; 
 
         try {
 
@@ -314,7 +233,6 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
         
             //Create the stderr reader
             theStdErrRecorder = new StreamRecorder( Constants.STD_ERR_ID );
-            theStdErrRecorder.setOutputFile( new File( workingDirectory, "stderr.txt" ) );
 
             try {
                 theProcess = theProcessBuilder.start(); //Start a new process
@@ -334,11 +252,23 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
             } catch ( IOException ioe ){
                 ioe = null;
             }
+            
+            //Send messages for the stdout & stderr
+            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            if( aCMManager != null ){
+                
+                PushFile resultFile = new PushFile( theTaskId, "0:stderr.txt", -1, PushFile.JOB_RESULT );
+                stdErrFileId = resultFile.getFileId();
+                aCMManager.send(resultFile);
+                
+                resultFile = new PushFile( theTaskId, "0:stdout.txt", -1, PushFile.JOB_RESULT );
+                stdOutFileId = resultFile.getFileId();
+                aCMManager.send(resultFile);
+            }
 
             //Collect the data from stdout...
             theStdOutRecorder = new StreamRecorder( Constants.STD_OUT_ID, theProcess.getInputStream() );
             theStdOutRecorder.setStreamReaderListener( this );
-            theStdOutRecorder.setOutputFile( new File( workingDirectory, "stdout.txt" ) );
             theStdOutRecorder.start();
        
             //Collect the data from stderr...
@@ -359,18 +289,13 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
 
             }
 
-            waitForStreamRecordersToFinish(); //Wait for the StreamRecorders to finish
 
         } finally {
-
             //Reset for the next execution...
-            stdOutRecorderFinished = false;
-            stdErrRecorderFinished = false;
             theProcess = null;
-
         }
 
-    }/* END execute( File, IStdOutReceiver, IStdErrReceiver ) */
+    }
 
     // ==========================================================================
     /**
@@ -409,27 +334,6 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
 
     // ==========================================================================
     /**
-    * Causes the calling {@link Thread} to wait until {@link StreamRecorder}s for
-    * stdout and stderr have finished reading from their {@link InputStream}s and
-    * notified the {@link TaskRunner}.
-    */
-    private synchronized void waitForStreamRecordersToFinish() {
-
-        //Until both StreamRecorders have finished...
-        while( (stdOutRecorderFinished == false || stdErrRecorderFinished == false)
-            && !runCancelled && !shutdownRequested) {
-
-            try {
-                wait();
-            } catch( InterruptedException ex ) {
-            }
-
-        }
-
-    }
-
-    // ==========================================================================
-    /**
      * Relays the bytes from the {@link StreamRecorder}s to the appropriate data
      * receiver.
      * <p>
@@ -438,54 +342,28 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
     */
     @Override
     public void handleBytesRead( int theStreamId, byte[] buffer ){
+        
+        int fileId;
+        switch( theStreamId ){
+            case Constants.STD_OUT_ID:
+                fileId = stdOutFileId;
+                break;
+            case Constants.STD_ERR_ID:
+                fileId = stdErrFileId;
+                break;
+            default:
+                RemoteLog.log(Level.SEVERE, NAME_Class, "handleBytesRead()", "Unrecognized stream id.", null );        
+                return;
+        }
+        
+        //Send the bytes
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager != null ){
+            FileData fileDataMsg = new FileData(fileId, buffer); 
+            aCMManager.send(fileDataMsg);
+        }
+        
     }
-
-
-//    // ==========================================================================
-//    /**
-//     * Notifies the {@link TaskRunner} that the given {@link StreamReader} has completed.
-//     * <p>
-//     *
-//     * @param reader the {@code StreamReader}
-//    */
-//    @Override
-//    public void handleEndOfStream( StreamReader reader ) {
-//
-//        if( reader == null || ( reader != theStdOutRecorder && reader != theStdErrRecorder ) ) 
-//            return;
-//
-//        if( reader == theStdOutRecorder )
-//            stdOutRecorderFinished = true; 
-//        else
-//            stdErrRecorderFinished = true; 
-//
-//        beNotified();
-//
-//    }
-//
-//    // ==========================================================================
-//    /**
-//     * Notifies the {@link TaskRunner} that the given {@link StreamReader} has encountered
-//     * an {@link IOException} and will read no more bytes from its {@link InputStream}.
-//     * <p>
-//     * @param reader the {@code StreamReader}
-//     * @param ex the {@code IOException} thrown
-//    */
-//    @Override
-//    public void handleIOException( StreamReader reader, IOException ex ) {
-//
-//        if( reader == null || ( reader != theStdOutRecorder && reader != theStdErrRecorder ) )
-//            return; 
-//
-//        if( reader == theStdOutRecorder ) 
-//            stdOutRecorderFinished = true;
-//        else 
-//            stdErrRecorderFinished = true; 
-//        
-//        beNotified();
-//
-//    }
-    
     
     // ==========================================================================
     /**
@@ -498,24 +376,29 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
      * Called by a {@code StreamReader} when it detects the end of file in its {@link InputStream}.
      *
      * @param passedId
+     * @param bytesRead
      */
      @Override
-     public synchronized void handleEndOfStream( int passedId ) {
+     public synchronized void handleEndOfStream( int passedId, long bytesRead ) {
 
+        PushFileUpdate theUpdate;
         switch( passedId ){
             case Constants.STD_OUT_ID:
-                stdOutRecorderFinished = true; 
+                theUpdate = new PushFileUpdate(theTaskId, stdOutFileId, bytesRead);
                 break;
             case Constants.STD_ERR_ID:
-                stdErrRecorderFinished = true;
+                theUpdate = new PushFileUpdate(theTaskId, stdErrFileId, bytesRead);
                 break;
             default:
                 RemoteLog.log(Level.SEVERE, NAME_Class, "handleEndOfStream()", "Unrecognized stream id.", null );    
-                break;
+                return;
         } 
 
-        notifyAll();
-
+        //Send the message
+        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
+        if( aCMM != null ){
+            aCMM.send(theUpdate);
+        }
     }
 
     
@@ -528,21 +411,20 @@ public class TaskRunner extends ManagedRunnable implements StreamReaderListener 
      */
     @Override
     public synchronized void handleIOException( int passedId, IOException ex ) {
-        handleEndOfStream(passedId);
-        RemoteLog.log(Level.INFO, NAME_Class, "receiveByteArray()", ex.getMessage(), ex );        
+        handleEndOfStream(passedId, 0);
+        RemoteLog.log(Level.INFO, NAME_Class, "handleIOException()", ex.getMessage(), ex );        
     }
 
     //===============================================================
     /**
-     * Copies the support files to the working dir
+     * Renames the support files from their hash to their real names
      *  
      * @param taskDir
     */
-    private boolean populateWorkingDir(File taskDir, List<String> hashFilenameList ) {
+    private boolean renameSupportFiles(File taskDir, List<String> hashFilenameList ) {
         
         if( taskDir == null )
-            return false;
-        
+            return false;        
 
         //Write the supporting files in the directory
         boolean rtnBool = true;

@@ -36,55 +36,33 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-package pwnbrew.host.gui;
+package pwnbrew.network.control.messages;
 
-import pwnbrew.shell.Shell;
-import java.util.List;
+import pwnbrew.misc.SocketUtilities;
+import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-public interface HostShellPanelListener {
+public final class PushFileUpdate extends FileMessage {
+
+    private static final byte OPTION_DATASIZE = 4;
     
     // ==========================================================================
     /**
-     *  Spawns a shell given the cmd line string.
-     * 
-     * @param passedShellClass 
-     */
-    public void spawnShell( Class passedShellClass );
+     * Constructor
+     *
+     * @param passedId
+     * @param passedFileId
+     * @param passedFileSize
+    */
+    public PushFileUpdate( int passedId, int passedFileId, long passedFileSize ) {
+        super(passedId, passedFileId );     
 
-    // ==========================================================================
-    /**
-     *  Sends the input string to the shell
-     * 
-     * @param theStr 
-     */
-    public void sendInput( String theStr);
-
-    
-    //==========================================================================
-    /**
-     *  Get the list of available shell classes
-     * 
-     * @return 
-     */
-    public List<Class> getShellList();
-
-     //==========================================================================
-    /**
-     *  Kill the shell
-     */
-    public void killShell();
-    
-     //==========================================================================
-    /**
-     *  Get the Shell
-     * @return 
-     */
-    public Shell getShell();
-    
-
-
+        byte[] tempArr = SocketUtilities.longToByteArray(passedFileSize);
+        ControlOption aTlv = new ControlOption( OPTION_DATASIZE, tempArr);
+        addOption(aTlv);
+       
+    }
 }

@@ -92,7 +92,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
     private final String startupCmd;
     private final boolean redirect_stderr;
     
-    private int parentId;
+    private final int parentId;
     private final CommManager theCommManager;
     private static final String NAME_Class = Shell.class.getSimpleName();
       
@@ -102,6 +102,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
      * 
      * @param passedExecutor 
      * @param passedManager 
+     * @param passedSrcId 
      * @param passedArr 
      * @param passedEncoding 
      * @param passedStartupCmd 
@@ -162,9 +163,9 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
                 }
                 aSMM.send(aMsg);
 
-            } catch (IOException ex) {
+            } catch ( IOException ex ){
                 RemoteLog.log( Level.SEVERE, NAME_Class, "handleBytesRead()", ex.getMessage(), null);
-            } catch (LoggableException ex) {
+            } catch ( LoggableException ex ) {
                 RemoteLog.log( Level.SEVERE, NAME_Class, "handleBytesRead()", ex.getMessage(), null);
             }
             
@@ -196,7 +197,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
      * @param passedId
      */
      @Override
-     public synchronized void handleEndOfStream( int passedId ) {
+     public synchronized void handleEndOfStream( int passedId, long bytesRead ) {
 
         switch( passedId ){
             case Constants.STD_OUT_ID:
@@ -231,7 +232,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
      */
     @Override
     public synchronized void handleIOException( int passedId, IOException ex ) {
-        handleEndOfStream(passedId);
+        handleEndOfStream(passedId, 0);
         RemoteLog.log(Level.INFO, NAME_Class, "receiveByteArray()", ex.getMessage(), ex );        
     }
     

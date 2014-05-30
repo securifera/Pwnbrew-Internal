@@ -275,9 +275,9 @@ public class PushFile extends FileMessage {
                 
         try {
             
-            if( fileType == PushFile.JOB_RESULT){       
+            if( fileType == PushFile.JOB_RESULT)      
                 passedManager.getTaskManager().taskChanged(new TaskStatus( getTaskId(), RemoteTask.TASK_XFER_RESULTS, -1 ));
-            }
+            
              
             //Get the file manager
             FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();

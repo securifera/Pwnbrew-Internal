@@ -36,15 +36,11 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-/*
- * StreamRecorder.java
- *
- * Created on Nov 12, 2013, 1:40:22 PM
- */
-
 package pwnbrew.output;
 
 import java.io.*;
+import java.util.logging.Level;
+import pwnbrew.log.RemoteLog;
 
 
 /**
@@ -54,6 +50,7 @@ public class StreamRecorder extends StreamReader {
 
     private File theOutputFile = null;
     private FileOutputStream theFileOutputStream = null;
+    private static final String NAME_Class = StreamRecorder.class.getSimpleName();
 
 
    // ==========================================================================
@@ -110,27 +107,19 @@ public class StreamRecorder extends StreamReader {
             return false; 
 
         boolean rtnBool = false;    
-        if( file.exists() && file.canWrite() ) { 
+        try {
+            if( file.getParentFile().exists() && file.createNewFile() ) { 
 
-            try {
                 theFileOutputStream = new FileOutputStream( file );
-            } catch( FileNotFoundException ex ) {
-             
-                try {
-                    if( file.createNewFile() )
-                        theFileOutputStream = new FileOutputStream( file );
-                } catch( IOException ex2 ) {
-                    ex2 = null;
+                if( theFileOutputStream != null ) { 
+                    theOutputFile = file;
+                    rtnBool = true; 
                 }
 
-            }
-
-            if( theFileOutputStream != null ) { 
-                theOutputFile = file;
-                rtnBool = true; 
-            }
-
-        } 
+            } 
+        } catch( IOException ex ) {
+            RemoteLog.log(Level.INFO, NAME_Class, "setOutputFile()", ex.getMessage(), ex ); 
+        }
 
         return rtnBool;
 

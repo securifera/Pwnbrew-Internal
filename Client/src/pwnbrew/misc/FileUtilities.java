@@ -91,6 +91,23 @@ abstract public class FileUtilities {
             throw new IOException("Unable to delete file " + dir);
         
     }
+    
+    // ==========================================================================
+    /**
+     * Returns the os temp dir
+     * <p>
+     * 
+     * @return a {@link File} representing the os temp dir
+     * @throws java.io.IOException
+    */
+    public static File getTempDir() throws IOException {
+
+        File aFile = File.createTempFile("ttf", null);
+        File rtnFile = aFile.getParentFile();
+        aFile.delete();
+
+        return rtnFile;
+    }
 
   
     // ==========================================================================
@@ -98,7 +115,6 @@ abstract public class FileUtilities {
     * Returns the SHA-256 hash for the passed file
     *
     * @param aFile
-    * @param addHeader
     *
     * @return a {@code String} representing the hash of the file
     *
@@ -187,20 +203,18 @@ abstract public class FileUtilities {
     public static boolean moveFile( File srcFile, File dstFile ) throws IOException {
         
         FileInputStream aFIS = new FileInputStream(srcFile);
-        try{
+        try {
+            
             FileOutputStream aFOS = new FileOutputStream(dstFile);
-            try{
-
+            try {
                 //Copy the file manually
                 FileChannel inputChannel = aFIS.getChannel();
-                FileChannel outputChannel = aFOS.getChannel();
-
-                inputChannel.transferTo(0, inputChannel.size(), outputChannel);
-
+                    FileChannel outputChannel = aFOS.getChannel();
+                inputChannel.transferTo(0, inputChannel.size(), outputChannel);         
+            
             } finally {
                 aFOS.close();
-            }         
-
+            }
         } finally {
             aFIS.close();
         }

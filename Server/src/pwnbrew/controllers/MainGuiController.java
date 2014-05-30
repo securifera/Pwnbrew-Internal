@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- * MainGuiController.java
- *
- * Created on June 21, 2013
- */
-
 package pwnbrew.controllers;
 
 import pwnbrew.library.LibraryItemController;
@@ -224,8 +217,8 @@ final public class MainGuiController extends Controller implements ActionListene
 
             //Remove the nodes
             DefaultMutableTreeNode lastSelectedNode = null;
-            for( int i = 0; i < selObjects.size(); i++ ){
-                lastSelectedNode = selObjects.get(i);
+            for (DefaultMutableTreeNode selObject : selObjects) {
+                lastSelectedNode = selObject;
                 removeObjectFromTree( (LibraryItemController)lastSelectedNode.getUserObject() ); //Remove the node and delete its object
             }
 
@@ -524,6 +517,22 @@ final public class MainGuiController extends Controller implements ActionListene
         }
     }
     
+    //======================================================================
+    /**
+     *  Get the remote task
+     * 
+     * @param passedTaskId
+     * @return 
+     */
+    @Override
+    public RemoteTask getRemoteTask(int passedTaskId ){
+        //Update the gui
+        RemoteTask theRemoteTask;
+        synchronized(theActiveTaskMap){
+            theRemoteTask = theActiveTaskMap.get( passedTaskId );
+        }
+        return theRemoteTask;
+    }
     
     // ==========================================================================
     /**
@@ -554,7 +563,11 @@ final public class MainGuiController extends Controller implements ActionListene
                     ((JobController)theController).setRemoteTaskId( 0 );
 
                     //Update the gui
-                    RemoteTask theRemoteTask = theActiveTaskMap.get( theRemoteTaskId );
+                    RemoteTask theRemoteTask;
+                    synchronized(theActiveTaskMap){
+                        theRemoteTask = theActiveTaskMap.get( theRemoteTaskId );
+                    }
+                    
                     if( theRemoteTask != null ){
                         List<RemoteTaskListener> theListeners = theRemoteTask.getRemoteListeners();
                         for(RemoteTaskListener aListener : theListeners){
@@ -1919,12 +1932,10 @@ final public class MainGuiController extends Controller implements ActionListene
             String taskState = passedMsg.getStatus();
             
             synchronized(theActiveTaskMap){
-                if(taskState.equals( RemoteTask.TASK_COMPLETED) || taskState.equals( RemoteTask.TASK_FAILED) 
-                        || taskState.equals( RemoteTask.TASK_CANCELLED)){
-                    theRemoteTask = theActiveTaskMap.remove(Integer.valueOf(theTaskId));
-                } else {
-                    theRemoteTask = theActiveTaskMap.get(Integer.valueOf(theTaskId));
-                }
+                if( taskState.equals( RemoteTask.TASK_CANCELLED))
+                    theRemoteTask = theActiveTaskMap.remove(theTaskId);
+                else 
+                    theRemoteTask = theActiveTaskMap.get(theTaskId);                
             }
 
             if(theRemoteTask != null){
@@ -1940,14 +1951,6 @@ final public class MainGuiController extends Controller implements ActionListene
                     theRemoteTask.setEndTime(taskEndTime);  
 
 //                    DebugPrinter.printMessage(this, "Task Completed.");
-                    
-                    //TODO Populate the runner panel
-                    SwingUtilities.invokeLater( new Runnable() {
-                        @Override
-                        public void run() {
-                            populateRunnerPanel( theRemoteTask );  
-                        }
-                    });
                     
                     //Get the next task
                     Integer nextTaskId = theRemoteTask.getNextTaskId();
@@ -1984,17 +1987,31 @@ final public class MainGuiController extends Controller implements ActionListene
 
                         }
 
-                    //Check for reboot
-                    } else if( theRemoteTask.shouldReboot() ){
+//                    //Check for reboot
+//                    } else if( theRemoteTask.shouldReboot() ){
                   
                     }
                     
                 }
                 
                 List<RemoteTaskListener> theListeners = theRemoteTask.getRemoteListeners();
-                for(RemoteTaskListener aListener : theListeners){
+                for(RemoteTaskListener aListener : theListeners)
                     aListener.taskChanged(theRemoteTask);
+                
+                //Update the panel and remove
+                if( theRemoteTask.resultsReceived()){
+                    synchronized(theActiveTaskMap){
+                        theActiveTaskMap.remove(theTaskId);
+                    }     
+                    
+                    SwingUtilities.invokeLater( new Runnable() {
+                        @Override
+                        public void run() {
+                            populateRunnerPanel( theRemoteTask );  
+                        }
+                    });
                 }
+                
             }
         } catch (IOException ex){
             Log.log(Level.SEVERE, NAME_Class, "taskChanged()", ex.getMessage(), ex );
@@ -2031,7 +2048,8 @@ final public class MainGuiController extends Controller implements ActionListene
     /*
      *  Write the output to the runner panel
      */
-    private void populateRunnerPanel( RemoteTask passedTask ) {
+    @Override
+    public void populateRunnerPanel( RemoteTask passedTask ) {
         
         //Get the host controller
         HostController theController = getHostController( passedTask.getClientId() );
@@ -2052,15 +2070,15 @@ final public class MainGuiController extends Controller implements ActionListene
                 //Readt the stderr file
                 File stdErrFile = new File( theTaskDir, Constants.STD_ERR_FILENAME );
                 byte[] fileBytes = FileUtilities.readFile(stdErrFile);
-                if( fileBytes != null && fileBytes.length > 0){
+                if( fileBytes != null && fileBytes.length > 0)
                     theRunnerPane.handleStreamBytes(Constants.STD_ERR_ID, new String( fileBytes ));
-                }
+                
                 
                 File stdOutFile = new File( theTaskDir, Constants.STD_OUT_FILENAME ); 
                 fileBytes = FileUtilities.readFile(stdOutFile);
-                if( fileBytes != null && fileBytes.length > 0 ){
+                if( fileBytes != null && fileBytes.length > 0 )
                     theRunnerPane.handleStreamBytes(Constants.STD_OUT_ID, new String( fileBytes) );
-                }
+                
 
                            
             } catch( IOException ex ){

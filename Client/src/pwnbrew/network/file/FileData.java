@@ -70,8 +70,19 @@ public class FileData extends Message {
         //Set id
         super( FILE_MESSAGE_TYPE );
         SocketUtilities.intToByteArray( fileId, passedId);
-        fileBytes = Arrays.copyOf(byteVal, byteVal.length);
+        fileBytes = byteVal;
         
+    }
+    
+     //=========================================================================
+    /*
+     *  Contructor
+     */
+    public FileData( int passedFileId, byte[] passedMsgId, byte[] byteVal ) {
+        //Set id
+        super( FILE_MESSAGE_TYPE, passedMsgId);
+        SocketUtilities.intToByteArray( fileId, passedFileId);
+        fileBytes = Arrays.copyOf(byteVal, byteVal.length);
     }
 
     //===============================================================
@@ -91,13 +102,6 @@ public class FileData extends Message {
         
         //Add the file byte value
         rtnBuffer.put( fileBytes );
-        
-        //Add padding to put the data on a word boundary
-        int remainder = rtnBuffer.position() % (Integer.SIZE/Byte.SIZE);
-        if(remainder > 0){
-            byte[] paddArr = new byte[(Integer.SIZE/Byte.SIZE) - remainder];
-            rtnBuffer.put(paddArr, 0, paddArr.length );
-        }
         
     }
     
@@ -137,14 +141,8 @@ public class FileData extends Message {
         //Add the function
         count += fileId.length;
         
-        //Add the options
+        //Add the file bytes
         count += fileBytes.length;
-
-        //Add padding to put the data on a word boundary
-        int remainder = count % (Integer.SIZE/Byte.SIZE);
-        if(remainder > 0){
-            count += (Integer.SIZE/Byte.SIZE) - remainder;
-        }
         
         //Set the length
         SocketUtilities.intToByteArray(length, count );
@@ -162,29 +160,33 @@ public class FileData extends Message {
     */
     public static FileData getMessage( ByteBuffer passedBuffer ) throws LoggableException {
 
-       byte[] theId = new byte[4],clientId = new byte[4], tempHostId = new byte[4];
-       FileData aMessage;       
-       
-       //Copy over the client id
-       passedBuffer.get(clientId, 0, clientId.length);
-       
+        byte[] theMsgId = new byte[4], theFileId = new byte[4],clientId = new byte[4], tempHostId = new byte[4];
+        FileData aMessage;
+
+        //Copy over the client id
+        passedBuffer.get(clientId, 0, clientId.length);
+
         //Copy over the dest host id
-       passedBuffer.get(tempHostId, 0, tempHostId.length);
-       
-       //Copy over the id
-       passedBuffer.get(theId, 0, theId.length);
-       int fileId = SocketUtilities.byteArrayToInt(theId);       
+        passedBuffer.get(tempHostId, 0, tempHostId.length);
 
-       //Copy over the id
-       byte[] theFileBytes = new byte[ passedBuffer.remaining() ];
-       passedBuffer.get(theFileBytes, 0, theFileBytes.length);
+        //Copy over the msg id
+        passedBuffer.get(theMsgId, 0, theMsgId.length);
+        int msgId = SocketUtilities.byteArrayToInt(theFileId);
 
-       //Create the message type
-       aMessage = new FileData( fileId, theFileBytes );
-       aMessage.setClientId(SocketUtilities.byteArrayToInt(clientId));
-       aMessage.setDestHostId(SocketUtilities.byteArrayToInt(tempHostId) );
-       
-       return aMessage;
+        //Copy over the id
+        passedBuffer.get(theFileId, 0, theFileId.length);
+        int fileId = SocketUtilities.byteArrayToInt(theFileId);
+
+        //Copy over the id
+        byte[] theFileBytes = new byte[ passedBuffer.remaining() ];
+        passedBuffer.get(theFileBytes, 0, theFileBytes.length);
+
+        //Create the message type
+        aMessage = new FileData( fileId, theMsgId, theFileBytes );
+        aMessage.setClientId(SocketUtilities.byteArrayToInt(clientId));
+        aMessage.setDestHostId(SocketUtilities.byteArrayToInt(tempHostId) );
+
+        return aMessage;
        
     }
     

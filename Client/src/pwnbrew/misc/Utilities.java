@@ -153,8 +153,6 @@ public class Utilities {
   
     private static final String NAME_Class = Utilities.class.getSimpleName();
 
-//    static final SecureRandom SecureRandomGen = new SecureRandom();
-
     private static URL theURL;
     private static File classPath;
 
@@ -334,20 +332,20 @@ public class Utilities {
                 encryptedData = theEncryptCipher.doFinal( dataToEncrypt, 0, dataToEncrypt.length );
             }
 
-        } catch ( IllegalBlockSizeException ex){
-            throw new LoggableException(ex);
-        } catch ( BadPaddingException ex){
-            throw new LoggableException(ex);
-        } catch ( InvalidKeyException ex){
-            throw new LoggableException(ex);
-        } catch ( InvalidAlgorithmParameterException ex) {
-            throw new LoggableException(ex);
-        } catch ( NoSuchAlgorithmException ex ){
-            throw new LoggableException(ex);
-        } catch ( NoSuchPaddingException ex ){
-            throw new LoggableException(ex);
-        } catch ( UnsupportedEncodingException ex ){
-            throw new LoggableException(ex);
+        } catch ( IllegalBlockSizeException ex ){
+           throw new LoggableException(ex);
+        } catch ( BadPaddingException  ex ){
+           throw new LoggableException(ex);
+        } catch (  InvalidKeyException  ex ){
+           throw new LoggableException(ex);
+        } catch (  InvalidAlgorithmParameterException  ex ){
+           throw new LoggableException(ex);
+        } catch (  NoSuchAlgorithmException  ex ){
+           throw new LoggableException(ex);
+        } catch (  NoSuchPaddingException  ex ){
+           throw new LoggableException(ex);
+        } catch (  UnsupportedEncodingException ex) {
+           throw new LoggableException(ex);
         }
 
         return encryptedData;
@@ -395,19 +393,19 @@ public class Utilities {
            }
            
         } catch ( IllegalBlockSizeException ex ){
-            throw new LoggableException(ex);
+           throw new LoggableException(ex);
         } catch ( BadPaddingException ex ){
-            throw new LoggableException(ex);
-        } catch ( InvalidKeyException ex ){
-            throw new LoggableException(ex);
-        } catch ( InvalidAlgorithmParameterException ex ){
-            throw new LoggableException(ex);
-        } catch ( NoSuchPaddingException ex ){
-            throw new LoggableException(ex);
+           throw new LoggableException(ex);
+        } catch (  InvalidKeyException ex ){
+           throw new LoggableException(ex);
+        } catch (  InvalidAlgorithmParameterException ex ){
+           throw new LoggableException(ex);
+        } catch (  NoSuchPaddingException ex ){
+           throw new LoggableException(ex);
         } catch ( NoSuchAlgorithmException ex ){
-            throw new LoggableException(ex);
-        } catch ( UnsupportedEncodingException ex ){
-            throw new LoggableException(ex);
+           throw new LoggableException(ex);
+        } catch ( UnsupportedEncodingException ex ) {
+           throw new LoggableException(ex);
         }
 
         return retVal;
@@ -508,7 +506,7 @@ public class Utilities {
 
                             //Add the entry
                             theZipOS.putNextEntry(anEntry);
-                            localProperties.store(theZipOS, "");
+                            localProperties.store(theZipOS);
 
                             //Write to zip
                             theZipOS.closeEntry();
@@ -742,14 +740,14 @@ public class Utilities {
                 passedManager.shutdown();   
                                                
             } catch ( ClassNotFoundException ex ){
-                RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);  
+                RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);        
             } catch ( NoSuchFieldException ex ){
-                RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);  
-            } catch ( SecurityException ex ){
-                RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);  
-            } catch ( IllegalArgumentException ex ){
-                RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);  
-            } catch ( IllegalAccessException ex ){
+                RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);        
+            } catch (  SecurityException ex ){
+                RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);        
+            } catch (  IllegalArgumentException ex ){
+                RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);        
+            } catch (  IllegalAccessException ex ) {
                 RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);        
             }
         }
@@ -805,14 +803,14 @@ public class Utilities {
             method.setAccessible(true); 
             method.invoke(classLoader, new Object[]{url}); 
         } catch (NoSuchMethodException ex ){
-            throw new IntrospectionException("Error when adding url to system ClassLoader ");
+            throw new IntrospectionException("Error when adding url to system ClassLoader "); 
         } catch ( SecurityException ex ){
-            throw new IntrospectionException("Error when adding url to system ClassLoader ");
-        } catch (IllegalAccessException ex ){
-            throw new IntrospectionException("Error when adding url to system ClassLoader ");
-        } catch (IllegalArgumentException ex ){
-            throw new IntrospectionException("Error when adding url to system ClassLoader ");
-        } catch (InvocationTargetException ex ){
+            throw new IntrospectionException("Error when adding url to system ClassLoader "); 
+        } catch (  IllegalAccessException ex ){
+            throw new IntrospectionException("Error when adding url to system ClassLoader "); 
+        } catch (  IllegalArgumentException ex ){
+            throw new IntrospectionException("Error when adding url to system ClassLoader "); 
+        } catch (  InvocationTargetException t ) { 
             throw new IntrospectionException("Error when adding url to system ClassLoader "); 
         } 
     }
