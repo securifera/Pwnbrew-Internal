@@ -41,10 +41,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -278,7 +276,7 @@ public class JarUtilities {
                         //Set the IP to something else
                         //Add the entry
                         anEntry = new ZipEntry(properties);
-                        localProperties.setProperty(propLabel, propValue);
+                        localProperties.setProperty(propLabel, propValue.trim());
 
 
                         //Add the entry

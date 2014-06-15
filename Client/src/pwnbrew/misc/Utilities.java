@@ -771,5 +771,50 @@ public class Utilities {
             throw new IntrospectionException("Error when adding url to system ClassLoader "); 
         } 
     }
+    
+     
+    /**
+     *
+     * @author Securifera
+     */
+    public static class ManifestProperties extends Properties {
+
+        //===================================================================
+        /**
+         * Constructor
+         */
+        public ManifestProperties() {
+            super();
+        }   
+
+        //=========================================================================
+        /**
+         * 
+         * After the entries have been written, the output stream is flushed.  
+         * The output stream remains open after this method returns.
+         * <p>
+         * @param   out      an output stream.
+         * @exception  IOException if writing this property list to the specified
+         *             output stream throws an <tt>IOException</tt>.
+         * @exception  ClassCastException  if this <code>Properties</code> object
+         *             contains any keys or values that are not <code>Strings</code>.
+         * @exception  NullPointerException  if <code>out</code> is null.
+         * @since 1.2
+         */
+        public void store(OutputStream out ) throws IOException {
+
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, "8859_1"));
+            synchronized (this) {
+                for (Enumeration e = keys(); e.hasMoreElements();) {
+                    String key = (String)e.nextElement();
+                    String val = (String)get(key);
+
+                    bw.write(key + ": " + val);
+                    bw.newLine();
+                }
+            }
+            bw.flush();
+        }
+    }
 
 }

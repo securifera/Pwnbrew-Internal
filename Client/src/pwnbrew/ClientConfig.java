@@ -49,7 +49,6 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.LoaderUtilities;
-import pwnbrew.misc.ManifestProperties;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.misc.Utilities;
 
@@ -217,7 +216,7 @@ public class ClientConfig {
         try {
         
             //Get the manifest
-            ManifestProperties localProperties = new ManifestProperties();
+            Utilities.ManifestProperties localProperties = new Utilities.ManifestProperties();
             String properties = Constants.PROP_FILE;
             String propLabel = Constants.HOST_ID_LABEL;
 
