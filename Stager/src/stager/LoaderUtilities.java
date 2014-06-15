@@ -547,7 +547,7 @@ public class LoaderUtilities {
     /**
     *   Performs the logic specific to the message.
     *
-     * @param passedManager
+     * @param killTime
     */
     public static void updateKillTime( Date killTime ) {
         

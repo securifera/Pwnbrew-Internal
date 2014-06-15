@@ -50,7 +50,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.Pwnbrew;
 import pwnbrew.manager.CommManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.log.RemoteLog;
@@ -187,7 +186,7 @@ public class Migrate extends ControlMessage {
            
             if( theClassPath != null && theClassPath.isFile() ){ 
 
-                //Close the loader
+                 //Close the loader
                 LoaderUtilities.unloadLibs( aClassLoader );
 
                 //Update the jar

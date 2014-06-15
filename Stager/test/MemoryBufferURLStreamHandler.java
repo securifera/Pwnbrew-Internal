@@ -15,11 +15,14 @@ public class MemoryBufferURLStreamHandler extends URLStreamHandler {
 
 	private List files = new ArrayList();
 
+        @Override
 	protected URLConnection openConnection(URL u) throws IOException {
-		return new MemoryBufferURLConnection(u);
+            MemoryBufferURLConnection aMBU = new MemoryBufferURLConnection(u);            
+            aMBU.setDefaultUseCaches(false);
+            return aMBU;
 	}
 	
 	public List getFiles() {
-		return files;
+            return files;
 	}
 }

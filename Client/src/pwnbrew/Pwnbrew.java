@@ -51,7 +51,6 @@ import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
-import pwnbrew.misc.ManifestProperties;
 import pwnbrew.misc.ReconnectTimer;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.control.ControlMessageManager;
@@ -210,7 +209,7 @@ public final class Pwnbrew extends CommManager implements TaskListener {
             String[] inputArr = new String[0];
             if( args.length == 0 ){
                 
-                ManifestProperties localProperties = new ManifestProperties();
+                Utilities.ManifestProperties localProperties = new Utilities.ManifestProperties();
                 Class localClass = Pwnbrew.class;
                 InputStream localInputStream = localClass.getResourceAsStream("/" + Constants.PROP_FILE);
                 if (localInputStream != null) {

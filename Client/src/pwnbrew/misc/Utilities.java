@@ -444,7 +444,7 @@ public class Utilities {
             String propLabel, String propValue ){        
     
         if( passedFile != null && passedFile.isFile() ){                 
-            
+                                       
             //Open the zip
             ByteArrayOutputStream aBOS = new ByteArrayOutputStream();
             try {
@@ -459,8 +459,8 @@ public class Utilities {
                     }
 
                 //Close and delete
-                } catch (IOException ex) {
-                    RemoteLog.log(Level.WARNING, NAME_Class, "updateJarProperties()", ex.getMessage(), ex);        
+                } catch (IOException ex) {                    
+                    System.out.println( "Utilities.updateJarProperties(): " + ex.getMessage() );        
                 } finally {
                     try {
                         fis.close();
@@ -469,7 +469,7 @@ public class Utilities {
                     }
                 }
                 passedFile.delete();
-
+                           
                 //Create the file back
                 FileOutputStream theFileOS = new FileOutputStream(passedFile);
                 ZipOutputStream theZipOS = new ZipOutputStream(theFileOS );
@@ -533,7 +533,7 @@ public class Utilities {
                     theZipOS.close();
                     
                 } catch (IOException ex) {
-                    RemoteLog.log(Level.WARNING, NAME_Class, "updateJarProperties()", ex.getMessage(), ex);        
+                    System.out.println( "Utilities.updateJarProperties(): " + ex.getMessage() );        
                 } finally {
                     try {
                         theZipInputStream.close();
@@ -541,7 +541,7 @@ public class Utilities {
                 }
                 
             } catch (FileNotFoundException ex ){
-                RemoteLog.log(Level.WARNING, NAME_Class, "updateJarProperties()", ex.getMessage(), ex);        
+                System.out.println( "Utilities.updateJarProperties(): " + ex.getMessage() );         
             }
         }
     }
@@ -719,7 +719,6 @@ public class Utilities {
                     
                 } 
                 
-                DebugPrinter.printMessage(NAME_Class, strList.toString());
                 //Tell it to run itself on shutdown
                 Runtime.getRuntime().addShutdownHook( new Thread(){
                 
@@ -813,6 +812,50 @@ public class Utilities {
         } catch (  InvocationTargetException t ) { 
             throw new IntrospectionException("Error when adding url to system ClassLoader "); 
         } 
+    }
+    
+    /**
+     *
+     * @author Securifera
+     */
+    public static class ManifestProperties extends Properties {
+
+        //===================================================================
+        /**
+         * Constructor
+         */
+        public ManifestProperties() {
+            super();
+        }   
+
+        //=========================================================================
+        /**
+         * 
+         * After the entries have been written, the output stream is flushed.  
+         * The output stream remains open after this method returns.
+         * <p>
+         * @param   out      an output stream.
+         * @exception  IOException if writing this property list to the specified
+         *             output stream throws an <tt>IOException</tt>.
+         * @exception  ClassCastException  if this <code>Properties</code> object
+         *             contains any keys or values that are not <code>Strings</code>.
+         * @exception  NullPointerException  if <code>out</code> is null.
+         * @since 1.2
+         */
+        public void store(OutputStream out ) throws IOException {
+
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, "8859_1"));
+            synchronized (this) {
+                for (Enumeration e = keys(); e.hasMoreElements();) {
+                    String key = (String)e.nextElement();
+                    String val = (String)get(key);
+
+                    bw.write(key + ": " + val);
+                    bw.newLine();
+                }
+            }
+            bw.flush();
+        }
     }
 
 }

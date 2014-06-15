@@ -90,13 +90,17 @@ public class MemoryBufferURLConnection extends URLConnection {
                 data = (byte[]) files.get(Integer.parseInt(file.substring(0, pos)));
         }
         contentType = file.substring(pos + 1);
+        setUseCaches(false);
     }
 
     
     //==================================================================
     /**
      * Create a new URL from a byte array and its content type.
+     * @param data
+     * @param contentType
      * @return 
+     * @throws java.net.MalformedURLException 
      */
     public static URL createURL(byte[] data, String contentType) throws MalformedURLException {
         synchronized(files) {
@@ -143,4 +147,5 @@ public class MemoryBufferURLConnection extends URLConnection {
     public String getContentType() {
         return contentType;
     }
+   
 }

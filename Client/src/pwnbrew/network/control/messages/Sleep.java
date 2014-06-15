@@ -52,7 +52,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.Pwnbrew;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.Constants;
@@ -171,6 +170,7 @@ public class Sleep extends ControlMessage {
                    
             if( Utilities.isStaged()){
                 
+                DebugPrinter.printMessage(NAME_Class, "staged");
                 Class stagerClass = Class.forName("stager.Stager");
                 ClassLoader aClassLoader = stagerClass.getClassLoader();  
                 
@@ -181,6 +181,7 @@ public class Sleep extends ControlMessage {
                 //Close the loader
                 Utilities.restart( passedManager, false, 5000 );               
                 
+                //Create a manifest before unloading
                 LoaderUtilities.unloadLibs( aClassLoader );
                 Utilities.updateJarProperties( theClassPath, properties, propLabel, dateStr );
                  

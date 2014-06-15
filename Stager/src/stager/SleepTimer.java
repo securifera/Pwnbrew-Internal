@@ -68,6 +68,7 @@ public class SleepTimer implements Runnable {
     private InputStream theInputStream = null;
     private byte[] theClientId;
     private Date deathDateCalendar = null;
+    private Date initialSleepDate = new Date();
  
     // ==========================================================================
     /**
@@ -88,7 +89,7 @@ public class SleepTimer implements Runnable {
     public void run() {
             
         Calendar theCalendar = Calendar.getInstance(); 
-        theCalendar.setTime( new Date() );
+        theCalendar.setTime( initialSleepDate );
         theCalendar.add(Calendar.SECOND, 5 );
         Date theDate = theCalendar.getTime();        
                 
@@ -280,7 +281,7 @@ public class SleepTimer implements Runnable {
                 
         //Create the calendar
         Calendar theCalendar = Calendar.getInstance(); 
-        theCalendar.setTime( new Date() );
+        theCalendar.setTime( initialSleepDate );
 
         //Add 1 Minute
         theCalendar.add( Calendar.MINUTE, 2);
@@ -352,6 +353,15 @@ public class SleepTimer implements Runnable {
     public void setDeathDate(Date tmpDate) {
         //Create the calendar
         deathDateCalendar = new Date(tmpDate.getTime());
+    }
+
+    // ==========================================================================
+    /**
+     * 
+     * @param tmpDate 
+     */
+    public void setIntialSleepDate(Date tmpDate) {
+        initialSleepDate = tmpDate;
     }
    
 }
