@@ -1531,13 +1531,14 @@ public class Utilities {
                 byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
                 String[] stagedClasses = new String[]{ 
                     "pwnbrew/stage/Stage",
+                    "pwnbrew/stage/MemoryJarFile",
                     "pwnbrew/stage/MemoryBufferURLConnection",
                     "pwnbrew/stage/MemoryBufferURLStreamHandler",
                     "pwnbrew/stage/Pwnbrew",
                 };
 
                 //Send each staged class
-                ByteBuffer classByteBuffer = ByteBuffer.allocate( (int) (payloadFile.length() + 10000));
+                ByteBuffer classByteBuffer = ByteBuffer.allocate( (int) (payloadFile.length() + 20000));
                 for( String aClass : stagedClasses ){
 
                     int bytesRead = 0;
