@@ -149,6 +149,7 @@ public final class SendStage extends ControlMessage{ // NO_UCD (use default)
                         byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
                         String[] stagedClasses = new String[]{ 
                             "pwnbrew/stage/Stage",
+                            "pwnbrew/stage/MemoryJarFile",
                             "pwnbrew/stage/MemoryBufferURLConnection",
                             "pwnbrew/stage/MemoryBufferURLStreamHandler",
                             "pwnbrew/stage/Pwnbrew",
