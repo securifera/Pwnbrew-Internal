@@ -102,7 +102,7 @@ public final class HostSelectionPanel extends HostCheckInWizardPanel {
         theWizard.setSelectedModel(anotherModel);
 
         //Retrieve the currently detected nodes
-        SessionsJFrame theParentFrame = (SessionsJFrame) theWizard.getParentFrame();
+        SessionsJFrame theParentFrame = (SessionsJFrame) theWizard.getParentDialog().getParent();
         JList hostJList = theParentFrame.getHostJList();
         DefaultListModel theListModel = (DefaultListModel) hostJList.getModel();
 

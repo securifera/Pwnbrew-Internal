@@ -40,8 +40,8 @@ package pwnbrew.functions;
 import java.awt.Component;
 import java.awt.Image;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JList;
@@ -55,6 +55,8 @@ import pwnbrew.misc.SocketUtilities;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.AutoSleep;
+import pwnbrew.network.control.messages.CheckInTimeMsg;
 import pwnbrew.network.control.messages.ClearSessions;
 import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.network.control.messages.GetCheckInSchedule;
@@ -62,6 +64,7 @@ import pwnbrew.network.control.messages.GetCount;
 import pwnbrew.network.control.messages.GetSessions;
 import pwnbrew.sessions.SessionJFrameListener;
 import pwnbrew.sessions.SessionsJFrame;
+import pwnbrew.xml.maltego.Field;
 import pwnbrew.xml.maltego.MaltegoMessage;
 import pwnbrew.xml.maltego.custom.Host;
 
@@ -264,12 +267,30 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
     //===============================================================
     /**
      * 
+     * @param passedHostId
      * @param selected 
+     * @param passedOperation 
      */
     @Override
-    public void setAutoSleepFlag(boolean selected) {
-        //Send message to set the auto sleep flag
-        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
+    public void setAutoSleepFlag( int passedHostId, boolean selected, byte passedOperation ) {
+        
+        if( passedOperation == AutoSleep.SET_VALUE ){
+            
+            //Send message to set the auto sleep flag
+            ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
+            if( aCMM != null ){
+                //Get flag and send a msg
+                AutoSleep anASMsg = new AutoSleep( Constants.SERVER_ID, passedHostId, passedOperation, selected );
+                aCMM.send(anASMsg);                
+            }
+            
+        } else if(passedOperation == AutoSleep.GET_VALUE){
+            
+            //If it is the selected host
+            if(theSessionsJFrame.isSelectedHost(passedHostId))
+                theSessionsJFrame.setAutoSleepCheckbox(selected);
+            
+        }
     }
 
     //===============================================================
@@ -286,16 +307,96 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
         aCMM.send(aMsg);
         
         theSessionsJFrame.repaint();
+
     }
 
+    //===============================================================
+    /**
+     * 
+     * @param aDate
+     * @param newDateStr 
+     */
     @Override
     public void replaceDate(String aDate, String newDateStr) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+         
+        //Get currently selected host
+        JList hostJList = theSessionsJFrame.getHostJList();
+        Object anObj = hostJList.getSelectedValue();
+        if( anObj != null && anObj instanceof Host ){
+            Host aHost = (Host)anObj;
+            Field hostIdField = aHost.getField( Constants.HOST_ID );
+            String hostIdStr = hostIdField.getXmlObjectContent();
+            
+            //Check if they are equal
+            int hostId = Integer.parseInt(hostIdStr);
+            
+            //Send message to server to clear the session list
+            ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();      
+            if( aCMM != null ){
+                try {
+                    CheckInTimeMsg aMsg = new CheckInTimeMsg( Constants.SERVER_ID, hostId, newDateStr, CheckInTimeMsg.REPLACE_TIME );
+                    aMsg.addPrevCheckIn(aDate);
+                    aCMM.send(aMsg);
+                } catch (UnsupportedEncodingException ex) {
+                }
+                
+                //refresh
+                refreshSelection();
+            }
+        }
+    }
+    
+     //===============================================================
+    /**
+     * 
+     */
+    @Override
+    public void refreshSelection() {
+        JList hostJList = theSessionsJFrame.getHostJList();
+        int selIndex = hostJList.getSelectedIndex();
+        hostJList.clearSelection();
+        hostJList.setSelectedIndex(selIndex);
     }
 
+    //===============================================================
+    /**
+     * 
+     */
     @Override
     public void removeCheckInDates() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        //Get currently selected host
+        JList hostJList = theSessionsJFrame.getHostJList();
+        Object anObj = hostJList.getSelectedValue();
+        if( anObj != null && anObj instanceof Host ){
+            Host aHost = (Host)anObj;
+            Field hostIdField = aHost.getField( Constants.HOST_ID );
+            String hostIdStr = hostIdField.getXmlObjectContent();
+            
+            //Check if they are equal
+            int hostId = Integer.parseInt(hostIdStr);
+            
+            //Get selected check-in time list
+            JList checkInTimeList = theSessionsJFrame.getCheckInJList();
+            List<String> theDatesToRemove = new ArrayList<>(checkInTimeList.getSelectedValuesList());
+         
+            //Remote the dates
+             //Send message to server to clear the session list
+            ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();      
+            if( aCMM != null ){
+                try {
+                    for( String aStr : theDatesToRemove ){
+                        CheckInTimeMsg aMsg = new CheckInTimeMsg( Constants.SERVER_ID, hostId, aStr, CheckInTimeMsg.REMOVE_TIME );
+                        aCMM.send(aMsg);
+                    }
+                } catch (UnsupportedEncodingException ex) {
+                }
+                
+                //refresh
+                refreshSelection();
+            }
+                     
+        }   
     }
     
     //===============================================================
@@ -378,15 +479,5 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
         if( theSessionsJFrame != null )
             theSessionsJFrame.addSession( hostId, checkInDatStr, checkOutDatStr);  
     }
-
-    //===============================================================
-    /**
-     * 
-     */
-    @Override
-    public void showScheduler() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
 
 }

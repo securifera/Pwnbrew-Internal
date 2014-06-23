@@ -42,14 +42,14 @@ import java.awt.CardLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.Icon;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 public class Wizard extends JPanel implements PropertyChangeListener {
 
     protected WizardController theController = null;
     protected WizardModel theWizardModel = null;
-    protected final JFrame theParent;
+    protected final JDialog theParent;
 
     protected CardLayout theCardLayout = new CardLayout();
 
@@ -66,7 +66,7 @@ public class Wizard extends JPanel implements PropertyChangeListener {
      * @param parentFrame 
      * @param passedController 
      */
-    public Wizard( JFrame parentFrame, WizardController passedController){
+    public Wizard( JDialog parentFrame, WizardController passedController){
 
         theWizardModel = new WizardModel();
         theController = passedController;
@@ -90,7 +90,7 @@ public class Wizard extends JPanel implements PropertyChangeListener {
      * Returns the parent frame.
      * @return 
     */
-    public JFrame getParentFrame() {
+    public JDialog getParentDialog() {
         return theParent;
     }
 

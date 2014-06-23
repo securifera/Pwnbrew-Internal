@@ -43,12 +43,12 @@ package pwnbrew.sessions;
  */
 public interface SessionJFrameListener extends HostCheckInListListener {
 
-    public void setAutoSleepFlag(boolean selected);
+    public void setAutoSleepFlag( int passedHostId, boolean selected, byte passedOperation );
 
     public void clearSessionList( String hostIdStr );
 
     public void hostSelected(String hostIdStr);
-
-    public void showScheduler();
+    
+    public void refreshSelection();
 
 }

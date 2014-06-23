@@ -39,7 +39,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.sessions.wizard;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import pwnbrew.generic.gui.wizard.Wizard;
 import pwnbrew.generic.gui.wizard.WizardController;
 
@@ -56,7 +56,7 @@ public class HostCheckInWizard extends Wizard {
      * @param parentFrame
      * @param passedController
     */
-    public HostCheckInWizard( JFrame parentFrame, WizardController passedController) {
+    public HostCheckInWizard( JDialog parentFrame, WizardController passedController) {
 
         super(parentFrame, passedController);       
         initialize();
@@ -79,8 +79,8 @@ public class HostCheckInWizard extends Wizard {
      *
     */
     @Override
-    public void close(int code) {
-        theController.close();  
+    public void close( int code ) {
+        theController.close( code );  
     }
 
     //===============================================================

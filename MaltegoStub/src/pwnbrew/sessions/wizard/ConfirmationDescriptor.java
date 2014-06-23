@@ -72,7 +72,7 @@ public class ConfirmationDescriptor extends WizardPanelDescriptor {
     @Override
     public String getBackPanelDescriptor() {
 
-        String prevDescriptor =  HostSelectionDescriptor.IDENTIFIER;
+        String prevDescriptor =  HostSchedulerDescriptor.IDENTIFIER;
         return prevDescriptor;
     }  
     

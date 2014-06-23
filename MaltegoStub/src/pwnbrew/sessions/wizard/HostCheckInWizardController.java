@@ -37,9 +37,21 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.sessions.wizard;
 
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JList;
+import pwnbrew.generic.gui.wizard.Wizard;
 import pwnbrew.generic.gui.wizard.WizardController;
 import pwnbrew.generic.gui.wizard.WizardModel;
 import pwnbrew.generic.gui.wizard.WizardPanelDescriptor;
+import pwnbrew.misc.Constants;
+import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.CheckInTimeMsg;
+import pwnbrew.sessions.SessionsJFrame;
+import pwnbrew.xml.maltego.Field;
+import pwnbrew.xml.maltego.custom.Host;
 
 public class HostCheckInWizardController extends WizardController {
 
@@ -82,30 +94,9 @@ public class HostCheckInWizardController extends WizardController {
      */
     @Override
     protected void backButtonPressed() {
-        
-//        WizardModel model = theWizard.getModel();        
-//        WizardPanelDescriptor descriptor = model.getCurrentPanelDescriptor();
-        
-//        if(descriptor.getPanelDescriptorIdentifier().equals(CSParameterDescriptor.IDENTIFIER)){   
-//            
-//            StringBuilder messageBldr = new StringBuilder();
-//            messageBldr.append("If you go back, all parameters in this window will be reset.\n")
-//                    .append("Are you sure you want to go back?");
-//            
-//            int usersChoice = JOptionPane.showConfirmDialog( theWizard.getParentFrame(), messageBldr.toString(), //The message
-//                "Clear entered data?",  //The title
-//                JOptionPane.YES_NO_OPTION ); //Dialog option
-//            
-//            //Proceed on yes
-//            if( usersChoice == JOptionPane.YES_OPTION){
-//                super.backButtonPressed();
-//            }
-//            
-//        } else {
             
-            //Use the usual function
-            super.backButtonPressed();
-//        } 
+        //Use the usual function
+        super.backButtonPressed();
         
     }
 
@@ -127,13 +118,54 @@ public class HostCheckInWizardController extends WizardController {
     //===============================================================
     /**
      *  Perform any cleanup duties before closing the wizard.
+     * @param code
      */
     @Override
-    public void close() {
+    public void close( int code ) {
         
-//        WizardModel model = theWizard.getModel();
-//        HostSelectionPanel theCSPpanel = (HostSelectionPanel) model.getPanel(HostSelectionDescriptor.IDENTIFIER);
-//        DetectionManager.getDetectionManager().removeDetectListener((HostListener)theCSPpanel);
+        if( code == Wizard.FINISH_RETURN_CODE ){
+            
+            //Get the wizard
+            WizardModel theWizardModel = theWizard.getModel();
+            HostSelectionPanel theHSP = (HostSelectionPanel) theWizardModel.getPanel( HostSelectionDescriptor.IDENTIFIER );
+
+            //Send message to server to clear the session list
+            ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();      
+            if( aCMM != null ){
+            
+                //Get the check-in list
+                HostSchedulerPanel theHschP = (HostSchedulerPanel) theWizardModel.getPanel( HostSchedulerDescriptor.IDENTIFIER );
+                List<String> theList = theHschP.getCheckInDates();
+                //Get the host list
+                List<Host> theHostList = theHSP.getSelectedHosts();
+                for( Host aHost : theHostList ){
+                    
+                    Field hostIdField = aHost.getField( Constants.HOST_ID );
+                    if( hostIdField != null ){
+                        
+                        //Get the id
+                        String hostIdStr = hostIdField.getXmlObjectContent();
+                        int hostId = Integer.parseInt(hostIdStr);
+
+                        //Send a message for each date that is added
+                        for( String aDate : theList ){
+                            try {
+                                CheckInTimeMsg aMsg = new CheckInTimeMsg( Constants.SERVER_ID, hostId, aDate, CheckInTimeMsg.ADD_TIME );
+                                aCMM.send(aMsg);
+                            } catch (UnsupportedEncodingException ex) {
+                            }
+                        }
+                    }
+
+                }
+                
+                //refresh the selection
+                SessionsJFrame theJFrame = (SessionsJFrame) theWizard.getParentDialog().getParent();
+                theJFrame.getListener().refreshSelection();
+            }
+        }
+        
+        theWizard.getParentDialog().dispose();
 
     }    
   

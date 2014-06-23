@@ -63,6 +63,7 @@ public class HostCheckInList extends MutableJList implements ActionListener {
     //===============================================================
     /**
      *  Constructor
+     * @param passedListener
     */
     public HostCheckInList(HostCheckInListListener passedListener) {
         

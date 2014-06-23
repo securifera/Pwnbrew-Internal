@@ -39,6 +39,9 @@ package pwnbrew.sessions;
 
 import java.awt.Component;
 import java.awt.Image;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import javax.swing.DefaultListCellRenderer;
@@ -53,6 +56,7 @@ import javax.swing.table.DefaultTableModel;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Iconable;
 import pwnbrew.misc.Utilities;
+import pwnbrew.network.control.messages.AutoSleep;
 import pwnbrew.sessions.wizard.HostCheckInWizard;
 import pwnbrew.sessions.wizard.HostCheckInWizardController;
 import pwnbrew.xml.maltego.Field;
@@ -285,15 +289,30 @@ public class SessionsJFrame extends javax.swing.JFrame {
 
     }//GEN-LAST:event_clearButtonActionPerformed
 
+    //========================================================================
+    /**
+     * 
+     * @param evt 
+     */
     private void autoSleepCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_autoSleepCheckboxActionPerformed
-        theListener.setAutoSleepFlag( autoSleepCheckbox.isSelected() );
+        //Clear the times
+        Object anObj = hostJList.getSelectedValue();
+        if( anObj != null && anObj instanceof Host ){
+            Host aHost = (Host)anObj;
+            Field hostIdField = aHost.getField( Constants.HOST_ID );
+            String hostIdStr = hostIdField.getXmlObjectContent();
+            int hostId = Integer.parseInt(hostIdStr);
+        
+            theListener.setAutoSleepFlag( hostId, autoSleepCheckbox.isSelected(), AutoSleep.SET_VALUE );
+        }
     }//GEN-LAST:event_autoSleepCheckboxActionPerformed
 
     private void scheduleButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_scheduleButtonActionPerformed
         
         //Create the wizard
-        HostCheckInWizard remoteWizard = new HostCheckInWizard( this, new HostCheckInWizardController());
         JDialog aDialog = new JDialog( this, true);
+        HostCheckInWizard remoteWizard = new HostCheckInWizard( aDialog, new HostCheckInWizardController());
+        
         aDialog.add(remoteWizard);
         aDialog.pack();
         aDialog.setLocationRelativeTo(null);
@@ -397,6 +416,16 @@ public class SessionsJFrame extends javax.swing.JFrame {
                 }
             }
         });
+        
+        KeyListener keyListener = new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if(e.getKeyChar() == KeyEvent.VK_DELETE || Character.toUpperCase((char)e.getKeyChar()) == 'D')
+                    theListener.removeCheckInDates();
+            
+            }
+        }; // end MouseAdapter class
+        checkInTimeList.addKeyListener(keyListener);
                
     }
 
@@ -409,7 +438,31 @@ public class SessionsJFrame extends javax.swing.JFrame {
         return hostJList;
     }
     
-    private boolean isSelectedHost( int hostId ){
+    //=================================================================
+    /**
+     * Get the listener
+     * @return 
+     */
+    public SessionJFrameListener getListener() {
+        return theListener;
+    }
+    
+    //=================================================================
+    /**
+     * Get the Check in list
+     * @return 
+     */
+    public JList getCheckInJList() {
+        return checkInTimeList;
+    }
+    
+    //=================================================================
+    /**
+     * 
+     * @param hostId
+     * @return 
+     */
+    public boolean isSelectedHost( int hostId ){
         
         boolean retVal = false;
         Object anObj = hostJList.getSelectedValue();
@@ -451,5 +504,14 @@ public class SessionsJFrame extends javax.swing.JFrame {
             HostCheckInListModel theModel = (HostCheckInListModel) checkInTimeList.getModel();        
             theModel.addElement( checkInDatStr );
         }
+    }
+
+    //=================================================================
+    /**
+     * 
+     * @param selected 
+     */
+    public void setAutoSleepCheckbox(boolean selected) {
+        autoSleepCheckbox.setSelected(selected);
     }
 }

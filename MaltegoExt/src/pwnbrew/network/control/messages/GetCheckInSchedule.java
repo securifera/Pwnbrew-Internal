@@ -118,16 +118,23 @@ public final class GetCheckInSchedule extends ControlMessage{
                 MainGuiController theGuiController = (MainGuiController)theTaskManager;
                 HostController theHostController = theGuiController.getHostController( hostIdStr );
                 if( theHostController != null ){
+                    
+                    int srcId = getSrcHostId();
                     Host theHost = theHostController.getObject();
                     List<String> theCheckInList = theHost.getCheckInList();
                     for( String aString : theCheckInList ){
                         try {
-                            CheckInTimeMsg aMsg = new CheckInTimeMsg( getSrcHostId(), hostId, aString);
+                            CheckInTimeMsg aMsg = new CheckInTimeMsg( srcId, hostId, aString);
                             aCMManager.send(aMsg);
                         } catch (UnsupportedEncodingException ex) {
                             Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
                         }
                     }
+                    
+                    //Get flag and send a msg
+                    boolean asfFlag = theHostController.getAutoSleepFlag();
+                    AutoSleep anASMsg = new AutoSleep( srcId, hostId, AutoSleep.GET_VALUE, asfFlag );
+                    aCMManager.send(anASMsg);
                 }
 
             }  

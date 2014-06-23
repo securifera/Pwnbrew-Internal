@@ -41,7 +41,6 @@ package pwnbrew.sessions.wizard;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JTree;

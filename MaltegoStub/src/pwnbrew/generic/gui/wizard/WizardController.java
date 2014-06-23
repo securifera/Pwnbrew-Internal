@@ -177,6 +177,6 @@ abstract public class WizardController implements ActionListener {
     //=======================================================================
     /*        
     */
-    public void close() {}
+    public void close( int code ) {}
 
 }/* END CLASS WizardController */
