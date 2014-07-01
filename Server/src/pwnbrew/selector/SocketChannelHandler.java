@@ -48,18 +48,20 @@ package pwnbrew.selector;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 import java.util.logging.Level;
 import javax.net.ssl.SSLException;
+import pwnbrew.host.Host;
+import pwnbrew.host.HostFactory;
 import pwnbrew.logging.Log;
+import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
@@ -84,12 +86,7 @@ public class SocketChannelHandler implements Selectable {
     private PortRouter thePortRouter = null;
     private int rootHostId = -1;
     private int state = 0;
-    
-    //Add a hashset
-    private final HashSet<Integer> internalHostIds = new HashSet<>();
-       
-    //Debug message
-    private String hostAlias = null;
+         
     private volatile boolean wrappingFlag = true;
     private volatile boolean staging = false;
     
@@ -359,57 +356,89 @@ public class SocketChannelHandler implements Selectable {
      * @param passedId
      * @return 
      */
-    public boolean registerId( int passedId ){
-        
-        if( rootHostId == -1 ){
-                            
-            SocketChannelHandler aHandler = thePortRouter.getSocketChannelHandler(passedId);
-            if( aHandler == null ){
+    public boolean registerId( int passedId ){        
+             
+        //Get the comm manager to register children ids
+//        CommManager theManager = thePortRouter.getCommManager();
+//        TaskManager theTaskManager = theManager.getTaskManager();
+//        if( theTaskManager instanceof MainGuiController ){
+            //Get the host controllers 
+//            MainGuiController theGuiController = (MainGuiController)theTaskManager;  
+            if( rootHostId == -1 ){
 
-                //Register the handler
-                rootHostId = passedId;
-                thePortRouter.registerHandler(rootHostId, this);
+                try {
 
-            } else if( aHandler == this ){
+                    Host localHost = HostFactory.getLocalHost();
+                    String localhostId = localHost.getId();
+//                    HostController aController = theGuiController.getHostController( localhostId );
+                    
+                    SocketChannelHandler aHandler = thePortRouter.getSocketChannelHandler(passedId);
+                    if( aHandler == null ){
 
-                //Set the clientId
-                rootHostId = passedId;
+                        //Add the id
+//                        localHost.addConnectedHostId( Integer.toString( passedId )); 
+//                        aController.saveToDisk();
+
+                        //Register the handler
+                        rootHostId = passedId;
+                        thePortRouter.registerHandler(rootHostId, Integer.parseInt(localhostId), this);
+
+                    } else if( aHandler == this ){
+
+                        //Set the clientId
+                        rootHostId = passedId;
+
+                    } else {
+
+                        if( theSCW.getSocketChannel().socket().getInetAddress().equals( 
+                                aHandler.getSocketChannelWrapper().getSocketChannel().socket().getInetAddress())){
+
+                            //Add the id
+//                            localHost.addConnectedHostId( Integer.toString( passedId )); 
+//                            aController.saveToDisk();
+
+                            //Register the new one
+                            rootHostId = passedId;
+                            thePortRouter.registerHandler(rootHostId, Integer.parseInt(localhostId), this);
+
+                            //Shutdown the previous one
+                            aHandler.shutdown();
+
+                        } else {    
+
+                            //Send message to tell client to reset their id
+                            ResetId resetIdMsg = new ResetId(passedId);
+                            ByteBuffer aByteBuffer;
+
+                            int msgLen = resetIdMsg.getLength();
+                            aByteBuffer = ByteBuffer.allocate( msgLen );
+                            resetIdMsg.append(aByteBuffer);
+
+                            //Queue to be sent
+                            queueBytes(Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()));
+                            return false;
+                        }
+                    }
+
+                } catch(LoggableException | SocketException ex){
+                    Log.log(Level.INFO, NAME_Class, "send()", ex.getMessage(), ex );
+                }
 
             } else {
-               
-                if( theSCW.getSocketChannel().socket().getInetAddress().equals( 
-                        aHandler.getSocketChannelWrapper().getSocketChannel().socket().getInetAddress())){
 
-                    //Register the new one
-                    rootHostId = passedId;
-                    thePortRouter.registerHandler(rootHostId, this);
-                    
-                    //Shutdown the previous one
-                    aHandler.shutdown();
-                   
-                } else {    
-                
-                    //Send message to tell client to reset their id
-                    ResetId resetIdMsg = new ResetId(passedId);
-                    ByteBuffer aByteBuffer;
+//                HostController aController = theGuiController.getHostController( Integer.toString(rootHostId));
+//                if( aController != null ){
+//                    Host aHost = aController.getHost();
+//                    aHost.addConnectedHostId( Integer.toString( passedId )); 
+//                    aController.saveToDisk();
+//                }
 
-                    int msgLen = resetIdMsg.getLength();
-                    aByteBuffer = ByteBuffer.allocate( msgLen );
-                    resetIdMsg.append(aByteBuffer);
+                //Register the relay
+                thePortRouter.registerHandler(passedId, rootHostId, this);            
 
-                    //Queue to be sent
-                    queueBytes(Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()));
-                    return false;
-                }
             }
-            
-        } else {
-            
-            //Register the relay
-            internalHostIds.add( passedId );
-            thePortRouter.registerHandler(passedId, this);
-            
-        }
+//        }
+        
         
         return true;
     }
@@ -558,10 +587,8 @@ public class SocketChannelHandler implements Selectable {
     * @return
     */
     public synchronized int getState(){
-
         //Get the current state
-        return Integer.valueOf(state);
-      
+        return state;      
     }
 
     //===============================================================
@@ -613,26 +640,6 @@ public class SocketChannelHandler implements Selectable {
             ex = null;
         }
         
-    }
-
-    //===============================================================
-    /**
-     * Sets the alias for the client
-     *
-     * @param passedAlias
-    */
-    public void setAlias(String passedAlias) {
-       hostAlias = passedAlias;
-    }
-   
-    //===============================================================
-    /**
-     * Returns the alias for the client
-     *
-     * @return 
-    */
-    public String getAlias() {
-       return hostAlias;
     }
 
     //===============================================================
@@ -745,15 +752,5 @@ public class SocketChannelHandler implements Selectable {
     public synchronized boolean isStaged() {
         return staging;
     }
-
-    //===================================================================
-    /**
-     * 
-     * @return 
-     */
-    public List<Integer> getInternalHosts() {    
-        return Arrays.asList( internalHostIds.toArray( new Integer[internalHostIds.size()]));
-    }
-    
 
 }/* END CLASS AccessHandler */

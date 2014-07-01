@@ -98,7 +98,7 @@ public class ClientPortRouter extends PortRouter {
      * @throws IOException
     */
     public ClientPortRouter( CommManager passedCommManager, boolean passedBool ) throws IOException {
-        super(passedCommManager, passedBool);
+        super(passedCommManager, passedBool, Constants.Executor );
         
         theConnectionLock = new LockingThread( Constants.Executor );
         theConnectionLock.start();

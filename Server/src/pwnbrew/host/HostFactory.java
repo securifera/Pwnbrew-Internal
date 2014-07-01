@@ -71,22 +71,6 @@ public class HostFactory {
 
     //=======================================================
     /**
-     *  Returns a Host constructed from a Hello message.
-     * 
-     * @param passedId
-     * @param passedHostname
-     * @return
-     * @throws IOException 
-     */
-    public static Host getHost( int passedId, String passedHostname ) throws IOException {
-
-        //Create a host
-        Host aHost = new Host(passedId, passedHostname);          
-        return aHost;
-    }
-
-    //=======================================================
-    /**
      *  Return a Host representing the local host.
      * 
      * @return 
@@ -100,7 +84,10 @@ public class HostFactory {
             //Get the host id
             int clientId = Integer.parseInt( ServerConfig.getServerConfig().getHostId() );
              
-            theLocalHost = new Host(clientId, LOCALHOST);
+            theLocalHost = new Host(clientId);
+            
+            //Set the hostname
+            theLocalHost.setName(LOCALHOST);
             
             //Add the OS Name
             theLocalHost.setOsName( Utilities.getOsName() );   
@@ -154,6 +141,15 @@ public class HostFactory {
        
         return theLocalHost;
     
+    }
+
+    //=======================================================
+    /**
+     * 
+     * @param aHost 
+     */
+    public static void setLocalHost(Host aHost) {
+        theLocalHost = aHost;
     }
  
 }

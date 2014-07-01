@@ -126,7 +126,6 @@ final public class SSLUtilities {
     //===============================================================
     /**
      * Loads the keystore from the configuration in the conf file
-     * @param theConf
      * @return 
      * @throws pwnbrew.log.LoggableException 
     */

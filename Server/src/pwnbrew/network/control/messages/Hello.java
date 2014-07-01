@@ -212,7 +212,8 @@ public final class Hello extends ControlMessage {
                     aSCH.setWrapping( theClientId, false);
 
                     //Create a host
-                    Host aHost = HostFactory.getHost( theClientId, getHostname() );
+                    Host aHost = new Host(theClientId);   
+                    aHost.setName(clientHostname);                    
 
                     //Get the list
                     List<String> nicInfoList = getNicInfoList();

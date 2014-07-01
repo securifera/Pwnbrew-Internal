@@ -57,10 +57,11 @@ import pwnbrew.tasks.TaskManager;
  *
  *  
  */
-public abstract class CommManager /*implements CommProvider*/ {
+public abstract class CommManager {
 
     //The map that relates the port to the port router
     private final Map<Integer, PortRouter> thePortRouterMap = new HashMap<>();
+    private final Map<Integer, Integer> theClientParentMap = new HashMap<>();
     
     abstract public void socketClosed( SocketChannelHandler thePortRouter );
 
@@ -91,9 +92,7 @@ public abstract class CommManager /*implements CommProvider*/ {
                 anIter.next().shutdown();
             }
         }
-    }
-    
-    
+    }   
 
    //===============================================================
     /**
@@ -121,6 +120,30 @@ public abstract class CommManager /*implements CommProvider*/ {
      * @return 
      */
     abstract public ProgressListener getProgressListener();
+
+    //===========================================================================
+    /**
+     * 
+     * @param passedClientId
+     * @param passedParentId 
+     */
+    public void setClientParent(int passedClientId, int passedParentId) {        
+        synchronized( theClientParentMap ){
+            theClientParentMap.put(passedClientId, passedParentId);
+        }
+    }
+    
+     //===========================================================================
+    /**
+     * 
+     * @param passedClientId 
+     * @return  
+     */
+    public int getClientParent(int passedClientId) {        
+        synchronized( theClientParentMap ){
+            return theClientParentMap.get(passedClientId);
+        }
+    }
 
 
 }/*END CLASS CommManager */

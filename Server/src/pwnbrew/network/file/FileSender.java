@@ -176,7 +176,7 @@ public class FileSender extends ManagedRunnable {
             if( fileToBeSent.length() == 0 ){
 
                 FileData fileDataMsg = new FileData(fileId, new byte[0]);
-                fileDataMsg.setClientId(SocketUtilities.byteArrayToInt(clientIdArr));
+                fileDataMsg.setSrcHostId(SocketUtilities.byteArrayToInt(clientIdArr));
                 fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) );           
 
                 //Send the message
@@ -226,7 +226,7 @@ public class FileSender extends ManagedRunnable {
 
                         byte[] fileBytes = Arrays.copyOf(fileChannelBB.array(), fileChannelBB.limit());
                         FileData fileDataMsg = new FileData(fileId, fileBytes);
-                        fileDataMsg.setClientId(SocketUtilities.byteArrayToInt(clientIdArr));
+                        fileDataMsg.setSrcHostId(SocketUtilities.byteArrayToInt(clientIdArr));
                         fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) ); 
                         thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
                     

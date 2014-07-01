@@ -61,13 +61,13 @@ import pwnbrew.xml.maltego.custom.IpV4Address;
  */
 public class ToIP extends Function implements CountSeeker {
     
-    private static final String NAME_Class = MaltegoStub.class.getSimpleName();
+    private static final String NAME_Class = ToIP.class.getSimpleName();
     
     private volatile boolean notified = false;
     private volatile int theIpCount = 0;   
     
     //Create the return msg
-    private MaltegoMessage theReturnMsg = new MaltegoMessage();
+    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
   
     //==================================================================
     /**
@@ -146,8 +146,7 @@ public class ToIP extends Function implements CountSeeker {
             if( connected ){
              
                 //Get the client count
-                int hostId = Integer.parseInt( hostIdStr);
-                ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.NIC_COUNT,  hostId);
+                ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.NIC_COUNT,  hostIdStr);
                 aCMManager.send(aMsg);
                 
                 //Wait for the response
@@ -157,7 +156,7 @@ public class ToIP extends Function implements CountSeeker {
                 if( theIpCount > 0 ){
                 
                     //Get each client msg                
-                    aMsg = new GetIPs( Constants.SERVER_ID, hostId );
+                    aMsg = new GetIPs( Constants.SERVER_ID, hostIdStr );
                     aCMManager.send(aMsg);
                 
                     //Wait for the response
@@ -182,7 +181,7 @@ public class ToIP extends Function implements CountSeeker {
         return retStr;
     }
     
-         // ==========================================================================
+    // ==========================================================================
     /**
     * Causes the calling {@link Thread} to <tt>wait()</tt> until notified by
     * another.

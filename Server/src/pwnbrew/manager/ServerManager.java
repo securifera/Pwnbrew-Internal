@@ -189,18 +189,18 @@ public class ServerManager extends CommManager {
             aSPR.removeHandler(clientId);
             HostController theController = theServer.getGuiController().getHostController(clientIdStr);
 
-            final List<HostController> theHostList = new ArrayList<>();
-            theHostList.add(theController);
-            
-            //Add any pivoting hosts
-            List<Integer> theInternalHosts = theHandler.getInternalHosts();
-            for( Integer anId : theInternalHosts ){
-                String idStr = Integer.toString( anId );
-                HostController aController = theServer.getGuiController().getHostController(idStr);
-                theHostList.add(aController);
-            }         
-            
             if( theController != null ){
+                
+                final List<HostController> theHostList = new ArrayList<>();
+                theHostList.add(theController);
+
+                //Add any pivoting hosts
+                List<String> theInternalHosts = theController.getHost().getConnectedHostIdList();
+    //            List<Integer> theInternalHosts = theHandler.getInternalHosts();
+                for( String idStr : theInternalHosts ){
+                    HostController aController = theServer.getGuiController().getHostController(idStr);
+                    theHostList.add(aController);
+                }         
 
                 SwingUtilities.invokeLater( new Runnable() {
 

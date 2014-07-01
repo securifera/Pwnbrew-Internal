@@ -485,7 +485,6 @@ final public class SSLUtilities {
      * @param issueeDN
      * @param sueeDN
      * @param issuerDN
-     * @param suerDN
      * @param days 
      * @throws pwnbrew.logging.LoggableException 
      */

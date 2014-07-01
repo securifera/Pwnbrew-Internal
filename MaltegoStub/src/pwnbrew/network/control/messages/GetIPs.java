@@ -55,11 +55,11 @@ public class GetIPs extends ControlMessage{ // NO_UCD (use default)
      * @param dstHostId
      * @param hostId
     */
-    public GetIPs( int dstHostId, int hostId ) {
+    public GetIPs( int dstHostId, String hostId ) {
         super( dstHostId );
         
         //Add file type
-        byte[] tempBytes = SocketUtilities.intToByteArray(hostId);
+        byte[] tempBytes = SocketUtilities.intToByteArray( Integer.parseInt(hostId) );
         ControlOption aTlv = new ControlOption( OPTION_HOST_ID, tempBytes);
         addOption(aTlv);
     }

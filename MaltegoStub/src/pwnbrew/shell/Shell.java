@@ -290,6 +290,12 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
                 DebugPrinter.printMessage( NAME_Class, "handleBytesRead", ex.getMessage(), ex);
             }
         }
+            
+        //Get runner pane
+        ShellJTextPane thePane = theListener.getShellTextPane(); 
+        String aStr = new String( buffer );                    
+        if( !aStr.isEmpty() )
+            thePane.handleStreamBytes(theStreamId, aStr);
     }
 
     // ==========================================================================
@@ -440,14 +446,8 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
                     
                 //Set the flag
                 setPromptFlag(false);
-
-                //Add the command terminator
-                String inputTerm = getInputTerminator();
-                if( !inputTerm.isEmpty() ){
-                    theStr = theStr.concat( inputTerm );
-                }
                 
-                 //Log it
+                //Log it
                 byte[] outStream = theStr.getBytes(  getEncoding() );
                 if( logging && theFileOutputStream != null ){            
                     try {
@@ -458,28 +458,15 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
                     }
                 }
 
-//                if( theListener.isLocalHost() ){
-//
-//                    //Send it locally
-//                    if( theOsStream != null ){
-//                        theOsStream.write(outStream);
-//                        theOsStream.flush(); 
-//                    }
-//
-//                } else {
+                int clientId = theListener.getHostId();
+                StdInMessage aMsg = new StdInMessage( ByteBuffer.wrap(theStr.getBytes()), clientId );  
 
-//                    int dstHostId = Integer.parseInt( theListener.getHost().getId());
-                    int clientId = theListener.getHostId();
-                    StdInMessage aMsg = new StdInMessage( ByteBuffer.wrap(theStr.getBytes()), clientId );  
-//                    aMsg.setClientId( dstHostId );
+                ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
+                if( aSMM == null){
+                    aSMM = ShellMessageManager.initialize( theListener.getCommManager() );
+                }
+                aSMM.send(aMsg);
 
-                    ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
-                    if( aSMM == null){
-                        aSMM = ShellMessageManager.initialize( theListener.getCommManager() );
-                    }
-                    aSMM.send(aMsg);
-
-//                }
             }
         } catch (IOException ex) {
             DebugPrinter.printMessage( NAME_Class, "sendInput", ex.getMessage(), ex);  
@@ -503,45 +490,16 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         } catch (IOException ex) {
             ex = null;
         }
-        
-//        if( theListener.isLocalHost() ){
-//            
-//            //Kill the process
-//            if( theProcess != null ){
-//                theProcess.destroy();
-//            }
-//
-//            if( theStdOutRecorder != null ){
-////                theStdOutRecorder.shutdown();
-//            }
-//
-//            if( theStdErrRecorder != null ){
-//                theStdErrRecorder.shutdown();
-//            }
-//
-//            try {
-//
-//                if( theOsStream != null ){
-//                    //Close the stdin
-//                    theOsStream.close();
-//                }
-//
-//            } catch (IOException ex) {
-//                ex = null;
-//            }
-//            
-//        } else {
             
-            //Get the control message manager
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
-                 //Create the message
-                int clientId = theListener.getHostId();
-                KillShell aShellMsg = new KillShell(clientId);
-                aCMManager.send(aShellMsg );
-            }
+        //Get the control message manager
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager != null ){
+             //Create the message
+            int clientId = theListener.getHostId();
+            KillShell aShellMsg = new KillShell(clientId);
+            aCMManager.send(aShellMsg );
+        }
 
-//        }
     }
     
     // ==========================================================================
@@ -553,10 +511,9 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     private void waitForStreamRecordersToFinish() {
 
         //Until both StreamRecorders have finished...
-        while( stdoutRecorderFinished == false || stderrRecorderFinished == false ) {
+        while( stdoutRecorderFinished == false || stderrRecorderFinished == false )
             waitToBeNotified();            
-        }
-
+        
     }/* END waitForStreamRecordersToFinish() */
 
     // ==========================================================================

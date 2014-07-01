@@ -40,6 +40,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.utilities;
 
+import pwnbrew.xmlBase.JarItemException;
 import com.sun.jna.Pointer;
 import java.awt.Component;
 import java.awt.Image;
@@ -61,6 +62,7 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.crypto.BadPaddingException;
@@ -74,6 +76,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.tree.DefaultMutableTreeNode;
+import pwnbrew.exception.NoSuchValidationException;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostFactory;
 import pwnbrew.library.LibraryItemController;
@@ -92,6 +95,7 @@ import pwnbrew.misc.IdGenerator;
 import pwnbrew.misc.RuntimeRunnable;
 import pwnbrew.network.control.messages.Payload;
 import pwnbrew.network.control.messages.SendStage;
+import pwnbrew.validation.StandardValidation;
 import pwnbrew.xmlBase.JarItem;
 
 
@@ -327,9 +331,11 @@ public class Utilities {
      *  Get version
      * 
      * @param payloadFile
+     * @param jarType
      * @return 
+     * @throws pwnbrew.xmlBase.JarItemException 
      */
-    public static JarItem getJavaItem( File payloadFile ){
+    public static JarItem getJavaItem( File payloadFile, String jarType ) throws JarItemException{
         
         //Remove JAR if that's how we are running
         JarItem aJarItem = null;        
@@ -394,12 +400,24 @@ public class Utilities {
                             Properties localProperties = new Properties();
                             localProperties.load(theZipInputStream);
 
-                            //Set the IP to something else
+                            //Get the version
                             String version = localProperties.getProperty(Constants.PAYLOAD_VERSION_LABEL);
                             if( version != null ){
                                 //Set the jar version
                                 jarVersionString = version;
                             }     
+                            
+                            if( jarType.equals( JarItem.STAGER_TYPE )){
+                                String aStr = localProperties.getProperty(Constants.STAGER_URL);
+                                try {
+                                    boolean isValid = StandardValidation.validate( StandardValidation.KEYWORD_ClientConnect, aStr);
+                                    if( !isValid )
+                                        throw new JarItemException("The JAR item does not contain a valid [IP Address:Port] connection string.");
+                                    
+                                } catch (NoSuchValidationException | LoggableException ex) {
+                                }
+                            }
+                            
                             continue;
                             
                         } 
@@ -447,6 +465,8 @@ public class Utilities {
 
                     aJarItem.setVersion(jarVersionString);
                     aJarItem.setJvmMajorVersion(jvmVersionString);
+                    aJarItem.setFilename( payloadFile.getName() );
+                    aJarItem.setType(jarType);
                     
                 //Close the jar
                 } finally {
@@ -1352,8 +1372,23 @@ public class Utilities {
                     Host aHost;
                     if( dirFile.equals( Directories.getLocalObjectLibraryDirectory() )){
                         
+                        //Get the host file
+                        Host currHost = HostFactory.getLocalHost();
+                        
                         //Get the local host
-                        aHost = HostFactory.getLocalHost();
+                        File theHostFile = new File( dirFile, dirFile.getName());
+                        if( theHostFile.exists() ){
+                            
+                            //Create the host file and remove it from the list
+                            aHost = (Host)XmlBaseFactory.createFromXmlFile( theHostFile);
+                            aHost.updateData(currHost);    
+                            aHost.setConnected(true);
+                            HostFactory.setLocalHost(aHost);
+                            
+                        } else {                            
+                            //Set host
+                            aHost = currHost;
+                        }
                         
                     } else {
                         

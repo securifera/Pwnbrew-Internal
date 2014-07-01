@@ -59,15 +59,23 @@ public final class HostMsg extends ControlMessage{
     private static final byte OPTION_OS = 62;
     private static final byte OPTION_CONNECTED = 63;
     private static final byte OPTION_HOST_ID = 64;
+    private static final byte OPTION_SLEEPABLE = 65;
     
     // ==========================================================================
     /**
      * Constructor
      *
      * @param dstHostId
+     * @param passeHostname
+     * @param passedOS
+     * @param passedArch
+     * @param hostId
+     * @param isConnected
+     * @param isSleepable
+     * @throws java.io.UnsupportedEncodingException
     */
     public HostMsg( int dstHostId, String passeHostname, String passedOS, 
-            String passedArch, int hostId, boolean isConnected ) throws UnsupportedEncodingException {
+            String passedArch, int hostId, boolean isConnected, boolean isSleepable ) throws UnsupportedEncodingException {
         super( dstHostId );
         
           //Add file type
@@ -91,12 +99,21 @@ public final class HostMsg extends ControlMessage{
         addOption(aTlv);
         
          //Add file type
-        byte conByte = 0;
+        byte aByte = 0;
         if( isConnected )
-            conByte = 1;
+            aByte = 1;
         
-        tempBytes = new byte[]{ conByte };
+        tempBytes = new byte[]{ aByte };
         aTlv = new ControlOption( OPTION_CONNECTED, tempBytes);
+        addOption(aTlv);
+        
+        //Sleepable flag
+        aByte = 0;
+        if( isConnected )
+            aByte = 1;
+        
+        tempBytes = new byte[]{ aByte };
+        aTlv = new ControlOption( OPTION_SLEEPABLE, tempBytes);
         addOption(aTlv);
     }
 

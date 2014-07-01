@@ -43,20 +43,31 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import pwnbrew.misc.SocketUtilities;
+import pwnbrew.network.ControlOption;
+
 /**
  *
  *  
  */
 public final class GetHosts extends ControlMessage{ // NO_UCD (use default)
+    
+    private static final byte OPTION_HOST_ID = 124;
 
     // ==========================================================================
     /**
      * Constructor
      *
      * @param dstHostId
+     * @param passedHostId
     */
-    public GetHosts( int dstHostId ) {
+    public GetHosts( int dstHostId, String passedHostId ) {
         super( dstHostId );
+        
+        //Add file type
+        byte[] tempBytes = SocketUtilities.intToByteArray( Integer.parseInt(passedHostId));
+        ControlOption aTlv = new ControlOption( OPTION_HOST_ID, tempBytes);
+        addOption(aTlv);
     }
 
 }/* END CLASS GetHosts */

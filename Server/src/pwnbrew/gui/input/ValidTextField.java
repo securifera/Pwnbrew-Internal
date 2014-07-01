@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- * Ipv4AddressTextField.java
- *
- * Created on June 24, 2013, 11:13:12 PM
- */
-
 package pwnbrew.gui.input;
 
 import pwnbrew.logging.Log;
@@ -176,7 +169,7 @@ public class ValidTextField extends JTextField implements KeyListener {
     @Override //KeyListener
     public void keyPressed( KeyEvent e ) {
         //Do nothing.
-    }/* END keyTyped( KeyEvent ) */
+    }
 
 
     // ==========================================================================
@@ -188,6 +181,6 @@ public class ValidTextField extends JTextField implements KeyListener {
     @Override //KeyListener
     public void keyReleased( KeyEvent e ) {
         evaluateValue();
-    }/* END keyTyped( KeyEvent ) */
+    }
 
-}/* END CLASS Ipv4AddressTextField */
+}

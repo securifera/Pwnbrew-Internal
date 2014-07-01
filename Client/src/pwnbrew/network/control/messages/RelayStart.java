@@ -140,6 +140,7 @@ public final class RelayStart extends ControlMessage{
         if( aCMManager != null ){
             //Send the message
             RelayStatus aMsg = new RelayStatus( retVal );
+            aMsg.setDestHostId( getSrcHostId() );
             aCMManager.send(aMsg);
         }
         

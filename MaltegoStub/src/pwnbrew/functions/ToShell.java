@@ -75,7 +75,7 @@ import pwnbrew.xml.maltego.MaltegoMessage;
  */
 public class ToShell extends Function implements ShellJPanelListener, ShellListener {
     
-    private static final String NAME_Class = MaltegoStub.class.getSimpleName();
+    private static final String NAME_Class = ToShell.class.getSimpleName();
     
     private volatile boolean notified = false;
     private int theHostId = 0;   

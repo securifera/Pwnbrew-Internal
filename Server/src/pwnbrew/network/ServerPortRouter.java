@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
-* ServerPortRouter.java
-*
-* Created on June 3, 2013, 10:46:36 PM
-*/
-
 package pwnbrew.network;
 
 import java.io.IOException;
@@ -98,15 +91,17 @@ public class ServerPortRouter extends PortRouter {
      * given InetAddress.
      *
      * @param passedClientId
+     * @param passedParentId
      */
     @Override
-    public void registerHandler(int passedClientId, SocketChannelHandler theHandler) {
+    public void registerHandler(int passedClientId, int passedParentId, SocketChannelHandler theHandler) {
 
         if( theHandler != null){
 //            DebugPrinter.printMessage(NAME_Class, "Registering " + passedClientId.toString());
             synchronized(hostHandlerMap){
                 hostHandlerMap.put( passedClientId, theHandler);
             }
+            theCommManager.setClientParent(passedClientId, passedParentId);
         }
     }
     

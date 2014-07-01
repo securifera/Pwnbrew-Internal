@@ -103,6 +103,13 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
             DebugPrinter.printMessage( NAME_Class, "listclients", "No pwnbrew server port provided", null);
             return retStr;
         }
+        
+         //Get host id
+        String hostIdStr = objectMap.get( Constants.HOST_ID);
+        if( hostIdStr == null ){
+            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
+            return retStr;
+        }
          
         //Create the connection
         try {
@@ -139,7 +146,7 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
             if( connected ){
              
                 //Get the client count
-                ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.HOST_COUNT, 0 );
+                ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.HOST_COUNT, hostIdStr );
                 aCMManager.send(aMsg);
                 
                 //Wait for the response
@@ -149,15 +156,12 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
                 if( theClientCount > 0 ){
                 
                     //Get each client msg                
-                    aMsg = new pwnbrew.network.control.messages.GetHosts( Constants.SERVER_ID );
+                    aMsg = new pwnbrew.network.control.messages.GetHosts( Constants.SERVER_ID, hostIdStr );
                     aCMManager.send(aMsg);
                 
                     //Wait for the response
                     waitToBeNotified( 180 * 1000);
-                    
-                    //Create the return message
-                    retStr = theReturnMsg.getXml();
-                    
+                                        
                 }
                 
             } else {
@@ -170,6 +174,9 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
         } catch (IOException ex) {
             DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex );
         }
+        
+        //Create the return message
+        retStr = theReturnMsg.getXml();
         
         return retStr;
     }

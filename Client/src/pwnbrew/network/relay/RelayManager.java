@@ -49,6 +49,8 @@ import pwnbrew.network.PortRouter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import pwnbrew.ClientConfig;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
@@ -66,6 +68,7 @@ public class RelayManager extends DataManager {
 
     private static RelayManager theRelayManager;
     private ServerPortRouter theServerPortRouter = null;
+    public ExecutorService MyExecutor;
     
     private static final String NAME_Class = RelayManager.class.getSimpleName();
     
@@ -73,9 +76,14 @@ public class RelayManager extends DataManager {
     /*
      *  Constructor
      */
-    private RelayManager( CommManager passedCommManager ) {
+    private RelayManager( CommManager passedCommManager ) throws IOException {
         
-        super(passedCommManager);        
+        super(passedCommManager);   
+        MyExecutor = Executors.newSingleThreadExecutor();
+        
+        //Create the port router
+        if( theServerPortRouter == null )
+            theServerPortRouter = new ServerPortRouter( passedCommManager, true, MyExecutor );           
         
     }  
     
@@ -92,13 +100,6 @@ public class RelayManager extends DataManager {
         if( theRelayManager == null ) {
             theRelayManager = new RelayManager( passedCommManager );
         }   
-        
-        //Create the port router
-        if( theRelayManager.getServerPorterRouter() == null ){
-            ServerPortRouter theServerPortRouter = new ServerPortRouter( passedCommManager, true );   
-            theRelayManager.setPortRouter(theServerPortRouter);       
-        }
-        
         return theRelayManager;
 
     }/* END initialize() */
@@ -153,15 +154,6 @@ public class RelayManager extends DataManager {
     public DataHandler getDataHandler() {
         return theDataHandler;
     }  
-  
-    //===============================================================
-    /**
-     * Sets the port router
-     *
-    */
-    private void setPortRouter(ServerPortRouter passedRouter) {
-        theServerPortRouter = passedRouter;
-    }
 
     //===========================================================================
     /**
@@ -169,8 +161,13 @@ public class RelayManager extends DataManager {
      */
     @Override
     public void shutdown() {
+        
         theServerPortRouter.shutdown();
         theServerPortRouter = null;
+        
+        MyExecutor.shutdownNow();
+        MyExecutor = null;
+        theRelayManager = null;
     }
 
     //===========================================================================

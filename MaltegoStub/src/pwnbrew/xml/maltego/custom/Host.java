@@ -49,6 +49,7 @@ import pwnbrew.xml.maltego.Field;
 public class Host extends Entity {
 
     public static final String PWNBREW_HOST_CONNECTED = "pwnbrew.host.connected";
+    public static final String PWNBREW_HOST_SLEEPABLE = "pwnbrew.host.sleepable";
     public static final String PWNBREW_HOST_DISCONNECTED = "pwnbrew.host.disconnected";
     
     
@@ -57,13 +58,14 @@ public class Host extends Entity {
      * Constructor
      * 
      * @param connected
+     * @param sleepable
      * @param passedHostname
      * @param passedArch 
      * @param passedOS 
      * @param passedId 
      */
-    public Host( boolean connected, String passedHostname, String passedArch, String passedOS, String passedId ) {
-        super( connected ? PWNBREW_HOST_CONNECTED : PWNBREW_HOST_DISCONNECTED );
+    public Host( boolean connected, boolean sleepable, String passedHostname, String passedArch, String passedOS, String passedId ) {
+        super( connected ? ( sleepable ? PWNBREW_HOST_SLEEPABLE : PWNBREW_HOST_CONNECTED ): PWNBREW_HOST_DISCONNECTED );
         
         //Set the hostname
         setDisplayValue(passedHostname);
@@ -76,7 +78,7 @@ public class Host extends Entity {
         aField.setXmlObjectContent( theConfig.getServerIp() );
         addField(aField);
         
-        //Add the server ip
+        //Add the server port
         aField = new Field( Constants.SERVER_PORT );
         aField.setXmlObjectContent( Integer.toString( theConfig.getSocketPort()) );
         addField(aField);

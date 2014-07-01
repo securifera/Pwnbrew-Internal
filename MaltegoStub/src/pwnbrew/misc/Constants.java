@@ -88,6 +88,7 @@ abstract public class Constants {
     
     public static final String SERVER_IP = "serverip";
     public static final String SERVER_PORT = "serverport";
+    public static final String RELAY_PORT = "relayport";
     
     public static final String HOST_ARCH = "arch";
     public static final String HOST_OS = "os";

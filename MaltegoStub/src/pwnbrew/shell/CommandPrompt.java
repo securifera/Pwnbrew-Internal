@@ -45,10 +45,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.shell;
 
 import java.util.concurrent.Executor;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.DebugPrinter;
-import pwnbrew.output.StreamReceiver;
-import static pwnbrew.shell.Shell.NAME_Class;
 
 /**
  *

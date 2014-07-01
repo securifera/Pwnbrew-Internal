@@ -156,7 +156,7 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
             if( connected ){
                 
                  //Get the client count
-                ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.HOST_COUNT, 0 );
+                ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.HOST_COUNT, "0" );
                 aCMManager.send(aMsg);
                 
                 //Wait for the response
@@ -166,7 +166,7 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
                 if( theClientCount > 0 ){
                 
                     //Get each client msg                
-                    aMsg = new pwnbrew.network.control.messages.GetHosts( Constants.SERVER_ID );
+                    aMsg = new pwnbrew.network.control.messages.GetHosts( Constants.SERVER_ID, "0" );
                     aCMManager.send(aMsg);
                 
                     //Wait for the response

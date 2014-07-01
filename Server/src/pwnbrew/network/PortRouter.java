@@ -63,7 +63,7 @@ abstract public class PortRouter {
     
     protected final SelectionRouter theSelectionRouter;
     private final boolean encrypted;
-    private final CommManager theCommManager;
+    protected final CommManager theCommManager;
     
     //===============================================================
     /**
@@ -111,9 +111,10 @@ abstract public class PortRouter {
      * given InetAddress.
      *
      * @param passedClientId
+     * @param parentId
      * @param theHandler
      */
-    abstract public void registerHandler(int passedClientId, SocketChannelHandler theHandler);
+    abstract public void registerHandler(int passedClientId, int parentId, SocketChannelHandler theHandler);
 
     //===============================================================
     /**

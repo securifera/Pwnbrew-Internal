@@ -53,10 +53,12 @@ import java.nio.channels.ServerSocketChannel;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.RelayDisconnect;
 import pwnbrew.selector.AcceptHandler;
@@ -72,6 +74,7 @@ public class ServerPortRouter extends PortRouter {
     private ServerSocketChannel theServerSocketChannel = null;
     private final Map<Integer, SocketChannelHandler> hostHandlerMap = new HashMap<>();
     
+    private AcceptHandler currentHandler = null;    
     private static final String NAME_Class = ServerPortRouter.class.getSimpleName();
   
       
@@ -81,10 +84,11 @@ public class ServerPortRouter extends PortRouter {
      *
      * @param passedCommManager
      * @param passedBool
+     * @param passedExecutor
      * @throws IOException
     */
-    public ServerPortRouter( CommManager passedCommManager, boolean passedBool ) throws IOException {
-        super(passedCommManager, passedBool);
+    public ServerPortRouter( CommManager passedCommManager, boolean passedBool, Executor passedExecutor ) throws IOException {
+        super(passedCommManager, passedBool, passedExecutor);
     }
 
     //===============================================================
@@ -218,7 +222,8 @@ public class ServerPortRouter extends PortRouter {
 
         // Register the server socket channel, indicating an interest in
         // accepting new connections
-        theSelectionRouter.register(theServerSocketChannel, SelectionKey.OP_ACCEPT, new AcceptHandler( this ));
+        currentHandler = new AcceptHandler( this );
+        theSelectionRouter.register(theServerSocketChannel, SelectionKey.OP_ACCEPT, currentHandler);
 
     }
     
@@ -259,18 +264,24 @@ public class ServerPortRouter extends PortRouter {
                 aHandler.shutdown();               
             }
         }
-             
-        //Clear the handler list
-        theSelectionRouter.shutdown();
-
-        //Shutdown the server socket
+        
+        //shutdown handler
+        theSelectionRouter.unregister(theServerSocketChannel);        
+                
+         //Shutdown the server socket
         if(theServerSocketChannel != null){
             try {
+                DebugPrinter.printMessage(NAME_Class, "Shutting down server port router.");
                 theServerSocketChannel.close();
+                theServerSocketChannel.socket().close();
             } catch (IOException ex) {
-                ex = null;
+                DebugPrinter.printMessage(NAME_Class, ex.getMessage());
             }
         }
+        
+        //Clear the handler list
+        theSelectionRouter.shutdown();
+        
     }   
    
 }/* END CLASS ServerPortRouter */

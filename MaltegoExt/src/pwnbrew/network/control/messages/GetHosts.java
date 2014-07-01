@@ -46,16 +46,26 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
+import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import pwnbrew.controllers.MainGuiController;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
+import pwnbrew.host.HostFactory;
 import pwnbrew.library.LibraryItemController;
 import pwnbrew.logging.Log;
+import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.misc.Constants;
+import pwnbrew.network.ControlOption;
+import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.tasks.TaskManager;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
@@ -64,6 +74,9 @@ import pwnbrew.tasks.TaskManager;
 public final class GetHosts extends ControlMessage{ // NO_UCD (use default)
     
     private static final String NAME_Class = GetHosts.class.getSimpleName();
+    private static final byte OPTION_HOST_ID = 124;
+
+    private int hostId;
 
     // ==========================================================================
     /**
@@ -73,6 +86,31 @@ public final class GetHosts extends ControlMessage{ // NO_UCD (use default)
     */
     public GetHosts(byte[] passedId ) {
         super( passedId );
+    }
+    
+     //=========================================================================
+    /**
+     *  Sets the variable in the message related to this TLV
+     * 
+     * @param tempTlv 
+     * @return  
+     */
+    @Override
+    public boolean setOption( ControlOption tempTlv ){        
+
+        boolean retVal = true;
+        
+        byte[] theValue = tempTlv.getValue();
+        switch( tempTlv.getType()){
+            case OPTION_HOST_ID:
+                hostId = SocketUtilities.byteArrayToInt(theValue);
+                break;
+            default:
+                retVal = false;
+                break;
+        }
+        
+        return retVal;
     }
     
      //===============================================================
@@ -90,9 +128,79 @@ public final class GetHosts extends ControlMessage{ // NO_UCD (use default)
             TaskManager theTaskManager = passedManager.getTaskManager();
             if( theTaskManager instanceof MainGuiController ){
                 
+                //Get the server port router
+//                int controlPort = aCMManager.getPort();
+//                ServerPortRouter aSPR = (ServerPortRouter)passedManager.getPortRouter( controlPort );
+                
                 //Get the host controllers 
                 MainGuiController theGuiController = (MainGuiController)theTaskManager;
-                List<LibraryItemController> theHostControllers = theGuiController.getHostControllers();
+                List<LibraryItemController> theHostControllers = new ArrayList<>();
+                if( hostId == 0 ){
+                    
+                    //Add everything
+                    theHostControllers.addAll( theGuiController.getHostControllers() );
+                    
+                } else if( hostId == Constants.SERVER_ID ){
+                    
+                    try {
+                        Host localHost = HostFactory.getLocalHost();
+                        List<String> hostIdList = localHost.getConnectedHostIdList();
+                        for( String anId : hostIdList ){
+                            HostController aController = theGuiController.getHostController(anId);
+                            if(aController != null )
+                                theHostControllers.add(aController);
+                            
+                        }
+//                    //Add everything
+//                    theHostControllers.addAll( theGuiController.getHostControllers() );
+//                    if( hostId == Constants.SERVER_ID ){
+                        
+                        
+//                        //Loop through the hosts and get any internal host ids
+//                        List<Integer> internalHosts = new ArrayList<>();
+//                        for( LibraryItemController aController : theHostControllers ){
+//                            if( aController instanceof HostController ){
+//                                HostController aHostController = (HostController)aController;
+//                                if( !aHostController.isLocalHost() ){
+//                                    SocketChannelHandler aHandler = aSPR.getSocketChannelHandler( Integer.parseInt(aHostController.getId()) );
+//                                    if( aHandler != null ){
+//                                        internalHosts.addAll( aHandler.getInternalHosts() );
+//                                    }
+//                                }
+//                                
+//                            }
+//                        }
+//                        
+//                        //Remove them from the original list
+//                        for( Integer anId : internalHosts ){
+//                            LibraryItemController aController = theGuiController.getHostController( Integer.toString(anId));
+//                            if( aController != null)
+//                                theHostControllers.remove(aController);
+//                        }
+//                    }
+                    } catch (LoggableException | SocketException ex) {
+                        Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
+                    }
+                    
+                } else {
+                    
+                    //Get the host
+                    HostController aHostController = theGuiController.getHostController( Integer.toString( hostId ));
+                    Host aHost = aHostController.getHost();
+                    List<String> internalHosts = aHost.getConnectedHostIdList();
+                     
+//                    SocketChannelHandler aHandler = aSPR.getSocketChannelHandler( hostId );
+//                    List<Integer> internalHosts = aHandler.getInternalHosts();
+                    
+                    //Add each host to the list
+                    for( String anId : internalHosts ){
+                        LibraryItemController aController = theGuiController.getHostController( anId );
+                        if( aController != null)
+                            theHostControllers.add(aController);
+                    }
+                }                
+                
+                //Create a hsot msg for each controller
                 for( LibraryItemController aController : theHostControllers ){
                     if( aController instanceof HostController ){
                         
@@ -102,7 +210,8 @@ public final class GetHosts extends ControlMessage{ // NO_UCD (use default)
                             Host aHost = aHostController.getHost();
                             try {
                                 HostMsg aHostMsg = new HostMsg( getSrcHostId(), aHost.getHostname(), 
-                                aHost.getOsName(), aHost.getJvmArch(), Integer.parseInt(aHost.getId()), aHost.isConnected());
+                                aHost.getOsName(), aHost.getJvmArch(), Integer.parseInt(aHost.getId()), aHost.isConnected(),
+                                !aHost.getCheckInList().isEmpty());
                                 aCMManager.send(aHostMsg);
                             } catch (UnsupportedEncodingException ex) {
                                 Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                

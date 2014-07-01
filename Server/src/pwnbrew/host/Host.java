@@ -56,7 +56,6 @@ import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.AttributeCollection;
 import pwnbrew.xmlBase.Node;
 import pwnbrew.xmlBase.XmlBase;
-import static pwnbrew.xmlBase.XmlBase.ATTRIBUTE_Name;
 
 /**
  *
@@ -81,6 +80,7 @@ public class Host extends Node {
     
     private List<Session> sessionList = new LinkedList<>(); //A list of sessions
     private static final String ATTRIBUTE_CheckInDates = "CheckInDates";
+    private static final String ATTRIBUTE_ConnectedHostIds = "ConnectedHostIds";
     private static final String ATTRIBUTE_AutoSleep = "autoSleep";
   
     private static final String ATTRIBUTE_Os_Name = "osName";
@@ -115,6 +115,8 @@ public class Host extends Node {
               
         //Add the check in date array
         theAttributeCollectionMap.put(ATTRIBUTE_CheckInDates, new AttributeCollection(ATTRIBUTE_CheckInDates, new String[0]));
+        
+        theAttributeCollectionMap.put(ATTRIBUTE_ConnectedHostIds, new AttributeCollection(ATTRIBUTE_ConnectedHostIds, new String[0]));
 
         //Add the auto sleep flag
         theAttributeMap.put( ATTRIBUTE_AutoSleep, "FALSE"  );
@@ -125,14 +127,11 @@ public class Host extends Node {
     //===============================================================
     /**
      *  Constructor
+     * @param passedId
     */
-    Host( int passedId, String hostname ) {
+    public Host( int passedId ) {
         this();
         setId( Integer.toString( passedId ) );
-        
-        //Add the attributes
-        theAttributeMap.put( ATTRIBUTE_Name,  hostname );
-       
     }
    
     
@@ -228,7 +227,7 @@ public class Host extends Node {
         sessionList = new ArrayList<>( passedList );
     }/* END setSessionList() */
     
-    // ==========================================================================
+      // ==========================================================================
     /**
      * Returns the check-in list.
      *
@@ -267,7 +266,7 @@ public class Host extends Node {
      * 
      * @param passedDateStr 
      */
-    void addCheckInTime( String passedDateStr ){
+    public void addCheckInTime( String passedDateStr ){
         
         List<String> theCheckInList = getCheckInList();
         if( theCheckInList != null && !theCheckInList.contains( passedDateStr )){
@@ -282,8 +281,66 @@ public class Host extends Node {
      * 
      * @param passedDateStr 
      */
-    void removeCheckInTime( String passedDateStr ){
+    public void removeCheckInTime( String passedDateStr ){
         AttributeCollection theCollection = theAttributeCollectionMap.get( ATTRIBUTE_CheckInDates );
+        theCollection.removeFromCollection(passedDateStr);
+    }
+    
+    // ==========================================================================
+    /**
+     * Returns a list of connected host ids
+     *
+     * @return the command
+     */
+    public List<String> getConnectedHostIdList() {
+        
+        List<String> theCheckInList = null;
+        
+        AttributeCollection theCollection = theAttributeCollectionMap.get( ATTRIBUTE_ConnectedHostIds );
+        if(theCollection != null)
+           theCheckInList = theCollection.getCollection();
+        
+        return theCheckInList;
+        
+    }
+    
+     // ==========================================================================
+    /**
+     * Returns the check-in list.
+     *
+     * @param passedList
+     */
+    public void setConnectedHostIdList( List<String> passedList ) {
+        
+        AttributeCollection theCollection = theAttributeCollectionMap.get( ATTRIBUTE_ConnectedHostIds );
+        if(theCollection != null)
+            theCollection.setCollection( passedList );        
+        
+    }
+    
+    // ========================================================================
+    /**
+     *  Adds host id
+     * 
+     * @param passedDateStr 
+     */
+    public void addConnectedHostId( String passedDateStr ){
+        
+        List<String> hostIdList = getConnectedHostIdList();
+        if( hostIdList != null && !hostIdList.contains( passedDateStr )){
+            AttributeCollection theCollection = theAttributeCollectionMap.get( ATTRIBUTE_ConnectedHostIds );
+            theCollection.addToCollection( passedDateStr );
+        }
+    }
+    
+    // ========================================================================
+    /**
+     *  Remove host id
+     * 
+     * @param passedDateStr 
+     */
+    public void removeConnectedHostId( String passedDateStr ){
+        AttributeCollection theCollection = theAttributeCollectionMap.get( ATTRIBUTE_ConnectedHostIds );
         theCollection.removeFromCollection(passedDateStr);
     }
     

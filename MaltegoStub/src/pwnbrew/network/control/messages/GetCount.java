@@ -68,7 +68,7 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
      * @param passedType
      * @param passedId
     */
-    public GetCount( int dstHostId, int passedType, int passedId ) {
+    public GetCount( int dstHostId, int passedType, String passedId ) {
         super( dstHostId );
         
         //Add file type
@@ -77,7 +77,7 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
         addOption(aTlv);
         
         //Add file type
-        tempBytes = SocketUtilities.intToByteArray(passedId);
+        tempBytes = SocketUtilities.intToByteArray( Integer.parseInt( passedId) );
         aTlv = new ControlOption( OPTION_OPTIONAL_ID, tempBytes);
         addOption(aTlv);
     }

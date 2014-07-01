@@ -58,6 +58,7 @@ abstract public class Constants {
     // Network states
     public static final int DISCONNECTED = 0;
     public static final int CONNECTED = 2;
+    public static final int SERVER_ID = -1;    
  
     //File notification messages for the taskruner
     public static final int FILE_SENT = 1000;    
@@ -143,6 +144,7 @@ abstract public class Constants {
     public static final String PROP_FILE ="META-INF/MANIFEST.MF";
     
     public static final String PAYLOAD_VERSION_LABEL = "Version";
+    public static final String STAGER_URL = "Private";
     public static String CURRENT_VERSION = "1.0.4.4";
     
     public static String FILE_UPLOAD = "FILE_UPLOAD";

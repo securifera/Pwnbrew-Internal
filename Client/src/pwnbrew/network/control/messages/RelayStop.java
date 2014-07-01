@@ -85,6 +85,7 @@ public final class RelayStop extends ControlMessage{
         if( aCMManager != null ){
             //Send the message
             RelayStatus aMsg = new RelayStatus( false );
+            aMsg.setDestHostId( getSrcHostId() );
             aCMManager.send(aMsg);
         }
         

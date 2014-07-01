@@ -48,6 +48,7 @@ package pwnbrew.network;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.Executor;
 import javax.net.ssl.SSLContext;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
@@ -81,15 +82,16 @@ abstract public class PortRouter {
      *
      * @param passedManager the listener for the created comm
      * @param passedBool
+     * @param passedExecutor
      * @throws IOException
      */
-    public PortRouter(CommManager passedManager, boolean passedBool ) throws IOException { // NO_UCD (use default)
+    public PortRouter(CommManager passedManager, boolean passedBool, Executor passedExecutor ) throws IOException { // NO_UCD (use default)
 
         theCommManager = passedManager;       
         encrypted = passedBool;
         
         //Create the selection router and start it
-        theSelectionRouter = new SelectionRouter( Constants.Executor );
+        theSelectionRouter = new SelectionRouter( passedExecutor );
         theSelectionRouter.start();
     }
 

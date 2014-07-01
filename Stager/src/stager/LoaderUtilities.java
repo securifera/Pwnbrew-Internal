@@ -435,6 +435,7 @@ public class LoaderUtilities {
      * @param properties 
      * @param propLabel 
      * @param propValue 
+     * @throws java.io.IOException 
      */
     public static void updateJarProperties( File passedFile, String properties,
             String propLabel, String propValue ) throws IOException{        

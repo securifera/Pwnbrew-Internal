@@ -63,8 +63,10 @@ public final class HostMsg extends ControlMessage{
     private static final byte OPTION_OS = 62;
     private static final byte OPTION_CONNECTED = 63;
     private static final byte OPTION_HOST_ID = 64;
+    private static final byte OPTION_SLEEPABLE = 65;
     
     private boolean connected = false;
+    private boolean sleepable = false;
     private String clientHostname = null;
     private String os_name = null;
     private String java_arch = null;
@@ -116,7 +118,16 @@ public final class HostMsg extends ControlMessage{
                     }
                     
                     break;
+                case OPTION_SLEEPABLE:
                     
+                    if( theValue.length > 0 ){
+                        byte retByte = theValue[0];
+                        if( retByte == 1 )
+                            sleepable = true;
+                        
+                    }
+                    
+                    break;    
                 default:
                     retVal = false;
                     break;
@@ -144,7 +155,7 @@ public final class HostMsg extends ControlMessage{
                 HostHandler aHandler = (HostHandler)aFunction;
                 
                 //Add the host to the list
-                Host aHost = new Host( connected, clientHostname, java_arch, os_name, Integer.toString( hostid) );
+                Host aHost = new Host( connected, sleepable, clientHostname, java_arch, os_name, Integer.toString( hostid) );
                 aHandler.addHost( aHost );
             }            
         }  

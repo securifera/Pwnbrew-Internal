@@ -103,6 +103,7 @@ public final class GetIPs extends ControlMessage{ // NO_UCD (use default)
     *   Performs the logic specific to the message.
     *
      * @param passedManager
+     * @throws pwnbrew.logging.LoggableException
     */
     @Override
     public void evaluate( CommManager passedManager ) throws LoggableException {     

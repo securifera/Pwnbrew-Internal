@@ -174,7 +174,7 @@ public abstract class Message {
      *
      * @param passedId
     */
-    public void setClientId( int passedId ){
+    public void setSrcHostId( int passedId ){
        SocketUtilities.intToByteArray( srcHostId, passedId );
     }
     
