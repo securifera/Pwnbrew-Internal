@@ -139,7 +139,7 @@ public abstract class CommManager {
      * @param passedClientId 
      * @return  
      */
-    public int getClientParent(int passedClientId) {        
+    public Integer getClientParent(int passedClientId) {        
         synchronized( theClientParentMap ){
             return theClientParentMap.get(passedClientId);
         }

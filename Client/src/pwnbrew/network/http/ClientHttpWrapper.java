@@ -120,7 +120,7 @@ public class ClientHttpWrapper extends HttpWrapper {
                                 int dstId = SocketUtilities.byteArrayToInt(dstHostId);
                                 
                                 try{
-                                    DataManager.routeMessage(  passedHandler.getPortRouter().getCommManager(), type, dstId, msgBytes );
+                                    DataManager.routeMessage(  passedHandler.getPortRouter(), type, dstId, msgBytes );
                                 } catch(Exception ex ){
                                     RemoteLog.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
                                 }   

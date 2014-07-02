@@ -330,7 +330,7 @@ public class SocketChannelHandler implements Selectable {
                                     return;
 
                                 try{
-                                    DataManager.routeMessage( thePortRouter.getCommManager(), currMsgType, dstId, msgByteArr );                      
+                                    DataManager.routeMessage( thePortRouter, currMsgType, dstId, msgByteArr );                      
                                 } catch(Exception ex ){
                                     RemoteLog.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
                                 }

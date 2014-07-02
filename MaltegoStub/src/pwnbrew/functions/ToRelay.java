@@ -111,86 +111,99 @@ public class ToRelay extends Function {
             DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
             return retStr;
         }
-         
+        
         //Create the connection
-        try {
-            ValidTextField aField = new ValidTextField( "0" );
-            aField.setValidation( StandardValidation.KEYWORD_Port );
-            aField.setMargin(new Insets(2,4,2,4));
-            Object[] objMsg = { "Please enter the port number to start listening.", " ", aField};
+        try {        
             
-            //Have the user manually put in the server ip
-            Object retVal = JOptionPane.showOptionDialog(null, objMsg, "Enter Port",
-                   JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+            //Set the server ip and port
+            StubConfig theConfig = StubConfig.getConfig();
+            theConfig.setServerIp(serverIp);
+            theConfig.setSocketPort(serverPortStr);
 
-            //If the user pressed OK and the ip was valid
-            if((Integer)retVal == JOptionPane.OK_OPTION && aField.isDataValid()){
-                
-                String strPort =  aField.getText();
-                
-                //Set the server ip and port
-                StubConfig theConfig = StubConfig.getConfig();
-                theConfig.setServerIp(serverIp);
-                theConfig.setSocketPort(serverPortStr);
+            //Set the client id
+            Integer anInteger = SocketUtilities.getNextId();
+            theConfig.setHostId(anInteger.toString());
+            
+                   //Get server IP
+            String relayPort = objectMap.get( Constants.RELAY_PORT);
+            if( relayPort != null ){
+                //Create a relay object
+               Relay aRelay = new Relay( hostIdStr, relayPort);
+               MaltegoTransformResponseMessage rspMsg = theReturnMsg.getReponseMessage();
+               Entities theEntities = rspMsg.getEntityList();
+               theEntities.addEntity( aRelay );
+               
+            } else {
+         
+                ValidTextField aField = new ValidTextField( "0" );
+                aField.setValidation( StandardValidation.KEYWORD_Port );
+                aField.setMargin(new Insets(2,4,2,4));
+                Object[] objMsg = { "Please enter the port number to start listening.", " ", aField};
 
-                //Set the client id
-                Integer anInteger = SocketUtilities.getNextId();
-                theConfig.setHostId(anInteger.toString());
+                //Have the user manually put in the server ip
+                Object retVal = JOptionPane.showOptionDialog(null, objMsg, "Enter Port",
+                       JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
 
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager == null ){
-                    aCMManager = ControlMessageManager.initialize( theManager );
-                }
+                //If the user pressed OK and the ip was valid
+                if((Integer)retVal == JOptionPane.OK_OPTION && aField.isDataValid()){
 
-                //Get the port router
-                int serverPort = Integer.parseInt( serverPortStr);
-                ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
+                    String strPort =  aField.getText();
 
-                //Initiate the file transfer
-                if(aPR == null){
-                    DebugPrinter.printMessage( NAME_Class, "listclients", "Unable to retrieve port router.", null);
-                    return retStr;     
-                }           
-
-                //Set up the port wrapper
-                theManager.initialize();
-
-                //Connect to server
-                boolean connected = aPR.ensureConnectivity( serverPort, theManager );
-                if( connected ){
-
-                    //Get the client count
-                    int hostId = Integer.parseInt( hostIdStr);
-                    RelayStartRelay aMsg = new RelayStartRelay( Constants.SERVER_ID, hostId, Integer.parseInt( strPort ));               
-                    aCMManager.send(aMsg );  
-                    
-                    //Wait for the response
-                    waitToBeNotified( 180 * 1000);
-                    
-                    //If connected create a relay
-                    if( isConnected ){
-                        
-                        //Create a relay object
-                        Relay aRelay = new Relay( hostIdStr, strPort);
-                        MaltegoTransformResponseMessage rspMsg = theReturnMsg.getReponseMessage();
-                        Entities theEntities = rspMsg.getEntityList();
-                        theEntities.addEntity( aRelay );
-                        
+                    ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+                    if( aCMManager == null ){
+                        aCMManager = ControlMessageManager.initialize( theManager );
                     }
 
-                try {
-                    //Sleep for a few seconds
-                    Thread.sleep(3000);
-                } catch (InterruptedException ex) {
-                }
+                    //Get the port router
+                    int serverPort = Integer.parseInt( serverPortStr);
+                    ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
 
-                } else {
-                    StringBuilder aSB = new StringBuilder()
-                            .append("Unable to connect to the Pwnbrew server at \"")
-                            .append(serverIp).append(":").append(serverPort).append("\"");
-                    DebugPrinter.printMessage( NAME_Class, "listclients", aSB.toString(), null);
+                    //Initiate the file transfer
+                    if(aPR == null){
+                        DebugPrinter.printMessage( NAME_Class, "listclients", "Unable to retrieve port router.", null);
+                        return retStr;     
+                    }           
+
+                    //Set up the port wrapper
+                    theManager.initialize();
+
+                    //Connect to server
+                    boolean connected = aPR.ensureConnectivity( serverPort, theManager );
+                    if( connected ){
+
+                        //Get the client count
+                        int hostId = Integer.parseInt( hostIdStr);
+                        RelayStartRelay aMsg = new RelayStartRelay( Constants.SERVER_ID, hostId, Integer.parseInt( strPort ));               
+                        aCMManager.send(aMsg );  
+
+                        //Wait for the response
+                        waitToBeNotified( 180 * 1000);
+
+                        //If connected create a relay
+                        if( isConnected ){
+
+                            //Create a relay object
+                            Relay aRelay = new Relay( hostIdStr, strPort);
+                            MaltegoTransformResponseMessage rspMsg = theReturnMsg.getReponseMessage();
+                            Entities theEntities = rspMsg.getEntityList();
+                            theEntities.addEntity( aRelay );
+
+                        }
+
+                    try {
+                        //Sleep for a few seconds
+                        Thread.sleep(3000);
+                    } catch (InterruptedException ex) {
+                    }
+
+                    } else {
+                        StringBuilder aSB = new StringBuilder()
+                                .append("Unable to connect to the Pwnbrew server at \"")
+                                .append(serverIp).append(":").append(serverPort).append("\"");
+                        DebugPrinter.printMessage( NAME_Class, "listclients", aSB.toString(), null);
+                    }
+
                 }
-            
             }
             
             //Create the return message

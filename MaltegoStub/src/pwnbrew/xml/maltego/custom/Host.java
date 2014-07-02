@@ -59,12 +59,13 @@ public class Host extends Entity {
      * 
      * @param connected
      * @param sleepable
+     * @param relayPort
      * @param passedHostname
      * @param passedArch 
      * @param passedOS 
      * @param passedId 
      */
-    public Host( boolean connected, boolean sleepable, String passedHostname, String passedArch, String passedOS, String passedId ) {
+    public Host( boolean connected, boolean sleepable, int relayPort, String passedHostname, String passedArch, String passedOS, String passedId ) {
         super( connected ? ( sleepable ? PWNBREW_HOST_SLEEPABLE : PWNBREW_HOST_CONNECTED ): PWNBREW_HOST_DISCONNECTED );
         
         //Set the hostname
@@ -97,6 +98,14 @@ public class Host extends Entity {
         aField = new Field( Constants.HOST_ID );
         aField.setXmlObjectContent( passedId );
         addField(aField);
+        
+        //Add the relaying
+        if( relayPort != -1 ){
+            aField = new Field( Constants.RELAY_PORT );
+            aField.setDisplayName( "Relay Port" );
+            aField.setXmlObjectContent( Integer.toString(relayPort) );
+            addField(aField);
+        }
         
     }    
      

@@ -130,7 +130,7 @@ public class FileMessageManager extends DataManager implements LockListener {
      * @param msgBytes
     */
     @Override
-    public void handleMessage( byte[] msgBytes ) {        
+    public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) {        
         theFileManager.getDataHandler().processData(msgBytes);        
     }
     

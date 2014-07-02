@@ -60,6 +60,7 @@ public final class HostMsg extends ControlMessage{
     private static final byte OPTION_CONNECTED = 63;
     private static final byte OPTION_HOST_ID = 64;
     private static final byte OPTION_SLEEPABLE = 65;
+    private static final byte OPTION_RELAY_PORT = 67;
     
     // ==========================================================================
     /**
@@ -72,10 +73,12 @@ public final class HostMsg extends ControlMessage{
      * @param hostId
      * @param isConnected
      * @param isSleepable
+     * @param relayPort
      * @throws java.io.UnsupportedEncodingException
     */
     public HostMsg( int dstHostId, String passeHostname, String passedOS, 
-            String passedArch, int hostId, boolean isConnected, boolean isSleepable ) throws UnsupportedEncodingException {
+            String passedArch, int hostId, boolean isConnected, 
+            boolean isSleepable ) throws UnsupportedEncodingException {
         super( dstHostId );
         
           //Add file type
@@ -109,11 +112,25 @@ public final class HostMsg extends ControlMessage{
         
         //Sleepable flag
         aByte = 0;
-        if( isConnected )
+        if( isSleepable )
             aByte = 1;
         
         tempBytes = new byte[]{ aByte };
         aTlv = new ControlOption( OPTION_SLEEPABLE, tempBytes);
+        addOption(aTlv);
+      
+    }
+
+    // ==========================================================================
+    /**
+     * 
+     * @param parseInt 
+     */
+    public void addRelayPort(int parseInt) {
+      
+        //Add file type
+        byte[] tempBytes = SocketUtilities.intToByteArray(parseInt);
+        ControlOption aTlv = new ControlOption( OPTION_RELAY_PORT, tempBytes);
         addOption(aTlv);
     }
 

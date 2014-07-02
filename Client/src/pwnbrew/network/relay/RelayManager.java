@@ -118,31 +118,35 @@ public class RelayManager extends DataManager {
     /**
      *   Send the message out the given channel.
      *
+     * @param srcPortRouter
      * @param msgBytes
     */
     @Override
-    public void handleMessage( byte[] msgBytes ) {        
+    public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) {        
                         
         //Get the dest id
         byte[] dstHostId = Arrays.copyOfRange(msgBytes, Message.DEST_HOST_ID_OFFSET, Message.DEST_HOST_ID_OFFSET + 4);
         int tempId = SocketUtilities.byteArrayToInt(dstHostId);
                
         //Get the port router
-        PortRouter thePR;
-        if( tempId == -1 || tempId == ClientConfig.getConfig().getServerId() ){
-            thePR = theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );    
-            DebugPrinter.printMessage(NAME_Class, "Queueing relay message to server");
-        } else {     
-
-            //If the dest is not the server
-            thePR = theServerPortRouter;  
-            DebugPrinter.printMessage(NAME_Class, "Queueing relay message to client");
-        }
+//        PortRouter thePR;
+//        if( tempId == -1 || tempId == ClientConfig.getConfig().getServerId() ){
+         PortRouter thePR = theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+         if( thePR.equals( srcPortRouter))
+             thePR = theServerPortRouter;
+         
+//            DebugPrinter.printMessage(NAME_Class, "Queueing relay message to server");
+//        } else {     
+//
+//            //If the dest is not the server
+//            thePR = theServerPortRouter;  
+//            DebugPrinter.printMessage(NAME_Class, "Queueing relay message to client");
+//        }
 
         //Queue the message to be sent
-        if( thePR != null ){
-            thePR.queueSend( msgBytes, tempId ); 
-        }      
+//        if( thePR != null )
+        thePR.queueSend( msgBytes, tempId ); 
+             
         
     }
     

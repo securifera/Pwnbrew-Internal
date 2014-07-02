@@ -157,23 +157,27 @@ abstract public class DataManager {
     /**
      *   Handle the message.
      *
+     * @param srcPortRouter
      * @param msgBytes
     */
-    abstract public void handleMessage( byte[] msgBytes );
+    abstract public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes );
     
     //===========================================================================
     /**
      *  Handles the passed message with the correct manager
      * 
-     * @param theCommManager
+     * @param passedRouter
      * @param msgType
      * @param msgBytes  
      * @param dstId  
      */
-    public static void routeMessage( CommManager theCommManager, byte msgType, int dstId, byte[] msgBytes ) {
+    public static void routeMessage( PortRouter passedRouter, byte msgType, int dstId, byte[] msgBytes ) {
         
         try {
-                        
+                  
+            //Get the comm manager
+            CommManager theCommManager = passedRouter.getCommManager();
+            
             //Get the config
             DataManager aManager = null;
             ClientConfig aConf = ClientConfig.getConfig();
@@ -232,7 +236,7 @@ abstract public class DataManager {
             
             //Handle it
             if( aManager != null ){
-                aManager.handleMessage( msgBytes );
+                aManager.handleMessage( passedRouter, msgBytes );
             }
             
         } catch (LoggableException | IOException ex) {

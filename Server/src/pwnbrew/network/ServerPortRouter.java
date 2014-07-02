@@ -46,7 +46,11 @@ import java.nio.channels.ServerSocketChannel;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
+import pwnbrew.controllers.MainGuiController;
+import pwnbrew.host.Host;
+import pwnbrew.host.HostController;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.selector.AcceptHandler;
 import pwnbrew.selector.SocketChannelHandler;
 
@@ -101,6 +105,23 @@ public class ServerPortRouter extends PortRouter {
             synchronized(hostHandlerMap){
                 hostHandlerMap.put( passedClientId, theHandler);
             }
+            
+            Integer anInt = theCommManager.getClientParent(passedClientId);
+            if( anInt != null && !anInt.equals(passedParentId) ){    
+                
+                //Remove the registration with the other host if it exists
+                ServerManager theServMgr = (ServerManager)theCommManager;
+                MainGuiController theGuiController = (MainGuiController) theServMgr.getTaskManager();
+                        
+                HostController lastParent = theGuiController.getHostController( Integer.toString(anInt) );
+                if( lastParent != null ){
+                    Host parentHost = lastParent.getHost();
+                    parentHost.removeConnectedHostId( Integer.toString( passedClientId) ); 
+                    lastParent.saveToDisk();
+                }
+                
+            }  
+            
             theCommManager.setClientParent(passedClientId, passedParentId);
         }
     }

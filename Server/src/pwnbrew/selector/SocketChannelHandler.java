@@ -359,25 +359,15 @@ public class SocketChannelHandler implements Selectable {
     public boolean registerId( int passedId ){        
              
         //Get the comm manager to register children ids
-//        CommManager theManager = thePortRouter.getCommManager();
-//        TaskManager theTaskManager = theManager.getTaskManager();
-//        if( theTaskManager instanceof MainGuiController ){
-            //Get the host controllers 
-//            MainGuiController theGuiController = (MainGuiController)theTaskManager;  
+        try {
+            
+            Host localHost = HostFactory.getLocalHost();
+            String localhostId = localHost.getId();
             if( rootHostId == -1 ){
 
-                try {
 
-                    Host localHost = HostFactory.getLocalHost();
-                    String localhostId = localHost.getId();
-//                    HostController aController = theGuiController.getHostController( localhostId );
-                    
                     SocketChannelHandler aHandler = thePortRouter.getSocketChannelHandler(passedId);
                     if( aHandler == null ){
-
-                        //Add the id
-//                        localHost.addConnectedHostId( Integer.toString( passedId )); 
-//                        aController.saveToDisk();
 
                         //Register the handler
                         rootHostId = passedId;
@@ -392,10 +382,6 @@ public class SocketChannelHandler implements Selectable {
 
                         if( theSCW.getSocketChannel().socket().getInetAddress().equals( 
                                 aHandler.getSocketChannelWrapper().getSocketChannel().socket().getInetAddress())){
-
-                            //Add the id
-//                            localHost.addConnectedHostId( Integer.toString( passedId )); 
-//                            aController.saveToDisk();
 
                             //Register the new one
                             rootHostId = passedId;
@@ -420,25 +406,20 @@ public class SocketChannelHandler implements Selectable {
                         }
                     }
 
-                } catch(LoggableException | SocketException ex){
-                    Log.log(Level.INFO, NAME_Class, "send()", ex.getMessage(), ex );
-                }
-
             } else {
 
-//                HostController aController = theGuiController.getHostController( Integer.toString(rootHostId));
-//                if( aController != null ){
-//                    Host aHost = aController.getHost();
-//                    aHost.addConnectedHostId( Integer.toString( passedId )); 
-//                    aController.saveToDisk();
-//                }
-
                 //Register the relay
-                thePortRouter.registerHandler(passedId, rootHostId, this);            
+                int parentId = rootHostId;
+                if( passedId == rootHostId )
+                    parentId = Integer.parseInt(localhostId);
+                
+                thePortRouter.registerHandler(passedId, parentId, this);            
 
             }
-//        }
-        
+        } catch(LoggableException | SocketException ex){
+            Log.log(Level.INFO, NAME_Class, "send()", ex.getMessage(), ex );
+        }
+
         
         return true;
     }

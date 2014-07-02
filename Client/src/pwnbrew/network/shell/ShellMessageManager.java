@@ -120,7 +120,7 @@ public class ShellMessageManager extends DataManager {
      * @param msgBytes
     */
     @Override
-    public void handleMessage( byte[] msgBytes ) {        
+    public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) {        
         theShellMsgManager.getDataHandler().processData(msgBytes);        
     }
     

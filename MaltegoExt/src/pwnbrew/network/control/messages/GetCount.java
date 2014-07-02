@@ -130,12 +130,6 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
                 case HOST_COUNT:
                     if( theTaskManager instanceof MainGuiController ){
 
-                        //Should ever return null since it's a closing socket
-//                        int controlPort = aCMManager.getPort();
-//                        ServerPortRouter aSPR = (ServerPortRouter)passedManager.getPortRouter( controlPort );
-                        
-                        //Get the host controllers 
-//                        HashSet<Integer> internalHosts = new HashSet<>();
                         MainGuiController theGuiController = (MainGuiController)theTaskManager;
                         List<LibraryItemController> theHostControllers = theGuiController.getHostControllers();
                         retCount = theHostControllers.size() - 1;
@@ -145,26 +139,14 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
                             
                             try {
                                 
+                                retCount = 0;
                                 Host localHost = HostFactory.getLocalHost();
                                 List<String> hostIdList = localHost.getConnectedHostIdList();
-//                                for( LibraryItemController aController : theHostControllers ){
-//                                    if( aController instanceof HostController ){
-//                                        HostController aHostController = (HostController)aController;
-//                                        
-//                                        //Get host id
-//                                        if( !aHostController.isLocalHost() ){
-//                                            int clientId = Integer.parseInt( aHostController.getId() );
-//                                            SocketChannelHandler aHandler = aSPR.getSocketChannelHandler( clientId );
-//                                            
-//                                            //Add to the hash set
-//                                            if( aHandler != null )
-//                                                internalHosts.addAll( aHandler.getInternalHosts());
-//                                        }
-//                                    }
-//                                }                                
-                                
-                                //Subtract all internal hosts and the server
-                                retCount = hostIdList.size();
+                                for( String hostIdStr : hostIdList ){
+                                    HostController aHostController = theGuiController.getHostController(hostIdStr);
+                                    if( aHostController != null )
+                                        retCount++;    
+                                }                                    
                                 
                             } catch (SocketException ex) {
                                 Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
@@ -173,12 +155,15 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
                         } else if( optionalId != 0 ){
                             
                             //Get the host
+                            retCount = 0;
                             HostController aHostController = theGuiController.getHostController( Integer.toString( optionalId ));
                             Host aHost = aHostController.getHost();
-                            retCount = aHost.getConnectedHostIdList().size();
-//                            SocketChannelHandler aHandler = aSPR.getSocketChannelHandler( optionalId );
-//                            if( aHandler != null )
-//                                retCount = aHandler.getInternalHosts().size();
+                            List<String> hostIdList = aHost.getConnectedHostIdList();
+                            for( String hostIdStr : hostIdList ){
+                                aHostController = theGuiController.getHostController(hostIdStr);
+                                if( aHostController != null )
+                                    retCount++;    
+                            }  
                             
                         }
 

@@ -1479,8 +1479,19 @@ final public class MainGuiController extends Controller implements ActionListene
     @Override
     public void hostDetected( final Host passedHost ) {
 
+        
         //Get the Host from the id
         String clientIdStr = passedHost.getId();  
+        
+        //Register the client with the parent
+        int parentId = theServerManager.getClientParent( Integer.parseInt(clientIdStr));
+        HostController parentController = getHostController( Integer.toString(parentId));
+        if( parentController != null ){
+            Host parentHost = parentController.getHost();
+            parentHost.addConnectedHostId( clientIdStr ); 
+            parentController.saveToDisk();
+        }
+        
         final HostController theController = getHostController( clientIdStr );
         if(theController != null && theController.getObject().equals(passedHost)){
                 
@@ -1558,15 +1569,6 @@ final public class MainGuiController extends Controller implements ActionListene
                               
         } else {
 
-            //Get the parent id
-            int parentId = theServerManager.getClientParent( Integer.parseInt(clientIdStr));
-            HostController parentController = getHostController( Integer.toString(parentId));
-            if( parentController != null ){
-                Host parentHost = parentController.getHost();
-                parentHost.addConnectedHostId( clientIdStr ); 
-                parentController.saveToDisk();
-            }
-            
             //Start in swing thread since it affects the gui
             final HostController aHostController = new HostController( passedHost, this );
             Session aSession = new Session();
