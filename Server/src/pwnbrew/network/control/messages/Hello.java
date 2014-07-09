@@ -51,7 +51,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.host.Host;
-import pwnbrew.host.HostFactory;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.DebugPrinter;
@@ -193,9 +192,7 @@ public final class Hello extends ControlMessage {
             
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
             if( aCMManager != null ){
-                aCMManager = ControlMessageManager.initialize(passedManager);
-            
-
+           
                 //Register the host
                 Integer theClientId = getSrcHostId();
                 DebugPrinter.printMessage(NAME_Class, "Accepted connection from host id: " + theClientId);

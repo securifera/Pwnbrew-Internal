@@ -21,7 +21,7 @@ public class Reload extends Function {
     private static final String NAME_Class = Reload.class.getSimpleName();
         
     //Create the return msg
-    private MaltegoMessage theReturnMsg = new MaltegoMessage();
+    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
   
     //==================================================================
     /**

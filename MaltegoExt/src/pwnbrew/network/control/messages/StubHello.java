@@ -38,25 +38,64 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-
 import java.io.IOException;
+import java.util.logging.Level;
+import pwnbrew.logging.Log;
+import pwnbrew.manager.CommManager;
+import pwnbrew.network.PortRouter;
+import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
  *  
  */
-@SuppressWarnings("ucd")
-public final class HelloAck extends ControlMessage {
-
+public class StubHello extends ControlMessage {
+        
+    //Class name
+    private static final String NAME_Class = StubHello.class.getSimpleName();
+ 
     // ==========================================================================
     /**
      * Constructor
      *
-     * @param dstHostId
-     * @throws java.io.IOException
+     * @param passedId
     */
-    public HelloAck( int dstHostId ) throws IOException {
-       super( dstHostId );
+    public StubHello(byte[] passedId ) {
+        super( passedId );
     }
+        
+     //===============================================================
+    /**
+    *   Performs the logic specific to the message.
+    *
+     * @param passedManager
+    */
+    @Override
+    public void evaluate( CommManager passedManager ) {     
+        
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager != null ){
+            
+            //Change the wrapping flag
+            Integer theClientId = getSrcHostId();
+            PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort() );
+            SocketChannelHandler aSCH = aPR.getSocketChannelHandler(theClientId);
+            
+            if( aSCH != null ){
 
-}/* END CLASS HelloAck */
+                try{
+                    //Send HostAck
+                    HelloAck aHostAck = new HelloAck(theClientId);
+                    aCMManager.send( aHostAck );
+
+                    //Turn off wrapping
+                    aSCH.setWrapping( theClientId, false);
+                } catch (IOException ex) {
+                    Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
+                }
+            }
+                        
+        }        
+    }
+ }

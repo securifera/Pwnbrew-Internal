@@ -38,16 +38,18 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-
 import java.io.IOException;
 
 /**
  *
  *  
  */
-@SuppressWarnings("ucd")
-public final class HelloAck extends ControlMessage {
-
+public class StubHello extends ControlMessage {
+        
+    //Class name
+    private static final String NAME_Class = StubHello.class.getSimpleName();
+ 
+   
     // ==========================================================================
     /**
      * Constructor
@@ -55,8 +57,7 @@ public final class HelloAck extends ControlMessage {
      * @param dstHostId
      * @throws java.io.IOException
     */
-    public HelloAck( int dstHostId ) throws IOException {
+    public StubHello( int dstHostId ) throws IOException {
        super( dstHostId );
     }
-
-}/* END CLASS HelloAck */
+ }

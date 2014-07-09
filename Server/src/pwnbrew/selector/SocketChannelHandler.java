@@ -71,6 +71,7 @@ import pwnbrew.network.PortWrapper;
 import pwnbrew.network.control.messages.ResetId;
 import pwnbrew.network.control.messages.SetRelayWrap;
 import pwnbrew.network.control.messages.StageFlag;
+import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.socket.SocketChannelWrapper;
 import pwnbrew.utilities.SocketUtilities;
 
@@ -358,88 +359,82 @@ public class SocketChannelHandler implements Selectable {
      */
     public boolean registerId( int passedId ){        
              
-        //Get the comm manager to register children ids
-//        CommManager theManager = thePortRouter.getCommManager();
-//        TaskManager theTaskManager = theManager.getTaskManager();
-//        if( theTaskManager instanceof MainGuiController ){
-            //Get the host controllers 
-//            MainGuiController theGuiController = (MainGuiController)theTaskManager;  
-            if( rootHostId == -1 ){
+        if( rootHostId == -1 ){
 
-                try {
+            try {
 
-                    Host localHost = HostFactory.getLocalHost();
-                    String localhostId = localHost.getId();
-//                    HostController aController = theGuiController.getHostController( localhostId );
-                    
-                    SocketChannelHandler aHandler = thePortRouter.getSocketChannelHandler(passedId);
-                    if( aHandler == null ){
+                Host localHost = HostFactory.getLocalHost();
+                String localhostId = localHost.getId();
 
-                        //Add the id
-//                        localHost.addConnectedHostId( Integer.toString( passedId )); 
-//                        aController.saveToDisk();
+                SocketChannelHandler aHandler = thePortRouter.getSocketChannelHandler(passedId);
+                if( aHandler == null ){
 
-                        //Register the handler
+                    //Register the handler
+                    rootHostId = passedId;
+                    thePortRouter.registerHandler(rootHostId, Integer.parseInt(localhostId), this);
+
+                } else if( aHandler == this ){
+
+                    //Set the clientId
+                    rootHostId = passedId;
+
+                } else {
+
+                    if( theSCW.getSocketChannel().socket().getInetAddress().equals( 
+                            aHandler.getSocketChannelWrapper().getSocketChannel().socket().getInetAddress())){
+
+                        //Register the new one
                         rootHostId = passedId;
                         thePortRouter.registerHandler(rootHostId, Integer.parseInt(localhostId), this);
 
-                    } else if( aHandler == this ){
+                        //Shutdown the previous one
+                        aHandler.shutdown();
 
-                        //Set the clientId
-                        rootHostId = passedId;
+                    } else {    
 
-                    } else {
+                        //Send message to tell client to reset their id
+                        ResetId resetIdMsg = new ResetId(passedId);
+                        ByteBuffer aByteBuffer;
 
-                        if( theSCW.getSocketChannel().socket().getInetAddress().equals( 
-                                aHandler.getSocketChannelWrapper().getSocketChannel().socket().getInetAddress())){
+                        int msgLen = resetIdMsg.getLength();
+                        aByteBuffer = ByteBuffer.allocate( msgLen );
+                        resetIdMsg.append(aByteBuffer);
 
-                            //Add the id
-//                            localHost.addConnectedHostId( Integer.toString( passedId )); 
-//                            aController.saveToDisk();
+                        //Queue to be sent
+                        byte[] msgBytes = Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position());
+                        
+                        //If wrapping is necessary then wrap it
+                        if( isWrapping() ){
+                            PortWrapper aWrapper = DataManager.getPortWrapper( getPort() );        
+                            if( aWrapper != null ){
 
-                            //Register the new one
-                            rootHostId = passedId;
-                            thePortRouter.registerHandler(rootHostId, Integer.parseInt(localhostId), this);
+                                //Set the staged wrapper if necessary
+                                if( aWrapper instanceof ServerHttpWrapper ){
+                                    ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+                                    aSrvWrapper.setStaging( isStaged());
+                                }
 
-                            //Shutdown the previous one
-                            aHandler.shutdown();
-
-                        } else {    
-
-                            //Send message to tell client to reset their id
-                            ResetId resetIdMsg = new ResetId(passedId);
-                            ByteBuffer aByteBuffer;
-
-                            int msgLen = resetIdMsg.getLength();
-                            aByteBuffer = ByteBuffer.allocate( msgLen );
-                            resetIdMsg.append(aByteBuffer);
-
-                            //Queue to be sent
-                            queueBytes(Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()));
-                            return false;
+                                ByteBuffer anotherBB = aWrapper.wrapBytes( msgBytes );  
+                                msgBytes = Arrays.copyOf(anotherBB.array(), anotherBB.position());
+                            } 
                         }
-                    }
 
-                } catch(LoggableException | SocketException ex){
-                    Log.log(Level.INFO, NAME_Class, "send()", ex.getMessage(), ex );
+                        queueBytes(msgBytes);
+                        return false;
+                    }
                 }
 
-            } else {
-
-//                HostController aController = theGuiController.getHostController( Integer.toString(rootHostId));
-//                if( aController != null ){
-//                    Host aHost = aController.getHost();
-//                    aHost.addConnectedHostId( Integer.toString( passedId )); 
-//                    aController.saveToDisk();
-//                }
-
-                //Register the relay
-                thePortRouter.registerHandler(passedId, rootHostId, this);            
-
+            } catch(LoggableException | SocketException ex){
+                Log.log(Level.INFO, NAME_Class, "send()", ex.getMessage(), ex );
             }
-//        }
-        
-        
+
+        } else {
+
+            //Register the relay
+            thePortRouter.registerHandler(passedId, rootHostId, this);            
+
+        }
+       
         return true;
     }
 

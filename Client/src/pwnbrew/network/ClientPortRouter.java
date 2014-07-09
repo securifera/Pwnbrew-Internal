@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
-* ClientPortRouter.java
-*
-* Created on June 3, 2013, 10:46:36 PM
-*/
-
 package pwnbrew.network;
 
 import java.io.IOException;
