@@ -38,8 +38,10 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-
-import java.io.IOException;
+import pwnbrew.StubConfig;
+import pwnbrew.manager.PortManager;
+import pwnbrew.network.PortRouter;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
@@ -48,15 +50,42 @@ import java.io.IOException;
 @SuppressWarnings("ucd")
 public final class HelloAck extends ControlMessage {
 
+    //Class name
+    private static final String NAME_Class = HelloAck.class.getSimpleName();
+     
     // ==========================================================================
     /**
-     * Constructor
-     *
-     * @param dstHostId
-     * @throws java.io.IOException
+     *  Constructor 
+     * 
+     * @param passedId 
+     */
+    public HelloAck( byte[] passedId ) {
+       super(passedId );
+    }
+      
+    //===============================================================
+    /**
+    *   Performs the logic specific to the message.
+    *
+     * @param passedManager
     */
-    public HelloAck( int dstHostId ) throws IOException {
-       super( dstHostId );
+    @Override
+    public void evaluate( PortManager passedManager ) {   
+        
+        //Get the address and connect    
+        StubConfig theConfig = StubConfig.getConfig();
+        PortRouter aPR = passedManager.getPortRouter( theConfig.getSocketPort() );
+        if( aPR != null ){
+
+            //Get the handler
+            SocketChannelHandler aSCH = aPR.getSocketChannelHandler();
+
+            //Set the wrapping flag
+            if( aSCH != null )
+                aSCH.setWrapping(false);            
+           
+        }    
+
     }
 
-}/* END CLASS HelloAck */
+}

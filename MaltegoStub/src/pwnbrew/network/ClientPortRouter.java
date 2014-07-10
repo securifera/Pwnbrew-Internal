@@ -58,6 +58,8 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
+import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.StubHello;
 import pwnbrew.selector.ConnectHandler;
 import pwnbrew.selector.SocketChannelHandler;
 
@@ -151,15 +153,6 @@ public class ClientPortRouter extends PortRouter {
 
         return true;
     }
-    
-//    //===============================================================
-//    /**
-//     * Set reconnect enable
-//     * @param passedFlag
-//     */
-//    public void setReconnectFlag(boolean passedFlag ){
-//        reconnectEnable = passedFlag;
-//    }
 
     //===============================================================
     /**
@@ -205,8 +198,32 @@ public class ClientPortRouter extends PortRouter {
 
                 } else {
 
-                    //Set connected to false if the server socket is null
-                    if( serverSCH == null ){
+//                    //Set connected to false if the server socket is null
+//                    if( serverSCH == null ){
+//                        connected = false;
+//                    }
+                    
+                    if( serverSCH != null ){
+
+                        //Get the message sender
+                        try {
+                            
+                            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+                            if( aCMManager == null ){
+                                aCMManager = ControlMessageManager.initialize(theCommManager);
+                            }
+                            
+                            //Create a hello message and send it
+                            StubHello helloMessage = new StubHello( Constants.SERVER_ID );
+                            aCMManager.send( helloMessage );
+                            
+                        } catch(IOException ex){
+                            throw new LoggableException(ex);
+                        }
+
+
+                    } else {
+                        //Set connected to false if the server socket is null
                         connected = false;
                     }
 
