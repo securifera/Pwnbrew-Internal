@@ -71,6 +71,7 @@ import pwnbrew.network.PortWrapper;
 import pwnbrew.network.control.messages.ResetId;
 import pwnbrew.network.control.messages.SetRelayWrap;
 import pwnbrew.network.control.messages.StageFlag;
+import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.socket.SocketChannelWrapper;
 import pwnbrew.utilities.SocketUtilities;
 
@@ -401,7 +402,25 @@ public class SocketChannelHandler implements Selectable {
                             resetIdMsg.append(aByteBuffer);
 
                             //Queue to be sent
-                            queueBytes(Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()));
+                            byte[] msgBytes = Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position());
+
+                            //If wrapping is necessary then wrap it
+                            if( isWrapping() ){
+                                PortWrapper aWrapper = DataManager.getPortWrapper( getPort() );        
+                                if( aWrapper != null ){
+
+                                    //Set the staged wrapper if necessary
+                                    if( aWrapper instanceof ServerHttpWrapper ){
+                                        ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+                                        aSrvWrapper.setStaging( isStaged());
+                                    }
+
+                                    ByteBuffer anotherBB = aWrapper.wrapBytes( msgBytes );  
+                                    msgBytes = Arrays.copyOf(anotherBB.array(), anotherBB.position());
+                                } 
+                            }
+
+                            queueBytes(msgBytes);
                             return false;
                         }
                     }
