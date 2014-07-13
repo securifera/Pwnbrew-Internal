@@ -38,81 +38,23 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
- * OptionsJPanel.java
- *
- * Created on June 23, 2013, 2:12 PM
- */
-package pwnbrew.gui.panels.options;
+* PanelListener.java
+*
+* Created on Oct 21, 2013, 8:52:28 AM
+*/
 
-import javax.swing.JPanel;
-import pwnbrew.gui.panels.PanelListener;
+package pwnbrew.generic.gui;
 
 /**
  *
  */
- public abstract class OptionsJPanel extends JPanel{
-     
-    private final String thePanelName;
-    private volatile boolean dirtyFlag = false;
-    protected final PanelListener theListener;
+public interface PanelListener {
 
-    abstract public void saveChanges();
-
-    //==============================================================
-    /**
-     * Constructor
-     * @param panelName
-     * @param passedListener 
-     */
-    public OptionsJPanel( String panelName, PanelListener passedListener) {
-        thePanelName = panelName;
-        theListener = passedListener;
-    }  
-    
-    //===============================================================
-    /**
-     * 
-     * @return 
-    */
-    @Override
-    public String getName() {
-        return thePanelName;
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @return 
-    */
-    public boolean isDirty() {
-        return dirtyFlag;
-    }
-    
-    //===============================================================
+    //=======================================================================
     /**
      * 
      * @param passedBool 
      */
-    public void setDirtyFlag( boolean passedBool ){
-        dirtyFlag = passedBool;
-    }
-    
-    //===============================================================
-    /**
-    * Sets the save button enablement
-     * @param passedBool
-    */
-    public void setSaveButton(boolean passedBool){
-        if(!isDirty()){
-            setDirtyFlag( true );
-            theListener.valueChanged(passedBool);
-        }
-    }
+    public void valueChanged(boolean passedBool);
 
-    //===============================================================
-    /**
-     * 
-     */
-    public void doClose() {}
-    
 }

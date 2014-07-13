@@ -36,83 +36,53 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
+package pwnbrew.network.control.messages;
 
-/*
- * OptionsJPanel.java
- *
- * Created on June 23, 2013, 2:12 PM
- */
-package pwnbrew.gui.panels.options;
-
-import javax.swing.JPanel;
-import pwnbrew.gui.panels.PanelListener;
+import java.io.UnsupportedEncodingException;
+import pwnbrew.network.ControlOption;
+import pwnbrew.network.control.messages.ControlMessage;
 
 /**
  *
+ *  
  */
- public abstract class OptionsJPanel extends JPanel{
-     
-    private final String thePanelName;
-    private volatile boolean dirtyFlag = false;
-    protected final PanelListener theListener;
-
-    abstract public void saveChanges();
-
-    //==============================================================
+public final class JarItemMsg extends ControlMessage{ 
+    
+    private static final byte OPTION_JAR_NAME = 32;
+    private static final byte OPTION_JAR_TYPE = 33;
+    private static final byte OPTION_JVM_VERSION = 34;
+    private static final byte OPTION_JAR_VERSION = 35;
+    
+    // ==========================================================================
     /**
      * Constructor
-     * @param panelName
-     * @param passedListener 
-     */
-    public OptionsJPanel( String panelName, PanelListener passedListener) {
-        thePanelName = panelName;
-        theListener = passedListener;
-    }  
-    
-    //===============================================================
-    /**
-     * 
-     * @return 
+     *
+     * @param dstHostId
+     * @param passedName
+     * @param passedType
+     * @param passedJvmVersion
+     * @param passedJarVersion
+     * @throws java.io.UnsupportedEncodingException
     */
-    @Override
-    public String getName() {
-        return thePanelName;
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @return 
-    */
-    public boolean isDirty() {
-        return dirtyFlag;
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @param passedBool 
-     */
-    public void setDirtyFlag( boolean passedBool ){
-        dirtyFlag = passedBool;
-    }
-    
-    //===============================================================
-    /**
-    * Sets the save button enablement
-     * @param passedBool
-    */
-    public void setSaveButton(boolean passedBool){
-        if(!isDirty()){
-            setDirtyFlag( true );
-            theListener.valueChanged(passedBool);
-        }
+    public JarItemMsg( int dstHostId, String passedName, String passedType, String passedJvmVersion, String passedJarVersion ) throws UnsupportedEncodingException {
+        super( dstHostId );
+        
+        byte[] tempBytes = passedName.getBytes("US-ASCII");
+        ControlOption aTlv = new ControlOption( OPTION_JAR_NAME, tempBytes);
+        addOption(aTlv);
+        
+        tempBytes = passedType.getBytes("US-ASCII");
+        aTlv = new ControlOption( OPTION_JAR_TYPE, tempBytes);
+        addOption(aTlv);
+        
+        tempBytes = passedJvmVersion.getBytes("US-ASCII");
+        aTlv = new ControlOption( OPTION_JVM_VERSION, tempBytes);
+        addOption(aTlv);
+        
+        tempBytes = passedJarVersion.getBytes("US-ASCII");
+        aTlv = new ControlOption( OPTION_JAR_VERSION, tempBytes);
+        addOption(aTlv);
+ 
     }
 
-    //===============================================================
-    /**
-     * 
-     */
-    public void doClose() {}
-    
 }

@@ -37,82 +37,82 @@ The copyright on this package is held by Securifera, Inc
 */
 
 
-/*
- * OptionsJPanel.java
- *
- * Created on June 23, 2013, 2:12 PM
- */
-package pwnbrew.gui.panels.options;
+package pwnbrew.misc;
 
-import javax.swing.JPanel;
-import pwnbrew.gui.panels.PanelListener;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
+import javax.swing.filechooser.FileFilter;
 
 /**
  *
+ *  
  */
- public abstract class OptionsJPanel extends JPanel{
-     
-    private final String thePanelName;
-    private volatile boolean dirtyFlag = false;
-    protected final PanelListener theListener;
+public class FileFilterImp extends FileFilter implements FilenameFilter{
 
-    abstract public void saveChanges();
+    private final ArrayList<String> extList = new ArrayList<>();
 
-    //==============================================================
-    /**
-     * Constructor
-     * @param panelName
-     * @param passedListener 
-     */
-    public OptionsJPanel( String panelName, PanelListener passedListener) {
-        thePanelName = panelName;
-        theListener = passedListener;
-    }  
-    
-    //===============================================================
+    //====================================================================
     /**
      * 
+     * @param passedExt 
+     */
+    public void addExt(String passedExt){
+       extList.add(passedExt);
+    }
+
+    
+    //======================================================================
+    /**
+     * 
+     * @param file
+     * @return 
+     */
+    @Override
+    public boolean accept(File file){
+
+        boolean passed = false;
+        String fileName = file.getName().toLowerCase();
+        
+        //If passes the ext filter then set to true
+        for( String ext : extList)
+           if(fileName.endsWith(ext))
+               passed = true;
+           
+        if(file.isDirectory())
+           passed = true;
+                
+        return passed;
+    }
+
+    // ===============================================
+    /**
+    * {@inheritDoc }
      * @return 
     */
     @Override
-    public String getName() {
-        return thePanelName;
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @return 
-    */
-    public boolean isDirty() {
-        return dirtyFlag;
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @param passedBool 
-     */
-    public void setDirtyFlag( boolean passedBool ){
-        dirtyFlag = passedBool;
-    }
-    
-    //===============================================================
-    /**
-    * Sets the save button enablement
-     * @param passedBool
-    */
-    public void setSaveButton(boolean passedBool){
-        if(!isDirty()){
-            setDirtyFlag( true );
-            theListener.valueChanged(passedBool);
-        }
+    public String getDescription() {
+       return " *." + extList.toString();
     }
 
-    //===============================================================
+    // ===============================================
     /**
      * 
+     * @param dir
+     * @param name
+     * @return 
      */
-    public void doClose() {}
-    
+    @Override
+    public boolean accept(File dir, String name) {
+        boolean passed = false;
+        name = name.toLowerCase();
+
+        //If passes the ext filter then set to true
+        for( String ext : extList)
+           if(name.endsWith(ext))
+               passed = true;
+        
+        return passed;
+    }
+
 }

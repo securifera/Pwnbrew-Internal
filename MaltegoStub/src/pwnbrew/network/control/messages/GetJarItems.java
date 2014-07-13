@@ -35,84 +35,22 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-
-
-/*
- * OptionsJPanel.java
- *
- * Created on June 23, 2013, 2:12 PM
- */
-package pwnbrew.gui.panels.options;
-
-import javax.swing.JPanel;
-import pwnbrew.gui.panels.PanelListener;
+package pwnbrew.network.control.messages;
 
 /**
  *
+ * @author Securifera
  */
- public abstract class OptionsJPanel extends JPanel{
-     
-    private final String thePanelName;
-    private volatile boolean dirtyFlag = false;
-    protected final PanelListener theListener;
-
-    abstract public void saveChanges();
-
-    //==============================================================
+public class GetJarItems extends ControlMessage{ // NO_UCD (use default)
+    
+    // ==========================================================================
     /**
      * Constructor
-     * @param panelName
-     * @param passedListener 
-     */
-    public OptionsJPanel( String panelName, PanelListener passedListener) {
-        thePanelName = panelName;
-        theListener = passedListener;
-    }  
-    
-    //===============================================================
-    /**
-     * 
-     * @return 
+     *
+     * @param dstHostId
     */
-    @Override
-    public String getName() {
-        return thePanelName;
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @return 
-    */
-    public boolean isDirty() {
-        return dirtyFlag;
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @param passedBool 
-     */
-    public void setDirtyFlag( boolean passedBool ){
-        dirtyFlag = passedBool;
-    }
-    
-    //===============================================================
-    /**
-    * Sets the save button enablement
-     * @param passedBool
-    */
-    public void setSaveButton(boolean passedBool){
-        if(!isDirty()){
-            setDirtyFlag( true );
-            theListener.valueChanged(passedBool);
-        }
+    public GetJarItems( int dstHostId ) {
+        super( dstHostId );             
     }
 
-    //===============================================================
-    /**
-     * 
-     */
-    public void doClose() {}
-    
 }

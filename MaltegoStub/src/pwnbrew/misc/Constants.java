@@ -86,6 +86,9 @@ abstract public class Constants {
     public static final String HOST_IMG_STR = "computer_small.png";
     public static final String DIS_HOST_IMG_STR = "dis_computer_small.png";
     
+    public static final String DELETE_IMG_STR = "delete_icon.png";
+    public static final String ADD_IMAGE_STR = "add.png";
+    
     public static final String SERVER_IP = "serverip";
     public static final String SERVER_PORT = "serverport";
     public static final String RELAY_PORT = "relayport";

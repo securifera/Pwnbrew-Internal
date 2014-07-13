@@ -83,6 +83,7 @@ public class Utilities {
     public static final String WINDOWS_LINE_SEPARATOR = "\r\n";
     public static final String UNIX_LINE_SEPARATOR = "\n";
     
+    
     //Local OS values...
     public static final String OS_NAME    = System.getProperty( PROPERTY_OsName ).toLowerCase();
     public static final String JAVA_ARCH    = System.getProperty( PROPERTY_OsArch ).toLowerCase();
@@ -803,5 +804,4 @@ public class Utilities {
           }
        }
     }
-
 }

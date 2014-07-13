@@ -35,84 +35,62 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
+package pwnbrew.network.control.messages;
 
-
-/*
- * OptionsJPanel.java
- *
- * Created on June 23, 2013, 2:12 PM
- */
-package pwnbrew.gui.panels.options;
-
-import javax.swing.JPanel;
-import pwnbrew.gui.panels.PanelListener;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import pwnbrew.logging.Log;
+import pwnbrew.manager.CommManager;
+import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.ControlMessage;
+import pwnbrew.utilities.Utilities;
+import pwnbrew.xmlBase.JarItem;
 
 /**
  *
+ * @author Securifera
  */
- public abstract class OptionsJPanel extends JPanel{
-     
-    private final String thePanelName;
-    private volatile boolean dirtyFlag = false;
-    protected final PanelListener theListener;
-
-    abstract public void saveChanges();
-
-    //==============================================================
+public class GetJarItems extends ControlMessage{ // NO_UCD (use default)
+    
+    private static final String NAME_Class = GetJarItems.class.getSimpleName();
+    
+    // ==========================================================================
     /**
      * Constructor
-     * @param panelName
-     * @param passedListener 
-     */
-    public OptionsJPanel( String panelName, PanelListener passedListener) {
-        thePanelName = panelName;
-        theListener = passedListener;
-    }  
-    
+     *
+     * @param passedId
+    */
+    public GetJarItems(byte[] passedId ) {
+        super( passedId );
+    }
+  
     //===============================================================
     /**
-     * 
-     * @return 
+    *   Performs the logic specific to the message.
+    *
+     * @param passedManager
     */
     @Override
-    public String getName() {
-        return thePanelName;
-    }
+    public void evaluate( CommManager passedManager ) {     
     
-    //===============================================================
-    /**
-     * 
-     * @return 
-    */
-    public boolean isDirty() {
-        return dirtyFlag;
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @param passedBool 
-     */
-    public void setDirtyFlag( boolean passedBool ){
-        dirtyFlag = passedBool;
-    }
-    
-    //===============================================================
-    /**
-    * Sets the save button enablement
-     * @param passedBool
-    */
-    public void setSaveButton(boolean passedBool){
-        if(!isDirty()){
-            setDirtyFlag( true );
-            theListener.valueChanged(passedBool);
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager != null ){
+            List<JarItem> jarList = new ArrayList<>();
+            jarList.addAll( Utilities.getJarItems());
+
+            //Get the table model
+            try {
+                for( JarItem anItem : jarList ){
+                    JarItemMsg aMsg = new JarItemMsg( getSrcHostId(), anItem.toString(), anItem.getType(), anItem.getJvmMajorVersion(), anItem.getVersion());
+                    aCMManager.send(aMsg);
+                }
+            } catch(UnsupportedEncodingException ex){
+                Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );  
+            }
         }
+          
     }
 
-    //===============================================================
-    /**
-     * 
-     */
-    public void doClose() {}
-    
 }

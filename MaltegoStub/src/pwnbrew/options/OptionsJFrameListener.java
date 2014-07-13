@@ -36,48 +36,17 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-/*
-* GetCount.java
-*
-*/
 
-package pwnbrew.network.control.messages;
-
-import pwnbrew.misc.SocketUtilities;
-import pwnbrew.network.ControlOption;
+package pwnbrew.options;
 
 /**
  *
  *  
  */
-public final class GetCount extends ControlMessage{ // NO_UCD (use default)
-    
-    private static final byte OPTION_COUNT_ID = 80;
-    private static final byte OPTION_OPTIONAL_ID = 81;
-    
-    public static final byte HOST_COUNT = 20;
-    public static final byte NIC_COUNT = 21;
+public interface OptionsJFrameListener {
 
-    // ==========================================================================
-    /**
-     * Constructor
-     *
-     * @param dstHostId
-     * @param passedType
-     * @param passedId
-    */
-    public GetCount( int dstHostId, int passedType, String passedId ) {
-        super( dstHostId );
-        
-        //Add file type
-        byte[] tempBytes = SocketUtilities.intToByteArray(passedType);
-        ControlOption aTlv = new ControlOption( OPTION_COUNT_ID, tempBytes);
-        addOption(aTlv);
-        
-        //Add file type
-        tempBytes = SocketUtilities.intToByteArray( Integer.parseInt( passedId) );
-        aTlv = new ControlOption( OPTION_OPTIONAL_ID, tempBytes);
-        addOption(aTlv);
-    }
+    public void getJarItems();    
 
+    public void beNotified();
+    
 }

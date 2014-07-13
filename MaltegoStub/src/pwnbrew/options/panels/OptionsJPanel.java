@@ -35,17 +35,10 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-
-
-/*
- * OptionsJPanel.java
- *
- * Created on June 23, 2013, 2:12 PM
- */
-package pwnbrew.gui.panels.options;
+package pwnbrew.options.panels;
 
 import javax.swing.JPanel;
-import pwnbrew.gui.panels.PanelListener;
+import pwnbrew.generic.gui.PanelListener;
 
 /**
  *

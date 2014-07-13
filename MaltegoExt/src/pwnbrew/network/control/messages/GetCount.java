@@ -55,6 +55,7 @@ import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.tasks.TaskManager;
 import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.ServerConfig;
 
 /**
@@ -186,7 +187,6 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
 
                     }
                     break;
-                
                 default:
                     Log.log(Level.WARNING, NAME_Class, "evaluate()", "Unknown count id type.", null );    
                     return;                    
