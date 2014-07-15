@@ -39,7 +39,13 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.options.panels;
 
 import java.awt.Color;
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+import javax.swing.BorderFactory;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import pwnbrew.generic.gui.PanelListener;
 import pwnbrew.misc.Constants;
@@ -53,10 +59,15 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
 
     private JFileChooser theJarChooser = null;    
     private final FileFilterImp theJarFilter = new FileFilterImp();
-    private static final String JAR_EXT = "jar";
     private JarTable theJarTable;
     
     private static final String NAME_Class = JarLibraryPanel.class.getSimpleName();
+    
+    private static final String JAR_EXT = "jar";
+    public static final String PAYLOAD_TYPE = "PAYLOAD";
+    public static final String STAGER_TYPE = "STAGER";
+    public static final String LOCAL_EXTENSION_TYPE = "LOCAL EXTENSION";
+    public static final String REMOTE_EXTENSION_TYPE = "REMOTE EXTENSION";
     
 
     //===================================================================
@@ -184,165 +195,47 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
     */
     private void selectJar() {
         
-//        //Have the user manually put in the server ip
-//        JComboBox aCB = new JComboBox();
-//        aCB.setRenderer(new pwnbrew.generic.gui.DefaultCellBorderRenderer(BorderFactory.createEmptyBorder(0, 4, 0, 0)));
-//        List<String> jarTypes = JarItem.getTypes();
-//        for( String aJarType : jarTypes )
-//            aCB.addItem(aJarType);
-//        
-//        Object[] objMsg = new Object[]{ "Please select the type of JAR being imported.", " ", aCB};
-//        Object retVal = JOptionPane.showOptionDialog(null, objMsg, "Select JAR type",
-//               JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
-//
-//        //Check that they clicked ok
-//        if((Integer)retVal == JOptionPane.OK_OPTION ) {
-//            
-//            String selVal = (String) aCB.getSelectedItem();
-//            File userSelectedFile = null;
-//
-//            int returnVal = theJarChooser.showDialog( this, "Select JAR File" ); //Show the dialogue
-//            switch( returnVal ) {
-//
-//               case JFileChooser.CANCEL_OPTION: //If the user canceled the selecting...
-//                  break;
-//               case JFileChooser.ERROR_OPTION: //If the dialogue was dismissed or an error occurred...
-//                  break; //Do nothing
-//
-//               case JFileChooser.APPROVE_OPTION: //If the user approved the selection...
-//                  userSelectedFile = theJarChooser.getSelectedFile(); //Get the files the user selected
-//                  break;
-//               default:
-//                  break;
-//
-//            }
-//
-//            //Check if the returned file is valid
-//            if(userSelectedFile == null  || userSelectedFile.isDirectory() || !userSelectedFile.canRead()){
-//                return;
-//            }
-//            
-//            //Create a FileContentRef
-//            JarItem aJarItem = null;
-//            try {
-//                aJarItem = Utilities.getJavaItem(userSelectedFile, selVal);
-//            } catch (JarItemException ex) {
-//                JOptionPane.showMessageDialog( this, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE );           
-//                return;
-//            }
-//
-//
-//            //See if the table already contains the entry
-//            DefaultTableModel theModel = (DefaultTableModel) theJarTable.getModel();
-//            JarItem currentItem = null;
-//            int rowToDelete = -1;
-//            for( int i =0; i < theModel.getRowCount(); i++ ){
-//
-//                //Set the JarItem
-//                currentItem = (JarItem)theModel.getValueAt(i, 0);
-//
-//                //Check if the jvm version is the same first
-//                if( aJarItem.getJvmMajorVersion().equals(currentItem.getJvmMajorVersion()) && 
-//                        aJarItem.getType().equals( currentItem.getType()) ){
-//
-//                    //Only one Stager and Payload are allowed
-//                    if( aJarItem.getType().equals(JarItem.STAGER_TYPE) || aJarItem.getType().equals(JarItem.PAYLOAD_TYPE)){
-//                        rowToDelete = i;
-//                        break;
-//                    //Check if one with the same name exists
-//                    } else if( aJarItem.getName().equals(currentItem.getName() )) {
-//                        rowToDelete = i;
-//                        break;
-//                    }
-//
-//                }
-//
-//                //Reset value
-//                currentItem = null;
-//            }
-//
-//            //If a similar library already exist
-//            if( currentItem != null ){                        
-//                String theMessage = new StringBuilder("Would you like to replace the existing ")
-//                        .append(currentItem.getType()).append(" named \"")
-//                        .append(currentItem.getName()).append("\" versioned \"")
-//                        .append(currentItem.getVersion()).append("\"?").toString();
-//                int dialogValue = JOptionPane.showConfirmDialog(this, theMessage, "Replace JAR Library?", JOptionPane.YES_NO_OPTION);
-//
-//                //Add the JAR to utilities
-//                if ( dialogValue == JOptionPane.YES_OPTION ){
-//                    deleteJarItem(rowToDelete);                    
-//                } else {
-//                    return;
-//                }
-//            }
-//            
-//            //Create a list out of the array
-//            List theObjList = new ArrayList();
-//            theObjList.add(userSelectedFile);
-//            theObjList.add(aJarItem);
-//
-////            GenericProgressDialog pDialog = new GenericProgressDialog(null, "Importing files to library...", this, false, theObjList);
-////            pDialog.setVisible(true);       
-//        } 
-                
-    }/* END selectJar() */
+        //Have the user manually put in the server ip
+        JComboBox aCB = new JComboBox();
+        aCB.setRenderer(new pwnbrew.generic.gui.DefaultCellBorderRenderer(BorderFactory.createEmptyBorder(0, 4, 0, 0)));
+        List<String> jarTypes = Arrays.asList( new String[]{ PAYLOAD_TYPE, STAGER_TYPE, LOCAL_EXTENSION_TYPE, REMOTE_EXTENSION_TYPE} );
+        for( String aJarType : jarTypes )
+            aCB.addItem(aJarType);
+        
+        Object[] objMsg = new Object[]{ "Please select the type of JAR being imported.", " ", aCB};
+        Object retVal = JOptionPane.showOptionDialog(null, objMsg, "Select JAR type",
+               JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
 
-//    //========================================================================
-//    /**
-//     * 
-//     * @param progressListener
-//     * @param theObjList
-//     * @return 
-//     */
-//    @Override
-//    public String executeFunction(ProgressListener progressListener, List<?> theObjList) {
-//        
-//        String retVal = null;
-//        if( theObjList != null ) { //If the user selected any files...
-//            
-//            File aFile = (File)theObjList.get(0);
-//            JarItem aJarItem = (JarItem)theObjList.get(1);                    
-//
-//            try {
-//
-//                //Add the jar
-//                Utilities.addJarItem( aJarItem );
-//
-//                //Write the file to disk
-//                String fileHash = FileUtilities.createHashedFile( aFile, progressListener );
-//                if( fileHash != null ) {
-//
-//                    //Create a FileContentRef
-//                    aJarItem.setFileHash( fileHash ); //Set the file's hash
-//
-//                    //Write to disk
-//                    aJarItem.writeSelfToDisk();
-//
-//                    DefaultTableModel theModel = (DefaultTableModel) theJarTable.getModel();
-//                    theModel.addRow( new Object[]{ aJarItem, 
-//                            aJarItem.getType(), aJarItem.getJvmMajorVersion(), aJarItem.getVersion() });
-//
-//                    //If it is a local extension then load it
-//                    if( aJarItem.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
-//
-//                        //Load the jar
-//                        File libraryFile = new File( Directories.getFileLibraryDirectory(), aJarItem.getFileHash() ); //Create a File to represent the library file to be copied
-//                        List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
-//                        for( Class aClass : theClasses )
-//                            addClassToMap(aClass);                            
-//                    }
-//
-//                } 
-//
-//            } catch ( NoSuchAlgorithmException | IOException ex) {
-//                JOptionPane.showMessageDialog( this, ex.getMessage(), "Could not import the JAR library.", JOptionPane.ERROR_MESSAGE );
-//                retVal = "Could not import the JAR library.";
-//            }
-//            
-//        }
-//        return retVal;
-//    }
+        //Check that they clicked ok
+        if((Integer)retVal == JOptionPane.OK_OPTION ) {
+            
+            String selVal = (String) aCB.getSelectedItem();
+            File userSelectedFile = null;
+
+            int returnVal = theJarChooser.showDialog( this, "Select JAR File" ); //Show the dialogue
+            switch( returnVal ) {
+
+               case JFileChooser.CANCEL_OPTION: //If the user canceled the selecting...
+                  break;
+               case JFileChooser.ERROR_OPTION: //If the dialogue was dismissed or an error occurred...
+                  break; //Do nothing
+
+               case JFileChooser.APPROVE_OPTION: //If the user approved the selection...
+                  userSelectedFile = theJarChooser.getSelectedFile(); //Get the files the user selected
+                  break;
+               default:
+                  break;
+
+            }
+
+            //Check if the returned file is valid
+            if(userSelectedFile == null  || userSelectedFile.isDirectory() || !userSelectedFile.canRead())
+                return;
+            
+            //Queue the file to be sent
+            theListener.sendJarFile( userSelectedFile, selVal);
+        }
+    }
 
     //========================================================================
     /**
@@ -353,14 +246,41 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
     @Override
     public void deleteJarItem(int anInt ) {
         
-//        //Get the model and remove the item
-//        DefaultTableModel theTableModel = (DefaultTableModel) theJarTable.getModel();    
-//        JarItem aJarItem = (JarItem)theTableModel.getValueAt(anInt, 0);
-//        theTableModel.removeRow(anInt);
-//                    
-//        Utilities.removeJarItem(aJarItem);
-//        aJarItem.deleteSelfFromDirectory( new File( Directories.getJarLibPath() ));
+        //Get the model and remove the item
+        DefaultTableModel theTableModel = (DefaultTableModel) theJarTable.getModel();    
+        String jarName = (String) theTableModel.getValueAt(anInt, 0);
+        String jarType = (String) theTableModel.getValueAt(anInt, 1);
+        String jvmVersion = (String) theTableModel.getValueAt(anInt, 2);
+        String jarVersion = (String) theTableModel.getValueAt(anInt, 3);
+                          
+        theListener.deleteJarItem(jarName, jarType, jvmVersion, jarVersion);        
+    }
+    
+    //========================================================================
+    /**
+     * Delete jar item entry
+     * 
+     * @param jarName
+     * @param jarType
+     * @param jvmVersion
+     * @param jarVersion
+     */
+    public synchronized void deleteJarItemFromTable(String jarName, String jarType, String jvmVersion, String jarVersion ) {
         
+        //Get the model and remove the item
+        DefaultTableModel theTableModel = (DefaultTableModel) theJarTable.getModel();   
+        int rowCount = theTableModel.getRowCount();
+        for( int i = 0; i < rowCount; i++ ){
+            if( jarName.equals((String) theTableModel.getValueAt(i, 0)) &&
+                jarType.equals((String) theTableModel.getValueAt(i, 1)) &&
+                jvmVersion.equals((String) theTableModel.getValueAt(i, 2)) &&
+                jarVersion.equals((String) theTableModel.getValueAt(i, 3))){
+                
+                //Remove from table
+                theTableModel.removeRow(i);
+                break;
+            }
+        }     
     }
 
     //========================================================================
@@ -376,9 +296,13 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
         theModel.addRow( new Object[]{ theJarName, theJarType, theJvmVersion, theJarVersion });
     }
 
+    //========================================================================
+    /**
+     * 
+     */
     @Override
     public void saveChanges() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
     
 }

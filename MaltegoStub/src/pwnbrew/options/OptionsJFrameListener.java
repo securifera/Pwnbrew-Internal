@@ -39,6 +39,8 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.options;
 
+import java.io.File;
+
 /**
  *
  *  
@@ -48,5 +50,9 @@ public interface OptionsJFrameListener {
     public void getJarItems();    
 
     public void beNotified();
+
+    public void sendDeleteJarItemMsg(String jarName, String jarType, String jvmVersion, String jarVersion);
+
+    public void sendJarFile(File userSelectedFile, String selVal);
     
 }

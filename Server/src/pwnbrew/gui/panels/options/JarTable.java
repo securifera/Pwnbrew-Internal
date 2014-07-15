@@ -38,31 +38,17 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.gui.panels.options;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.text.ParseException;
-import java.util.Comparator;
-import java.util.Date;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableRowSorter;
-import pwnbrew.misc.Constants;
-import pwnbrew.network.control.messages.FileOperation;
-import pwnbrew.network.control.messages.FileSystemMsg;
-import pwnbrew.xmlBase.JarItem;
 
 /**
  *
@@ -99,10 +85,7 @@ public class JarTable extends JTable {
         //set the model and remove the grid lines
         setModel(theTableModel);
         setRowHeight(19);
-//        TableColumnModel theCM = getColumnModel();
-        
-        
-//        setShowGrid(false);
+
         setAutoCreateRowSorter(true);
         TableRowSorter theRowSorter = (TableRowSorter) getRowSorter();
         setRowSorter(theRowSorter);
@@ -113,24 +96,7 @@ public class JarTable extends JTable {
         for(int i=0; i < getColumnCount(); i++){
             getColumnModel().getColumn(i).setCellRenderer( centerRenderer );
         }
-            
-//         //Set the size comparator
-//        theRowSorter.setComparator(3, new Comparator() {
-//
-//            @Override
-//            public int compare(Object o1, Object o2) {
-//                if( o1 instanceof Long && o2 instanceof Long )
-//                    return ((Long)o1).compareTo((Long)o2);                
-//                else if( o1 instanceof String && o2 instanceof String)
-//                    return ((String)o1).compareTo((String)o2);
-//                else if( o1 instanceof String )
-//                    return -1;
-//                else 
-//                    return 1;
-//                
-//            }
-//        });
-//        
+   
         //Set the background
         setBackground( Color.WHITE );
             

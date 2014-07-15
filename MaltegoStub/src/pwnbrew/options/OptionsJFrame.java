@@ -40,7 +40,9 @@ package pwnbrew.options;
 
 import java.awt.Cursor;
 import java.awt.Frame;
+import java.awt.Image;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
@@ -49,6 +51,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 import pwnbrew.generic.gui.PanelListener;
+import pwnbrew.misc.Constants;
+import pwnbrew.misc.Utilities;
 import pwnbrew.options.panels.JarLibraryPanel;
 import pwnbrew.options.panels.NetworkOptionsPanel;
 
@@ -121,8 +125,11 @@ public class OptionsJFrame extends JFrame implements PanelListener {
         };
         optionsTabbedPane.addChangeListener(changeListener);
         
-        //Get the jar items
-        theListener.getJarItems();
+        //Set the icon
+        Image appIcon = Utilities.loadImageFromJar( Constants.OPTIONS_IMG_STR );
+        if( appIcon != null )
+            setIconImage( appIcon );
+        
     }
 
     /**
@@ -254,6 +261,30 @@ public class OptionsJFrame extends JFrame implements PanelListener {
     @Override
     public void valueChanged(boolean passedBool) {
         setSaveButton(passedBool);
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @param jarName
+     * @param jarType
+     * @param jvmVersion
+     * @param jarVersion 
+     */
+    @Override
+    public void deleteJarItem(String jarName, String jarType, String jvmVersion, String jarVersion) {
+        theListener.sendDeleteJarItemMsg(jarName, jarType, jvmVersion, jarVersion);
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @param userSelectedFile
+     * @param selVal 
+     */
+    @Override
+    public void sendJarFile(File userSelectedFile, String selVal) {
+        theListener.sendJarFile(userSelectedFile, selVal);
     }
     
     // Internal class to limit the length of the param delim fields

@@ -48,6 +48,7 @@ import java.io.UnsupportedEncodingException;
 import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
 import pwnbrew.functions.ToFileBrowser;
+import pwnbrew.functions.ToOptions;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
@@ -71,11 +72,11 @@ public final class PushFileFin extends FileMessage {
      * @throws java.io.UnsupportedEncodingException
     */
     public PushFileFin( int taskId, String hashFileNameStr, int dstHostId ) throws UnsupportedEncodingException  {
-       super(taskId, dstHostId  );       
-         
-       byte[] strBytes = hashFileNameStr.getBytes("US-ASCII");
-       ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);
-       addOption(aTlv);
+        super(taskId, dstHostId  );       
+
+        byte[] strBytes = hashFileNameStr.getBytes("US-ASCII");
+        ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);
+        addOption(aTlv);
        
     }
     
@@ -87,7 +88,7 @@ public final class PushFileFin extends FileMessage {
      * @throws pwnbrew.log.LoggableException
     */
     public PushFileFin( byte[] msgId ) throws LoggableException  {
-       super( msgId );
+        super( msgId );
     }
     
       //=========================================================================
@@ -104,12 +105,11 @@ public final class PushFileFin extends FileMessage {
         if( !super.setOption(tempTlv)){
             try {
 
-                if( tempTlv.getType() == OPTION_HASH_FILENAME){
+                if( tempTlv.getType() == OPTION_HASH_FILENAME)
                     hashFilenameStr = new String( tempTlv.getValue(), "US-ASCII");                   
-                } else {
+                else
                     retVal = false;
-                }
-
+                
             } catch (UnsupportedEncodingException ex) {
                 ex = null;
             }
@@ -135,7 +135,10 @@ public final class PushFileFin extends FileMessage {
             if( aFunction instanceof ToFileBrowser ){
                 ToFileBrowser tfbFunc = (ToFileBrowser)aFunction;
                 tfbFunc.refreshFileSystemJTree();
-            }            
+            } else if( aFunction instanceof ToOptions ){
+                ToOptions optionFunc = (ToOptions)aFunction;
+                optionFunc.jarFileSent(hashFilenameStr, getTaskId());
+            }           
         }
        
     }

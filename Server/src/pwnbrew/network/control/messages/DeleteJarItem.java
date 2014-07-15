@@ -35,36 +35,59 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
+
+/*
+* GetCount.java
+*
+*/
+
 package pwnbrew.network.control.messages;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
+import pwnbrew.misc.Directories;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.JarItem;
 
 /**
  *
- * @author Securifera
+ *  
  */
-public class GetJarItems extends ControlMessage{ // NO_UCD (use default)
-    
-    private static final String NAME_Class = GetJarItems.class.getSimpleName();
-    
+public final class DeleteJarItem extends JarItemMsg { 
+        
+     private static final String NAME_Class = DeleteJarItem.class.getSimpleName();
+     
     // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param dstHostId
+     * @param passedName
+     * @param passedType
+     * @param passedJvmVersion
+     * @param passedJarVersion
+     * @throws java.io.UnsupportedEncodingException
+    */
+    public DeleteJarItem(int dstHostId, String passedName, String passedType, String passedJvmVersion, String passedJarVersion ) throws UnsupportedEncodingException {
+        super( dstHostId, passedName, passedType, passedJvmVersion, passedJarVersion );
+    }
+    
+    // =====================================================================
     /**
      * Constructor
      *
      * @param passedId
     */
-    public GetJarItems(byte[] passedId ) {
+    public DeleteJarItem(byte[] passedId ) {
         super( passedId );
     }
-  
+    
     //===============================================================
     /**
     *   Performs the logic specific to the message.
@@ -72,24 +95,34 @@ public class GetJarItems extends ControlMessage{ // NO_UCD (use default)
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {     
+    public void evaluate( CommManager passedManager ) {
     
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
-            List<JarItem> jarList = new ArrayList<>();
-            jarList.addAll( Utilities.getJarItems());
-
-            //Get the table model
-            try {
-                for( JarItem anItem : jarList ){
-                    JarItemMsg aMsg = new JarItemMsg( getSrcHostId(), anItem.toString(), anItem.getType(), anItem.getJvmMajorVersion(), anItem.getVersion());
-                    aCMManager.send(aMsg);
-                }
-            } catch(UnsupportedEncodingException ex){
-                Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );  
+        List<JarItem> jarList = Utilities.getJarItems();
+        for( JarItem anItem : jarList){
+               
+            if( anItem.toString().equals(theJarName) &&  anItem.getType().equals(theJarType) && 
+                    anItem.getJvmMajorVersion().equals(theJvmVersion) &&
+                    anItem.getVersion().equals(theJarVersion) ){
+                Utilities.removeJarItem(anItem);
+                anItem.deleteSelfFromDirectory( new File( Directories.getJarLibPath() ));
+                break;
             }
         }
-          
+        
+        try {
+            
+            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            if( aCMManager != null ){
+                aCMManager = ControlMessageManager.initialize( passedManager );            
+            
+                //Send the msg
+                DeleteJarItem aMsg = new DeleteJarItem( getSrcHostId(), theJarName, theJarType, theJvmVersion, theJarVersion );
+                aCMManager.send(aMsg);
+            }
+            
+        } catch (IOException ex) {
+            Log.log(Level.WARNING, NAME_Class, "deleteJarItem", ex.getMessage(), ex );
+        }
     }
 
 }

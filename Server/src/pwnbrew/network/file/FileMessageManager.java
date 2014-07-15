@@ -230,16 +230,25 @@ public class FileMessageManager extends DataManager {
         
         int clientId = passedMessage.getSrcHostId();
         File aClientDir = theCommManager.getTaskManager().getHostDirectory( clientId );
-        if( aClientDir != null ){
+
         
             File libDir = null;
             int fileType = passedMessage.getFileType();
             switch(fileType){
                 case PushFile.JOB_RESULT:
+                    if( aClientDir == null )
+                        return retVal;
                     libDir = new File(aClientDir, Integer.toString(taskId));
                     break;
                 case PushFile.FILE_DOWNLOAD:
+                    if( aClientDir == null )
+                        return retVal;
                     libDir = new File(aClientDir, Integer.toString(taskId));
+                    break;
+                case PushFile.JAR_UPLOAD:
+                    File aFile = File.createTempFile("tmp", null);
+                    libDir = aFile.getParentFile();
+                    aFile.delete();
                     break;
             }
 
@@ -270,8 +279,7 @@ public class FileMessageManager extends DataManager {
                 throw new LoggableException(ex);
             }
             
-            retVal = true;
-        }
+            retVal = true;  
 
         return retVal;
 

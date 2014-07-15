@@ -36,11 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-/*
-* GetCount.java
-*
-*/
-
 package pwnbrew.network.control.messages;
 
 import pwnbrew.misc.SocketUtilities;

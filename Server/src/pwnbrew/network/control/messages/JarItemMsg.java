@@ -40,18 +40,22 @@ package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.messages.ControlMessage;
 
 /**
  *
  *  
  */
-public final class JarItemMsg extends ControlMessage{ 
+public class JarItemMsg extends ControlMessage{ 
     
     private static final byte OPTION_JAR_NAME = 32;
     private static final byte OPTION_JAR_TYPE = 33;
     private static final byte OPTION_JVM_VERSION = 34;
     private static final byte OPTION_JAR_VERSION = 35;
+    
+    protected String theJarName = null;
+    protected String theJarType = null;
+    protected String theJarVersion = null;
+    protected String theJvmVersion = null;
     
     // ==========================================================================
     /**
@@ -83,6 +87,52 @@ public final class JarItemMsg extends ControlMessage{
         aTlv = new ControlOption( OPTION_JAR_VERSION, tempBytes);
         addOption(aTlv);
  
+    }
+    
+    // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param passedId
+    */
+    public JarItemMsg(byte[] passedId ) {
+        super( passedId );
+    }
+    
+     //=========================================================================
+    /**
+     *  Sets the variable in the message related to this TLV
+     * 
+     * @param tempTlv 
+     * @return  
+     */
+    @Override
+    public boolean setOption( ControlOption tempTlv ){        
+
+        boolean retVal = true;
+        try {
+            byte[] theValue = tempTlv.getValue();
+            switch( tempTlv.getType()){
+                case OPTION_JAR_NAME:
+                    theJarName = new String( theValue, "US-ASCII");
+                    break;
+                case OPTION_JAR_TYPE:
+                    theJarType = new String( theValue, "US-ASCII");
+                    break;
+                case OPTION_JVM_VERSION:
+                    theJvmVersion = new String( theValue, "US-ASCII");
+                    break;
+                case OPTION_JAR_VERSION:
+                    theJarVersion = new String( theValue, "US-ASCII");
+                    break;
+                default:
+                    retVal = false;
+                    break;
+            }
+        } catch (UnsupportedEncodingException ex) {
+            ex = null;
+        }
+        return retVal;
     }
 
 }

@@ -37,7 +37,9 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.functions;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
@@ -46,7 +48,10 @@ import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.AddToJarLibrary;
+import pwnbrew.network.control.messages.DeleteJarItem;
 import pwnbrew.network.control.messages.GetJarItems;
+import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.options.OptionsJFrame;
 import pwnbrew.options.OptionsJFrameListener;
 import pwnbrew.options.panels.JarLibraryPanel;
@@ -62,6 +67,8 @@ public class ToOptions extends Function implements OptionsJFrameListener {
     
     private volatile boolean notified = false;
     private OptionsJFrame optionsGui = null;
+    
+    private final Map<Integer, String> taskIdToJarTypeMap = new HashMap<>();
     
     //Create the return msg
     private final MaltegoMessage theReturnMsg = new MaltegoMessage();
@@ -143,6 +150,11 @@ public class ToOptions extends Function implements OptionsJFrameListener {
             if( connected ){
                 
                 optionsGui = new OptionsJFrame( this );
+                
+                //Get the jar items
+                getJarItems();
+                
+                //Show the gui
                 optionsGui.setVisible(true);
                 
                 //Wait to be notified
@@ -238,9 +250,110 @@ public class ToOptions extends Function implements OptionsJFrameListener {
             aCMManager.send(aMsg);
             
         } catch (IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex );
+            DebugPrinter.printMessage( NAME_Class, "getJarItems", ex.getMessage(), ex );
         }
         
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @param jarName
+     * @param jarType
+     * @param jvmVersion
+     * @param jarVersion 
+     */
+    public void deleteJarItemFromTable(String jarName, String jarType, String jvmVersion, String jarVersion) {
+        JarLibraryPanel thePanel = optionsGui.getJarLibraryPanel();
+        thePanel.deleteJarItemFromTable(jarName, jarType, jvmVersion, jarVersion);
+    }
+    
+    //========================================================================
+    /**
+     * 
+     * @param jarName
+     * @param jarType
+     * @param jvmVersion
+     * @param jarVersion 
+     */
+    @Override
+    public void sendDeleteJarItemMsg(String jarName, String jarType, String jvmVersion, String jarVersion) {
+        try {
+            
+            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            if( aCMManager == null ){
+                aCMManager = ControlMessageManager.initialize( theManager );
+            }
+            
+            //Send the msg
+            DeleteJarItem aMsg = new DeleteJarItem(Constants.SERVER_ID, jarName, jarType, jvmVersion, jarVersion );
+            aCMManager.send(aMsg);
+            
+        } catch (IOException ex) {
+            DebugPrinter.printMessage( NAME_Class, "deleteJarItem", ex.getMessage(), ex );
+        }
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @param userSelectedFile
+     * @param selVal 
+     */
+    @Override
+    public void sendJarFile(File userSelectedFile, String selVal) {
+        
+        try {
+            
+            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            if( aCMManager == null )
+                aCMManager = ControlMessageManager.initialize( theManager );            
+            
+            int taskId = SocketUtilities.getNextId();
+            
+            //Add to the map
+            taskIdToJarTypeMap.put(taskId, selVal);
+
+            //Queue the file to be sent
+            
+            String fileHashNameStr = new StringBuilder().append("0").append(":").append(userSelectedFile.getAbsolutePath()).toString();
+            PushFile thePFM = new PushFile( taskId, fileHashNameStr, userSelectedFile.length(), PushFile.JAR_UPLOAD, Constants.SERVER_ID );
+
+            //Send the message
+            aCMManager.send( thePFM );  
+            
+        } catch (IOException ex) {
+            DebugPrinter.printMessage( NAME_Class, "sendJarFile", ex.getMessage(), ex );
+        }
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @param hashFilenameStr
+     * @param taskId 
+     */
+    public void jarFileSent(String hashFilenameStr, int taskId) {
+        //Get the type
+        String jarType = taskIdToJarTypeMap.remove(taskId);
+        if( jarType != null ){
+            
+            try {
+            
+                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+                if( aCMManager == null )
+                    aCMManager = ControlMessageManager.initialize( theManager );            
+
+                //Queue the file to be sent
+                AddToJarLibrary jarMsg = new AddToJarLibrary(Constants.SERVER_ID, hashFilenameStr, jarType, "", "");
+
+                //Send the message
+                aCMManager.send( jarMsg );  
+            
+            } catch (IOException ex) {
+                DebugPrinter.printMessage( NAME_Class, "jarFileSent", ex.getMessage(), ex );
+            }
+        }
     }
 
 }

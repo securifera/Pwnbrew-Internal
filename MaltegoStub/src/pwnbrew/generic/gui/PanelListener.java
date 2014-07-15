@@ -45,6 +45,8 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.generic.gui;
 
+import java.io.File;
+
 /**
  *
  */
@@ -56,5 +58,23 @@ public interface PanelListener {
      * @param passedBool 
      */
     public void valueChanged(boolean passedBool);
+
+    //=======================================================================
+    /**
+     * 
+     * @param jarName
+     * @param jarType
+     * @param jvmVersion
+     * @param jarVersion 
+     */
+    public void deleteJarItem(String jarName, String jarType, String jvmVersion, String jarVersion);
+
+    //=======================================================================
+    /**
+     * 
+     * @param userSelectedFile
+     * @param selVal 
+     */
+    public void sendJarFile(File userSelectedFile, String selVal);
 
 }

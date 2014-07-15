@@ -85,6 +85,7 @@ abstract public class Constants {
     public static final String SCHEDULE_IMG_STR = "schedule.png";
     public static final String HOST_IMG_STR = "computer_small.png";
     public static final String DIS_HOST_IMG_STR = "dis_computer_small.png";
+    public static final String OPTIONS_IMG_STR = "system.png";
     
     public static final String DELETE_IMG_STR = "delete_icon.png";
     public static final String ADD_IMAGE_STR = "add.png";

@@ -247,7 +247,7 @@ final public class FileReceiver {
         //Send fin message to host
         try {
 
-            PushFileFin finMessage = new PushFileFin( taskId, hexString, clientId );
+            PushFileFin finMessage = new PushFileFin( taskId, hexString+":"+fileLoc.getName(), clientId );
 
             //Returns if it should unlock or not
             ControlMessageManager theCMM = ControlMessageManager.getControlMessageManager();

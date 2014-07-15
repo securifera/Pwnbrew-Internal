@@ -49,17 +49,49 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
-public final class JarItemMsg extends ControlMessage{ 
+public class JarItemMsg extends ControlMessage{ 
     
-    private static final byte OPTION_JAR_NAME = 32;
-    private static final byte OPTION_JAR_TYPE = 33;
-    private static final byte OPTION_JVM_VERSION = 34;
-    private static final byte OPTION_JAR_VERSION = 35;
+    protected static final byte OPTION_JAR_NAME = 32;
+    protected static final byte OPTION_JAR_TYPE = 33;
+    protected static final byte OPTION_JVM_VERSION = 34;
+    protected static final byte OPTION_JAR_VERSION = 35;
     
-    private String theJarName = null;
-    private String theJarType = null;
-    private String theJarVersion = null;
-    private String theJvmVersion = null;
+    protected String theJarName = null;
+    protected String theJarType = null;
+    protected String theJarVersion = null;
+    protected String theJvmVersion = null;
+    
+     // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param dstHostId
+     * @param passedName
+     * @param passedType
+     * @param passedJvmVersion
+     * @param passedJarVersion
+     * @throws java.io.UnsupportedEncodingException
+    */
+    public JarItemMsg( int dstHostId, String passedName, String passedType, String passedJvmVersion, String passedJarVersion ) throws UnsupportedEncodingException {
+        super( dstHostId );
+        
+        byte[] tempBytes = passedName.getBytes("US-ASCII");
+        ControlOption aTlv = new ControlOption( OPTION_JAR_NAME, tempBytes);
+        addOption(aTlv);
+        
+        tempBytes = passedType.getBytes("US-ASCII");
+        aTlv = new ControlOption( OPTION_JAR_TYPE, tempBytes);
+        addOption(aTlv);
+        
+        tempBytes = passedJvmVersion.getBytes("US-ASCII");
+        aTlv = new ControlOption( OPTION_JVM_VERSION, tempBytes);
+        addOption(aTlv);
+        
+        tempBytes = passedJarVersion.getBytes("US-ASCII");
+        aTlv = new ControlOption( OPTION_JAR_VERSION, tempBytes);
+        addOption(aTlv);
+ 
+    }
     
     
      // ==========================================================================

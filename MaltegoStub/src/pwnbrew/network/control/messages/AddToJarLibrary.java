@@ -35,36 +35,46 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
+
 package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import pwnbrew.logging.Log;
-import pwnbrew.manager.CommManager;
-import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.utilities.Utilities;
-import pwnbrew.xmlBase.JarItem;
+import pwnbrew.MaltegoStub;
+import pwnbrew.functions.Function;
+import pwnbrew.functions.ToOptions;
+import pwnbrew.manager.PortManager;
 
 /**
  *
- * @author Securifera
+ *  
  */
-public class GetJarItems extends ControlMessage{ // NO_UCD (use default)
-    
-    private static final String NAME_Class = GetJarItems.class.getSimpleName();
+public final class AddToJarLibrary extends JarItemMsg{ // NO_UCD (use default)
     
     // ==========================================================================
     /**
      * Constructor
      *
+     * @param dstHostId
+     * @param passedName
+     * @param passedType
+     * @param passedJvmVersion
+     * @param passedJarVersion
+     * @throws java.io.UnsupportedEncodingException
+    */
+    public AddToJarLibrary(int dstHostId, String passedName, String passedType, String passedJvmVersion, String passedJarVersion ) throws UnsupportedEncodingException {
+        super( dstHostId, passedName, passedType, passedJvmVersion, passedJarVersion );
+    }
+    
+      // =====================================================================
+    /**
+     * Constructor
+     *
      * @param passedId
     */
-    public GetJarItems(byte[] passedId ) {
+    public AddToJarLibrary(byte[] passedId ) {
         super( passedId );
     }
-  
+    
     //===============================================================
     /**
     *   Performs the logic specific to the message.
@@ -72,24 +82,17 @@ public class GetJarItems extends ControlMessage{ // NO_UCD (use default)
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {     
+    public void evaluate( PortManager passedManager ) {
     
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
-            List<JarItem> jarList = new ArrayList<>();
-            jarList.addAll( Utilities.getJarItems());
-
-            //Get the table model
-            try {
-                for( JarItem anItem : jarList ){
-                    JarItemMsg aMsg = new JarItemMsg( getSrcHostId(), anItem.toString(), anItem.getType(), anItem.getJvmMajorVersion(), anItem.getVersion());
-                    aCMManager.send(aMsg);
-                }
-            } catch(UnsupportedEncodingException ex){
-                Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );  
+         if( passedManager instanceof MaltegoStub ){
+            MaltegoStub theStub = (MaltegoStub)passedManager;
+            Function aFunction = theStub.getFunction();
+            if( aFunction instanceof ToOptions ){                
+                //Cast the function
+                ToOptions aFunc = (ToOptions)aFunction;
+                aFunc.addJarItem(theJarName, theJarType, theJvmVersion, theJarVersion);
             }
-        }
-          
+         }
     }
 
 }
