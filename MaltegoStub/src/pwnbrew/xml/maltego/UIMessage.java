@@ -44,5 +44,23 @@ import pwnbrew.xml.XmlObject;
  * @author Securifera
  */
 public class UIMessage extends XmlObject {
+    
+    public static final String FATAL_ERROR = "FatalError";
+    public static final String PARTIAL_ERROR = "PartialError";
+    public static final String INFORM = "Inform";
+    public static final String DEBUG = "Debug";
+    
+    private static final String MESSAGE_TYPE = "MessageType";
+    
+    //==================================================================
+    /**
+     * 
+     * @param passedType 
+     * @param passedMessage 
+     */
+    public UIMessage( String passedType, String passedMessage ){
+        theAttributeMap.put( MESSAGE_TYPE, passedType  );
+        setXmlObjectContent(passedMessage);
+    }
 
 }

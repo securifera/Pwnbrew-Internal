@@ -47,6 +47,7 @@ import pwnbrew.xml.XmlObject;
 public class MaltegoMessage extends XmlObject {
 
     private MaltegoTransformResponseMessage theResponseMsg;
+    private MaltegoTransformExceptionMessage theExceptionMsg;
 
     //===================================================================
     /**
@@ -69,7 +70,10 @@ public class MaltegoMessage extends XmlObject {
     @Override
     public List<XmlObject> getXmlComponents() {
         List<XmlObject> rtnList = super.getXmlComponents();
-        rtnList.add( theResponseMsg );
+        if( theResponseMsg != null )
+            rtnList.add( theResponseMsg );
+        if( theExceptionMsg != null )
+            rtnList.add( theExceptionMsg );
         return rtnList;
     }
 
@@ -78,7 +82,24 @@ public class MaltegoMessage extends XmlObject {
      * 
      * @return 
      */
-    public MaltegoTransformResponseMessage getReponseMessage() {
+    public MaltegoTransformResponseMessage getResponseMessage() {
+        theExceptionMsg = null;
+        if( theResponseMsg == null )
+            theResponseMsg = new MaltegoTransformResponseMessage();
+            
         return theResponseMsg;
+    }
+    
+    // ==========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public MaltegoTransformExceptionMessage getExceptionMessage() {
+        theResponseMsg = null;
+        if( theExceptionMsg == null )
+            theExceptionMsg = new MaltegoTransformExceptionMessage();
+        
+        return theExceptionMsg;
     }
 }

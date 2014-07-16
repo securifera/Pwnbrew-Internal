@@ -53,6 +53,7 @@ import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.RelayStartRelay;
 import pwnbrew.xml.maltego.Entities;
 import pwnbrew.xml.maltego.MaltegoMessage;
+import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 import pwnbrew.xml.maltego.MaltegoTransformResponseMessage;
 import pwnbrew.xml.maltego.custom.Relay;
 
@@ -129,7 +130,7 @@ public class ToRelay extends Function {
             if( relayPort != null ){
                 //Create a relay object
                Relay aRelay = new Relay( hostIdStr, relayPort);
-               MaltegoTransformResponseMessage rspMsg = theReturnMsg.getReponseMessage();
+               MaltegoTransformResponseMessage rspMsg = theReturnMsg.getResponseMessage();
                Entities theEntities = rspMsg.getEntityList();
                theEntities.addEntity( aRelay );
                
@@ -184,10 +185,19 @@ public class ToRelay extends Function {
 
                             //Create a relay object
                             Relay aRelay = new Relay( hostIdStr, strPort);
-                            MaltegoTransformResponseMessage rspMsg = theReturnMsg.getReponseMessage();
+                            MaltegoTransformResponseMessage rspMsg = theReturnMsg.getResponseMessage();
                             Entities theEntities = rspMsg.getEntityList();
                             theEntities.addEntity( aRelay );
 
+                        } else {
+                            
+                            //Create a relay object
+                            pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( "Unable to create relay because one already exists.");
+                            MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+                            
+                            //Create the message list
+                            malMsg.getExceptionMessages().addExceptionMessage(exMsg);                      
+                            
                         }
 
                     try {

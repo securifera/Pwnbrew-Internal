@@ -37,34 +37,37 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.functions;
 
+import java.awt.Insets;
 import java.io.IOException;
 import java.util.Map;
+import javax.swing.JOptionPane;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
+import pwnbrew.generic.gui.ValidTextField;
 import pwnbrew.misc.Constants;
-import pwnbrew.misc.CountSeeker;
 import pwnbrew.misc.DebugPrinter;
-import pwnbrew.misc.HostHandler;
 import pwnbrew.misc.SocketUtilities;
+import pwnbrew.misc.StandardValidation;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.network.control.messages.GetCount;
-import pwnbrew.network.control.messages.ControlMessage;
+import pwnbrew.network.control.messages.RelayStartRelay;
+import pwnbrew.network.control.messages.RelayStopRelay;
 import pwnbrew.xml.maltego.Entities;
 import pwnbrew.xml.maltego.MaltegoMessage;
+import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 import pwnbrew.xml.maltego.MaltegoTransformResponseMessage;
-import pwnbrew.xml.maltego.custom.Host;
+import pwnbrew.xml.maltego.custom.Relay;
 
 /**
  *
  * @author Securifera
  */
-public class ListClients extends Function implements HostHandler, CountSeeker{
+public class StopRelay extends Function {
     
-    private static final String NAME_Class = MaltegoStub.class.getSimpleName();
+    private static final String NAME_Class = StopRelay.class.getSimpleName();
     
     private volatile boolean notified = false;
-    private volatile int theClientCount = 0;   
+    private volatile boolean isConnected = false;
     
     //Create the return msg
     private MaltegoMessage theReturnMsg = new MaltegoMessage();
@@ -74,7 +77,7 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
      * Constructor
      * @param passedManager
      */
-    public ListClients( MaltegoStub passedManager ) {
+    public StopRelay( MaltegoStub passedManager ) {
         super(passedManager);
     }      
     
@@ -93,36 +96,36 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
         //Get server IP
         String serverIp = objectMap.get( Constants.SERVER_IP);
         if( serverIp == null ){
-            DebugPrinter.printMessage( NAME_Class, "listclients", "No pwnbrew server IP provided", null);
+            DebugPrinter.printMessage( NAME_Class, "run", "No pwnbrew server IP provided", null);
             return retStr;
         }
          
         //Get server port
         String serverPortStr = objectMap.get( Constants.SERVER_PORT);
         if( serverPortStr == null ){
-            DebugPrinter.printMessage( NAME_Class, "listclients", "No pwnbrew server port provided", null);
+            DebugPrinter.printMessage( NAME_Class, "run", "No pwnbrew server port provided", null);
             return retStr;
         }
         
-         //Get host id
+        //Get host id
         String hostIdStr = objectMap.get( Constants.HOST_ID);
         if( hostIdStr == null ){
-            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
+            DebugPrinter.printMessage( NAME_Class, "run", "No host id provided", null);
             return retStr;
         }
-         
+        
         //Create the connection
-        try {
+        try {        
             
             //Set the server ip and port
             StubConfig theConfig = StubConfig.getConfig();
             theConfig.setServerIp(serverIp);
             theConfig.setSocketPort(serverPortStr);
-            
+
             //Set the client id
             Integer anInteger = SocketUtilities.getNextId();
-            theConfig.setHostId(anInteger.toString());
-            
+            theConfig.setHostId(anInteger.toString());            
+                    
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
             if( aCMManager == null ){
                 aCMManager = ControlMessageManager.initialize( theManager );
@@ -137,51 +140,60 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
                 DebugPrinter.printMessage( NAME_Class, "listclients", "Unable to retrieve port router.", null);
                 return retStr;     
             }           
-            
+
             //Set up the port wrapper
             theManager.initialize();
-            
+
             //Connect to server
             boolean connected = aPR.ensureConnectivity( serverPort, theManager );
             if( connected ){
-             
+
                 //Get the client count
-                ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.HOST_COUNT, hostIdStr );
-                aCMManager.send(aMsg);
-                
+                int hostId = Integer.parseInt( hostIdStr);
+                RelayStopRelay aMsg = new RelayStopRelay( Constants.SERVER_ID, hostId );               
+                aCMManager.send(aMsg );  
+
                 //Wait for the response
                 waitToBeNotified( 180 * 1000);
-                
-                //Get the client info
-                if( theClientCount > 0 ){
-                
-                    //Get each client msg                
-                    aMsg = new pwnbrew.network.control.messages.GetHosts( Constants.SERVER_ID, hostIdStr );
-                    aCMManager.send(aMsg);
-                
-                    //Wait for the response
-                    waitToBeNotified( 180 * 1000);
-                                        
+
+                //If connected create a relay
+                if( !isConnected ){
+
+                    //Create a relay object
+                    pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( "Relay stopped. Please remove the relay and any hosts connected to it.");
+                    MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+
+                    //Create the message list
+                    malMsg.getExceptionMessages().addExceptionMessage(exMsg);      
+
+                } 
+
+                try {
+                    //Sleep for a few seconds
+                    Thread.sleep(3000);
+                } catch (InterruptedException ex) {
                 }
-                
+
             } else {
                 StringBuilder aSB = new StringBuilder()
                         .append("Unable to connect to the Pwnbrew server at \"")
                         .append(serverIp).append(":").append(serverPort).append("\"");
                 DebugPrinter.printMessage( NAME_Class, "listclients", aSB.toString(), null);
             }
+
+                
             
+            
+            //Create the return message
+            retStr = theReturnMsg.getXml();
         } catch (IOException ex) {
             DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex );
         }
         
-        //Create the return message
-        retStr = theReturnMsg.getXml();
-        
         return retStr;
     }
     
-         // ==========================================================================
+    // ==========================================================================
     /**
     * Causes the calling {@link Thread} to <tt>wait()</tt> until notified by
     * another.
@@ -219,37 +231,16 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
     protected synchronized void beNotified() {
         notified = true;
         notifyAll();
-    }
+    }   
 
     //===============================================================
     /**
      * 
-     * @param countType
-     * @param objId
+     * @param connected 
      */
-    @Override
-    public synchronized void setCount(int passedCount, int countType, int objId ) {
-        theClientCount = passedCount;
+    public void setStatus(boolean connected) {
+        isConnected = connected;
         beNotified();
-    }
-
-    //===============================================================
-    /**
-     * 
-     * @param aHost 
-     */
-    @Override
-    public synchronized void addHost(Host aHost) {
-        
-        MaltegoTransformResponseMessage rspMsg = theReturnMsg.getResponseMessage();
-        Entities theEntities = rspMsg.getEntityList();
-        theEntities.addEntity(aHost);
-        
-        //Decrement and see if we are done
-        theClientCount--;
-        if( theClientCount == 0)
-            beNotified();
-        
     }
 
 

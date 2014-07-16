@@ -44,18 +44,16 @@ import pwnbrew.xml.XmlObject;
  *
  * @author Securifera
  */
-public class MaltegoTransformResponseMessage extends XmlObject {
+public class MaltegoTransformExceptionMessage extends XmlObject {
 
-    private final Entities theEntitiesContainer;
-    private final UIMessages uiMessages;
+    private final Exceptions exceptionMessages;
     
     //===================================================================
     /**
      * Constructor
      */
-    public MaltegoTransformResponseMessage() {
-        theEntitiesContainer = new Entities();
-        uiMessages = new UIMessages();
+    public MaltegoTransformExceptionMessage() {
+        exceptionMessages = new Exceptions();
     }    
     
      // ==========================================================================
@@ -71,26 +69,16 @@ public class MaltegoTransformResponseMessage extends XmlObject {
     @Override
     public List<XmlObject> getXmlComponents() {
         List<XmlObject> rtnList = super.getXmlComponents();
-        rtnList.add( theEntitiesContainer );
-        rtnList.add( uiMessages );
+        rtnList.add( exceptionMessages );
         return rtnList;
     }
-
-     // ==========================================================================
-    /**
-     *  Return the entity container
-     * @return 
-     */
-    public Entities getEntityList() {
-        return theEntitiesContainer;
-    }
     
-      // ==========================================================================
+    // ==========================================================================
     /**
      *  Return the ui messages
      * @return 
      */
-    public UIMessages getUIMessages() {
-        return uiMessages;
+    public Exceptions getExceptionMessages() {
+        return exceptionMessages;
     }
 }

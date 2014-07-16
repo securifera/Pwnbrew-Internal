@@ -119,13 +119,21 @@ public final class RelayStartRelay extends ControlMessage{
                 if( theHostController != null ){
                     
                     Host theHost = theHostController.getObject();
-                    theHost.setRelayPort( Integer.toString( thePort ) );
-                    theHostController.saveToDisk();
-                    
-                    //Send relay start message
-                    RelayStart relayMsg = new RelayStart( thePort, hostId );
-                    relayMsg.setSrcHostId( getSrcHostId() );
-                    aCMManager.send( relayMsg );
+                    if( theHost.getRelayPort().isEmpty() ) {
+                        theHost.setRelayPort( Integer.toString( thePort ) );
+                        theHostController.saveToDisk();
+
+                        //Send relay start message
+                        RelayStart relayMsg = new RelayStart( thePort, hostId );
+                        relayMsg.setSrcHostId( getSrcHostId() );
+                        aCMManager.send( relayMsg );
+                    } else {
+                        
+                        //Send the message
+                        RelayStatus aMsg = new RelayStatus(getSrcHostId(), false );
+                        aCMManager.send(aMsg);
+                        
+                    }
                 
                 }               
             }

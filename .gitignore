@@ -28,6 +28,19 @@ local.properties
 # PDT-specific
 .buildpath
 
+#ant specific
+dist/
+build/
+ 
+#netbeans specific
+core
+nbproject/*
+!nbproject/project.properties
+!nbproject/project.xml
+ 
+#java specific
+*.class
+
 
 #################
 ## Visual Studio

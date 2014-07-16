@@ -35,62 +35,35 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-package pwnbrew.xml.maltego;
 
-import java.util.List;
-import pwnbrew.xml.XmlObject;
+package pwnbrew.network.control.messages;
+
+import pwnbrew.misc.SocketUtilities;
+import pwnbrew.network.ControlOption;
 
 /**
  *
- * @author Securifera
+ *  
  */
-public class MaltegoTransformResponseMessage extends XmlObject {
-
-    private final Entities theEntitiesContainer;
-    private final UIMessages uiMessages;
+public final class RelayStopRelay extends ControlMessage{
     
-    //===================================================================
+    private static final byte OPTION_TARGET_HOST_ID = 22;
+    
+     // ==========================================================================
     /**
      * Constructor
-     */
-    public MaltegoTransformResponseMessage() {
-        theEntitiesContainer = new Entities();
-        uiMessages = new UIMessages();
-    }    
-    
-     // ==========================================================================
-    /**
-    * Returns a list of this object's subcomponents that should be added to its
-    * XML data.
-    * <p>
-    * NOTE: This overrides a method in {@link XmlObject}.
-    * 
-    * @return an {@link ArrayList} of the {@link XmlObject} components for this
-    * object
+     *
+     * @param targetHostId
+     * @param passedDestHostId
     */
-    @Override
-    public List<XmlObject> getXmlComponents() {
-        List<XmlObject> rtnList = super.getXmlComponents();
-        rtnList.add( theEntitiesContainer );
-        rtnList.add( uiMessages );
-        return rtnList;
-    }
+    public RelayStopRelay( int passedDestHostId, int targetHostId ) {
+        super( passedDestHostId );
+        
+        byte[] strBytes = SocketUtilities.intToByteArray(targetHostId);
+        ControlOption aTlv = new ControlOption(OPTION_TARGET_HOST_ID, strBytes);
+        addOption(aTlv);
 
-     // ==========================================================================
-    /**
-     *  Return the entity container
-     * @return 
-     */
-    public Entities getEntityList() {
-        return theEntitiesContainer;
     }
-    
-      // ==========================================================================
-    /**
-     *  Return the ui messages
-     * @return 
-     */
-    public UIMessages getUIMessages() {
-        return uiMessages;
-    }
-}
+  
+
+}/* END CLASS RelayStopRelay */

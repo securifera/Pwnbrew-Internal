@@ -241,7 +241,7 @@ public class ToIP extends Function implements CountSeeker {
      */
     public synchronized void addIp( IpV4Address anIp) {
         
-        MaltegoTransformResponseMessage rspMsg = theReturnMsg.getReponseMessage();
+        MaltegoTransformResponseMessage rspMsg = theReturnMsg.getResponseMessage();
         Entities theEntities = rspMsg.getEntityList();
         theEntities.addEntity( anIp );
         

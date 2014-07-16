@@ -128,6 +128,9 @@ public final class RelayStart extends ControlMessage{
                 
                 ServerHttpWrapper aWrapper = new ServerHttpWrapper();
                 DataManager.setPortWrapper( port, aWrapper);
+                
+            } else {
+                retVal = false;
             }
             
         } catch(IOException | GeneralSecurityException ex ){

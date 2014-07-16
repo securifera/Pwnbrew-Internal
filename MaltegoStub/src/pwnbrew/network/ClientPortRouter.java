@@ -75,10 +75,7 @@ public class ClientPortRouter extends PortRouter {
     
     private SocketChannelHandler serverSCH = null;
     private final LockingThread theConnectionLock;       
-    private static final String NAME_Class = ClientPortRouter.class.getSimpleName();
-    
-//    volatile boolean reconnectEnable = true;
-    
+    private static final String NAME_Class = ClientPortRouter.class.getSimpleName();    
       
     //===============================================================
      /**
@@ -174,8 +171,7 @@ public class ClientPortRouter extends PortRouter {
             retVal = passedListener.waitForLock();
         }
 
-        //DebugPrinter.printMessage( NAME_Class, "Obtained connection lock");
-            
+        //DebugPrinter.printMessage( NAME_Class, "Obtained connection lock");            
         try {
             //Call the recursive function for connecting
             while( retry > 0 && !connected ){
@@ -197,11 +193,6 @@ public class ClientPortRouter extends PortRouter {
                     retry--;
 
                 } else {
-
-//                    //Set connected to false if the server socket is null
-//                    if( serverSCH == null ){
-//                        connected = false;
-//                    }
                     
                     if( serverSCH != null ){
 
@@ -216,6 +207,9 @@ public class ClientPortRouter extends PortRouter {
                             //Create a hello message and send it
                             StubHello helloMessage = new StubHello( Constants.SERVER_ID );
                             aCMManager.send( helloMessage );
+                            
+                            //Wait until the thread is notified or times out
+                            waitForConnection();
                             
                         } catch(IOException ex){
                             throw new LoggableException(ex);

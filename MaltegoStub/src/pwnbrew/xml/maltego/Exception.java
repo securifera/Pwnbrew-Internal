@@ -37,60 +37,21 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.xml.maltego;
 
-import java.util.List;
 import pwnbrew.xml.XmlObject;
 
 /**
  *
  * @author Securifera
  */
-public class MaltegoTransformResponseMessage extends XmlObject {
-
-    private final Entities theEntitiesContainer;
-    private final UIMessages uiMessages;
-    
-    //===================================================================
+public class Exception extends XmlObject {
+        
+    //==================================================================
     /**
-     * Constructor
+     * 
+     * @param passedMessage 
      */
-    public MaltegoTransformResponseMessage() {
-        theEntitiesContainer = new Entities();
-        uiMessages = new UIMessages();
-    }    
-    
-     // ==========================================================================
-    /**
-    * Returns a list of this object's subcomponents that should be added to its
-    * XML data.
-    * <p>
-    * NOTE: This overrides a method in {@link XmlObject}.
-    * 
-    * @return an {@link ArrayList} of the {@link XmlObject} components for this
-    * object
-    */
-    @Override
-    public List<XmlObject> getXmlComponents() {
-        List<XmlObject> rtnList = super.getXmlComponents();
-        rtnList.add( theEntitiesContainer );
-        rtnList.add( uiMessages );
-        return rtnList;
+    public Exception( String passedMessage ){
+        setXmlObjectContent(passedMessage);
     }
 
-     // ==========================================================================
-    /**
-     *  Return the entity container
-     * @return 
-     */
-    public Entities getEntityList() {
-        return theEntitiesContainer;
-    }
-    
-      // ==========================================================================
-    /**
-     *  Return the ui messages
-     * @return 
-     */
-    public UIMessages getUIMessages() {
-        return uiMessages;
-    }
 }

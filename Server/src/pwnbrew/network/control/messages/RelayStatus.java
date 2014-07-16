@@ -64,6 +64,27 @@ public final class RelayStatus extends ControlMessage{
     /**
      * Constructor
      *
+     * @param dstHostId
+     * @param passedResult
+    */
+    public RelayStatus( int dstHostId, boolean passedResult ) {
+        super(dstHostId);
+        
+        int status = 0;
+        if( passedResult )
+            status = 1;        
+        
+        //Convert to bytes
+        byte[] strBytes = SocketUtilities.intToByteArray(status);
+
+        ControlOption aTlv = new ControlOption(OPTION_TASK_STATUS, strBytes);
+        addOption(aTlv);
+    }
+    
+    // ==========================================================================
+    /**
+     * Constructor
+     *
      * @param passedId
     */
     public RelayStatus( byte[] passedId ) {

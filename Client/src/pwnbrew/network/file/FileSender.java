@@ -53,7 +53,6 @@ import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.Persistence;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;

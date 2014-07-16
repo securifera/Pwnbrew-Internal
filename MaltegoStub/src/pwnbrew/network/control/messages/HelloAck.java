@@ -81,8 +81,10 @@ public final class HelloAck extends ControlMessage {
             SocketChannelHandler aSCH = aPR.getSocketChannelHandler();
 
             //Set the wrapping flag
-            if( aSCH != null )
-                aSCH.setWrapping(false);            
+            if( aSCH != null ){
+                aSCH.setWrapping(false);    
+                aPR.beNotified(); 
+            }        
            
         }    
 

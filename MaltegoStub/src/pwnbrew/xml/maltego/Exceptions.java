@@ -37,6 +37,7 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.xml.maltego;
 
+import java.util.ArrayList;
 import java.util.List;
 import pwnbrew.xml.XmlObject;
 
@@ -44,20 +45,28 @@ import pwnbrew.xml.XmlObject;
  *
  * @author Securifera
  */
-public class MaltegoTransformResponseMessage extends XmlObject {
-
-    private final Entities theEntitiesContainer;
-    private final UIMessages uiMessages;
+public class Exceptions extends XmlObject {
     
-    //===================================================================
+    private final List<Exception> theExceptionList = new ArrayList<>();
+
+    //===========================================================================
     /**
      * Constructor
      */
-    public MaltegoTransformResponseMessage() {
-        theEntitiesContainer = new Entities();
-        uiMessages = new UIMessages();
-    }    
+    public Exceptions() {
     
+    }
+        
+    //===========================================================================
+    /**
+     *  Adds the message to the message list
+     * @param passedEntity 
+     */
+    public void addExceptionMessage( Exception passedEntity){
+        synchronized( theExceptionList ){
+            theExceptionList.add(passedEntity);
+        }
+    }
      // ==========================================================================
     /**
     * Returns a list of this object's subcomponents that should be added to its
@@ -70,27 +79,17 @@ public class MaltegoTransformResponseMessage extends XmlObject {
     */
     @Override
     public List<XmlObject> getXmlComponents() {
-        List<XmlObject> rtnList = super.getXmlComponents();
-        rtnList.add( theEntitiesContainer );
-        rtnList.add( uiMessages );
-        return rtnList;
-    }
 
-     // ==========================================================================
-    /**
-     *  Return the entity container
-     * @return 
-     */
-    public Entities getEntityList() {
-        return theEntitiesContainer;
-    }
-    
-      // ==========================================================================
-    /**
-     *  Return the ui messages
-     * @return 
-     */
-    public UIMessages getUIMessages() {
-        return uiMessages;
-    }
+        List<XmlObject> rtnList = super.getXmlComponents();
+
+        synchronized( theExceptionList ){
+            if( theExceptionList.size() > 0 ) //Add the entities
+                rtnList.addAll( theExceptionList ); 
+        }
+        
+        return rtnList;
+
+    }/* END getXmlComponents() */
+
 }
+
