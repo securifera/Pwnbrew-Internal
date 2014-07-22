@@ -39,7 +39,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.options;
 
 import java.awt.Cursor;
-import java.awt.Frame;
 import java.awt.Image;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -50,17 +49,18 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
-import pwnbrew.generic.gui.PanelListener;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Utilities;
 import pwnbrew.options.panels.JarLibraryPanel;
+import pwnbrew.options.panels.JarLibraryPanelListener;
 import pwnbrew.options.panels.NetworkOptionsPanel;
+import pwnbrew.options.panels.NetworkPanelListener;
 
 /**
  *
  *  
  */
-public class OptionsJFrame extends JFrame implements PanelListener {
+public class OptionsJFrame extends JFrame implements JarLibraryPanelListener, NetworkPanelListener {
 
     private static final String NETWORK_PANEL_TITLE = "Network";
     private static final String LIBRARY_PANEL_TITLE = "JAR Library";
@@ -224,10 +224,10 @@ public class OptionsJFrame extends JFrame implements PanelListener {
 
                 //Save the changes
                 if( theNetworkOptionsPanel != null )
-                    theNetworkOptionsPanel.saveChanges();
-                
+                    theNetworkOptionsPanel.saveChanges();                
 
                 setSaveButton(false);
+                
             } finally {
                 setCursor(null);
             }
@@ -235,7 +235,7 @@ public class OptionsJFrame extends JFrame implements PanelListener {
         } else
             closeDialog();
         
-   }//GEN-LAST:event_saveOrOkJButtonActionPerformed
+   }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -286,8 +286,32 @@ public class OptionsJFrame extends JFrame implements PanelListener {
     public void sendJarFile(File userSelectedFile, String selVal) {
         theListener.sendJarFile(userSelectedFile, selVal);
     }
+
+    //========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public NetworkOptionsPanel getNetworkSettingsPanel() {
+        return theNetworkOptionsPanel;
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @param sueeDN
+     * @param suerDN
+     * @param days 
+     */
+    @Override
+    public void sendCertInfo( int serverPort, String sueeDN, String suerDN, int days) {
+        theListener.sendCertInfo(serverPort, sueeDN, suerDN, days);
+    }
     
-    // Internal class to limit the length of the param delim fields
+    //========================================================================
+    /**
+     *  Internal class to limit the length of the param delim fields
+     */
     public static class JTextFieldLimit extends PlainDocument {
 
        private final int limit;

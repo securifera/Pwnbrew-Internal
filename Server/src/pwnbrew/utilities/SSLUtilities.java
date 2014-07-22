@@ -45,10 +45,9 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.utilities;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -62,14 +61,13 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.logging.Level;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-import pwnbrew.Persistence;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
+import pwnbrew.misc.Directories;
 import pwnbrew.misc.X509CertificateFactory;
 import pwnbrew.xmlBase.ServerConfig;
 /**
@@ -82,7 +80,7 @@ final public class SSLUtilities {
     private static KeyStore theKeystore;
     private static SSLContext theSSLContext = null;
     
-//    private static final String KEYSTORE_NAME =  "keystore.jks";    
+    private static final String KEYSTORE_NAME =  "keystore.jks";    
     
     //===============================================================
     /**
@@ -133,85 +131,81 @@ final public class SSLUtilities {
        return theKeystore;
     }
 
-    //****************************************************************************
+    //========================================================================
     /**
-     * Loads the keystore from the configuration in the conf file
+     * Loads the keystore from the configuration in the ACT conf file
      * @param theConf
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.logging.LoggableException
     */
     public static KeyStore loadKeystore( ServerConfig theConf ) throws LoggableException {
 
+        File libDir = new File( Directories.getDataPath() );
+        File keyStoreFile = new File(libDir, KEYSTORE_NAME);
         KeyStore tempKeystore = null;
-        boolean saveConf = false;     
-
+        boolean saveConf = false;
+     
         try{
 
             //The keystore password
             String keyStorePass;
-            List<byte[]> theConfEntries = Persistence.getLabelBytes( Persistence.SSL_CHUNK );
-            if( theConfEntries.isEmpty() ){    
-                
-                //Create a random keypass
-                keyStorePass = Utilities.simpleEncrypt(Integer.toString(Utilities.SecureRandomGen.nextInt()), Long.toString(Utilities.SecureRandomGen.nextLong()));
-                tempKeystore = createKeystore( keyStorePass );
 
-                //Set the keypath and passphrase
-                theConf.setKeyStorePass(keyStorePass);
-                saveConf = true;
+            //If the keystore path is empty create one
+            if(!keyStoreFile.exists()){
+
+               //Create a random keypass
+               keyStorePass = Utilities.simpleEncrypt(Integer.toString(Utilities.SecureRandomGen.nextInt()), Long.toString(Utilities.SecureRandomGen.nextLong()));
+               tempKeystore = createKeystore( keyStorePass);
+
+               //Set the keypath and passphrase
+               theConf.setKeyStorePass(keyStorePass);
+               saveConf = true;
 
             } else {
 
-                //Get the keystore pass
-                keyStorePass = theConf.getKeyStorePass();
-                
-                //Loop through the return entries
-                for( byte[] theBytes : theConfEntries ){
-                
-                    ByteArrayInputStream theBIS = new ByteArrayInputStream( theBytes );
+               //Get the keystore pass
+               keyStorePass = theConf.getKeyStorePass();
+
+               //Load the keystore
+               FileInputStream theFIS = new FileInputStream(keyStoreFile.getAbsolutePath());
+               try {
+
+                  tempKeystore = KeyStore.getInstance("JKS");                      
+                  tempKeystore.load(theFIS, keyStorePass.toCharArray());
+
+               } catch(IOException ex){
+
+                    //Ensure the file stream is closed
                     try {
+                        theFIS.close();
+                    } catch (IOException ex1 ) {
+                        ex1 = null;
+                    }
 
-                        //Load the keystore
-                        tempKeystore = KeyStore.getInstance("JKS");                      
-                        tempKeystore.load(theBIS, keyStorePass.toCharArray());
-                        break;
+                    Log.log(Level.INFO, NAME_Class, "loadKeystore()", ex.getMessage(), ex);
+                    if(ex.getMessage().contains("tampered")){
 
-                    } catch(IOException ex){
-
-                        //Ensure the file stream is closed
-                        try {
-                            theBIS.close();
-                        } catch (IOException ex1 ) {
-                            ex1 = null;
-                        }
-
-                        //Log it
-                        Log.log(Level.INFO, NAME_Class, "loadKeystore()", ex.getMessage(), ex);
-
-                        //If the keystore password doesn't work then create a new one
-                        if(ex.getMessage().contains("tampered")){
-
-                            //Delete the keystore
-                            Persistence.removeLabel( Persistence.SSL_CHUNK );
+                        //Delete the keystore
+                        if( FileUtilities.deleteFile(keyStoreFile) ){
                             //Try and load it again
                             try {
                                 return SSLUtilities.loadKeystore(theConf);
                             } catch (LoggableException ex1) {    
                                 ex1 = null;
                             }
-                            
-                        }
-
-                    } finally {
-
-                        //Ensure the file stream is closed
-                        try {
-                            theBIS.close();
-                        } catch (IOException ex) {
-                            ex = null;
                         }
                     }
-                }
+
+
+               } finally {
+
+                  //Ensure the file stream is closed
+                  try {
+                     theFIS.close();
+                  } catch (IOException ex) {
+                     ex = null;
+                  }
+               }
 
             }
 
@@ -244,37 +238,39 @@ final public class SSLUtilities {
 
             //Write to disk if needed
             if( saveConf ){
-                theConf.writeSelfToDisk();
+               theConf.writeSelfToDisk();
             }    
         }
 
         return tempKeystore;
 
     }
-
-    //****************************************************************************
+    
+    //=======================================================================
     /**
-     *  * Returns a file representing a java keystore
-     * 
+     * Returns a file representing a java keystore
      * @param keystorePass
-     * @return
-     * @throws KeyStoreException
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
-     * @throws CertificateException
-     * @throws LoggableException 
-    */    
-    private static KeyStore createKeystore( String keystorePass ) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, LoggableException {
+     * @return 
+     * @throws pwnbrew.logging.LoggableException
+    */
+    public static KeyStore createKeystore( String keystorePass ) throws LoggableException {
 
-        KeyStore tempKeystore = KeyStore.getInstance("JKS");
-        tempKeystore.load(null);
+        KeyStore tempKeystore = null;
+        try {
+            
+            tempKeystore = KeyStore.getInstance("JKS");
+            tempKeystore.load(null);
 
-        //Save it
-        saveKeyStore( tempKeystore, keystorePass );      
+            //Save it
+            saveKeyStore( tempKeystore, keystorePass ); 
+            
+        } catch( IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException ex ){
+            throw new LoggableException(ex);
+        }
         
         return tempKeystore;
     }
-
+    
     //===============================================================
     /**
      *  Saves the passed keystore
@@ -288,24 +284,29 @@ final public class SSLUtilities {
         //Write the keystore back to disk        
         try {
             
-            ByteArrayOutputStream theOS = new ByteArrayOutputStream();
-            try {    
-                //Store the keystore in the byte array stream
-                passedKeyStore.store(theOS, keystorePass.toCharArray());            
-            } finally {            
-                try { theOS.close(); } catch (IOException ex) { ex = null; }            
+            File libDir = new File( Directories.getDataPath() );
+            //Write the keystore back to disk
+            File keyStore = new File(libDir, KEYSTORE_NAME);
+            FileOutputStream theOS = new FileOutputStream(keyStore);
+            try {
+                
+               passedKeyStore.store(theOS, keystorePass.toCharArray());
+               
+            } finally {
+               //Close the file stream
+               try{
+                  theOS.close();
+               } catch(IOException ex){
+                  ex = null;
+               }
             }
-
-            //Get the bytes 
-            byte[] objectBytes = theOS.toByteArray();
-            Persistence.writeLabel( Persistence.SSL_CHUNK, objectBytes);
             
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException ex) {
            throw new LoggableException(ex);
         }
         
     }
-    
+      
     //===========================================================================
     /**
      * Returns a file representing a java keystore
@@ -327,7 +328,6 @@ final public class SSLUtilities {
         }
     }
 
-
     //===============================================================
     /**
      * Returns the certificate for the localhost
@@ -342,9 +342,8 @@ final public class SSLUtilities {
        String theAlias = theConf.getAlias();
 
        KeyStore localKeyStore = getKeystore();
-       if(localKeyStore != null){
-          theCert = localKeyStore.getCertificate(theAlias);
-       }
+       if(localKeyStore != null)
+          theCert = localKeyStore.getCertificate(theAlias);       
        
        return theCert;
     }
@@ -358,9 +357,8 @@ final public class SSLUtilities {
 
         boolean retVal = false;
 
-        if( passedKeyStore != null && passedAlias != null ){
-           retVal = passedKeyStore.containsAlias(passedAlias);
-        }
+        if( passedKeyStore != null && passedAlias != null )
+           retVal = passedKeyStore.containsAlias(passedAlias);        
 
         return retVal;
     }
@@ -385,9 +383,8 @@ final public class SSLUtilities {
     public static synchronized SSLContext getSSLContext() throws LoggableException {
 
         //If the context has not be created than create it
-        if ( theSSLContext == null ){               
-            theSSLContext = createSSLContext();        
-        }
+        if ( theSSLContext == null )               
+            theSSLContext = createSSLContext();
 
         return theSSLContext;
     }
@@ -452,7 +449,7 @@ final public class SSLUtilities {
                     }
 
                     //Save the keystore
-                    SSLUtilities.saveKeyStore(localKeystore, new String(keyStorePassArr));
+                    saveKeyStore(localKeystore, new String(keyStorePassArr));
                     retVal = true;
 
                 } catch (IOException ex){
@@ -483,7 +480,6 @@ final public class SSLUtilities {
      *  Wrapper for creating a self signed certificate
      * 
      * @param issueeDN
-     * @param sueeDN
      * @param issuerDN
      * @param days 
      * @throws pwnbrew.logging.LoggableException 

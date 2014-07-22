@@ -35,26 +35,25 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
+package pwnbrew.options.panels;
 
-
-package pwnbrew.options;
-
-import java.io.File;
+import pwnbrew.generic.gui.PanelListener;
 
 /**
  *
- *  
+ * @author Securifera
  */
-public interface OptionsJFrameListener {
+public interface NetworkPanelListener extends PanelListener {    
 
-    public void getJarItems();    
-
-    public void beNotified();
-
-    public void sendDeleteJarItemMsg(String jarName, String jarType, String jvmVersion, String jarVersion);
-
-    public void sendJarFile(File userSelectedFile, String selVal);
-
-    public void sendCertInfo(int serverPort, String sueeDN, String suerDN, int days);
+    //================================================================
+    /**
+     * 
+     * @param serverPort
+     * @param sueeDN
+     * @param suerDN
+     * @param days 
+     */
+    public void sendCertInfo( int serverPort, String sueeDN, String suerDN, int days);
     
+   
 }

@@ -70,8 +70,7 @@ import pwnbrew.utilities.Utilities;
 final public class Persistence {
     
     //The configuration file
-    public transient static final String CONF_CHUNK = "xPWn";
-    public transient static final String SSL_CHUNK = "sSLn";     
+    public transient static final String CONF_CHUNK = "xPWn";   
     
     // ==========================================================================
     /**

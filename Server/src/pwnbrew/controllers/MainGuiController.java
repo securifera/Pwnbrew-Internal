@@ -1414,10 +1414,8 @@ final public class MainGuiController extends Controller implements ActionListene
      * @throws pwnbrew.logging.LoggableException 
     */
     @Override
-    public boolean recreateSockets() throws LoggableException {
-        
-        return theServerManager.rebuildServerSockets();
-        
+    public boolean recreateSockets() throws LoggableException {        
+        return theServerManager.rebuildServerSockets();        
     }
     
     // ==========================================================================
@@ -2042,7 +2040,7 @@ final public class MainGuiController extends Controller implements ActionListene
 
         RemoteTask theTask;
         synchronized(theActiveTaskMap){
-            theTask = theActiveTaskMap.get(Integer.valueOf(msgId));
+            theTask = theActiveTaskMap.get(msgId);
         }
 
         if(theTask != null){

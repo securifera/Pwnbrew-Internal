@@ -54,7 +54,6 @@ import java.security.KeyStoreException;
 import java.security.Principal;
 import java.security.cert.Certificate;
 import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import javax.swing.*;
@@ -162,7 +161,7 @@ public class NetworkOptionsPanel extends OptionsJPanel {
                 theName = aPrincipal.getName();
                 populateCertComponents( ISSUER, theName );
                 
-                //Set the algorythm
+                //Set the algorithm
                 String theAlgorithm = theCustomCert.getSigAlgName();
                 algoValLabel.setText(theAlgorithm);
                 
@@ -952,9 +951,6 @@ public class NetworkOptionsPanel extends OptionsJPanel {
                     Date futureDate = Constants.CHECKIN_DATE_FORMAT.parse(dateStr);
                     long difference = futureDate.getTime() - (new Date()).getTime();
                     int days = (int) (difference / 86400000); //milliseconds in one day                    
-                    
-                    Calendar aCalendar = Calendar.getInstance();
-                    aCalendar.setTime(futureDate);
                     
                     //Create a self signed cert
                     SSLUtilities.createSelfSignedCertificate(issueeDN, issuerDN, days);

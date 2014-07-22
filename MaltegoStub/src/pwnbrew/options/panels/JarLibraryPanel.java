@@ -233,7 +233,7 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
                 return;
             
             //Queue the file to be sent
-            theListener.sendJarFile( userSelectedFile, selVal);
+            getListener().sendJarFile( userSelectedFile, selVal);
         }
     }
 
@@ -253,7 +253,7 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
         String jvmVersion = (String) theTableModel.getValueAt(anInt, 2);
         String jarVersion = (String) theTableModel.getValueAt(anInt, 3);
                           
-        theListener.deleteJarItem(jarName, jarType, jvmVersion, jarVersion);        
+        getListener().deleteJarItem(jarName, jarType, jvmVersion, jarVersion);        
     }
     
     //========================================================================
@@ -302,6 +302,16 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
      */
     @Override
     public void saveChanges() {
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public JarLibraryPanelListener getListener() {
+        return (JarLibraryPanelListener)super.getListener();
     }
 
     

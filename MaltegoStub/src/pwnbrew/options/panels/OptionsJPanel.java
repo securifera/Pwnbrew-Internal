@@ -47,7 +47,7 @@ import pwnbrew.generic.gui.PanelListener;
      
     private final String thePanelName;
     private volatile boolean dirtyFlag = false;
-    protected final PanelListener theListener;
+    private final PanelListener theListener;
 
     abstract public void saveChanges();
 
@@ -70,6 +70,15 @@ import pwnbrew.generic.gui.PanelListener;
     @Override
     public String getName() {
         return thePanelName;
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @return 
+    */
+    public PanelListener getListener(){
+        return theListener;
     }
     
     //===============================================================

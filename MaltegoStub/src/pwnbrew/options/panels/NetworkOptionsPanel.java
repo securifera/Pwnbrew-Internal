@@ -42,11 +42,16 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.border.Border;
+import pwnbrew.StubConfig;
 import pwnbrew.generic.gui.PanelListener;
+import pwnbrew.misc.Constants;
 import pwnbrew.misc.FileFilterImp;
 import pwnbrew.misc.StandardValidation;
 
@@ -56,15 +61,11 @@ import pwnbrew.misc.StandardValidation;
 public class NetworkOptionsPanel extends OptionsJPanel {
 
     private JFileChooser theCertificateChooser = null;
-//    private ServerConfig theConf = null;
     private final FileFilterImp theCertFilter = new FileFilterImp();
     
     public static final Color COLOR_InputDeviceBackground_Disabled = new Color( 0xDFDFDF );
     public static final Color COLOR_InputDeviceBackground_Normal = Color.WHITE;
-    
-    private volatile boolean reloadSSL = false;
-    private volatile boolean recreateSockets = false;
-    
+        
     private static final String P12_EXT = "p12"; 
     private static final String NAME_Class = NetworkOptionsPanel.class.getSimpleName();
     private static final String SUBJECT = "SUBJECT";
@@ -89,8 +90,6 @@ public class NetworkOptionsPanel extends OptionsJPanel {
     * Initialize components
     */
     private void initializeComponents() {
-
-//        theConf = ServerConfig.getServerConfig();        
         
         //Create a listener
         editCheckbox.setIconTextGap(8);
@@ -125,47 +124,41 @@ public class NetworkOptionsPanel extends OptionsJPanel {
         //Set enablements
         updateComponentEnablements(false);
 
-//        //Populate the componenets
-//        if(theConf != null)
-//            ctrlPortField.setText(Integer.toString(theConf.getSocketPort()));
-//        
-//        try {
-//            //Get the PKI Cert
-//            Certificate theCert = SSLUtilities.getCertificate();
-//            if( theCert instanceof sun.security.x509.X509CertImpl ){
-//                sun.security.x509.X509CertImpl theCustomCert = (sun.security.x509.X509CertImpl)theCert;
-//                
-//                //Get the issuee name
-//                Principal aPrincipal = theCustomCert.getSubjectDN();
-//                String theName = aPrincipal.getName();
-//                populateCertComponents( SUBJECT, theName );
-//                
-//                //Get the issuer org
-//                aPrincipal = theCustomCert.getIssuerDN();
-//                theName = aPrincipal.getName();
-//                populateCertComponents( ISSUER, theName );
-//                
-//                //Set the algorythm
-//                String theAlgorithm = theCustomCert.getSigAlgName();
-//                algoValLabel.setText(theAlgorithm);
-//                
-//                //Set the date
-//                Date expirationDate = theCustomCert.getNotAfter();
-//                String expDateStr = Constants.DEFAULT_DATE_FORMAT.format(expirationDate);
-//                expDateField.setText(expDateStr);
-//                
-//            }
-//                       
-//        } catch (KeyStoreException ex) {
-//            throw new LoggableException(ex);
-//        }
-
         //Create a JFileChooser to select wim files...
         theCertFilter.addExt( P12_EXT);
         theCertificateChooser = new JFileChooser();
         theCertificateChooser.setMultiSelectionEnabled(false);
         theCertificateChooser.setFileFilter(theCertFilter);
 
+    }
+    
+    //=========================================================================
+    /**
+     * 
+     * @param passedPort
+     * @param issueeName
+     * @param issuerName
+     * @param alg
+     * @param expDate 
+     */
+    public void setNetworkSettings( int passedPort, String issueeName, String issuerName, String alg, String expDate ){
+         
+        //Populate the componenets
+        ctrlPortField.setText(Integer.toString( passedPort ));
+        
+        //Get the issuee name
+        populateCertComponents( SUBJECT, issueeName );
+
+        //Get the issuer org
+
+        populateCertComponents( ISSUER, issuerName );
+
+        //Set the algorythm
+        algoValLabel.setText(alg);
+
+        //Set the exp date
+        expDateField.setText(expDate);     
+       
     }
     
     //=============================================================
@@ -663,9 +656,6 @@ public class NetworkOptionsPanel extends OptionsJPanel {
         setSaveButton(true);
     }//GEN-LAST:event_ctrlPortFieldKeyReleased
 
-    private void dataPortFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_dataPortFieldKeyReleased
-    }//GEN-LAST:event_dataPortFieldKeyReleased
-
     private void certPathTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_certPathTextFieldKeyReleased
         setSaveButton(true);
     }//GEN-LAST:event_certPathTextFieldKeyReleased
@@ -826,9 +816,6 @@ public class NetworkOptionsPanel extends OptionsJPanel {
 
         try {
            dataIsValid = StandardValidation.validate( StandardValidation.KEYWORD_Port, value );
-//        } catch( NoSuchValidationException ex ) {
-//            //This case won't occur.
-//           ex = null;
         } catch (NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(NetworkOptionsPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -847,75 +834,32 @@ public class NetworkOptionsPanel extends OptionsJPanel {
 
     //===============================================================
     /**
-     *  Check if the SSL contexts needs reloading.
-     * @return 
-    */
-    public boolean shouldReloadSSL() {
-       return reloadSSL;
-    }
-    
-    //===============================================================
-    /**
-     *  Set the SSL reload context flag.
-     * @param passedBool
-    */
-    public void setReloadSslFlag( boolean passedBool ) {
-        reloadSSL = passedBool;
-    }
-    
-    //===============================================================
-    /**
-     * Check if the server sockets need reloading.
-     * @return 
-    */
-    public boolean shouldRecreateSockets() {
-       return recreateSockets;
-    }
-    
-     //===============================================================
-    /**
-     *  Set the socket recreation flag.
-     * @param passedBool
-    */
-    public void setSocketRecreateFlag( boolean passedBool ) {
-        recreateSockets = passedBool;
-    }
-
-    //===============================================================
-    /**
      * Saves any changes that have been performed
     */
     @Override
     public void saveChanges(){
 
-//        //Reset the dirty flag
-//        setDirtyFlag( false );
-//
-//        //Write the changes to disk
-//        try {
-//            
-//            if(theConf != null){
-//
-//                String ctrlPortStr = ctrlPortField.getText();
-//
-//                //Ensure the ports are valid
-//                if(evaluateValue(ctrlPortField) ){
-//
-//                    //See if things should be saved
-//                    if(theConf.getSocketPort() != Integer.parseInt(ctrlPortStr) ){
-//                        theConf.setSocketPort(ctrlPortStr);
-////                        theConf.setDataPort(ctrlPortStr);
-//                        recreateSockets = true;
-//                    }
-//
-//                } else
-//                    JOptionPane.showMessageDialog( this, "The control port is invalid.","Error", JOptionPane.ERROR_MESSAGE );
-//                
-//                String certPath = certPathTextField.getText();
-//                char[] passArr = passwordField.getPassword();
-//
-//                //If the the cert was defined
-//                if(!certPath.isEmpty()){
+        //Reset the dirty flag
+        setDirtyFlag( false );
+          
+        //Set the server ip and port
+        StubConfig theConf = StubConfig.getConfig();
+        if(theConf != null){
+
+            String ctrlPortStr = ctrlPortField.getText();
+
+            //Ensure the ports are valid
+            if(!evaluateValue(ctrlPortField)){
+                JOptionPane.showMessageDialog( this, "The control port is invalid.","Error", JOptionPane.ERROR_MESSAGE );
+                ctrlPortStr = Integer.toString( theConf.getSocketPort() );
+            }
+
+            //Get certpath
+            String certPath = certPathTextField.getText();
+
+            //If the the cert was defined
+            if(!certPath.isEmpty()){
+//                    char[] passArr = passwordField.getPassword();
 //                    File theCertFile= new File(certPath);
 //
 //                    //Load the cert into the keystore
@@ -924,72 +868,31 @@ public class NetworkOptionsPanel extends OptionsJPanel {
 //
 //                    //Return that the ssl context needs to be recreated
 //                    reloadSSL = true;
-//                    
-//                } else if( editCheckbox.isSelected() ){
-//                    
-//                    String issueeDN = constructDN( SUBJECT );
-//                    String issuerDN = constructDN( ISSUER );
-//                    
-//                    //Get the date and calculate how many days between
-//                    String dateStr = expDateField.getText();
-//                    Date futureDate = Constants.DEFAULT_DATE_FORMAT.parse(dateStr);
-//                    long difference = futureDate.getTime() - (new Date()).getTime();
-//                    int days = (int) (difference / 86400000); //milliseconds in one day                    
-//                    
-//                    Calendar aCalendar = Calendar.getInstance();
-//                    aCalendar.setTime(futureDate);
-//                    
-//                    //Create a self signed cert
-//                    SSLUtilities.createSelfSignedCertificate(issueeDN, issuerDN, days);
-//                    
-//                }
-//
-//                //Write to disk
-//                theConf.writeSelfToDisk();
-//            }
-//
-//        } catch (LoggableException | ParseException ex) {
-//            Log.log(Level.SEVERE, NAME_Class, "saveChanges()", ex.getMessage(), ex );
-//            JOptionPane.showMessageDialog( this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE );          
-//        }
 
-    }
-    
-    //===============================================================
-    /**
-     * 
-     */
-    @Override
-    public void doClose() {   
-    
-//        OptionsJDialog theDialog = (OptionsJDialog)theListener;
-//        OptionsJDialogListener theDialogListener = theDialog.getDialogListener();
-        
-        //If a change was made to the ssl configuration
-        if( shouldReloadSSL() ){
-//            //Reload the ssl context
-//            theDialogListener.reloadSSLContext();               
-//            setReloadSslFlag( false );
-        }
+            } else if( editCheckbox.isSelected() ){
 
-         //If a change was made to the socket ports
-        if( shouldRecreateSockets() ){
+                try {
+                                       
+                    String issueeDN = constructDN( SUBJECT );
+                    String issuerDN = constructDN( ISSUER );
 
-//            try {
-                
-                //Reload the ssl context
-//                if( !theDialogListener.recreateSockets() )
-//                    return;
-                         
-//                setSocketRecreateFlag(false );
+                    //Get the date and calculate how many days between
+                    String dateStr = expDateField.getText();
+                    Date futureDate = Constants.DEFAULT_DATE_FORMAT.parse(dateStr);
+                    long difference = futureDate.getTime() - (new Date()).getTime();
+                    int days = (int) (difference / 86400000); //milliseconds in one day
 
-//            } catch (LoggableException ex) {
-//                JOptionPane.showMessageDialog( this, ex.getMessage(),
-//                        "Could not create sockets.", JOptionPane.ERROR_MESSAGE );
-//            }                      
+                    getListener().sendCertInfo( Integer.parseInt(ctrlPortStr), issueeDN, issuerDN, days );
+
+                } catch (ParseException ex) {
+                    Logger.getLogger(NetworkOptionsPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
 
         }
-    }
+
+    } 
 
     //===============================================================
     /**
@@ -1185,6 +1088,16 @@ public class NetworkOptionsPanel extends OptionsJPanel {
         }   
         
         return aSB.toString();
+    }
+    
+    //========================================================================
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public NetworkPanelListener getListener() {
+        return (NetworkPanelListener)super.getListener();
     }
 
 

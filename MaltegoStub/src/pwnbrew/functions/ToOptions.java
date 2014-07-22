@@ -51,10 +51,13 @@ import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.AddToJarLibrary;
 import pwnbrew.network.control.messages.DeleteJarItem;
 import pwnbrew.network.control.messages.GetJarItems;
+import pwnbrew.network.control.messages.GetNetworkSettings;
+import pwnbrew.network.control.messages.NetworkSettingsMsg;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.options.OptionsJFrame;
 import pwnbrew.options.OptionsJFrameListener;
 import pwnbrew.options.panels.JarLibraryPanel;
+import pwnbrew.options.panels.NetworkOptionsPanel;
 import pwnbrew.xml.maltego.MaltegoMessage;
 
 /**
@@ -153,6 +156,9 @@ public class ToOptions extends Function implements OptionsJFrameListener {
                 
                 //Get the jar items
                 getJarItems();
+                
+                //Get the network settings
+                getNetworkSettings();
                 
                 //Show the gui
                 optionsGui.setVisible(true);
@@ -254,6 +260,29 @@ public class ToOptions extends Function implements OptionsJFrameListener {
         }
         
     }
+    
+    //========================================================================
+    /**
+     * 
+     */
+    public void getNetworkSettings() {
+        
+        try {
+            
+            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            if( aCMManager == null ){
+                aCMManager = ControlMessageManager.initialize( theManager );
+            }
+            
+            //Send the msg
+            GetNetworkSettings aMsg = new GetNetworkSettings(Constants.SERVER_ID );
+            aCMManager.send(aMsg);
+            
+        } catch (IOException ex) {
+            DebugPrinter.printMessage( NAME_Class, "getJarItems", ex.getMessage(), ex );
+        }
+        
+    }
 
     //========================================================================
     /**
@@ -293,6 +322,32 @@ public class ToOptions extends Function implements OptionsJFrameListener {
             DebugPrinter.printMessage( NAME_Class, "deleteJarItem", ex.getMessage(), ex );
         }
     }
+    
+    //========================================================================
+    /**
+     * 
+     * @param serverPort
+     * @param issueeDN
+     * @param issuerDN
+     * @param days 
+     */
+    @Override
+    public void sendCertInfo(int serverPort, String issueeDN, String issuerDN, int days) {
+         try {
+            
+            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            if( aCMManager == null )
+                aCMManager = ControlMessageManager.initialize( theManager );            
+            
+            //Send the msg
+            NetworkSettingsMsg aMsg = new NetworkSettingsMsg( Constants.SERVER_ID, serverPort, issueeDN, issuerDN, "", Integer.toString(days));
+            aCMManager.send(aMsg);
+            
+        } catch (IOException ex) {
+            DebugPrinter.printMessage( NAME_Class, "deleteJarItem", ex.getMessage(), ex );
+        }
+    }
+    
 
     //========================================================================
     /**
@@ -354,6 +409,20 @@ public class ToOptions extends Function implements OptionsJFrameListener {
                 DebugPrinter.printMessage( NAME_Class, "jarFileSent", ex.getMessage(), ex );
             }
         }
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @param theServerPort
+     * @param theIssueeName
+     * @param theIssuerName
+     * @param theExpDate
+     * @param theAlgorithm 
+     */
+    public void setNetworkSettings(int theServerPort, String theIssueeName, String theIssuerName, String theExpDate, String theAlgorithm) {
+        NetworkOptionsPanel thePanel = optionsGui.getNetworkSettingsPanel();
+        thePanel.setNetworkSettings(theServerPort, theIssueeName, theIssuerName, theExpDate, theAlgorithm );
     }
 
 }
