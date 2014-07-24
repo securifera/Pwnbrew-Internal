@@ -45,7 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.logging.LoggableException;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -56,6 +55,7 @@ import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.tasks.TaskManager;
 
 
 /**
@@ -171,7 +171,9 @@ public final class TaskGetFile extends TaskStatus{
             if( aCMManager != null ){
                 
                 //Alert the manager of the change in the task
-                passedManager.getTaskManager().taskChanged(this);
+                TaskManager aMgr = passedManager.getTaskManager();
+                if( aMgr != null )
+                    aMgr.taskChanged(this);
 
                 File libDir = Directories.getFileLibraryDirectory();
                 String theHash = getHashToRetrieve();

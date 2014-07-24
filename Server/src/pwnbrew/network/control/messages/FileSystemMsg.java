@@ -133,11 +133,10 @@ public final class FileSystemMsg extends Tasking {
     
         String clientIdStr = Integer.toString( getSrcHostId() );
         final ServerManager aSM = (ServerManager) passedManager;
-        final HostController theController = aSM.getServer().getGuiController().getHostController( clientIdStr );
-        if( theController != null ){
+        final HostController theController = aSM.getHostController( clientIdStr );
+        if( theController != null )
             theController.updateFileSystem( getTaskId(), size, filePath, fileType, dateModified );
-        }
-    
+       
     }
    
 }

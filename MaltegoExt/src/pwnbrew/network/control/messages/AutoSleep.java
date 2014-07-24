@@ -37,9 +37,9 @@ The copyright on this package is held by Securifera, Inc
 */
 
 package pwnbrew.network.control.messages;
-import pwnbrew.controllers.MainGuiController;
 import pwnbrew.host.HostController;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
 
@@ -143,14 +143,12 @@ public final class AutoSleep extends ControlMessage{ // NO_UCD (use default)
     public void evaluate( CommManager passedManager ) {
     
         //Get the host controller 
-        MainGuiController theGuiController = (MainGuiController)passedManager.getTaskManager();
         String hostStr = Integer.toString( hostId );
-        HostController theHostController = theGuiController.getHostController( hostStr );
-        if( theHostController != null ){
-            if(theOperation == SET_VALUE){            
-                theHostController.setAutoSleepFlag(autoSleepBool);            
-                theHostController.saveToDisk();
-            }
+        ServerManager aSM = (ServerManager) passedManager;
+        HostController theHostController = aSM.getHostController( hostStr );
+        if( theHostController != null && theOperation == SET_VALUE){            
+            theHostController.setAutoSleepFlag(autoSleepBool);            
+            theHostController.saveToDisk();
         }
     
     }

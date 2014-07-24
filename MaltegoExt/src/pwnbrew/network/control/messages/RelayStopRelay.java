@@ -38,13 +38,12 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.controllers.MainGuiController;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.tasks.TaskManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -102,35 +101,31 @@ public final class RelayStopRelay extends ControlMessage{
         
         ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
         if( aCMManager != null ){
-            
-            TaskManager theTaskManager = passedManager.getTaskManager();
-            if( theTaskManager instanceof MainGuiController ){
-                
-                //Get the host controllers 
-                String hostIdStr = Integer.toString(hostId);
-                MainGuiController theGuiController = (MainGuiController)theTaskManager;
-                HostController theHostController = theGuiController.getHostController(hostIdStr);
-                if( theHostController != null ){
-                    
-                    Host theHost = theHostController.getObject();
-                    if( !theHost.getRelayPort().isEmpty() ) {
-                        theHost.setRelayPort( "" );
-                        theHostController.saveToDisk();
+                  
+            //Get the host controllers 
+            String hostIdStr = Integer.toString(hostId);
+            ServerManager aSM = (ServerManager) passedManager;
+            HostController theHostController = aSM.getHostController(hostIdStr);
+            if( theHostController != null ){
 
-                        //Send relay start message
-                        RelayStop relayMsg = new RelayStop( hostId );
-                        relayMsg.setSrcHostId( getSrcHostId() );
-                        aCMManager.send( relayMsg );
-                    } else {
-                        
-                        //Send the message
-                        RelayStatus aMsg = new RelayStatus(getSrcHostId(), true );
-                        aCMManager.send(aMsg);
-                        
-                    }
-                
-                }               
-            }
+                Host theHost = theHostController.getObject();
+                if( !theHost.getRelayPort().isEmpty() ) {
+                    theHost.setRelayPort( "" );
+                    theHostController.saveToDisk();
+
+                    //Send relay start message
+                    RelayStop relayMsg = new RelayStop( hostId );
+                    relayMsg.setSrcHostId( getSrcHostId() );
+                    aCMManager.send( relayMsg );
+                } else {
+
+                    //Send the message
+                    RelayStatus aMsg = new RelayStatus(getSrcHostId(), true );
+                    aCMManager.send(aMsg);
+
+                }
+
+            }               
                         
         }        
     }

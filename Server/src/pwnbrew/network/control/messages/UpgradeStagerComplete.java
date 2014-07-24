@@ -39,8 +39,8 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.tasks.TaskManager;
 
 /**
  *
@@ -93,7 +93,7 @@ public final class UpgradeStagerComplete extends ControlMessage {
     */
     @Override
     public void evaluate( CommManager passedManager ) {
-        TaskManager aManager = passedManager.getTaskManager();
+        ServerManager aManager = (ServerManager)passedManager;
         aManager.stagerUpgradeComplete( getSrcHostId(), jar_version );
     }
        

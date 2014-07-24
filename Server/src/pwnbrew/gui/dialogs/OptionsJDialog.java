@@ -52,11 +52,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import javax.swing.JDialog;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 import pwnbrew.gui.panels.options.OptionsJPanel;
+import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.utilities.Utilities;
 
@@ -68,6 +70,8 @@ public class OptionsJDialog extends JDialog implements PanelListener {
 
     private final OptionsJDialogListener theListener;
     private final List<OptionsJPanel> theExtPanelList = new ArrayList<>();
+    
+    private static final String NAME_Class = OptionsJDialog.class.getSimpleName();
  
     //=======================================================================
     /** Creates new form OptionsJDialog
@@ -93,6 +97,7 @@ public class OptionsJDialog extends JDialog implements PanelListener {
                }
                
            } catch ( ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+               Log.log(Level.SEVERE, NAME_Class, "saveChanges()", ex.getMessage(), ex);
            }
            
        }

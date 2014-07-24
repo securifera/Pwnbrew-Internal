@@ -150,18 +150,10 @@ public class JobJProgressPanel extends JPanel implements ActionListener {
                     JButton theCancelButton = getCancelButton();
                     Rectangle cancelButtonRect = new Rectangle(theCancelButton.getLocation(), theCancelButton.getSize());
                     if(cancelButtonRect.contains(e.getX(), e.getY())){
-                        
-//                        try {
-                            //Get the task IP and cancel the task
-//                            InetAddress theInet = InetAddress.getByName( theRemoteTask.getTargetIp() );
-                            theListener.cancelTask(Integer.parseInt( theRemoteTask.getClientId()), Integer.parseInt( theRemoteTask.getTaskId() ) );
-                            updateComponents();
-                            
-//                        } catch (UnknownHostException ex) {
-//                            Log.log(Level.WARNING, NAME_Class, "mouseReleased()", ex.getMessage(), ex );
-//                        }
-                                               
-                        
+
+                        theListener.cancelTask(Integer.parseInt( theRemoteTask.getClientId()), Integer.parseInt( theRemoteTask.getTaskId() ) );
+                        updateComponents();
+                                      
                     } else if(e.getClickCount() == 2){
 
                         try {
@@ -486,7 +478,7 @@ public class JobJProgressPanel extends JPanel implements ActionListener {
                     theTasksJDialog.removeTask( theRemoteTask );
                     
                     //Remove the task
-                    File aClientDir = theListener.getHostDirectory( Integer.parseInt(theRemoteTask.getClientId()) );
+                    File aClientDir = theListener.getServerManager().getHostDirectory( Integer.parseInt(theRemoteTask.getClientId()) );
                     File theTaskDir = new File(aClientDir, theRemoteTask.getTaskId());
                     
                     FileUtilities.deleteDir(theTaskDir);
@@ -518,7 +510,7 @@ public class JobJProgressPanel extends JPanel implements ActionListener {
     */
     private void openTaskFolder() throws IOException {
         //Open a file browser to the task directory
-        File aClientDir = theListener.getHostDirectory( Integer.parseInt(theRemoteTask.getClientId()) );
+        File aClientDir = theListener.getServerManager().getHostDirectory( Integer.parseInt(theRemoteTask.getClientId()) );
         File theTaskDir = new File(aClientDir, theRemoteTask.getTaskId());
 
         

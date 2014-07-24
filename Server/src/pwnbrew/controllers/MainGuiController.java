@@ -74,7 +74,6 @@ import pwnbrew.gui.tree.LibraryItemJTree;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.HostFactory;
-import pwnbrew.host.HostListener;
 import pwnbrew.host.Session;
 import pwnbrew.library.Ancestor;
 import pwnbrew.logging.Log;
@@ -110,7 +109,7 @@ import pwnbrew.xmlBase.JarItem;
  */
 final public class MainGuiController extends Controller implements ActionListener, TreeSelectionListener,
         JobSetControllerListener, OptionsJDialogListener,
-        HostListener, TaskManager, ProgressListener {
+        TaskManager, ProgressListener {
     
     public static final String ACTION_RunSelectedItem = "Run Selected Item";
     public static final String ACTION_StopSelectedItem = "Stop Selected Item";
@@ -136,9 +135,7 @@ final public class MainGuiController extends Controller implements ActionListene
         theMainGui = MainGui.createInstance( this ); 
         
         TasksJDialog.setMainGuiController( this );
-        theServerManager.addDetectListener( this);
-        updateComponents();
-        
+        updateComponents();        
     }
   
     //===============================================================
@@ -174,13 +171,9 @@ final public class MainGuiController extends Controller implements ActionListene
         
         JPanel thePanel = null;
         JViewport theVP = theMainGui.getMainScrollPane().getViewport();
-        if(theVP != null){
-
-            //Call repaint on the view so that the scriptset will reflect any changes
+        if(theVP != null)
             thePanel = (JPanel)theVP.getView();
-            
-        }
-        
+               
         return thePanel;
     }
    
@@ -1460,164 +1453,6 @@ final public class MainGuiController extends Controller implements ActionListene
     
     // ==========================================================================
     /**
-     *  Basically fires a repaint because a node changed.
-     * 
-     * @param passedNode
-     */
-    @Override
-    public void hostChanged(final Host passedNode) { }
-     
-    // ==========================================================================
-    /**
-     * Adds the host to the JTree
-     *
-     * @param passedHost 
-     */
-     
-    @Override
-    public void hostDetected( final Host passedHost ) {
-
-        
-        //Get the Host from the id
-        String clientIdStr = passedHost.getId();  
-        
-        //Register the client with the parent
-        int parentId = theServerManager.getClientParent( Integer.parseInt(clientIdStr));
-        HostController parentController = getHostController( Integer.toString(parentId));
-        if( parentController != null ){
-            Host parentHost = parentController.getHost();
-            parentHost.addConnectedHostId( clientIdStr ); 
-            parentController.saveToDisk();
-        }
-        
-        final HostController theController = getHostController( clientIdStr );
-        if(theController != null && theController.getObject().equals(passedHost)){
-                
-            //Get the address
-            Host theHost = (Host) theController.getObject();
-            theHost.setConnected(true);
-                                       
-            //Update all data
-            theHost.updateData(passedHost);
-
-            //Set time
-            Session aSession = new Session();
-            theHost.addSession(aSession);
-
-            //Purge stale dates
-            theController.removeStaleDates();
-
-            //Write it to disk
-            theController.saveToDisk();
-            
-            //Get the relayPort
-            String thePortStr = theHost.getRelayPort();
-
-            //Call for repaint
-            SwingUtilities.invokeLater( new Runnable(){
-                @Override
-                public void run() {
-                    getJTree().repaint();
-                    getJTree().requestFocus();
-                    theController.updateComponents();
-                }
-            });
-
-            //Get the auto sleep flag and if it is set then tell the client to goto sleep
-            final JFrame theParent = getParentJFrame();
-            if( theController.getAutoSleepFlag() ){
-
-                Constants.Executor.execute( new Runnable(){
-                    @Override
-                    public void run() {
-                        try {
-                            Thread.sleep( 30000 );
-                            theController.sleep( theParent, true );
-                        } catch (InterruptedException ex) {
-                            ex = null;
-                        }
-                    }
-                });
-                
-            } else {
-                
-                //Get the port
-                if( !thePortStr.isEmpty() ){
-                    
-                    //Parse the port
-                    int port = Integer.parseInt( thePortStr );     
-
-                    //Get the control message manager
-                    try {
-                        
-                        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                        if( aCMManager == null ){
-                            aCMManager = ControlMessageManager.initialize( getServer().getServerManager());
-                        }                      
-                        
-                        int hostId = Integer.parseInt(theHost.getId());
-                        RelayStart aMigMsg = new RelayStart( port, hostId ); //Convert mins to seconds
-                        aCMManager.send( aMigMsg );                        
-                  
-                    } catch( IOException ex ){
-                       Log.log(Level.SEVERE, NAME_Class, "hostDetected()", ex.getMessage(), ex );
-                    }
-                }
-            }
-                              
-        } else {
-
-            //Start in swing thread since it affects the gui
-            final HostController aHostController = new HostController( passedHost, this );
-            Session aSession = new Session();
-            passedHost.addSession(aSession);
-            
-            SwingUtilities.invokeLater( new Runnable(){
-                @Override
-                public void run() {
-
-                    //Get the JTree and add the controller
-                    LibraryItemJTree theJTree = getJTree();
-                    MainGuiTreeModel treeModel = theJTree.getModel();               
-                    DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) treeModel.getRoot();
-
-                    //Add the host node
-                    IconNode newParentNode = new IconNode( aHostController, true );
-
-                    //Add the node at the end of the children of the parentNode
-                    int index = parentNode.getChildCount();
-                    treeModel.insertNodeInto( newParentNode, parentNode, index );                
-
-                }
-            });
-            
-            aHostController.saveToDisk();
-                        
-        }
-                
-    }
-
-    // ==========================================================================
-    /**
-     *  Notify that the host has disconnected.
-     *
-     * @param passedHost 
-     */
-    @Override
-    public void hostDisconnected(final Host passedHost) {
-                
-        List<Session> sessionList = passedHost.getSessionList();
-        Session aSession = sessionList.get(sessionList.size() - 1);
-        aSession.setDisconnectedTime(Constants.CHECKIN_DATE_FORMAT.format( new Date() ));
-        
-       
-        passedHost.setConnected( false );
-        getJTree().repaint();
-
-    }
-    
-    // ==========================================================================
-    /**
      *  Creates a remote job out of the selected component  
      * @param passedController 
     */    
@@ -1904,26 +1739,6 @@ final public class MainGuiController extends Controller implements ActionListene
         }
         
     }
-     //===============================================================
-    /**
-     * Handles the completion of a task
-     *
-     * @param passedVersion
-    */
-    @Override
-    public void stagerUpgradeComplete( int clientId, String passedVersion ) {
-        
-        //Get the host
-        HostController theController = getHostController( Integer.toString( clientId) );
-        Host theHost = theController.getHost();
-        
-        //Set the new version and save
-        theHost.setJreVersion( passedVersion );
-        theController.saveToDisk();
-        
-        JOptionPane.showMessageDialog(theMainGui, "Stager upgrade complete for " + theController.getItemName());
-    }
-    
     
     //===============================================================
     /**
@@ -2061,7 +1876,7 @@ final public class MainGuiController extends Controller implements ActionListene
     public void populateRunnerPanel( RemoteTask passedTask ) {
         
         //Get the host controller
-        HostController theController = getHostController( passedTask.getClientId() );
+        HostController theController = theServerManager.getHostController( passedTask.getClientId() );
       
         LibraryItemController aLibController = getControllerByObjName( theController.getItemName(), passedTask.getType(), passedTask.getName());
         RunnerPane theRunnerPane = aLibController.getRunnerPane( true );
@@ -2070,7 +1885,7 @@ final public class MainGuiController extends Controller implements ActionListene
         if( theRunnerPane != null ){
             
             theRunnerPane.setText(" ");
-            File aClientDir = getHostDirectory( Integer.parseInt( passedTask.getClientId()) );
+            File aClientDir = theServerManager.getHostDirectory( Integer.parseInt( passedTask.getClientId()) );
             File theTaskDir = new File(aClientDir, passedTask.getTaskId());
                       
             //Read the stdout file
@@ -2096,53 +1911,6 @@ final public class MainGuiController extends Controller implements ActionListene
             
         }
                                               
-    }
-    
-     //===============================================================
-    /**
-     * Adds a new host to the map
-     *
-     * @param passedHost
-    */
-    @Override
-    public void registerHost( Host passedHost ) {
-
-        List<HostListener> theListenerList = theServerManager.getDetectListenerList();
-        for(HostListener aListener : theListenerList){
-            aListener.hostDetected(passedHost);
-        }
-
-    }
-    
-     // ==========================================================================
-    /**
-     *  Get the host with the given id string
-     * 
-     * @param clientIdStr
-     * @return 
-     */
-    @Override
-    public HostController getHostController( String clientIdStr ) {
-        
-        HostController retController = null;
-        for( LibraryItemController aController : theMainGui.getJTree().getLibraryItemControllers( HostController.class ) ){
-            Host aHost = (Host)aController.getObject();
-            if( aHost.getId().equals( clientIdStr )){
-                retController = (HostController) aController;
-                break;
-            }           
-        }
-        return retController;
-    }
-    
-    // ==========================================================================
-    /**
-     *  Get all of the host controllers
-     * 
-     * @return 
-     */
-    public List<LibraryItemController> getHostControllers() {
-        return new ArrayList<>( theMainGui.getJTree().getLibraryItemControllers( HostController.class ));  
     }
     
      //=========================================================================
@@ -2171,22 +1939,14 @@ final public class MainGuiController extends Controller implements ActionListene
         
     }
 
-    // ==========================================================================
+    //========================================================================
     /**
-     * Gets the directory of the client id passed
      * 
-     * @param clientId
      * @return 
      */
     @Override
-    public File getHostDirectory(int clientId) {
-        
-        File dirFile = null;
-        HostController theController = getHostController(Integer.toString(clientId));
-        if( theController != null ){
-            dirFile = new File(Directories.getRemoteTasksDirectory(), theController.getItemName());
-        }
-        return dirFile;
+    public ServerManager getServerManager() {
+        return theServerManager;
     }
 
 }

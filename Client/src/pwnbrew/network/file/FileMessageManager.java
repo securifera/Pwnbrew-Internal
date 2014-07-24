@@ -53,7 +53,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import pwnbrew.ClientConfig;
-import pwnbrew.Persistence;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;

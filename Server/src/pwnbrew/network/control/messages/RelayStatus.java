@@ -48,6 +48,7 @@ package pwnbrew.network.control.messages;
 import pwnbrew.host.HostController;
 import pwnbrew.host.gui.HostDetailsPanel;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
 
@@ -128,7 +129,8 @@ public final class RelayStatus extends ControlMessage{
     
         //Get the host and set the relay information
         int clientId = getSrcHostId();
-        HostController theController = passedManager.getTaskManager().getHostController( Integer.toString( clientId) );
+        final ServerManager aSM = (ServerManager) passedManager;
+        HostController theController = aSM.getHostController( Integer.toString( clientId) );
         if( theController != null ){
             HostDetailsPanel aPanel = theController.getRootPanel().getOverviewPanel();
             aPanel.setRelayValue(connected);

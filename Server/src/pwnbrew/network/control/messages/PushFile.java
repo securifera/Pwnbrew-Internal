@@ -57,6 +57,7 @@ import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.tasks.RemoteTask;
+import pwnbrew.tasks.TaskManager;
 
 
 /**
@@ -78,6 +79,7 @@ public class PushFile extends FileMessage {
     public static final int FILE_UPLOAD = 2;
     public static final int FILE_DOWNLOAD = 3;
     public static final int JAR_UPLOAD = 4;
+    public static final int CERT_UPLOAD = 5;
   
      //Class name
     private static final String NAME_Class = PushFile.class.getSimpleName();
@@ -276,8 +278,11 @@ public class PushFile extends FileMessage {
                 
         try {
             
-            if( fileType == PushFile.JOB_RESULT)      
-                passedManager.getTaskManager().taskChanged(new TaskStatus( getTaskId(), RemoteTask.TASK_XFER_RESULTS, -1 ));
+            if( fileType == PushFile.JOB_RESULT){  
+                TaskManager aMgr = passedManager.getTaskManager();
+                if( aMgr != null )
+                    aMgr.taskChanged(new TaskStatus( getTaskId(), RemoteTask.TASK_XFER_RESULTS, -1 ));
+            }
             
              
             //Get the file manager

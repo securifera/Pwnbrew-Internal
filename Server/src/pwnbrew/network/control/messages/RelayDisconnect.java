@@ -45,11 +45,9 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.util.List;
 import javax.swing.SwingUtilities;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
-import pwnbrew.host.HostListener;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
@@ -111,7 +109,7 @@ public final class RelayDisconnect extends ControlMessage{
         //Get the host and set the relay information
         String clientIdStr = Integer.toString( relayHostId );
         final ServerManager aSM = (ServerManager) passedManager;
-        final HostController theController = aSM.getServer().getGuiController().getHostController(clientIdStr);
+        final HostController theController = aSM.getHostController(clientIdStr);
 
         if( theController != null ){
 
@@ -120,10 +118,11 @@ public final class RelayDisconnect extends ControlMessage{
                 @Override
                 public void run() {                    
 
-                    List<HostListener> theListenerList = aSM.getDetectListenerList();
-                    for(HostListener aListener : theListenerList){
-                        aListener.hostDisconnected( (Host) theController.getObject() );
-                    }                    
+//                    List<HostListener> theListenerList = aSM.getDetectListenerList();
+//                    for(HostListener aListener : theListenerList){
+//                        aListener.
+                    aSM.hostDisconnected( (Host) theController.getObject() );
+//                    }                    
 
                     theController.getRootPanel().getShellPanel().disablePanel( false );
                     theController.updateComponents();

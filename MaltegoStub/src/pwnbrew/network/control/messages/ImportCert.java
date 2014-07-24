@@ -36,25 +36,39 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
+package pwnbrew.network.control.messages;
 
-/*
-* HostListener.java
-*
-* Created on June 21, 2013, 8:02:12 PM
-*/
-
-package pwnbrew.host;
+import java.io.UnsupportedEncodingException;
+import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-public interface HostListener {
-
-    public abstract void hostDetected( Host passedNode);
+public final class ImportCert extends ControlMessage { // NO_UCD (use default)
+        
+    private static final byte OPTION_CERT_FILENAME = 78;
+    private static final byte OPTION_CERT_PASSWORD = 79;
     
-    public abstract void hostChanged( Host passedNode);
-
-    public abstract void hostDisconnected( Host passedNode );
+    // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param dstHostId
+     * @param passedName
+     * @param passedType
+     * @throws java.io.UnsupportedEncodingException
+    */
+    public ImportCert(int dstHostId, String passedName, String passedType ) throws UnsupportedEncodingException {
+        super( dstHostId );
+        
+        byte[] tempBytes = passedName.getBytes("US-ASCII");
+        ControlOption aTlv = new ControlOption( OPTION_CERT_FILENAME, tempBytes);
+        addOption(aTlv);
+        
+        tempBytes = passedType.getBytes("US-ASCII");
+        aTlv = new ControlOption( OPTION_CERT_PASSWORD, tempBytes);
+        addOption(aTlv);
+    }
 
 }

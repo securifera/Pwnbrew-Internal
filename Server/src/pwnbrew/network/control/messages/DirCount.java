@@ -108,7 +108,7 @@ public final class DirCount extends Tasking {
     
         String clientIdStr = Integer.toString( getSrcHostId() );
         final ServerManager aSM = (ServerManager) passedManager;
-        final HostController theController = aSM.getServer().getGuiController().getHostController( clientIdStr );
+        final HostController theController = aSM.getHostController( clientIdStr );
         if( theController != null ){
             theController.setFileCount( getTaskId(), theDirCount );
         }

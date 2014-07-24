@@ -41,15 +41,14 @@ package pwnbrew.network.control.messages;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.logging.Level;
-import pwnbrew.controllers.MainGuiController;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.tasks.TaskManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -109,35 +108,33 @@ public final class GetCheckInSchedule extends ControlMessage{
             
         ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
         if( aCMManager != null ){
-            TaskManager theTaskManager = passedManager.getTaskManager();        
-            if( theTaskManager instanceof MainGuiController ){
 
-                String hostIdStr = Integer.toString( hostId );
+            String hostIdStr = Integer.toString( hostId );
 
-                //Get the host controller 
-                MainGuiController theGuiController = (MainGuiController)theTaskManager;
-                HostController theHostController = theGuiController.getHostController( hostIdStr );
-                if( theHostController != null ){
-                    
-                    int srcId = getSrcHostId();
-                    Host theHost = theHostController.getObject();
-                    List<String> theCheckInList = theHost.getCheckInList();
-                    for( String aString : theCheckInList ){
-                        try {
-                            CheckInTimeMsg aMsg = new CheckInTimeMsg( srcId, hostId, aString);
-                            aCMManager.send(aMsg);
-                        } catch (UnsupportedEncodingException ex) {
-                            Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                        }
+            //Get the host controller 
+            ServerManager aSM = (ServerManager) passedManager;
+            HostController theHostController = aSM.getHostController( hostIdStr );
+            if( theHostController != null ){
+
+                int srcId = getSrcHostId();
+                Host theHost = theHostController.getObject();
+                List<String> theCheckInList = theHost.getCheckInList();
+                for( String aString : theCheckInList ){
+                    try {
+                        CheckInTimeMsg aMsg = new CheckInTimeMsg( srcId, hostId, aString);
+                        aCMManager.send(aMsg);
+                    } catch (UnsupportedEncodingException ex) {
+                        Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
                     }
-                    
-                    //Get flag and send a msg
-                    boolean asfFlag = theHostController.getAutoSleepFlag();
-                    AutoSleep anASMsg = new AutoSleep( srcId, hostId, AutoSleep.GET_VALUE, asfFlag );
-                    aCMManager.send(anASMsg);
                 }
 
-            }  
+                //Get flag and send a msg
+                boolean asfFlag = theHostController.getAutoSleepFlag();
+                AutoSleep anASMsg = new AutoSleep( srcId, hostId, AutoSleep.GET_VALUE, asfFlag );
+                aCMManager.send(anASMsg);
+            }
+
+             
         }      
 
     }        

@@ -126,7 +126,7 @@ public final class TasksJDialog extends JDialog implements Observer{
        theGuiController = passedController;
    }
 
-   //****************************************************************************
+   //===============================================================
    /**
     * Returns the task updater
      * @return 

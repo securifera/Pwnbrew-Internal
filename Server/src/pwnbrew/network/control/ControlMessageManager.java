@@ -45,21 +45,21 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control;
 
-import pwnbrew.network.PortRouter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
+import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.network.control.messages.TaskStatus;
 import pwnbrew.network.control.messages.Tasking;
 import pwnbrew.tasks.RemoteTask;
+import pwnbrew.tasks.TaskManager;
 import pwnbrew.xmlBase.ServerConfig;
 
 /**
@@ -153,7 +153,9 @@ public class ControlMessageManager extends DataManager {
             if( passedMessage instanceof Tasking ){
                 try {
                     Tasking aTasking = (Tasking)passedMessage;
-                    theCommManager.getTaskManager().taskChanged( new TaskStatus( aTasking.getTaskId(), RemoteTask.TASK_FAILED, -1 ));
+                    TaskManager aMgr = theCommManager.getTaskManager();
+                    if( aMgr != null )
+                        aMgr.taskChanged( new TaskStatus( aTasking.getTaskId(), RemoteTask.TASK_FAILED, -1 ));
                 } catch( IOException ex ){
                     Log.log( Level.SEVERE, NAME_Class, "send()", ex.getMessage(), ex);
                 } 

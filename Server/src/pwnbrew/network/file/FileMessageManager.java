@@ -57,6 +57,7 @@ import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
@@ -229,57 +230,58 @@ public class FileMessageManager extends DataManager {
         int fileId = passedMessage.getFileId();
         
         int clientId = passedMessage.getSrcHostId();
-        File aClientDir = theCommManager.getTaskManager().getHostDirectory( clientId );
+        ServerManager aSM = (ServerManager)theCommManager;
+        File aClientDir = aSM.getHostDirectory( clientId );
 
-        
-            File libDir = null;
-            int fileType = passedMessage.getFileType();
-            switch(fileType){
-                case PushFile.JOB_RESULT:
-                    if( aClientDir == null )
-                        return retVal;
-                    libDir = new File(aClientDir, Integer.toString(taskId));
-                    break;
-                case PushFile.FILE_DOWNLOAD:
-                    if( aClientDir == null )
-                        return retVal;
-                    libDir = new File(aClientDir, Integer.toString(taskId));
-                    break;
-                case PushFile.JAR_UPLOAD:
-                    File aFile = File.createTempFile("tmp", null);
-                    libDir = aFile.getParentFile();
-                    aFile.delete();
-                    break;
-            }
+        File libDir = null;
+        int fileType = passedMessage.getFileType();
+        switch(fileType){
+            case PushFile.JOB_RESULT:
+                if( aClientDir == null )
+                    return retVal;
+                libDir = new File(aClientDir, Integer.toString(taskId));
+                break;
+            case PushFile.FILE_DOWNLOAD:
+                if( aClientDir == null )
+                    return retVal;
+                libDir = new File(aClientDir, Integer.toString(taskId));
+                break;
+            case PushFile.JAR_UPLOAD:
+            case PushFile.CERT_UPLOAD:
+                File aFile = File.createTempFile("tmp", null);
+                libDir = aFile.getParentFile();
+                aFile.delete();
+                break;
+        }
 
-            //Get the control manager for sending messages
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( getCommManager() );
-            }
+        //Get the control manager for sending messages
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager == null ){
+            aCMManager = ControlMessageManager.initialize( getCommManager() );
+        }
 
-            try {
+        try {
 
-                //Get the hash/filename
-                String hashFileNameStr = passedMessage.getHashFilenameString();
+            //Get the hash/filename
+            String hashFileNameStr = passedMessage.getHashFilenameString();
 
-                //Try to begin the file transfer
-                long fileSize = passedMessage.getFileSize();
-                initFileTransfer( passedMessage.getSrcHostId(), taskId, fileId, libDir, hashFileNameStr, fileSize );
+            //Try to begin the file transfer
+            long fileSize = passedMessage.getFileSize();
+            initFileTransfer( passedMessage.getSrcHostId(), taskId, fileId, libDir, hashFileNameStr, fileSize );
 
-                //If filesize == -1 then it is streaming
-                if( fileSize >= 0 ){
-                    //Send an ack to the sender to begin transfer
-                    DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);
-                    PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr, clientId );
-                    aCMManager.send( aSFMA );
-                } 
+            //If filesize == -1 then it is streaming
+            if( fileSize >= 0 ){
+                //Send an ack to the sender to begin transfer
+                DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);
+                PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr, clientId );
+                aCMManager.send( aSFMA );
+            } 
 
-            } catch (IOException | NoSuchAlgorithmException ex){
-                throw new LoggableException(ex);
-            }
-            
-            retVal = true;  
+        } catch (IOException | NoSuchAlgorithmException ex){
+            throw new LoggableException(ex);
+        }
+
+        retVal = true;  
 
         return retVal;
 

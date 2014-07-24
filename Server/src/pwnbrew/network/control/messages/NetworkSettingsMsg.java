@@ -41,7 +41,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.KeyStoreException;
 import java.security.Principal;
 import java.security.cert.Certificate;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;

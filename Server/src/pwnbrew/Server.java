@@ -55,7 +55,6 @@ import java.util.logging.Level;
 import javax.swing.JDialog;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import pwnbrew.controllers.MainGuiController;
 import pwnbrew.gui.MainGui;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
@@ -80,7 +79,6 @@ public final class Server {
 
     private static Server staticSelf = null;
     private final ServerManager theServerManager;
-    private final MainGuiController theGuiController;
     private static final String NAME_Class = Server.class.getSimpleName();
     
     //FileLock variables
@@ -88,17 +86,24 @@ public final class Server {
     private FileLock theLock = null;
     private FileChannel theLockFileChannel = null;    
     private static final boolean debug = true;
-
-    private Server() throws LoggableException, IOException  {
+    
+    private static final String showGuiArg = "-showGui";
+    
+    //=========================================================================
+    /**
+     * Constructor
+     * 
+     * @param passedArg
+     * @throws LoggableException
+     * @throws IOException 
+     */
+    private Server( boolean passedBool ) throws LoggableException, IOException  {
         
         initialize();
         
         //Create the server manager
-        theServerManager = new ServerManager( this );
-        
-        //Create the main controller and gui
-        theGuiController = new MainGuiController( theServerManager );     
-                           
+        theServerManager = new ServerManager( this, passedBool );
+                                 
         try {
 
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
@@ -130,7 +135,7 @@ public final class Server {
     private void start() throws LoggableException {
 
         theServerManager.start();
-        ((MainGui)theGuiController.getObject()).setVisible(true); 
+//        ((MainGui)theGuiController.getObject()).setVisible(true); 
         
     }
 
@@ -167,11 +172,20 @@ public final class Server {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main( String[] args ) {
 
         try {
-
-            staticSelf = new Server();
+            
+            boolean showGui = false;
+            
+            //Assign the service name
+            if( args.length > 0 ){
+                String passedArg = args[0]; 
+                if( passedArg.equals(showGuiArg))
+                    showGui = true;
+            }          
+            
+            staticSelf = new Server( showGui );
             staticSelf.start();
 
         } catch ( Throwable ex) {
@@ -190,16 +204,6 @@ public final class Server {
             
         }
         
-    }
-
-    //===============================================================
-    /**
-     * Returns the server controller
-     *
-     * @return 
-    */
-    public MainGuiController getGuiController(){
-       return theGuiController;
     }
 
     //===============================================================

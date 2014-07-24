@@ -56,5 +56,7 @@ public interface OptionsJFrameListener {
     public void sendJarFile(File userSelectedFile, String selVal);
 
     public void sendCertInfo(int serverPort, String sueeDN, String suerDN, int days);
+
+    public void sendCertFile(File theCertFile, String string);
     
 }

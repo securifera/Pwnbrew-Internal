@@ -666,14 +666,12 @@ public final class HostController extends LibraryItemController implements Actio
         removeStaleDates();
         
         int rtnCode = JOptionPane.YES_OPTION;
-        if( !autoFlag ){
+        if( !autoFlag && parent != null ){
             rtnCode = JOptionPane.CLOSED_OPTION;
-            StringBuilder messageBuilder = new StringBuilder( "Are you sure you want to put \"")
-                    .append(theHost.getHostname()).append("\" to sleep?");
+            String messageBuilder = "Are you sure you want to put \"" + theHost.getHostname() + "\" to sleep?";
             while( rtnCode == JOptionPane.CLOSED_OPTION ) { //Until the user chooses 'Yes' or 'No'...
                 //Prompt user to confirm the delete
-                rtnCode = JOptionPane.showConfirmDialog( parent,
-                        messageBuilder.toString(),
+                rtnCode = JOptionPane.showConfirmDialog( parent, messageBuilder,
                         "Sleep",
                         JOptionPane.YES_NO_OPTION );
             }
@@ -730,19 +728,17 @@ public final class HostController extends LibraryItemController implements Actio
                     nextCalendar.setTime(nextDate);                       
 
                     //Keep pulling dates until one is found that is after
-                    if( nextCalendar.before(currCalendar) ){
+                    if( nextCalendar.before(currCalendar) )
                         removeCheckInDate( nextCheckInStr );
-                    } else {
+                    else
                         break;
-                    }
 
                 } catch (ParseException ex) {
                     ex = null;
                 }
 
-            } else {
-                break;
-            }
+            } else
+                break;            
         } 
     }
     

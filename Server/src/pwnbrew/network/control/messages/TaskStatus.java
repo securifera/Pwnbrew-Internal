@@ -50,6 +50,7 @@ import java.io.UnsupportedEncodingException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.tasks.TaskManager;
 
 /**
  *
@@ -143,7 +144,9 @@ public class TaskStatus extends Tasking {
     public void evaluate( CommManager passedManager ) {
         
         //Pass it to the manager
-        passedManager.getTaskManager().taskChanged(this);       
+        TaskManager aMgr = passedManager.getTaskManager();
+        if( aMgr != null )
+            aMgr.taskChanged(this);       
             
         //Send an empty message
         ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();

@@ -59,8 +59,6 @@ import java.util.Date;
 import java.util.ListIterator;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;

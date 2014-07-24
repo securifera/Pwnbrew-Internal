@@ -47,8 +47,6 @@ import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import pwnbrew.misc.Constants;
-import pwnbrew.misc.DebugPrinter;
-import pwnbrew.output.StreamReceiver;
 
 /**
  *

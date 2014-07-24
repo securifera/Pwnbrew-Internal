@@ -48,7 +48,7 @@ package pwnbrew;
 
 
 import java.io.File;
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -112,10 +112,9 @@ final public class Persistence {
             Set<Png.PngChunk> chuckSet = theLogoPNG.getChunks( passedLabel );
             
             //And the chunk bytes to the list
-            for( Iterator<Png.PngChunk> theIter = chuckSet.iterator(); theIter.hasNext(); ){       
+            for( Iterator<Png.PngChunk> theIter = chuckSet.iterator(); theIter.hasNext(); )       
                 byteArrList.add( theIter.next().getValue() );
-            }
-            
+                        
         }
         
         return byteArrList;
@@ -166,7 +165,7 @@ final public class Persistence {
                 //Set the date to the previous date
                 theLogo.setLastModified(lastModified);
 
-            } catch (IOException ex) {
+            } catch (UnsupportedEncodingException ex) {
                 throw new LoggableException(ex);
             }
         }

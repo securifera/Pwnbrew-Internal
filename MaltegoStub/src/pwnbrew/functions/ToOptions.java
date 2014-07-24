@@ -49,9 +49,11 @@ import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.AddToJarLibrary;
+import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.network.control.messages.DeleteJarItem;
 import pwnbrew.network.control.messages.GetJarItems;
 import pwnbrew.network.control.messages.GetNetworkSettings;
+import pwnbrew.network.control.messages.ImportCert;
 import pwnbrew.network.control.messages.NetworkSettingsMsg;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.options.OptionsJFrame;
@@ -71,7 +73,8 @@ public class ToOptions extends Function implements OptionsJFrameListener {
     private volatile boolean notified = false;
     private OptionsJFrame optionsGui = null;
     
-    private final Map<Integer, String> taskIdToJarTypeMap = new HashMap<>();
+    //Map for temp strings
+    private final Map<Integer, String> taskIdToStringMap = new HashMap<>();
     
     //Create the return msg
     private final MaltegoMessage theReturnMsg = new MaltegoMessage();
@@ -367,7 +370,7 @@ public class ToOptions extends Function implements OptionsJFrameListener {
             int taskId = SocketUtilities.getNextId();
             
             //Add to the map
-            taskIdToJarTypeMap.put(taskId, selVal);
+            taskIdToStringMap.put(taskId, selVal);
 
             //Queue the file to be sent
             
@@ -388,10 +391,10 @@ public class ToOptions extends Function implements OptionsJFrameListener {
      * @param hashFilenameStr
      * @param taskId 
      */
-    public void jarFileSent(String hashFilenameStr, int taskId) {
+    public void fileSent(String hashFilenameStr, int taskId) {
         //Get the type
-        String jarType = taskIdToJarTypeMap.remove(taskId);
-        if( jarType != null ){
+        String tempStr = taskIdToStringMap.remove(taskId);
+        if( tempStr != null ){
             
             try {
             
@@ -400,11 +403,17 @@ public class ToOptions extends Function implements OptionsJFrameListener {
                     aCMManager = ControlMessageManager.initialize( theManager );            
 
                 //Queue the file to be sent
-                AddToJarLibrary jarMsg = new AddToJarLibrary(Constants.SERVER_ID, hashFilenameStr, jarType, "", "");
-
+                ControlMessage aMsg = null;
+                if( hashFilenameStr.endsWith("jar")){
+                    aMsg = new AddToJarLibrary(Constants.SERVER_ID, hashFilenameStr, tempStr, "", "");
+                } else if( hashFilenameStr.endsWith("p12")){
+                    aMsg = new ImportCert(Constants.SERVER_ID, hashFilenameStr, tempStr );
+                }
+                
                 //Send the message
-                aCMManager.send( jarMsg );  
-            
+                if( aMsg != null )
+                    aCMManager.send( aMsg );
+                            
             } catch (IOException ex) {
                 DebugPrinter.printMessage( NAME_Class, "jarFileSent", ex.getMessage(), ex );
             }
@@ -422,7 +431,39 @@ public class ToOptions extends Function implements OptionsJFrameListener {
      */
     public void setNetworkSettings(int theServerPort, String theIssueeName, String theIssuerName, String theExpDate, String theAlgorithm) {
         NetworkOptionsPanel thePanel = optionsGui.getNetworkSettingsPanel();
-        thePanel.setNetworkSettings(theServerPort, theIssueeName, theIssuerName, theExpDate, theAlgorithm );
+        thePanel.setNetworkSettings(theServerPort, theIssueeName, theIssuerName, theAlgorithm, theExpDate );
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @param userSelectedFile
+     * @param string 
+     */
+    @Override
+    public void sendCertFile( File userSelectedFile, String string ) {
+        
+        try {
+            
+            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            if( aCMManager == null )
+                aCMManager = ControlMessageManager.initialize( theManager );            
+            
+            int taskId = SocketUtilities.getNextId();
+            
+            //Add to the map
+            taskIdToStringMap.put(taskId, string);
+
+            //Queue the file to be sent            
+            String fileHashNameStr = new StringBuilder().append("0").append(":").append(userSelectedFile.getAbsolutePath()).toString();
+            PushFile thePFM = new PushFile( taskId, fileHashNameStr, userSelectedFile.length(), PushFile.JAR_UPLOAD, Constants.SERVER_ID );
+
+            //Send the message
+            aCMManager.send( thePFM );  
+            
+        } catch (IOException ex) {
+            DebugPrinter.printMessage( NAME_Class, "sendJarFile", ex.getMessage(), ex );
+        }
     }
 
 }

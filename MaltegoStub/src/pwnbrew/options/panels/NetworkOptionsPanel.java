@@ -43,7 +43,6 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -260,7 +259,7 @@ public class NetworkOptionsPanel extends OptionsJPanel {
         issueeOU = new javax.swing.JTextField();
         issueeState = new javax.swing.JTextField();
         issueeCountry = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        importButton = new javax.swing.JButton();
         issuedToPanel1 = new javax.swing.JPanel();
         certLabel12 = new javax.swing.JLabel();
         certLabel13 = new javax.swing.JLabel();
@@ -417,7 +416,12 @@ public class NetworkOptionsPanel extends OptionsJPanel {
                 .addContainerGap())
         );
 
-        jButton1.setText("Import");
+        importButton.setText("Import");
+        importButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importButtonActionPerformed(evt);
+            }
+        });
 
         issuedToPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Issued By"));
 
@@ -553,7 +557,7 @@ public class NetworkOptionsPanel extends OptionsJPanel {
                                 .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addGroup(encryptionPanelLayout.createSequentialGroup()
                                         .addGap(0, 0, Short.MAX_VALUE)
-                                        .addComponent(jButton1))
+                                        .addComponent(importButton))
                                     .addComponent(certPathTextField))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(fileChooserButton, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))))
@@ -600,7 +604,7 @@ public class NetworkOptionsPanel extends OptionsJPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(noteLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton1)
+                .addComponent(importButton)
                 .addContainerGap())
         );
 
@@ -720,6 +724,20 @@ public class NetworkOptionsPanel extends OptionsJPanel {
         setSaveButton(true);
     }//GEN-LAST:event_issuerCountryKeyReleased
 
+    private void importButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importButtonActionPerformed
+        String certPath = certPathTextField.getText();
+        char[] passArr = passwordField.getPassword();
+
+        //If the the cert was defined
+        if(!certPath.isEmpty()){
+            File theCertFile= new File(certPath);
+
+            //Load the cert into the keystore
+            if(theCertFile.exists())
+                getListener().sendCertFile( theCertFile, new String(passArr));
+        }
+    }//GEN-LAST:event_importButtonActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel algoLabel;
@@ -745,6 +763,7 @@ public class NetworkOptionsPanel extends OptionsJPanel {
     private javax.swing.JPanel encryptionPanel;
     private javax.swing.JTextField expDateField;
     private javax.swing.JButton fileChooserButton;
+    private javax.swing.JButton importButton;
     private javax.swing.JPanel issuedToPanel;
     private javax.swing.JPanel issuedToPanel1;
     private javax.swing.JTextField issueeCity;
@@ -759,7 +778,6 @@ public class NetworkOptionsPanel extends OptionsJPanel {
     private javax.swing.JTextField issuerOU;
     private javax.swing.JTextField issuerOrg;
     private javax.swing.JTextField issuerState;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel noteLabel;
     private javax.swing.JPasswordField passwordField;
     private javax.swing.JLabel passwordLabel;

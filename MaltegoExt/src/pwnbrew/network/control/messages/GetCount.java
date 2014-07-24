@@ -42,7 +42,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.util.List;
 import java.util.logging.Level;
-import pwnbrew.controllers.MainGuiController;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.HostFactory;
@@ -50,12 +49,11 @@ import pwnbrew.library.LibraryItemController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.tasks.TaskManager;
 import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.ServerConfig;
 
 /**
@@ -126,13 +124,12 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
         if( aCMManager != null ){
             
             int retCount = 0;
-            TaskManager theTaskManager = passedManager.getTaskManager();
+            ServerManager aSM = (ServerManager) passedManager;
+            
             switch( countType ){
                 case HOST_COUNT:
-                    if( theTaskManager instanceof MainGuiController ){
-
-                        MainGuiController theGuiController = (MainGuiController)theTaskManager;
-                        List<LibraryItemController> theHostControllers = theGuiController.getHostControllers();
+                    
+                        List<LibraryItemController> theHostControllers = aSM.getHostControllers();
                         retCount = theHostControllers.size() - 1;
                                 
                         //If 
@@ -144,7 +141,7 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
                                 Host localHost = HostFactory.getLocalHost();
                                 List<String> hostIdList = localHost.getConnectedHostIdList();
                                 for( String hostIdStr : hostIdList ){
-                                    HostController aHostController = theGuiController.getHostController(hostIdStr);
+                                    HostController aHostController = aSM.getHostController(hostIdStr);
                                     if( aHostController != null )
                                         retCount++;    
                                 }                                    
@@ -157,35 +154,33 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
                             
                             //Get the host
                             retCount = 0;
-                            HostController aHostController = theGuiController.getHostController( Integer.toString( optionalId ));
+                            HostController aHostController = aSM.getHostController( Integer.toString( optionalId ));
                             Host aHost = aHostController.getHost();
                             List<String> hostIdList = aHost.getConnectedHostIdList();
                             for( String hostIdStr : hostIdList ){
-                                aHostController = theGuiController.getHostController(hostIdStr);
+                                aHostController = aSM.getHostController(hostIdStr);
                                 if( aHostController != null )
                                     retCount++;    
                             }  
                             
                         }
 
-                    }
+                    
                     break;
                 case NIC_COUNT:
-                    if( theTaskManager instanceof MainGuiController ){
+                  
+                    String hostIdStr = Integer.toString( optionalId );
+                    if( optionalId == -1 )
+                        hostIdStr  = ServerConfig.getServerConfig().getHostId();                            
 
-                        String hostIdStr = Integer.toString( optionalId );
-                        if( optionalId == -1 )
-                            hostIdStr  = ServerConfig.getServerConfig().getHostId();                            
-                            
-                        //Get the host controller 
-                        MainGuiController theGuiController = (MainGuiController)theTaskManager;
-                        HostController theHostController = theGuiController.getHostController( hostIdStr );
-                        if( theHostController != null ){
-                            Host theHost = theHostController.getObject();
-                            retCount = theHost.getNicMap().size();
-                        }       
+                    //Get the host controller 
+                    HostController theHostController = aSM.getHostController( hostIdStr );
+                    if( theHostController != null ){
+                        Host theHost = theHostController.getObject();
+                        retCount = theHost.getNicMap().size();
+                    }       
 
-                    }
+                    
                     break;
                 default:
                     Log.log(Level.WARNING, NAME_Class, "evaluate()", "Unknown count id type.", null );    

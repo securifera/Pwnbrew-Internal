@@ -40,7 +40,6 @@ package pwnbrew.network.control.messages;
 
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 
 /**
  *

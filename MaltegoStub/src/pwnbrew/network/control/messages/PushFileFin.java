@@ -137,7 +137,7 @@ public final class PushFileFin extends FileMessage {
                 tfbFunc.refreshFileSystemJTree();
             } else if( aFunction instanceof ToOptions ){
                 ToOptions optionFunc = (ToOptions)aFunction;
-                optionFunc.jarFileSent(hashFilenameStr, getTaskId());
+                optionFunc.fileSent(hashFilenameStr, getTaskId());
             }           
         }
        

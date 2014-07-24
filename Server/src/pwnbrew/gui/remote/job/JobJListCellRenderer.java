@@ -136,7 +136,7 @@ public class JobJListCellRenderer extends DefaultListCellRenderer {
        while(taskIter.hasNext()){
            //Remove the task dir
            RemoteTask aTask = taskIter.next();
-           File aClientDir = theTaskManager.getHostDirectory( Integer.parseInt( aTask.getClientId() ));
+           File aClientDir = theTaskManager.getServerManager().getHostDirectory(Integer.parseInt( aTask.getClientId() ));
            FileUtilities.deleteDir(aClientDir);
        }
        theTaskControllerMap.clear();

@@ -45,7 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.gui.tree;
 
-import pwnbrew.controllers.MainGuiController;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;

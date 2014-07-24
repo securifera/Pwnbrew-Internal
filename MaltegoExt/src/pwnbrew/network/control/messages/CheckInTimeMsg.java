@@ -41,10 +41,10 @@ package pwnbrew.network.control.messages;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.logging.Level;
-import pwnbrew.controllers.MainGuiController;
 import pwnbrew.host.HostController;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
 
@@ -149,9 +149,10 @@ public final class CheckInTimeMsg extends ControlMessage{
     public void evaluate( CommManager passedManager ) {
     
         //Get the host controller 
-        MainGuiController theGuiController = (MainGuiController)passedManager.getTaskManager();
         String hostStr = Integer.toString( hostId );
-        HostController theHostController = theGuiController.getHostController( hostStr );
+        
+        ServerManager aSM = (ServerManager) passedManager;
+        HostController theHostController = aSM.getHostController( hostStr );
         if( theHostController != null ){
             switch(theOperation){
             

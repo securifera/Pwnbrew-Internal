@@ -315,13 +315,10 @@ public class LibraryItemJTree extends SearchableJTree {
         List<LibraryItemController> editedObjectControllers = new ArrayList<>();
 
         List<LibraryItemController> theControllerList = getLibraryItemControllers( null );
-        for( LibraryItemController aController : theControllerList ) {
-            
-            if( aController.isDirty() ) {
+        for( LibraryItemController aController : theControllerList )
+            if( aController.isDirty() )
                 editedObjectControllers.add( aController );
-            }
-        }
-
+               
         return editedObjectControllers;
     }
     

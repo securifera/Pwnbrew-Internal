@@ -73,6 +73,7 @@ public class PushFile extends FileMessage {
     public static final int FILE_UPLOAD = 2;
     public static final int FILE_DOWNLOAD = 3;
     public static final int JAR_UPLOAD = 4;
+    public static final int CERT_UPLOAD = 5;
   
      //Class name
     private static final String NAME_Class = PushFile.class.getSimpleName();

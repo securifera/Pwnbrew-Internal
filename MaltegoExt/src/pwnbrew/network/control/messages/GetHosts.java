@@ -43,7 +43,6 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import pwnbrew.controllers.MainGuiController;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.HostFactory;
@@ -51,10 +50,10 @@ import pwnbrew.library.LibraryItemController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.tasks.TaskManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -115,77 +114,72 @@ public final class GetHosts extends ControlMessage{ // NO_UCD (use default)
         ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
         if( aCMManager != null ){
             
-            TaskManager theTaskManager = passedManager.getTaskManager();
-            if( theTaskManager instanceof MainGuiController ){
-                                
-                //Get the host controllers 
-                MainGuiController theGuiController = (MainGuiController)theTaskManager;
-                List<LibraryItemController> theHostControllers = new ArrayList<>();
-                if( hostId == 0 ){
-                    
-                    //Add everything
-                    theHostControllers.addAll( theGuiController.getHostControllers() );
-                    
-                } else if( hostId == Constants.SERVER_ID ){
-                    
-                    try {
-                        Host localHost = HostFactory.getLocalHost();
-                        List<String> hostIdList = localHost.getConnectedHostIdList();
-                        for( String anId : hostIdList ){
-                            HostController aController = theGuiController.getHostController(anId);
-                            if(aController != null )
-                                theHostControllers.add(aController);
-                            
-                        }
+            ServerManager aSM = (ServerManager) passedManager;
+            //Get the host controllers 
+            List<LibraryItemController> theHostControllers = new ArrayList<>();
+            if( hostId == 0 ){
 
-                    } catch (LoggableException | SocketException ex) {
-                        Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                    }
-                    
-                } else {
-                    
-                    //Get the host
-                    HostController aHostController = theGuiController.getHostController( Integer.toString( hostId ));
-                    Host aHost = aHostController.getHost();
-                    List<String> internalHosts = aHost.getConnectedHostIdList();
+                //Add everything
+                theHostControllers.addAll( aSM.getHostControllers() );
 
-                    //Add each host to the list
-                    for( String anId : internalHosts ){
-                        LibraryItemController aController = theGuiController.getHostController( anId );
-                        if( aController != null)
+            } else if( hostId == Constants.SERVER_ID ){
+
+                try {
+                    Host localHost = HostFactory.getLocalHost();
+                    List<String> hostIdList = localHost.getConnectedHostIdList();
+                    for( String anId : hostIdList ){
+                        HostController aController = aSM.getHostController(anId);
+                        if(aController != null )
                             theHostControllers.add(aController);
+
                     }
-                }                
-                
-                //Create a hsot msg for each controller
-                for( LibraryItemController aController : theHostControllers ){
-                    if( aController instanceof HostController ){
-                        
-                        HostController aHostController = (HostController)aController;
-                        if( !aHostController.isLocalHost() ){
-                            
-                            Host aHost = aHostController.getHost();
-                            try {
-                                
-                                HostMsg aHostMsg = new HostMsg( getSrcHostId(), aHost.getHostname(), 
-                                    aHost.getOsName(), aHost.getJvmArch(), Integer.parseInt(aHost.getId()), aHost.isConnected(),
-                                    !aHost.getCheckInList().isEmpty() );
-                                
-                                String relayPort = aHost.getRelayPort();
-                                if( !relayPort.isEmpty() )
-                                    aHostMsg.addRelayPort( Integer.parseInt(relayPort));
-                                
-                                aCMManager.send(aHostMsg);
-                            } catch (UnsupportedEncodingException ex) {
-                                Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                            }
-                            
+
+                } catch (LoggableException | SocketException ex) {
+                    Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
+                }
+
+            } else {
+
+                //Get the host
+                HostController aHostController = aSM.getHostController( Integer.toString( hostId ));
+                Host aHost = aHostController.getHost();
+                List<String> internalHosts = aHost.getConnectedHostIdList();
+
+                //Add each host to the list
+                for( String anId : internalHosts ){
+                    LibraryItemController aController = aSM.getHostController( anId );
+                    if( aController != null)
+                        theHostControllers.add(aController);
+                }
+            }                
+
+            //Create a hsot msg for each controller
+            for( LibraryItemController aController : theHostControllers ){
+                if( aController instanceof HostController ){
+
+                    HostController aHostController = (HostController)aController;
+                    if( !aHostController.isLocalHost() ){
+
+                        Host aHost = aHostController.getHost();
+                        try {
+
+                            HostMsg aHostMsg = new HostMsg( getSrcHostId(), aHost.getHostname(), 
+                                aHost.getOsName(), aHost.getJvmArch(), Integer.parseInt(aHost.getId()), aHost.isConnected(),
+                                !aHost.getCheckInList().isEmpty() );
+
+                            String relayPort = aHost.getRelayPort();
+                            if( !relayPort.isEmpty() )
+                                aHostMsg.addRelayPort( Integer.parseInt(relayPort));
+
+                            aCMManager.send(aHostMsg);
+                        } catch (UnsupportedEncodingException ex) {
+                            Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
                         }
-                        
+
                     }
-                }                
-                
-            }
+
+                }
+            }           
                         
         }        
     }

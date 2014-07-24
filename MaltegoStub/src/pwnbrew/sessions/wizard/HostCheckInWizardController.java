@@ -39,9 +39,6 @@ package pwnbrew.sessions.wizard;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JList;
 import pwnbrew.generic.gui.wizard.Wizard;
 import pwnbrew.generic.gui.wizard.WizardController;
 import pwnbrew.generic.gui.wizard.WizardModel;

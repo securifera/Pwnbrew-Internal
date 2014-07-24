@@ -36,18 +36,9 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- * TaskManager.java
- *
- * Created on June 21, 2013, 8:07:13PM
- */
-
 package pwnbrew.tasks;
 
-import java.io.File;
-import pwnbrew.host.Host;
-import pwnbrew.host.HostController;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.network.control.messages.TaskStatus;
 
 
@@ -88,42 +79,14 @@ public interface TaskManager {
     */
     public void taskChanged( TaskStatus passedMsg );
     
-    
-  
-    //===============================================================
+     //===============================================================
     /**
      * Returns the client directory
      *
-     * @param clientId
      * @return
     */
-    public File getHostDirectory( int clientId );
-    
-     // ==========================================================================
-    /**
-     *  Get the host with the given id string
-     * 
-     * @param clientIdStr
-     * @return 
-     */
-    public HostController getHostController( String clientIdStr );
-    
-    //===============================================================
-    /**
-     * Adds a new host to the map
-     *
-     * @param passedHost
-    */
-    public void registerHost( Host passedHost );
-    
-    //===============================================================
-    /**
-     * 
-     * @param clientId 
-     * @param passedVersion 
-     */
-    public void stagerUpgradeComplete( int clientId, String passedVersion );
-    
+    public ServerManager getServerManager();
+      
     //=================================================================
     /*
      *  Write the output to the runner panel

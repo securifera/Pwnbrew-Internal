@@ -37,6 +37,7 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.options.panels;
 
+import java.io.File;
 import pwnbrew.generic.gui.PanelListener;
 
 /**
@@ -54,6 +55,14 @@ public interface NetworkPanelListener extends PanelListener {
      * @param days 
      */
     public void sendCertInfo( int serverPort, String sueeDN, String suerDN, int days);
+
+    //================================================================
+    /**
+     * 
+     * @param theCertFile
+     * @param string 
+     */
+    public void sendCertFile(File theCertFile, String string);
     
    
 }

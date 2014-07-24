@@ -53,7 +53,6 @@ import javax.net.ssl.SSLContext;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.Constants;
 import pwnbrew.misc.SSLUtilities;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.selector.SelectionRouter;

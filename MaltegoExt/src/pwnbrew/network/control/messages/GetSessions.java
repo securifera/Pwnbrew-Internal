@@ -41,16 +41,15 @@ package pwnbrew.network.control.messages;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.logging.Level;
-import pwnbrew.controllers.MainGuiController;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.Session;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.tasks.TaskManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -111,29 +110,26 @@ public final class GetSessions extends ControlMessage{
             
         ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
         if( aCMManager != null ){
-            TaskManager theTaskManager = passedManager.getTaskManager();        
-            if( theTaskManager instanceof MainGuiController ){
 
-                String hostIdStr = Integer.toString( hostId );
+            String hostIdStr = Integer.toString( hostId );
 
-                //Get the host controller 
-                MainGuiController theGuiController = (MainGuiController)theTaskManager;
-                HostController theHostController = theGuiController.getHostController( hostIdStr );
-                if( theHostController != null ){
-                    Host theHost = theHostController.getObject();
-                    List<Session> sessionList = theHost.getSessionList();
-                    for( Session aSession : sessionList ){
-                        
-                        try {
-                            SessionMsg aMsg = new SessionMsg( getSrcHostId(), hostId, aSession.getCheckInTime(), aSession.getDisconnectedTime());
-                            aCMManager.send(aMsg);
-                        } catch (UnsupportedEncodingException ex) {
-                            Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                        }
+            //Get the host controller 
+            ServerManager aSM = (ServerManager) passedManager;
+            HostController theHostController = aSM.getHostController( hostIdStr );
+            if( theHostController != null ){
+                Host theHost = theHostController.getObject();
+                List<Session> sessionList = theHost.getSessionList();
+                for( Session aSession : sessionList ){
+
+                    try {
+                        SessionMsg aMsg = new SessionMsg( getSrcHostId(), hostId, aSession.getCheckInTime(), aSession.getDisconnectedTime());
+                        aCMManager.send(aMsg);
+                    } catch (UnsupportedEncodingException ex) {
+                        Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
                     }
                 }
-
-            } 
+            }
+            
         }       
 
     }        

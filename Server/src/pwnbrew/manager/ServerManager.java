@@ -36,33 +36,43 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
-* ServerManager.java
-*
-* Created on June 21, 2013, 8:25:11 PM
-*/
-
 package pwnbrew.manager;
 
+import java.awt.Component;
+import java.io.File;
 import java.io.IOException;
 import java.net.BindException;
 import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.logging.Level;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
 import pwnbrew.Server;
+import pwnbrew.controllers.MainGuiController;
+import pwnbrew.gui.MainGui;
+import pwnbrew.gui.tree.IconNode;
+import pwnbrew.gui.tree.LibraryItemJTree;
+import pwnbrew.gui.tree.MainGuiTreeModel;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
-import pwnbrew.host.HostListener;
+import pwnbrew.host.Session;
+import pwnbrew.library.LibraryItemController;
+import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
+import pwnbrew.misc.Constants;
+import pwnbrew.misc.Directories;
 import pwnbrew.misc.ProgressListener;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.control.messages.RelayStart;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.tasks.TaskManager;
+import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xmlBase.XmlBase;
 
 /**
  *
@@ -71,22 +81,44 @@ import pwnbrew.xmlBase.ServerConfig;
 public class ServerManager extends CommManager {
 
     private final Server theServer;
-    private final List<HostListener> hostListeners = new ArrayList<>();
+//    private final List<HostListener> hostListeners = new ArrayList<>();
+    private boolean showGuiFlag = false;
+    private MainGuiController theGuiController = null;
 
-
+    //Create the host map
+    private final Map<String, HostController> theHostControllerMap = new HashMap<>();    
+    private static final String NAME_Class = ServerManager.class.getSimpleName();
+    
     // ==========================================================================
     /**
      * Constructor
      *
      * @param passedServer
+     * @param passedBool
      * @throws pwnbrew.logging.LoggableException
      * @throws java.io.IOException
     */
-    public ServerManager( Server passedServer ) throws LoggableException, IOException {
+    public ServerManager( Server passedServer, boolean passedBool ) throws LoggableException, IOException {
 
-       //The comm channels
-       theServer = passedServer;
-       
+        //The comm channels
+        showGuiFlag = passedBool;
+        theServer = passedServer;
+        
+        //Create the main controller and gui if flag is set            
+        if( showGuiFlag )
+            theGuiController = new MainGuiController( this );   
+        else {
+            
+            //Create list to hold of the separate controllers
+            Map<Host, List<XmlBase>> retMap = Utilities.rebuildLibrary(); //Get the Scripts in the library
+            Set<Host> hostSet = retMap.keySet();
+            for( Host aHost : hostSet ){
+                HostController aController = new HostController(aHost, theGuiController);
+                theHostControllerMap.put( aHost.getId(), aController);
+            }
+            
+        }
+            
     }
 
     //===============================================================
@@ -99,6 +131,18 @@ public class ServerManager extends CommManager {
 
         //Builds the sockets
         rebuildServerSockets();
+        if( showGuiFlag )
+            ((MainGui)theGuiController.getObject()).setVisible(true); 
+    }
+    
+     //===============================================================
+    /**
+     * Returns the server controller
+     *
+     * @return 
+    */
+    public MainGuiController getGuiController(){
+       return theGuiController;
     }
     
     //===============================================================
@@ -113,30 +157,28 @@ public class ServerManager extends CommManager {
         //Get the ports and try to connect
         ServerConfig theConf = ServerConfig.getServerConfig();
         int theControlPort = theConf.getSocketPort();
-//        int theDataPort = theConf.getDataPort();
         
         boolean retVal = true;
         try {
             
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( this );
-            }
+            if( aCMManager == null )
+                aCMManager = ControlMessageManager.initialize( this );            
             
             int controlPort = aCMManager.getPort();
             ServerPortRouter aSPR = (ServerPortRouter)getPortRouter( controlPort );
             aSPR.startServer(null, controlPort );
             
         } catch (BindException ex) {
-            StringBuilder aSB = new StringBuilder()
-                    .append("Unable to bind to port ").append( theControlPort )
-                    .append(".  Please select a new control port.  Tools->Options : \"Network\" Tab");
-            JOptionPane.showMessageDialog( getServer().getGuiController().getParentJFrame(), aSB.toString());
+            if( theGuiController != null ){
+                String aSB = "Unable to bind to port " + theControlPort + ".  Please select a new control port.  Tools->Options : \"Network\" Tab";
+                JOptionPane.showMessageDialog( null, aSB);
+            } else {
+                throw new LoggableException( ex, Integer.toString(theControlPort));
+            }
             retVal = false;
-        } catch (IOException ex) {
+        } catch (IOException | GeneralSecurityException ex) {
             throw new LoggableException( ex, Integer.toString(theControlPort));
-        } catch (GeneralSecurityException ex) {
-            throw new LoggableException( ex, Integer.toString(theControlPort)) ;
         }
         
         try {
@@ -151,14 +193,12 @@ public class ServerManager extends CommManager {
             aSPR.startServer(null, filePort );
             
         } catch (BindException ex) {
-            StringBuilder aSB = new StringBuilder()
-                    .append("Unable to bind to port ").append( theControlPort )
-                    .append(". Please select a new data port. Tools->Options : \"Network\" Tab");
-            JOptionPane.showMessageDialog( getServer().getGuiController().getParentJFrame(), aSB.toString());
+            if( theGuiController != null ){
+                String aSB = "Unable to bind to port " + theControlPort + ". Please select a new data port. Tools->Options : \"Network\" Tab";
+                JOptionPane.showMessageDialog( theGuiController.getParentJFrame(), aSB);
+            }
             retVal = false;
-        } catch (IOException ex) {
-            throw new LoggableException(ex, Integer.toString(theControlPort));
-        } catch (GeneralSecurityException ex) {
+        } catch (IOException | GeneralSecurityException ex) {
             throw new LoggableException(ex, Integer.toString(theControlPort));
         }
         
@@ -187,7 +227,7 @@ public class ServerManager extends CommManager {
             //If the connection was closed
             String clientIdStr = Integer.toString( clientId );
             aSPR.removeHandler(clientId);
-            HostController theController = theServer.getGuiController().getHostController(clientIdStr);
+            HostController theController = getHostController(clientIdStr);
 
             if( theController != null ){
                 
@@ -196,9 +236,8 @@ public class ServerManager extends CommManager {
 
                 //Add any pivoting hosts
                 List<String> theInternalHosts = theController.getHost().getConnectedHostIdList();
-    //            List<Integer> theInternalHosts = theHandler.getInternalHosts();
                 for( String idStr : theInternalHosts ){
-                    HostController aController = theServer.getGuiController().getHostController(idStr);
+                    HostController aController = getHostController(idStr);
                     theHostList.add(aController);
                 }         
 
@@ -208,10 +247,10 @@ public class ServerManager extends CommManager {
                     public void run() {                    
 
                         for( HostController nextController: theHostList ){
-                            List<HostListener> theListenerList = getDetectListenerList();
-                            for(HostListener aListener : theListenerList){
-                                aListener.hostDisconnected( (Host) nextController.getObject() );
-                            }                    
+//                            List<HostListener> theListenerList = getDetectListenerList();
+//                            for(HostListener aListener : theListenerList)
+//                                aListener.
+                            hostDisconnected( (Host) nextController.getObject() );
 
                             nextController.getRootPanel().getShellPanel().disablePanel( false );
                             nextController.updateComponents();
@@ -242,40 +281,43 @@ public class ServerManager extends CommManager {
      */
     @Override
     public TaskManager getTaskManager() {
-        return (TaskManager) theServer.getGuiController();
+        TaskManager aMgr = null;
+        if( theGuiController != null && theGuiController instanceof TaskManager)
+            aMgr = (TaskManager) theGuiController;
+        
+        return aMgr;
     }
     
-     //===============================================================
-    /**
-     * Adds a detect listener to the list
-     * 
-     * @param aListener
-    */
-    public void addDetectListener(HostListener aListener) {
-        if( !hostListeners.contains(aListener)){
-            hostListeners.add(aListener);
-        }
-    }
+//     //===============================================================
+//    /**
+//     * Adds a detect listener to the list
+//     * 
+//     * @param aListener
+//    */
+//    public void addDetectListener(HostListener aListener) {
+//        if( !hostListeners.contains(aListener))
+//            hostListeners.add(aListener);
+//    }
 
-    //===============================================================
-    /**
-     * Removes a detect listener from the list
-     *
-     * @param aListener
-    */
-    public void removeDetectListener(HostListener aListener) {
-        hostListeners.remove(aListener);
-    }
-    
-    //===============================================================
-    /**
-     * Returns a list of the detect listeners
-     *
-     * @return 
-    */
-    public List<HostListener> getDetectListenerList() {
-       return new ArrayList<>(hostListeners);
-    }
+//    //===============================================================
+//    /**
+//     * Removes a detect listener from the list
+//     *
+//     * @param aListener
+//    */
+//    public void removeDetectListener(HostListener aListener) {
+//        hostListeners.remove(aListener);
+//    }
+//    
+//    //===============================================================
+//    /**
+//     * Returns a list of the detect listeners
+//     *
+//     * @return 
+//    */
+//    public List<HostListener> getDetectListenerList() {
+//       return new ArrayList<>(hostListeners);
+//    }
 
     //===============================================================
     /**
@@ -284,7 +326,261 @@ public class ServerManager extends CommManager {
      */
     @Override
     public ProgressListener getProgressListener() {
-        return theServer.getGuiController();
+        return theGuiController;
     }
+    
+    // ==========================================================================
+    /**
+     *  Get the host with the given id string
+     * 
+     * @param clientIdStr
+     * @return 
+     */
+    public HostController getHostController( String clientIdStr ) {
+        
+        HostController retController = null;
+        if( theGuiController != null ){
+            
+            MainGui theMainGui = (MainGui) theGuiController.getObject();
+            for( LibraryItemController aController : theMainGui.getJTree().getLibraryItemControllers( HostController.class ) ){
+                Host aHost = (Host)aController.getObject();
+                if( aHost.getId().equals( clientIdStr )){
+                    retController = (HostController) aController;
+                    break;
+                }           
+            }
+            
+        } else {
+            retController = theHostControllerMap.get(clientIdStr);
+        }
+        return retController;
+    }
+    
+    // ==========================================================================
+    /**
+     *  Get all of the host controllers
+     * 
+     * @return 
+     */
+    public List<LibraryItemController> getHostControllers() {
+        
+        List<LibraryItemController> aList = new ArrayList<>();
+        if( theGuiController != null ){
+            MainGui theMainGui = (MainGui) theGuiController.getObject();
+            aList.addAll(theMainGui.getJTree().getLibraryItemControllers( HostController.class ));
+        } else {
+            aList.addAll( theHostControllerMap.values() );
+        }
+        return aList;  
+    }
+    
+    //===============================================================
+    /**
+     * Adds a new host to the map
+     *
+     * @param passedHost
+    */
+    public void registerHost( Host passedHost ) {
+
+//        List<HostListener> theListenerList = getDetectListenerList();
+//        for(HostListener aListener : theListenerList)
+//            aListener.
+        hostDetected(passedHost);
+    }
+    
+     // ==========================================================================
+    /**
+     * Gets the directory of the client id passed
+     * 
+     * @param clientId
+     * @return 
+     */
+    public File getHostDirectory(int clientId) {
+        
+        File dirFile = null;
+        HostController theController = getHostController(Integer.toString(clientId));
+        if( theController != null )
+            dirFile = new File(Directories.getRemoteTasksDirectory(), theController.getItemName());
+        
+        return dirFile;
+    }
+    
+    //===============================================================
+    /**
+     * Handles the completion of a task
+     *
+     * @param clientId
+     * @param passedVersion
+    */
+    public void stagerUpgradeComplete( int clientId, String passedVersion ) {
+        
+        //Get the host
+        HostController theController = getHostController( Integer.toString( clientId) );
+        Host theHost = theController.getHost();
+        
+        //Set the new version and save
+        theHost.setJreVersion( passedVersion );
+        theController.saveToDisk();
+        
+        if( theGuiController != null )
+            JOptionPane.showMessageDialog((Component) theGuiController.getObject(), "Stager upgrade complete for " + theController.getItemName());
+    }
+    
+     // ==========================================================================
+    /**
+     * Adds the host to the JTree
+     *
+     * @param passedHost 
+     */
+    public void hostDetected( final Host passedHost ) {
+
+        
+        //Get the Host from the id
+        String clientIdStr = passedHost.getId();  
+        
+        //Register the client with the parent
+        int parentId = getClientParent( Integer.parseInt(clientIdStr));
+        HostController parentController = getHostController( Integer.toString(parentId));
+        if( parentController != null ){
+            Host parentHost = parentController.getHost();
+            parentHost.addConnectedHostId( clientIdStr ); 
+            parentController.saveToDisk();
+        }
+        
+        final HostController theController = getHostController( clientIdStr );
+        if(theController != null && theController.getObject().equals(passedHost)){
+                
+            //Get the address
+            Host theHost = (Host) theController.getObject();
+            theHost.setConnected(true);
+                                       
+            //Update all data
+            theHost.updateData(passedHost);
+
+            //Set time
+            Session aSession = new Session();
+            theHost.addSession(aSession);
+
+            //Purge stale dates
+            theController.removeStaleDates();
+
+            //Write it to disk
+            theController.saveToDisk();
+            
+            //Get the relayPort
+            String thePortStr = theHost.getRelayPort();
+
+            //Call for repaint
+            SwingUtilities.invokeLater( new Runnable(){
+                @Override
+                public void run() {
+                    if( theGuiController != null ){
+                        LibraryItemJTree theJTree = theGuiController.getJTree();
+                        theJTree.repaint();
+                        theJTree.requestFocus();
+                        theController.updateComponents();
+                    }
+                }
+            });
+
+            //Get the auto sleep flag and if it is set then tell the client to goto sleep
+            if( theController.getAutoSleepFlag() ){
+
+                Constants.Executor.execute( new Runnable(){
+                    @Override
+                    public void run() {
+                        try {
+                            JFrame theParent = null;
+                            if( theGuiController != null )
+                                theParent = theGuiController.getParentJFrame();
+                            
+                            Thread.sleep( 30000 );
+                            theController.sleep( theParent, true );
+                            
+                        } catch (InterruptedException ex) {
+                            ex = null;
+                        }
+                    }
+                });
+                
+            } else {
+                
+                //Get the port
+                if( !thePortStr.isEmpty() ){
+                    
+                    //Parse the port
+                    int port = Integer.parseInt( thePortStr );     
+
+                    //Get the control message manager
+                    try {
+                        
+                        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+                        if( aCMManager == null ){
+                            aCMManager = ControlMessageManager.initialize( getServer().getServerManager());
+                        }                      
+                        
+                        int hostId = Integer.parseInt(theHost.getId());
+                        RelayStart aMigMsg = new RelayStart( port, hostId ); //Convert mins to seconds
+                        aCMManager.send( aMigMsg );                        
+                  
+                    } catch( IOException ex ){
+                       Log.log(Level.SEVERE, NAME_Class, "hostDetected()", ex.getMessage(), ex );
+                    }
+                }
+            }
+                              
+        } else {
+
+            //Start in swing thread since it affects the gui
+            final HostController aHostController = new HostController( passedHost, theGuiController );
+            Session aSession = new Session();
+            passedHost.addSession(aSession);
+            
+            SwingUtilities.invokeLater( new Runnable(){
+                @Override
+                public void run() {
+
+                    //Get the JTree and add the controller
+                    if( theGuiController != null ){
+                        LibraryItemJTree theJTree = theGuiController.getJTree();
+                        MainGuiTreeModel treeModel = theJTree.getModel();               
+                        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) treeModel.getRoot();
+
+                        //Add the host node
+                        IconNode newParentNode = new IconNode( aHostController, true );
+
+                        //Add the node at the end of the children of the parentNode
+                        int index = parentNode.getChildCount();
+                        treeModel.insertNodeInto( newParentNode, parentNode, index );  
+                    }              
+
+                }
+            });
+            
+            aHostController.saveToDisk();
+                        
+        }
+                
+    }
+
+    // ==========================================================================
+    /**
+     *  Notify that the host has disconnected.
+     *
+     * @param passedHost 
+     */
+    public void hostDisconnected(final Host passedHost) {
+                
+        List<Session> sessionList = passedHost.getSessionList();
+        Session aSession = sessionList.get(sessionList.size() - 1);
+        aSession.setDisconnectedTime(Constants.CHECKIN_DATE_FORMAT.format( new Date() ));
+        
+       
+        passedHost.setConnected( false );
+        if( theGuiController != null )
+            theGuiController.getJTree().repaint();
+
+    }
+    
 
 }/* END CLASS ServerManager */

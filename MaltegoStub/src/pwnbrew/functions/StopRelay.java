@@ -37,26 +37,18 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.functions;
 
-import java.awt.Insets;
 import java.io.IOException;
 import java.util.Map;
-import javax.swing.JOptionPane;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
-import pwnbrew.generic.gui.ValidTextField;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.SocketUtilities;
-import pwnbrew.misc.StandardValidation;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.network.control.messages.RelayStartRelay;
 import pwnbrew.network.control.messages.RelayStopRelay;
-import pwnbrew.xml.maltego.Entities;
 import pwnbrew.xml.maltego.MaltegoMessage;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
-import pwnbrew.xml.maltego.MaltegoTransformResponseMessage;
-import pwnbrew.xml.maltego.custom.Relay;
 
 /**
  *

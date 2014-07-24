@@ -46,13 +46,11 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
 import pwnbrew.host.HostController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LogLevel;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.ServerManager;
-import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
 
 /**
@@ -130,7 +128,7 @@ public class LogMsg extends ControlMessage {
             String clientIdStr = Integer.toString( getSrcHostId() );
             
             //Get the host controller
-            HostController theController = theManager.getServer().getGuiController().getHostController( clientIdStr );
+            HostController theController = theManager.getHostController( clientIdStr );
             String hostStr = theController.getItemName();
                
             StringBuilder aSB = new StringBuilder();

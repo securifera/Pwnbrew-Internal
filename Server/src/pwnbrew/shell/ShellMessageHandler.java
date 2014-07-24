@@ -162,7 +162,7 @@ public class ShellMessageHandler extends DataHandler {
                 ServerManager aServMgr = (ServerManager)theCommManager;
                 String theClientIdStr = Integer.toString(aMessage.getSrcHostId());
                 
-                HostController aController = aServMgr.getServer().getGuiController().getHostController(theClientIdStr);
+                HostController aController = aServMgr.getHostController(theClientIdStr);
                 Shell theShell = aController.getShell();
                 if( theShell != null ){
                     if( aMessage instanceof StdOutMessage ) { 

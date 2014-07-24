@@ -39,14 +39,13 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.util.ArrayList;
-import pwnbrew.controllers.MainGuiController;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.Session;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.tasks.TaskManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -101,23 +100,19 @@ public final class ClearSessions extends ControlMessage{
      * @throws pwnbrew.logging.LoggableException
     */
     @Override
-    public void evaluate( CommManager passedManager ) throws LoggableException {     
-            
-        TaskManager theTaskManager = passedManager.getTaskManager();        
-        if( theTaskManager instanceof MainGuiController ){
+    public void evaluate( CommManager passedManager ) throws LoggableException {            
 
-            String hostIdStr = Integer.toString( hostId );
-      
-            //Get the host controller 
-            MainGuiController theGuiController = (MainGuiController)theTaskManager;
-            HostController theHostController = theGuiController.getHostController( hostIdStr );
-            if( theHostController != null ){
-                Host theHost = theHostController.getObject();
-                theHost.setSessionList( new ArrayList<Session>());
-                theHostController.saveToDisk();
-            }
+        String hostIdStr = Integer.toString( hostId );
 
-        }        
+        //Get the host controller 
+        ServerManager aSM = (ServerManager) passedManager;
+
+        HostController theHostController = aSM.getHostController( hostIdStr );
+        if( theHostController != null ){
+            Host theHost = theHostController.getObject();
+            theHost.setSessionList( new ArrayList<Session>());
+            theHostController.saveToDisk();
+        }
 
     }        
     

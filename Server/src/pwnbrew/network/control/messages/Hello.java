@@ -53,6 +53,7 @@ import java.util.logging.Level;
 import pwnbrew.host.Host;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Nic;
@@ -257,7 +258,7 @@ public final class Hello extends ControlMessage {
                     aHost.setJreVersion(jre_version);
 
                     //Notify the task manager
-                    theTaskManager.registerHost( aHost );
+                    ((ServerManager)passedManager).registerHost( aHost );
 
                 } else {
                     Log.log(Level.INFO, NAME_Class, "evaluate()", "Unable to locate the client id specified.", null );
