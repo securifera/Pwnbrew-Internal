@@ -50,7 +50,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
-import pwnbrew.log.LoggableException;
 
 /**
  * 
@@ -96,18 +95,12 @@ public class DebugPrinter implements Runnable {
             
             String debugMsg = passedMessage;
             if( thrown != null ){
-                
-                if( thrown instanceof LoggableException )
-                    thrown = ((LoggableException)thrown).getException();                
-                
+                 
                 StringWriter errors = new StringWriter();
                 thrown.printStackTrace( new PrintWriter(errors) );
 
-                StringBuilder aSB = new StringBuilder()
-                    .append(passedMessage)
-                    .append("\n")
-                    .append(errors.toString());
-                debugMsg = aSB.toString();
+                String aSB = passedMessage + "\n" + errors.toString();
+                debugMsg = aSB;
             }
 
             //Add the message to the queue to be handled

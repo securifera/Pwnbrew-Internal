@@ -118,15 +118,11 @@ public final class RelayDisconnect extends ControlMessage{
                 @Override
                 public void run() {                    
 
-//                    List<HostListener> theListenerList = aSM.getDetectListenerList();
-//                    for(HostListener aListener : theListenerList){
-//                        aListener.
                     aSM.hostDisconnected( (Host) theController.getObject() );
-//                    }                    
-
                     theController.getRootPanel().getShellPanel().disablePanel( false );
                     theController.updateComponents();
                     theController.saveToDisk();
+                    
                 }
             });
         }

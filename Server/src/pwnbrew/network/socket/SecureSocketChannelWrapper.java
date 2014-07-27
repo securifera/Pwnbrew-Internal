@@ -118,8 +118,8 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
         SSLContext theContext = SSLUtilities.getSSLContext();
 
         sslEngine = theContext.createSSLEngine(SocketUtilities.getHostname(), sc.socket().getPort());
-        sslEngine.setUseClientMode(false);        
-
+        sslEngine.setUseClientMode(false);  
+     
         netBBSize = sslEngine.getSession().getPacketBufferSize();
         inNetBB  = ByteBuffer.allocate(netBBSize);
         outNetBB = ByteBuffer.allocate(netBBSize);

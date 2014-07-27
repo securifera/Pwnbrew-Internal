@@ -237,10 +237,7 @@ public final class MainGui extends javax.swing.JFrame {
             //Create list to hold of the separate controllers
             Map<HostController, List<LibraryItemController>> theRtnMap = new LinkedHashMap<>();
             Map<Host, List<XmlBase>> retMap = Utilities.rebuildLibrary(); //Get the Scripts in the library
-            for( Iterator<Entry<Host, List<XmlBase>>> anIter = retMap.entrySet().iterator();
-                    anIter.hasNext(); ){
-            
-                Entry<Host, List<XmlBase>> anEntry = anIter.next();
+            for (Entry<Host, List<XmlBase>> anEntry : retMap.entrySet()) {
                 List<XmlBase> treeList = anEntry.getValue();
 
                 //Initialize the lists
@@ -267,9 +264,9 @@ public final class MainGui extends javax.swing.JFrame {
 
                         JobSet aJobSet = (JobSet)anXB;
                         theController = aJobSet.instantiateController( theGuiController );
-
-                        jobSetControllerList.add( (JobSetController) theController );                    
-
+                        
+                        jobSetControllerList.add( (JobSetController) theController );
+                        
                     } else {
                         continue;    
                     }
@@ -284,8 +281,7 @@ public final class MainGui extends javax.swing.JFrame {
 
                 //Add the entry
                 Host aHost = anEntry.getKey();
-                theRtnMap.put( new HostController(aHost, theGuiController), theControllerList);                
-                           
+                theRtnMap.put( new HostController(aHost, theGuiController), theControllerList);
             }
             
             populateTreeModel( theRtnMap ); //Populate the TreeModel

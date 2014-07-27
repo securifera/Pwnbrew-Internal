@@ -47,6 +47,8 @@ import java.security.*;
 import java.util.*;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -262,22 +264,7 @@ public class Utilities {
             }
 
     }
-    
-    //===============================================================
-    /**
-     *  Returns whether the client is staged
-     * @return 
-     */
-    public static boolean isStaged(){
-        boolean retVal = true;
-        try {
-            Class.forName("stager.Stager");
-        } catch (ClassNotFoundException ex) {
-            retVal = false;
-        }
-        return retVal;
-    }
-
+   
     //===============================================================
     /**
     * Converts a byte array into hex string representation
@@ -803,5 +790,162 @@ public class Utilities {
              passedJButton.setText("");
           }
        }
+    }
+    
+      //===========================================================================
+    /**
+     * 
+     * @param passedFile
+     * @param properties 
+     * @param propMap 
+     */
+    public static void updateJarProperties( File passedFile, String properties, Map<String, String> propMap ){        
+    
+        if( passedFile != null && passedFile.isFile() ){                 
+            
+            //Open the zip
+            ByteArrayOutputStream aBOS = new ByteArrayOutputStream();
+            try {
+                
+                FileInputStream fis = new FileInputStream(passedFile);
+                try{
+
+                    //Read into the buffer
+                    byte[] buf = new byte[1024];                
+                    for (int readNum; (readNum = fis.read(buf)) != -1;)
+                        aBOS.write(buf, 0, readNum);                    
+
+                //Close and delete
+                } catch (IOException ex) {
+                    DebugPrinter.printMessage( NAME_Class, "updateJarProperties()",  ex.getMessage(), ex);         
+                } finally {
+                    try {
+                        fis.close();
+                    } catch (IOException ex) {
+                        ex = null;
+                    }
+                }
+                passedFile.delete();
+
+                //Create the file back
+                FileOutputStream theFileOS = new FileOutputStream(passedFile);
+                ZipOutputStream theZipOS = new ZipOutputStream(theFileOS );
+
+                //Creat an inputstream
+                ByteArrayInputStream aBIS = new ByteArrayInputStream(aBOS.toByteArray());    
+                
+                //Close the stream
+                try {
+                    aBOS.close();
+                } catch (IOException ex) { ex = null;}
+
+                //Open the zip input stream
+                ZipInputStream theZipInputStream = new ZipInputStream(aBIS);
+                try {
+                    
+                    ZipEntry anEntry;
+                    while((anEntry = theZipInputStream.getNextEntry())!=null){
+                        //Get the entry name
+                        String theEntryName = anEntry.getName();
+
+                        //Change the properties file
+                        if( theEntryName.equals(properties) ){
+
+                            //Get the input stream and modify the value
+                            ManifestProperties localProperties = new ManifestProperties();
+                            localProperties.load(theZipInputStream);
+
+                            //Set the IP to something else
+                            //Add the entry
+                            anEntry = new ZipEntry(properties);
+                            
+                            //Add each property
+                            for (Map.Entry<String, String> mapEntry : propMap.entrySet())
+                                localProperties.setProperty(mapEntry.getKey(), mapEntry.getValue());
+
+                            //Add the entry
+                            theZipOS.putNextEntry(anEntry);
+                            localProperties.store(theZipOS);
+
+                            //Write to zip
+                            theZipOS.closeEntry();
+
+                            continue;
+                        } 
+
+                        //Add the entry
+                        theZipOS.putNextEntry(anEntry);
+                        /*
+                        * After creating entry in the zip file, actually
+                        * write the file.
+                        */
+                        int temp;
+                        byte[] buffer = new byte[1024];
+                        while((temp = theZipInputStream.read(buffer)) > 0) {
+                            theZipOS.write(buffer, 0, temp);
+                        }
+                        theZipOS.closeEntry();
+                    }
+
+                    //Close the jar
+                    theZipOS.flush();
+                    theZipOS.close();
+                    
+                } catch (IOException ex) {
+                    DebugPrinter.printMessage( NAME_Class, "updateJarProperties()",  ex.getMessage(), ex);         
+                } finally {
+                    try {
+                        theZipInputStream.close();
+                    } catch (IOException ex) { ex = null; }
+                }
+                
+            } catch (FileNotFoundException ex ){
+                DebugPrinter.printMessage( NAME_Class, "updateJarProperties()",  ex.getMessage(), ex);      
+            }
+        }
+    }
+    
+    /**
+     *
+     * @author Securifera
+     */
+    public static class ManifestProperties extends Properties {
+
+        //===================================================================
+        /**
+         * Constructor
+         */
+        public ManifestProperties() {
+            super();
+        }   
+
+        //=========================================================================
+        /**
+         * 
+         * After the entries have been written, the output stream is flushed.  
+         * The output stream remains open after this method returns.
+         * <p>
+         * @param   out      an output stream.
+         * @exception  IOException if writing this property list to the specified
+         *             output stream throws an <tt>IOException</tt>.
+         * @exception  ClassCastException  if this <code>Properties</code> object
+         *             contains any keys or values that are not <code>Strings</code>.
+         * @exception  NullPointerException  if <code>out</code> is null.
+         * @since 1.2
+         */
+        public void store(OutputStream out ) throws IOException {
+
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, "8859_1"));
+            synchronized (this) {
+                for (Enumeration e = keys(); e.hasMoreElements();) {
+                    String key = (String)e.nextElement();
+                    String val = (String)get(key);
+
+                    bw.write(key + ": " + val);
+                    bw.newLine();
+                }
+            }
+            bw.flush();
+        }
     }
 }

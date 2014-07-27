@@ -107,6 +107,9 @@ abstract public class Constants {
     public static final String FOLDER_IMG_STR = "folder_yellow.png";
     public static final String FOLDER_OPEN_IMG_STR = "folder_open.png";
     
+    public static final String MANIFEST_FILE = "META-INF/MANIFEST.MF";
+    public static final String CERT_ALIAS = "Alias";  
+    public static final String CERT_PW = "PS";  
     
     
 }/* END CLASS Constants */

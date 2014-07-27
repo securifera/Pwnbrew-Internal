@@ -67,7 +67,7 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
     private volatile int theClientCount = 0;   
     
     //Create the return msg
-    private MaltegoMessage theReturnMsg = new MaltegoMessage();
+    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
   
     //==================================================================
     /**
@@ -165,10 +165,8 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
                 }
                 
             } else {
-                StringBuilder aSB = new StringBuilder()
-                        .append("Unable to connect to the Pwnbrew server at \"")
-                        .append(serverIp).append(":").append(serverPort).append("\"");
-                DebugPrinter.printMessage( NAME_Class, "listclients", aSB.toString(), null);
+                String aSB = String.valueOf("Unable to connect to the Pwnbrew server at \"" + serverIp + ":") + Integer.toString(serverPort) + "\"";
+                DebugPrinter.printMessage( NAME_Class, "listclients", aSB, null);
             }
             
         } catch (IOException ex) {

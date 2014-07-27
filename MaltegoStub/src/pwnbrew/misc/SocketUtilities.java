@@ -44,8 +44,12 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.misc;
 
+import java.io.IOException;
 import java.io.StringWriter;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.SecureRandom;
+import pwnbrew.log.LoggableException;
 
 
 /**
@@ -57,6 +61,7 @@ final public class SocketUtilities {
     private static int messageCounter = -1;
     private static final String NAME_Class = SocketUtilities.class.getSimpleName();
     public static final SecureRandom SecureRandomGen = new SecureRandom();
+    private static String theHostname = null;
     
     //===============================================================
     /**
@@ -171,6 +176,37 @@ final public class SocketUtilities {
         }
 
         return data;
+    }
+    
+    //===============================================================
+    /**
+    * Returns the hostname of the current host.
+    *
+    * @return
+     * @throws pwnbrew.logging.LoggableException
+     * @throws java.io.IOException
+    */
+    public static String getHostname() throws LoggableException, IOException {
+
+        //Try and get the hostname
+        if(theHostname == null){
+            try {
+                InetAddress localInetAddress = InetAddress.getLocalHost();
+                theHostname = localInetAddress.getHostName().toLowerCase();
+            } catch(UnknownHostException ex){
+
+                if(Utilities.isUnix( Utilities.getOsName() )){
+
+                    RuntimeRunnable aCommand = new RuntimeRunnable( new String[]{"hostname"} );
+                    aCommand.run();
+
+                    theHostname = aCommand.getStdOut().trim().toLowerCase();
+
+                }
+            }
+        }
+
+        return theHostname;
     }
 
      

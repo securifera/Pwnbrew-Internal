@@ -68,15 +68,15 @@ public class X509CertificateFactory {
   
     private static final String Algorithm_RSA = "RSA";
     private static final String Hash_SHA256withRSA = "SHA256withRSA";
-    
-    
+      
     // ==========================================================================
     /**
      * 
      * 
      * @param name the X.509 Distinguished Name, eg "CN=Test, L=London, C=GB"
-     * @param days how many days from now the Certificate is valid for
+     * @param issuer
      * @param algorithm
+     * @param days how many days from now the Certificate is valid for
      * @param KeySize
      * 
      * @return
@@ -87,7 +87,7 @@ public class X509CertificateFactory {
      * @throws java.io.IOException
      * @throws java.security.NoSuchAlgorithmException
      */
-    public static Object[] generateCertificate( String name, int days, String algorithm, int KeySize )
+    public static Object[] generateCertificate( String name, String issuer, int days, String algorithm, int KeySize )
             throws CertificateException, InvalidKeyException, IOException, NoSuchAlgorithmException,
             NoSuchProviderException, SignatureException {
 
@@ -107,17 +107,18 @@ public class X509CertificateFactory {
             KeyPair keyPair = kpGenerator.generateKeyPair();
 
             Date from = new Date();
-            Date to = new Date( from.getTime() + ((long)360 * (long)86400000) ); //Milliseconds in one day = 86400000
+            Date to = new Date( from.getTime() + ((long)days * (long)86400000) ); //Milliseconds in one day = 86400000
             sun.security.x509.CertificateValidity certValidity = new sun.security.x509.CertificateValidity( from, to );
 
             BigInteger certSerialNumber = new BigInteger( 64, new SecureRandom() );
             sun.security.x509.X500Name ownerName = new sun.security.x509.X500Name( name );
+            sun.security.x509.X500Name issuerName = new sun.security.x509.X500Name( issuer );
 
             sun.security.x509.X509CertInfo certInfo = new sun.security.x509.X509CertInfo();
             certInfo.set( sun.security.x509.X509CertInfo.VALIDITY, certValidity );
             certInfo.set( sun.security.x509.X509CertInfo.SERIAL_NUMBER, new sun.security.x509.CertificateSerialNumber( certSerialNumber ) );
             certInfo.set( sun.security.x509.X509CertInfo.SUBJECT, new sun.security.x509.CertificateSubjectName( ownerName ) );
-            certInfo.set( sun.security.x509.X509CertInfo.ISSUER, new sun.security.x509.CertificateIssuerName( ownerName ) );
+            certInfo.set( sun.security.x509.X509CertInfo.ISSUER, new sun.security.x509.CertificateIssuerName( issuerName ) );
             certInfo.set( sun.security.x509.X509CertInfo.KEY, new sun.security.x509.CertificateX509Key( keyPair.getPublic() ) );
             certInfo.set( sun.security.x509.X509CertInfo.VERSION, new sun.security.x509.CertificateVersion( sun.security.x509.CertificateVersion.V3 ) );
                

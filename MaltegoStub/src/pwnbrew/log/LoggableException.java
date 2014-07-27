@@ -40,6 +40,7 @@ The copyright on this package is held by Securifera, Inc
 /*
 * LoggableException.java
 *
+* Created on Oct 19, 2013, 11:34:22 PM
 */
 
 package pwnbrew.log;
@@ -50,31 +51,23 @@ package pwnbrew.log;
  */
 public class LoggableException extends Exception {
 
-    private static final long serialVersionUID = 1L;
     private final Exception origEx;
 
-    //=========================================================================
-    /*
-     *  Constructor
-     */
     public LoggableException(String passedMsg){
        super(passedMsg);
        origEx = null;
     }
 
-    //=========================================================================
-    /*
-     *  Constructor
-     */
     public LoggableException(Exception passedEx) {
         super(passedEx.getMessage());
         origEx = passedEx;
     }
+    
+    public LoggableException( Exception passedEx, String passedMsg ) {
+        super( new StringBuilder().append(passedEx.getMessage()).append("\n").append(passedMsg).toString() );
+        origEx = passedEx;
+    }
 
-     //=========================================================================
-    /*
-     *  Returns the the original exception.
-     */
     public Exception getException(){
         return origEx;
     }
