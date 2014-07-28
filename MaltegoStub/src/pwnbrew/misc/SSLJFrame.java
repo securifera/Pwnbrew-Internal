@@ -245,7 +245,7 @@ public class SSLJFrame extends javax.swing.JFrame {
                     if( !certAlias.isEmpty() ){
 
                         KeyStore aKeyStore = SSLUtilities.getKeystore();
-                        if(!SSLUtilities.checkAlias(aKeyStore, certAlias)){
+                        if( SSLUtilities.checkAlias(aKeyStore, certAlias)){
                             String theMessage = "A certificate already exists with the given alias. Would you like to overwrite it?";
                             int dialogValue = JOptionPane.showConfirmDialog(this, theMessage, "Replace Certificate?", JOptionPane.YES_NO_OPTION);
                              

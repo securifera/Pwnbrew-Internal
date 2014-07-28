@@ -107,14 +107,7 @@ public class StubConfig {
      * @throws pwnbrew.log.LoggableException 
     */
     public String getKeyStorePass() throws LoggableException {
-
-        String retVal = "";
-        String theKey = getHostId();
-
-        if(!theStorePass.isEmpty() && !theKey.isEmpty())
-            retVal = Utilities.simpleDecrypt(theStorePass, theKey);       
-
-        return retVal;
+       return theStorePass;
     }
 
      //==========================================================================
@@ -123,24 +116,8 @@ public class StubConfig {
      * @param passedKey
      * @throws pwnbrew.log.LoggableException
     */
-    public void setKeyStorePass(String passedKey) throws LoggableException {
-
-        String theKey = getHostId();
-        if(theKey.isEmpty()){
-            theKey = Integer.toString(SocketUtilities.getNextId());
-            setHostId(theKey);
-        }
-
-        //Make sure the passed key pass is not empty
-        if(passedKey != null ){
-            if( !passedKey.isEmpty() && !theKey.isEmpty() ){
-                String b64encoded = Utilities.simpleEncrypt(passedKey, theKey);
-                if(b64encoded != null)
-                    theStorePass = b64encoded;
-
-            } else
-                theStorePass = "";            
-        }
+    public void setKeyStorePass( String passedKey ) throws LoggableException {
+        theStorePass = passedKey;       
     }
     
 
@@ -205,7 +182,7 @@ public class StubConfig {
      * Returns the configuration object
      * @return 
     */
-    public static StubConfig getConfig(){
+    public synchronized static StubConfig getConfig(){
         
         if(theConf == null)
             theConf = loadConfiguration();   
@@ -272,6 +249,7 @@ public class StubConfig {
                 } else 
                     localConf.setKeyStorePass(certPW);
                 
+                
                 //Save the conf
                 if( saveFlag )
                     localConf.writeSelfToDisk();
@@ -291,7 +269,7 @@ public class StubConfig {
      * Writes the configuration file to the appropriate place
      * @throws pwnbrew.log.LoggableException
     */
-    public void writeSelfToDisk() throws LoggableException {
+    public synchronized void writeSelfToDisk() throws LoggableException {
             
         //Check for null
         File theClassPath = Utilities.getClassPath();

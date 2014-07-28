@@ -52,6 +52,7 @@ import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.JarItem;
 
@@ -111,9 +112,9 @@ public final class DeleteJarItem extends JarItemMsg {
         
         try {
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            RelayManager aCMManager = RelayManager.getRelayManager();
             if( aCMManager != null ){
-                aCMManager = ControlMessageManager.initialize( passedManager );            
+                aCMManager = RelayManager.initialize( passedManager );            
             
                 //Send the msg
                 DeleteJarItem aMsg = new DeleteJarItem( getSrcHostId(), theJarName, theJarType, theJvmVersion, theJarVersion );

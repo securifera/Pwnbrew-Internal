@@ -157,22 +157,26 @@ abstract public class DataManager {
     /**
      *   Handle the message.
      *
+     * @param srcPortRouter
      * @param msgBytes
     */
-    abstract public void handleMessage( byte[] msgBytes );
+    abstract public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes );
     
      //===========================================================================
     /**
      *  Handles the passed message with the correct manager
      * 
-     * @param theCommManager
+     * @param passedRouter
      * @param msgType
      * @param msgBytes  
      * @param dstId  
      */
-    public static void routeMessage( CommManager theCommManager, byte msgType, int dstId, byte[] msgBytes ) {
+    public static void routeMessage( PortRouter passedRouter, byte msgType, int dstId, byte[] msgBytes ) {
         
         try {
+            
+            //Get the comm manager
+            CommManager theCommManager = passedRouter.getCommManager();
                         
             //Get the config
             DataManager aManager = null;
@@ -231,9 +235,8 @@ abstract public class DataManager {
             }
             
             //Handle it
-            if( aManager != null ){
-                aManager.handleMessage( msgBytes );
-            }
+            if( aManager != null )
+                aManager.handleMessage( passedRouter, msgBytes );            
             
         } catch (LoggableException | IOException ex) {
             DebugPrinter.printMessage(DataManager.class.getSimpleName(), "No manager for bytes");                                 
@@ -278,7 +281,7 @@ abstract public class DataManager {
     public static synchronized void createPortRouter( CommManager passedManager, int passedPort, boolean encrypted ) throws IOException{
         PortRouter aPR = passedManager.getPortRouter( passedPort );
         if( aPR == null ){
-            aPR = new ServerPortRouter( passedManager, encrypted );
+            aPR = new ServerPortRouter( passedManager, encrypted, false );
             passedManager.setPortRouter( passedPort, aPR);            
         }
     }

@@ -38,7 +38,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.host.Host;
@@ -49,7 +49,7 @@ import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -108,8 +108,8 @@ public final class GetSessions extends ControlMessage{
     @Override
     public void evaluate( CommManager passedManager ) throws LoggableException {     
             
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
+        RelayManager aManager = RelayManager.getRelayManager();
+        if( aManager != null ){
 
             String hostIdStr = Integer.toString( hostId );
 
@@ -123,8 +123,8 @@ public final class GetSessions extends ControlMessage{
 
                     try {
                         SessionMsg aMsg = new SessionMsg( getSrcHostId(), hostId, aSession.getCheckInTime(), aSession.getDisconnectedTime());
-                        aCMManager.send(aMsg);
-                    } catch (UnsupportedEncodingException ex) {
+                        aManager.send(aMsg);
+                    } catch ( IOException ex) {
                         Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
                     }
                 }

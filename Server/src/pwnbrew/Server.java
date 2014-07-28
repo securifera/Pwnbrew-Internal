@@ -51,6 +51,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.security.GeneralSecurityException;
 import java.util.logging.Level;
 import javax.swing.JDialog;
 import javax.swing.UIManager;
@@ -64,11 +65,13 @@ import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Directories;
+import pwnbrew.network.ServerPortRouter;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.network.http.Http;
 import pwnbrew.network.http.ServerHttpWrapper;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.shell.ShellMessageManager;
 
 /**
@@ -87,7 +90,8 @@ public final class Server {
     private FileChannel theLockFileChannel = null;    
     private static final boolean debug = true;
     
-    private static final String showGuiArg = "-showGui";
+    private static final String SHOW_GUI_ARG = "-gui";
+    private static final String REMOTE_MANAGEMENT_ARG = "-rmp";
     
     //=========================================================================
     /**
@@ -132,10 +136,22 @@ public final class Server {
      * Starts the server threads
      *
     */
-    private void start() throws LoggableException {
+    private void start( int remManagePort ) throws LoggableException, IOException, GeneralSecurityException {
 
         theServerManager.start();
-//        ((MainGui)theGuiController.getObject()).setVisible(true); 
+        
+        if( remManagePort != -1 ){
+            
+            RelayManager aManager = RelayManager.getRelayManager();
+            if( aManager == null ){
+                aManager = RelayManager.initialize( theServerManager );
+            }
+            
+            ServerPortRouter aSPR = aManager.getServerPorterRouter();
+            if( aSPR.getServerSocketChannel() == null )
+                aSPR.startServer(null, remManagePort );
+            
+        }
         
     }
 
@@ -163,6 +179,11 @@ public final class Server {
         if( aSMM != null ){
             aSMM.shutdown();
         }
+        
+        RelayManager aRMM = RelayManager.getRelayManager();
+        if( aRMM != null ){
+            aRMM.shutdown();
+        }
 
         //Debug
         DebugPrinter.shutdown();        
@@ -177,16 +198,26 @@ public final class Server {
         try {
             
             boolean showGui = false;
+            int remManagePort = -1;
             
             //Assign the service name
-            if( args.length > 0 ){
-                String passedArg = args[0]; 
-                if( passedArg.equals(showGuiArg))
+            for( String aString : args ){
+                if(aString.equals( SHOW_GUI_ARG )){
                     showGui = true;
+                } else if( aString.contains(REMOTE_MANAGEMENT_ARG)){
+                    String[] argStrArr = aString.split("=");
+                    if(argStrArr.length > 1 ){
+                        try{ 
+                            remManagePort = Integer.parseInt( argStrArr[1] );
+                        } catch( NumberFormatException ex ){
+                            remManagePort = -1;
+                        }
+                    }                    
+                }
             }          
             
             staticSelf = new Server( showGui );
-            staticSelf.start();
+            staticSelf.start( remManagePort );
 
         } catch ( Throwable ex) {
 
@@ -318,6 +349,6 @@ public final class Server {
         MainGui.setDefaultLookAndFeelDecorated(true);
         JDialog.setDefaultLookAndFeelDecorated(true);
     }
-     
+
 
 }/* END CLASS Server */

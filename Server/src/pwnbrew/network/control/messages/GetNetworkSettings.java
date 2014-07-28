@@ -37,6 +37,7 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.network.control.messages;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyStoreException;
 import java.security.Principal;
@@ -48,6 +49,7 @@ import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.xmlBase.ServerConfig;
 
@@ -78,8 +80,8 @@ public class GetNetworkSettings extends ControlMessage{ // NO_UCD (use default)
     @Override
     public void evaluate( CommManager passedManager ) {     
     
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
+        RelayManager aManager = RelayManager.getRelayManager();
+        if( aManager != null ){
              //Populate the componenets
             try {
                 
@@ -110,13 +112,13 @@ public class GetNetworkSettings extends ControlMessage{ // NO_UCD (use default)
                         
                         //Send back the data
                         NetworkSettingsMsg aMsg = new NetworkSettingsMsg( getSrcHostId(), serverPort, issueeName, issuerName, theAlgorithm, expDateStr );
-                        aCMManager.send(aMsg);
+                        aManager.send(aMsg);
                   
                     }
                 
                 }
                             
-            } catch(KeyStoreException | LoggableException | UnsupportedEncodingException ex){
+            } catch(KeyStoreException | LoggableException | IOException ex){
                 Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );  
             }
         }

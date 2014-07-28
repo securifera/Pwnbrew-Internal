@@ -133,7 +133,7 @@ public class ControlMessageManager extends DataManager {
      * @param msgBytes
     */
     @Override
-    public void handleMessage( byte[] msgBytes ) {        
+    public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) {        
         theControlManager.getDataHandler().processData(msgBytes);        
     }
     

@@ -59,6 +59,7 @@ import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
+import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFile;
@@ -137,7 +138,7 @@ public class FileMessageManager extends DataManager {
      * @param msgBytes
     */
     @Override
-    public void handleMessage( byte[] msgBytes ) {        
+    public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) {        
         theFileManager.getDataHandler().processData(msgBytes);        
     }
     

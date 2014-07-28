@@ -38,6 +38,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.logging.Level;
@@ -49,6 +50,7 @@ import pwnbrew.manager.CommManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -106,8 +108,8 @@ public final class GetCheckInSchedule extends ControlMessage{
     @Override
     public void evaluate( CommManager passedManager ) throws LoggableException {     
             
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
+        RelayManager aManager = RelayManager.getRelayManager();
+        if( aManager != null ){
 
             String hostIdStr = Integer.toString( hostId );
 
@@ -122,16 +124,20 @@ public final class GetCheckInSchedule extends ControlMessage{
                 for( String aString : theCheckInList ){
                     try {
                         CheckInTimeMsg aMsg = new CheckInTimeMsg( srcId, hostId, aString);
-                        aCMManager.send(aMsg);
-                    } catch (UnsupportedEncodingException ex) {
+                        aManager.send(aMsg);
+                    } catch (IOException ex) {
                         Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
                     }
                 }
 
                 //Get flag and send a msg
-                boolean asfFlag = theHostController.getAutoSleepFlag();
-                AutoSleep anASMsg = new AutoSleep( srcId, hostId, AutoSleep.GET_VALUE, asfFlag );
-                aCMManager.send(anASMsg);
+                try {
+                    boolean asfFlag = theHostController.getAutoSleepFlag();
+                    AutoSleep anASMsg = new AutoSleep( srcId, hostId, AutoSleep.GET_VALUE, asfFlag );
+                    aManager.send(anASMsg);
+                } catch (IOException ex) {
+                    Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
+                }
             }
 
              

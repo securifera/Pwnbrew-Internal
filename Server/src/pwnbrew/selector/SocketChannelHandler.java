@@ -312,7 +312,7 @@ public class SocketChannelHandler implements Selectable {
                                 int dstId = SocketUtilities.byteArrayToInt(dstHostId);
 
                                 try{
-                                    DataManager.routeMessage( thePortRouter.getCommManager(), currMsgType, dstId, msgByteArr ); 
+                                    DataManager.routeMessage( thePortRouter, currMsgType, dstId, msgByteArr ); 
                                 } catch(Exception ex ){
                                     Log.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
                                 }

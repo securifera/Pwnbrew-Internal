@@ -37,13 +37,13 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.network.control.messages;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
-import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.JarItem;
 
@@ -74,8 +74,8 @@ public class GetJarItems extends ControlMessage{ // NO_UCD (use default)
     @Override
     public void evaluate( CommManager passedManager ) {     
     
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
+        RelayManager aManager = RelayManager.getRelayManager();
+        if( aManager != null ){
             List<JarItem> jarList = new ArrayList<>();
             jarList.addAll( Utilities.getJarItems());
 
@@ -83,9 +83,9 @@ public class GetJarItems extends ControlMessage{ // NO_UCD (use default)
             try {
                 for( JarItem anItem : jarList ){
                     JarItemMsg aMsg = new JarItemMsg( getSrcHostId(), anItem.toString(), anItem.getType(), anItem.getJvmMajorVersion(), anItem.getVersion());
-                    aCMManager.send(aMsg);
+                    aManager.send(aMsg);
                 }
-            } catch(UnsupportedEncodingException ex){
+            } catch(IOException ex){
                 Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );  
             }
         }

@@ -160,7 +160,7 @@ public class FileData extends Message {
     */
     static FileData getMessage( ByteBuffer passedBuffer ) throws LoggableException {
 
-       byte[] theId = new byte[4],clientId = new byte[4], tempHostId = new byte[4];
+       byte[] theMsgId = new byte[4], theId = new byte[4],clientId = new byte[4], tempHostId = new byte[4];
        FileData aMessage;
 
         //Copy over the client id
@@ -168,6 +168,9 @@ public class FileData extends Message {
        
         //Copy over the dest host id
        passedBuffer.get(tempHostId, 0, tempHostId.length);
+       
+       //Copy over the msg id
+       passedBuffer.get(theMsgId, 0, theMsgId.length);
        
        //Copy over the id
        passedBuffer.get(theId, 0, theId.length);

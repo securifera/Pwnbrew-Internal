@@ -165,60 +165,57 @@ public class NetworkSettingsMsg extends ControlMessage {
     */
     @Override
     public void evaluate( CommManager passedManager ) {     
-    
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
-            
-            //Populate the componenets
-            try {
-                
-                //Get the PKI Cert
-                Certificate theCert = SSLUtilities.getCertificate();
-                if( theCert instanceof sun.security.x509.X509CertImpl ){
-                    sun.security.x509.X509CertImpl theCustomCert = (sun.security.x509.X509CertImpl)theCert;
+           
+        //Populate the componenets
+        try {
 
-                    //Get the issuee name
-                    Principal aPrincipal = theCustomCert.getSubjectDN();
-                    String issueeName = aPrincipal.getName();
+            //Get the PKI Cert
+            Certificate theCert = SSLUtilities.getCertificate();
+            if( theCert instanceof sun.security.x509.X509CertImpl ){
+                sun.security.x509.X509CertImpl theCustomCert = (sun.security.x509.X509CertImpl)theCert;
 
-                    //Get the issuer org
-                    aPrincipal = theCustomCert.getIssuerDN();
-                    String issuerName = aPrincipal.getName();
+                //Get the issuee name
+                Principal aPrincipal = theCustomCert.getSubjectDN();
+                String issueeName = aPrincipal.getName();
 
-                    //Set the date
-                    Date expirationDate = theCustomCert.getNotAfter();
-                    String expDateStr = Constants.CHECKIN_DATE_FORMAT.format(expirationDate);   
+                //Get the issuer org
+                aPrincipal = theCustomCert.getIssuerDN();
+                String issuerName = aPrincipal.getName();
 
-                    //Create a self signed cert if they aren't the same                            
-                    if( !theIssueeName.equals(issueeName) || !theIssuerName.equals(issuerName) || !expDateStr.equals(theExpDate)){
-                        //Get the date and calculate how many days between
-                        SSLUtilities.createSelfSignedCertificate(theIssueeName, theIssuerName, Integer.parseInt( theExpDate ));
+                //Set the date
+                Date expirationDate = theCustomCert.getNotAfter();
+                String expDateStr = Constants.CHECKIN_DATE_FORMAT.format(expirationDate);   
 
-                        //Reload ssl
-                        SSLUtilities.reloadSSLContext();     
-                    }
+                //Create a self signed cert if they aren't the same                            
+                if( !theIssueeName.equals(issueeName) || !theIssuerName.equals(issuerName) || !expDateStr.equals(theExpDate)){
+                    //Get the date and calculate how many days between
+                    SSLUtilities.createSelfSignedCertificate(theIssueeName, theIssuerName, Integer.parseInt( theExpDate ));
+
+                    //Reload ssl
+                    SSLUtilities.reloadSSLContext();     
+                }
+
+            }
+
+            //Recreate the server socket
+            ServerConfig theConf = ServerConfig.getServerConfig();        
+            if(theConf != null){
+
+                int serverPort = theConf.getSocketPort();
+                if( serverPort != theServerPort && passedManager instanceof ServerManager ){
+
+                    //Set the port and restart the socket
+                    theConf.setSocketPort( Integer.toString( theServerPort ));
+                    ((ServerManager)passedManager).rebuildServerSockets();
 
                 }
-                
-                //Recreate the server socket
-                ServerConfig theConf = ServerConfig.getServerConfig();        
-                if(theConf != null){
+            }
 
-                    int serverPort = theConf.getSocketPort();
-                    if( serverPort != theServerPort && passedManager instanceof ServerManager ){
-                        
-                        //Set the port and restart the socket
-                        theConf.setSocketPort( Integer.toString( theServerPort ));
-                        ((ServerManager)passedManager).rebuildServerSockets();
-                        
-                    }
-                }
-                
-            } catch(KeyStoreException | LoggableException ex ){
-                Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );  
-            }           
-        }
+        } catch(KeyStoreException | LoggableException ex ){
+            Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );  
+        }           
     }
+    
                     
 
 }

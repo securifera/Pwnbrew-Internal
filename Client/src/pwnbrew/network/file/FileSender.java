@@ -171,7 +171,8 @@ public class FileSender extends ManagedRunnable implements LockListener {
         if( fileToBeSent.length() == 0 ){
             
             //Send the file data
-            FileData fileDataMsg = new FileData(passedId, new byte[0]);          
+            FileData fileDataMsg = new FileData(passedId, new byte[0]);   
+            fileDataMsg.setDestHostId(dstHostId);
             
             //Send the message
             thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
@@ -190,7 +191,6 @@ public class FileSender extends ManagedRunnable implements LockListener {
                 int readCount;            
 
                 int fileRead = 0;
-//                ByteBuffer tempBuffer;
                 DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sending " + theFileAck.getHashFilenameString());
                 while(fileRead != -1 && !finished() ){
 
@@ -211,6 +211,8 @@ public class FileSender extends ManagedRunnable implements LockListener {
                     
                     byte[] fileBytes = Arrays.copyOf(fileChannelBB.array(), fileChannelBB.limit());
                     FileData fileDataMsg = new FileData(passedId, fileBytes);
+                    fileDataMsg.setDestHostId(dstHostId);
+                    
                     thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
 
                 }

@@ -107,11 +107,12 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
      * 
      * @param sc
      * @param passedHandler
+     * @param requireAuth
      * @throws LoggableException
      * @throws IOException
      * @throws InterruptedException 
      */
-    public SecureSocketChannelWrapper ( SocketChannel sc, SocketChannelHandler passedHandler ) throws LoggableException, IOException, InterruptedException {
+    public SecureSocketChannelWrapper ( SocketChannel sc, SocketChannelHandler passedHandler, boolean requireAuth ) throws LoggableException, IOException, InterruptedException {
         super(sc, passedHandler );
 
         //Get the type and the SSL context
@@ -119,6 +120,10 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
 
         sslEngine = theContext.createSSLEngine(SocketUtilities.getHostname(), sc.socket().getPort());
         sslEngine.setUseClientMode(false);  
+        
+        //Set authentication is it is set
+        if( requireAuth )
+            sslEngine.setNeedClientAuth(true);        
      
         netBBSize = sslEngine.getSession().getPacketBufferSize();
         inNetBB  = ByteBuffer.allocate(netBBSize);

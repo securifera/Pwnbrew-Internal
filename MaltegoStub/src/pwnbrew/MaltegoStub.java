@@ -45,15 +45,12 @@ import javax.swing.UnsupportedLookAndFeelException;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.fileoperation.TaskManager;
 import pwnbrew.functions.Function;
-import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.file.FileMessageManager;
-import pwnbrew.network.http.ClientHttpWrapper;
-import pwnbrew.network.http.Http;
 import pwnbrew.shell.ShellMessageManager;
 
 /**
@@ -83,6 +80,9 @@ public class MaltegoStub extends PortManager  implements LockListener {
         function = args[0];
         entityName = args[1];
         entityProperties = args[2];
+        
+        //Make sure the we aren't running already
+        DebugPrinter.enable( debug );   
     }
 
     //========================================================================
@@ -181,16 +181,16 @@ public class MaltegoStub extends PortManager  implements LockListener {
     public void initialize() {
 
         //Get the port
-        int thePort = StubConfig.getConfig().getSocketPort();        
+//        int thePort = StubConfig.getConfig().getSocketPort();        
        
-        //Switch based on the port
-        switch( thePort ){
-            case Http.DEFAULT_PORT:
-            case Http.SECURE_PORT:
-                ClientHttpWrapper aWrapper = new ClientHttpWrapper();
-                DataManager.setPortWrapper( thePort, aWrapper);
-                break;
-        }
+//        //Switch based on the port
+//        switch( thePort ){
+//            case Http.DEFAULT_PORT:
+//            case Http.SECURE_PORT:
+//                ClientHttpWrapper aWrapper = new ClientHttpWrapper();
+//                DataManager.setPortWrapper( thePort, aWrapper);
+//                break;
+//        }
         
         String lookAndFeelClassStr = "javax.swing.plaf.metal.MetalLookAndFeel";
         if( Utilities.isWindows() )

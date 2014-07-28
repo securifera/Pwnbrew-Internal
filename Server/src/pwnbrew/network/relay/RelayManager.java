@@ -45,9 +45,8 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.relay;
 
-import pwnbrew.network.PortRouter;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
@@ -57,8 +56,8 @@ import pwnbrew.manager.DataManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
-import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.network.control.messages.RemoteException;
+import pwnbrew.network.PortRouter;
+import pwnbrew.network.ServerPortRouter;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
 
@@ -69,7 +68,7 @@ import pwnbrew.xmlBase.ServerConfig;
 public class RelayManager extends DataManager {
 
     private static RelayManager theRelayManager;
-//    private ServerPortRouter theServerPortRouter = null;
+    private ServerPortRouter theServerPortRouter = null;
     
     private static final String NAME_Class = RelayManager.class.getSimpleName();
     
@@ -77,9 +76,13 @@ public class RelayManager extends DataManager {
     /*
      *  Constructor
      */
-    private RelayManager( CommManager passedCommManager ) {
+    private RelayManager( CommManager passedCommManager ) throws IOException {
         
-        super(passedCommManager);        
+        super(passedCommManager);     
+        
+        //Create the port router
+        if( theServerPortRouter == null )
+            theServerPortRouter = new ServerPortRouter( passedCommManager, true, true );  
         
     }  
     
@@ -111,52 +114,81 @@ public class RelayManager extends DataManager {
         return theRelayManager;
     }
     
-    //===============================================================
+     //===============================================================
     /**
      *   Send the message out the given channel.
      *
+     * @param srcPortRouter
      * @param msgBytes
     */
     @Override
-    public void handleMessage( byte[] msgBytes ) {        
+    public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) {        
                         
         //Get the dest id
         byte[] dstHostId = Arrays.copyOfRange(msgBytes, Message.DEST_HOST_ID_OFFSET, Message.DEST_HOST_ID_OFFSET + 4);
         int tempId = SocketUtilities.byteArrayToInt(dstHostId);
                
         //Get the port router
-        PortRouter thePR = null; 
         try {
-            thePR = theCommManager.getPortRouter( ServerConfig.getServerConfig().getSocketPort() );    
-            DebugPrinter.printMessage(NAME_Class, "Queueing relay message");
-        } catch (LoggableException ex) {
+            
+            PortRouter thePR = theCommManager.getPortRouter( ServerConfig.getServerConfig().getSocketPort() );
+            if( thePR.equals( srcPortRouter))
+                 thePR = theServerPortRouter;
+
+            thePR.queueSend( msgBytes, tempId );
+            
+        } catch (LoggableException | IOException ex) {
             Log.log( Level.SEVERE, NAME_Class, "handleMessage()", ex.getMessage(), ex);        
         }
-
-        //Queue the message to be sent
-        if( thePR != null ){
-            try { 
-                thePR.queueSend( msgBytes, tempId );
-            } catch (IOException ex) {
-                
-                //Send an error message back to the sender
-                byte[] srcHostId = Arrays.copyOfRange(msgBytes, Message.SRC_HOST_ID_OFFSET, Message.SRC_HOST_ID_OFFSET + 4);
-                tempId = SocketUtilities.byteArrayToInt(srcHostId);
-                
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager != null ){
-                    try {
-                        RemoteException reMsg = new RemoteException( tempId, ex.getMessage() );
-                        aCMManager.send(reMsg);
-                    } catch (UnsupportedEncodingException ex1) {
-                        ex1 = null;
-                    }
-                }
-                
-            }
-        }      
         
     }
+    
+//    //===============================================================
+//    /**
+//     *   Send the message out the given channel.
+//     *
+//     * @param msgBytes
+//    */
+//    @Override
+//    public void handleMessage( byte[] msgBytes ) {        
+//                        
+//        //Get the dest id
+//        byte[] dstHostId = Arrays.copyOfRange(msgBytes, Message.DEST_HOST_ID_OFFSET, Message.DEST_HOST_ID_OFFSET + 4);
+//        int tempId = SocketUtilities.byteArrayToInt(dstHostId);
+//               
+//        //Get the port router
+//        PortRouter thePR = null; 
+//        try {
+//            thePR = theCommManager.getPortRouter( ServerConfig.getServerConfig().getSocketPort() );    
+//            DebugPrinter.printMessage(NAME_Class, "Queueing relay message");
+//        } catch (LoggableException ex) {
+//            Log.log( Level.SEVERE, NAME_Class, "handleMessage()", ex.getMessage(), ex);        
+//        }
+//
+//        //Queue the message to be sent
+//        if( thePR != null ){
+//            try { 
+//                thePR.queueSend( msgBytes, tempId );
+//            } catch (IOException ex) {
+//                
+//                //Send an error message back to the sender
+//                byte[] srcHostId = Arrays.copyOfRange(msgBytes, Message.SRC_HOST_ID_OFFSET, Message.SRC_HOST_ID_OFFSET + 4);
+//                tempId = SocketUtilities.byteArrayToInt(srcHostId);
+//                
+//                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//                if( aCMManager != null ){
+//                    try {
+//                        RemoteException reMsg = new RemoteException( tempId, ex.getMessage() );
+//                        aCMManager.send(reMsg);
+//                    } catch (UnsupportedEncodingException ex1) {
+//                        ex1 = null;
+//                    }
+//                }
+//                
+//            }
+//        }      
+//        
+//    }
     
     //===========================================================================
     /*
@@ -166,5 +198,47 @@ public class RelayManager extends DataManager {
     public DataHandler getDataHandler() {
         return theDataHandler;
     }  
+    
+    //===========================================================================
+    /**
+     *  Return the Port Router
+     * @return 
+    */
+    public ServerPortRouter getServerPorterRouter() {
+        return theServerPortRouter;
+    }
+    
+     //===========================================================================
+    /**
+     *  Shutdown the relay 
+     */
+    @Override
+    public void shutdown() {
+        
+        if( theServerPortRouter != null )
+            theServerPortRouter.shutdown();
+        
+        theServerPortRouter = null;
+        theRelayManager = null;
+    }
+    
+     //===============================================================
+    /**
+     *   Send the message out the given channel.
+     *
+     * @param passedMessage
+     * @throws java.io.IOException
+    */
+    public void send( Message passedMessage ) throws IOException {
+
+        int msgLen = passedMessage.getLength();
+        ByteBuffer aByteBuffer = ByteBuffer.allocate( msgLen );
+        passedMessage.append(aByteBuffer);
+        
+        //Queue the message to be sent
+        theServerPortRouter.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
+        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+              
+    }
 
 }

@@ -141,7 +141,7 @@ public class ServerHttpWrapper extends HttpWrapper {
                                             int dstId = SocketUtilities.byteArrayToInt(dstHostId);
                                             
                                             try{
-                                                DataManager.routeMessage( passedHandler.getPortRouter().getCommManager(), type, dstId, msgBytes );
+                                                DataManager.routeMessage( passedHandler.getPortRouter(), type, dstId, msgBytes );
                                             } catch(Exception ex ){
                                                 Log.log( Level.SEVERE, NAME_Class, "processHeader()", ex.toString(), ex);
                                             }
@@ -176,7 +176,7 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                 System.arraycopy(Constants.OLD_STAGER_MARKER, 0, msgBytes, 8, Constants.OLD_STAGER_MARKER.length);
 
                                                 try{
-                                                    DataManager.routeMessage( passedHandler.getPortRouter().getCommManager(), type, dstId, msgBytes );
+                                                    DataManager.routeMessage( passedHandler.getPortRouter(), type, dstId, msgBytes );
                                                 } catch(Exception ex ){
                                                     Log.log( Level.SEVERE, NAME_Class, "processHeader()", ex.toString(), ex);
                                                 }

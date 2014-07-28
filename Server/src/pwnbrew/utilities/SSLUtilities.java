@@ -59,14 +59,13 @@ import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.util.Enumeration;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
+import javax.swing.SwingUtilities;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.Directories;
@@ -497,83 +496,22 @@ final public class SSLUtilities {
         createSelfSignedCertificate(issueeDN, issuerDN, days, theKeyStore, new String(keyStorePassArr), theAlias );
     }
     
-    /**
+     /**
      * @param args the command line arguments
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
-        
-        //Assign the service name
-        if( args.length > 1 ) {
-            
-            //Get the first options
-            String firstOption = args[0];
-            String firstValue = args[1];
-            
-            File certFile = new File(firstValue);
-            if( certFile.exists() ){
-                switch(firstOption){
-                    case "-export":                    
-                        //Pass the status up to the manager
-                        try {
-                            Certificate theCert = SSLUtilities.getCertificate();
 
-                            //If a cert is returned then send it to the client
-                            if(theCert != null){
-                                byte[] certBytes = theCert.getEncoded();
-                                try (FileOutputStream aFOS = new FileOutputStream(certFile)) {
-                                    aFOS.write(certBytes);
-                                    aFOS.flush();
-                                }
-                            }
-                        } catch(KeyStoreException | CertificateEncodingException | LoggableException ex ){
-                            System.out.println(ex.getMessage());
-                        }
-                        return;
-                    case "-import":                    
-                        //Pass the status up to the manager
-                        try {
-                         
-                            //If a cert is returned then send it to the client                            
-                            byte[] certBytes = new byte[(int)certFile.length()];
-                            try (FileInputStream aFOS = new FileInputStream(certFile)) {
-                                aFOS.read(certBytes);                              
-                            }
-                            
-                            //Create a cert from the bytes
-                            Certificate aCert = new sun.security.x509.X509CertImpl( certBytes );
-                            SSLUtilities.importCertificate( "", aCert);
-                            
-                        } catch( CertificateException | LoggableException ex ){
-                            System.out.println(ex.getMessage());
-                        }
-                        return;
-                    default:
-                        break;
-                }
+        /* Create and display the form */
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new SSLJFrame().setVisible(true);
             }
-        
-        } 
-                
-        //Print Usage
-        printUsage();
+        });
         
     }
         
-    //========================================================================
-    /**
-     * Print stager info
-     */
-    private static void printUsage(){
-        StringBuilder aSB = new StringBuilder();
-        aSB.append("Usage: java -cp <this jar> pwnbrew.utilities.SSLUtilities\n")
-                .append(" -h\tPrint usage\n")
-                .append(" -import <DER Encoded Certificate Filename>\n")
-                .append(" -export <DER Encoded Certificate Filename>\n");
-                
-        System.out.println(aSB.toString());
-    }
-    
     //====================================================================
     /**
      * Returns the certificate for the localhost

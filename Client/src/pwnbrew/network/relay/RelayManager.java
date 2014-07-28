@@ -129,24 +129,11 @@ public class RelayManager extends DataManager {
         int tempId = SocketUtilities.byteArrayToInt(dstHostId);
                
         //Get the port router
-//        PortRouter thePR;
-//        if( tempId == -1 || tempId == ClientConfig.getConfig().getServerId() ){
-         PortRouter thePR = theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
-         if( thePR.equals( srcPortRouter))
+        PortRouter thePR = theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+        if( thePR.equals( srcPortRouter))
              thePR = theServerPortRouter;
          
-//            DebugPrinter.printMessage(NAME_Class, "Queueing relay message to server");
-//        } else {     
-//
-//            //If the dest is not the server
-//            thePR = theServerPortRouter;  
-//            DebugPrinter.printMessage(NAME_Class, "Queueing relay message to client");
-//        }
-
-        //Queue the message to be sent
-//        if( thePR != null )
         thePR.queueSend( msgBytes, tempId ); 
-             
         
     }
     

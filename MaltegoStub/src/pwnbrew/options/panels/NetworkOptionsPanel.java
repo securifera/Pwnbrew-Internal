@@ -872,22 +872,8 @@ public class NetworkOptionsPanel extends OptionsJPanel {
                 ctrlPortStr = Integer.toString( theConf.getSocketPort() );
             }
 
-            //Get certpath
-            String certPath = certPathTextField.getText();
-
             //If the the cert was defined
-            if(!certPath.isEmpty()){
-//                    char[] passArr = passwordField.getPassword();
-//                    File theCertFile= new File(certPath);
-//
-//                    //Load the cert into the keystore
-//                    if(theCertFile.exists())
-//                        SSLUtilities.importPKCS12Keystore(theCertFile, passArr);                    
-//
-//                    //Return that the ssl context needs to be recreated
-//                    reloadSSL = true;
-
-            } else if( editCheckbox.isSelected() ){
+            if( editCheckbox.isSelected() ){
 
                 try {
                                        

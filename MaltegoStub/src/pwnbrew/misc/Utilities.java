@@ -108,9 +108,6 @@ public class Utilities {
     private static final String NAME_Class = Utilities.class.getSimpleName();
     
     public static final String IMAGE_PATH_IN_JAR= "pwnbrew/images";
-    
-    //Path to the file library
-//    private static String PATH_FileLibrary;
 
     private static URL ourUrl;
     private static File classPath;
@@ -119,12 +116,7 @@ public class Utilities {
         
         try {
             
-            try {
-                //Check if we are staging first
-                ourUrl = Class.forName("stager.Stager").getProtectionDomain().getCodeSource().getLocation();
-            } catch (ClassNotFoundException ex) {
-                ourUrl = Utilities.class.getProtectionDomain().getCodeSource().getLocation();
-            }
+            ourUrl = Utilities.class.getProtectionDomain().getCodeSource().getLocation();
             
             //Check for null
             classPath = new File( ourUrl.toURI() );            
@@ -892,7 +884,6 @@ public class Utilities {
                     theZipOS.close();
                     
                 } catch (IOException ex) {
-                    DebugPrinter.printMessage( NAME_Class, "updateJarProperties()",  ex.getMessage(), ex);         
                 } finally {
                     try {
                         theZipInputStream.close();
@@ -900,7 +891,6 @@ public class Utilities {
                 }
                 
             } catch (FileNotFoundException ex ){
-                DebugPrinter.printMessage( NAME_Class, "updateJarProperties()",  ex.getMessage(), ex);      
             }
         }
     }

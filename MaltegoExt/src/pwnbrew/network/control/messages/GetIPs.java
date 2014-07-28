@@ -38,7 +38,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 import pwnbrew.host.Host;
@@ -49,7 +49,7 @@ import pwnbrew.manager.CommManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Nic;
-import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
 
@@ -107,8 +107,8 @@ public final class GetIPs extends ControlMessage{ // NO_UCD (use default)
     @Override
     public void evaluate( CommManager passedManager ) throws LoggableException {     
         
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
+        RelayManager aManager = RelayManager.getRelayManager();
+        if( aManager != null ){
                             
             String hostIdStr = Integer.toString( hostId );
             if( hostId == -1 )
@@ -126,8 +126,8 @@ public final class GetIPs extends ControlMessage{ // NO_UCD (use default)
                     String anIP = anEntry.getIpAddress();
                     try {
                         IpMsg anIpMsg = new IpMsg( getSrcHostId(), anIP);
-                        aCMManager.send(anIpMsg);
-                    } catch (UnsupportedEncodingException ex) {
+                        aManager.send(anIpMsg);
+                    } catch ( IOException ex) {
                         Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
                     }
                 }       

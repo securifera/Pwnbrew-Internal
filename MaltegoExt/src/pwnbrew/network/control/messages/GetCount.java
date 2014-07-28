@@ -38,7 +38,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.net.SocketException;
 import java.util.List;
 import java.util.logging.Level;
@@ -52,7 +52,7 @@ import pwnbrew.manager.CommManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
 
@@ -120,8 +120,8 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
     @Override
     public void evaluate( CommManager passedManager ) throws LoggableException {     
         
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
+        RelayManager aManager = RelayManager.getRelayManager();
+        if( aManager != null ){
             
             int retCount = 0;
             ServerManager aSM = (ServerManager) passedManager;
@@ -189,8 +189,8 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
             
             try {
                 CountReply aHostMsg = new CountReply( getSrcHostId(), retCount, countType, optionalId);
-                aCMManager.send(aHostMsg);
-            } catch (UnsupportedEncodingException ex) {
+                aManager.send(aHostMsg);
+            } catch (IOException ex) {
                 Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
             }  
                         

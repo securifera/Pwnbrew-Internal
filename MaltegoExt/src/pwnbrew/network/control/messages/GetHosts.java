@@ -38,7 +38,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +53,7 @@ import pwnbrew.manager.CommManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -111,8 +111,8 @@ public final class GetHosts extends ControlMessage{ // NO_UCD (use default)
     @Override
     public void evaluate( CommManager passedManager ) {     
         
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
+        RelayManager aManager = RelayManager.getRelayManager();
+        if( aManager != null ){
             
             ServerManager aSM = (ServerManager) passedManager;
             //Get the host controllers 
@@ -171,8 +171,8 @@ public final class GetHosts extends ControlMessage{ // NO_UCD (use default)
                             if( !relayPort.isEmpty() )
                                 aHostMsg.addRelayPort( Integer.parseInt(relayPort));
 
-                            aCMManager.send(aHostMsg);
-                        } catch (UnsupportedEncodingException ex) {
+                            aManager.send(aHostMsg);
+                        } catch ( IOException ex) {
                             Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
                         }
 

@@ -49,6 +49,7 @@ import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.JarItem;
@@ -168,13 +169,13 @@ public final class AddToJarLibrary extends JarItemMsg{ // NO_UCD (use default)
                         
                         try {
             
-                            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                            if( aCMManager != null ){
-                                aCMManager = ControlMessageManager.initialize( passedManager );            
+                            RelayManager aManager = RelayManager.getRelayManager();
+                            if( aManager != null ){
+                                aManager = RelayManager.initialize( passedManager );            
 
                                 //Send the msg
                                 AddToJarLibrary aMsg = new AddToJarLibrary( getSrcHostId(), aJarItem.toString(), theJarType, aJarItem.getJvmMajorVersion(), aJarItem.getVersion() );
-                                aCMManager.send(aMsg);
+                                aManager.send(aMsg);
                             }
                             
                             //Delete the file

@@ -67,6 +67,7 @@ import pwnbrew.network.socket.SecureSocketChannelWrapper;
 final public class AcceptHandler implements Selectable {
 
     private final ServerPortRouter theSPR;
+    private final boolean requireAuthentication;
 
     private static final String NAME_Class = AcceptHandler.class.getSimpleName();
   
@@ -75,9 +76,11 @@ final public class AcceptHandler implements Selectable {
      *  Constructor
      * 
      * @param passedSPR 
+     * @param passedBool 
      */
-    public AcceptHandler( ServerPortRouter passedSPR ) {
+    public AcceptHandler( ServerPortRouter passedSPR, boolean passedBool ) {
 	theSPR = passedSPR;
+        requireAuthentication = passedBool;
     }
 
     //===============================================================
@@ -123,7 +126,7 @@ final public class AcceptHandler implements Selectable {
             }
 
             //Assign an unencyrpted socketwrapper to the handler temporarily
-            SecureSocketChannelWrapper theSCW = new SecureSocketChannelWrapper( theSocketChannel, theSCH );
+            SecureSocketChannelWrapper theSCW = new SecureSocketChannelWrapper( theSocketChannel, theSCH, requireAuthentication );
             theSCH.setSocketChannelWrapper(theSCW);
             
             theSCW.beginHandshake();

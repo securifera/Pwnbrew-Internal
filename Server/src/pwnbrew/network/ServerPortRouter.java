@@ -62,7 +62,8 @@ public class ServerPortRouter extends PortRouter {
 
     private ServerSocketChannel theServerSocketChannel = null;
     private final Map<Integer, SocketChannelHandler> hostHandlerMap = new HashMap<>();
-    
+    private final boolean authenticated;
+        
     private static final String NAME_Class = ServerPortRouter.class.getSimpleName();
   
       
@@ -72,10 +73,12 @@ public class ServerPortRouter extends PortRouter {
      *
      * @param passedCommManager
      * @param passedBool
+     * @param requireAuthentication
      * @throws IOException
     */
-    public ServerPortRouter( CommManager passedCommManager, boolean passedBool ) throws IOException {
+    public ServerPortRouter( CommManager passedCommManager, boolean passedBool, boolean requireAuthentication ) throws IOException {
         super(passedCommManager, passedBool);
+        authenticated = requireAuthentication;
     }
 
     //===============================================================
@@ -170,11 +173,10 @@ public class ServerPortRouter extends PortRouter {
         //Shutdown the server socket
         if(theServerSocketChannel != null){
             int thePort = theServerSocketChannel.socket().getLocalPort();
-            if( thePort != passedPort ){
+            if( thePort != passedPort )
                 theServerSocketChannel.close();
-            } else {
+            else 
                 return;
-            }
         }
         
         //Spawn a new server socket channel
@@ -183,7 +185,7 @@ public class ServerPortRouter extends PortRouter {
 
         // Register the server socket channel, indicating an interest in
         // accepting new connections
-        theSelectionRouter.register(theServerSocketChannel, SelectionKey.OP_ACCEPT, new AcceptHandler( this ));
+        theSelectionRouter.register(theServerSocketChannel, SelectionKey.OP_ACCEPT, new AcceptHandler( this, authenticated ));
 
     }
     

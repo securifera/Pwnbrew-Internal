@@ -224,6 +224,14 @@ pip-log.txt
 #Translations
 *.mo
 
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+nbactions.xml
+nb-configuration.xml
+
 #ant specific
 dist/
 build/
