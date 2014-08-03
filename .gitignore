@@ -251,3 +251,7 @@ build/
 
 #Mr Developer
 .mr.developer.cfg
+*.properties
+*.properties
+Client/nbproject/private/private.xml
+*.xml
