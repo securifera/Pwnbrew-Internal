@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.selector.SocketChannelHandler;
 
@@ -119,8 +120,9 @@ public class SocketChannelWrapper {
     * @param sk
     * @return
     * @throws IOException 
+     * @throws pwnbrew.logging.LoggableException 
     */
-    public boolean doHandshake(SelectionKey sk) throws IOException {
+    public boolean doHandshake(SelectionKey sk) throws IOException, LoggableException {
         return true;
     }
 

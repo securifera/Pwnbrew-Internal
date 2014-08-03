@@ -53,6 +53,7 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
+import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -107,8 +108,8 @@ final public class SSLUtilities {
                 TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
                 tmf.init(theKeyStore);
 
-                aContext = SSLContext.getInstance("TLS");
-                aContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+                aContext = SSLContext.getInstance("TLS");                
+                aContext.init(kmf.getKeyManagers(),tmf.getTrustManagers(), null);
 
             } catch (    KeyManagementException | KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException ex) {
                 throw new LoggableException(ex);
@@ -149,23 +150,23 @@ final public class SSLUtilities {
         try{
 
             //The keystore password
-            String keyStorePass;
+            String keyStorePass = theConf.getKeyStorePass();
 
             //If the keystore path is empty create one
             if(!keyStoreFile.exists()){
 
                //Create a random keypass
-               keyStorePass = Utilities.simpleEncrypt(Integer.toString(Utilities.SecureRandomGen.nextInt()), Long.toString(Utilities.SecureRandomGen.nextLong()));
+//               keyStorePass = Utilities.simpleEncrypt(Integer.toString(Utilities.SecureRandomGen.nextInt()), Long.toString(Utilities.SecureRandomGen.nextLong()));
                tempKeystore = createKeystore( keyStorePass);
 
                //Set the keypath and passphrase
-               theConf.setKeyStorePass(keyStorePass);
-               saveConf = true;
+//               theConf.setKeyStorePass(keyStorePass);
+//               saveConf = true;
 
             } else {
 
-               //Get the keystore pass
-               keyStorePass = theConf.getKeyStorePass();
+//               //Get the keystore pass
+//               keyStorePass = theConf.getKeyStorePass();
 
                //Load the keystore
                FileInputStream theFIS = new FileInputStream(keyStoreFile.getAbsolutePath());
@@ -228,9 +229,9 @@ final public class SSLUtilities {
 
             //Check that the host alias has a certificate
             if(!checkAlias(tempKeystore, theAlias)){
-               String distName = "CN=lisle.net, O=RSA, L=Snailville, S=CA, C=USA";
-               String issuerName = "CN=a.gov, O=sfsefse, L=sefesf, S=CA, C=USA";
-               createSelfSignedCertificate(distName, issuerName, 365, tempKeystore, keyStorePass, theAlias);
+                String distName = SSLUtilities.getRandomSSLString();
+                String issuerName = SSLUtilities.getRandomSSLString();
+                createSelfSignedCertificate(distName, issuerName, 365, tempKeystore, keyStorePass, theAlias);
             }
 
         } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException ex) {
@@ -527,7 +528,9 @@ final public class SSLUtilities {
             
             KeyStore localKeyStore = getKeystore();
             if(certificate != null && localKeyStore != null){
-                localKeyStore.setCertificateEntry(passedAlias, certificate);
+                
+                localKeyStore.setEntry( passedAlias, new TrustedCertificateEntry( certificate ), null);
+//                localKeyStore.setCertificateEntry(passedAlias, certificate);
 
                 //Write it to disk
                 ServerConfig theConf = ServerConfig.getServerConfig();
@@ -548,6 +551,28 @@ final public class SSLUtilities {
         }
 
        return retVal;
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @return 
+     */
+    private static String getRandomSSLString() {
+        
+        String hostname = Utilities.nextString();
+        String issueOrg = Utilities.nextString();
+      
+        //Get a psuedo random city
+        String retStr = "";        
+        String[] cityState = Utilities.nextCityState();
+        if( cityState.length > 1){
+            String aCity = cityState[0];
+            String aState = cityState[1];
+
+            retStr = "CN="+ hostname +".com, O="+issueOrg+", L="+aCity+", S="+aState+", C=US";
+        }
+        return retStr;
     }
 
 }/* END CLASS SSLUtilities */

@@ -177,9 +177,9 @@ public class LockingThread extends ManagedRunnable {
     private int releaseTransferLock() {
 
         //If it is locked, unlock it
-        if(theLock.isLocked()){
+        if(theLock.isLocked())
             theLock.unlock();
-        }
+        
         return UNLOCK;
 
     }

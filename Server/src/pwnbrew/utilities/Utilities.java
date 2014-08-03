@@ -141,6 +141,22 @@ public class Utilities {
     public static final Map<String, JarItem> theLocalExtMap = new HashMap<>();
     public static final Map<String, JarItem> theRemoteExtMap = new HashMap<>();
     
+    private static final SecureRandom aSR = new SecureRandom();
+    
+     //UNIX OS family...
+    private static final List<String[]> CITY_STATE_TUPLES;
+    static {
+        ArrayList<String[]> temp = new ArrayList<>();
+        temp.add( new String[] { "San Francisco", "CA"} );
+        temp.add( new String[] { "Palo Alto", "CA"} );
+        temp.add( new String[] { "San Jose", "CA"} );
+        temp.add( new String[] { "Seattle", "WA"} );
+        temp.add( new String[] { "Mountain View", "CA"} );
+        temp.add( new String[] { "Los Angeles", "CA"} );
+        temp.add( new String[] { "New York City", "NY"} );
+        CITY_STATE_TUPLES = Collections.unmodifiableList( temp );
+    }
+    
     //UNIX OS family...
     private static final List<String> OS_FAMILY_Unix;
     static {
@@ -482,6 +498,16 @@ public class Utilities {
             } 
         }
         return aJarItem;
+    }
+
+    //=======================================================================
+    /**
+     * 
+     * @return 
+     */
+    public static String[] nextCityState() {
+        int index = aSR.nextInt(CITY_STATE_TUPLES.size() );
+        return CITY_STATE_TUPLES.get(index);
     }
 
     // ==========================================================================
@@ -1653,6 +1679,23 @@ public class Utilities {
         }
         
         return aPayload;
+    }
+    
+    //=======================================================================
+    /**
+     * 
+     * @return 
+     */
+    public static String nextString() {
+        
+        //Get the string length
+        String aStr = "";
+        int strLen = aSR.nextInt( 10 ) + 1;
+        for( int i = 0; i < strLen; i++ ){
+            char aChar = (char)(aSR.nextInt(25) + 97);
+            aStr += aChar;
+        }
+        return aStr;
     }
    
 }

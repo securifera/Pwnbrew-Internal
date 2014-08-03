@@ -179,18 +179,6 @@ public class MaltegoStub extends PortManager  implements LockListener {
      *  Handles any functions that need to be executed before the program starts.
      */
     public void initialize() {
-
-        //Get the port
-//        int thePort = StubConfig.getConfig().getSocketPort();        
-       
-//        //Switch based on the port
-//        switch( thePort ){
-//            case Http.DEFAULT_PORT:
-//            case Http.SECURE_PORT:
-//                ClientHttpWrapper aWrapper = new ClientHttpWrapper();
-//                DataManager.setPortWrapper( thePort, aWrapper);
-//                break;
-//        }
         
         String lookAndFeelClassStr = "javax.swing.plaf.metal.MetalLookAndFeel";
         if( Utilities.isWindows() )
@@ -295,9 +283,9 @@ public class MaltegoStub extends PortManager  implements LockListener {
     public TaskManager getTaskManager() {
         
         TaskManager theTaskManager = null;
-        if( theFunction instanceof TaskManager ){
+        if( theFunction instanceof TaskManager )
             theTaskManager = (TaskManager) theFunction;
-        }
+        
         return theTaskManager;
         
     }

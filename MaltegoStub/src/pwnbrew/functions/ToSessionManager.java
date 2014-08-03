@@ -83,7 +83,7 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
     private SessionsJFrame theSessionsJFrame = null;
         
     //Create the return msg
-    private MaltegoMessage theReturnMsg = new MaltegoMessage();
+    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
     
   
     //==================================================================
@@ -201,10 +201,8 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
                 retStr = theReturnMsg.getXml();
                 
             } else {
-                StringBuilder aSB = new StringBuilder()
-                        .append("Unable to connect to the Pwnbrew server at \"")
-                        .append(serverIp).append(":").append(serverPort).append("\"");
-                DebugPrinter.printMessage( NAME_Class, "run", aSB.toString(), null);
+                String aSB = String.valueOf("Unable to connect to the Pwnbrew server at \"" + serverIp + ":") + Integer.toString(serverPort) + "\"";
+                DebugPrinter.printMessage( NAME_Class, "run", aSB, null);
             }
             
         } catch (IOException ex) {

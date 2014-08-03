@@ -45,13 +45,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.Principal;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.util.Date;
+import java.util.Enumeration;
+import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.event.ListSelectionEvent;
 import pwnbrew.logging.LoggableException;
-
+import pwnbrew.misc.Constants;
 /**
  *
  * @author Securifera
@@ -59,15 +64,16 @@ import pwnbrew.logging.LoggableException;
 public class SSLJFrame extends javax.swing.JFrame {
 
     private JFileChooser theCertificateChooser = null;
+    private static final String SUBJECT = "SUBJECT";
+    private static final String ISSUER = "ISSUER";
     
     /**
      * Creates new form SSLJFrame
      */
     public SSLJFrame() {
         initComponents();
-        
-        theCertificateChooser = new JFileChooser();
-        theCertificateChooser.setMultiSelectionEnabled(false);
+        initializeComponents();
+       
     }
 
     /**
@@ -79,16 +85,48 @@ public class SSLJFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        algoLabel6 = new javax.swing.JLabel();
         importButton = new javax.swing.JButton();
         exportButton = new javax.swing.JButton();
-        certPathTextField = new javax.swing.JTextField();
-        certLabel = new javax.swing.JLabel();
-        fileChooserButton = new javax.swing.JButton();
-        certAliasTextField = new javax.swing.JTextField();
-        certLabel1 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        certList = new javax.swing.JList();
+        encryptionPanel = new javax.swing.JPanel();
+        algoLabel = new javax.swing.JLabel();
+        algoValLabel = new javax.swing.JLabel();
+        certLabel3 = new javax.swing.JLabel();
+        issuedToPanel = new javax.swing.JPanel();
+        certLabel4 = new javax.swing.JLabel();
+        certLabel5 = new javax.swing.JLabel();
+        algoLabel1 = new javax.swing.JLabel();
+        certLabel6 = new javax.swing.JLabel();
+        algoLabel2 = new javax.swing.JLabel();
+        certLabel7 = new javax.swing.JLabel();
+        issueeName = new javax.swing.JTextField();
+        issueeOrg = new javax.swing.JTextField();
+        issueeCity = new javax.swing.JTextField();
+        issueeOU = new javax.swing.JTextField();
+        issueeState = new javax.swing.JTextField();
+        issueeCountry = new javax.swing.JTextField();
+        issuedToPanel1 = new javax.swing.JPanel();
+        certLabel12 = new javax.swing.JLabel();
+        certLabel13 = new javax.swing.JLabel();
+        algoLabel5 = new javax.swing.JLabel();
+        certLabel14 = new javax.swing.JLabel();
+        certLabel15 = new javax.swing.JLabel();
+        issuerName = new javax.swing.JTextField();
+        issuerOrg = new javax.swing.JTextField();
+        issuerCity = new javax.swing.JTextField();
+        issuerOU = new javax.swing.JTextField();
+        issuerState = new javax.swing.JTextField();
+        issuerCountry = new javax.swing.JTextField();
+        certLabel16 = new javax.swing.JLabel();
+        expDateField = new javax.swing.JTextField();
+
+        algoLabel6.setText("City:");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("SSL Keystore Utility");
+        setResizable(false);
 
         importButton.setText("Import");
         importButton.setToolTipText("Import Public Key Certificate");
@@ -106,90 +144,321 @@ public class SSLJFrame extends javax.swing.JFrame {
             }
         });
 
-        certPathTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                certPathTextFieldActionPerformed(evt);
+        jScrollPane1.setViewportView(certList);
+
+        encryptionPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("PKI Certificate Information"));
+
+        algoLabel.setText("Algorithm:");
+
+        certLabel3.setText("Expiration:");
+
+        issuedToPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Issued To"));
+
+        certLabel4.setText("Organization:");
+
+        certLabel5.setText("OU:");
+
+        algoLabel1.setText("Name:");
+
+        certLabel6.setText("State:");
+
+        algoLabel2.setText("City:");
+
+        certLabel7.setText("Country:");
+
+        issueeName.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                issueeNameKeyReleased(evt);
             }
         });
 
-        certLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        certLabel.setText("Certificate Path:");
-
-        fileChooserButton.setText("...");
-        fileChooserButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                fileChooserButtonActionPerformed(evt);
+        issueeOrg.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                issueeOrgKeyReleased(evt);
             }
         });
 
-        certAliasTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                certAliasTextFieldActionPerformed(evt);
+        issueeCity.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                issueeCityKeyReleased(evt);
             }
         });
 
-        certLabel1.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        certLabel1.setText("Certificate Alias:");
+        issueeOU.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                issueeOUKeyReleased(evt);
+            }
+        });
+
+        issueeState.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                issueeStateKeyReleased(evt);
+            }
+        });
+
+        issueeCountry.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                issueeCountryKeyReleased(evt);
+            }
+        });
+
+        javax.swing.GroupLayout issuedToPanelLayout = new javax.swing.GroupLayout(issuedToPanel);
+        issuedToPanel.setLayout(issuedToPanelLayout);
+        issuedToPanelLayout.setHorizontalGroup(
+            issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(issuedToPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(issuedToPanelLayout.createSequentialGroup()
+                        .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(algoLabel1)
+                            .addComponent(certLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(issuedToPanelLayout.createSequentialGroup()
+                                .addComponent(issueeName, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(certLabel4))
+                            .addGroup(issuedToPanelLayout.createSequentialGroup()
+                                .addComponent(issueeOU, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(certLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(algoLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(issueeCountry, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(issueeCity, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(issueeOrg, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(issuedToPanelLayout.createSequentialGroup()
+                        .addComponent(certLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(issueeState, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(21, Short.MAX_VALUE))
+        );
+        issuedToPanelLayout.setVerticalGroup(
+            issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(issuedToPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(algoLabel1)
+                    .addComponent(certLabel4)
+                    .addComponent(issueeName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(issueeOrg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(certLabel5)
+                    .addComponent(issueeOU, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(algoLabel2)
+                    .addComponent(issueeCity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(certLabel6)
+                    .addComponent(issueeState, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(issueeCountry, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(certLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+
+        issuedToPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Issued By"));
+
+        certLabel12.setText("Organization:");
+
+        certLabel13.setText("OU:");
+
+        algoLabel5.setText("Name:");
+
+        certLabel14.setText("State:");
+
+        certLabel15.setText("Country:");
+
+        issuerName.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                issuerNameKeyReleased(evt);
+            }
+        });
+
+        issuerOrg.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                issuerOrgKeyReleased(evt);
+            }
+        });
+
+        issuerCity.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                issuerCityKeyReleased(evt);
+            }
+        });
+
+        issuerOU.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                issuerOUKeyReleased(evt);
+            }
+        });
+
+        issuerState.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                issuerStateKeyReleased(evt);
+            }
+        });
+
+        issuerCountry.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                issuerCountryKeyReleased(evt);
+            }
+        });
+
+        certLabel16.setText("City:");
+
+        javax.swing.GroupLayout issuedToPanel1Layout = new javax.swing.GroupLayout(issuedToPanel1);
+        issuedToPanel1.setLayout(issuedToPanel1Layout);
+        issuedToPanel1Layout.setHorizontalGroup(
+            issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(issuedToPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(issuedToPanel1Layout.createSequentialGroup()
+                        .addComponent(certLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(issuerState, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(issuedToPanel1Layout.createSequentialGroup()
+                        .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(algoLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
+                            .addComponent(certLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(issuerOU, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(issuerName, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(certLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(certLabel15)
+                    .addComponent(certLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(issuerOrg, javax.swing.GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE)
+                    .addComponent(issuerCity)
+                    .addComponent(issuerCountry))
+                .addContainerGap(20, Short.MAX_VALUE))
+        );
+        issuedToPanel1Layout.setVerticalGroup(
+            issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(issuedToPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(algoLabel5)
+                    .addComponent(certLabel12)
+                    .addComponent(issuerName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(issuerOrg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(certLabel13)
+                    .addComponent(issuerOU, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(issuerCity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(certLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(issuerCountry, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(certLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(certLabel14)
+                        .addComponent(issuerState, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        expDateField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                expDateFieldKeyReleased(evt);
+            }
+        });
+
+        javax.swing.GroupLayout encryptionPanelLayout = new javax.swing.GroupLayout(encryptionPanel);
+        encryptionPanel.setLayout(encryptionPanelLayout);
+        encryptionPanelLayout.setHorizontalGroup(
+            encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(encryptionPanelLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(issuedToPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(encryptionPanelLayout.createSequentialGroup()
+                        .addComponent(algoLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(algoValLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(certLabel3)
+                        .addGap(18, 18, 18)
+                        .addComponent(expDateField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(issuedToPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        encryptionPanelLayout.setVerticalGroup(
+            encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(encryptionPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(certLabel3)
+                    .addComponent(algoLabel)
+                    .addComponent(expDateField)
+                    .addComponent(algoValLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(issuedToPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(issuedToPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(8, 8, 8))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
+            .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(certLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE)
-                    .addComponent(certLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(certAliasTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 156, Short.MAX_VALUE)
+                        .addGap(10, 10, 10))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(importButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(exportButton))
-                    .addComponent(certPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 345, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(10, 10, 10)
-                .addComponent(fileChooserButton, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(15, 15, 15))
+                        .addGap(18, 18, 18)
+                        .addComponent(exportButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addComponent(encryptionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(24, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(certLabel)
-                    .addComponent(certPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(fileChooserButton))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(exportButton)
-                    .addComponent(importButton)
-                    .addComponent(certAliasTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(certLabel1))
-                .addGap(18, 18, 18))
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(encryptionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(10, 10, 10))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(exportButton)
+                            .addComponent(importButton))
+                        .addGap(15, 15, 15))))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void certPathTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_certPathTextFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_certPathTextFieldActionPerformed
-
-    private void fileChooserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileChooserButtonActionPerformed
-        selectKeystorePath();
-    }//GEN-LAST:event_fileChooserButtonActionPerformed
-
     private void exportButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportButtonActionPerformed
+        
+        CertificateWrapper aCertWrapper = (CertificateWrapper) certList.getSelectedValue();
+        File selFile = new File(aCertWrapper.theAlias + ".der");
+        selFile = getFilePath(selFile);
         
         setCursor( Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) );
         try {
             
-            String aStr = certPathTextField.getText();
-            if( !aStr.isEmpty() ){
-                File certFile = new File(aStr);
-                if( certFile.exists()){
+             if( selFile != null ){ 
+                
+                if( selFile.exists()){
 
                     String theMessage = "The selected file exists. Would you like to overwrite it?";
                     int dialogValue = JOptionPane.showConfirmDialog(this, theMessage, "Replace file?", JOptionPane.YES_NO_OPTION);
@@ -206,7 +475,7 @@ public class SSLJFrame extends javax.swing.JFrame {
                     //If a cert is returned then send it to the client
                     if(theCert != null){
                         byte[] certBytes = theCert.getEncoded();
-                        try (FileOutputStream aFOS = new FileOutputStream(certFile)) {
+                        try (FileOutputStream aFOS = new FileOutputStream(selFile)) {
                             aFOS.write(certBytes);
                             aFOS.flush();
                         }
@@ -217,8 +486,8 @@ public class SSLJFrame extends javax.swing.JFrame {
                 } catch (IOException | KeyStoreException | LoggableException | CertificateEncodingException ex) {
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
-
             }
+
         } finally {
             setCursor( null );
         }
@@ -226,103 +495,485 @@ public class SSLJFrame extends javax.swing.JFrame {
 
     private void importButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importButtonActionPerformed
          
+        File selFile = getFilePath( null );
         setCursor( Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) );
         try {
             
-            String aStr = certPathTextField.getText();
-            if( !aStr.isEmpty() ){
-                File certFile = new File(aStr);
-                if( !certFile.exists()){                
-                    String theMessage = "The selected file doesn't exists";
-                    JOptionPane.showMessageDialog(this, theMessage, "File doesn't exists", JOptionPane.INFORMATION_MESSAGE);
-                    return;                  
-                }   
-                                
-                //Pass the status up to the manager
-                try {
-                    
-                    String certAlias = certAliasTextField.getText();
-                    if( !certAlias.isEmpty() ){
+            if( selFile == null || !selFile.exists()){                
+                String theMessage = "Import failed.";
+                JOptionPane.showMessageDialog(this, theMessage, "Import failed.", JOptionPane.INFORMATION_MESSAGE);
+                return;                  
+            }   
 
-                        KeyStore aKeyStore = SSLUtilities.getKeystore();
-                        if( SSLUtilities.checkAlias(aKeyStore, certAlias) ){
-                            String theMessage = "A certificate already exists with the given alias. Would you like to overwrite it?";
-                            int dialogValue = JOptionPane.showConfirmDialog(this, theMessage, "Replace Certificate?", JOptionPane.YES_NO_OPTION);
-                             
-                            //Return if no is chosen
-                            if ( dialogValue == JOptionPane.NO_OPTION )
-                               return;    
+            //Pass the status up to the manager
+            try {
 
-                        }
+                String filename = selFile.getName();
+                int index = filename.lastIndexOf('.');
+                String certAlias = filename.substring(0, index);
+                if( !certAlias.isEmpty() ){
+
+                    KeyStore aKeyStore = SSLUtilities.getKeystore();
+                    if( SSLUtilities.checkAlias(aKeyStore, certAlias)){
+                        String theMessage = "A certificate already exists with the given alias. Would you like to overwrite it?";
+                        int dialogValue = JOptionPane.showConfirmDialog(this, theMessage, "Replace Certificate?", JOptionPane.YES_NO_OPTION);
+
+                        //Return if no is chosen
+                        if ( dialogValue == JOptionPane.NO_OPTION )
+                           return;    
+
                     }
-
-                    //If a cert is returned then send it to the client                            
-                    byte[] certBytes = new byte[(int)certFile.length()];
-                    try (FileInputStream aFOS = new FileInputStream(certFile)) {
-                        aFOS.read(certBytes);                              
-                    }
-
-                    //Create a cert from the bytes
-                    Certificate aCert = new sun.security.x509.X509CertImpl( certBytes );
-                    SSLUtilities.importCertificate( certAlias, aCert);
-
-                    JOptionPane.showMessageDialog(this, "Import Complete", "Import Complete", JOptionPane.INFORMATION_MESSAGE);
-
-                } catch( CertificateException | LoggableException | IOException | KeyStoreException ex ){
-                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
+
+                //If a cert is returned then send it to the client                            
+                byte[] certBytes = new byte[(int)selFile.length()];
+                try (FileInputStream aFOS = new FileInputStream(selFile)) {
+                    aFOS.read(certBytes);                              
+                }
+
+                //Create a cert from the bytes
+                Certificate aCert = new sun.security.x509.X509CertImpl( certBytes );
+                SSLUtilities.importCertificate( certAlias, aCert);
+
+                DefaultListModel aModel = (DefaultListModel) certList.getModel();
+                aModel.addElement(new CertificateWrapper( certAlias, aCert));
+
+                JOptionPane.showMessageDialog(this, "Import Complete", "Import Complete", JOptionPane.INFORMATION_MESSAGE);
+
+            } catch( CertificateException | LoggableException | IOException | KeyStoreException ex ){
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
+            
         } finally {
             setCursor( null );
         }
     }//GEN-LAST:event_importButtonActionPerformed
 
-    private void certAliasTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_certAliasTextFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_certAliasTextFieldActionPerformed
+    private void issueeNameKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issueeNameKeyReleased
+//        setSaveButton(true);
+    }//GEN-LAST:event_issueeNameKeyReleased
+
+    private void issueeOrgKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issueeOrgKeyReleased
+//        setSaveButton(true);
+    }//GEN-LAST:event_issueeOrgKeyReleased
+
+    private void issueeCityKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issueeCityKeyReleased
+//        setSaveButton(true);
+    }//GEN-LAST:event_issueeCityKeyReleased
+
+    private void issueeOUKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issueeOUKeyReleased
+//        setSaveButton(true);
+    }//GEN-LAST:event_issueeOUKeyReleased
+
+    private void issueeStateKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issueeStateKeyReleased
+//        setSaveButton(true);
+    }//GEN-LAST:event_issueeStateKeyReleased
+
+    private void issueeCountryKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issueeCountryKeyReleased
+//        setSaveButton(true);
+    }//GEN-LAST:event_issueeCountryKeyReleased
+
+    private void issuerNameKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issuerNameKeyReleased
+//        setSaveButton(true);
+    }//GEN-LAST:event_issuerNameKeyReleased
+
+    private void issuerOrgKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issuerOrgKeyReleased
+//        setSaveButton(true);
+    }//GEN-LAST:event_issuerOrgKeyReleased
+
+    private void issuerCityKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issuerCityKeyReleased
+//        setSaveButton(true);
+    }//GEN-LAST:event_issuerCityKeyReleased
+
+    private void issuerOUKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issuerOUKeyReleased
+//        setSaveButton(true);
+    }//GEN-LAST:event_issuerOUKeyReleased
+
+    private void issuerStateKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issuerStateKeyReleased
+//        setSaveButton(true);
+    }//GEN-LAST:event_issuerStateKeyReleased
+
+    private void issuerCountryKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issuerCountryKeyReleased
+//        setSaveButton(true);
+    }//GEN-LAST:event_issuerCountryKeyReleased
+
+    private void expDateFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_expDateFieldKeyReleased
+//        setSaveButton(true);
+    }//GEN-LAST:event_expDateFieldKeyReleased
 
      // ==========================================================================
     /**
     * Selects the keystore path via a {@link JFileChooser}.
     */
-    private void selectKeystorePath() {
+    private File getFilePath( File initialFile ) {
 
         File userSelectedFile = null;
-
+        theCertificateChooser.setSelectedFile( initialFile );
         int returnVal = theCertificateChooser.showDialog( this, "Select Certificate File" ); //Show the dialogue
         switch( returnVal ) {
 
            case JFileChooser.CANCEL_OPTION: //If the user canceled the selecting...
-              break;
+              return null;
            case JFileChooser.ERROR_OPTION: //If the dialogue was dismissed or an error occurred...
-              break; //Do nothing
+              return null; //Do nothing
 
            case JFileChooser.APPROVE_OPTION: //If the user approved the selection...
               userSelectedFile = theCertificateChooser.getSelectedFile(); //Get the files the user selected
               break;
            default:
-              break;
+              return null;
 
         }
 
         //Check if the returned file is valid
         if(userSelectedFile == null  || userSelectedFile.isDirectory())
-           return;
-        
+            return null;
 
-        String userPath = userSelectedFile.getAbsolutePath();
-        certPathTextField.setText(userPath);
+        return userSelectedFile;
 
-    }/* END selectKeystorePath() */
+    }
     
+     //===============================================================
+    /**
+     *  Populates the components from the cert being used for encryption
+     * 
+     * @param passedFlag flag
+     * @param theName 
+     */
+    private void populateCertComponents(String passedFlag, String theName) {
+    
+        //Split the DN into components
+        String[] theDnArr = theName.split(",");
+        for( String aStr : theDnArr ){
+            String[] DnElementArr = aStr.trim().split("=");
+            if( DnElementArr.length == 2){
+                
+                String type = DnElementArr[0];
+                String value = DnElementArr[1];
+                
+                //Switch on the type
+                switch( type ){
+                    case "CN":
+                        switch( passedFlag ){
+                            case SUBJECT:
+                                issueeName.setText(value);
+                                break;
+                            case ISSUER:
+                                issuerName.setText(value);
+                                break;
+                        }                            
+                        break;
+                    case "OU":
+                        switch( passedFlag ){
+                            case SUBJECT:
+                                issueeOU.setText(value);
+                                break;
+                            case ISSUER:
+                                issuerOU.setText(value);
+                                break;
+                        }
+                        break;
+                    case "O":
+                        switch( passedFlag ){
+                            case SUBJECT:
+                                issueeOrg.setText(value);
+                                break;
+                            case ISSUER:
+                                issuerOrg.setText(value);
+                                break;
+                        }
+                        break;
+                    case "L": 
+                        switch( passedFlag ){
+                            case SUBJECT:
+                                issueeCity.setText(value);
+                                break;
+                            case ISSUER:
+                                issuerCity.setText(value);
+                                break;
+                        }
+                        break;
+                    case "S": 
+                        switch( passedFlag ){
+                            case SUBJECT:
+                                issueeState.setText(value);
+                                break;
+                            case ISSUER:
+                                issuerState.setText(value);
+                                break;
+                        }
+                        break;
+                    case "ST": 
+                        switch( passedFlag ){
+                            case SUBJECT:
+                                issueeState.setText(value);
+                                break;
+                            case ISSUER:
+                                issuerState.setText(value);
+                                break;
+                        }
+                        break;
+                    case "C":
+                        switch( passedFlag ){
+                            case SUBJECT:
+                                issueeCountry.setText(value);
+                                break;
+                            case ISSUER:
+                                issuerCountry.setText(value);
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }    
+                
+                
+            }
+        }
+    
+    }
+
+    //===============================================================
+    /**
+     * 
+     * @param passedFlag
+     * @return 
+     */
+    private String constructDN( String passedFlag ) {
+    
+        StringBuilder aSB = new StringBuilder();
+        //Switch on the type
+        switch( passedFlag ){
+            case SUBJECT:
+                 
+                //Get the name first
+                String tempStr = issueeName.getText();
+                if( !tempStr.isEmpty()){
+                    aSB.append("CN=").append(tempStr).append(",");
+                }
+                
+                //Get the ou
+                tempStr = issueeOU.getText();
+                if( !tempStr.isEmpty()){
+                    aSB.append("OU=").append(tempStr).append(",");
+                }
+                
+                //Get the org
+                tempStr = issueeOrg.getText();
+                if( !tempStr.isEmpty()){
+                    aSB.append("O=").append(tempStr).append(",");
+                }
+                
+                //Get the city
+                tempStr = issueeCity.getText();
+                if( !tempStr.isEmpty()){
+                    aSB.append("L=").append(tempStr).append(",");
+                }
+                
+                //Get the state
+                tempStr = issueeState.getText();
+                if( !tempStr.isEmpty()){
+                    aSB.append("S=").append(tempStr).append(",");
+                }
+                
+                //Get the country
+                tempStr = issueeCountry.getText();
+                if( !tempStr.isEmpty()){
+                    aSB.append("C=").append(tempStr);
+                }
+                
+                break;
+            case ISSUER:
+               
+                //Get the name first
+                tempStr = issuerName.getText();
+                if( !tempStr.isEmpty()){
+                    aSB.append("CN=").append(tempStr).append(",");
+                }
+                
+                //Get the ou
+                tempStr = issuerOU.getText();
+                if( !tempStr.isEmpty()){
+                    aSB.append("OU=").append(tempStr).append(",");
+                }
+                
+                //Get the org
+                tempStr = issuerOrg.getText();
+                if( !tempStr.isEmpty()){
+                    aSB.append("O=").append(tempStr).append(",");
+                }
+                
+                //Get the city
+                tempStr = issuerCity.getText();
+                if( !tempStr.isEmpty()){
+                    aSB.append("L=").append(tempStr).append(",");
+                }
+                
+                //Get the state
+                tempStr = issuerState.getText();
+                if( !tempStr.isEmpty()){
+                    aSB.append("S=").append(tempStr).append(",");
+                }
+                
+                //Get the country
+                tempStr = issuerCountry.getText();
+                if( !tempStr.isEmpty()){
+                    aSB.append("C=").append(tempStr);
+                }
+                
+                break;
+           default:
+                break;
+        }   
+        
+        return aSB.toString();
+    }
    
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField certAliasTextField;
-    private javax.swing.JLabel certLabel;
-    private javax.swing.JLabel certLabel1;
-    private javax.swing.JTextField certPathTextField;
+    private javax.swing.JLabel algoLabel;
+    private javax.swing.JLabel algoLabel1;
+    private javax.swing.JLabel algoLabel2;
+    private javax.swing.JLabel algoLabel5;
+    private javax.swing.JLabel algoLabel6;
+    private javax.swing.JLabel algoValLabel;
+    private javax.swing.JLabel certLabel12;
+    private javax.swing.JLabel certLabel13;
+    private javax.swing.JLabel certLabel14;
+    private javax.swing.JLabel certLabel15;
+    private javax.swing.JLabel certLabel16;
+    private javax.swing.JLabel certLabel3;
+    private javax.swing.JLabel certLabel4;
+    private javax.swing.JLabel certLabel5;
+    private javax.swing.JLabel certLabel6;
+    private javax.swing.JLabel certLabel7;
+    private javax.swing.JList certList;
+    private javax.swing.JPanel encryptionPanel;
+    private javax.swing.JTextField expDateField;
     private javax.swing.JButton exportButton;
-    private javax.swing.JButton fileChooserButton;
     private javax.swing.JButton importButton;
+    private javax.swing.JPanel issuedToPanel;
+    private javax.swing.JPanel issuedToPanel1;
+    private javax.swing.JTextField issueeCity;
+    private javax.swing.JTextField issueeCountry;
+    private javax.swing.JTextField issueeName;
+    private javax.swing.JTextField issueeOU;
+    private javax.swing.JTextField issueeOrg;
+    private javax.swing.JTextField issueeState;
+    private javax.swing.JTextField issuerCity;
+    private javax.swing.JTextField issuerCountry;
+    private javax.swing.JTextField issuerName;
+    private javax.swing.JTextField issuerOU;
+    private javax.swing.JTextField issuerOrg;
+    private javax.swing.JTextField issuerState;
+    private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
+
+    //=====================================================================
+    /**
+     * 
+     */
+    private void initializeComponents() {
+         
+        theCertificateChooser = new JFileChooser();
+        theCertificateChooser.setMultiSelectionEnabled(false);
+        
+        try {
+            //Get the keystore
+            KeyStore aKeystore = SSLUtilities.getKeystore();
+            Enumeration<String> aliasEnum = aKeystore.aliases();
+            
+            //Add the cert to the list
+            DefaultListModel aModel = new DefaultListModel();
+            while( aliasEnum.hasMoreElements() ){
+                String aStr = aliasEnum.nextElement();
+                Certificate aCert = aKeystore.getCertificate(aStr);
+                if( aCert != null )
+                    aModel.addElement( new CertificateWrapper( aStr, aCert));
+            }
+            
+            certList.setModel(aModel);
+            
+        } catch (LoggableException | KeyStoreException ex) {
+        }
+        
+        certList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            @Override
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+               certListValueChanged(evt);               
+            }
+        });
+        
+        //Set the entry to the first cert
+        if( certList.getModel().getSize() > 0)
+            certList.setSelectedIndex(0);
+        
+    }
+    
+    //======================================================================
+    /**
+     * 
+     * @param evt 
+     */
+    private void certListValueChanged(ListSelectionEvent evt) {
+        
+        CertificateWrapper theWrapper = (CertificateWrapper)certList.getSelectedValue();
+       
+        //Get the PKI Cert
+        Certificate theCert = theWrapper.theCertificate;
+        if( theCert instanceof sun.security.x509.X509CertImpl ){
+            sun.security.x509.X509CertImpl theCustomCert = (sun.security.x509.X509CertImpl)theCert;
+
+            //Get the issuee name
+            Principal aPrincipal = theCustomCert.getSubjectDN();
+            String theName = aPrincipal.getName();
+            populateCertComponents( SUBJECT, theName );
+
+            //Get the issuer org
+            aPrincipal = theCustomCert.getIssuerDN();
+            theName = aPrincipal.getName();
+            populateCertComponents( ISSUER, theName );
+
+            //Set the algorithm
+            String theAlgorithm = theCustomCert.getSigAlgName();
+            algoValLabel.setText(theAlgorithm);
+
+            //Set the date
+            Date expirationDate = theCustomCert.getNotAfter();
+            String expDateStr = Constants.CHECKIN_DATE_FORMAT.format(expirationDate);
+            expDateField.setText(expDateStr);
+
+        }   
+                   
+    }
+    
+    //=======================================================================
+    /**
+     * 
+     */
+    private class CertificateWrapper {
+        
+        private final Certificate theCertificate;
+        private final String theAlias;
+        
+        //===================================================================
+        /**
+         * 
+         * @param passedAlias
+         * @param aCert 
+         */
+        public CertificateWrapper( String passedAlias, Certificate aCert ){
+            theAlias = passedAlias;
+            theCertificate = aCert;
+        }
+        
+         //===================================================================
+        /**
+         * 
+         * @return 
+         */
+        @Override
+        public String toString(){
+            return theAlias;
+        }
+    }
 }

@@ -82,7 +82,7 @@ public class ServerConfig extends XmlBase {
     public ServerConfig() {
        // Extend the object's structure
        theAttributeMap.put( ATTRIBUTE_HostId, ""  );
-       theAttributeMap.put( ATTRIBUTE_StorePass, "" );
+       theAttributeMap.put( ATTRIBUTE_StorePass, "password" );
        theAttributeMap.put( ATTRIBUTE_CertAlias, "" );
        theAttributeMap.put( ATTRIBUTE_CommPort, Integer.toString(Constants.COMM_PORT) );
 
@@ -147,17 +147,8 @@ public class ServerConfig extends XmlBase {
      * @return 
      * @throws pwnbrew.logging.LoggableException 
     */
-    public String getKeyStorePass() throws LoggableException {
-
-       String retVal = "";
-       String b64encoded = theAttributeMap.get(ATTRIBUTE_StorePass);
-       String theKey = getHostId();
-
-       if(!b64encoded.isEmpty() && !theKey.isEmpty()){
-          retVal = Utilities.simpleDecrypt(b64encoded, theKey);
-       }
-
-       return retVal;
+    public String getKeyStorePass(){
+        return theAttributeMap.get(ATTRIBUTE_StorePass);
     }
 
      //==========================================================================
@@ -166,26 +157,11 @@ public class ServerConfig extends XmlBase {
      * @param passedKey
      * @throws pwnbrew.logging.LoggableException
     */
-    public void setKeyStorePass(String passedKey) throws LoggableException {
+    public void setKeyStorePass( String passedKey ) throws LoggableException {
 
-       String theKey = getHostId();
-       if(theKey.isEmpty()){
-          theKey = Integer.toString(SocketUtilities.getNextId());
-          setHostId(theKey);
-       }
-
-       //Make sure the passed key pass is not empty
-       if(passedKey != null ){
-           if( !passedKey.isEmpty() && !theKey.isEmpty() ){
-              String b64encoded = Utilities.simpleEncrypt(passedKey, theKey);
-              if(b64encoded != null){
-                 theAttributeMap.put(ATTRIBUTE_StorePass, b64encoded);
-              }
-
-           } else {
-              theAttributeMap.put(ATTRIBUTE_StorePass, "");
-           }
-       }
+        //Make sure the passed key pass is not empty
+        if(passedKey != null )
+            theAttributeMap.put(ATTRIBUTE_StorePass, passedKey);
     }
     
      //==========================================================================

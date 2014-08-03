@@ -53,9 +53,11 @@ import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.swing.SwingUtilities;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
@@ -68,44 +70,8 @@ final public class SSLUtilities {
     private static KeyStore theKeystore;
     private static final String NAME_Class = SSLUtilities.class.getSimpleName();
     private static final String KEYSTORE_NAME =  "keystore.jks"; 
-    
-//    //===============================================================
-//    /**
-//     * Create a SSL context
-//     * @return
-//     * @throws LoggableException 
-//    */   
-//    public static SSLContext createSSLContext() throws LoggableException {
-//
-//        SSLContext aContext = null;
-//        try {
-//
-//            //Important, add trustmanager that trusts all certs
-//            TrustManager[] trustAllCerts = new TrustManager[] {new X509TrustManager() {
-//
-//                @Override
-//                public java.security.cert.X509Certificate[] getAcceptedIssuers() { 
-//                    return null;
-//                }
-//
-//                @Override
-//                public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-//
-//                @Override
-//                public void checkServerTrusted(X509Certificate[] certs, String authType) {}
-//            }};
-//
-//            aContext = SSLContext.getInstance("TLS");
-//            aContext.init( null, trustAllCerts, new SecureRandom());
-//
-//        } catch (KeyManagementException | NoSuchAlgorithmException ex) {
-//            throw new LoggableException(ex);
-//        }
-//
-//        return aContext;
-//    }
 
-      //===============================================================
+    //===============================================================
     /**
      * Create a SSL context
      * @return
@@ -125,18 +91,29 @@ final public class SSLUtilities {
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
                 kmf.init(theKeyStore, keyStorePass.toCharArray());
 
-                TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-                tmf.init(theKeyStore);
+                //Important, add trustmanager that trusts all certs
+                TrustManager[] trustAllCerts = new TrustManager[] {new X509TrustManager() {
 
+                    @Override
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() { 
+                        return new X509Certificate[0];
+                    }
+
+                    @Override
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+                }};
+                
                 aContext = SSLContext.getInstance("TLS");
-                aContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+                aContext.init(kmf.getKeyManagers(), trustAllCerts, null);
 
             } catch (    KeyManagementException | KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException ex) {
                 throw new LoggableException(ex);
             }
 
         }
-
         return aContext;
     }
     
@@ -176,7 +153,8 @@ final public class SSLUtilities {
             if(!keyStoreFile.exists()){
 
                //Create a random keypass
-               keyStorePass = Utilities.simpleEncrypt(Integer.toString( SocketUtilities.SecureRandomGen.nextInt()), Long.toString( SocketUtilities.SecureRandomGen.nextLong()));
+               keyStorePass = Utilities.nextString();
+//               keyStorePass = Utilities.simpleEncrypt(Integer.toString( SocketUtilities.SecureRandomGen.nextInt()), Long.toString( SocketUtilities.SecureRandomGen.nextLong()));
                tempKeystore = createKeystore( keyStorePass);
 
                //Set the keypath and passphrase
@@ -249,8 +227,15 @@ final public class SSLUtilities {
 
             //Check that the host alias has a certificate
             if(!checkAlias(tempKeystore, theAlias)){
-                String distName = "CN=lisle.net, O=RSA, L=Snailville, S=CA, C=USA";
-                String issuerName = "CN=a.gov, O=sfsefse, L=sefesf, S=CA, C=USA";
+                
+                String hostname = Utilities.nextString();
+                String issuerhostname = Utilities.nextString();
+                String issueOrg = Utilities.nextString();
+                String issuerOrg = Utilities.nextString();
+                
+                
+                String distName = "CN="+ hostname +".com, O="+issueOrg+", L=San Francisco, S=CA, C=US";
+                String issuerName = "CN="+ issuerhostname +".com, O="+issuerOrg+", L=San Francisco, S=CA, C=US";
                 createSelfSignedCertificate(distName, issuerName, 365, tempKeystore, keyStorePass, theAlias);
             }
 
@@ -286,8 +271,8 @@ final public class SSLUtilities {
     /**
      * Returns a file representing a java keystore
      * @param keystorePass
-     * @return 
-     * @throws pwnbrew.logging.LoggableException
+     * @return
+     * @throws pwnbrew.log.LoggableException
     */
     public static KeyStore createKeystore( String keystorePass ) throws LoggableException {
 
@@ -415,7 +400,8 @@ final public class SSLUtilities {
             
             KeyStore localKeyStore = getKeystore();
             if(certificate != null && localKeyStore != null){
-                localKeyStore.setCertificateEntry(passedAlias, certificate);
+                
+                localKeyStore.setEntry( passedAlias, new KeyStore.TrustedCertificateEntry( certificate ), null);
 
                 //Write it to disk
                 StubConfig theConf = StubConfig.getConfig();

@@ -122,8 +122,8 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
         sslEngine.setUseClientMode(false);  
         
         //Set authentication is it is set
-        if( requireAuth )
-            sslEngine.setNeedClientAuth(true);        
+        sslEngine.setWantClientAuth(true);
+//        sslEngine.setNeedClientAuth(false);        
      
         netBBSize = sslEngine.getSession().getPacketBufferSize();
         inNetBB  = ByteBuffer.allocate(netBBSize);
@@ -219,7 +219,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
     *		false while handshake is in progress
     */
     @Override
-    public boolean doHandshake(SelectionKey passedKey) throws IOException {
+    public boolean doHandshake(SelectionKey passedKey) throws IOException, LoggableException {
 
         HandshakeStatus currStatus;
 
@@ -289,23 +289,19 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
     */
     private void doTasks( final SelectionKey passedKey) {
 
+        
+        //Need to check for "No trusted certificate found" - ValidatorException
+        Runnable taskRunnable;
+        while((taskRunnable = sslEngine.getDelegatedTask()) != null) {
+            try {
+                taskRunnable.run();
+            } catch( RuntimeException ex ){
+                ex = null;
+            }
+        }
 
-//        final SSLTaskListener theListener = this;
-//        Constants.Executor.execute( new Runnable() {
-//            @Override
-//            public void run(){
-
-                //Need to check for "No trusted certificate found" - ValidatorException
-                Runnable taskRunnable;
-                while((taskRunnable = sslEngine.getDelegatedTask()) != null) {
-                    taskRunnable.run();
-                }
-
-                //Notify listener
-                taskFinished(passedKey);
-//
-//            }
-//        });
+        //Notify listener
+        taskFinished(passedKey);
 
     }
 
@@ -570,16 +566,21 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
     * Called when the SSL engine needs to unwrap data
     *
     */
-    private void doUnwrap(SelectionKey passedKey) throws IOException {
+    private void doUnwrap(SelectionKey passedKey) throws IOException, LoggableException {
 
         SSLEngineResult result;
         DebugPrinter.printMessage( this.getClass().getSimpleName(), "Unwrapping.");
 
         // Don't need to resize requestBB, since no app data should
-        synchronized(inNetBB){
-            inNetBB.flip();
-            result = sslEngine.unwrap(inNetBB, requestBB);
-            inNetBB.compact();
+        try {
+            synchronized(inNetBB){
+                inNetBB.flip();
+                result = sslEngine.unwrap(inNetBB, requestBB);
+                inNetBB.compact();
+            } 
+            
+        } catch(RuntimeException ex ){
+            throw new LoggableException(ex);
         }
 
         HandshakeStatus currStatus = result.getHandshakeStatus();
@@ -682,6 +683,8 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
 
         } catch (IOException ex){
             Log.log(Level.SEVERE, NAME_Class, "taskFinished()", ex.getMessage(), ex );
+        } catch (LoggableException ex) {
+            DebugPrinter.printException(ex.getException());
         }
     }
 

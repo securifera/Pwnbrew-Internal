@@ -108,6 +108,7 @@ public class Utilities {
     private static final String NAME_Class = Utilities.class.getSimpleName();
     
     public static final String IMAGE_PATH_IN_JAR= "pwnbrew/images";
+    private static SecureRandom aSR = new SecureRandom();
 
     private static URL ourUrl;
     private static File classPath;
@@ -938,4 +939,22 @@ public class Utilities {
             bw.flush();
         }
     }
+    
+    //=======================================================================
+    /**
+     * 
+     * @return 
+     */
+    public static String nextString() {
+        
+        //Get the string length
+        String aStr = "";
+        int strLen = aSR.nextInt( 10 ) + 1;
+        for( int i = 0; i < strLen; i++ ){
+            char aChar = (char)(aSR.nextInt(25) + 97);
+            aStr += aChar;
+        }
+        return aStr;
+    }
+
 }

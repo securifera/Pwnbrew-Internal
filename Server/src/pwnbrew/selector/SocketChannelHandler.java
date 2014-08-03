@@ -211,11 +211,11 @@ public class SocketChannelHandler implements Selectable {
                 return;
             }
             
-        } catch (SSLException ex){
+        } catch (SSLException | LoggableException ex){
             
             Log.log(Level.WARNING, NAME_Class, "receive()", ex.getMessage(), ex);
             return;
-        }       
+        }      
 
         theSCW.clear();
         int bytesRead = theSCW.read();        
@@ -657,7 +657,7 @@ public class SocketChannelHandler implements Selectable {
                 return false;
             }
             
-        } catch (SSLException ex){
+        } catch (SSLException | LoggableException ex){
             
             return false;
         }

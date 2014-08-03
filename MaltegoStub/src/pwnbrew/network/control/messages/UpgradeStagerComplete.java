@@ -37,43 +37,32 @@ The copyright on this package is held by Securifera, Inc
 */
 
 package pwnbrew.network.control.messages;
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.logging.Level;
-import pwnbrew.host.Host;
-import pwnbrew.host.HostController;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.CommManager;
-import pwnbrew.manager.ServerManager;
+import pwnbrew.MaltegoStub;
+import pwnbrew.functions.Function;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.Nic;
-import pwnbrew.network.relay.RelayManager;
-import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.xmlBase.ServerConfig;
 
 /**
  *
  *  
  */
-public final class GetIPs extends ControlMessage{ // NO_UCD (use default)
+public final class UpgradeStagerComplete extends ControlMessage {    
     
-    private static final byte OPTION_HOST_ID = 100;
-    private int hostId;
-    private static final String NAME_Class = GetIPs.class.getSimpleName();
+    private static final byte OPTION_JAR_VERSION = 19;    
 
-    // ==========================================================================
+    private String jar_version = "";
+    
+    //===========================================================================
     /**
-     * Constructor
-     *
-     * @param passedId
-    */
-    public GetIPs(byte[] passedId ) {
-        super( passedId );
+     *  Constructor
+     * 
+     * @param passedId 
+     */
+    public UpgradeStagerComplete( byte[] passedId ) {
+        super(passedId);
     }
     
-     //=========================================================================
+      //=========================================================================
     /**
      *  Sets the variable in the message related to this TLV
      * 
@@ -84,57 +73,38 @@ public final class GetIPs extends ControlMessage{ // NO_UCD (use default)
     public boolean setOption( ControlOption tempTlv ){        
 
         boolean retVal = true;
-        
         byte[] theValue = tempTlv.getValue();
         switch( tempTlv.getType()){
-            case OPTION_HOST_ID:
-                hostId = SocketUtilities.byteArrayToInt(theValue);
+            case OPTION_JAR_VERSION:
+                jar_version = new String(theValue);
                 break;
             default:
                 retVal = false;
                 break;
         }
-        
         return retVal;
     }
+    
      //===============================================================
     /**
     *   Performs the logic specific to the message.
     *
      * @param passedManager
-     * @throws pwnbrew.logging.LoggableException
     */
     @Override
-    public void evaluate( CommManager passedManager ) throws LoggableException {     
-        
-        RelayManager aManager = RelayManager.getRelayManager();
-        if( aManager != null ){
-                            
-            String hostIdStr = Integer.toString( hostId );
-            if( hostId == -1 )
-                hostIdStr  = ServerConfig.getServerConfig().getHostId();  
-
-            //Get the host controllers 
-            ServerManager aSM = (ServerManager) passedManager;
-            HostController theHostController = aSM.getHostController(hostIdStr);
-            if( theHostController != null ){
-
-                //Get the host
-                Host theHost = theHostController.getHost();
-                Map<String, Nic> nicMap = theHost.getNicMap();     
-                for (Nic anEntry : nicMap.values()) {
-                    String anIP = anEntry.getIpAddress();
-                    try {
-                        IpMsg anIpMsg = new IpMsg( getSrcHostId(), anIP);
-                        aManager.send(anIpMsg);
-                    } catch ( IOException ex) {
-                        Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                    }
-                }       
-
-            }              
-                        
-        }        
+    public void evaluate( PortManager passedManager ) {
+        if( passedManager instanceof MaltegoStub ){
+            MaltegoStub theStub = (MaltegoStub)passedManager;
+            Function aFunction = theStub.getFunction();
+            if( aFunction instanceof pwnbrew.functions.Reload ){
+                
+                //Cast the function
+                pwnbrew.functions.Reload relFunc = (pwnbrew.functions.Reload)aFunction;
+                
+                //Set the upgrade flag
+                relFunc.beNotified();
+            }            
+        }  
     }
-
+       
 }

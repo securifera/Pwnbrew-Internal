@@ -143,53 +143,6 @@ public class RelayManager extends DataManager {
         
     }
     
-//    //===============================================================
-//    /**
-//     *   Send the message out the given channel.
-//     *
-//     * @param msgBytes
-//    */
-//    @Override
-//    public void handleMessage( byte[] msgBytes ) {        
-//                        
-//        //Get the dest id
-//        byte[] dstHostId = Arrays.copyOfRange(msgBytes, Message.DEST_HOST_ID_OFFSET, Message.DEST_HOST_ID_OFFSET + 4);
-//        int tempId = SocketUtilities.byteArrayToInt(dstHostId);
-//               
-//        //Get the port router
-//        PortRouter thePR = null; 
-//        try {
-//            thePR = theCommManager.getPortRouter( ServerConfig.getServerConfig().getSocketPort() );    
-//            DebugPrinter.printMessage(NAME_Class, "Queueing relay message");
-//        } catch (LoggableException ex) {
-//            Log.log( Level.SEVERE, NAME_Class, "handleMessage()", ex.getMessage(), ex);        
-//        }
-//
-//        //Queue the message to be sent
-//        if( thePR != null ){
-//            try { 
-//                thePR.queueSend( msgBytes, tempId );
-//            } catch (IOException ex) {
-//                
-//                //Send an error message back to the sender
-//                byte[] srcHostId = Arrays.copyOfRange(msgBytes, Message.SRC_HOST_ID_OFFSET, Message.SRC_HOST_ID_OFFSET + 4);
-//                tempId = SocketUtilities.byteArrayToInt(srcHostId);
-//                
-//                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//                if( aCMManager != null ){
-//                    try {
-//                        RemoteException reMsg = new RemoteException( tempId, ex.getMessage() );
-//                        aCMManager.send(reMsg);
-//                    } catch (UnsupportedEncodingException ex1) {
-//                        ex1 = null;
-//                    }
-//                }
-//                
-//            }
-//        }      
-//        
-//    }
-    
     //===========================================================================
     /*
      *  Returns the data handler

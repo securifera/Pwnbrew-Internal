@@ -48,6 +48,7 @@ package pwnbrew.execution;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
+import pwnbrew.misc.DebugPrinter;
 
 /**
  *
@@ -93,7 +94,7 @@ abstract public class ManagedRunnable implements Runnable {
         try {
             go();
         } catch( Throwable ex ){
-            Log.log(Level.SEVERE, ManagedRunnable.class.getSimpleName(), "run", ex.getMessage(), ex);
+            DebugPrinter.printException(ex);
         }
         
         //Set flag

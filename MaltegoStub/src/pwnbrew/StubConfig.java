@@ -221,39 +221,15 @@ public class StubConfig {
                 localInputStream.close();
 
                 //Get the alias
-                boolean saveFlag = false;
                 String certAlias = localProperties.getProperty(Constants.CERT_ALIAS, null);
-                if( certAlias == null || certAlias.isEmpty() ){
-                    
-                    //Try and get the hostname
-                    String hostname = SocketUtilities.getHostname();
-
-                    //Get the new alias and set it
-                    certAlias = new StringBuilder().append(hostname)
-                       .append("_").append(SocketUtilities.getNextId()).toString();
-
-                    localConf.setAlias(certAlias);
-                    saveFlag = true;
-                    
-                } else 
-                    localConf.setHostId( certAlias );
+                if( certAlias != null )
+                    localConf.setAlias(certAlias );
                 
                 //Get the alias
                 String certPW = localProperties.getProperty(Constants.CERT_PW, null);
-                if( certPW == null || certPW.isEmpty() ){
-                    //Create a new pw and save it
-                    certPW = Utilities.simpleEncrypt(Integer.toString( SocketUtilities.SecureRandomGen.nextInt()), 
-                            Long.toString( SocketUtilities.SecureRandomGen.nextLong()));
+                if( certPW != null )
                     localConf.setKeyStorePass(certPW);
-                    saveFlag = true;
-                } else 
-                    localConf.setKeyStorePass(certPW);
-                
-                
-                //Save the conf
-                if( saveFlag )
-                    localConf.writeSelfToDisk();
-                
+                                
             }
             
         } catch ( LoggableException | IOException ex ){

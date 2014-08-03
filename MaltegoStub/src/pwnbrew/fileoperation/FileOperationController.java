@@ -122,17 +122,10 @@ public class FileOperationController implements RemoteFileIOListener {
      *
      * @return 
     */
-//    @Override
     public JPanel getRootPanel() {
        if( theProgressPanel == null ) //If the ParameterPanel has not yet been created...
             createProgressPanel(); //Create the ParameterPanel for the Task
        return theProgressPanel;
     }
-
-    
-//    @Override
-//    public void updateComponents() {
-//
-//    }
 
 }

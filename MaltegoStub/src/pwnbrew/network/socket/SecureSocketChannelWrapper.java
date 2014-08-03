@@ -63,7 +63,6 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
 
     private final SSLEngine sslEngine;
     private static final String NAME_Class = SecureSocketChannelWrapper.class.getSimpleName();
-//    private static final int NUMBER_OF_SENDS = 15;
 
     private int appBBSize;
     private int netBBSize;

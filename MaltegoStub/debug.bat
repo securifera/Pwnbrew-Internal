@@ -1,1 +1,1 @@
-java -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8888 -jar dist\MaltegoStub.jar ToOptions "Pwnbrew Server" "name=Pwnbrew Server#hostid=-1#serverip=127.0.0.1#serverport=8443"
+java -jar dist\MaltegoStub.jar ToOptions "Pwnbrew Server" "name=Pwnbrew Server#hostid=-1#serverip=127.0.0.1#serverport=8443"

@@ -90,7 +90,7 @@ final public class SSLUtilities {
 
                 @Override
                 public java.security.cert.X509Certificate[] getAcceptedIssuers() { 
-                    return null;
+                    return new X509Certificate[0];
                 }
 
                 @Override

@@ -3,6 +3,7 @@ package pwnbrew.functions;
 
 import java.io.IOException;
 import java.util.Map;
+import javax.swing.JOptionPane;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.misc.Constants;
@@ -10,6 +11,9 @@ import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.ControlMessage;
+import pwnbrew.network.control.messages.GetUpgradeFlag;
+import pwnbrew.network.control.messages.UpgradeStagerRelay;
 import pwnbrew.xml.maltego.MaltegoMessage;
 
 /**
@@ -18,6 +22,8 @@ import pwnbrew.xml.maltego.MaltegoMessage;
  */
 public class Reload extends Function {
     
+    private volatile boolean notified = false;
+    private volatile boolean oldStager = false;
     private static final String NAME_Class = Reload.class.getSimpleName();
         
     //Create the return msg
@@ -98,6 +104,28 @@ public class Reload extends Function {
             //Connect to server
             boolean connected = aPR.ensureConnectivity( serverPort, theManager );
             if( connected ){
+                
+                //Check if client can be upgraded
+                ControlMessage aMsg = new GetUpgradeFlag( Constants.SERVER_ID,  hostIdStr);
+                aCMManager.send(aMsg);
+                
+                //Wait for the response
+                waitToBeNotified( 180 * 1000);
+                
+                if(oldStager){
+                    String theMessage = "Would you like to upgrade the stager prior to reloading the client?";
+                    int dialogValue = JOptionPane.showConfirmDialog(null, theMessage, "Upgrade stager?", JOptionPane.YES_NO_OPTION);
+
+                    if ( dialogValue == JOptionPane.YES_OPTION ){
+                        //Upgrade the stager
+                        UpgradeStagerRelay aRelMsg = new UpgradeStagerRelay(Constants.SERVER_ID,  hostIdStr);               
+                        aCMManager.send(aRelMsg );
+                        
+                        //Wait for the response
+                        waitToBeNotified( 180 * 1000);
+                    }
+                           
+                }  
              
                 //Get the client count
                 int hostId = Integer.parseInt(hostIdStr);
@@ -113,10 +141,8 @@ public class Reload extends Function {
                 retStr = theReturnMsg.getXml();
                             
             } else {
-                StringBuilder aSB = new StringBuilder()
-                        .append("Unable to connect to the Pwnbrew server at \"")
-                        .append(serverIp).append(":").append(serverPort).append("\"");
-                DebugPrinter.printMessage( NAME_Class, "listclients", aSB.toString(), null);
+                String aSB = String.valueOf("Unable to connect to the Pwnbrew server at \"" + serverIp + ":") + Integer.toString(serverPort) + "\"";
+                DebugPrinter.printMessage( NAME_Class, "listclients", aSB, null);
             }
             
         } catch (IOException ex) {
@@ -124,6 +150,56 @@ public class Reload extends Function {
         }
         
         return retStr;
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @param passedBool 
+     */
+    public synchronized void setUpgradeFlag( boolean passedBool ) {
+        oldStager = passedBool;
+        beNotified();
+    }
+    
+     //===============================================================
+    /**
+     * Notifies the thread
+    */
+    public synchronized void beNotified() {
+        notified = true;
+        notifyAll();
+    }
+    
+    // ==========================================================================
+    /**
+    * Causes the calling {@link Thread} to <tt>wait()</tt> until notified by
+    * another.
+    * <p>
+    * <strong>This method most certainly "blocks".</strong>
+     * @param anInt
+    */
+    protected synchronized void waitToBeNotified( Integer... anInt ) {
+
+        while( !notified ) {
+
+            try {
+                
+                //Add a timeout if necessary
+                if( anInt.length > 0 ){
+                    
+                    wait( anInt[0]);
+                    break;
+                    
+                } else {
+                    wait(); //Wait here until notified
+                }
+                
+            } catch( InterruptedException ex ) {
+            }
+
+        }
+        notified = false;
     }
     
 }

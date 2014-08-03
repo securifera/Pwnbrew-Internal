@@ -39,7 +39,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.logging.Level;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
@@ -48,20 +47,21 @@ import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.Nic;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.utilities.Utilities;
+import pwnbrew.xmlBase.JarItem;
 import pwnbrew.xmlBase.ServerConfig;
 
 /**
  *
  *  
  */
-public final class GetIPs extends ControlMessage{ // NO_UCD (use default)
+public final class GetUpgradeFlag extends ControlMessage{ // NO_UCD (use default)
     
     private static final byte OPTION_HOST_ID = 100;
     private int hostId;
-    private static final String NAME_Class = GetIPs.class.getSimpleName();
+    private static final String NAME_Class = GetUpgradeFlag.class.getSimpleName();
 
     // ==========================================================================
     /**
@@ -69,7 +69,7 @@ public final class GetIPs extends ControlMessage{ // NO_UCD (use default)
      *
      * @param passedId
     */
-    public GetIPs(byte[] passedId ) {
+    public GetUpgradeFlag(byte[] passedId ) {
         super( passedId );
     }
     
@@ -121,20 +121,32 @@ public final class GetIPs extends ControlMessage{ // NO_UCD (use default)
 
                 //Get the host
                 Host theHost = theHostController.getHost();
-                Map<String, Nic> nicMap = theHost.getNicMap();     
-                for (Nic anEntry : nicMap.values()) {
-                    String anIP = anEntry.getIpAddress();
-                    try {
-                        IpMsg anIpMsg = new IpMsg( getSrcHostId(), anIP);
-                        aManager.send(anIpMsg);
-                    } catch ( IOException ex) {
-                        Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                    }
-                }       
+                
+                //See if the JAR needs upgrading
+                String theJarVersion = theHost.getJarVersion();
+                String theJreVersion = theHost.getJreVersion();   
+                boolean upgradeStager = false;
+                if( theJreVersion.length() > 2 ){
+                    char theChar = theJreVersion.charAt(2);
 
-            }              
+                    //Get the current library for that jre version
+                    JarItem aJarItem = Utilities.getStagerJarItem( String.valueOf(theChar) );
+                    if( aJarItem != null ){
+                        String stagerJarVersion = aJarItem.getVersion();
+                        if( stagerJarVersion.compareTo( theJarVersion ) > 0)
+                            upgradeStager = true;                                            
+                    }   
+                }
+                
+                //Send msg
+                try {
+                    UpgradeStagerFlag aMsg = new UpgradeStagerFlag( getSrcHostId(), upgradeStager);
+                    aManager.send(aMsg);
+                } catch( IOException ex ){
+                    Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );    
+                }
+            }           
                         
         }        
     }
-
 }
