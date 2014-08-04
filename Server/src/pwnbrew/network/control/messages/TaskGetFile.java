@@ -51,10 +51,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.tasks.TaskManager;
 
 
@@ -166,32 +166,28 @@ public final class TaskGetFile extends TaskStatus{
     public void evaluate( CommManager passedManager ) {
         
         try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
-                
-                //Alert the manager of the change in the task
-                TaskManager aMgr = passedManager.getTaskManager();
-                if( aMgr != null )
-                    aMgr.taskChanged(this);
 
-                File libDir = Directories.getFileLibraryDirectory();
-                String theHash = getHashToRetrieve();
+            //Alert the manager of the change in the task
+            TaskManager aMgr = passedManager.getTaskManager();
+            if( aMgr != null )
+                aMgr.taskChanged(this);
 
-                //Debug
-                DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received TaskGetFile for " + theHash);
+            File libDir = Directories.getFileLibraryDirectory();
+            String theHash = getHashToRetrieve();
 
-                File fileToSend = new File(libDir, theHash);
-                if(fileToSend.exists()){
+            //Debug
+            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received TaskGetFile for " + theHash);
 
-                    //Queue the file to be sent
-                    String fileHashNameStr = new StringBuilder().append(fileToSend.getName()).append(":").append(fileToSend.getName()).toString();
+            File fileToSend = new File(libDir, theHash);
+            if(fileToSend.exists()){
 
-                    int clientId =  getSrcHostId();
-                    PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.JOB_SUPPORT, clientId );
-                    aCMManager.send(thePFM);
-                }
-            }           
+                //Queue the file to be sent
+                String fileHashNameStr = new StringBuilder().append(fileToSend.getName()).append(":").append(fileToSend.getName()).toString();
+
+                int clientId =  getSrcHostId();
+                PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.JOB_SUPPORT, clientId );
+                DataManager.send(passedManager,thePFM);
+            }
 
         } catch (IOException ex) {
             Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );

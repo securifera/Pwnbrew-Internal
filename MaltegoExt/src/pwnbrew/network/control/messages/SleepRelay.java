@@ -45,6 +45,7 @@ import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
@@ -105,36 +106,32 @@ public class SleepRelay extends ControlMessage {
     */
     @Override
     public void evaluate( CommManager passedManager ) {     
-        
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
-                 
-            //Get the host controllers 
-            String hostIdStr = Integer.toString(hostId);
-            ServerManager aSM = (ServerManager) passedManager;
-            HostController theHostController = aSM.getHostController(hostIdStr);
-            if( theHostController != null ){
+                        
+        //Get the host controllers 
+        String hostIdStr = Integer.toString(hostId);
+        ServerManager aSM = (ServerManager) passedManager;
+        HostController theHostController = aSM.getHostController(hostIdStr);
+        if( theHostController != null ){
 
-                try {
-                    Host theHost = theHostController.getObject();
-                    //Get the sleep time
-                    List<String> theCheckInList = theHost.getCheckInList();
-                    if( !theCheckInList.isEmpty() ){
+            try {
+                Host theHost = theHostController.getObject();
+                //Get the sleep time
+                List<String> theCheckInList = theHost.getCheckInList();
+                if( !theCheckInList.isEmpty() ){
 
-                        //Get the first time
-                        String theCheckInTime = theCheckInList.get(0);
-                        //Send sleep message
-                        Sleep sleepMsg = new Sleep( hostId, theCheckInTime ); //Convert mins to seconds
-                        aCMManager.send(sleepMsg );
-                    }
-
-                } catch( UnsupportedEncodingException ex ){
-                    Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );
+                    //Get the first time
+                    String theCheckInTime = theCheckInList.get(0);
+                    //Send sleep message
+                    Sleep sleepMsg = new Sleep( hostId, theCheckInTime ); //Convert mins to seconds
+                    DataManager.send( passedManager, sleepMsg );
                 }
 
-            }        
-                        
-        }        
+            } catch( UnsupportedEncodingException ex ){
+                Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );
+            }
+
+        }              
+             
     }
   
 

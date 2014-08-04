@@ -145,7 +145,6 @@ public class ServerConfig extends XmlBase {
     /**
      * Returns the password to the java keystore for encryption
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
     */
     public String getKeyStorePass(){
         return theAttributeMap.get(ATTRIBUTE_StorePass);

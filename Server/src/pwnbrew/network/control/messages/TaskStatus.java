@@ -48,8 +48,8 @@ package pwnbrew.network.control.messages;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.tasks.TaskManager;
 
 /**
@@ -148,16 +148,11 @@ public class TaskStatus extends Tasking {
         if( aMgr != null )
             aMgr.taskChanged(this);       
             
-        //Send an empty message
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
-            
-            //Send a noop to look like a typical HTTP response
-            int clientId = getSrcHostId();
-            NoOp aNoOp = new NoOp(clientId);
-            aCMManager.send(  aNoOp );
-
-        }
+        //Send a noop to look like a typical HTTP response
+        int clientId = getSrcHostId();
+        NoOp aNoOp = new NoOp(clientId);
+        DataManager.send(passedManager, aNoOp);
+   
     }
 
 }/* END CLASS TaskStatus */

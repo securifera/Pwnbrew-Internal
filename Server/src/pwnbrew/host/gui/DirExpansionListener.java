@@ -51,6 +51,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
+import pwnbrew.manager.DataManager;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.GetDrives;
 import pwnbrew.network.control.messages.ListFiles;
@@ -110,7 +111,7 @@ public class DirExpansionListener implements TreeExpansionListener {
             
             //Send a message
             theController.addRemoteFileSystemTask(aRFST);
-            aCMM.send(aTaskMessage);
+            DataManager.send( theController.getCommManager(), aTaskMessage);
             
         }
 

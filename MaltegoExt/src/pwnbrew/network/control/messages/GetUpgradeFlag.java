@@ -45,6 +45,7 @@ import pwnbrew.host.HostController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.relay.RelayManager;
@@ -107,46 +108,38 @@ public final class GetUpgradeFlag extends ControlMessage{ // NO_UCD (use default
     @Override
     public void evaluate( CommManager passedManager ) throws LoggableException {     
         
-        RelayManager aManager = RelayManager.getRelayManager();
-        if( aManager != null ){
-                            
-            String hostIdStr = Integer.toString( hostId );
-            if( hostId == -1 )
-                hostIdStr  = ServerConfig.getServerConfig().getHostId();  
+        String hostIdStr = Integer.toString( hostId );
+        if( hostId == -1 )
+            hostIdStr  = ServerConfig.getServerConfig().getHostId();  
 
-            //Get the host controllers 
-            ServerManager aSM = (ServerManager) passedManager;
-            HostController theHostController = aSM.getHostController(hostIdStr);
-            if( theHostController != null ){
+        //Get the host controllers 
+        ServerManager aSM = (ServerManager) passedManager;
+        HostController theHostController = aSM.getHostController(hostIdStr);
+        if( theHostController != null ){
 
-                //Get the host
-                Host theHost = theHostController.getHost();
-                
-                //See if the JAR needs upgrading
-                String theJarVersion = theHost.getJarVersion();
-                String theJreVersion = theHost.getJreVersion();   
-                boolean upgradeStager = false;
-                if( theJreVersion.length() > 2 ){
-                    char theChar = theJreVersion.charAt(2);
+            //Get the host
+            Host theHost = theHostController.getHost();
 
-                    //Get the current library for that jre version
-                    JarItem aJarItem = Utilities.getStagerJarItem( String.valueOf(theChar) );
-                    if( aJarItem != null ){
-                        String stagerJarVersion = aJarItem.getVersion();
-                        if( stagerJarVersion.compareTo( theJarVersion ) > 0)
-                            upgradeStager = true;                                            
-                    }   
-                }
-                
-                //Send msg
-                try {
-                    UpgradeStagerFlag aMsg = new UpgradeStagerFlag( getSrcHostId(), upgradeStager);
-                    aManager.send(aMsg);
-                } catch( IOException ex ){
-                    Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );    
-                }
-            }           
-                        
-        }        
+            //See if the JAR needs upgrading
+            String theJarVersion = theHost.getJarVersion();
+            String theJreVersion = theHost.getJreVersion();   
+            boolean upgradeStager = false;
+            if( theJreVersion.length() > 2 ){
+                char theChar = theJreVersion.charAt(2);
+
+                //Get the current library for that jre version
+                JarItem aJarItem = Utilities.getStagerJarItem( String.valueOf(theChar) );
+                if( aJarItem != null ){
+                    String stagerJarVersion = aJarItem.getVersion();
+                    if( stagerJarVersion.compareTo( theJarVersion ) > 0)
+                        upgradeStager = true;                                            
+                }   
+            }
+
+            //Send msg
+            UpgradeStagerFlag aMsg = new UpgradeStagerFlag( getSrcHostId(), upgradeStager);
+            DataManager.send( passedManager, aMsg);
+
+        }          
     }
 }

@@ -53,6 +53,7 @@ import java.util.logging.Level;
 import pwnbrew.host.Host;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
@@ -204,7 +205,7 @@ public final class Hello extends ControlMessage {
 
                     //Send HostAck
                     HelloAck aHostAck = new HelloAck(theClientId);
-                    aCMManager.send( aHostAck );
+                    DataManager.send( passedManager, aHostAck );
 
                     //Turn off wrapping
                     aSCH.setWrapping( theClientId, false);
@@ -239,8 +240,6 @@ public final class Hello extends ControlMessage {
                         Nic aNic = new Nic( nicMac, ipAddress, netMask);
                         aHost.addNicPair(nicMac, aNic );
                     }
-
-                    TaskManager theTaskManager = passedManager.getTaskManager();
 
                     //Set the host to connected
                     aHost.setConnected(true);

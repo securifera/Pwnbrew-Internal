@@ -39,6 +39,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.host.Host;
@@ -47,6 +48,7 @@ import pwnbrew.host.Session;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.relay.RelayManager;
@@ -108,29 +110,24 @@ public final class GetSessions extends ControlMessage{
     @Override
     public void evaluate( CommManager passedManager ) throws LoggableException {     
             
-        RelayManager aManager = RelayManager.getRelayManager();
-        if( aManager != null ){
+        String hostIdStr = Integer.toString( hostId );
 
-            String hostIdStr = Integer.toString( hostId );
+        //Get the host controller 
+        ServerManager aSM = (ServerManager) passedManager;
+        HostController theHostController = aSM.getHostController( hostIdStr );
+        if( theHostController != null ){
+            Host theHost = theHostController.getObject();
+            List<Session> sessionList = theHost.getSessionList();
+            for( Session aSession : sessionList ){
 
-            //Get the host controller 
-            ServerManager aSM = (ServerManager) passedManager;
-            HostController theHostController = aSM.getHostController( hostIdStr );
-            if( theHostController != null ){
-                Host theHost = theHostController.getObject();
-                List<Session> sessionList = theHost.getSessionList();
-                for( Session aSession : sessionList ){
-
-                    try {
-                        SessionMsg aMsg = new SessionMsg( getSrcHostId(), hostId, aSession.getCheckInTime(), aSession.getDisconnectedTime());
-                        aManager.send(aMsg);
-                    } catch ( IOException ex) {
-                        Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                    }
+                try {
+                    SessionMsg aMsg = new SessionMsg( getSrcHostId(), hostId, aSession.getCheckInTime(), aSession.getDisconnectedTime());
+                    DataManager.send( passedManager, aMsg);
+                } catch ( UnsupportedEncodingException ex) {
+                    Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
                 }
             }
-            
-        }       
+        }
 
     }        
     

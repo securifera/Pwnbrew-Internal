@@ -134,30 +134,30 @@ public class ShellMessageManager extends DataManager {
         theShellMsgManager.getDataHandler().processData(msgBytes);        
     }
     
-    //===============================================================
-    /**
-     *   Send the message out the given channel.
-     *
-     * @param passedMessage
-     * @throws java.io.IOException
-    */
-    public void send( ProcessMessage passedMessage ) throws IOException {
-
-        
-        ByteBuffer aByteBuffer;
-        int msgLen = passedMessage.getLength();
-        aByteBuffer = ByteBuffer.allocate( msgLen );
-        passedMessage.append(aByteBuffer);
-
-        
-        //Get the port router
-        PortRouter thePR = theCommManager.getPortRouter( operatingPort );
-                
-        //Queue the message to be sent
-        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId() );
-//        DebugPrinter.printMessage(this, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-          
-    }
+//    //===============================================================
+//    /**
+//     *   Send the message out the given channel.
+//     *
+//     * @param passedMessage
+//     * @throws java.io.IOException
+//    */
+//    public void send( ProcessMessage passedMessage ) throws IOException {
+//
+//        
+//        ByteBuffer aByteBuffer;
+//        int msgLen = passedMessage.getLength();
+//        aByteBuffer = ByteBuffer.allocate( msgLen );
+//        passedMessage.append(aByteBuffer);
+//
+//        
+//        //Get the port router
+//        PortRouter thePR = theCommManager.getPortRouter( operatingPort );
+//                
+//        //Queue the message to be sent
+//        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId() );
+////        DebugPrinter.printMessage(this, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+//          
+//    }
     
     //===========================================================================
     /*

@@ -122,8 +122,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
         sslEngine.setUseClientMode(false);  
         
         //Set authentication is it is set
-        sslEngine.setWantClientAuth(true);
-//        sslEngine.setNeedClientAuth(false);        
+        sslEngine.setNeedClientAuth(requireAuth);        
      
         netBBSize = sslEngine.getSession().getPacketBufferSize();
         inNetBB  = ByteBuffer.allocate(netBBSize);

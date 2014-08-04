@@ -46,18 +46,25 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.manager;
 
 import java.io.IOException;
-import pwnbrew.network.control.ControlMessageManager;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.DebugPrinter;
-import pwnbrew.network.PortWrapper;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
+import pwnbrew.network.PortWrapper;
 import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.file.FileMessageManager;
+import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
+import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.shell.ShellMessageManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
@@ -240,6 +247,72 @@ abstract public class DataManager {
             
         } catch (LoggableException | IOException ex) {
             DebugPrinter.printMessage(DataManager.class.getSimpleName(), "No manager for bytes");                                 
+        }
+    }
+    
+    //===============================================================
+    /**
+     * Single point for sending out messages from the server  
+     *
+     * @param passedCommManager
+     * @param passedMessage
+    */
+    public static void send( CommManager passedCommManager, Message passedMessage ) {
+    
+        //Get the port router
+        try {
+            
+            ServerConfig aConf = ServerConfig.getServerConfig();
+            int serverPort = aConf.getSocketPort();
+            int destClientId = passedMessage.getDestHostId();
+            
+            //Try the default port router
+            PortRouter thePR = passedCommManager.getPortRouter( serverPort );
+            SocketChannelHandler theHandler = thePR.getSocketChannelHandler(destClientId);
+            if( theHandler == null ){
+                
+                RelayManager aRelayManager = RelayManager.getRelayManager();
+                if( aRelayManager == null )
+                    aRelayManager = RelayManager.initialize(passedCommManager);
+                
+                //See if the relay port router has the client id
+                thePR = aRelayManager.getServerPorterRouter();
+                theHandler = thePR.getSocketChannelHandler(destClientId);
+                if( theHandler == null ){
+                    Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified client.", null);      
+                    return;
+                }
+                
+            }                        
+
+            ByteBuffer aByteBuffer;
+            int msgLen = passedMessage.getLength();
+            aByteBuffer = ByteBuffer.allocate( msgLen );
+            passedMessage.append(aByteBuffer);
+        
+            //Create a byte array from the messagen byte buffer
+            byte[] msgBytes = Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position());
+         
+            //If wrapping is necessary then wrap it
+            if( theHandler.isWrapping() ){
+                PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
+                if( aWrapper != null ){
+                    
+                    //Set the staged wrapper if necessary
+                    if( aWrapper instanceof ServerHttpWrapper ){
+                        ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+                        aSrvWrapper.setStaging( theHandler.isStaged());
+                    }
+                    
+                    aByteBuffer = aWrapper.wrapBytes( msgBytes );  
+                    msgBytes = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
+                } 
+            }
+            
+            theHandler.queueBytes(msgBytes);
+    //        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+        } catch (IOException | LoggableException ex) {
+            Log.log( Level.SEVERE, NAME_Class, "send()", ex.getMessage(), ex);           
         }
     }
 

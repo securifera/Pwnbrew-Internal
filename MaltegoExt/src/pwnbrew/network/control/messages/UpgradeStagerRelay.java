@@ -42,9 +42,9 @@ import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.JarItem;
@@ -122,12 +122,10 @@ public final class UpgradeStagerRelay extends ControlMessage{ // NO_UCD (use def
                 JarItem theItem = Utilities.getStagerJarItem( String.valueOf(theChar));
            
                 //Send the new stager
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager != null ){
-                    UpgradeStager upgradeMsg = new UpgradeStager(hostId, theItem); 
-                    upgradeMsg.setSrcHostId( getSrcHostId() );
-                    aCMManager.send(upgradeMsg );
-                }
+                UpgradeStager upgradeMsg = new UpgradeStager(hostId, theItem); 
+                upgradeMsg.setSrcHostId( getSrcHostId() );
+                DataManager.send( passedManager, upgradeMsg );
+                
             }
 
         }           

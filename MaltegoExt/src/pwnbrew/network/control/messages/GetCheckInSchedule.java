@@ -47,6 +47,7 @@ import pwnbrew.host.HostController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
@@ -107,41 +108,32 @@ public final class GetCheckInSchedule extends ControlMessage{
     */
     @Override
     public void evaluate( CommManager passedManager ) throws LoggableException {     
-            
-        RelayManager aManager = RelayManager.getRelayManager();
-        if( aManager != null ){
 
-            String hostIdStr = Integer.toString( hostId );
+        String hostIdStr = Integer.toString( hostId );
 
-            //Get the host controller 
-            ServerManager aSM = (ServerManager) passedManager;
-            HostController theHostController = aSM.getHostController( hostIdStr );
-            if( theHostController != null ){
+        //Get the host controller 
+        ServerManager aSM = (ServerManager) passedManager;
+        HostController theHostController = aSM.getHostController( hostIdStr );
+        if( theHostController != null ){
 
-                int srcId = getSrcHostId();
-                Host theHost = theHostController.getObject();
-                List<String> theCheckInList = theHost.getCheckInList();
-                for( String aString : theCheckInList ){
-                    try {
-                        CheckInTimeMsg aMsg = new CheckInTimeMsg( srcId, hostId, aString);
-                        aManager.send(aMsg);
-                    } catch (IOException ex) {
-                        Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                    }
-                }
-
-                //Get flag and send a msg
+            int srcId = getSrcHostId();
+            Host theHost = theHostController.getObject();
+            List<String> theCheckInList = theHost.getCheckInList();
+            for( String aString : theCheckInList ){
                 try {
-                    boolean asfFlag = theHostController.getAutoSleepFlag();
-                    AutoSleep anASMsg = new AutoSleep( srcId, hostId, AutoSleep.GET_VALUE, asfFlag );
-                    aManager.send(anASMsg);
-                } catch (IOException ex) {
+                    CheckInTimeMsg aMsg = new CheckInTimeMsg( srcId, hostId, aString);
+                    DataManager.send( passedManager, aMsg);
+                } catch (UnsupportedEncodingException ex) {
                     Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
                 }
             }
 
-             
-        }      
+            //Get flag and send a msg
+            boolean asfFlag = theHostController.getAutoSleepFlag();
+            AutoSleep anASMsg = new AutoSleep( srcId, hostId, AutoSleep.GET_VALUE, asfFlag );
+            DataManager.send( passedManager, anASMsg);
+
+        }     
 
     }        
     

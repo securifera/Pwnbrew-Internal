@@ -38,7 +38,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,10 +50,10 @@ import pwnbrew.library.LibraryItemController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -111,77 +111,73 @@ public final class GetHosts extends ControlMessage{ // NO_UCD (use default)
     @Override
     public void evaluate( CommManager passedManager ) {     
         
-        RelayManager aManager = RelayManager.getRelayManager();
-        if( aManager != null ){
-            
-            ServerManager aSM = (ServerManager) passedManager;
-            //Get the host controllers 
-            List<LibraryItemController> theHostControllers = new ArrayList<>();
-            if( hostId == 0 ){
+        ServerManager aSM = (ServerManager) passedManager;
+        //Get the host controllers 
+        List<LibraryItemController> theHostControllers = new ArrayList<>();
+        if( hostId == 0 ){
 
-                //Add everything
-                theHostControllers.addAll( aSM.getHostControllers() );
+            //Add everything
+            theHostControllers.addAll( aSM.getHostControllers() );
 
-            } else if( hostId == Constants.SERVER_ID ){
+        } else if( hostId == Constants.SERVER_ID ){
 
-                try {
-                    Host localHost = HostFactory.getLocalHost();
-                    List<String> hostIdList = localHost.getConnectedHostIdList();
-                    for( String anId : hostIdList ){
-                        HostController aController = aSM.getHostController(anId);
-                        if(aController != null )
-                            theHostControllers.add(aController);
-
-                    }
-
-                } catch (LoggableException | SocketException ex) {
-                    Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                }
-
-            } else {
-
-                //Get the host
-                HostController aHostController = aSM.getHostController( Integer.toString( hostId ));
-                Host aHost = aHostController.getHost();
-                List<String> internalHosts = aHost.getConnectedHostIdList();
-
-                //Add each host to the list
-                for( String anId : internalHosts ){
-                    LibraryItemController aController = aSM.getHostController( anId );
-                    if( aController != null)
+            try {
+                Host localHost = HostFactory.getLocalHost();
+                List<String> hostIdList = localHost.getConnectedHostIdList();
+                for( String anId : hostIdList ){
+                    HostController aController = aSM.getHostController(anId);
+                    if(aController != null )
                         theHostControllers.add(aController);
+
                 }
-            }                
 
-            //Create a hsot msg for each controller
-            for( LibraryItemController aController : theHostControllers ){
-                if( aController instanceof HostController ){
+            } catch (LoggableException | SocketException ex) {
+                Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
+            }
 
-                    HostController aHostController = (HostController)aController;
-                    if( !aHostController.isLocalHost() ){
+        } else {
 
-                        Host aHost = aHostController.getHost();
-                        try {
+            //Get the host
+            HostController aHostController = aSM.getHostController( Integer.toString( hostId ));
+            Host aHost = aHostController.getHost();
+            List<String> internalHosts = aHost.getConnectedHostIdList();
 
-                            HostMsg aHostMsg = new HostMsg( getSrcHostId(), aHost.getHostname(), 
-                                aHost.getOsName(), aHost.getJvmArch(), Integer.parseInt(aHost.getId()), aHost.isConnected(),
-                                !aHost.getCheckInList().isEmpty() );
+            //Add each host to the list
+            for( String anId : internalHosts ){
+                LibraryItemController aController = aSM.getHostController( anId );
+                if( aController != null)
+                    theHostControllers.add(aController);
+            }
+        }                
 
-                            String relayPort = aHost.getRelayPort();
-                            if( !relayPort.isEmpty() )
-                                aHostMsg.addRelayPort( Integer.parseInt(relayPort));
+        //Create a hsot msg for each controller
+        for( LibraryItemController aController : theHostControllers ){
+            if( aController instanceof HostController ){
 
-                            aManager.send(aHostMsg);
-                        } catch ( IOException ex) {
-                            Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                        }
+                HostController aHostController = (HostController)aController;
+                if( !aHostController.isLocalHost() ){
 
+                    Host aHost = aHostController.getHost();
+                    try {
+
+                        HostMsg aHostMsg = new HostMsg( getSrcHostId(), aHost.getHostname(), 
+                            aHost.getOsName(), aHost.getJvmArch(), Integer.parseInt(aHost.getId()), aHost.isConnected(),
+                            !aHost.getCheckInList().isEmpty() );
+
+                        String relayPort = aHost.getRelayPort();
+                        if( !relayPort.isEmpty() )
+                            aHostMsg.addRelayPort( Integer.parseInt(relayPort));
+
+                        DataManager.send( passedManager, aHostMsg);
+                    } catch ( UnsupportedEncodingException ex) {
+                        Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
                     }
 
                 }
-            }           
-                        
-        }        
+
+            }
+        }           
+            
     }
 
 }/* END CLASS GetHosts */

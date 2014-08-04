@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.PortRouter;
@@ -252,7 +253,7 @@ public final class SendStage extends ControlMessage{ // NO_UCD (use default)
                     //Turn on staging flag and send the payload if it isn't relayed
                     if( aSCH.setStaging(clientId, true, theJvmVersion) ) {
                         Payload aPayload = Utilities.getClientPayload(clientId, theJvmVersion);
-                        aCMManager.send(aPayload);
+                        DataManager.send(passedManager,aPayload);
                     }
                 } catch (UnsupportedEncodingException ex) {
                 }

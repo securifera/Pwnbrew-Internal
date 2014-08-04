@@ -46,9 +46,9 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 
 /**
  *
@@ -98,14 +98,10 @@ public final class NoOp extends ControlMessage{
     public void evaluate( CommManager passedManager ) {
         
         //Get the address and connect                   
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
-
-            //Send one back
-            int clientId = getSrcHostId();
-            NoOp aNoOp = new NoOp(clientId);
-            aCMManager.send(  aNoOp );
-        }       
+        //Send one back
+        int clientId = getSrcHostId();
+        NoOp aNoOp = new NoOp(clientId);
+        DataManager.send(passedManager, aNoOp);
     
     }
 

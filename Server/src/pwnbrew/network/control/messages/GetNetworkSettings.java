@@ -38,7 +38,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.KeyStoreException;
 import java.security.Principal;
 import java.security.cert.Certificate;
@@ -47,8 +46,8 @@ import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.xmlBase.ServerConfig;
@@ -79,50 +78,48 @@ public class GetNetworkSettings extends ControlMessage{ // NO_UCD (use default)
     */
     @Override
     public void evaluate( CommManager passedManager ) {     
-    
-        RelayManager aManager = RelayManager.getRelayManager();
-        if( aManager != null ){
-             //Populate the componenets
-            try {
-                
-                ServerConfig theConf = ServerConfig.getServerConfig();        
-                if(theConf != null){
 
-                    int serverPort = theConf.getSocketPort();
-                
-                    //Get the PKI Cert
-                    Certificate theCert = SSLUtilities.getCertificate();
-                    if( theCert instanceof sun.security.x509.X509CertImpl ){
-                        sun.security.x509.X509CertImpl theCustomCert = (sun.security.x509.X509CertImpl)theCert;
+        //Populate the componenets
+        try {
 
-                        //Get the issuee name
-                        Principal aPrincipal = theCustomCert.getSubjectDN();
-                        String issueeName = aPrincipal.getName();
-                    
-                        //Get the issuer org
-                        aPrincipal = theCustomCert.getIssuerDN();
-                        String issuerName = aPrincipal.getName();
-                    
-                        //Set the algorithm
-                        String theAlgorithm = theCustomCert.getSigAlgName();
-                      
-                        //Set the date
-                        Date expirationDate = theCustomCert.getNotAfter();
-                        String expDateStr = Constants.CHECKIN_DATE_FORMAT.format(expirationDate);                        
-                        
-                        //Send back the data
-                        NetworkSettingsMsg aMsg = new NetworkSettingsMsg( getSrcHostId(), serverPort, issueeName, issuerName, theAlgorithm, expDateStr );
-                        aManager.send(aMsg);
-                  
-                    }
-                
+            ServerConfig theConf = ServerConfig.getServerConfig();        
+            if(theConf != null){
+
+                int serverPort = theConf.getSocketPort();
+
+                //Get the PKI Cert
+                Certificate theCert = SSLUtilities.getCertificate();
+                if( theCert instanceof sun.security.x509.X509CertImpl ){
+                    sun.security.x509.X509CertImpl theCustomCert = (sun.security.x509.X509CertImpl)theCert;
+
+                    //Get the issuee name
+                    Principal aPrincipal = theCustomCert.getSubjectDN();
+                    String issueeName = aPrincipal.getName();
+
+                    //Get the issuer org
+                    aPrincipal = theCustomCert.getIssuerDN();
+                    String issuerName = aPrincipal.getName();
+
+                    //Set the algorithm
+                    String theAlgorithm = theCustomCert.getSigAlgName();
+
+                    //Set the date
+                    Date expirationDate = theCustomCert.getNotAfter();
+                    String expDateStr = Constants.CHECKIN_DATE_FORMAT.format(expirationDate);                        
+
+                    //Send back the data
+                    NetworkSettingsMsg aMsg = new NetworkSettingsMsg( getSrcHostId(), serverPort, issueeName, issuerName, theAlgorithm, expDateStr );
+                    DataManager.send( passedManager, aMsg);
+
                 }
-                            
-            } catch(KeyStoreException | LoggableException | IOException ex){
-                Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );  
+
             }
+
+        } catch(KeyStoreException | LoggableException | IOException ex){
+            Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );  
         }
-          
     }
+          
+    
 
 }

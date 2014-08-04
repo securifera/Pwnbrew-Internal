@@ -54,6 +54,7 @@ import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
+import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.network.control.messages.TaskStatus;
@@ -137,48 +138,39 @@ public class ControlMessageManager extends DataManager {
         theControlManager.getDataHandler().processData(msgBytes);        
     }
     
-    //===============================================================
-    /**
-     *   Send the message out the given channel.
-     *
-     * @param passedMessage
-    */
-    public void send( ControlMessage passedMessage ) {
-
-         //Get the port router
-        int destClientId = passedMessage.getDestHostId();
-        PortRouter thePR = theCommManager.getPortRouter( operatingPort );
-        if( thePR.getState( destClientId ) == Constants.DISCONNECTED ){
-                
-            if( passedMessage instanceof Tasking ){
-                try {
-                    Tasking aTasking = (Tasking)passedMessage;
-                    TaskManager aMgr = theCommManager.getTaskManager();
-                    if( aMgr != null )
-                        aMgr.taskChanged( new TaskStatus( aTasking.getTaskId(), RemoteTask.TASK_FAILED, -1 ));
-                } catch( IOException ex ){
-                    Log.log( Level.SEVERE, NAME_Class, "send()", ex.getMessage(), ex);
-                } 
-            }            
-
-            Log.log( Level.SEVERE, NAME_Class, "send()", "Unable to send message, socket disconnected.", null);
-            return;
-        }
-        
-        ByteBuffer aByteBuffer;
-        int msgLen = passedMessage.getLength();
-        aByteBuffer = ByteBuffer.allocate( msgLen );
-        passedMessage.append(aByteBuffer);
-        
-        try {
-            //Queue the message to be sent
-            thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), destClientId );
-    //        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-        } catch (IOException ex) {
-            Log.log( Level.SEVERE, NAME_Class, "send()", ex.getMessage(), ex);           
-        }
-        
-    }
+//    //===============================================================
+//    /**
+//     *   Send the message out the given channel.
+//     *
+//     * @param passedMessage
+//    */
+//    @Override
+//    public void send( Message passedMessage ) {
+//
+//         //Get the port router
+//        int destClientId = passedMessage.getDestHostId();
+//        PortRouter thePR = theCommManager.getPortRouter( operatingPort );
+//        if( thePR.getState( destClientId ) == Constants.DISCONNECTED ){
+//                
+//            if( passedMessage instanceof Tasking ){
+//                try {
+//                    Tasking aTasking = (Tasking)passedMessage;
+//                    TaskManager aMgr = theCommManager.getTaskManager();
+//                    if( aMgr != null )
+//                        aMgr.taskChanged( new TaskStatus( aTasking.getTaskId(), RemoteTask.TASK_FAILED, -1 ));
+//                } catch( IOException ex ){
+//                    Log.log( Level.SEVERE, NAME_Class, "send()", ex.getMessage(), ex);
+//                } 
+//            }            
+//
+//            Log.log( Level.SEVERE, NAME_Class, "send()", "Unable to send message, socket disconnected.", null);
+//            return;
+//        }
+//        
+//        //Send the message
+//        super.send(passedMessage);
+//        
+//    }
     
      //===========================================================================
     /*

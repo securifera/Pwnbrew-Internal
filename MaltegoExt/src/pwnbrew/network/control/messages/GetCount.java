@@ -39,6 +39,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.util.List;
 import java.util.logging.Level;
@@ -49,6 +50,7 @@ import pwnbrew.library.LibraryItemController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
@@ -119,82 +121,77 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
     */
     @Override
     public void evaluate( CommManager passedManager ) throws LoggableException {     
-        
-        RelayManager aManager = RelayManager.getRelayManager();
-        if( aManager != null ){
-            
-            int retCount = 0;
-            ServerManager aSM = (ServerManager) passedManager;
-            
-            switch( countType ){
-                case HOST_COUNT:
-                    
-                        List<LibraryItemController> theHostControllers = aSM.getHostControllers();
-                        retCount = theHostControllers.size() - 1;
-                                
-                        //If 
-                        if(optionalId == Constants.SERVER_ID ){
-                            
-                            try {
-                                
-                                retCount = 0;
-                                Host localHost = HostFactory.getLocalHost();
-                                List<String> hostIdList = localHost.getConnectedHostIdList();
-                                for( String hostIdStr : hostIdList ){
-                                    HostController aHostController = aSM.getHostController(hostIdStr);
-                                    if( aHostController != null )
-                                        retCount++;    
-                                }                                    
-                                
-                            } catch (SocketException ex) {
-                                Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-                            }
-                            
-                        } else if( optionalId != 0 ){
-                            
-                            //Get the host
+  
+        int retCount = 0;
+        ServerManager aSM = (ServerManager) passedManager;
+
+        switch( countType ){
+            case HOST_COUNT:
+
+                    List<LibraryItemController> theHostControllers = aSM.getHostControllers();
+                    retCount = theHostControllers.size() - 1;
+
+                    //If 
+                    if(optionalId == Constants.SERVER_ID ){
+
+                        try {
+
                             retCount = 0;
-                            HostController aHostController = aSM.getHostController( Integer.toString( optionalId ));
-                            Host aHost = aHostController.getHost();
-                            List<String> hostIdList = aHost.getConnectedHostIdList();
+                            Host localHost = HostFactory.getLocalHost();
+                            List<String> hostIdList = localHost.getConnectedHostIdList();
                             for( String hostIdStr : hostIdList ){
-                                aHostController = aSM.getHostController(hostIdStr);
+                                HostController aHostController = aSM.getHostController(hostIdStr);
                                 if( aHostController != null )
                                     retCount++;    
-                            }  
-                            
+                            }                                    
+
+                        } catch (SocketException ex) {
+                            Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
                         }
 
-                    
-                    break;
-                case NIC_COUNT:
-                  
-                    String hostIdStr = Integer.toString( optionalId );
-                    if( optionalId == -1 )
-                        hostIdStr  = ServerConfig.getServerConfig().getHostId();                            
+                    } else if( optionalId != 0 ){
 
-                    //Get the host controller 
-                    HostController theHostController = aSM.getHostController( hostIdStr );
-                    if( theHostController != null ){
-                        Host theHost = theHostController.getObject();
-                        retCount = theHost.getNicMap().size();
-                    }       
+                        //Get the host
+                        retCount = 0;
+                        HostController aHostController = aSM.getHostController( Integer.toString( optionalId ));
+                        Host aHost = aHostController.getHost();
+                        List<String> hostIdList = aHost.getConnectedHostIdList();
+                        for( String hostIdStr : hostIdList ){
+                            aHostController = aSM.getHostController(hostIdStr);
+                            if( aHostController != null )
+                                retCount++;    
+                        }  
 
-                    
-                    break;
-                default:
-                    Log.log(Level.WARNING, NAME_Class, "evaluate()", "Unknown count id type.", null );    
-                    return;                    
-            }
-            
-            try {
-                CountReply aHostMsg = new CountReply( getSrcHostId(), retCount, countType, optionalId);
-                aManager.send(aHostMsg);
-            } catch (IOException ex) {
-                Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-            }  
-                        
-        }        
+                    }
+
+
+                break;
+            case NIC_COUNT:
+
+                String hostIdStr = Integer.toString( optionalId );
+                if( optionalId == -1 )
+                    hostIdStr  = ServerConfig.getServerConfig().getHostId();                            
+
+                //Get the host controller 
+                HostController theHostController = aSM.getHostController( hostIdStr );
+                if( theHostController != null ){
+                    Host theHost = theHostController.getObject();
+                    retCount = theHost.getNicMap().size();
+                }       
+
+
+                break;
+            default:
+                Log.log(Level.WARNING, NAME_Class, "evaluate()", "Unknown count id type.", null );    
+                return;                    
+        }
+
+        try {
+            CountReply aHostMsg = new CountReply( getSrcHostId(), retCount, countType, optionalId);
+            DataManager.send( passedManager, aHostMsg);
+        } catch (UnsupportedEncodingException ex) {
+            Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
+        }         
     }
 
 }

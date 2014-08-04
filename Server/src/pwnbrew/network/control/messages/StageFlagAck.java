@@ -47,9 +47,9 @@ package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.utilities.Utilities;
 
 /**
@@ -113,13 +113,11 @@ public final class StageFlagAck extends ControlMessage{
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {     
-        
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
-            Payload aPayload = Utilities.getClientPayload( theRelayClientId, theJvmVersion );
-            aCMManager.send(aPayload);  
-        }        
+    public void evaluate( CommManager passedManager ) {  
+
+        Payload aPayload = Utilities.getClientPayload( theRelayClientId, theJvmVersion );
+        DataManager.send(passedManager, aPayload);  
+       
     }
 
 }

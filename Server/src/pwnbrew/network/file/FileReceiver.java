@@ -54,6 +54,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Directories;
@@ -250,9 +251,10 @@ final public class FileReceiver {
             PushFileFin finMessage = new PushFileFin( taskId, hexString+":"+fileLoc.getName(), clientId );
 
             //Returns if it should unlock or not
-            ControlMessageManager theCMM = ControlMessageManager.getControlMessageManager();
-            if( theCMM != null )
-                theCMM.send( finMessage );
+//            ControlMessageManager theCMM = ControlMessageManager.getControlMessageManager();
+//            if( theCMM != null )
+//                theCMM.send( finMessage );
+            DataManager.send(theFileMessageManager.getCommManager(), finMessage);
             
 
         } catch ( UnsupportedEncodingException ex) {

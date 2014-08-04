@@ -44,7 +44,6 @@ import java.io.IOException;
 import java.net.BindException;
 import java.security.GeneralSecurityException;
 import java.util.*;
-import java.util.logging.Level;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -59,7 +58,6 @@ import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.Session;
 import pwnbrew.library.LibraryItemController;
-import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
@@ -511,21 +509,11 @@ public class ServerManager extends CommManager {
                     //Parse the port
                     int port = Integer.parseInt( thePortStr );     
 
-                    //Get the control message manager
-                    try {
-                        
-                        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                        if( aCMManager == null ){
-                            aCMManager = ControlMessageManager.initialize( getServer().getServerManager());
-                        }                      
-                        
-                        int hostId = Integer.parseInt(theHost.getId());
-                        RelayStart aMigMsg = new RelayStart( port, hostId ); //Convert mins to seconds
-                        aCMManager.send( aMigMsg );                        
-                  
-                    } catch( IOException ex ){
-                       Log.log(Level.SEVERE, NAME_Class, "hostDetected()", ex.getMessage(), ex );
-                    }
+                    //Get the control message manager                              
+                    int hostId = Integer.parseInt(theHost.getId());
+                    RelayStart aMigMsg = new RelayStart( port, hostId ); //Convert mins to seconds
+                    DataManager.send( getServer().getServerManager(), aMigMsg );                        
+
                 }
             }
                               

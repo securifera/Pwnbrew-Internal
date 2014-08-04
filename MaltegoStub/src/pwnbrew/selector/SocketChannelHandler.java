@@ -60,7 +60,7 @@ import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
-import pwnbrew.network.PortWrapper;
+//import pwnbrew.network.PortWrapper;
 import pwnbrew.network.socket.SocketChannelWrapper;
 
 /**
@@ -79,7 +79,7 @@ public class SocketChannelHandler implements Selectable {
     private static final String NAME_Class = SocketChannelHandler.class.getSimpleName();
 
     private PortRouter thePortRouter = null;
-    private volatile boolean wrappingFlag = true;
+//    private volatile boolean wrappingFlag = true;
     private volatile boolean staging = false;
 
     private int clientId = -1;
@@ -248,8 +248,8 @@ public class SocketChannelHandler implements Selectable {
 //            DebugPrinter.printMessage(this,  "Received Bytes.");
             
             //Check if a port wrapper has been assigned
-            PortWrapper aPortWrapper = DataManager.getPortWrapper( getPort() );
-            if( aPortWrapper == null || !isWrapping() ){  
+//            PortWrapper aPortWrapper = DataManager.getPortWrapper( getPort() );
+//            if( aPortWrapper == null || !isWrapping() ){  
                 
                 //Until the message length is populated
                 ByteBuffer msgLenBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE );
@@ -336,12 +336,12 @@ public class SocketChannelHandler implements Selectable {
                     }
                 
                 }
-                
-            } else {
-                
-                //Unwrap and process the data
-                aPortWrapper.processData( this, readByteBuf, getInetAddress() );
-            }  
+//                
+//            } else {
+//                
+//                //Unwrap and process the data
+//                aPortWrapper.processData( this, readByteBuf, getInetAddress() );
+//            }  
 
         
         } else  if(bytesRead == 0){
@@ -597,25 +597,25 @@ public class SocketChannelHandler implements Selectable {
         
         return true;
     }
-
-    //===================================================================
-    /**
-     *  Set the flag
-     * 
-     * @param passedBool 
-     */
-    public synchronized void setWrapping( boolean passedBool ) {
-        wrappingFlag = passedBool;
-    }
-    
-    //===================================================================
-    /**
-     *  Wrap the data
-     * 
-     * @return 
-     */
-    public synchronized boolean isWrapping() {
-        return wrappingFlag;
-    }
+//
+//    //===================================================================
+//    /**
+//     *  Set the flag
+//     * 
+//     * @param passedBool 
+//     */
+//    public synchronized void setWrapping( boolean passedBool ) {
+//        wrappingFlag = passedBool;
+//    }
+//    
+//    //===================================================================
+//    /**
+//     *  Wrap the data
+//     * 
+//     * @return 
+//     */
+//    public synchronized boolean isWrapping() {
+//        return wrappingFlag;
+//    }
 
 }/* END CLASS AccessHandler */

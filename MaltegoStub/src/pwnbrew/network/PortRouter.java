@@ -45,12 +45,9 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import javax.net.ssl.SSLContext;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
-import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.SSLUtilities;
 import pwnbrew.selector.SelectionRouter;
@@ -181,14 +178,14 @@ abstract public class PortRouter {
         SocketChannelHandler theHandler = getSocketChannelHandler( clientId );
         if( theHandler != null ){
             
-            //If wrapping is necessary then wrap it
-            if( theHandler.isWrapping() ){
-                PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
-                if( aWrapper != null ){                    
-                    ByteBuffer aByteBuffer = aWrapper.wrapBytes( byteArr );  
-                    byteArr = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
-                } 
-            }
+//            //If wrapping is necessary then wrap it
+//            if( theHandler.isWrapping() ){
+//                PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
+//                if( aWrapper != null ){                    
+//                    ByteBuffer aByteBuffer = aWrapper.wrapBytes( byteArr );  
+//                    byteArr = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
+//                } 
+//            }
 
             theHandler.queueBytes(byteArr);
             

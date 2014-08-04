@@ -67,6 +67,8 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.Directories;
@@ -156,17 +158,10 @@ final public class SSLUtilities {
             if(!keyStoreFile.exists()){
 
                //Create a random keypass
-//               keyStorePass = Utilities.simpleEncrypt(Integer.toString(Utilities.SecureRandomGen.nextInt()), Long.toString(Utilities.SecureRandomGen.nextLong()));
                tempKeystore = createKeystore( keyStorePass);
-
-               //Set the keypath and passphrase
-//               theConf.setKeyStorePass(keyStorePass);
-//               saveConf = true;
 
             } else {
 
-//               //Get the keystore pass
-//               keyStorePass = theConf.getKeyStorePass();
 
                //Load the keystore
                FileInputStream theFIS = new FileInputStream(keyStoreFile.getAbsolutePath());
@@ -503,6 +498,15 @@ final public class SSLUtilities {
      */
     public static void main(String[] args) throws IOException {
 
+        String lookAndFeelClassStr = "javax.swing.plaf.metal.MetalLookAndFeel";
+        if( Utilities.isWindows( Utilities.getOsName()) )
+            lookAndFeelClassStr = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
+        
+        try{
+            UIManager.setLookAndFeel( lookAndFeelClassStr );
+        } catch ( ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+        }
+        
         /* Create and display the form */
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -530,7 +534,6 @@ final public class SSLUtilities {
             if(certificate != null && localKeyStore != null){
                 
                 localKeyStore.setEntry( passedAlias, new TrustedCertificateEntry( certificate ), null);
-//                localKeyStore.setCertificateEntry(passedAlias, certificate);
 
                 //Write it to disk
                 ServerConfig theConf = ServerConfig.getServerConfig();

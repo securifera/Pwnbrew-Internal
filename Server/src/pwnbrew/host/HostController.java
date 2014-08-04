@@ -74,8 +74,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import pwnbrew.controllers.MainGuiController;
 import pwnbrew.gui.dialogs.TasksJDialog;
-import pwnbrew.library.LibraryItemController;
-import pwnbrew.library.LibraryItemControllerListener;
 import pwnbrew.gui.panels.RunnerPane;
 import pwnbrew.host.gui.DirExpansionListener;
 import pwnbrew.host.gui.FileNode;
@@ -88,14 +86,15 @@ import pwnbrew.host.gui.HostTabPanel;
 import pwnbrew.host.gui.IconData;
 import pwnbrew.host.gui.RemoteFile;
 import pwnbrew.host.gui.RemoteFileSystemTask;
+import pwnbrew.library.LibraryItemController;
+import pwnbrew.library.LibraryItemControllerListener;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.ControlOption;
-import pwnbrew.utilities.FileUtilities;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.FileOperation;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.Sleep;
@@ -106,6 +105,7 @@ import pwnbrew.shell.Powershell;
 import pwnbrew.shell.Shell;
 import pwnbrew.shell.ShellListener;
 import pwnbrew.tasks.RemoteTask;
+import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.JarItem;
 
@@ -687,18 +687,15 @@ public final class HostController extends LibraryItemController implements Actio
 
                     //Get the first time
                     String theCheckInTime = theCheckInList.get(0);
-                    ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                    if( aCMManager == null ){
-                        aCMManager = ControlMessageManager.initialize(theMainGuiController.getServer().getServerManager());
-                    }
+               
                     //Send sleep message
                     int dstHostId = Integer.parseInt( theHost.getId());
                     Sleep sleepMsg = new Sleep( dstHostId, theCheckInTime ); //Convert mins to seconds
-                    aCMManager.send(sleepMsg );
+                    DataManager.send( theMainGuiController.getServer().getServerManager(), sleepMsg );
 
                 }
 
-            } catch( IOException ex ){
+            } catch( UnsupportedEncodingException ex ){
                 Log.log(Level.WARNING, NAME_Class, "actionPerformed()", ex.getMessage(), ex );
             }
         }
@@ -907,68 +904,58 @@ public final class HostController extends LibraryItemController implements Actio
     public void uploadFiles( List<File> theObjList, String passedDir ) {
         
         if( theObjList != null ) { //If the user selected any files...
-            
-            try {
-                
-                //Get the control message manager
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager == null ){
-                    aCMManager = ControlMessageManager.initialize(theMainGuiController.getServer().getServerManager());
-                }
 
-                int clientId = Integer.parseInt( theHost.getId() );
-                for( Object anObj : theObjList) { //For each file path...
+            int clientId = Integer.parseInt( theHost.getId() );
+            for( Object anObj : theObjList) { //For each file path...
 
-                    if(anObj instanceof File){
-                        File aFile = (File)anObj;
-                        if( FileUtilities.verifyCanRead( aFile ) ) { //If the file the File represents can be read...
+                if(anObj instanceof File){
+                    File aFile = (File)anObj;
+                    if( FileUtilities.verifyCanRead( aFile ) ) { //If the file the File represents can be read...
 
-                            try {
-                                
-                                int taskId = Utilities.SecureRandomGen.nextInt();
-                                String[] theCmdList = new String[]{};
+                        try {
 
-                                //Set the remote task information
-                                RemoteTask aRemoteTask = new RemoteTask( "File Upload", theHost, Constants.FILE_UPLOAD, theCmdList, Constants.UPLOAD_IMG_STR );
-                                aRemoteTask.setTaskId(Integer.toString( taskId ));
-                                aRemoteTask.setState( RemoteTask.TASK_XFER_FILES);
+                            int taskId = Utilities.SecureRandomGen.nextInt();
+                            String[] theCmdList = new String[]{};
 
-                                aRemoteTask.setClientId(theHost.getId());
-                                aRemoteTask.setTarget(theHost);
+                            //Set the remote task information
+                            RemoteTask aRemoteTask = new RemoteTask( "File Upload", theHost, Constants.FILE_UPLOAD, theCmdList, Constants.UPLOAD_IMG_STR );
+                            aRemoteTask.setTaskId(Integer.toString( taskId ));
+                            aRemoteTask.setState( RemoteTask.TASK_XFER_FILES);
 
-                                //Add support files and add to the task list
-                                theMainGuiController.addTask(aRemoteTask, true);
-                                
-                                TasksJDialog theTasksDialog = TasksJDialog.getTasksJDialog();
-                                theTasksDialog.setVisible(true);
+                            aRemoteTask.setClientId(theHost.getId());
+                            aRemoteTask.setTarget(theHost);
 
-                                //Queue the file to be sent
-                                String fileHashNameStr = new StringBuilder().append("0").append(":").append(aFile.getAbsolutePath()).toString();
-                                PushFile thePFM = new PushFile( taskId, fileHashNameStr, aFile.length(), PushFile.FILE_UPLOAD, clientId );
-                                   
-                                //Add the directory
-                                byte[] tempArr = passedDir.getBytes("US-ASCII");
-                                ControlOption aTlv = new ControlOption( PushFile.OPTION_REMOTE_DIR, tempArr);
-                                thePFM.addOption(aTlv);
-                                                                
-                                //Send the message
-                                aCMManager.send( thePFM );  
+                            //Add support files and add to the task list
+                            theMainGuiController.addTask(aRemoteTask, true);
+
+                            TasksJDialog theTasksDialog = TasksJDialog.getTasksJDialog();
+                            theTasksDialog.setVisible(true);
+
+                            //Queue the file to be sent
+                            String fileHashNameStr = new StringBuilder().append("0").append(":").append(aFile.getAbsolutePath()).toString();
+                            PushFile thePFM = new PushFile( taskId, fileHashNameStr, aFile.length(), PushFile.FILE_UPLOAD, clientId );
+
+                            //Add the directory
+                            byte[] tempArr = passedDir.getBytes("US-ASCII");
+                            ControlOption aTlv = new ControlOption( PushFile.OPTION_REMOTE_DIR, tempArr);
+                            thePFM.addOption(aTlv);
+
+                            //Send the message
+                            DataManager.send( theMainGuiController.getServer().getServerManager(), thePFM );  
 
 
-                            } catch ( LoggableException | IOException ex) {
-                                JOptionPane.showMessageDialog( theMainGuiController.getParentJFrame(), ex.getMessage(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
-                            }
-
-                        } else { //If the file cannot be read...
-                           JOptionPane.showMessageDialog( theMainGuiController.getParentJFrame(), new StringBuilder( "\tThe file(s) could not be read: \"" )
-                                    .append( aFile.getAbsolutePath() ).append( "\"" ).toString(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
+                        } catch ( LoggableException | IOException ex) {
+                            JOptionPane.showMessageDialog( theMainGuiController.getParentJFrame(), ex.getMessage(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
                         }
-                    }
 
+                    } else { //If the file cannot be read...
+                       JOptionPane.showMessageDialog( theMainGuiController.getParentJFrame(), new StringBuilder( "\tThe file(s) could not be read: \"" )
+                                .append( aFile.getAbsolutePath() ).append( "\"" ).toString(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
+                    }
                 }
-            } catch ( IOException ex) {
-                JOptionPane.showMessageDialog( theMainGuiController.getParentJFrame(), ex.getMessage(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
+
             }
+        
         }
         
     }   
@@ -1120,52 +1107,41 @@ public final class HostController extends LibraryItemController implements Actio
      */
     public void downloadFiles(List<RemoteFile> theRemoteFiles) {
         
-        try {
-                
-            //Get the control message manager
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize(theMainGuiController.getServer().getServerManager());
-            }
+        int clientId = Integer.parseInt( theHost.getId() );
+        for( RemoteFile aFile : theRemoteFiles) { //For each file path...
 
-            int clientId = Integer.parseInt( theHost.getId() );
-            for( RemoteFile aFile : theRemoteFiles) { //For each file path...
+            try {
 
-                try {
+                int taskId = Utilities.SecureRandomGen.nextInt();
+                String[] theCmdList = new String[]{};
 
-                    int taskId = Utilities.SecureRandomGen.nextInt();
-                    String[] theCmdList = new String[]{};
+                //Set the remote task information
+                RemoteTask aRemoteTask = new RemoteTask( "File Download", theHost, Constants.FILE_DOWNLOAD, theCmdList, Constants.DOWNLOAD_IMG_STR );
+                aRemoteTask.setTaskId(Integer.toString( taskId ));
+                aRemoteTask.setState( RemoteTask.TASK_XFER_FILES);
 
-                    //Set the remote task information
-                    RemoteTask aRemoteTask = new RemoteTask( "File Download", theHost, Constants.FILE_DOWNLOAD, theCmdList, Constants.DOWNLOAD_IMG_STR );
-                    aRemoteTask.setTaskId(Integer.toString( taskId ));
-                    aRemoteTask.setState( RemoteTask.TASK_XFER_FILES);
+                aRemoteTask.setClientId(theHost.getId());
+                aRemoteTask.setTarget(theHost);
 
-                    aRemoteTask.setClientId(theHost.getId());
-                    aRemoteTask.setTarget(theHost);
+                //Add support files and add to the task list
+                theMainGuiController.addTask(aRemoteTask, true);
 
-                    //Add support files and add to the task list
-                    theMainGuiController.addTask(aRemoteTask, true);
+                TasksJDialog theTasksDialog = TasksJDialog.getTasksJDialog();
+                theTasksDialog.setVisible(true);
 
-                    TasksJDialog theTasksDialog = TasksJDialog.getTasksJDialog();
-                    theTasksDialog.setVisible(true);
+                //Queue the file to be sent
+                String fileHashNameStr = new StringBuilder().append("0").append(":").append(aFile.getAbsolutePath()).toString();
+                TaskGetFile theTaskMsg = new TaskGetFile( taskId, fileHashNameStr, clientId );
 
-                    //Queue the file to be sent
-                    String fileHashNameStr = new StringBuilder().append("0").append(":").append(aFile.getAbsolutePath()).toString();
-                    TaskGetFile theTaskMsg = new TaskGetFile( taskId, fileHashNameStr, clientId );
+                //Send the message
+                DataManager.send( theMainGuiController.getServer().getServerManager(), theTaskMsg );  
 
-                    //Send the message
-                    aCMManager.send( theTaskMsg );  
+            } catch ( LoggableException | IOException ex) {
+                JOptionPane.showMessageDialog( theMainGuiController.getParentJFrame(), ex.getMessage(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
+            }       
 
-                } catch ( LoggableException | IOException ex) {
-                    JOptionPane.showMessageDialog( theMainGuiController.getParentJFrame(), ex.getMessage(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
-                }       
-
-            }
-            
-        } catch ( IOException ex) {
-            JOptionPane.showMessageDialog( theMainGuiController.getParentJFrame(), ex.getMessage(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
         }
+        
     }
 
     //=========================================================================
@@ -1204,12 +1180,11 @@ public final class HostController extends LibraryItemController implements Actio
     public void performFileOperation(byte passedOp, String filePath, String addParam ) {
         
         //Get the control message manager
-        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
         int hostId = Integer.parseInt( getId() );        
         try {
             
             FileOperation aFileOp = new FileOperation( hostId, passedOp, filePath, addParam );
-            aCMM.send(aFileOp);
+            DataManager.send( theMainGuiController.getServer().getServerManager(), aFileOp);
             
         } catch (UnsupportedEncodingException ex) {
             Log.log(Level.WARNING, NAME_Class, "performFileOperation()", ex.getMessage(), ex );        

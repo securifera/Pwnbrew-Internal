@@ -35,29 +35,20 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-
-
-/*
- *  RelayManager.java
- *
- *  Created on Dec 2, 2013
- */
-
 package pwnbrew.network.relay;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
+import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
 
@@ -135,9 +126,10 @@ public class RelayManager extends DataManager {
             if( thePR.equals( srcPortRouter))
                  thePR = theServerPortRouter;
 
-            thePR.queueSend( msgBytes, tempId );
+            SocketChannelHandler theHandler = thePR.getSocketChannelHandler(tempId);
+            theHandler.queueBytes(msgBytes);
             
-        } catch (LoggableException | IOException ex) {
+        } catch (LoggableException ex) {
             Log.log( Level.SEVERE, NAME_Class, "handleMessage()", ex.getMessage(), ex);        
         }
         
@@ -174,24 +166,24 @@ public class RelayManager extends DataManager {
         theServerPortRouter = null;
         theRelayManager = null;
     }
-    
-     //===============================================================
-    /**
-     *   Send the message out the given channel.
-     *
-     * @param passedMessage
-     * @throws java.io.IOException
-    */
-    public void send( Message passedMessage ) throws IOException {
-
-        int msgLen = passedMessage.getLength();
-        ByteBuffer aByteBuffer = ByteBuffer.allocate( msgLen );
-        passedMessage.append(aByteBuffer);
-        
-        //Queue the message to be sent
-        theServerPortRouter.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
-        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-              
-    }
+//    
+//     //===============================================================
+//    /**
+//     *   Send the message out the given channel.
+//     *
+//     * @param passedMessage
+//     * @throws java.io.IOException
+//    */
+//    public void send( Message passedMessage ) throws IOException {
+//
+//        int msgLen = passedMessage.getLength();
+//        ByteBuffer aByteBuffer = ByteBuffer.allocate( msgLen );
+//        passedMessage.append(aByteBuffer);
+//        
+//        //Queue the message to be sent
+//        theServerPortRouter.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
+//        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+//              
+//    }
 
 }

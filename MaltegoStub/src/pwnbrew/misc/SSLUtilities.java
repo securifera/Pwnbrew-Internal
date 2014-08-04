@@ -59,6 +59,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
 /**
@@ -147,24 +149,15 @@ final public class SSLUtilities {
         try{
 
             //The keystore password
-            String keyStorePass;
+            String keyStorePass = theConf.getKeyStorePass();
 
             //If the keystore path is empty create one
             if(!keyStoreFile.exists()){
 
                //Create a random keypass
-               keyStorePass = Utilities.nextString();
-//               keyStorePass = Utilities.simpleEncrypt(Integer.toString( SocketUtilities.SecureRandomGen.nextInt()), Long.toString( SocketUtilities.SecureRandomGen.nextLong()));
                tempKeystore = createKeystore( keyStorePass);
 
-               //Set the keypath and passphrase
-               theConf.setKeyStorePass(keyStorePass);
-               saveConf = true;
-
             } else {
-
-               //Get the keystore pass
-               keyStorePass = theConf.getKeyStorePass();
 
                //Load the keystore
                FileInputStream theFIS = new FileInputStream(keyStoreFile.getAbsolutePath());
@@ -183,19 +176,6 @@ final public class SSLUtilities {
                     }
 
                     DebugPrinter.printMessage( NAME_Class, "loadKeystore()", ex.getMessage(), ex);
-                    if(ex.getMessage().contains("tampered")){
-
-                        //Delete the keystore
-                        if( keyStoreFile.delete() ){
-                            //Try and load it again
-                            try {
-                                return SSLUtilities.loadKeystore(theConf);
-                            } catch (LoggableException ex1) {    
-                                ex1 = null;
-                            }
-                        }
-                    }
-
 
                } finally {
 
@@ -229,14 +209,10 @@ final public class SSLUtilities {
             if(!checkAlias(tempKeystore, theAlias)){
                 
                 String hostname = Utilities.nextString();
-                String issuerhostname = Utilities.nextString();
                 String issueOrg = Utilities.nextString();
-                String issuerOrg = Utilities.nextString();
-                
                 
                 String distName = "CN="+ hostname +".com, O="+issueOrg+", L=San Francisco, S=CA, C=US";
-                String issuerName = "CN="+ issuerhostname +".com, O="+issuerOrg+", L=San Francisco, S=CA, C=US";
-                createSelfSignedCertificate(distName, issuerName, 365, tempKeystore, keyStorePass, theAlias);
+                createSelfSignedCertificate(distName, distName, 365, tempKeystore, keyStorePass, theAlias);
             }
 
         } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException ex) {
@@ -374,7 +350,16 @@ final public class SSLUtilities {
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
-
+          
+        String lookAndFeelClassStr = "javax.swing.plaf.metal.MetalLookAndFeel";
+        if( Utilities.isWindows() )
+            lookAndFeelClassStr = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
+        
+        try{
+            UIManager.setLookAndFeel( lookAndFeelClassStr );
+        } catch ( ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+        }
+   
         /* Create and display the form */
         SwingUtilities.invokeLater(new Runnable() {
             @Override

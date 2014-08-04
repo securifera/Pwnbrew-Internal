@@ -67,8 +67,8 @@ import javax.swing.text.StyledDocument;
 import pwnbrew.execution.ManagedRunnable;
 import pwnbrew.gui.panels.RunnerPane;
 import pwnbrew.logging.Log;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.CreateShell;
 import pwnbrew.network.control.messages.KillShell;
 import pwnbrew.network.shell.messages.StdInMessage;
@@ -152,12 +152,6 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         } else {
             
             try {
-                        
-                //Get the control message manager
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager == null ){
-                    aCMManager = ControlMessageManager.initialize(theListener.getCommManager());
-                }
 
                 //Add the command terminator
                 String startupStr = getStartupCommand();
@@ -169,9 +163,9 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
                 int dstHostId = Integer.parseInt( theListener.getHost().getId());
                 CreateShell aShellMsg = new CreateShell( dstHostId, getCommandStringArray(),
                         getEncoding(), startupStr, getStderrRedirectFlag() );
-                aCMManager.send( aShellMsg );
+                DataManager.send(theListener.getCommManager(), aShellMsg );
 
-            } catch ( IOException ex) {
+            } catch ( UnsupportedEncodingException ex) {
                 Log.log(Level.WARNING, NAME_Class, "spawnShell()", ex.getMessage(), ex );
             }     
         }
@@ -480,11 +474,8 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
 
                     int dstHostId = Integer.parseInt( theListener.getHost().getId());
                     StdInMessage aMsg = new StdInMessage( ByteBuffer.wrap(theStr.getBytes()), dstHostId);  
-                    ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
-                    if( aSMM == null){
-                        aSMM = ShellMessageManager.initialize( theListener.getCommManager() );
-                    }
-                    aSMM.send(aMsg);
+                    //Send the message
+                    DataManager.send(theListener.getCommManager(), aMsg);
 
                 }
             }
@@ -538,23 +529,12 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
             }
             
         } else {
-            
-            try {     
 
-                //Get the control message manager
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager == null ){
-                    aCMManager = ControlMessageManager.initialize( theListener.getCommManager());
-                }
+            //Create the message
+            int dstHostId = Integer.parseInt( theListener.getHost().getId() );
+            KillShell aShellMsg = new KillShell(dstHostId);
+            DataManager.send(theListener.getCommManager(), aShellMsg );
 
-                //Create the message
-                int dstHostId = Integer.parseInt( theListener.getHost().getId() );
-                KillShell aShellMsg = new KillShell(dstHostId);
-                aCMManager.send(aShellMsg );
-
-            } catch ( IOException ex ) {
-                Log.log(Level.WARNING, NAME_Class, "killShell()", ex.getMessage(), ex );        
-            }
         }
     }
     

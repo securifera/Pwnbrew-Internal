@@ -47,9 +47,8 @@ import java.util.logging.Level;
 import static pwnbrew.Environment.addClassToMap;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Directories;
-import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.JarItem;
@@ -168,20 +167,15 @@ public final class AddToJarLibrary extends JarItemMsg{ // NO_UCD (use default)
                         }
                         
                         try {
-            
-                            RelayManager aManager = RelayManager.getRelayManager();
-                            if( aManager != null ){
-                                aManager = RelayManager.initialize( passedManager );            
 
-                                //Send the msg
-                                AddToJarLibrary aMsg = new AddToJarLibrary( getSrcHostId(), aJarItem.toString(), theJarType, aJarItem.getJvmMajorVersion(), aJarItem.getVersion() );
-                                aManager.send(aMsg);
-                            }
+                            //Send the msg
+                            AddToJarLibrary aMsg = new AddToJarLibrary( getSrcHostId(), aJarItem.toString(), theJarType, aJarItem.getJvmMajorVersion(), aJarItem.getVersion() );
+                            DataManager.send( passedManager, aMsg);
                             
                             //Delete the file
                             tempJarFile.delete();
 
-                        } catch (IOException ex) {
+                        } catch (UnsupportedEncodingException ex) {
                             Log.log(Level.WARNING, NAME_Class, "deleteJarItem", ex.getMessage(), ex );
                         }
                         

@@ -39,6 +39,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.logging.Level;
 import pwnbrew.host.Host;
@@ -46,6 +47,7 @@ import pwnbrew.host.HostController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Nic;
@@ -106,35 +108,32 @@ public final class GetIPs extends ControlMessage{ // NO_UCD (use default)
     */
     @Override
     public void evaluate( CommManager passedManager ) throws LoggableException {     
-        
-        RelayManager aManager = RelayManager.getRelayManager();
-        if( aManager != null ){
-                            
-            String hostIdStr = Integer.toString( hostId );
-            if( hostId == -1 )
-                hostIdStr  = ServerConfig.getServerConfig().getHostId();  
 
-            //Get the host controllers 
-            ServerManager aSM = (ServerManager) passedManager;
-            HostController theHostController = aSM.getHostController(hostIdStr);
-            if( theHostController != null ){
+        String hostIdStr = Integer.toString( hostId );
+        if( hostId == -1 )
+            hostIdStr  = ServerConfig.getServerConfig().getHostId();  
 
-                //Get the host
-                Host theHost = theHostController.getHost();
-                Map<String, Nic> nicMap = theHost.getNicMap();     
-                for (Nic anEntry : nicMap.values()) {
-                    String anIP = anEntry.getIpAddress();
-                    try {
-                        IpMsg anIpMsg = new IpMsg( getSrcHostId(), anIP);
-                        aManager.send(anIpMsg);
-                    } catch ( IOException ex) {
-                        Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                    }
-                }       
+        //Get the host controllers 
+        ServerManager aSM = (ServerManager) passedManager;
+        HostController theHostController = aSM.getHostController(hostIdStr);
+        if( theHostController != null ){
 
-            }              
-                        
-        }        
-    }
+            //Get the host
+            Host theHost = theHostController.getHost();
+            Map<String, Nic> nicMap = theHost.getNicMap();     
+            for (Nic anEntry : nicMap.values()) {
+                String anIP = anEntry.getIpAddress();
+                try {
+                    IpMsg anIpMsg = new IpMsg( getSrcHostId(), anIP);
+                    DataManager.send( passedManager, anIpMsg);
+                } catch ( UnsupportedEncodingException ex) {
+                    Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
+                }
+            }       
+
+        }              
+
+    }        
+    
 
 }

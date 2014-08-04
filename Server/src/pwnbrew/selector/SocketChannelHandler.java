@@ -537,11 +537,12 @@ public class SocketChannelHandler implements Selectable {
                     ex1 = null;
                 }
                 
-                try {
-                    thePortRouter.queueSend( byteArr, getRootHostId() );
-                } catch (IOException ex) {
-                    Log.log(Level.INFO, NAME_Class, "retrySend()", ex.getMessage(), ex );
-                }
+//                try {
+                queueBytes(byteArr);
+//                    thePortRouter.queueSend( byteArr, getRootHostId() );
+//                } catch (IOException ex) {
+//                    Log.log(Level.INFO, NAME_Class, "retrySend()", ex.getMessage(), ex );
+//                }
                 
             }
 

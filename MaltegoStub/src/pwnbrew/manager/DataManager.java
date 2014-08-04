@@ -50,7 +50,7 @@ import java.util.HashMap;
 import java.util.Map;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ClientPortRouter;
-import pwnbrew.network.PortWrapper;
+//import pwnbrew.network.PortWrapper;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
@@ -65,7 +65,6 @@ abstract public class DataManager {
     protected DataHandler theDataHandler;
     protected final PortManager theCommManager;
     
-    private static final Map<Integer, PortWrapper> thePortWrapperMap = new HashMap<>();
     private transient static final String NAME_Class = DataManager.class.getSimpleName();
     
 
@@ -77,28 +76,6 @@ abstract public class DataManager {
     public DataManager( PortManager passedProvider ) {
         theCommManager = passedProvider ;
     }  
-    
-    //===========================================================================
-    /**
-     *  Get the the port wrapper.
-     * 
-     * @param passedPort 
-     * @return  
-     */
-    public static PortWrapper getPortWrapper( int passedPort ) {
-        return thePortWrapperMap.get( passedPort );
-    }
-    
-     //===========================================================================
-    /**
-     *  Set the the port wrapper.
-     * 
-     * @param passedPort 
-     * @param passedWrapper 
-     */
-    public static void setPortWrapper( int passedPort, PortWrapper passedWrapper) {
-        thePortWrapperMap.put( passedPort, passedWrapper );
-    }
     
     //===========================================================================
     /*

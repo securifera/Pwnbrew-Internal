@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.relay.RelayManager;
@@ -111,17 +112,12 @@ public final class DeleteJarItem extends JarItemMsg {
         }
         
         try {
-            
-            RelayManager aCMManager = RelayManager.getRelayManager();
-            if( aCMManager != null ){
-                aCMManager = RelayManager.initialize( passedManager );            
-            
-                //Send the msg
-                DeleteJarItem aMsg = new DeleteJarItem( getSrcHostId(), theJarName, theJarType, theJvmVersion, theJarVersion );
-                aCMManager.send(aMsg);
-            }
-            
-        } catch (IOException ex) {
+
+            //Send the msg
+            DeleteJarItem aMsg = new DeleteJarItem( getSrcHostId(), theJarName, theJarType, theJvmVersion, theJarVersion );
+            DataManager.send( passedManager,aMsg);
+           
+        } catch (UnsupportedEncodingException ex) {
             Log.log(Level.WARNING, NAME_Class, "deleteJarItem", ex.getMessage(), ex );
         }
     }

@@ -41,13 +41,11 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.utilities;
 
 import pwnbrew.xmlBase.JarItemException;
-import com.sun.jna.Pointer;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.beans.IntrospectionException;
 import java.io.*;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.SocketException;
@@ -88,10 +86,8 @@ import pwnbrew.tasks.RemoteTask;
 import pwnbrew.xmlBase.XmlBase;
 import pwnbrew.exception.XmlBaseCreationException;
 import pwnbrew.xmlBase.XmlBaseFactory;
-import pwnbrew.jna.Kernel32;
 import pwnbrew.misc.FileFilterImp;
 import pwnbrew.misc.IdGenerator;
-import pwnbrew.misc.RuntimeRunnable;
 import pwnbrew.network.control.messages.Payload;
 import pwnbrew.network.control.messages.SendStage;
 import pwnbrew.validation.StandardValidation;
@@ -1486,65 +1482,65 @@ public class Utilities {
         }
     }
     
-     // ==========================================================================
-    /**
-     * Kill the children spawned by the parent process provided.
-     * @param theProcess
-    */
-    public static void killChildProcesses(Process theProcess) {
-        
-        StringBuilder killString = new StringBuilder();
-        List<String> stringList = new ArrayList<>();
-        int pid;
-        try {
-            
-            if (theProcess.getClass().getName().equals("java.lang.Win32Process") ||
-                theProcess.getClass().getName().equals("java.lang.ProcessImpl")) {
-                
-                //Get the process handle
-                Field f = theProcess.getClass().getDeclaredField("handle");
-                f.setAccessible(true);				
-                long handl = f.getLong(theProcess);
-
-                //Get the pid
-                Kernel32 kernel = Kernel32.INSTANCE;
-                Kernel32.HANDLE handle = new Kernel32.HANDLE();
-                handle.setPointer(Pointer.createConstant(handl));
-                pid = kernel.GetProcessId(handle);
-                
-                //Create the kill string
-                stringList.add("taskkill");
-                stringList.add("/PID");
-                stringList.add(Integer.toString(pid));
-                stringList.add("/T");
-            
-            } else {
-
-                if(theProcess.getClass().getName().equals("java.lang.UNIXProcess")) {
-
-                    //Get the pid field
-                    Field f = theProcess.getClass().getDeclaredField("pid");
-                    f.setAccessible(true);
-                    pid = f.getInt(theProcess);
-                    stringList.add("/bin/bash");
-                    stringList.add("-c");
-                   
-                    killString.append("pstree -p ").append(pid)
-                            .append(" | sed 's/(/\\n(/g' | grep '(' | sed 's/(\\(.*\\)).*/\\1/' | tr '\\n' ' ' | xargs kill");
-
-                    stringList.add(killString.toString());
-                }
-            }
-            
-        } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
-            Log.log(Level.WARNING, NAME_Class, "killChildProcesses()", ex.getMessage(), ex );
-        } 
-
-        String[] stringArr = stringList.toArray( new String[stringList.size()]);
-        //Kill child process
-        Constants.Executor.execute( new RuntimeRunnable( stringArr ));
-             
-    }
+//     // ==========================================================================
+//    /**
+//     * Kill the children spawned by the parent process provided.
+//     * @param theProcess
+//    */
+//    public static void killChildProcesses(Process theProcess) {
+//        
+//        StringBuilder killString = new StringBuilder();
+//        List<String> stringList = new ArrayList<>();
+//        int pid;
+//        try {
+//            
+//            if (theProcess.getClass().getName().equals("java.lang.Win32Process") ||
+//                theProcess.getClass().getName().equals("java.lang.ProcessImpl")) {
+//                
+//                //Get the process handle
+//                Field f = theProcess.getClass().getDeclaredField("handle");
+//                f.setAccessible(true);				
+//                long handl = f.getLong(theProcess);
+//
+//                //Get the pid
+//                Kernel32 kernel = Kernel32.INSTANCE;
+//                Kernel32.HANDLE handle = new Kernel32.HANDLE();
+//                handle.setPointer(Pointer.createConstant(handl));
+//                pid = kernel.GetProcessId(handle);
+//                
+//                //Create the kill string
+//                stringList.add("taskkill");
+//                stringList.add("/PID");
+//                stringList.add(Integer.toString(pid));
+//                stringList.add("/T");
+//            
+//            } else {
+//
+//                if(theProcess.getClass().getName().equals("java.lang.UNIXProcess")) {
+//
+//                    //Get the pid field
+//                    Field f = theProcess.getClass().getDeclaredField("pid");
+//                    f.setAccessible(true);
+//                    pid = f.getInt(theProcess);
+//                    stringList.add("/bin/bash");
+//                    stringList.add("-c");
+//                   
+//                    killString.append("pstree -p ").append(pid)
+//                            .append(" | sed 's/(/\\n(/g' | grep '(' | sed 's/(\\(.*\\)).*/\\1/' | tr '\\n' ' ' | xargs kill");
+//
+//                    stringList.add(killString.toString());
+//                }
+//            }
+//            
+//        } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
+//            Log.log(Level.WARNING, NAME_Class, "killChildProcesses()", ex.getMessage(), ex );
+//        } 
+//
+//        String[] stringArr = stringList.toArray( new String[stringList.size()]);
+//        //Kill child process
+//        Constants.Executor.execute( new RuntimeRunnable( stringArr ));
+//             
+//    }
     
      //=====================================================================
     /*

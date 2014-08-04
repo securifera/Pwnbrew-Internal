@@ -38,14 +38,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.controllers;
 
-import pwnbrew.library.LibraryItemController;
-import pwnbrew.exception.XmlBaseCreationException;
-import pwnbrew.xmlBase.Bundle;
-import pwnbrew.xmlBase.XmlBase;
-import pwnbrew.exception.FileContentException;
-import pwnbrew.xmlBase.XmlBaseFactory;
-import pwnbrew.xmlBase.job.Job;
-import pwnbrew.xmlBase.job.JobSet;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Insets;
@@ -63,28 +55,27 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import pwnbrew.Server;
+import pwnbrew.exception.FileContentException;
+import pwnbrew.exception.XmlBaseCreationException;
 import pwnbrew.gui.MainGui;
 import pwnbrew.gui.dialogs.OptionsJDialogListener;
 import pwnbrew.gui.dialogs.TasksJDialog;
 import pwnbrew.gui.input.ValidTextField;
 import pwnbrew.gui.panels.RunnerPane;
-import pwnbrew.gui.tree.IconNode;
-import pwnbrew.gui.tree.MainGuiTreeModel;
 import pwnbrew.gui.tree.LibraryItemJTree;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.HostFactory;
-import pwnbrew.host.Session;
 import pwnbrew.library.Ancestor;
+import pwnbrew.library.LibraryItemController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
-import pwnbrew.utilities.FileUtilities;
 import pwnbrew.misc.GarbageCollector;
 import pwnbrew.misc.ProgressListener;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.Migrate;
 import pwnbrew.network.control.messages.RelayStart;
 import pwnbrew.network.control.messages.RelayStop;
@@ -97,11 +88,17 @@ import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.tasks.RemoteTask;
 import pwnbrew.tasks.RemoteTaskListener;
 import pwnbrew.tasks.TaskManager;
+import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.GuiUtilities;
 import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.validation.StandardValidation;
+import pwnbrew.xmlBase.Bundle;
 import pwnbrew.xmlBase.JarItem;
+import pwnbrew.xmlBase.XmlBase;
+import pwnbrew.xmlBase.XmlBaseFactory;
+import pwnbrew.xmlBase.job.Job;
+import pwnbrew.xmlBase.job.JobSet;
 
 /**
  *
@@ -1023,11 +1020,6 @@ final public class MainGuiController extends Controller implements ActionListene
 
                 case Constants.ACTION_UNINSTALL:
 
-                    ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                    if( aCMManager == null ){
-                        aCMManager = ControlMessageManager.initialize( getServer().getServerManager());
-                    }
-
                     theControllerList = theMainGui.getJTree().getSelectedObjectControllers();
                     for( LibraryItemController aController : theControllerList){
                         if( aController instanceof HostController){
@@ -1035,7 +1027,7 @@ final public class MainGuiController extends Controller implements ActionListene
                             int hostId = Integer.parseInt( ((HostController)aController).getId());
                             //Send sleep message
                             Uninstall aMsg = new Uninstall(hostId); //Convert mins to seconds
-                            aCMManager.send( aMsg );
+                            DataManager.send( theServerManager, aMsg );
 
                         }
                     }
@@ -1050,12 +1042,7 @@ final public class MainGuiController extends Controller implements ActionListene
                     break;
                 case Constants.ACTION_RELOAD:
                     //Tell the client to reload                      
-                    //Get the control message manager
-                    aCMManager = ControlMessageManager.getControlMessageManager();
-                    if( aCMManager == null ){
-                        aCMManager = ControlMessageManager.initialize( getServer().getServerManager());
-                    }
-
+                    
                     //Send reload message
                     theControllerList = theMainGui.getJTree().getSelectedObjectControllers();
                     for( LibraryItemController aController : theControllerList){
@@ -1063,19 +1050,13 @@ final public class MainGuiController extends Controller implements ActionListene
 
                             int hostId = Integer.parseInt(((HostController)aController).getId());
                             Reload aRelMsg = new Reload(hostId); //Convert mins to seconds
-                            aCMManager.send(aRelMsg );
+                            DataManager.send( theServerManager, aRelMsg );
                         }
                     }
                     break;
                     
                  case Constants.ACTION_UPGRADE:
-                    
-                     //Upgrade the client stager
-                    aCMManager = ControlMessageManager.getControlMessageManager();
-                    if( aCMManager == null ){
-                        aCMManager = ControlMessageManager.initialize( getServer().getServerManager());
-                    }
-
+                   
                     //Send reload message
                     theControllerList = theMainGui.getJTree().getSelectedObjectControllers();
                     for( LibraryItemController aController : theControllerList){
@@ -1093,7 +1074,7 @@ final public class MainGuiController extends Controller implements ActionListene
 
                                 //Send the new stager
                                 UpgradeStager upgradeMsg = new UpgradeStager(hostId, theItem); 
-                                aCMManager.send(upgradeMsg );
+                                DataManager.send( theServerManager, upgradeMsg );
                             }
                         }
                     }
@@ -1121,19 +1102,13 @@ final public class MainGuiController extends Controller implements ActionListene
                                 String strPort =  aField.getText();
                                 int port = Integer.parseInt( strPort );                    
 
-                                //Get the control message manager
-                                aCMManager = ControlMessageManager.getControlMessageManager();
-                                if( aCMManager == null ){
-                                    aCMManager = ControlMessageManager.initialize( getServer().getServerManager());
-                                }                      
-
                                 HostController aHostController = (HostController)aController;
                                 Host aHost = aHostController.getObject();
                                 aHost.setRelayPort( strPort );
                                 
                                 int hostId = Integer.parseInt(aHostController.getId());
                                 RelayStart aMigMsg = new RelayStart( port, hostId ); //Convert mins to seconds
-                                aCMManager.send( aMigMsg );
+                                DataManager.send( theServerManager, aMigMsg );
                             }
                         }
                     }
@@ -1157,21 +1132,12 @@ final public class MainGuiController extends Controller implements ActionListene
                             
                             //Get the last-selected node
                             if( rtnCode == JOptionPane.YES_OPTION ) { //If the delete is confirmed...
-
-                                try {
                                    
-                                    aCMManager = ControlMessageManager.getControlMessageManager();
-                                    if( aCMManager == null ){
-                                        aCMManager = ControlMessageManager.initialize( getServer().getServerManager());
-                                    }
-                                    //Send sleep message
-                                    int dstHostId = Integer.parseInt( theHost.getId());
-                                    RelayStop stopMsg = new RelayStop( dstHostId ); //Convert mins to seconds
-                                    aCMManager.send(stopMsg );
+                                //Send sleep message
+                                int dstHostId = Integer.parseInt( theHost.getId());
+                                RelayStop stopMsg = new RelayStop( dstHostId ); //Convert mins to seconds
+                                DataManager.send( theServerManager, stopMsg );
 
-                                } catch( IOException ex ){
-                                    Log.log(Level.WARNING, NAME_Class, "actionPerformed()", ex.getMessage(), ex );
-                                }
                             }
                         } 
                     } 
@@ -1191,12 +1157,6 @@ final public class MainGuiController extends Controller implements ActionListene
                     if((Integer)retVal == JOptionPane.OK_OPTION && aField.isDataValid()){
                        String serverIp = aField.getText();                    
 
-                       //Get the control message manager
-                       aCMManager = ControlMessageManager.getControlMessageManager();
-                       if( aCMManager == null ){
-                           aCMManager = ControlMessageManager.initialize( getServer().getServerManager());
-                       }
-
                        //Send sleep message
                         theControllerList = theMainGui.getJTree().getSelectedObjectControllers();
                         for( LibraryItemController aController : theControllerList){
@@ -1204,7 +1164,7 @@ final public class MainGuiController extends Controller implements ActionListene
 
                                 int hostId = Integer.parseInt(((HostController)aController).getId());
                                 Migrate aMigMsg = new Migrate( hostId, serverIp ); //Convert mins to seconds
-                                aCMManager.send( aMigMsg );
+                                DataManager.send( theServerManager, aMigMsg );
                             }
                         }
                     }
@@ -1625,21 +1585,9 @@ final public class MainGuiController extends Controller implements ActionListene
             int clientId = Integer.parseInt( aTask.getClientId() );
             final TaskNew aMessage = aTask.getControlMessage(clientId);
 
-            if( aMessage != null ){
-                //Send staging message
-                try {
-
-                    ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                    if( aCMManager == null ){
-                        aCMManager = ControlMessageManager.initialize( theServerManager );
-                    }
-
-                    aCMManager.send(aMessage);
-
-                } catch( IOException ex ){
-                   Log.log(Level.SEVERE, NAME_Class, "addTask()", ex.getMessage(), ex );
-                }
-            }
+            if( aMessage != null )
+                DataManager.send( theServerManager, aMessage );
+            
         }
         
     }    
@@ -1654,16 +1602,11 @@ final public class MainGuiController extends Controller implements ActionListene
     public void startTask(RemoteTask theTask) {
         
         try {
-             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( theServerManager );
-            }
             
             int dstHostId = Integer.parseInt( theTask.getClientId());
-            aCMManager.send(theTask.getControlMessage(dstHostId) );
+            DataManager.send( theServerManager, theTask.getControlMessage(dstHostId) );
 
-        } catch ( LoggableException | IOException ex) {
+        } catch ( LoggableException ex) {
            Log.log(Level.WARNING, NAME_Class, "startTask()", ex.getMessage(), ex );
         }
         
@@ -1696,15 +1639,9 @@ final public class MainGuiController extends Controller implements ActionListene
                 }
                 aFMM.cancelFileTransfer( msgId, taskId);
                 
-                if(msgId != null){
-                    
-                    ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                    if( aCMManager == null ){
-                        aCMManager = ControlMessageManager.initialize( theServerManager );
-                    }
-                    
+                if(msgId != null){                    
                     TaskStatus cancelMessage = new TaskStatus( taskId, RemoteTask.TASK_CANCELLED, msgId );
-                    aCMManager.send(cancelMessage);
+                    DataManager.send( theServerManager, cancelMessage);
                 }
                 
             } catch ( IOException ex) {

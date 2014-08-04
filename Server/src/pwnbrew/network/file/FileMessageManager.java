@@ -255,12 +255,6 @@ public class FileMessageManager extends DataManager {
                 break;
         }
 
-        //Get the control manager for sending messages
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager == null ){
-            aCMManager = ControlMessageManager.initialize( getCommManager() );
-        }
-
         try {
 
             //Get the hash/filename
@@ -275,7 +269,7 @@ public class FileMessageManager extends DataManager {
                 //Send an ack to the sender to begin transfer
                 DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);
                 PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr, clientId );
-                aCMManager.send( aSFMA );
+                DataManager.send(theCommManager, aSFMA);
             } 
 
         } catch (IOException | NoSuchAlgorithmException ex){

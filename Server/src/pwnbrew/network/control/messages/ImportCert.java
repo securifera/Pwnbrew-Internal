@@ -49,9 +49,9 @@ import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.xmlBase.ServerConfig;
 
@@ -143,36 +143,32 @@ public final class ImportCert extends ControlMessage { // NO_UCD (use default)
                         
                         //Get the port
                         int serverPort = theConf.getSocketPort();
-
-                        //Get the PKI Cert
-                        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                        if( aCMManager != null ){
                             
-                            Certificate theCert = SSLUtilities.getCertificate();
-                            if( theCert instanceof sun.security.x509.X509CertImpl ){
-                                sun.security.x509.X509CertImpl theCustomCert = (sun.security.x509.X509CertImpl)theCert;
+                        Certificate theCert = SSLUtilities.getCertificate();
+                        if( theCert instanceof sun.security.x509.X509CertImpl ){
+                            sun.security.x509.X509CertImpl theCustomCert = (sun.security.x509.X509CertImpl)theCert;
 
-                                //Get the issuee name
-                                Principal aPrincipal = theCustomCert.getSubjectDN();
-                                String issueeName = aPrincipal.getName();
+                            //Get the issuee name
+                            Principal aPrincipal = theCustomCert.getSubjectDN();
+                            String issueeName = aPrincipal.getName();
 
-                                //Get the issuer org
-                                aPrincipal = theCustomCert.getIssuerDN();
-                                String issuerName = aPrincipal.getName();
+                            //Get the issuer org
+                            aPrincipal = theCustomCert.getIssuerDN();
+                            String issuerName = aPrincipal.getName();
 
-                                //Set the algorithm
-                                String theAlgorithm = theCustomCert.getSigAlgName();
+                            //Set the algorithm
+                            String theAlgorithm = theCustomCert.getSigAlgName();
 
-                                //Set the date
-                                Date expirationDate = theCustomCert.getNotAfter();
-                                String expDateStr = Constants.CHECKIN_DATE_FORMAT.format(expirationDate);                        
+                            //Set the date
+                            Date expirationDate = theCustomCert.getNotAfter();
+                            String expDateStr = Constants.CHECKIN_DATE_FORMAT.format(expirationDate);                        
 
-                                //Send back the data
-                                NetworkSettingsMsg aMsg = new NetworkSettingsMsg( getSrcHostId(), serverPort, issueeName, issuerName, theAlgorithm, expDateStr );
-                                aCMManager.send(aMsg);
+                            //Send back the data
+                            NetworkSettingsMsg aMsg = new NetworkSettingsMsg( getSrcHostId(), serverPort, issueeName, issuerName, theAlgorithm, expDateStr );
+                            DataManager.send( passedManager, aMsg);
 
-                            }
                         }
+                       
                     }
                 }
             }        

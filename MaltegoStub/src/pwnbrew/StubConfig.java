@@ -66,7 +66,7 @@ public class StubConfig {
     private transient int theSocketPort = 443;
     
     //Java keystore variables
-    private String theStorePass = "";
+    private String theStorePass = "password";
     private String theCertAlias = "";
   
     //The time to sleep between connections

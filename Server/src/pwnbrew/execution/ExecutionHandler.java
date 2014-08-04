@@ -342,11 +342,11 @@ public class ExecutionHandler implements Runnable, LibraryFileCopyListener, Stre
             if( theProcess != null ) {
                 
                 //Kill child process first
-                Utilities.killChildProcesses(theProcess);
+//                Utilities.killChildProcesses(theProcess);
                 
-//                theProcess.destroy(); //Stop the process
-//                theStdoutStreamRecorder.abort();
-//                theStderrStreamRecorder.abort();
+                theProcess.destroy(); //Stop the process
+                theStdoutStreamRecorder.shutdown();
+                theStderrStreamRecorder.shutdown();
             }
           
         }

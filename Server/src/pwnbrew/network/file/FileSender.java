@@ -57,6 +57,7 @@ import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.execution.ManagedRunnable;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.SocketUtilities;
@@ -127,21 +128,22 @@ public class FileSender extends ManagedRunnable {
 
                 Log.log(Level.INFO, NAME_Class, "go()", ex.getMessage(), ex );
 
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                try {
-                    
-                    if( aCMManager == null ){
-                        aCMManager = ControlMessageManager.initialize(theCommManager);
-                    }
+//                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//                try {
+//                    
+//                    if( aCMManager == null ){
+//                        aCMManager = ControlMessageManager.initialize(theCommManager);
+//                    }
 
                     //Send message to cleanup the file transfer on the client side
                     int clientId = theFileAck.getSrcHostId();
                     PushFileAbort fileAbortMsg = new PushFileAbort( fileId, clientId );
-                    aCMManager.send(fileAbortMsg ); 
-                    
-                } catch( IOException ex1 ){
-                     Log.log(Level.INFO, NAME_Class, "go()", ex.getMessage(), ex );
-                }
+                    DataManager.send(theCommManager, fileAbortMsg);
+//                    aCMManager.send(fileAbortMsg ); 
+//                    
+//                } catch( IOException ex1 ){
+//                     Log.log(Level.INFO, NAME_Class, "go()", ex.getMessage(), ex );
+//                }
 
             }
         }
@@ -170,8 +172,7 @@ public class FileSender extends ManagedRunnable {
     
         //Get the id and port router
         if( aHandler != null ){
-            
-//            byte[] theFileId = SocketUtilities.intToByteArray(fileId); 
+
             if( fileToBeSent.length() == 0 ){
 
                 FileData fileDataMsg = new FileData(fileId, new byte[0]);
@@ -179,16 +180,8 @@ public class FileSender extends ManagedRunnable {
                 fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) );           
 
                 //Send the message
-                thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
-//                ByteBuffer tempBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE + clientIdArr.length + destIdArr.length + theFileId.length + 1 );
-//                tempBuffer.put( Message.FILE_MESSAGE_TYPE );
-//                tempBuffer.put( new byte[]{0x0,0x0,0x0,0x0c});
-//                tempBuffer.put(clientIdArr);
-//                tempBuffer.put(destIdArr);
-//                tempBuffer.put(theFileId);
-//
-//                //Send the message
-//                thePR.queueSend( Arrays.copyOf( tempBuffer.array(), tempBuffer.position()), theFileAck.getSrcHostId() );
+                DataManager.send(theCommManager, fileDataMsg);
+//                thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
 
             } else {  
 
@@ -199,12 +192,7 @@ public class FileSender extends ManagedRunnable {
                     FileChannel theFC = aFIS.getChannel();
                     ByteBuffer fileChannelBB = ByteBuffer.allocate(maxMsgLen);
 
-                    //Set the msglen
-//                    final byte[] msgLen = new byte[ Message.MSG_LEN_SIZE ];
-//                    int readCount;            
-
                     int fileRead = 0;
-//                    ByteBuffer tempBuffer;
                     DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sending " + theFileAck.getHashFilenameString());
                     while(fileRead != -1 && !finished() ){
 
@@ -213,33 +201,18 @@ public class FileSender extends ManagedRunnable {
                         fileRead = theFC.read(fileChannelBB);                
 
                         //Set file length
-                        if( fileRead == -1 )//{
+                        if( fileRead == -1 )
                             continue;
-//                        } else {
-//                            readCount = fileRead;
-//                        }
 
-                        //Convert the length to a byte array
-//                        SocketUtilities.intToByteArray(msgLen, readCount + clientIdArr.length + destIdArr.length + theFileId.length );
                         fileChannelBB.flip();
 
                         byte[] fileBytes = Arrays.copyOf(fileChannelBB.array(), fileChannelBB.limit());
                         FileData fileDataMsg = new FileData(fileId, fileBytes);
                         fileDataMsg.setSrcHostId(SocketUtilities.byteArrayToInt(clientIdArr));
                         fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) ); 
-                        thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
-                    
-//                        //Construct the buffer
-//                        tempBuffer = ByteBuffer.allocate( readCount + msgLen.length + clientIdArr.length + destIdArr.length + theFileId.length + 1 );
-//                        tempBuffer.put( Message.FILE_MESSAGE_TYPE );
-//                        tempBuffer.put(msgLen);
-//                        tempBuffer.put(clientIdArr);
-//                        tempBuffer.put(destIdArr);
-//                        tempBuffer.put(theFileId);
-//                        tempBuffer.put(fileChannelBB);
-//                        
-//                        //Send the message
-//                        thePR.queueSend( Arrays.copyOf( tempBuffer.array(), tempBuffer.position()), theFileAck.getSrcHostId() );
+                        
+                        DataManager.send(theCommManager, fileDataMsg);
+//                        thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
 
                     }
 

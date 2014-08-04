@@ -168,6 +168,11 @@ final public class Log {
         
         DebugPrinter.printMessage( new StringBuilder().append(sourceClass).append(".")
                 .append(sourceMethod).toString(), message);  
+        
+        //Print stace trace
+        if( thrown != null ){
+            DebugPrinter.printException(thrown);
+        }
                
         
     }/* END log( Level, String, String, String, Throwable ) */
