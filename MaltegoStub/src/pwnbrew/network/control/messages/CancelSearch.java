@@ -38,40 +38,21 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.UnsupportedEncodingException;
-import pwnbrew.misc.SocketUtilities;
-import pwnbrew.network.ControlOption;
-
 /**
  *
  *  
  */
-@SuppressWarnings("ucd")
-public final class ListFiles extends Tasking {
-    
-    private static final byte OPTION_PATH = 7; 
-    
-
+public class CancelSearch extends ControlMessage {
+     
     // ==========================================================================
-    /**\
+    /**
      * Constructor
      *
      * @param dstHostId
-     * @param passedFilePath
     */
-    public ListFiles( int dstHostId, String passedFilePath ) {
-        super( SocketUtilities.getNextId(), dstHostId );    
-        
-        try {
-            
-            //Add file path
-            byte[] tempBytes = passedFilePath.getBytes("US-ASCII");
-            ControlOption aTlv = new ControlOption( OPTION_PATH, tempBytes);
-            addOption(aTlv);
-            
-        } catch (UnsupportedEncodingException ex) {
-            ex = null;
-        }
+    public CancelSearch( int dstHostId )  {
+        super( dstHostId);
     }
+    
 
 }

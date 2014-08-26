@@ -78,9 +78,8 @@ public class TaskStatus extends Tasking {
      *
      * @param passedId
      * @param passedStatus
-     * @throws java.io.IOException
     */
-    public TaskStatus( int passedId, String passedStatus  ) throws IOException  {
+    public TaskStatus( int passedId, String passedStatus  ) {
         super( passedId );
 
         taskStatus = passedStatus;

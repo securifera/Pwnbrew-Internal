@@ -132,18 +132,14 @@ public final class StageFlag extends ControlMessage{
             
             //Set the flag on the handler
             SocketChannelHandler aHandler = theSPR.getSocketChannelHandler(theRelayClientId);
-            if( aHandler != null ){
-                aHandler.setStaging(true);
-            }            
+            if( aHandler != null )
+                aHandler.setStaging(true);                     
                             
             //Send the ack
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
             if( aCMManager != null ){
-                try {
-                    StageFlagAck ackFlag = new StageFlagAck( theRelayClientId, theJvmVersion );
-                    aCMManager.send(ackFlag);
-                } catch (UnsupportedEncodingException ex) {              
-                }
+                StageFlagAck ackFlag = new StageFlagAck( theRelayClientId, theJvmVersion );
+                aCMManager.send(ackFlag);
             }            
             
         }    

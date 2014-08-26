@@ -46,7 +46,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.SocketUtilities;
@@ -76,9 +75,8 @@ public final class FileSystemMsg extends Tasking {
      * @param taskId
      * @param passedFile
      * @param isRoot
-     * @throws java.io.UnsupportedEncodingException
     */
-    public FileSystemMsg( int taskId, File passedFile, boolean isRoot ) throws UnsupportedEncodingException {
+    public FileSystemMsg( int taskId, File passedFile, boolean isRoot ) {
         super(taskId);
         
         //Get file details

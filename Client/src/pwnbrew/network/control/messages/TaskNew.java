@@ -68,7 +68,7 @@ public final class TaskNew extends TaskStatus {
     /*
      * Constructor
      */
-    public TaskNew( byte[] passedId ) throws LoggableException, IOException { // NO_UCD (use default)
+    public TaskNew( byte[] passedId ) { // NO_UCD (use default)
        super(passedId );
     }
    

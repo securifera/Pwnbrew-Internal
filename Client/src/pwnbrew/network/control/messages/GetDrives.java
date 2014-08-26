@@ -80,28 +80,22 @@ public final class GetDrives extends Tasking {
     @Override
     public void evaluate( CommManager passedManager ) {   
     
-        try {
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager != null ){
+            //Get the roots
+            File[] theRoots = File.listRoots();
+            int taskId = getTaskId();
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
-                //Get the roots
-                File[] theRoots = File.listRoots();
-                int taskId = getTaskId();
-                
-                //Create a dircount message and send it back
-                ControlMessage aMsg = new DirCount(taskId, theRoots.length);
+            //Create a dircount message and send it back
+            ControlMessage aMsg = new DirCount(taskId, theRoots.length);
+            aMsg.setDestHostId( getSrcHostId() );
+            aCMManager.send(aMsg);
+            
+            for (File aFile : theRoots) {
+                aMsg = new FileSystemMsg( taskId, aFile, true );
                 aMsg.setDestHostId( getSrcHostId() );
                 aCMManager.send(aMsg);
-
-                for (File aFile : theRoots) {
-                    aMsg = new FileSystemMsg( taskId, aFile, true );
-                    aMsg.setDestHostId( getSrcHostId() );
-                    aCMManager.send(aMsg);
-                }
             }
-            
-        } catch (UnsupportedEncodingException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        
         }
         
     }

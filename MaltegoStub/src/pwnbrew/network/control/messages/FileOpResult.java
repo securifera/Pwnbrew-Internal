@@ -116,7 +116,7 @@ public final class FileOpResult extends Tasking {
             Function aFunction = theStub.getFunction();
             if( aFunction instanceof ToFileBrowser ){
                 ToFileBrowser tfbFunc = (ToFileBrowser)aFunction;
-                tfbFunc.refreshFileSystemJTree();
+                tfbFunc.refreshFileSystemJTree( getTaskId() );
             }            
         }
     }

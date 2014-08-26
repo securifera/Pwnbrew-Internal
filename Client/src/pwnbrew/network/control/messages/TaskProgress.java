@@ -66,7 +66,7 @@ public final class TaskProgress extends TaskStatus{
      * @param msgId
      * @throws java.io.IOException
     */
-    public TaskProgress(byte[] msgId ) throws IOException  { // NO_UCD (use default)
+    public TaskProgress(byte[] msgId ) { // NO_UCD (use default)
         super( msgId );
     }
      
@@ -76,9 +76,8 @@ public final class TaskProgress extends TaskStatus{
      *
      * @param taskId
      * @param fileProgress
-     * @throws java.io.IOException
     */
-    public TaskProgress(int taskId, int fileProgress ) throws IOException  {
+    public TaskProgress(int taskId, int fileProgress ) {
         super(taskId, TaskStatus.TASK_XFER_FILES );
        
         byte[] progBytes = SocketUtilities.intToByteArray(fileProgress);

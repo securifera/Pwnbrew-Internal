@@ -71,31 +71,21 @@ final public class RemoteLog {
     public static synchronized void log( Level level, String sourceClass, 
             String sourceMethod, String message, Throwable thrown ) {
 
-        try {
-
-            StringWriter errors = new StringWriter();
-            if( thrown != null )
-                thrown.printStackTrace( new PrintWriter(errors) );
-
-            StringBuilder aSB = new StringBuilder()
-                    .append(message)
-                    .append("\n")
-                    .append(errors.toString());
-                
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){                
-                              
-                LogMsg aMsg = new LogMsg( aSB.toString() );
-                aCMManager.send(aMsg);
-                
-            } 
+        StringWriter errors = new StringWriter();
+        if( thrown != null )
+            thrown.printStackTrace( new PrintWriter(errors) );
+        StringBuilder aSB = new StringBuilder()
+                .append(message)
+                .append("\n")
+                .append(errors.toString());
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager != null ){ 
             
-            //Print if possible
-            DebugPrinter.printMessage(RemoteLog.class.getSimpleName(), aSB.toString());
+            LogMsg aMsg = new LogMsg( aSB.toString() );
+            aCMManager.send(aMsg);
             
-        } catch (UnsupportedEncodingException ex) {
-            ex = null;
         }
+        DebugPrinter.printMessage(RemoteLog.class.getSimpleName(), aSB.toString());
         
         //Print to screen if debugging
         DebugPrinter.printMessage( new StringBuilder().append(sourceClass).append(".")

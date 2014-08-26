@@ -55,9 +55,12 @@ import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JTree;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import pwnbrew.fileoperation.FileOperationJList;
 import pwnbrew.fileoperation.FileOperationUpdater;
 import pwnbrew.fileoperation.RemoteFileIO;
@@ -156,6 +159,11 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
         downloadButton.setText("jButton1");
 
         searchButton.setText("jButton1");
+        searchButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                searchButtonActionPerformed(evt);
+            }
+        });
 
         downloadFolderButton.setText("jButton1");
 
@@ -216,6 +224,40 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchButtonActionPerformed
+        
+        JTree theJTree = theFileTreePanel.getJTree(); 
+        TreePath theSelPath = theJTree.getSelectionPath();    
+
+        //Update the table
+        if(searchButton.getToolTipText().equals("Search")){
+            
+            if( theSelPath != null ){
+
+                DefaultMutableTreeNode selNode = (DefaultMutableTreeNode) theSelPath.getLastPathComponent();
+
+                 //Get the search string
+                String searchStr = searchTextField.getText();
+                if( !searchStr.isEmpty() )
+                    theListener.searchForFiles( selNode, searchStr);
+                
+
+            } 
+            
+            //Set the tooltip and image
+            searchButton.setToolTipText("Cancel");
+            Utilities.setComponentIcon(searchButton, 20, 20, Constants.DELETE_IMG_STR);
+            
+        } else if(searchButton.getToolTipText().equals("Cancel")){
+            
+            //Cancel the search
+            theListener.cancelSearch();
+            setCursor(null);
+           
+        }
+        
+    }//GEN-LAST:event_searchButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton downloadButton;
@@ -513,6 +555,19 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
     public void setFileIOButtonEnablements(boolean uploadEnable , boolean downloadEnable) {
         uploadButton.setEnabled(uploadEnable);
         downloadButton.setEnabled(downloadEnable);
+    }
+
+    //========================================================================
+    /**
+     * 
+     */
+    public void searchComplete() {
+        
+        //Set the tooltip and image and cursor
+        setCursor(null);
+        searchButton.setToolTipText("Search");
+        Utilities.setComponentIcon(searchButton, 25, 25, Constants.SEARCH_IMG_STR);
+        
     }
 
 }

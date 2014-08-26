@@ -57,7 +57,6 @@ import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.ManagedRunnable;
 import pwnbrew.misc.SocketUtilities;
-import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFileAbort;
@@ -156,24 +155,15 @@ public class FileSender extends ManagedRunnable {
         //Get the id and port router
         if( aHandler != null ){
             
-            byte[] theFileId = SocketUtilities.intToByteArray(fileId); 
             if( fileToBeSent.length() == 0 ){
                 
                 //Send the file data
                 FileData fileDataMsg = new FileData(fileId, new byte[0]);   
+                fileDataMsg.setSrcHostId(SocketUtilities.byteArrayToInt(clientIdArr));
+                fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) );   
                 
                 //Send the message
                 thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
-
-//                ByteBuffer tempBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE + clientIdArr.length + destIdArr.length + theFileId.length + 1 );
-//                tempBuffer.put( Message.FILE_MESSAGE_TYPE );
-//                tempBuffer.put( new byte[]{0x0,0x0,0x0,0x0c});
-//                tempBuffer.put(clientIdArr);
-//                tempBuffer.put(destIdArr);
-//                tempBuffer.put(theFileId);
-
-                //Send the message
-//                thePR.queueSend( Arrays.copyOf( tempBuffer.array(), tempBuffer.position()), theFileAck.getSrcHostId() );
 
             } else {  
 
@@ -185,11 +175,7 @@ public class FileSender extends ManagedRunnable {
                     ByteBuffer fileChannelBB = ByteBuffer.allocate(maxMsgLen);
 
                     //Set the msglen
-                    final byte[] msgLen = new byte[ Message.MSG_LEN_SIZE ];
-                    int readCount;            
-
                     int fileRead = 0;
-//                    ByteBuffer tempBuffer;
                     while(fileRead != -1 && !finished() ){
 
                         //Add the file message type
@@ -197,31 +183,16 @@ public class FileSender extends ManagedRunnable {
                         fileRead = theFC.read(fileChannelBB);                
 
                         //Set file length
-                        if( fileRead == -1 ){
-                            continue;
-                        } else {
-                            readCount = fileRead;
-                        }
+                        if( fileRead == -1 )
+                            continue;                        
 
-                        //Convert the length to a byte array
-                        SocketUtilities.intToByteArray(msgLen, readCount + clientIdArr.length + destIdArr.length + theFileId.length );
                         fileChannelBB.flip();
                         
                         byte[] fileBytes = Arrays.copyOf(fileChannelBB.array(), fileChannelBB.limit());
                         FileData fileDataMsg = new FileData(fileId, fileBytes);
+                        fileDataMsg.setSrcHostId(SocketUtilities.byteArrayToInt(clientIdArr));
+                        fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) ); 
                         thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
-
-//                        //Construct the buffer
-//                        tempBuffer = ByteBuffer.allocate( readCount + msgLen.length + clientIdArr.length + destIdArr.length + theFileId.length + 1 );
-//                        tempBuffer.put( Message.FILE_MESSAGE_TYPE );
-//                        tempBuffer.put(msgLen);
-//                        tempBuffer.put(clientIdArr);
-//                        tempBuffer.put(destIdArr);
-//                        tempBuffer.put(theFileId);
-//                        tempBuffer.put(fileChannelBB);
-//                        
-//                        //Send the message
-//                        thePR.queueSend( Arrays.copyOf( tempBuffer.array(), tempBuffer.position()), theFileAck.getSrcHostId() );
 
                     }
 

@@ -45,7 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.UnsupportedEncodingException;
 import pwnbrew.network.ControlOption;
 
 /**
@@ -62,9 +61,8 @@ public final class FileOpResult extends Tasking {
      *
      * @param taskId
      * @param passedResult
-     * @throws java.io.UnsupportedEncodingException
     */
-    public FileOpResult( int taskId, byte passedResult ) throws UnsupportedEncodingException {
+    public FileOpResult( int taskId, byte passedResult ) {
         super( taskId );   
         
         //Add file type

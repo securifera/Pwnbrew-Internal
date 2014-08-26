@@ -76,9 +76,8 @@ public final class PushFileAck extends FileMessage {
      * @param passedId
      * @param hashFileNameStr
      * @param passedFileId
-     * @throws java.io.IOException
     */
-    public PushFileAck(int passedId, int passedFileId, String hashFileNameStr ) throws IOException  {
+    public PushFileAck(int passedId, int passedFileId, String hashFileNameStr ) {
        super(passedId, passedFileId );
 
        byte[] strBytes = hashFileNameStr.getBytes();

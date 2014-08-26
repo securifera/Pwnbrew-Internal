@@ -128,22 +128,10 @@ public class FileSender extends ManagedRunnable {
 
                 Log.log(Level.INFO, NAME_Class, "go()", ex.getMessage(), ex );
 
-//                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//                try {
-//                    
-//                    if( aCMManager == null ){
-//                        aCMManager = ControlMessageManager.initialize(theCommManager);
-//                    }
-
-                    //Send message to cleanup the file transfer on the client side
-                    int clientId = theFileAck.getSrcHostId();
-                    PushFileAbort fileAbortMsg = new PushFileAbort( fileId, clientId );
-                    DataManager.send(theCommManager, fileAbortMsg);
-//                    aCMManager.send(fileAbortMsg ); 
-//                    
-//                } catch( IOException ex1 ){
-//                     Log.log(Level.INFO, NAME_Class, "go()", ex.getMessage(), ex );
-//                }
+                //Send message to cleanup the file transfer on the client side
+                int clientId = theFileAck.getSrcHostId();
+                PushFileAbort fileAbortMsg = new PushFileAbort( fileId, clientId );
+                DataManager.send(theCommManager, fileAbortMsg);
 
             }
         }
@@ -181,7 +169,6 @@ public class FileSender extends ManagedRunnable {
 
                 //Send the message
                 DataManager.send(theCommManager, fileDataMsg);
-//                thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
 
             } else {  
 
@@ -212,7 +199,6 @@ public class FileSender extends ManagedRunnable {
                         fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) ); 
                         
                         DataManager.send(theCommManager, fileDataMsg);
-//                        thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
 
                     }
 

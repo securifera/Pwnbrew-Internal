@@ -132,16 +132,10 @@ public class FileSender extends ManagedRunnable implements LockListener {
                 RemoteLog.log(Level.INFO, NAME_Class, "go()", ex.getMessage(), ex );
 
                 ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                try {
-
-                    if( aCMManager != null ){
-                        //Send message to cleanup the file transfer on the client side
-                        PushFileAbort fileAbortMsg = new PushFileAbort( fileId );
-                        aCMManager.send(fileAbortMsg); 
-                    }
-
-                } catch( LoggableException ex1 ){
-                     RemoteLog.log(Level.INFO, NAME_Class, "go()", ex.getMessage(), ex );
+                if( aCMManager != null ){
+                    //Send message to cleanup the file transfer on the client side
+                    PushFileAbort fileAbortMsg = new PushFileAbort( fileId );
+                    aCMManager.send(fileAbortMsg);
                 }
 
             }

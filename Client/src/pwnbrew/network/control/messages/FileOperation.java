@@ -49,10 +49,9 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.Constants;
+import pwnbrew.misc.FileFinder;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
 
@@ -65,6 +64,7 @@ public final class FileOperation extends Tasking {
     private static final byte DELETE = 78;
     private static final byte RENAME = 79;
     private static final byte DATE = 80;
+    private static final byte SEARCH = 81;
             
     private static final byte OPTION_OPERATION = 42;
     private static final byte OPTION_FILE_PATH = 43;
@@ -141,6 +141,25 @@ public final class FileOperation extends Tasking {
                 case DELETE:
                     retVal = theFile.delete();              
                     break;
+                case SEARCH:
+                    File theRemoteFile = new File(theFilePath);
+                    FileFinder theFileFinder = FileFinder.getFileFinder();
+
+                    //Shutdown the file finder if it's running
+                    if( theFileFinder.isRunning() ){
+                        theFileFinder.shutdown();
+                        theFileFinder.waitToBeNotified();
+                    }            
+
+                    //Set file finder options
+                    theFileFinder.setSearchStr(addParam);
+                    theFileFinder.setRootFile(theRemoteFile);
+                    theFileFinder.setSrcId( getSrcHostId());
+                    theFileFinder.setTaskId( getTaskId());
+
+                    //Start a new one
+                    theFileFinder.start();
+                    return;
                 case RENAME:
                     File newFile = new File( theFile.getParentFile(), addParam);                    
                     retVal = theFile.renameTo(newFile);  
@@ -158,19 +177,14 @@ public final class FileOperation extends Tasking {
         
         //Send back the result
         byte retByte = 0;
-        if( retVal){
-            retByte = 1;
-        }
+        if( retVal)
+            retByte = 1;        
         
-        try {
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
-                FileOpResult theResult = new FileOpResult( getTaskId(), retByte);
-                theResult.setDestHostId( getSrcHostId() );
-                aCMManager.send(theResult);
-            }
-        } catch (UnsupportedEncodingException ex) {
-            RemoteLog.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex);
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager != null ){
+            FileOpResult theResult = new FileOpResult( getTaskId(), retByte);
+            theResult.setDestHostId( getSrcHostId() );
+            aCMManager.send(theResult);
         }       
     
     }

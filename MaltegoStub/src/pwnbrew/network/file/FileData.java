@@ -182,7 +182,7 @@ public class FileData extends Message {
 
        //Create the message type
        aMessage = new FileData( fileId, theFileBytes );
-       aMessage.setClientId(SocketUtilities.byteArrayToInt(clientId));
+       aMessage.setSrcHostId(SocketUtilities.byteArrayToInt(clientId));
        aMessage.setDestHostId(SocketUtilities.byteArrayToInt(tempHostId) );
        
        return aMessage;

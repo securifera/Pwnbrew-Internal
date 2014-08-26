@@ -56,9 +56,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 public class RemoteFileSystemTask {
     
     private final int taskId;
-    private int theFileCount;
+    private int theFileCount = 0;
     private final DefaultMutableTreeNode parentNode;
     private final List<FileNode> theNodeList = new ArrayList<>();
+    private boolean fileSearch = false;
  
     //=========================================================================
     /**
@@ -140,6 +141,24 @@ public class RemoteFileSystemTask {
      */
     public void setFileCount(int passedCount) {
         theFileCount = passedCount;
+    }
+
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public boolean isFileSearch() {
+        return fileSearch;
+    }
+
+    //=========================================================================
+    /**
+     * 
+     * @param passedBool
+     */
+    public void setFileSearchFlag(boolean passedBool) {
+        fileSearch = passedBool;
     }
     
 

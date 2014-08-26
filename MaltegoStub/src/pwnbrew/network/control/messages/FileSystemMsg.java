@@ -136,8 +136,7 @@ public final class FileSystemMsg extends Tasking {
         if( passedManager instanceof MaltegoStub ){
             MaltegoStub theStub = (MaltegoStub)passedManager;
             Function aFunction = theStub.getFunction();
-            if( aFunction instanceof ToFileBrowser ){
-                
+            if( aFunction instanceof ToFileBrowser ){                
                 ToFileBrowser tfbFunc = (ToFileBrowser)aFunction;
                 tfbFunc.updateFileSystem( getTaskId(), size, filePath, fileType, dateModified );
             }

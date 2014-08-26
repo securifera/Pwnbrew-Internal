@@ -68,9 +68,8 @@ public final class PushFileFin extends FileMessage {
      * @param passedId
      * @param passedFileId
      * @param hashFileNameStr
-     * @throws java.io.UnsupportedEncodingException
     */
-    public PushFileFin( int passedId, int passedFileId, String hashFileNameStr ) throws UnsupportedEncodingException  {
+    public PushFileFin( int passedId, int passedFileId, String hashFileNameStr ) {
        super(passedId, passedFileId );     
          
        byte[] strBytes = hashFileNameStr.getBytes();

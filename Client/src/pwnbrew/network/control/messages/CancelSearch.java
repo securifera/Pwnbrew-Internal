@@ -38,40 +38,41 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.UnsupportedEncodingException;
-import pwnbrew.misc.SocketUtilities;
-import pwnbrew.network.ControlOption;
+import pwnbrew.manager.CommManager;
+import pwnbrew.misc.FileFinder;
 
 /**
  *
  *  
  */
-@SuppressWarnings("ucd")
-public final class ListFiles extends Tasking {
+public class CancelSearch extends ControlMessage {
     
-    private static final byte OPTION_PATH = 7; 
-    
-
+      
     // ==========================================================================
-    /**\
+    /**
      * Constructor
      *
-     * @param dstHostId
-     * @param passedFilePath
+     * @param passedId
     */
-    public ListFiles( int dstHostId, String passedFilePath ) {
-        super( SocketUtilities.getNextId(), dstHostId );    
+    public CancelSearch(byte[] passedId ) {
+        super( passedId );
+    }
+    
+     //===============================================================
+    /**
+    *   Performs the logic specific to the message.
+    *
+     * @param passedManager
+    */
+    @Override
+    public void evaluate( CommManager passedManager ) {
         
-        try {
-            
-            //Add file path
-            byte[] tempBytes = passedFilePath.getBytes("US-ASCII");
-            ControlOption aTlv = new ControlOption( OPTION_PATH, tempBytes);
-            addOption(aTlv);
-            
-        } catch (UnsupportedEncodingException ex) {
-            ex = null;
-        }
+        FileFinder theFileFinder = FileFinder.getFileFinder();
+
+        //Shutdown the file finder if it's running
+        if( theFileFinder.isRunning() )
+            theFileFinder.shutdown();
+           
     }
 
 }

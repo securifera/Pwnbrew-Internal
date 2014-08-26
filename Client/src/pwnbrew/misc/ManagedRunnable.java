@@ -119,7 +119,7 @@ abstract public class ManagedRunnable implements Runnable {
     * <strong>This method most certainly "blocks".</strong>
      * @param anInt
     */
-    protected synchronized void waitToBeNotified( Integer... anInt ) {
+    public synchronized void waitToBeNotified( Integer... anInt ) {
 
         while( !notified && !shutdownRequested) { //Until notified...
 

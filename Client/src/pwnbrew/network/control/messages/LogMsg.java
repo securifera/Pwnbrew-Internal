@@ -62,9 +62,8 @@ public class LogMsg extends ControlMessage {
      * Constructor
      *
      * @param passedMsg
-     * @throws java.io.UnsupportedEncodingException
     */
-    public LogMsg( String passedMsg ) throws UnsupportedEncodingException  {
+    public LogMsg( String passedMsg ) {
         super();
 
         //Add the message  

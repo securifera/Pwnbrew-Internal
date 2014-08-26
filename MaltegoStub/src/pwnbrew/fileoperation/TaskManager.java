@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- * TaskManager.java
- *
- * Created on June 21, 2013, 8:07:13PM
- */
-
 package pwnbrew.fileoperation;
 
 import java.io.File;
@@ -83,15 +76,6 @@ public interface TaskManager {
      * @param theRemoteTask
      */
     public void removeTask(RemoteFileIO theRemoteTask);
-    
-//    //===========================================================================
-//    /**
-//     * Get the download directory 
-//     * 
-//     * @param clientId
-//     * @return 
-//     */
-//    public File getDownloadDir(int clientId);
     
     // ========================================================================
     /**

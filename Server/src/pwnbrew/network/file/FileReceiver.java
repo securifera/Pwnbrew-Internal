@@ -249,11 +249,6 @@ final public class FileReceiver {
         try {
 
             PushFileFin finMessage = new PushFileFin( taskId, hexString+":"+fileLoc.getName(), clientId );
-
-            //Returns if it should unlock or not
-//            ControlMessageManager theCMM = ControlMessageManager.getControlMessageManager();
-//            if( theCMM != null )
-//                theCMM.send( finMessage );
             DataManager.send(theFileMessageManager.getCommManager(), finMessage);
             
 

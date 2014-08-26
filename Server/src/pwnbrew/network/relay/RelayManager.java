@@ -127,7 +127,11 @@ public class RelayManager extends DataManager {
                  thePR = theServerPortRouter;
 
             SocketChannelHandler theHandler = thePR.getSocketChannelHandler(tempId);
-            theHandler.queueBytes(msgBytes);
+            if( theHandler != null ){
+                theHandler.queueBytes(msgBytes);
+            } else {
+                Log.log( Level.SEVERE, NAME_Class, "handleMessage()", "No socket handler found for the given id.", null);    
+            }
             
         } catch (LoggableException ex) {
             Log.log( Level.SEVERE, NAME_Class, "handleMessage()", ex.getMessage(), ex);        

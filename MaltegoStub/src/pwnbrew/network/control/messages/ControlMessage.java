@@ -153,7 +153,7 @@ public abstract class ControlMessage extends Message {
                 
        //Set client id
        int theClientId = SocketUtilities.byteArrayToInt(clientId);
-       aMessage.setClientId( theClientId );
+       aMessage.setSrcHostId( theClientId );
 
 	   //Set dest host id
        int theDestHostId= SocketUtilities.byteArrayToInt(destHostId);

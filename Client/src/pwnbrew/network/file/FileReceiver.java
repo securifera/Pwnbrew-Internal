@@ -205,13 +205,9 @@ final public class FileReceiver {
                 //Send a progress update
                 sndFileProgress = tempProgressInt;
                 if( theCMM != null ){                    
-                    try {
-                        TaskProgress aProgMsg = new TaskProgress(taskId, sndFileProgress );
-                        aProgMsg.setDestHostId(srcHostId);
-                        theCMM.send(aProgMsg);
-                    }  catch (IOException ex) {
-                        RemoteLog.log(Level.SEVERE, NAME_Class, "receiveFile()", ex.getMessage(), ex);
-                    }
+                    TaskProgress aProgMsg = new TaskProgress(taskId, sndFileProgress );
+                    aProgMsg.setDestHostId(srcHostId);
+                    theCMM.send(aProgMsg);
                    
                 }
             }            
@@ -239,20 +235,11 @@ final public class FileReceiver {
                     ((TaskListener)theManager).notifyHandler(taskId, Constants.FILE_RECEIVED);
                 }
                 
-                //Send fin message to host
-                try {
-                    
-                    PushFileFin finMessage = new PushFileFin( taskId, fileId, hexString ); 
-                    finMessage.setDestHostId(srcHostId);
-                    //Returns if it should unlock or not
-                    if( theCMM != null ){
-                        theCMM.send(finMessage);
-                    }
-                    
-                } catch ( UnsupportedEncodingException ex) {
-                    RemoteLog.log(Level.SEVERE, NAME_Class, "receiveFile()", ex.getMessage(), ex);
-                }
-
+                PushFileFin finMessage = new PushFileFin( taskId, fileId, hexString );
+                finMessage.setDestHostId(srcHostId);
+                if( theCMM != null )
+                    theCMM.send(finMessage);
+                
                 //Remove from the parent map
                 theFileMessageManager.removeFileReceiver( fileId );
                 

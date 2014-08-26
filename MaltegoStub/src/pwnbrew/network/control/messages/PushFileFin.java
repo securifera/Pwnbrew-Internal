@@ -134,7 +134,7 @@ public final class PushFileFin extends FileMessage {
             Function aFunction = theStub.getFunction();
             if( aFunction instanceof ToFileBrowser ){
                 ToFileBrowser tfbFunc = (ToFileBrowser)aFunction;
-                tfbFunc.refreshFileSystemJTree();
+                tfbFunc.refreshFileSystemJTree( getTaskId() );
             } else if( aFunction instanceof ToOptions ){
                 ToOptions optionFunc = (ToOptions)aFunction;
                 optionFunc.fileSent(hashFilenameStr, getTaskId());

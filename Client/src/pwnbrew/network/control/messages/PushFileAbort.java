@@ -67,9 +67,8 @@ public final class PushFileAbort extends FileMessage {
      * Constructor
      *
      * @param passedId
-     * @throws pwnbrew.log.LoggableException
     */
-    public PushFileAbort( int passedId ) throws LoggableException {
+    public PushFileAbort( int passedId ) {
         super( passedId );
     }
     
@@ -78,9 +77,8 @@ public final class PushFileAbort extends FileMessage {
      * Constructor
      *
      * @param passedId
-     * @throws pwnbrew.log.LoggableException
     */
-    public PushFileAbort( byte[] passedId ) throws LoggableException {
+    public PushFileAbort( byte[] passedId ) {
         super(passedId);
     }
     

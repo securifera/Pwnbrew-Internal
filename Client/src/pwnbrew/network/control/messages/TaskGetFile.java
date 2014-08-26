@@ -65,10 +65,9 @@ public final class TaskGetFile extends TaskStatus{
      * Constructor
      *
      * @param msgId
-     * @throws pwnbrew.log.LoggableException
      * @throws java.io.IOException
     */
-    public TaskGetFile(byte[] msgId ) throws LoggableException, IOException  { // NO_UCD (use default)
+    public TaskGetFile(byte[] msgId ) { // NO_UCD (use default)
         super(msgId);
     }
      

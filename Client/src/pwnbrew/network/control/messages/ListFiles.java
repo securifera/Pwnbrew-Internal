@@ -46,8 +46,6 @@ package pwnbrew.network.control.messages;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.CommManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
@@ -114,36 +112,30 @@ public final class ListFiles extends Tasking {
     @Override
     public void evaluate( CommManager passedManager ) {   
     
-        try {
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager != null ){
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
-               
-                File theRemoteFile = new File(theFilePath); 
-                File[] fileList = theRemoteFile.listFiles();
-                if( fileList != null && fileList.length != 0 ){
-
-                    //Send the count
-                    ControlMessage aMsg = new DirCount(getTaskId(), fileList.length);
+            File theRemoteFile = new File(theFilePath);
+            File[] fileList = theRemoteFile.listFiles();
+            if( fileList != null && fileList.length != 0 ){
+                
+                //Send the count
+                ControlMessage aMsg = new DirCount(getTaskId(), fileList.length);
+                aMsg.setDestHostId( getSrcHostId() );
+                aCMManager.send(aMsg);
+                
+                //Send a message per file
+                for (File aFile : fileList) {
+                    aMsg = new FileSystemMsg( getTaskId(), aFile, false );
                     aMsg.setDestHostId( getSrcHostId() );
                     aCMManager.send(aMsg);
-
-                    //Send a message per file
-                    for (File aFile : fileList) {                    
-                        aMsg = new FileSystemMsg( getTaskId(), aFile, false );
-                        aMsg.setDestHostId( getSrcHostId() );
-                        aCMManager.send(aMsg);
-                    }
-
-                } else {
-                    FileSystemMsg aMsg = new FileSystemMsg( getTaskId(), null, false );
-                    aMsg.setDestHostId( getSrcHostId() );
-                    aCMManager.send(aMsg);                
                 }
+                
+            } else {
+                FileSystemMsg aMsg = new FileSystemMsg( getTaskId(), null, false );
+                aMsg.setDestHostId( getSrcHostId() );
+                aCMManager.send(aMsg);
             }
-            
-        } catch (UnsupportedEncodingException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        
         }
     
     }

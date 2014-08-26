@@ -74,4 +74,8 @@ public interface FileBrowserListener extends TaskManager {
 
     public void selectNodeInTree(FileNode aFileNode);
 
+    public void searchForFiles(DefaultMutableTreeNode passedNode, String searchStr);
+
+    public void cancelSearch();
+
 }
