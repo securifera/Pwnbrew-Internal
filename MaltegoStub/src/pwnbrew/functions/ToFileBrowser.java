@@ -262,8 +262,6 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                 //Sleep a couple seconds to make sure the message was sent
                 Thread.sleep(2000);
                 
-                retStr = theReturnMsg.getXml();
-                
             } else {
                 StringBuilder aSB = new StringBuilder()
                         .append("Unable to connect to the Pwnbrew server at \"")
@@ -275,6 +273,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex );
         }
         
+        retStr = theReturnMsg.getXml();
         return retStr;
     }
     
@@ -920,7 +919,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
 
             @Override
             public void run() {
-                if( theTask.isFileSearch() ){
+                if( theTask != null && theTask.isFileSearch() ){
                     theFsFrame.searchComplete();
                 } else {
                     JTree theJTree = theFsFrame.getFileTreePanel().getJTree();

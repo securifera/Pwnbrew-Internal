@@ -107,8 +107,7 @@ public class ToIP extends Function implements CountSeeker {
         //Get host id
         String hostIdStr = objectMap.get( Constants.HOST_ID);
         if( hostIdStr == null ){
-            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
-            return retStr;
+            hostIdStr = "-1";
         }
          
         //Create the connection
@@ -162,21 +161,18 @@ public class ToIP extends Function implements CountSeeker {
                     //Wait for the response
                     waitToBeNotified( 180 * 1000);
                     
-                    //Create the return message
-                    retStr = theReturnMsg.getXml();
-                    
                 }
                 
             } else {
-                StringBuilder aSB = new StringBuilder()
-                        .append("Unable to connect to the Pwnbrew server at \"")
-                        .append(serverIp).append(":").append(serverPort).append("\"");
-                DebugPrinter.printMessage( NAME_Class, "listclients", aSB.toString(), null);
+                String aSB = String.valueOf("Unable to connect to the Pwnbrew server at \"" + serverIp + ":") + Integer.toString(serverPort) + "\"";
+                DebugPrinter.printMessage( NAME_Class, "listclients", aSB, null);
             }
             
         } catch (IOException ex) {
             DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex );
         }
+        
+        retStr = theReturnMsg.getXml();
         
         return retStr;
     }

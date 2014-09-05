@@ -51,4 +51,6 @@ public interface SessionJFrameListener extends HostCheckInListListener {
     
     public void refreshSelection();
 
+    public void beNotified();
+
 }

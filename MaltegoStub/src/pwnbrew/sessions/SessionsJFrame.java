@@ -42,6 +42,7 @@ import java.awt.Image;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import javax.swing.DefaultListCellRenderer;
@@ -82,6 +83,21 @@ public class SessionsJFrame extends javax.swing.JFrame {
         initComponents();
         initializeComponents( passedHostList );
         setLocationRelativeTo(null);
+    }
+    
+    // ==========================================================================
+    /**
+    * Processes {@link WindowEvent}s occurring on this component.
+    * @param event the {@code WindowEvent}
+    */
+    @Override //Overrides JFrame.processWindowEvent( WindowEvent )
+    protected void processWindowEvent( WindowEvent event ) {
+        if( WindowEvent.WINDOW_CLOSING == event.getID() ) { //If the event is the window closing...
+            dispose();
+            theListener.beNotified();
+        } else { //If the event is not the window closing...
+            super.processWindowEvent( event ); //Proceed normally
+        } 
     }
 
     /**

@@ -90,6 +90,7 @@ abstract public class Constants {
     public static final String DELETE_IMG_STR = "delete_icon.png";
     public static final String ADD_IMAGE_STR = "add.png";
     
+    public static final String NAME = "name";
     public static final String SERVER_IP = "serverip";
     public static final String SERVER_PORT = "serverport";
     public static final String RELAY_PORT = "relayport";

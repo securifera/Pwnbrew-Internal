@@ -48,7 +48,7 @@ import java.io.UnsupportedEncodingException;
 import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
 import pwnbrew.functions.ToFileBrowser;
-import pwnbrew.functions.ToOptions;
+import pwnbrew.functions.ToServerConfiguration;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
@@ -135,8 +135,8 @@ public final class PushFileFin extends FileMessage {
             if( aFunction instanceof ToFileBrowser ){
                 ToFileBrowser tfbFunc = (ToFileBrowser)aFunction;
                 tfbFunc.refreshFileSystemJTree( getTaskId() );
-            } else if( aFunction instanceof ToOptions ){
-                ToOptions optionFunc = (ToOptions)aFunction;
+            } else if( aFunction instanceof ToServerConfiguration ){
+                ToServerConfiguration optionFunc = (ToServerConfiguration)aFunction;
                 optionFunc.fileSent(hashFilenameStr, getTaskId());
             }           
         }

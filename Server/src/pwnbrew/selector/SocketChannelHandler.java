@@ -435,7 +435,7 @@ public class SocketChannelHandler implements Selectable {
                 thePortRouter.registerHandler(passedId, parentId, this);            
 
             }
-        } catch(LoggableException | SocketException ex){
+        } catch(LoggableException ex){
             Log.log(Level.INFO, NAME_Class, "send()", ex.getMessage(), ex );
         }
 

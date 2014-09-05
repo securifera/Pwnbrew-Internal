@@ -183,6 +183,7 @@ final public class SocketUtilities {
     * Returns the hostname of the current host.
     *
     * @return
+     * @throws pwnbrew.log.LoggableException
      * @throws pwnbrew.logging.LoggableException
      * @throws java.io.IOException
     */

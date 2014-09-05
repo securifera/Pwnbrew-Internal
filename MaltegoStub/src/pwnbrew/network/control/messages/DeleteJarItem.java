@@ -46,7 +46,7 @@ package pwnbrew.network.control.messages;
 import java.io.UnsupportedEncodingException;
 import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
-import pwnbrew.functions.ToOptions;
+import pwnbrew.functions.ToServerConfiguration;
 import pwnbrew.manager.PortManager;
 
 /**
@@ -92,9 +92,9 @@ public final class DeleteJarItem extends JarItemMsg {
          if( passedManager instanceof MaltegoStub ){
             MaltegoStub theStub = (MaltegoStub)passedManager;
             Function aFunction = theStub.getFunction();
-            if( aFunction instanceof ToOptions ){                
+            if( aFunction instanceof ToServerConfiguration ){                
                 //Cast the function
-                ToOptions aFunc = (ToOptions)aFunction;
+                ToServerConfiguration aFunc = (ToServerConfiguration)aFunction;
                 aFunc.deleteJarItemFromTable(theJarName, theJarType, theJvmVersion, theJarVersion);
             }
          }

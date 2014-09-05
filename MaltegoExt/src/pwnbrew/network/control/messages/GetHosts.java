@@ -131,7 +131,7 @@ public final class GetHosts extends ControlMessage{ // NO_UCD (use default)
 
                 }
 
-            } catch (LoggableException | SocketException ex) {
+            } catch (LoggableException ex) {
                 Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
             }
 

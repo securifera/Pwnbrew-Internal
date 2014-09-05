@@ -38,12 +38,12 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.logging.Level;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
+import pwnbrew.host.HostFactory;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
@@ -51,7 +51,6 @@ import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Nic;
-import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
 
@@ -110,25 +109,26 @@ public final class GetIPs extends ControlMessage{ // NO_UCD (use default)
     public void evaluate( CommManager passedManager ) throws LoggableException {     
 
         String hostIdStr = Integer.toString( hostId );
-        if( hostId == -1 )
-            hostIdStr  = ServerConfig.getServerConfig().getHostId();  
-
-        //Get the host controllers 
-        ServerManager aSM = (ServerManager) passedManager;
-        HostController theHostController = aSM.getHostController(hostIdStr);
-        if( theHostController != null ){
-
-            //Get the host
-            Host theHost = theHostController.getHost();
+        Host theHost = null ;
+        if( hostId == -1 ){
+            theHost = HostFactory.getLocalHost(); 
+        } else {
+            //Get the host controllers 
+            ServerManager aSM = (ServerManager) passedManager;
+            HostController theHostController = aSM.getHostController(hostIdStr);
+            if( theHostController != null ){
+                //Get the host
+                theHost = theHostController.getHost();
+            }
+        }
+        
+        //Send back the
+        if( theHost != null ){
             Map<String, Nic> nicMap = theHost.getNicMap();     
             for (Nic anEntry : nicMap.values()) {
                 String anIP = anEntry.getIpAddress();
-                try {
-                    IpMsg anIpMsg = new IpMsg( getSrcHostId(), anIP);
-                    DataManager.send( passedManager, anIpMsg);
-                } catch ( UnsupportedEncodingException ex) {
-                    Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                }
+                IpMsg anIpMsg = new IpMsg( getSrcHostId(), anIP);
+                DataManager.send( passedManager, anIpMsg);
             }       
 
         }              

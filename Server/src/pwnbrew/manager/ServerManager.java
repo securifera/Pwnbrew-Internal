@@ -79,7 +79,6 @@ import pwnbrew.xmlBase.XmlBase;
 public class ServerManager extends CommManager {
 
     private final Server theServer;
-//    private final List<HostListener> hostListeners = new ArrayList<>();
     private boolean showGuiFlag = false;
     private MainGuiController theGuiController = null;
 
@@ -245,9 +244,6 @@ public class ServerManager extends CommManager {
                     public void run() {                    
 
                         for( HostController nextController: theHostList ){
-//                            List<HostListener> theListenerList = getDetectListenerList();
-//                            for(HostListener aListener : theListenerList)
-//                                aListener.
                             hostDisconnected( (Host) nextController.getObject() );
 
                             nextController.getRootPanel().getShellPanel().disablePanel( false );
@@ -285,37 +281,6 @@ public class ServerManager extends CommManager {
         
         return aMgr;
     }
-    
-//     //===============================================================
-//    /**
-//     * Adds a detect listener to the list
-//     * 
-//     * @param aListener
-//    */
-//    public void addDetectListener(HostListener aListener) {
-//        if( !hostListeners.contains(aListener))
-//            hostListeners.add(aListener);
-//    }
-
-//    //===============================================================
-//    /**
-//     * Removes a detect listener from the list
-//     *
-//     * @param aListener
-//    */
-//    public void removeDetectListener(HostListener aListener) {
-//        hostListeners.remove(aListener);
-//    }
-//    
-//    //===============================================================
-//    /**
-//     * Returns a list of the detect listeners
-//     *
-//     * @return 
-//    */
-//    public List<HostListener> getDetectListenerList() {
-//       return new ArrayList<>(hostListeners);
-//    }
 
     //===============================================================
     /**
@@ -379,10 +344,6 @@ public class ServerManager extends CommManager {
      * @param passedHost
     */
     public void registerHost( Host passedHost ) {
-
-//        List<HostListener> theListenerList = getDetectListenerList();
-//        for(HostListener aListener : theListenerList)
-//            aListener.
         hostDetected(passedHost);
     }
     
@@ -562,7 +523,6 @@ public class ServerManager extends CommManager {
         List<Session> sessionList = passedHost.getSessionList();
         Session aSession = sessionList.get(sessionList.size() - 1);
         aSession.setDisconnectedTime(Constants.CHECKIN_DATE_FORMAT.format( new Date() ));
-        
        
         passedHost.setConnected( false );
         if( theGuiController != null )

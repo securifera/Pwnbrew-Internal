@@ -40,7 +40,7 @@ package pwnbrew.network.control.messages;
 import java.io.UnsupportedEncodingException;
 import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
-import pwnbrew.functions.ToOptions;
+import pwnbrew.functions.ToServerConfiguration;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ControlOption;
@@ -162,10 +162,10 @@ public final class NetworkSettingsMsg extends ControlMessage {
          if( passedManager instanceof MaltegoStub ){
             MaltegoStub theStub = (MaltegoStub)passedManager;
             Function aFunction = theStub.getFunction();
-            if( aFunction instanceof ToOptions ){
+            if( aFunction instanceof ToServerConfiguration ){
                 
                 //Cast the function
-                ToOptions aFunc = (ToOptions)aFunction;
+                ToServerConfiguration aFunc = (ToServerConfiguration)aFunction;
                 
                 //Add the jar item
                 aFunc.setNetworkSettings(theServerPort, theIssueeName, theIssuerName, theExpDate, theAlgorithm );

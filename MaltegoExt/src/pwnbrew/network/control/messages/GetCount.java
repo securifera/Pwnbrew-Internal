@@ -38,7 +38,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.util.List;
@@ -54,7 +53,6 @@ import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
 
@@ -134,20 +132,14 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
                     //If 
                     if(optionalId == Constants.SERVER_ID ){
 
-                        try {
-
-                            retCount = 0;
-                            Host localHost = HostFactory.getLocalHost();
-                            List<String> hostIdList = localHost.getConnectedHostIdList();
-                            for( String hostIdStr : hostIdList ){
-                                HostController aHostController = aSM.getHostController(hostIdStr);
-                                if( aHostController != null )
-                                    retCount++;    
-                            }                                    
-
-                        } catch (SocketException ex) {
-                            Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-                        }
+                        retCount = 0;
+                        Host localHost = HostFactory.getLocalHost();
+                        List<String> hostIdList = localHost.getConnectedHostIdList();
+                        for( String hostIdStr : hostIdList ){
+                            HostController aHostController = aSM.getHostController(hostIdStr);
+                            if( aHostController != null )
+                                retCount++;    
+                        }  
 
                     } else if( optionalId != 0 ){
 
@@ -169,15 +161,17 @@ public final class GetCount extends ControlMessage{ // NO_UCD (use default)
             case NIC_COUNT:
 
                 String hostIdStr = Integer.toString( optionalId );
-                if( optionalId == -1 )
-                    hostIdStr  = ServerConfig.getServerConfig().getHostId();                            
-
-                //Get the host controller 
-                HostController theHostController = aSM.getHostController( hostIdStr );
-                if( theHostController != null ){
-                    Host theHost = theHostController.getObject();
-                    retCount = theHost.getNicMap().size();
-                }       
+                if( optionalId == -1 ){
+                    Host localHost = HostFactory.getLocalHost(); 
+                    retCount = localHost.getNicMap().size();
+                } else {
+                    //Get the host controller 
+                    HostController theHostController = aSM.getHostController( hostIdStr );
+                    if( theHostController != null ){
+                        Host theHost = theHostController.getObject();
+                        retCount = theHost.getNicMap().size();
+                    } 
+                }      
 
 
                 break;

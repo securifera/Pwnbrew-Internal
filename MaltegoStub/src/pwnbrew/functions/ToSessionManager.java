@@ -198,7 +198,6 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
                     }
                 
                 }
-                retStr = theReturnMsg.getXml();
                 
             } else {
                 String aSB = String.valueOf("Unable to connect to the Pwnbrew server at \"" + serverIp + ":") + Integer.toString(serverPort) + "\"";
@@ -209,6 +208,7 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
             DebugPrinter.printMessage( NAME_Class, "run", ex.getMessage(), ex );
         }
         
+        retStr = theReturnMsg.getXml();        
         return retStr;
     }
     
@@ -257,7 +257,8 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
     /**
      * Notifies the thread
     */
-    protected synchronized void beNotified() {
+    @Override
+    public synchronized void beNotified() {
         notified = true;
         notifyAll();
     }

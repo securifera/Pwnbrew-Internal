@@ -448,8 +448,18 @@ public class SSLJFrame extends javax.swing.JFrame {
 
     private void exportButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportButtonActionPerformed
         
-        CertificateWrapper aCertWrapper = (CertificateWrapper) certList.getSelectedValue();
-        File selFile = new File(aCertWrapper.theAlias + ".der");
+        String hostname;
+        try {
+            hostname = SocketUtilities.getHostname();
+        } catch (LoggableException | IOException ex) {
+            hostname = "maltego_host";
+        }
+
+        //Get the new alias and set it
+        String theAlias = new StringBuilder().append(hostname)
+           .append("_").append( new Date().getTime()).toString();
+        
+        File selFile = new File(theAlias + ".der");
         selFile = getFilePath(selFile);
         
         setCursor( Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) );
@@ -732,101 +742,101 @@ public class SSLJFrame extends javax.swing.JFrame {
     
     }
 
-    //===============================================================
-    /**
-     * 
-     * @param passedFlag
-     * @return 
-     */
-    private String constructDN( String passedFlag ) {
-    
-        StringBuilder aSB = new StringBuilder();
-        //Switch on the type
-        switch( passedFlag ){
-            case SUBJECT:
-                 
-                //Get the name first
-                String tempStr = issueeName.getText();
-                if( !tempStr.isEmpty()){
-                    aSB.append("CN=").append(tempStr).append(",");
-                }
-                
-                //Get the ou
-                tempStr = issueeOU.getText();
-                if( !tempStr.isEmpty()){
-                    aSB.append("OU=").append(tempStr).append(",");
-                }
-                
-                //Get the org
-                tempStr = issueeOrg.getText();
-                if( !tempStr.isEmpty()){
-                    aSB.append("O=").append(tempStr).append(",");
-                }
-                
-                //Get the city
-                tempStr = issueeCity.getText();
-                if( !tempStr.isEmpty()){
-                    aSB.append("L=").append(tempStr).append(",");
-                }
-                
-                //Get the state
-                tempStr = issueeState.getText();
-                if( !tempStr.isEmpty()){
-                    aSB.append("S=").append(tempStr).append(",");
-                }
-                
-                //Get the country
-                tempStr = issueeCountry.getText();
-                if( !tempStr.isEmpty()){
-                    aSB.append("C=").append(tempStr);
-                }
-                
-                break;
-            case ISSUER:
-               
-                //Get the name first
-                tempStr = issuerName.getText();
-                if( !tempStr.isEmpty()){
-                    aSB.append("CN=").append(tempStr).append(",");
-                }
-                
-                //Get the ou
-                tempStr = issuerOU.getText();
-                if( !tempStr.isEmpty()){
-                    aSB.append("OU=").append(tempStr).append(",");
-                }
-                
-                //Get the org
-                tempStr = issuerOrg.getText();
-                if( !tempStr.isEmpty()){
-                    aSB.append("O=").append(tempStr).append(",");
-                }
-                
-                //Get the city
-                tempStr = issuerCity.getText();
-                if( !tempStr.isEmpty()){
-                    aSB.append("L=").append(tempStr).append(",");
-                }
-                
-                //Get the state
-                tempStr = issuerState.getText();
-                if( !tempStr.isEmpty()){
-                    aSB.append("S=").append(tempStr).append(",");
-                }
-                
-                //Get the country
-                tempStr = issuerCountry.getText();
-                if( !tempStr.isEmpty()){
-                    aSB.append("C=").append(tempStr);
-                }
-                
-                break;
-           default:
-                break;
-        }   
-        
-        return aSB.toString();
-    }
+//    //===============================================================
+//    /**
+//     * 
+//     * @param passedFlag
+//     * @return 
+//     */
+//    private String constructDN( String passedFlag ) {
+//    
+//        StringBuilder aSB = new StringBuilder();
+//        //Switch on the type
+//        switch( passedFlag ){
+//            case SUBJECT:
+//                 
+//                //Get the name first
+//                String tempStr = issueeName.getText();
+//                if( !tempStr.isEmpty()){
+//                    aSB.append("CN=").append(tempStr).append(",");
+//                }
+//                
+//                //Get the ou
+//                tempStr = issueeOU.getText();
+//                if( !tempStr.isEmpty()){
+//                    aSB.append("OU=").append(tempStr).append(",");
+//                }
+//                
+//                //Get the org
+//                tempStr = issueeOrg.getText();
+//                if( !tempStr.isEmpty()){
+//                    aSB.append("O=").append(tempStr).append(",");
+//                }
+//                
+//                //Get the city
+//                tempStr = issueeCity.getText();
+//                if( !tempStr.isEmpty()){
+//                    aSB.append("L=").append(tempStr).append(",");
+//                }
+//                
+//                //Get the state
+//                tempStr = issueeState.getText();
+//                if( !tempStr.isEmpty()){
+//                    aSB.append("S=").append(tempStr).append(",");
+//                }
+//                
+//                //Get the country
+//                tempStr = issueeCountry.getText();
+//                if( !tempStr.isEmpty()){
+//                    aSB.append("C=").append(tempStr);
+//                }
+//                
+//                break;
+//            case ISSUER:
+//               
+//                //Get the name first
+//                tempStr = issuerName.getText();
+//                if( !tempStr.isEmpty()){
+//                    aSB.append("CN=").append(tempStr).append(",");
+//                }
+//                
+//                //Get the ou
+//                tempStr = issuerOU.getText();
+//                if( !tempStr.isEmpty()){
+//                    aSB.append("OU=").append(tempStr).append(",");
+//                }
+//                
+//                //Get the org
+//                tempStr = issuerOrg.getText();
+//                if( !tempStr.isEmpty()){
+//                    aSB.append("O=").append(tempStr).append(",");
+//                }
+//                
+//                //Get the city
+//                tempStr = issuerCity.getText();
+//                if( !tempStr.isEmpty()){
+//                    aSB.append("L=").append(tempStr).append(",");
+//                }
+//                
+//                //Get the state
+//                tempStr = issuerState.getText();
+//                if( !tempStr.isEmpty()){
+//                    aSB.append("S=").append(tempStr).append(",");
+//                }
+//                
+//                //Get the country
+//                tempStr = issuerCountry.getText();
+//                if( !tempStr.isEmpty()){
+//                    aSB.append("C=").append(tempStr);
+//                }
+//                
+//                break;
+//           default:
+//                break;
+//        }   
+//        
+//        return aSB.toString();
+//    }
    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel algoLabel;

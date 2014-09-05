@@ -55,12 +55,11 @@ public final class IpMsg extends ControlMessage{
      *
      * @param dstHostId
      * @param passedIP
-     * @throws java.io.UnsupportedEncodingException
     */
-    public IpMsg( int dstHostId, String passedIP ) throws UnsupportedEncodingException {
+    public IpMsg( int dstHostId, String passedIP ) {
         super( dstHostId );
         
-        byte[] tempBytes = passedIP.getBytes("US-ASCII");
+        byte[] tempBytes = passedIP.getBytes();
         ControlOption aTlv = new ControlOption( OPTION_IP, tempBytes);
         addOption(aTlv);
  

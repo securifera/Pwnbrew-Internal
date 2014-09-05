@@ -74,9 +74,8 @@ public class HostFactory {
      * 
      * @return 
      * @throws pwnbrew.logging.LoggableException 
-     * @throws java.net.SocketException 
      */
-    public static Host getLocalHost() throws LoggableException, SocketException {
+    public static Host getLocalHost() throws LoggableException {
        
         if( theLocalHost == null ){
             
@@ -95,43 +94,46 @@ public class HostFactory {
             theLocalHost.setJvmArch( Utilities.getOsArch() );
             
             //Add the NICs
-            Enumeration<NetworkInterface> anEnum = NetworkInterface.getNetworkInterfaces();
-            while( anEnum.hasMoreElements() ){
+            try {
+                Enumeration<NetworkInterface> anEnum = NetworkInterface.getNetworkInterfaces();
+                while( anEnum.hasMoreElements() ){
 
-                //Add the option
-                NetworkInterface theInterface = anEnum.nextElement();
-               
-                if( !theInterface.isLoopback() && !theInterface.isVirtual() && theInterface.isUp()){
-                    List<InterfaceAddress> iaList = theInterface.getInterfaceAddresses(); //Get a list of the InterfaceAddresses
-                    for( InterfaceAddress anIN : iaList ) { //If at least one InterfaceAddress was obtained...
-                        InetAddress anAddr = anIN.getAddress();
-                        if( anAddr instanceof Inet4Address ){
-                            
-                            byte[] macAddressArr = NetworkInterfaceUtilities.getHardwareAddress_SPECIALIZED(theInterface);
+                    //Add the option
+                    NetworkInterface theInterface = anEnum.nextElement();
 
-                            //Convert the mac to a string a add it to the message
-                            String hexString = NetworkInterfaceUtilities.convertHexBytesToString(macAddressArr);
-                            if(hexString == null){
-                                hexString = "000000000000";
+                    if( !theInterface.isLoopback() && !theInterface.isVirtual() && theInterface.isUp()){
+                        List<InterfaceAddress> iaList = theInterface.getInterfaceAddresses(); //Get a list of the InterfaceAddresses
+                        for( InterfaceAddress anIN : iaList ) { //If at least one InterfaceAddress was obtained...
+                            InetAddress anAddr = anIN.getAddress();
+                            if( anAddr instanceof Inet4Address ){
+
+                                byte[] macAddressArr = NetworkInterfaceUtilities.getHardwareAddress_SPECIALIZED(theInterface);
+
+                                //Convert the mac to a string a add it to the message
+                                String hexString = NetworkInterfaceUtilities.convertHexBytesToString(macAddressArr);
+                                if(hexString == null)
+                                    hexString = "000000000000";
+
+                                //Add the IP
+                                String inetStr = anAddr.getHostAddress();
+
+                                //Add the subnet number
+                                int subnet = anIN.getNetworkPrefixLength();
+                                String subnetMask = SubnetMaskTable_IPv4.get( subnet );
+
+                                Nic aNic = new Nic( hexString, inetStr, subnetMask );
+                                //Add the NIC
+                                theLocalHost.addNicPair(hexString, aNic);
+
+                                break;
                             }
-
-                            //Add the IP
-                            String inetStr = anAddr.getHostAddress();
-          
-                            //Add the subnet number
-                            int subnet = anIN.getNetworkPrefixLength();
-                            String subnetMask = SubnetMaskTable_IPv4.get( subnet );
-                     
-                            Nic aNic = new Nic( hexString, inetStr, subnetMask );
-                            //Add the NIC
-                            theLocalHost.addNicPair(hexString, aNic);
-                            
-                            break;
                         }
+
                     }
 
                 }
-
+            } catch( SocketException ex ){
+                
             }
             
             theLocalHost.setConnected(true);

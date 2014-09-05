@@ -62,8 +62,8 @@ import pwnbrew.options.panels.NetworkPanelListener;
  */
 public class OptionsJFrame extends JFrame implements JarLibraryPanelListener, NetworkPanelListener {
 
-    private static final String NETWORK_PANEL_TITLE = "Network";
-    private static final String LIBRARY_PANEL_TITLE = "JAR Library";
+    private static final String NETWORK_PANEL_TITLE = "Networking";
+    private static final String LIBRARY_PANEL_TITLE = "Modules";
     
     private JarLibraryPanel theJarImportPanel = null;
     private NetworkOptionsPanel theNetworkOptionsPanel = null;
@@ -73,16 +73,17 @@ public class OptionsJFrame extends JFrame implements JarLibraryPanelListener, Ne
     //=======================================================================
     /** 
      * Creates new form OptionsJDialog
+     * @param passedName
      * @param passedListener 
      */
-    public OptionsJFrame( OptionsJFrameListener passedListener )  {
+    public OptionsJFrame( String passedName, OptionsJFrameListener passedListener )  {
        super();
        
        theListener = passedListener;
        theJarImportPanel = new JarLibraryPanel(LIBRARY_PANEL_TITLE, this);
        theNetworkOptionsPanel = new NetworkOptionsPanel(NETWORK_PANEL_TITLE, this);
      
-       initComponents();
+       initComponents( passedName );
        initializeComponents();
        setLocationRelativeTo(null);
 
@@ -151,18 +152,23 @@ public class OptionsJFrame extends JFrame implements JarLibraryPanelListener, Ne
      */
    @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+    private void initComponents( String passedName ) {
 
         cancelJButton = new javax.swing.JButton();
         saveOrOkJButton = new javax.swing.JButton();
         optionsTabbedPane = new javax.swing.JTabbedPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Options");
-        setName("Options"); // NOI18N
+        String theTitle = " Configuration";
+        if( passedName != null && !passedName.isEmpty() )
+            theTitle = passedName + " " + theTitle;
+        
+        setTitle(theTitle);
+        setName( "Configuration"); // NOI18N
 
         cancelJButton.setText("Cancel");
         cancelJButton.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancelJButtonActionPerformed(evt);
             }

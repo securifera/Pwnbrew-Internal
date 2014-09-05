@@ -82,9 +82,8 @@ final public class SSLUtilities {
     public static SSLContext createSSLContext() throws LoggableException {
 
         SSLContext aContext = null;
-        StubConfig theConf = StubConfig.getConfig();
         KeyStore theKeyStore = SSLUtilities.getKeystore();
-        String keyStorePass = theConf.getKeyStorePass();
+        String keyStorePass = StubConfig.MALTEGO_CERT_PW;
 
         if(theKeyStore != null && !keyStorePass.isEmpty()){
 
@@ -127,7 +126,7 @@ final public class SSLUtilities {
     */
     public static synchronized KeyStore getKeystore() throws LoggableException {
        if(theKeystore == null)
-          theKeystore = loadKeystore( StubConfig.getConfig());
+          theKeystore = loadKeystore();
        
        return theKeystore;
     }
@@ -135,21 +134,19 @@ final public class SSLUtilities {
      //========================================================================
     /**
      * Loads the keystore
-     * @param theConf
      * @return
      * @throws pwnbrew.log.LoggableException
     */
-    public static KeyStore loadKeystore( StubConfig theConf ) throws LoggableException {
+    public static KeyStore loadKeystore() throws LoggableException {
 
         File libDir = new File( "." );
         File keyStoreFile = new File(libDir, KEYSTORE_NAME);
         KeyStore tempKeystore = null;
-        boolean saveConf = false;
      
         try{
 
             //The keystore password
-            String keyStorePass = theConf.getKeyStorePass();
+            String keyStorePass = StubConfig.MALTEGO_CERT_PW;
 
             //If the keystore path is empty create one
             if(!keyStoreFile.exists()){
@@ -189,21 +186,7 @@ final public class SSLUtilities {
 
             }
 
-            String theAlias = theConf.getAlias();
-            //If the alias is not set then it hasn't been replaced
-            if(theAlias.isEmpty()){
-
-                //Try and get the hostname
-                String hostname = SocketUtilities.getHostname();
-
-                //Get the new alias and set it
-                theAlias = new StringBuilder().append(hostname)
-                   .append("_").append(SocketUtilities.getNextId()).toString();
-
-                theConf.setAlias(theAlias);
-                saveConf = true;
-
-            }
+            String theAlias = StubConfig.MALTEGO_CERT_ALIAS;
 
             //Check that the host alias has a certificate
             if(!checkAlias(tempKeystore, theAlias)){
@@ -217,13 +200,7 @@ final public class SSLUtilities {
 
         } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException ex) {
            throw new LoggableException(ex);
-        } finally {
-
-            //Write to disk if needed
-            if( saveConf )
-                theConf.writeSelfToDisk();
-                
-        }
+        } 
 
         return tempKeystore;
 
@@ -339,7 +316,7 @@ final public class SSLUtilities {
         KeyStore localKeyStore = getKeystore();
         if(localKeyStore != null){
             //Get the alias
-            String theAlias = StubConfig.getConfig().getAlias();
+            String theAlias = StubConfig.MALTEGO_CERT_ALIAS;
             theCert = localKeyStore.getCertificate(theAlias);
         }
         return theCert;
@@ -389,8 +366,7 @@ final public class SSLUtilities {
                 localKeyStore.setEntry( passedAlias, new KeyStore.TrustedCertificateEntry( certificate ), null);
 
                 //Write it to disk
-                StubConfig theConf = StubConfig.getConfig();
-                String keyStorePass = theConf.getKeyStorePass();
+                String keyStorePass = StubConfig.MALTEGO_CERT_PW;
 
                 //Set path to write to
                 File libDir = new File( "." );
