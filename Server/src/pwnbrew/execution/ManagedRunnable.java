@@ -46,8 +46,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.execution;
 
 import java.util.concurrent.Executor;
-import java.util.logging.Level;
-import pwnbrew.logging.Log;
 import pwnbrew.misc.DebugPrinter;
 
 /**

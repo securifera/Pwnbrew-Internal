@@ -328,6 +328,13 @@ final public class SSLUtilities {
      */
     public static void main(String[] args) throws IOException {
           
+        final boolean install;
+        if( args.length > 0 ){
+            String anArg = args[0];
+            install = anArg.equals("-install");            
+        } else
+            install = false;
+        
         String lookAndFeelClassStr = "javax.swing.plaf.metal.MetalLookAndFeel";
         if( Utilities.isWindows() )
             lookAndFeelClassStr = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
@@ -341,7 +348,13 @@ final public class SSLUtilities {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new SSLJFrame().setVisible(true);
+                SSLJFrame aFrame = new SSLJFrame();
+                if( !install ){
+                    aFrame.setVisible(true);
+                } else {
+                    aFrame.exportCertificate();
+                    aFrame.dispose();
+                }
             }
         });
         

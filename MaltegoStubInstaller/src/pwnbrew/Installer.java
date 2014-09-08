@@ -45,6 +45,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -54,6 +55,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  *
@@ -113,20 +116,43 @@ public class Installer {
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException {
+        
+        String lookAndFeelClassStr = "javax.swing.plaf.metal.MetalLookAndFeel";
+        if( isWindows() )
+            lookAndFeelClassStr = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
+        
+        try{
+            UIManager.setLookAndFeel( lookAndFeelClassStr );
+        } catch ( ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+        }
+        
+        InstallerGui aIG = new InstallerGui();
+        aIG.setVisible(true);
+        
+        aIG.addStatusString("Starting installation...\n");
+        aIG.addStatusString("Copying Maltego Entities & Transforms...\n");
         copyMaltegoFiles(); 
-        copyMaltegoStub();
+        aIG.addStatusString("Copying Pwnbrew Maltego Plugin...\n");
+        String filePath = copyMaltegoStub();
+        aIG.addStatusString("Exporting SSL Public Key...\n");
+        exportSSLCert(filePath);
+        aIG.addStatusString("Installation complete.\n");
+        aIG.installationComplete();
+        
     }
     
     //===========================================================================
     /**
      * 
+     * @return 
      * @throws java.io.IOException
      */
-    public static void copyMaltegoStub() throws IOException{ 
+    public static String copyMaltegoStub() throws IOException{ 
         
         JFileChooser theFileChooser = new JFileChooser();
         theFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         theFileChooser.setMultiSelectionEnabled( false ); //Let the user select multiple files
+        String retStr = null;
         
         if( isWindows()){
             
@@ -180,8 +206,13 @@ public class Installer {
             
             //Move the JAR to the install dir
             if( malDir !=null && malDir.exists()){
-                File destFile = new File( malDir, "pwnbrew" + FILE_SEPARATOR + MALTEGO_STUB);
-                writeJarElementToDisk(destFile, MALTEGO_STUB);               
+                File pwnbrewDir = new File( malDir, "pwnbrew");
+                //Make the underlying dirs
+                pwnbrewDir.mkdirs();
+                //Create the maltego jar
+                File destFile = new File( pwnbrewDir, MALTEGO_STUB);
+                writeJarElementToDisk(destFile, MALTEGO_STUB);
+                retStr = destFile.getAbsolutePath();
             }
             
         } else if( isUnix() ){
@@ -209,11 +240,17 @@ public class Installer {
             
             //Move the JAR to the install dir
             if( aDir !=null && aDir.exists()){
-                File destFile = new File( aDir, "bin" + FILE_SEPARATOR + "pwnbrew" + FILE_SEPARATOR + MALTEGO_STUB);
-                writeJarElementToDisk(destFile, MALTEGO_STUB);               
+                File pwnbrewDir = new File( aDir, "bin" + FILE_SEPARATOR + "pwnbrew");
+                //Make the underlying dirs
+                pwnbrewDir.mkdirs();
+                //Create the maltego jar
+                File destFile = new File( pwnbrewDir, MALTEGO_STUB);
+                writeJarElementToDisk(destFile, MALTEGO_STUB);   
+                retStr = destFile.getAbsolutePath();
             }
                         
         }
+        return retStr;
     }
     
       //===========================================================================
@@ -339,44 +376,91 @@ public class Installer {
         int bytesRead = 0;
         if( passedJarElementName!=null ){
                 
-//                String theResourceStr = "/" + passedJarElementName;
-                InputStream theIS = Installer.class.getClassLoader().getResourceAsStream(passedJarElementName);
-                if( theIS != null ){
-                    
-                    try {
+            InputStream theIS = Installer.class.getClassLoader().getResourceAsStream(passedJarElementName);
+            if( theIS != null ){
 
-                        if(filePath != null){
+                try {
 
-                            byte[] byteBuffer = new byte[ 4096 ];
-                            FileOutputStream theOutStream = new FileOutputStream(filePath);
-                            try (BufferedOutputStream theBOS = new BufferedOutputStream(theOutStream)) {
+                    if(filePath != null){
 
-                                //Read to the end
-                                while( bytesRead != -1){
-                                    bytesRead = theIS.read(byteBuffer);
-                                    if(bytesRead != -1)
-                                        theBOS.write(byteBuffer, 0, bytesRead);                                   
-                                }
+                        byte[] byteBuffer = new byte[ 4096 ];
+                        FileOutputStream theOutStream = new FileOutputStream(filePath);
+                        try (BufferedOutputStream theBOS = new BufferedOutputStream(theOutStream)) {
 
-                                theBOS.flush();
-
+                            //Read to the end
+                            while( bytesRead != -1){
+                                bytesRead = theIS.read(byteBuffer);
+                                if(bytesRead != -1)
+                                    theBOS.write(byteBuffer, 0, bytesRead);                                   
                             }
-                        }
-                        
-                    } finally {
-                        
-                        try {
-                            //Make sure an close the input stream
-                            theIS.close();
-                        } catch (IOException ex) {
-                            ex = null;
+
+                            theBOS.flush();
+
                         }
                     }
-                    
-                } 
-            
-            }
 
+                } finally {
+
+                    try {
+                        //Make sure an close the input stream
+                        theIS.close();
+                    } catch (IOException ex) {
+                        ex = null;
+                    }
+                }
+
+            } 
+
+        }
+
+    }
+
+    //=====================================================================
+    /**
+     * 
+     */
+    private static void exportSSLCert( String jarPath ) {
+
+        Process theProcess;
+        try {
+
+            if( jarPath != null ){
+                
+                String[] cmdArgs = new String[]{"java", "-cp", jarPath, "pwnbrew.misc.SSLUtilities", "-install"};
+                ProcessBuilder theProcessBuilder = new ProcessBuilder( cmdArgs );
+                theProcessBuilder.directory( new File(jarPath).getParentFile());
+                
+                try {
+                    theProcess = theProcessBuilder.start(); //Start a new process
+                } catch( IOException ex ) {                
+                    return;
+                }
+
+                OutputStream theirStdin = theProcess.getOutputStream();
+                try {
+                    theirStdin.close();
+                } catch ( IOException ioe ){
+                    ioe = null;
+                }
+
+                //Wait for the process to complete...
+                int exitValue = Integer.MIN_VALUE;
+                while( exitValue == Integer.MIN_VALUE ) { //Until the exit value is obtained...
+
+                    try {
+                        exitValue = theProcess.waitFor();
+                    } catch( InterruptedException ex ) {
+                        //Do nothing / Continue to wait for the process to exit
+                        ex = null;
+                    }
+
+                }
+            }
+        } finally {
+            //Reset for the next execution...
+            theProcess = null;
+        }
+    
     }
     
     

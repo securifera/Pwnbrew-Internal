@@ -447,59 +447,7 @@ public class SSLJFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void exportButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportButtonActionPerformed
-        
-        String hostname;
-        try {
-            hostname = SocketUtilities.getHostname();
-        } catch (LoggableException | IOException ex) {
-            hostname = "maltego_host";
-        }
-
-        //Get the new alias and set it
-        String theAlias = new StringBuilder().append(hostname)
-           .append("_").append( new Date().getTime()).toString();
-        
-        File selFile = new File(theAlias + ".der");
-        selFile = getFilePath(selFile);
-        
-        setCursor( Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) );
-        try {
-            
-            if( selFile != null ){ 
-                
-                if( selFile.exists()){
-
-                    String theMessage = "The selected file exists. Would you like to overwrite it?";
-                    int dialogValue = JOptionPane.showConfirmDialog(this, theMessage, "Replace file?", JOptionPane.YES_NO_OPTION);
-
-                    //Add the JAR to utilities
-                    if ( dialogValue == JOptionPane.NO_OPTION )
-                        return;                  
-                }                
-
-                try {
-                    //Pass the status up to the manager                
-                    Certificate theCert = SSLUtilities.getCertificate();
-
-                    //If a cert is returned then send it to the client
-                    if(theCert != null){
-                        byte[] certBytes = theCert.getEncoded();
-                        try (FileOutputStream aFOS = new FileOutputStream(selFile)) {
-                            aFOS.write(certBytes);
-                            aFOS.flush();
-                        }
-                    }
-
-                    JOptionPane.showMessageDialog(this, "Export Complete", "Export Complete", JOptionPane.INFORMATION_MESSAGE);
-
-                } catch (IOException | KeyStoreException | LoggableException | CertificateEncodingException ex) {
-                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-
-        } finally {
-            setCursor( null );
-        }
+       exportCertificate();
     }//GEN-LAST:event_exportButtonActionPerformed
 
     private void importButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importButtonActionPerformed
@@ -618,7 +566,7 @@ public class SSLJFrame extends javax.swing.JFrame {
 
         File userSelectedFile = null;
         theCertificateChooser.setSelectedFile( initialFile );
-        int returnVal = theCertificateChooser.showDialog( this, "Select Certificate File" ); //Show the dialogue
+        int returnVal = theCertificateChooser.showSaveDialog(null); //Show the dialogue
         switch( returnVal ) {
 
            case JFileChooser.CANCEL_OPTION: //If the user canceled the selecting...
@@ -953,6 +901,66 @@ public class SSLJFrame extends javax.swing.JFrame {
 
         }   
                    
+    }
+    
+    //==============================================================
+    /**
+     * 
+     */
+    public void exportCertificate(){
+        
+        String hostname;
+        try {
+            hostname = SocketUtilities.getHostname();
+        } catch (LoggableException | IOException ex) {
+            hostname = "maltego_host";
+        }
+
+        //Get the new alias and set it
+        String theAlias = new StringBuilder().append(hostname)
+           .append("_").append( new Date().getTime()).toString();
+        
+        File selFile = new File(theAlias + ".der");
+        selFile = getFilePath(selFile);
+        
+        setCursor( Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) );
+        try {
+            
+            if( selFile != null ){ 
+                
+                if( selFile.exists()){
+
+                    String theMessage = "The selected file exists. Would you like to overwrite it?";
+                    int dialogValue = JOptionPane.showConfirmDialog(this, theMessage, "Replace file?", JOptionPane.YES_NO_OPTION);
+
+                    //Add the JAR to utilities
+                    if ( dialogValue == JOptionPane.NO_OPTION )
+                        return;                  
+                }                
+
+                try {
+                    //Pass the status up to the manager                
+                    Certificate theCert = SSLUtilities.getCertificate();
+
+                    //If a cert is returned then send it to the client
+                    if(theCert != null){
+                        byte[] certBytes = theCert.getEncoded();
+                        try (FileOutputStream aFOS = new FileOutputStream(selFile)) {
+                            aFOS.write(certBytes);
+                            aFOS.flush();
+                        }
+                    }
+
+                    JOptionPane.showMessageDialog(this, "Export Complete", "Export Complete", JOptionPane.INFORMATION_MESSAGE);
+
+                } catch (IOException | KeyStoreException | LoggableException | CertificateEncodingException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+
+        } finally {
+            setCursor( null );
+        }
     }
     
     //=======================================================================
