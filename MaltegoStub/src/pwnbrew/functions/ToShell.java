@@ -51,6 +51,7 @@ import java.util.concurrent.Executor;
 import javax.swing.JFrame;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
+import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
@@ -68,6 +69,7 @@ import pwnbrew.shell.ShellJPanelListener;
 import pwnbrew.shell.ShellJTextPane;
 import pwnbrew.shell.ShellListener;
 import pwnbrew.xml.maltego.MaltegoMessage;
+import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
  *
@@ -83,7 +85,7 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
     private String theHostName;
     
     //Create the return msg
-    private MaltegoMessage theReturnMsg = new MaltegoMessage();
+    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
     private ShellJPanel theShellPanel;
     private Shell theShell = null;
   
@@ -174,9 +176,10 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
             theManager.initialize();
             
             //Connect to server
-            boolean connected = aPR.ensureConnectivity( serverPort, theManager );
-            if( connected ){
-             
+            try {
+                
+                aPR.ensureConnectivity( serverPort, theManager );
+                             
                 //Set the host id
                 theHostId = Integer.parseInt( hostIdStr);
                 theOS = tempOs;
@@ -228,11 +231,14 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
                 
                 retStr = theReturnMsg.getXml();
                 
-            } else {
-                StringBuilder aSB = new StringBuilder()
-                        .append("Unable to connect to the Pwnbrew server at \"")
-                        .append(serverIp).append(":").append(serverPort).append("\"");
-                DebugPrinter.printMessage( NAME_Class, "listclients", aSB.toString(), null);
+            } catch( LoggableException ex ) {
+                
+                //Create a relay object
+                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+                MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+
+                //Create the message list
+                malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
             }
             
         } catch (IOException | InterruptedException ex) {

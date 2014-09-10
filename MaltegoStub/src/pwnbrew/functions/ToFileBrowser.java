@@ -76,6 +76,7 @@ import pwnbrew.filesystem.FileTreePanel;
 import pwnbrew.filesystem.IconData;
 import pwnbrew.filesystem.RemoteFile;
 import pwnbrew.filesystem.RemoteFileSystemTask;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.ProgressListener;
@@ -95,6 +96,7 @@ import pwnbrew.network.control.messages.TaskStatus;
 import pwnbrew.network.control.messages.Tasking;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.xml.maltego.MaltegoMessage;
+import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
  *
@@ -229,8 +231,10 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             theManager.initialize();
             
             //Connect to server
-            boolean connected = aPR.ensureConnectivity( serverPort, theManager );
-            if( connected ){
+            try {
+//            boolean connected =
+                aPR.ensureConnectivity( serverPort, theManager );
+//            if( connected ){
              
                 //Set the host id
                 theHostId = Integer.parseInt( hostIdStr);
@@ -262,11 +266,16 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                 //Sleep a couple seconds to make sure the message was sent
                 Thread.sleep(2000);
                 
-            } else {
-                StringBuilder aSB = new StringBuilder()
-                        .append("Unable to connect to the Pwnbrew server at \"")
-                        .append(serverIp).append(":").append(serverPort).append("\"");
-                DebugPrinter.printMessage( NAME_Class, "listclients", aSB.toString(), null);
+            } catch( LoggableException ex ) {
+                
+                //Create a relay object
+                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+                MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+
+                //Create the message list
+                malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
+//                String aSB = String.valueOf("Unable to connect to the Pwnbrew server at \"" + serverIp + ":") + Integer.toString(serverPort) + "\"";
+//                DebugPrinter.printMessage( NAME_Class, "listclients", aSB, null);
             }
             
         } catch (IOException | InterruptedException ex) {

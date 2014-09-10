@@ -39,8 +39,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.socket;
 
-import pwnbrew.selector.SocketChannelHandler;
-import pwnbrew.log.LoggableException;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -52,8 +50,12 @@ import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLException;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
+import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.xml.maltego.MaltegoMessage;
+import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
  * A helper class which performs I/O using the SSLEngine API.
@@ -64,8 +66,8 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
     private final SSLEngine sslEngine;
     private static final String NAME_Class = SecureSocketChannelWrapper.class.getSimpleName();
 
-    private int appBBSize;
-    private int netBBSize;
+    private final int appBBSize;
+    private final int netBBSize;
 
     /*
     * All I/O goes through these buffers.
@@ -277,23 +279,14 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
     */
     private void doTasks( final SelectionKey passedKey) {
 
+        //Need to check for "No trusted certificate found" - ValidatorException
+        Runnable taskRunnable;
+        while((taskRunnable = sslEngine.getDelegatedTask()) != null) {
+            taskRunnable.run();
+        }
 
-//        final SSLTaskListener theListener = this;
-//        Constants.Executor.execute( new Runnable() {
-//            @Override
-//            public void run(){
-
-                //Need to check for "No trusted certificate found" - ValidatorException
-                Runnable taskRunnable;
-                while((taskRunnable = sslEngine.getDelegatedTask()) != null) {
-                    taskRunnable.run();
-                }
-
-                //Notify listener
-                taskFinished(passedKey);
-
-//            }
-//        });
+        //Notify listener
+        taskFinished(passedKey);
 
     }
 
@@ -589,7 +582,6 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
                         //Notify the comm
                         theSocketHandler.setState( Constants.CONNECTED);
                         theSocketHandler.getPortRouter().beNotified(); 
-//                        thePortRouter.connectionCompleted(theSocketChannel, true, true);
                         
                         break;
 
@@ -656,15 +648,28 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
                     //Notify the comm
                     theSocketHandler.setState( Constants.CONNECTED);
                     theSocketHandler.getPortRouter().beNotified(); 
-//                    thePortRouter.connectionCompleted(theSocketChannel, true, true);                                        
+                    
                     break;
                     
                 default:
     //                   DebugPrinter.printMessage(SecureSocketChannelWrapper.class, "Not handshaking.");
 
             }
+        } catch ( SSLException ex ){
+            if( ex.getMessage().contains("Handshake message sequence violation, 2" )){
+                    //Create a relay object
+                MaltegoMessage theReturnMsg = new MaltegoMessage();
+                String retStr = "Unable to connect to Pwnbrew server.  Please ensure the Pwnbrew MaltegoStub SSL Certificate has been imported into the target Pwnbrew server's keystore.";
+                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( retStr );
+                MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
 
-        } catch (IOException ex){
+                //Create the message list
+                malMsg.getExceptionMessages().addExceptionMessage(exMsg); 
+                System.out.println(theReturnMsg.getXml());
+                System.exit(0);
+            }
+        
+        } catch (IOException ex){            
             DebugPrinter.printMessage( NAME_Class, "taskFinished", ex.getMessage(), ex);      
         }
     }

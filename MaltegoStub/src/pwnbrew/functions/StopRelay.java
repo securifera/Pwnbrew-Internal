@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.Map;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.SocketUtilities;
@@ -62,7 +63,7 @@ public class StopRelay extends Function {
     private volatile boolean isConnected = false;
     
     //Create the return msg
-    private MaltegoMessage theReturnMsg = new MaltegoMessage();
+    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
   
     //==================================================================
     /**
@@ -137,8 +138,9 @@ public class StopRelay extends Function {
             theManager.initialize();
 
             //Connect to server
-            boolean connected = aPR.ensureConnectivity( serverPort, theManager );
-            if( connected ){
+            try {
+                
+                aPR.ensureConnectivity( serverPort, theManager );
 
                 //Get the client count
                 int hostId = Integer.parseInt( hostIdStr);
@@ -166,15 +168,15 @@ public class StopRelay extends Function {
                 } catch (InterruptedException ex) {
                 }
 
-            } else {
-                StringBuilder aSB = new StringBuilder()
-                        .append("Unable to connect to the Pwnbrew server at \"")
-                        .append(serverIp).append(":").append(serverPort).append("\"");
-                DebugPrinter.printMessage( NAME_Class, "listclients", aSB.toString(), null);
-            }
-
+            } catch( LoggableException ex ) {
                 
-            
+                //Create a relay object
+                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+                MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+
+                //Create the message list
+                malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
+            }
             
             //Create the return message
             retStr = theReturnMsg.getXml();

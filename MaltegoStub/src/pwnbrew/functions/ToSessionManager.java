@@ -47,6 +47,7 @@ import java.util.Map;
 import javax.swing.JList;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.CountSeeker;
 import pwnbrew.misc.DebugPrinter;
@@ -66,6 +67,7 @@ import pwnbrew.sessions.SessionJFrameListener;
 import pwnbrew.sessions.SessionsJFrame;
 import pwnbrew.xml.maltego.Field;
 import pwnbrew.xml.maltego.MaltegoMessage;
+import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 import pwnbrew.xml.maltego.custom.Host;
 
 /**
@@ -152,8 +154,9 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
             theManager.initialize();
             
             //Connect to server
-            boolean connected = aPR.ensureConnectivity( serverPort, theManager );
-            if( connected ){
+            try {
+                
+                aPR.ensureConnectivity( serverPort, theManager );
                 
                  //Get the client count
                 ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.HOST_COUNT, "0" );
@@ -199,9 +202,14 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
                 
                 }
                 
-            } else {
-                String aSB = String.valueOf("Unable to connect to the Pwnbrew server at \"" + serverIp + ":") + Integer.toString(serverPort) + "\"";
-                DebugPrinter.printMessage( NAME_Class, "run", aSB, null);
+            } catch( LoggableException ex ) {
+                
+                //Create a relay object
+                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+                MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+
+                //Create the message list
+                malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
             }
             
         } catch (IOException ex) {

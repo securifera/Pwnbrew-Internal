@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.Map;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.CountSeeker;
 import pwnbrew.misc.DebugPrinter;
@@ -48,10 +49,11 @@ import pwnbrew.misc.HostHandler;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.network.control.messages.GetCount;
 import pwnbrew.network.control.messages.ControlMessage;
+import pwnbrew.network.control.messages.GetCount;
 import pwnbrew.xml.maltego.Entities;
 import pwnbrew.xml.maltego.MaltegoMessage;
+import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 import pwnbrew.xml.maltego.MaltegoTransformResponseMessage;
 import pwnbrew.xml.maltego.custom.Host;
 
@@ -142,8 +144,9 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
             theManager.initialize();
             
             //Connect to server
-            boolean connected = aPR.ensureConnectivity( serverPort, theManager );
-            if( connected ){
+            try {
+                
+                aPR.ensureConnectivity( serverPort, theManager );
              
                 //Get the client count
                 ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.HOST_COUNT, hostIdStr );
@@ -164,9 +167,14 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
                                         
                 }
                 
-            } else {
-                String aSB = String.valueOf("Unable to connect to the Pwnbrew server at \"" + serverIp + ":") + Integer.toString(serverPort) + "\"";
-                DebugPrinter.printMessage( NAME_Class, "listclients", aSB, null);
+            } catch( LoggableException ex ) {
+                
+                //Create a relay object
+                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+                MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+
+                //Create the message list
+                malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
             }
             
         } catch (IOException ex) {

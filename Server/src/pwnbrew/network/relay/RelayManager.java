@@ -170,24 +170,5 @@ public class RelayManager extends DataManager {
         theServerPortRouter = null;
         theRelayManager = null;
     }
-//    
-//     //===============================================================
-//    /**
-//     *   Send the message out the given channel.
-//     *
-//     * @param passedMessage
-//     * @throws java.io.IOException
-//    */
-//    public void send( Message passedMessage ) throws IOException {
-//
-//        int msgLen = passedMessage.getLength();
-//        ByteBuffer aByteBuffer = ByteBuffer.allocate( msgLen );
-//        passedMessage.append(aByteBuffer);
-//        
-//        //Queue the message to be sent
-//        theServerPortRouter.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
-//        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-//              
-//    }
 
 }

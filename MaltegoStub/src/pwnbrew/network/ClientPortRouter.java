@@ -57,7 +57,6 @@ import pwnbrew.concurrent.LockingThread;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
-import pwnbrew.misc.DebugPrinter;
 import pwnbrew.selector.ConnectHandler;
 import pwnbrew.selector.SocketChannelHandler;
 
@@ -69,7 +68,7 @@ import pwnbrew.selector.SocketChannelHandler;
 public class ClientPortRouter extends PortRouter {
 
     private static final int SLEEP_TIME = 1000;
-    private static final int CONNECT_RETRY = 3;
+    private static final int CONNECT_RETRY = 2;
     
     private SocketChannelHandler serverSCH = null;
     private final LockingThread theConnectionLock;       
@@ -278,12 +277,11 @@ public class ClientPortRouter extends PortRouter {
      * creates one.
      *
      * @param passedPort
-     * @param passedListener
-     * @return 
+     * @param passedListener 
+     * @throws pwnbrew.log.LoggableException 
     */
-    public boolean ensureConnectivity( int passedPort, LockListener passedListener ) {
+    public void ensureConnectivity( int passedPort, LockListener passedListener ) throws LoggableException {
 
-        boolean isConnected = true;
         try {
             
             if(serverSCH == null || serverSCH.getState() == Constants.DISCONNECTED){            
@@ -296,25 +294,15 @@ public class ClientPortRouter extends PortRouter {
                 InetAddress srvInet = InetAddress.getByName(serverIp);
                 //DebugPrinter.printMessage( NAME_Class, "Attempting to connect to " + srvInet.getHostAddress() + ":" + passedPort);
      
-                if( !initiateConnection( passedListener, srvInet, passedPort, CONNECT_RETRY )){
-                    DebugPrinter.printMessage( NAME_Class, "routeMessage", "Unable to connect to port " + passedPort, null);  
-                    isConnected = false;
-                } else {
-                
-                    //Set flag
-                    if( serverSCH == null || serverSCH.getState() == Constants.DISCONNECTED ){
-                        isConnected = false;               
-                    }
-                }
-        
+                if( !initiateConnection( passedListener, srvInet, passedPort, CONNECT_RETRY ))
+                    throw new LoggableException("Unable to connect to Pwnbrew server at " + serverIp + " on port " + passedPort);
+               
             }
      
         } catch ( UnknownHostException | LoggableException ex) {
-            DebugPrinter.printMessage( NAME_Class, "routeMessage", ex.getMessage(), ex);  
-            isConnected = false;
+            throw new LoggableException(ex);
         }
 
-        return isConnected;
     }  
 
 

@@ -69,6 +69,8 @@ public class MaltegoStub extends PortManager  implements LockListener {
     
     private static final String BASE_FUNCTION_CLASSPATH = "pwnbrew.functions.";
     private static final String NAME_Class = MaltegoStub.class.getSimpleName();   
+    private static MaltegoStub theMaltegoStub;
+    
     
     //========================================================================
     /**
@@ -153,19 +155,17 @@ public class MaltegoStub extends PortManager  implements LockListener {
             if( args.length > 0 && args.length < 4 ){
                 
                 //Instantiate the manager and start it up
-                MaltegoStub entryPoint = null;
                 try {
                     //Start up the process
-                    entryPoint = new MaltegoStub( args );
-                    entryPoint.start();
+                    theMaltegoStub = new MaltegoStub( args );
+                    theMaltegoStub.start();
                     
                 } finally {
                     
                     //Shutdown the stub
-                    if( entryPoint != null )
-                        entryPoint.shutdown();
+                    if( theMaltegoStub != null )
+                        theMaltegoStub.shutdown();
                 }
-                
                 
             } else {            
                 System.err.println("Incorrect parameters.");
@@ -173,7 +173,15 @@ public class MaltegoStub extends PortManager  implements LockListener {
        
         
     }
-
+    
+    //========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public static MaltegoStub getMaltegoStub(){
+        return theMaltegoStub;
+    }
     // ========================================================================
     /**
      *  Handles any functions that need to be executed before the program starts.

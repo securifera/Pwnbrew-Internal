@@ -60,7 +60,6 @@ import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
-//import pwnbrew.network.PortWrapper;
 import pwnbrew.network.socket.SocketChannelWrapper;
 
 /**
@@ -79,7 +78,6 @@ public class SocketChannelHandler implements Selectable {
     private static final String NAME_Class = SocketChannelHandler.class.getSimpleName();
 
     private PortRouter thePortRouter = null;
-//    private volatile boolean wrappingFlag = true;
     private volatile boolean staging = false;
 
     private int clientId = -1;
@@ -128,7 +126,6 @@ public class SocketChannelHandler implements Selectable {
             } else {
                 passedSelKey.cancel();
             }
-            
         } catch ( CancelledKeyException | IOException ex ){
             
             //Cancel the key

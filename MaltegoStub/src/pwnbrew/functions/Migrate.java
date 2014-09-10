@@ -8,6 +8,7 @@ import javax.swing.JOptionPane;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.generic.gui.ValidTextField;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.SocketUtilities;
@@ -15,6 +16,7 @@ import pwnbrew.misc.StandardValidation;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.xml.maltego.MaltegoMessage;
+import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
  *
@@ -113,8 +115,9 @@ public class Migrate extends Function {
                 theManager.initialize();
 
                 //Connect to server
-                boolean connected = aPR.ensureConnectivity( serverPort, theManager );
-                if( connected ){
+                try {
+                    
+                    aPR.ensureConnectivity( serverPort, theManager );
 
                     //Get the client count
                     int hostId = Integer.parseInt(hostIdStr);
@@ -127,11 +130,14 @@ public class Migrate extends Function {
                     } catch (InterruptedException ex) {
                     }
 
-                } else {
-                    StringBuilder aSB = new StringBuilder()
-                            .append("Unable to connect to the Pwnbrew server at \"")
-                            .append(serverIp).append(":").append(serverPort).append("\"");
-                    DebugPrinter.printMessage( NAME_Class, "listclients", aSB.toString(), null);
+                } catch( LoggableException ex ) {
+                
+                    //Create a relay object
+                    pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+                    MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+
+                    //Create the message list
+                    malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
                 }
             }
             

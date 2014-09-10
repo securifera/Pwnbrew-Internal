@@ -44,6 +44,7 @@ import javax.swing.JOptionPane;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.generic.gui.ValidTextField;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.SocketUtilities;
@@ -169,8 +170,9 @@ public class ToRelay extends Function {
                     theManager.initialize();
 
                     //Connect to server
-                    boolean connected = aPR.ensureConnectivity( serverPort, theManager );
-                    if( connected ){
+                    try {
+                        
+                        aPR.ensureConnectivity( serverPort, theManager );
 
                         //Get the client count
                         int hostId = Integer.parseInt( hostIdStr);
@@ -206,9 +208,14 @@ public class ToRelay extends Function {
                         } catch (InterruptedException ex) {
                         }
 
-                    } else {
-                        String aSB = String.valueOf("Unable to connect to the Pwnbrew server at \"" + serverIp + ":") + Integer.toString(serverPort) + "\"";
-                        DebugPrinter.printMessage( NAME_Class, "listclients", aSB, null);
+                    } catch( LoggableException ex ) {
+                
+                        //Create a relay object
+                        pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+                        MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+
+                        //Create the message list
+                        malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
                     }
 
                 }
