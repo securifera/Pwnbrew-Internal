@@ -38,10 +38,9 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew;
 
+import java.awt.Point;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,8 +50,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -68,8 +66,10 @@ public class Installer {
     private static File classPath;
     
     //Stub name
+    private static final String IMPORT_FILE = "pwnbrew.mtz";
     private static final String MALTEGO_STUB = "MaltegoStub.jar";
-    private static final String MALTEGO_DIR = ".maltego";
+    private static final String MALTEGO = "maltego";
+    private static File INSTALL_DIR = null;
     
     //OS properties...
     private static final String PROPERTY_OsName    = "os.name";  
@@ -81,7 +81,7 @@ public class Installer {
     private static final String OS_NAME_Unix         = "unix";
     
     public static final String FILE_SEPARATOR    = System.getProperty("file.separator");
-    
+        
     //Local OS values...
     public static final String OS_NAME    = System.getProperty( PROPERTY_OsName ).toLowerCase();
     static {
@@ -127,15 +127,58 @@ public class Installer {
         }
         
         InstallerGui aIG = new InstallerGui();
+        aIG.setLocationRelativeTo(null);
+        Point parentLocation = aIG.getLocation();
+        aIG.setLocation(parentLocation.x - 500, parentLocation.y - 300);
+         
+        aIG.setAlwaysOnTop(true);
         aIG.setVisible(true);
         
+        aIG.setButtonText("Cancel");
         aIG.addStatusString("Starting installation...\n");
-        aIG.addStatusString("Copying Maltego Entities & Transforms...\n");
-        copyMaltegoFiles(); 
+        aIG.addStatusString("Copying Maltego Import File...\n");
         aIG.addStatusString("Copying Pwnbrew Maltego Plugin...\n");
-        String filePath = copyMaltegoStub();
+        copyPwnbrewFiles();
+        
         aIG.addStatusString("Exporting SSL Public Key...\n");
-        exportSSLCert(filePath);
+        
+        //Export the SSL Cert to a file specified by the user
+        File aFile = new File(INSTALL_DIR, MALTEGO_STUB );
+        String[] cmdArgs = new String[]{"java", "-cp", aFile.getAbsolutePath(), "pwnbrew.misc.SSLUtilities", "-install"};
+        executeCmd(cmdArgs, aFile.getParentFile());
+        
+        aIG.addStatusString("Attemping to run Maltego for Pwnbrew import...\n");
+        
+        //Attempt to run maltego so the entities can be imported
+        aFile = new File(INSTALL_DIR, IMPORT_FILE );
+        String msg = "To Import Pwnbrew Entities & Transforms,\n\n"
+                + "Click Maltego Logo in the top left corner of the Maltego application.\n"
+                + "Select Import->Import Configuration.\n"
+                + "Navigate to \"" + aFile.getAbsolutePath() + "\"\n"
+                + "Click \"Next\",\"Next\",\"Finish\"\n"
+                + "Close Maltego to conclude installation.\n\n";
+        
+        //Get the parent frame location
+        parentLocation = aIG.getLocation();
+        
+        JOptionPane aPane = new JOptionPane(msg , JOptionPane.INFORMATION_MESSAGE);
+        JDialog aDialog = aPane.createDialog(aIG, "Import Pwnbrew Entities & Transforms");
+        aDialog.setLocation( parentLocation.x + 500, parentLocation.y);
+        aDialog.setModal(false);
+        aDialog.setAlwaysOnTop(true);
+        aDialog.setVisible(true); 
+        
+        File maltegoExe = null;
+        if( isWindows() )
+            maltegoExe = new File(INSTALL_DIR.getParentFile(), "bin" + FILE_SEPARATOR + MALTEGO + ".exe" );
+        else if ( isUnix() )   
+            maltegoExe = new File(INSTALL_DIR.getParentFile(), MALTEGO );
+        
+        if( maltegoExe != null ){
+            cmdArgs = new String[]{ maltegoExe.getAbsolutePath() };
+            executeCmd(cmdArgs, maltegoExe.getParentFile());
+        }
+        
         aIG.addStatusString("Installation complete.\n");
         aIG.installationComplete();
         
@@ -144,15 +187,13 @@ public class Installer {
     //===========================================================================
     /**
      * 
-     * @return 
      * @throws java.io.IOException
      */
-    public static String copyMaltegoStub() throws IOException{ 
+    public static void copyPwnbrewFiles() throws IOException{ 
         
         JFileChooser theFileChooser = new JFileChooser();
         theFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         theFileChooser.setMultiSelectionEnabled( false ); //Let the user select multiple files
-        String retStr = null;
         
         if( isWindows()){
             
@@ -206,13 +247,18 @@ public class Installer {
             
             //Move the JAR to the install dir
             if( malDir !=null && malDir.exists()){
-                File pwnbrewDir = new File( malDir, "pwnbrew");
+                
+                INSTALL_DIR = new File( malDir, "pwnbrew");
                 //Make the underlying dirs
-                pwnbrewDir.mkdirs();
+                INSTALL_DIR.mkdirs();
+                
+                //Create the maltego import file
+                File destFile = new File( INSTALL_DIR, IMPORT_FILE);
+                writeJarElementToDisk(destFile, IMPORT_FILE);
+                
                 //Create the maltego jar
-                File destFile = new File( pwnbrewDir, MALTEGO_STUB);
+                destFile = new File( INSTALL_DIR, MALTEGO_STUB);
                 writeJarElementToDisk(destFile, MALTEGO_STUB);
-                retStr = destFile.getAbsolutePath();
             }
             
         } else if( isUnix() ){
@@ -240,108 +286,26 @@ public class Installer {
             
             //Move the JAR to the install dir
             if( aDir !=null && aDir.exists()){
-                File pwnbrewDir = new File( aDir, "bin" + FILE_SEPARATOR + "pwnbrew");
+                
+                INSTALL_DIR = new File( aDir, "bin" + FILE_SEPARATOR + "pwnbrew");
                 //Make the underlying dirs
-                pwnbrewDir.mkdirs();
+                INSTALL_DIR.mkdirs();
+                 
+                //Create the maltego import file
+                File destFile = new File( INSTALL_DIR, IMPORT_FILE);
+                writeJarElementToDisk(destFile, IMPORT_FILE);   
+                
                 //Create the maltego jar
-                File destFile = new File( pwnbrewDir, MALTEGO_STUB);
-                writeJarElementToDisk(destFile, MALTEGO_STUB);   
-                retStr = destFile.getAbsolutePath();
+                destFile = new File( INSTALL_DIR, MALTEGO_STUB);
+                writeJarElementToDisk(destFile, MALTEGO_STUB); 
+                               
             }
                         
         }
-        return retStr;
-    }
-    
-      //===========================================================================
-    /**
-     * 
-     * @throws java.io.FileNotFoundException
-     */
-    public static void copyMaltegoFiles() throws IOException{  
         
-        //Get the path prefix
-        String pathPrefix = null;
-        if( isWindows())
-            pathPrefix = System.getenv("APPDATA");
-        else if( isUnix() )
-            pathPrefix = System.getProperty("user.home");
-    
-        if( pathPrefix != null ){
-            
-            //Make sure the maltego file exists
-            File aFile = new File(pathPrefix, MALTEGO_DIR);
-            if( aFile.exists() ){
-                                
-                //List the files
-                boolean configDirFound = false;
-                File[] aFileArr = aFile.listFiles();
-                for( File nextFile : aFileArr ){
-                    if( nextFile.isDirectory() ){
-                        File maltegoFile = new File( nextFile, "config" + FILE_SEPARATOR + "Maltego");
-                        if( maltegoFile.exists()){
-                            pathPrefix = nextFile.getAbsolutePath();
-                            configDirFound = true;
-                            break;
-                        }
-                    }
-                }
-                
-                //Make sure the file exists
-                if( configDirFound && classPath != null && classPath.isFile() ){                 
-
-                    FileInputStream fis = new FileInputStream(classPath);
-
-                    //Open the zip input stream
-                    ZipInputStream theZipInputStream = new ZipInputStream(fis);
-                    ZipEntry anEntry;
-                    while((anEntry = theZipInputStream.getNextEntry())!=null){
-                        
-                        //Get the entry name
-                        String theEntryName = anEntry.getName();
-
-                        //Check if it's a maltego config file
-                        if( theEntryName.contains("config")){                                    
-
-                            aFile = new File( pathPrefix, theEntryName );                                    
-                            try {
-                                
-                                if( theEntryName.contains(".") ){
-                                    //Write the file.
-                                    try (FileOutputStream theFileOS = new FileOutputStream(aFile)) {
-
-                                        int temp;
-                                        byte[] buffer = new byte[1024];
-                                        while((temp = theZipInputStream.read(buffer)) > 0)
-                                            theFileOS.write(buffer, 0, temp);                                    
-
-                                        //Close the file
-                                        theFileOS.flush();
-                                    }
-                                } else {
-                                    //Make the directories
-                                    if( !aFile.exists())
-                                        aFile.mkdirs();
-                                }
-                            } catch( FileNotFoundException ex ){
-                                
-                            }
-                        }
-
-                    }
-
-                }
-                
-            } else {
-                
-                //Show error message
-                JOptionPane.showMessageDialog(null, "Unable to locate maltego config directory. "
-                        + "\n Please ensure the installer is being run\n   as the user that installed Maltego.");
-            }
-        }
     }
     
-      // ==========================================================================
+    // ==========================================================================
     /**
     * Determines if the local host is running an OS that is in the Windows family.
     *
@@ -419,16 +383,15 @@ public class Installer {
     /**
      * 
      */
-    private static void exportSSLCert( String jarPath ) {
+    private static void executeCmd( String[] cmdArgs, File workingDir ) {
 
         Process theProcess;
         try {
 
-            if( jarPath != null ){
+            if( INSTALL_DIR != null ){
                 
-                String[] cmdArgs = new String[]{"java", "-cp", jarPath, "pwnbrew.misc.SSLUtilities", "-install"};
                 ProcessBuilder theProcessBuilder = new ProcessBuilder( cmdArgs );
-                theProcessBuilder.directory( new File(jarPath).getParentFile());
+                theProcessBuilder.directory(workingDir);
                 
                 try {
                     theProcess = theProcessBuilder.start(); //Start a new process
