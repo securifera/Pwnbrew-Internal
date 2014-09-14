@@ -113,6 +113,13 @@ public class Uninstall extends Function {
                 } catch (InterruptedException ex) {
                 }
                 
+                //Create a relay object
+                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( "Client uninstalled. Please remove the client from the graph.");
+                MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+
+                //Create the message list
+                malMsg.getExceptionMessages().addExceptionMessage(exMsg); 
+                
                 retStr = theReturnMsg.getXml();
                             
             } catch( LoggableException ex ) {

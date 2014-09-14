@@ -27,7 +27,7 @@ public class Migrate extends Function {
     private static final String NAME_Class = Migrate.class.getSimpleName();
         
     //Create the return msg
-    private MaltegoMessage theReturnMsg = new MaltegoMessage();
+    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
   
     //==================================================================
     /**
@@ -141,12 +141,11 @@ public class Migrate extends Function {
                 }
             }
             
-            retStr = theReturnMsg.getXml();
-            
         } catch (IOException ex) {
             DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex );
         }
         
+        retStr = theReturnMsg.getXml();
         return retStr;
     }
     

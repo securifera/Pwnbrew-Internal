@@ -48,7 +48,6 @@ import java.nio.channels.SocketChannel;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
-import pwnbrew.ClientConfig;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.concurrent.LockingThread;
 import pwnbrew.log.RemoteLog;
@@ -306,13 +305,12 @@ public class ClientPortRouter extends PortRouter {
         KeepAliveTimer aKAT = getKeepAliveTimer();
         aKAT.setConnectedFlag(false);
 
-        
+        DebugPrinter.printMessage(NAME_Class, "Socket closed.");
         ReconnectTimer aReconnectTimer = ReconnectTimer.getReconnectTimer();
         if( !aReconnectTimer.isRunning() && reconnectEnable ){
             
             aReconnectTimer.clearTimes();
-            DebugPrinter.printMessage(NAME_Class, "Socket closed.");
-            
+                        
             //Create the calendar
             Calendar theCalendar = Calendar.getInstance(); 
             theCalendar.setTime( new Date() );
@@ -389,21 +387,18 @@ public class ClientPortRouter extends PortRouter {
      * Checks that a connection has been made to the passed port.  If not it
      * creates one.
      *
+     * @param serverIp
      * @param passedPort
      * @param passedListener
      * @return 
     */
-    public boolean ensureConnectivity( int passedPort, LockListener passedListener ) {
+    public boolean ensureConnectivity( String serverIp, int passedPort, LockListener passedListener ) {
 
         boolean isConnected = true;
         try {
             
             if(serverSCH == null || serverSCH.getState() == Constants.DISCONNECTED){            
            
-                //Get the data port and try to connect
-                ClientConfig theConf = ClientConfig.getConfig();
-                String serverIp = theConf.getServerIp();
-               
                 //Get the inet
                 InetAddress srvInet = InetAddress.getByName(serverIp);
                 DebugPrinter.printMessage( NAME_Class, "Attempting to connect to " + srvInet.getHostAddress() + ":" + passedPort);

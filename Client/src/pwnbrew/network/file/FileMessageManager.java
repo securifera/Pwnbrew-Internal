@@ -153,13 +153,15 @@ public class FileMessageManager extends DataManager implements LockListener {
             throws LoggableException, NoSuchAlgorithmException, IOException {
 
         //Get the socket router
-        int socketPort = ClientConfig.getConfig().getSocketPort();
+        ClientConfig theConf = ClientConfig.getConfig();
+        int socketPort = theConf.getSocketPort();
+        String serverIp = theConf.getServerIp();
         ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( socketPort );
                        
         //Initiate the file transfer
         if(aPR != null){
             
-            aPR.ensureConnectivity( socketPort, this );       
+            aPR.ensureConnectivity( serverIp, socketPort, this );       
             
             //Initialize the file transfer
             synchronized( theFileReceiverMap ){

