@@ -42,7 +42,6 @@ package pwnbrew.misc;
 
 import java.beans.IntrospectionException;
 import java.io.*;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
@@ -51,7 +50,6 @@ import java.net.URLClassLoader;
 import java.security.*;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -61,11 +59,8 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import pwnbrew.ClientConfig;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
-import pwnbrew.network.ClientPortRouter;
 
 
 /**
@@ -662,102 +657,102 @@ public class Utilities {
     }
     
    
-    // ==========================================================================
-    /**
-     * Attempt to restart pwnbrew
-     * 
-     * @param passedManager
-     * @param passedBool
-     * @param milDelay
-     */
-    public static void restart( CommManager passedManager, boolean passedBool, final int milDelay ){
-        
-        if( Utilities.isStaged()){
-                
-            try {
-                
-                Class stagerClass = Class.forName("stager.Stager");            
-                Field aField = stagerClass.getField("serviceName");
-                File theClassPath = Utilities.getClassPath(); 
-                
-                final List<String> strList = new ArrayList<>();
-                //Get the jre path
-                String jrePath = Utilities.getJreExecutable("java"); 
-                strList.add(jrePath);
-                strList.add("-jar");
-                strList.add(theClassPath.getAbsolutePath());
-                
-                Object anObj = aField.get(null);
-                if( anObj != null && anObj instanceof String ){
-
-                    //Cast to string
-                    String svcStr = (String)anObj;
-                    if( !svcStr.isEmpty() && Utilities.isWindows() ){
-                           
-                        //Clear the list
-                        strList.clear();
-
-                        //Tell the service to stop and restart
-                        strList.add("cmd.exe");
-                        strList.add("/c");
-
-                        StringBuilder aSB = new StringBuilder()
-                                .append("net stop \"").append(svcStr).append("\"")
-                                .append(" && net start \"").append(svcStr).append("\"");
-                        strList.add(aSB.toString());
-                        
-                        //Run restart command
-                        Constants.Executor.execute( new Runnable(){
-
-                            @Override
-                            public void run() {
-                                if( milDelay > 0 ){
-                                    try {
-                                        Thread.sleep(milDelay);
-                                    } catch (InterruptedException ex) {
-                                    }
-                                }
-                                
-                                //Run the command
-                                try {
-                                    Runtime.getRuntime().exec(strList.toArray( new String[strList.size()]) );
-                                } catch (IOException ex) {
-                                }
-                            }
-                        
-                        });
-                        return;
-
-                    } 
-                    
-                } 
-                
-                DebugPrinter.printMessage(NAME_Class, strList.toString());
-                //Tell it to run itself on shutdown
-                Runtime.getRuntime().addShutdownHook( new Thread(){
-                
-                    @Override
-                    public void run(){       
-                        try {
-                            //Run restart command
-                            Runtime.getRuntime().exec(strList.toArray( new String[strList.size()]) );
-                        } catch (IOException ex) {
-                        }
-                    }
-                
-                });
-                    
-                //Tell it not to reconnect
-                ClientPortRouter aCPR = (ClientPortRouter)passedManager.getPortRouter(ClientConfig.getConfig().getSocketPort());
-                aCPR.setReconnectFlag( passedBool );
-                passedManager.shutdown();   
-                                               
-            } catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
-                RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);        
-            }
-        }
-        
-    }
+//    // ==========================================================================
+//    /**
+//     * Attempt to restart pwnbrew
+//     * 
+//     * @param passedManager
+//     * @param passedBool
+//     * @param milDelay
+//     */
+//    public static void restart( CommManager passedManager, boolean passedBool, final int milDelay ){
+//        
+//        if( Utilities.isStaged()){
+//                
+//            try {
+//                
+//                Class stagerClass = Class.forName("stager.Stager");            
+//                Field aField = stagerClass.getField("serviceName");
+//                File theClassPath = Utilities.getClassPath(); 
+//                
+//                final List<String> strList = new ArrayList<>();
+//                //Get the jre path
+//                String jrePath = Utilities.getJreExecutable("java"); 
+//                strList.add(jrePath);
+//                strList.add("-jar");
+//                strList.add(theClassPath.getAbsolutePath());
+//                
+//                Object anObj = aField.get(null);
+//                if( anObj != null && anObj instanceof String ){
+//
+//                    //Cast to string
+//                    String svcStr = (String)anObj;
+//                    if( !svcStr.isEmpty() && Utilities.isWindows() ){
+//                           
+//                        //Clear the list
+//                        strList.clear();
+//
+//                        //Tell the service to stop and restart
+//                        strList.add("cmd.exe");
+//                        strList.add("/c");
+//
+//                        StringBuilder aSB = new StringBuilder()
+//                                .append("net stop \"").append(svcStr).append("\"")
+//                                .append(" && net start \"").append(svcStr).append("\"");
+//                        strList.add(aSB.toString());
+//                        
+//                        //Run restart command
+//                        Constants.Executor.execute( new Runnable(){
+//
+//                            @Override
+//                            public void run() {
+//                                if( milDelay > 0 ){
+//                                    try {
+//                                        Thread.sleep(milDelay);
+//                                    } catch (InterruptedException ex) {
+//                                    }
+//                                }
+//                                
+//                                //Run the command
+//                                try {
+//                                    Runtime.getRuntime().exec(strList.toArray( new String[strList.size()]) );
+//                                } catch (IOException ex) {
+//                                }
+//                            }
+//                        
+//                        });
+//                        return;
+//
+//                    } 
+//                    
+//                } 
+//                
+//                DebugPrinter.printMessage(NAME_Class, strList.toString());
+//                //Tell it to run itself on shutdown
+//                Runtime.getRuntime().addShutdownHook( new Thread(){
+//                
+//                    @Override
+//                    public void run(){       
+//                        try {
+//                            //Run restart command
+//                            Runtime.getRuntime().exec(strList.toArray( new String[strList.size()]) );
+//                        } catch (IOException ex) {
+//                        }
+//                    }
+//                
+//                });
+//                    
+//                //Tell it not to reconnect
+//                ClientPortRouter aCPR = (ClientPortRouter)passedManager.getPortRouter(ClientConfig.getConfig().getSocketPort());
+//                aCPR.setReconnectFlag( passedBool );
+//                passedManager.shutdown();   
+//                                               
+//            } catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
+//                RemoteLog.log(Level.WARNING, NAME_Class, "restart()", ex.getMessage(), ex);        
+//            }
+//        }
+//        
+//    }
     
 
     // ==========================================================================

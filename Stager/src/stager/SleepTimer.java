@@ -69,6 +69,8 @@ public class SleepTimer implements Runnable {
     private byte[] theClientId;
     private Date deathDateCalendar = null;
     private Date initialSleepDate = new Date();
+    
+    private volatile boolean notified = false;
  
     // ==========================================================================
     /**
@@ -194,7 +196,9 @@ public class SleepTimer implements Runnable {
                 }
             }
 
-        }      
+        }  
+        
+        theReconnectTimeList.clear();
         
     }
     
@@ -206,13 +210,10 @@ public class SleepTimer implements Runnable {
      */
     private void waitUntil(Date date) {
         
-        final Object syncedObject = new Object();
         TimerTask aTimerTask = new TimerTask() {
             @Override
             public void run() {
-                synchronized (syncedObject) {
-                    syncedObject.notify();
-                }
+                beNotified();
             }
         };
         
@@ -221,11 +222,8 @@ public class SleepTimer implements Runnable {
         //Create a timer
         Timer aTimer = new Timer();
         aTimer.schedule(aTimerTask, date);
-        synchronized(syncedObject) {
-            try {
-                syncedObject.wait();
-            } catch (InterruptedException ie) {}
-        }
+        waitToBeNotified();
+
         aTimer.cancel();
         aTimer.purge();
     }
@@ -362,6 +360,47 @@ public class SleepTimer implements Runnable {
      */
     public void setIntialSleepDate(Date tmpDate) {
         initialSleepDate = tmpDate;
+    }
+    
+     //===============================================================
+    /**
+     * Notifies the thread
+    */
+    protected synchronized void beNotified() {
+        notified = true;
+        notifyAll();
+    }
+    
+    // ==========================================================================
+    /**
+    * Causes the calling {@link Thread} to <tt>wait()</tt> until notified by
+    * another.
+    * <p>
+    * <strong>This method most certainly "blocks".</strong>
+     * @param anInt
+    */
+    protected synchronized void waitToBeNotified( Integer... anInt ) {
+
+        while( !notified ) { //Until notified...
+
+            try {
+                
+                //Add a timeout if necessary
+                if( anInt.length > 0 ){
+                    
+                    wait( anInt[0]);
+                    break;
+                    
+                } else {
+                    wait(); //Wait here until notified
+                }
+                
+            } catch( InterruptedException ex ) {
+                continue;
+            }
+
+        }
+        notified = false;
     }
    
 }

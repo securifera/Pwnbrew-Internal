@@ -104,12 +104,6 @@ public class Migrate extends ControlMessage {
     @Override
     public void evaluate( CommManager passedManager ) {        
         
-        //Remove JAR if that's how we are running
-        File theClassPath;
-        ClassLoader aClassLoader;
-        String properties;
-        String propLabel;
-        
         //Try and connect to the new server
         String connectStr = getConnectString().trim();
         String[] connectArr = connectStr.split(":");
@@ -137,34 +131,6 @@ public class Migrate extends ControlMessage {
                     int serverPort = theConf.getSocketPort();
                     
                     Utilities.updateServerInfoInJar(connectStr);
-//                    Class stagerClass = Class.forName("stager.Stager");
-//                    theClassPath = Utilities.getClassPath();
-//                    aClassLoader = stagerClass.getClassLoader();            
-//
-//                    //Get append spaces to avoid == at the end
-//                    StringBuilder aSB = new StringBuilder()
-//                        .append("https://")
-//                        .append( connectStr )
-//                        .append("/");
-//                    int neededChars = aSB.length() % 3;
-//                    for( int i = 0; i < neededChars + 1; i++){
-//                        aSB.append(" ");
-//                    }
-//
-//                    //Decode the base64   
-//                    DebugPrinter.printMessage(NAME_Class, "Migrating to " + aSB.toString());
-//                    connectStr = Base64Converter.encode( aSB.toString().getBytes() );
-//                    properties = Constants.PROP_FILE;
-//                    propLabel = Constants.URL_LABEL;  
-//                    
-//                    //Unload the stager
-//                    LoaderUtilities.unloadLibs( aClassLoader );
-//
-//                    //Replace the file
-//                    Utilities.updateJarProperties( theClassPath, properties, propLabel, connectStr );
-//
-//                    //Load it back                    
-//                    LoaderUtilities.reloadLib(theClassPath); 
                     
                     //Set the new ones
                     theConf.setServerIp(connectArr[0]);
