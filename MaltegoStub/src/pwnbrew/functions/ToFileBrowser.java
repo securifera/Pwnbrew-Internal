@@ -95,7 +95,6 @@ import pwnbrew.network.control.messages.TaskGetFile;
 import pwnbrew.network.control.messages.TaskStatus;
 import pwnbrew.network.control.messages.Tasking;
 import pwnbrew.network.file.FileMessageManager;
-import pwnbrew.xml.maltego.MaltegoMessage;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
@@ -116,7 +115,6 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     private FileSystemJFrame theFsFrame;
         
     //Create the return msg
-    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
     private final Map<Integer, RemoteFileSystemTask> theRemoteFileSystemTaskMap = new HashMap<>();
     
     //Map relating the msgid to the task
@@ -274,8 +272,6 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
 
                 //Create the message list
                 malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
-//                String aSB = String.valueOf("Unable to connect to the Pwnbrew server at \"" + serverIp + ":") + Integer.toString(serverPort) + "\"";
-//                DebugPrinter.printMessage( NAME_Class, "listclients", aSB, null);
             }
             
         } catch (IOException | InterruptedException ex) {

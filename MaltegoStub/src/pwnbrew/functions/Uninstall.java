@@ -11,7 +11,6 @@ import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.xml.maltego.MaltegoMessage;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
@@ -21,10 +20,7 @@ import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 public class Uninstall extends Function {
     
     private static final String NAME_Class = Uninstall.class.getSimpleName();
-        
-    //Create the return msg
-    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
-  
+          
     //==================================================================
     /**
      * Constructor

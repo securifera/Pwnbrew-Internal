@@ -12,7 +12,6 @@ import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.SleepRelay;
-import pwnbrew.xml.maltego.MaltegoMessage;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
@@ -22,10 +21,7 @@ import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 public class Sleep extends Function {
     
     private static final String NAME_Class = Sleep.class.getSimpleName();
-        
-    //Create the return msg
-    private MaltegoMessage theReturnMsg = new MaltegoMessage();
-  
+          
     //==================================================================
     /**
      * Constructor

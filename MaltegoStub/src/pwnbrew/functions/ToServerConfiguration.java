@@ -61,7 +61,6 @@ import pwnbrew.options.OptionsJFrame;
 import pwnbrew.options.OptionsJFrameListener;
 import pwnbrew.options.panels.JarLibraryPanel;
 import pwnbrew.options.panels.NetworkOptionsPanel;
-import pwnbrew.xml.maltego.MaltegoMessage;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
@@ -77,10 +76,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
     
     //Map for temp strings
     private final Map<Integer, String> taskIdToStringMap = new HashMap<>();
-    
-    //Create the return msg
-    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
-  
+      
     //==================================================================
     /**
      * Constructor

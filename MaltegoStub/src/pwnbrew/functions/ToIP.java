@@ -52,7 +52,6 @@ import pwnbrew.network.control.messages.GetCount;
 import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.network.control.messages.GetIPs;
 import pwnbrew.xml.maltego.Entities;
-import pwnbrew.xml.maltego.MaltegoMessage;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 import pwnbrew.xml.maltego.MaltegoTransformResponseMessage;
 import pwnbrew.xml.maltego.custom.IpV4Address;
@@ -67,10 +66,7 @@ public class ToIP extends Function implements CountSeeker {
     
     private volatile boolean notified = false;
     private volatile int theIpCount = 0;   
-    
-    //Create the return msg
-    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
-  
+      
     //==================================================================
     /**
      * Constructor

@@ -48,7 +48,6 @@ import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.RelayStopRelay;
-import pwnbrew.xml.maltego.MaltegoMessage;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
@@ -62,9 +61,6 @@ public class StopRelay extends Function {
     private volatile boolean notified = false;
     private volatile boolean isConnected = false;
     
-    //Create the return msg
-    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
-  
     //==================================================================
     /**
      * Constructor

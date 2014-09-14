@@ -45,7 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.logging.LoggableException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -53,11 +52,13 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import pwnbrew.exception.RemoteExceptionWrapper;
 import pwnbrew.logging.Log;
+import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.DebugPrinter;
-import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Message;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
@@ -126,7 +127,7 @@ public abstract class ControlMessage extends Message {
      * @param passedObject
      */
     public void addOption(ControlOption passedObject) {
-       optionList.add(passedObject);
+        optionList.add(passedObject);
     }
 
     //===============================================================
@@ -137,41 +138,52 @@ public abstract class ControlMessage extends Message {
      * @return msgAddress
      * @throws pwnbrew.logging.LoggableException
      * @throws java.io.IOException
+     * @throws pwnbrew.exception.RemoteExceptionWrapper
     */
-    public static ControlMessage getMessage( ByteBuffer passedBuffer ) throws LoggableException, IOException {
+    public static ControlMessage getMessage( ByteBuffer passedBuffer ) throws LoggableException, IOException, RemoteExceptionWrapper {
 
-       byte[] theId = new byte[4],  clientId = new byte[4], destHostId = new byte[4];
-       ControlMessage aMessage;
+        byte[] theId = new byte[4],  clientId = new byte[4], destHostId = new byte[4];
+        ControlMessage aMessage = null;
 
-       //Copy over the client id
-       passedBuffer.get(clientId, 0, clientId.length);
-       
-       //Copy over the dst host id
-       passedBuffer.get(destHostId, 0, destHostId.length);
-       
-       //Copy over the id
-       passedBuffer.get(theId, 0, theId.length);
-       
-       //Create a message
-       aMessage = instatiateMessage(theId, passedBuffer );       
-         
-       //Ignore NoOps
-       if( !aMessage.getClass().equals( NoOp.class ))
-           DebugPrinter.printMessage(ControlMessage.class.getSimpleName(), "Received " + aMessage.getClass().getSimpleName() + " message.");
-       
-       //Set client id
-       int theClientId = SocketUtilities.byteArrayToInt(clientId);
-       aMessage.setSrcHostId( theClientId );
+        //Copy over the client id
+        passedBuffer.get(clientId, 0, clientId.length);
 
-	   //Set dest host id
-       int theDestHostId= SocketUtilities.byteArrayToInt(destHostId);
-       aMessage.setDestHostId( theDestHostId );
+        //Copy over the dst host id
+        passedBuffer.get(destHostId, 0, destHostId.length);
 
-       //Parse the tlvs
-//       byte[] tlvArray = Arrays.copyOfRange( passedBuffer.array(), passedBuffer.position(), passedBuffer.limit());
-       aMessage.parseControlOptions(passedBuffer);
+        //Copy over the id
+        passedBuffer.get(theId, 0, theId.length);
 
-       return aMessage;
+        try {
+            //Create a message
+            aMessage = instatiateMessage(theId, passedBuffer );
+             
+            //Ignore NoOps
+            if( !aMessage.getClass().equals( NoOp.class ))
+                DebugPrinter.printMessage(ControlMessage.class.getSimpleName(), "Received " + aMessage.getClass().getSimpleName() + " message.");
+
+            //Set client id
+            int theClientId = SocketUtilities.byteArrayToInt(clientId);
+            aMessage.setSrcHostId( theClientId );
+
+            //Set dest host id
+            int theDestHostId= SocketUtilities.byteArrayToInt(destHostId);
+            aMessage.setDestHostId( theDestHostId );
+
+            //Parse the tlvs
+            aMessage.parseControlOptions(passedBuffer);
+            
+        } catch (ClassNotFoundException ex) {
+            
+            //Convert the clientid
+            int theClientId = SocketUtilities.byteArrayToInt(clientId);
+            String retStr = "Unable to run the Pwnbrew transform.\nPlease ensure the appropriate extension has been loaded into the target Pwnbrew server.";
+            RemoteException anException = new RemoteException(theClientId, retStr);
+            throw new RemoteExceptionWrapper(anException);
+            
+        }
+
+        return aMessage;
     }
     
      //===============================================================
@@ -182,8 +194,9 @@ public abstract class ControlMessage extends Message {
      * @param passedBuffer
      * @return 
      * @throws pwnbrew.logging.LoggableException 
+     * @throws java.lang.ClassNotFoundException 
      */
-    public static ControlMessage instatiateMessage( byte[] msgId, ByteBuffer passedBuffer ) throws LoggableException{
+    public static ControlMessage instatiateMessage( byte[] msgId, ByteBuffer passedBuffer ) throws LoggableException, ClassNotFoundException{
         
         ControlMessage aMsg = null;
         byte[] classFqnLength = new byte[2];
@@ -203,7 +216,7 @@ public abstract class ControlMessage extends Message {
             Constructor aConstruct = aClass.getConstructor( byte[].class);
             aMsg = (ControlMessage)aConstruct.newInstance(msgId);
 
-        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+        } catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             Log.log(Level.SEVERE, NAME_Class, "instatiateMessage()", ex.getMessage(), ex );  
             throw new LoggableException(ex);
         }

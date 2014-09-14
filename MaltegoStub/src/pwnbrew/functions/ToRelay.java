@@ -53,7 +53,6 @@ import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.RelayStartRelay;
 import pwnbrew.xml.maltego.Entities;
-import pwnbrew.xml.maltego.MaltegoMessage;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 import pwnbrew.xml.maltego.MaltegoTransformResponseMessage;
 import pwnbrew.xml.maltego.custom.Relay;
@@ -68,9 +67,6 @@ public class ToRelay extends Function {
     
     private volatile boolean notified = false;
     private volatile boolean isConnected = false;
-    
-    //Create the return msg
-    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
   
     //==================================================================
     /**

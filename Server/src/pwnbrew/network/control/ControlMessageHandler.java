@@ -45,17 +45,18 @@ package pwnbrew.network.control;
 * Created on June 7, 2013, 11:41:21 PM
 */
 
-import pwnbrew.network.DataHandler;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
+import pwnbrew.exception.RemoteExceptionWrapper;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.DataManager;
-import pwnbrew.network.control.messages.ControlMessage;
+import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
+import pwnbrew.network.control.messages.ControlMessage;
 
 /**
  *
@@ -137,7 +138,7 @@ public class ControlMessageHandler extends DataHandler {
      * @param passedByteArray 
      */
     @Override
-    public void processData( byte[] passedByteArray ) {
+    public void processData( byte[] passedByteArray ) throws RemoteExceptionWrapper {
       
         try {
 

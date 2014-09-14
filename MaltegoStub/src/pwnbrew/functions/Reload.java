@@ -152,8 +152,7 @@ public class Reload extends Function {
 
                 //Create the message list
                 malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
-//                String aSB = String.valueOf("Unable to connect to the Pwnbrew server at \"" + serverIp + ":") + Integer.toString(serverPort) + "\"";
-//                DebugPrinter.printMessage( NAME_Class, "listclients", aSB, null);
+                
             }
             
         } catch (IOException ex) {

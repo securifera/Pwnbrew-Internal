@@ -46,21 +46,13 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.logging.Level;
+import pwnbrew.exception.RemoteExceptionWrapper;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.Constants;
-import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
-import pwnbrew.network.control.messages.ControlMessage;
-import pwnbrew.network.control.messages.TaskStatus;
-import pwnbrew.network.control.messages.Tasking;
-import pwnbrew.tasks.RemoteTask;
-import pwnbrew.tasks.TaskManager;
 import pwnbrew.xmlBase.ServerConfig;
 
 /**
@@ -132,46 +124,13 @@ public class ControlMessageManager extends DataManager {
      *   Send the message out the given channel.
      *
      * @param msgBytes
+     * @throws pwnbrew.exception.RemoteExceptionWrapper
     */
     @Override
-    public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) {        
+    public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) throws RemoteExceptionWrapper {        
         theControlManager.getDataHandler().processData(msgBytes);        
     }
-    
-//    //===============================================================
-//    /**
-//     *   Send the message out the given channel.
-//     *
-//     * @param passedMessage
-//    */
-//    @Override
-//    public void send( Message passedMessage ) {
-//
-//         //Get the port router
-//        int destClientId = passedMessage.getDestHostId();
-//        PortRouter thePR = theCommManager.getPortRouter( operatingPort );
-//        if( thePR.getState( destClientId ) == Constants.DISCONNECTED ){
-//                
-//            if( passedMessage instanceof Tasking ){
-//                try {
-//                    Tasking aTasking = (Tasking)passedMessage;
-//                    TaskManager aMgr = theCommManager.getTaskManager();
-//                    if( aMgr != null )
-//                        aMgr.taskChanged( new TaskStatus( aTasking.getTaskId(), RemoteTask.TASK_FAILED, -1 ));
-//                } catch( IOException ex ){
-//                    Log.log( Level.SEVERE, NAME_Class, "send()", ex.getMessage(), ex);
-//                } 
-//            }            
-//
-//            Log.log( Level.SEVERE, NAME_Class, "send()", "Unable to send message, socket disconnected.", null);
-//            return;
-//        }
-//        
-//        //Send the message
-//        super.send(passedMessage);
-//        
-//    }
-    
+     
      //===========================================================================
     /*
      *  Returns the data handler

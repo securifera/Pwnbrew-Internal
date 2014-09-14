@@ -68,9 +68,6 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
     private volatile boolean notified = false;
     private volatile int theClientCount = 0;   
     
-    //Create the return msg
-    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
-  
     //==================================================================
     /**
      * Constructor

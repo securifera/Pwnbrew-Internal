@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import pwnbrew.MaltegoStub;
+import pwnbrew.xml.maltego.MaltegoMessage;
 
 /**
  *
@@ -51,6 +52,9 @@ import pwnbrew.MaltegoStub;
 abstract public class Function {
 
     protected final MaltegoStub theManager;
+    
+    //Create the return msg
+    protected final MaltegoMessage theReturnMsg = new MaltegoMessage();
 
     //===================================================================
     /**
@@ -110,6 +114,15 @@ abstract public class Function {
         }
         
         return retMap;
+    }
+
+    //===================================================================
+    /**
+     * 
+     * @return 
+     */
+    public MaltegoMessage getMaltegoMsg() {
+        return theReturnMsg;
     }
 
      //========================================================================

@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import pwnbrew.exception.RemoteExceptionWrapper;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.DebugPrinter;
@@ -166,8 +167,9 @@ abstract public class DataManager {
      *
      * @param srcPortRouter
      * @param msgBytes
+     * @throws pwnbrew.exception.RemoteExceptionWrapper
     */
-    abstract public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes );
+    abstract public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) throws RemoteExceptionWrapper;
     
      //===========================================================================
     /**
@@ -247,6 +249,8 @@ abstract public class DataManager {
             
         } catch (LoggableException | IOException ex) {
             DebugPrinter.printMessage(DataManager.class.getSimpleName(), "No manager for bytes");                                 
+        } catch (RemoteExceptionWrapper ex) {
+            send( passedRouter.getCommManager(), ex.getRemoteExceptionMsg() );
         }
     }
     

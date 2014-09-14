@@ -38,13 +38,13 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.awt.Component;
 import java.io.UnsupportedEncodingException;
-import javax.swing.JOptionPane;
 import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
+import pwnbrew.xml.maltego.MaltegoMessage;
+import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
  *
@@ -102,8 +102,17 @@ public final class RemoteException extends ControlMessage{ // NO_UCD (use defaul
         if( passedManager instanceof MaltegoStub ){            
             MaltegoStub theStub = (MaltegoStub)passedManager;
             Function aFunction = theStub.getFunction(); 
-            Component aComponent = aFunction.getParentComponent();
-            JOptionPane.showMessageDialog( aComponent, theExceptionMsg, "Error", JOptionPane.ERROR_MESSAGE );
+            MaltegoMessage aMsg = aFunction.getMaltegoMsg();
+            
+             //Create a relay object
+            pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( theExceptionMsg );
+            MaltegoTransformExceptionMessage malMsg = aMsg.getExceptionMessage();
+
+            //Create the message list
+            malMsg.getExceptionMessages().addExceptionMessage(exMsg); 
+            System.out.println( aMsg.getXml() );
+            System.exit(0);
+            
         }
     }
 

@@ -35,56 +35,34 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
+package pwnbrew.exception;
 
-
-/*
-* DataHandler.java
-*
-* Created on Jun 21, 2013, 9:12:31 PM
-*/
-
-package pwnbrew.network;
-
-import pwnbrew.exception.RemoteExceptionWrapper;
-import pwnbrew.manager.DataManager;
-import pwnbrew.misc.Constants;
-import pwnbrew.execution.ManagedRunnable;
+import pwnbrew.network.control.messages.RemoteException;
 
 /**
  *
+ * @author Securifera
  */
-public abstract class DataHandler extends ManagedRunnable {
-
-    protected final DataManager theDataManager;            
-
-    //===============================================================
-     /**
-     *  Constructor
-     *
-     * @param passedListener
-    */
-    public DataHandler( DataManager passedListener ) {
-        super( Constants.Executor );
-        theDataManager = passedListener;
-    }    
+public class RemoteExceptionWrapper extends Exception {
     
-    //===============================================================
+    private final RemoteException theRemoteExceptionMsg;
+
+    //=============================================================
     /**
-     *  Returns the data manager
+     * 
+     * @param passedRemoteExceptionMsg 
+     */
+    public RemoteExceptionWrapper(RemoteException passedRemoteExceptionMsg) {
+        theRemoteExceptionMsg = passedRemoteExceptionMsg;
+    }
+
+    //=============================================================
+    /**
      * 
      * @return 
-    */
-    public DataManager getDataManager(){
-        return theDataManager;
-    }
-    
-    //===============================================================
-    /**
-     *  Process the passed byte array
-     * 
-     * @param passedByteArray 
-     * @throws pwnbrew.exception.RemoteExceptionWrapper 
      */
-    abstract protected void processData( byte[] passedByteArray ) throws RemoteExceptionWrapper;
-
+    public RemoteException getRemoteExceptionMsg() {
+        return theRemoteExceptionMsg;
+    }    
+    
 }

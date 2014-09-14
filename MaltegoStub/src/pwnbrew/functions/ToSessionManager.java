@@ -66,7 +66,6 @@ import pwnbrew.network.control.messages.GetSessions;
 import pwnbrew.sessions.SessionJFrameListener;
 import pwnbrew.sessions.SessionsJFrame;
 import pwnbrew.xml.maltego.Field;
-import pwnbrew.xml.maltego.MaltegoMessage;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 import pwnbrew.xml.maltego.custom.Host;
 
@@ -83,10 +82,7 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
     
     private volatile int theClientCount = 0;  
     private SessionsJFrame theSessionsJFrame = null;
-        
-    //Create the return msg
-    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
-    
+            
   
     //==================================================================
     /**

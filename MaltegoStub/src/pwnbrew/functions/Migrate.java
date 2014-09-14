@@ -25,10 +25,7 @@ import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 public class Migrate extends Function {
     
     private static final String NAME_Class = Migrate.class.getSimpleName();
-        
-    //Create the return msg
-    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
-  
+          
     //==================================================================
     /**
      * Constructor

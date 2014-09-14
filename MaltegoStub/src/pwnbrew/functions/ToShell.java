@@ -68,7 +68,6 @@ import pwnbrew.shell.ShellJPanel;
 import pwnbrew.shell.ShellJPanelListener;
 import pwnbrew.shell.ShellJTextPane;
 import pwnbrew.shell.ShellListener;
-import pwnbrew.xml.maltego.MaltegoMessage;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
@@ -84,8 +83,6 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
     private String theOS;
     private String theHostName;
     
-    //Create the return msg
-    private final MaltegoMessage theReturnMsg = new MaltegoMessage();
     private ShellJPanel theShellPanel;
     private Shell theShell = null;
   
