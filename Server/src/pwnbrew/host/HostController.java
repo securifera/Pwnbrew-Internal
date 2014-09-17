@@ -667,14 +667,13 @@ public final class HostController extends LibraryItemController implements Actio
         
         int rtnCode = JOptionPane.YES_OPTION;
         if( !autoFlag && parent != null ){
-            rtnCode = JOptionPane.CLOSED_OPTION;
+            
             String messageBuilder = "Are you sure you want to put \"" + theHost.getHostname() + "\" to sleep?";
-            while( rtnCode == JOptionPane.CLOSED_OPTION ) { //Until the user chooses 'Yes' or 'No'...
-                //Prompt user to confirm the delete
-                rtnCode = JOptionPane.showConfirmDialog( parent, messageBuilder,
+            //Prompt user to confirm the delete
+            rtnCode = JOptionPane.showConfirmDialog( parent, messageBuilder,
                         "Sleep",
                         JOptionPane.YES_NO_OPTION );
-            }
+            
         }
 
         //Get the last-selected node

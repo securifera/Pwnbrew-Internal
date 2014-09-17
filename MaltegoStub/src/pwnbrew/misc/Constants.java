@@ -112,5 +112,13 @@ abstract public class Constants {
     public static final String CERT_ALIAS = "Alias";  
     public static final String CERT_PW = "PS";  
     
+    public static final String PAYLOAD_VERSION_LABEL = "Version";
+    public static final String STAGER_URL = "Private";
+    
+    public static final String PAYLOAD_TYPE = "PAYLOAD";
+    public static final String STAGER_TYPE = "STAGER";
+    public static final String LOCAL_EXTENSION_TYPE = "LOCAL EXTENSION";
+    public static final String REMOTE_EXTENSION_TYPE = "REMOTE EXTENSION";
+    
     
 }/* END CLASS Constants */

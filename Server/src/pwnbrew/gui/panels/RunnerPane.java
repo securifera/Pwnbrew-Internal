@@ -112,7 +112,7 @@ public class RunnerPane extends JTextPane implements CaretListener, StreamReceiv
      * @param passedOffset 
      */
     public void setEndOffset( int passedOffset ){
-        outputOffset = -1;
+        outputOffset = passedOffset;
     }
     
     //========================================================================
@@ -187,8 +187,9 @@ public class RunnerPane extends JTextPane implements CaretListener, StreamReceiv
                         
                         //Set the new length
                         int newLength = theSD.getLength();
-                        setCaretPosition( newLength );   
-                        outputOffset = newLength;
+                        setCaretPosition( newLength );
+                        
+                        theRunnerPane.setEndOffset(newLength);
 
                     } catch ( BadLocationException ex) {
                         Log.log(Level.SEVERE, NAME_Class, "handleStdOut()", ex.getMessage(), ex );

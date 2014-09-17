@@ -1121,15 +1121,13 @@ final public class MainGuiController extends Controller implements ActionListene
                         if( aController instanceof HostController){
                             
                             Host theHost = (Host) aController.getObject();
-                            int rtnCode = JOptionPane.CLOSED_OPTION;
                             StringBuilder messageBuilder = new StringBuilder( "Are you sure you want to stop the relay on \"")
                                     .append(theHost.getHostname()).append("\" ?");
-                            while( rtnCode == JOptionPane.CLOSED_OPTION ) { //Until the user chooses 'Yes' or 'No'...
-                                //Prompt user to confirm the delete
-                                rtnCode = JOptionPane.showConfirmDialog( null, messageBuilder.toString(),
-                                        "Stop Relay", JOptionPane.YES_NO_OPTION );
-                            } 
                             
+                            //Prompt user to confirm the delete
+                            int rtnCode = JOptionPane.showConfirmDialog( null, messageBuilder.toString(),
+                                        "Stop Relay", JOptionPane.YES_NO_OPTION );
+                                                      
                             //Get the last-selected node
                             if( rtnCode == JOptionPane.YES_OPTION ) { //If the delete is confirmed...
                                    

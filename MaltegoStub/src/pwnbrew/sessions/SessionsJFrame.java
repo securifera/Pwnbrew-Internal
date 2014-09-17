@@ -257,14 +257,12 @@ public class SessionsJFrame extends javax.swing.JFrame {
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
         
         //Make sure they want to clear the session list
-        int rtnCode = JOptionPane.CLOSED_OPTION;
         String messageBuilder = "Are you sure you want to clear the session list?";
-        while( rtnCode == JOptionPane.CLOSED_OPTION ) { //Until the user chooses 'Yes' or 'No'...
-            //Prompt user to confirm the delete
-            rtnCode = JOptionPane.showConfirmDialog( null, messageBuilder,
+        
+        //Prompt user to confirm the delete
+        int rtnCode = JOptionPane.showConfirmDialog( null, messageBuilder,
                     "Clear Session List", JOptionPane.YES_NO_OPTION );
-        } 
-                            
+                                    
         //Get the last-selected node
         if( rtnCode == JOptionPane.YES_OPTION ) { //If the delete is confirmed...
 

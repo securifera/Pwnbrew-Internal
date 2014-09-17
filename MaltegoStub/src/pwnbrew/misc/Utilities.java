@@ -41,6 +41,7 @@ package pwnbrew.misc;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.*;
@@ -783,6 +784,165 @@ public class Utilities {
              passedJButton.setText("");
           }
        }
+    }
+    
+       //==========================================================================
+    /**
+     *  Get version
+     * 
+     * @param payloadFile
+     * @param jarType
+     * @return 
+     */
+    public static String[] getJavaItem( File payloadFile, String jarType ) throws JarItemException {
+        
+        //Remove JAR if that's how we are running
+        String[] jarDetails = null;     
+        if( payloadFile != null && payloadFile.getPath().endsWith(".jar")){ 
+
+            try {                 
+                
+                String jarVersionString = "";
+                String jvmVersionString = "";
+       
+                //Open the zip
+                ByteArrayOutputStream aBOS = new ByteArrayOutputStream();
+                ByteArrayInputStream aBIS;
+                try{
+                    
+                    FileInputStream fis = new FileInputStream(payloadFile);
+                    try{
+
+                        //Read into the buffer
+                        byte[] buf = new byte[1024];                
+                        for (int readNum; (readNum = fis.read(buf)) != -1;)
+                            aBOS.write(buf, 0, readNum);                        
+
+                    } finally{
+
+                        try {
+                            //Close and delete
+                            fis.close();
+                        } catch (IOException ex) {                        
+                        }
+                    }
+
+                    //Creat an inputstream
+                    aBIS = new ByteArrayInputStream(aBOS.toByteArray());    
+                
+                } finally {
+                    try {
+                        aBOS.close();
+                    } catch (IOException ex) {
+                    }
+                }
+
+                //Open the zip input stream
+                ZipInputStream theZipInputStream = new ZipInputStream(aBIS);
+                ZipEntry anEntry;
+                byte[] classHeader = new byte[]{ (byte)0xCA, (byte)0xFE, (byte)0xBA, (byte)0xBE};
+                try {
+                    
+                    while((anEntry = theZipInputStream.getNextEntry())!=null){
+                        
+                        //Get the entry name
+                        String theEntryName = anEntry.getName();
+                        if ( !jvmVersionString.isEmpty() && !jarVersionString.isEmpty() )
+                            break;
+                                                
+                        //Change the properties file
+                        if( theEntryName.equals( Constants.MANIFEST_FILE) && jarVersionString.isEmpty() ){
+
+                            //Get the input stream and modify the value
+                            Properties localProperties = new Properties();
+                            localProperties.load(theZipInputStream);
+
+                            //Get the version
+                            String version = localProperties.getProperty(Constants.PAYLOAD_VERSION_LABEL);
+                            if( version != null ){
+                                //Set the jar version
+                                jarVersionString = version;
+                            }     
+                            
+                            if( jarType.equals( Constants.STAGER_TYPE )){
+                                String aStr = localProperties.getProperty(Constants.STAGER_URL);
+                                try {
+                                    boolean isValid = StandardValidation.validate( StandardValidation.KEYWORD_ClientConnect, aStr);
+                                    if( !isValid )
+                                        throw new JarItemException("The JAR item does not contain a valid [IP Address:Port] connection string.");
+                                 
+                                } catch ( IllegalAccessException | NoSuchMethodException | IllegalArgumentException | InvocationTargetException ex) {
+                                    DebugPrinter.printMessage( NAME_Class, "updateJarProperties()",  ex.getMessage(), ex);
+                                    return jarDetails;
+                                } 
+                            }
+                            
+                            continue;
+                            
+                        } 
+                        
+                        if( theEntryName.endsWith("class") && jvmVersionString.isEmpty() ){
+                            
+                            //Get the JVM version
+                            byte[] aByteArray = new byte[4];
+                            
+                            int bytesRead = theZipInputStream.read(aByteArray, 0, aByteArray.length);
+                            if( bytesRead ==4 && Arrays.equals(aByteArray, classHeader)){
+                                theZipInputStream.skip(3);
+                                int jvmVersion = theZipInputStream.read();
+                                switch( jvmVersion ){
+                                    case 46:
+                                        jvmVersionString = "2";
+                                        break;
+                                    case 47:
+                                        jvmVersionString = "3";
+                                        break;
+                                    case 48:
+                                        jvmVersionString = "4";
+                                        break;
+                                    case 49:
+                                        jvmVersionString = "5";
+                                        break;
+                                    case 50:
+                                        jvmVersionString = "6";
+                                        break;
+                                    case 51:
+                                        jvmVersionString = "7";
+                                        break;
+                                    case 52:
+                                        jvmVersionString = "8";
+                                        break;
+                                }
+                                
+                            }   
+                            
+                            continue;
+                            
+                        }
+
+                    }
+
+                    jarDetails = new String[4];
+                    jarDetails[0] = payloadFile.getName();
+                    jarDetails[1] = jarType;
+                    jarDetails[2] = jarVersionString;
+                    jarDetails[3] = jvmVersionString;
+                    
+                //Close the jar
+                } finally {
+                    
+                    try {
+                        theZipInputStream.close();
+                    } catch (IOException ex) {
+                    }
+                    
+                }
+                
+            } catch ( IOException ex) {
+                DebugPrinter.printMessage( NAME_Class, "updateJarProperties()",  ex.getMessage(), ex);
+            } 
+        }
+        return jarDetails;
     }
     
       //===========================================================================

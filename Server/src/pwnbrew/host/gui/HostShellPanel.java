@@ -75,7 +75,7 @@ public class HostShellPanel extends javax.swing.JPanel {
 
     private final HostShellPanelListener theListener;   
     private JFileChooser theFileChooser = null;
-           
+               
     //===============================================================
     /**
      * Constructor
@@ -237,9 +237,20 @@ public class HostShellPanel extends javax.swing.JPanel {
         
         boolean retVal = true;
         RunnerPane theTextPane = getShellTextPane();
-        if( !theTextPane.isEnabled() || theTextPane.isUpdating())
+        //Check if the offset has been set, if it has reset it
+        int historyOffset = theListener.getShell().getHistoryOffset();
+        if( historyOffset != -1 ){ 
+            if( passedOffset >= historyOffset ){
+                theTextPane.setEndOffset(passedOffset);
+                return true;
+            } else {
+                return false;
+            }
+        }        
+        
+        if( !theTextPane.isEnabled() || theTextPane.isUpdating() )
             return true;
-                
+        
         if( passedOffset < theTextPane.getEndOffset() )
             retVal = false;
         
@@ -285,6 +296,9 @@ public class HostShellPanel extends javax.swing.JPanel {
                         String outputStr = theStr;
                         if( !inputTerm.isEmpty() )
                             outputStr = theStr.concat( inputTerm );
+                        
+                        //Reset the offset
+                        theListener.getShell().setHistoryOffset(-1);
 
                         theListener.sendInput( outputStr );
 
@@ -293,23 +307,6 @@ public class HostShellPanel extends javax.swing.JPanel {
 
                     } else if( e.getKeyCode() == KeyEvent.VK_TAB ){
 
-//                        StyledDocument aSD = theTextPane.getStyledDocument();
-//                        Element rootElement = aSD.getDefaultRootElement();
-//                        if( rootElement != null ){
-//
-//                            Element anElement = rootElement.getElement( rootElement.getElementCount() - 1 );
-//                            int startPos = anElement.getStartOffset();
-//                            int endPos = anElement.getEndOffset();
-//
-//                            String theStr = aSD.getText(startPos, (endPos - startPos) - 1);
-//                            int pathPos = theStr.indexOf(">");
-//                            theStr = theStr.substring(pathPos + 1);
-//
-//                            pathPos = theStr.indexOf(" ");
-//                            theStr = theStr.substring(pathPos + 1);
-//                            theListener.sendInput( theStr );
-//
-//                        }
 
                     } else if( e.getKeyCode() == KeyEvent.VK_UP ){
 
@@ -318,18 +315,7 @@ public class HostShellPanel extends javax.swing.JPanel {
                     } else if( e.getKeyCode() == KeyEvent.VK_DOWN ){
 
                         theListener.getShell().printNextCommand();
-                        
-//                    } else if( e.getKeyCode() == KeyEvent.VK_BACK_SPACE ){
-//                        
-//                        //Remove the last char
-//                        if( theOutputBuffer.length() > 0 )
-//                            theOutputBuffer.deleteCharAt(theOutputBuffer.length() - 1);
-//                        
-//                    } else if(  Pattern.matches( "\\p{Print}", String.valueOf(e.getKeyChar())) ) {
-//                        
-//                        //Add the character
-//                        char aChar = e.getKeyChar();
-//                        theOutputBuffer.append(aChar);                        
+                  
                     }
                     
                 } catch (BadLocationException ex) {

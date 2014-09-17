@@ -39,7 +39,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.shell;
 
 import java.util.concurrent.Executor;
-import java.util.regex.Pattern;
 import javax.swing.text.StyledDocument;
 import pwnbrew.gui.panels.RunnerPane;
 
@@ -52,8 +51,8 @@ public class Bash extends Shell {
 //    private static final String[] BASH_EXE_STR = new String[]{ "/bin/bash", "-i"};
     private static final String[] BASH_EXE_STR = new String[]{ "python", "-c", "import pty;pty.spawn(\"/bin/bash\")"};
     private static final String encoding = "UTF-8";
-    private static final String PROMPT_REGEX_BASH = "\\x1b.*[$#]";
-    private static final Pattern PROMPT_PATTERN = Pattern.compile(PROMPT_REGEX_BASH);
+//    private static final String PROMPT_REGEX_BASH = "\\x1b.*[$#]";
+//    private static final Pattern PROMPT_PATTERN = Pattern.compile(PROMPT_REGEX_BASH);
    
     
     // ==========================================================================
@@ -107,6 +106,9 @@ public class Bash extends Shell {
     public void printPreviousCommand(){
         
         RunnerPane thePane = theListener.getShellTextPane();
+        if( theHistoryOffset == -1 )
+            theHistoryOffset = thePane.getEndOffset();
+        
         StyledDocument theSD = thePane.getStyledDocument();
             
         //Set the new length
@@ -116,7 +118,7 @@ public class Bash extends Shell {
         char escape = (byte)0x1b;
         sendInput( escape + "[A" );
     }
-    
+       
     //===============================================================
     /**
      *
@@ -125,6 +127,9 @@ public class Bash extends Shell {
     public void printNextCommand(){
         
         RunnerPane thePane = theListener.getShellTextPane();
+        if( theHistoryOffset == -1 )
+            theHistoryOffset = thePane.getEndOffset();
+                       
         StyledDocument theSD = thePane.getStyledDocument();
         
         //Set the new length

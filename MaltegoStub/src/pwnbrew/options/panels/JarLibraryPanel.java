@@ -50,6 +50,7 @@ import javax.swing.table.DefaultTableModel;
 import pwnbrew.generic.gui.PanelListener;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.FileFilterImp;
+import pwnbrew.misc.JarItemException;
 import pwnbrew.misc.Utilities;
 
 /**
@@ -64,11 +65,7 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
     private static final String NAME_Class = JarLibraryPanel.class.getSimpleName();
     
     private static final String JAR_EXT = "jar";
-    public static final String PAYLOAD_TYPE = "PAYLOAD";
-    public static final String STAGER_TYPE = "STAGER";
-    public static final String LOCAL_EXTENSION_TYPE = "LOCAL EXTENSION";
-    public static final String REMOTE_EXTENSION_TYPE = "REMOTE EXTENSION";
-    
+      
 
     //===================================================================
     /** Creates new form AdvancedlOptionsPanel
@@ -95,6 +92,9 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
         
         Utilities.setComponentIcon(addFile,  15, 15, Constants.ADD_IMAGE_STR);
         Utilities.setComponentIcon(removeFile, 15, 15, Constants.DELETE_IMG_STR);
+        
+        addFile.setToolTipText("Add JAR to Library");
+        removeFile.setToolTipText("Remove JAR from Library");
         
         //Create a file table
         theJarTable = new JarTable( this );
@@ -198,7 +198,9 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
         //Have the user manually put in the server ip
         JComboBox aCB = new JComboBox();
         aCB.setRenderer(new pwnbrew.generic.gui.DefaultCellBorderRenderer(BorderFactory.createEmptyBorder(0, 4, 0, 0)));
-        List<String> jarTypes = Arrays.asList( new String[]{ PAYLOAD_TYPE, STAGER_TYPE, LOCAL_EXTENSION_TYPE, REMOTE_EXTENSION_TYPE} );
+        List<String> jarTypes = Arrays.asList( new String[]{ Constants.PAYLOAD_TYPE, Constants.STAGER_TYPE, 
+            Constants.LOCAL_EXTENSION_TYPE, Constants.REMOTE_EXTENSION_TYPE} );
+        
         for( String aJarType : jarTypes )
             aCB.addItem(aJarType);
         
@@ -232,8 +234,72 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
             if(userSelectedFile == null  || userSelectedFile.isDirectory() || !userSelectedFile.canRead())
                 return;
             
-            //Queue the file to be sent
-            getListener().sendJarFile( userSelectedFile, selVal);
+            //Create the java item
+            String[] aStrArr;
+            try {
+                aStrArr = Utilities.getJavaItem(userSelectedFile, selVal);
+            } catch (JarItemException ex) {
+                JOptionPane.showMessageDialog( this, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE );           
+                return;
+            }
+            
+            if( aStrArr != null ){
+                
+                String selJarName = aStrArr[0];
+                String selJarType = aStrArr[1];
+                String selJarVersion = aStrArr[2];
+                String selJarJvmVersion = aStrArr[3];
+
+                //See if the table already contains the entry
+                DefaultTableModel theModel = (DefaultTableModel) theJarTable.getModel();
+                int rowToDelete = -1;
+                for( int i =0; i < theModel.getRowCount(); i++ ){
+
+                    //Get table entries
+                    String jarName = (String) theJarTable.getValueAt(i, 0);
+                    String jarType = (String) theJarTable.getValueAt(i, 1);
+                    String jvmVersion = (String) theJarTable.getValueAt(i, 2);
+                    String jarVersion = (String) theJarTable.getValueAt(i, 3);
+
+                    //Check if the jvm version is the same first
+                    if( jvmVersion.equals(selJarJvmVersion) && 
+                            jarType.equals( selJarType) ){
+
+                        //Only one Stager and Payload are allowed
+                        if( jarType.equals( Constants.STAGER_TYPE) || jarType.equals( Constants.PAYLOAD_TYPE)){
+                            rowToDelete = i;
+                            break;
+                        //Check if one with the same name exists
+                        } else if( jarName.equals( selJarName )) {
+                            rowToDelete = i;
+                            break;
+                        }
+
+                    }
+
+                    //Reset value
+                    aStrArr = null;
+                }
+
+                //If a similar library already exist
+                if( aStrArr != null ){                        
+                    String theMessage = new StringBuilder("Would you like to replace the existing ")
+                            .append( selJarType ).append(" named \"")
+                            .append( selJarName ).append("\" versioned \"")
+                            .append( selJarVersion ).append("\"?").toString();
+                    int dialogValue = JOptionPane.showConfirmDialog(this, theMessage, "Replace JAR Library?", JOptionPane.YES_NO_OPTION);
+
+                    //Add the JAR to utilities
+                    if ( dialogValue == JOptionPane.YES_OPTION ){
+                        deleteJarItem(rowToDelete);                    
+                    } else {
+                        return;
+                    }
+                    
+                    //Queue the file to be sent
+                    getListener().sendJarFile( userSelectedFile, selVal);
+                }
+            }
         }
     }
 

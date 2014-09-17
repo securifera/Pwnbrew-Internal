@@ -100,6 +100,8 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     protected final StringBuilder theStdOutStringBuilder = new StringBuilder();
     protected final StringBuilder theStdErrStringBuilder = new StringBuilder();
     
+    protected int theHistoryOffset = -1;
+    
     //If enabled then save the shell to disk
     private boolean logging = true;     
     protected static final String NAME_Class = Shell.class.getSimpleName();  
@@ -171,6 +173,24 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         }
     }
 
+    // ==========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getHistoryOffset() {
+        return theHistoryOffset;
+    }
+    
+     // ==========================================================================
+    /**
+     * 
+     * @param passedOffset
+     */
+    public void setHistoryOffset( int passedOffset ) {
+        theHistoryOffset = passedOffset;
+    }
+    
     // ==========================================================================
     /**
      * 
