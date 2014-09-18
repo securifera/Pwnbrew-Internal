@@ -106,7 +106,8 @@ public class MaltegoStub extends PortManager  implements LockListener {
                 theFunction = (Function)aConstruct.newInstance( this );
                 
                 //Get the return XML
-                String retVal = theFunction.run( entityProperties );
+                theFunction.run( entityProperties );
+                String retVal = theFunction.getOutput();
                 System.out.println( retVal );
 
             } catch( NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex ) {

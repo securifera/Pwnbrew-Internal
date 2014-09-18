@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import pwnbrew.MaltegoStub;
 import pwnbrew.xml.maltego.MaltegoMessage;
+import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
  *
@@ -52,9 +53,14 @@ import pwnbrew.xml.maltego.MaltegoMessage;
 abstract public class Function {
 
     protected final MaltegoStub theManager;
+    private volatile boolean notified = false;
+    
     
     //Create the return msg
     protected final MaltegoMessage theReturnMsg = new MaltegoMessage();
+    
+    //Set the exception msg
+    private String theExceptionMsg = null;
 
     //===================================================================
     /**
@@ -68,10 +74,9 @@ abstract public class Function {
     //==================================================================
     /**
      * Runs the function and returns an XML string as output
-     * @param passedObjectStr
-     * @return 
+     * @param passedObjectStr 
      */
-    abstract public String run( String passedObjectStr );
+    abstract public void run( String passedObjectStr );
     
      //========================================================================
     /**
@@ -119,6 +124,24 @@ abstract public class Function {
     //===================================================================
     /**
      * 
+     * @param passedMsg 
+     */
+    public void setExceptionMsg( String passedMsg ) {
+        theExceptionMsg = passedMsg;
+    }   
+        
+    //===================================================================
+     /**
+     *
+     * @return
+     */
+    public String getExceptionMsg() {
+        return theExceptionMsg;
+    }
+    
+    //===================================================================
+    /**
+     * 
      * @return 
      */
     public MaltegoMessage getMaltegoMsg() {
@@ -132,5 +155,66 @@ abstract public class Function {
      */
     public Component getParentComponent(){
         return null;
+    }
+    
+    // ==========================================================================
+    /**
+    * Causes the calling {@link Thread} to <tt>wait()</tt> until notified by
+    * another.
+    * <p>
+    * <strong>This method most certainly "blocks".</strong>
+     * @param anInt
+    */
+    protected synchronized void waitToBeNotified( Integer... anInt ) {
+
+        while( !notified ) {
+
+            try {
+                
+                //Add a timeout if necessary
+                if( anInt.length > 0 ){
+                    
+                    wait( anInt[0]);
+                    break;
+                    
+                } else {
+                    wait(); //Wait here until notified
+                }
+                
+            } catch( InterruptedException ex ) {
+            }
+
+        }
+        notified = false;
+    }
+    
+    //===============================================================
+    /**
+     * Notifies the thread
+    */
+    public synchronized void beNotified() {
+        notified = true;
+        notifyAll();
+    }
+
+    //===============================================================
+    /**
+     * 
+     * @return 
+     */
+    public String getOutput() {
+        
+        if(theExceptionMsg != null ){
+            
+            //Create a relay object
+            pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( theExceptionMsg );
+            MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+
+            //Create the message list
+            malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
+            
+        } 
+        
+        return theReturnMsg.getXml();
     }
 }

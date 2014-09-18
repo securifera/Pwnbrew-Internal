@@ -43,11 +43,10 @@ public class Reload extends Function {
     //===================================================================
     /**
      * 
-     * @param passedObjectStr
-     * @return 
+     * @param passedObjectStr 
      */
     @Override
-    public String run(String passedObjectStr) {
+    public void run(String passedObjectStr) {
         
         String retStr = "";
         Map<String, String> objectMap = getKeyValueMap(passedObjectStr); 
@@ -56,21 +55,21 @@ public class Reload extends Function {
         String serverIp = objectMap.get( Constants.SERVER_IP);
         if( serverIp == null ){
             DebugPrinter.printMessage( NAME_Class, "run", "No pwnbrew server IP provided", null);
-            return retStr;
+            return;
         }
          
         //Get server port
         String serverPortStr = objectMap.get( Constants.SERVER_PORT);
         if( serverPortStr == null ){
             DebugPrinter.printMessage( NAME_Class, "run", "No pwnbrew server port provided", null);
-            return retStr;
+            return;
         }
         
         //Get host id
         String hostIdStr = objectMap.get( Constants.HOST_ID);
         if( hostIdStr == null ){
             DebugPrinter.printMessage( NAME_Class, "run", "No host id provided", null);
-            return retStr;
+            return;
         }
          
         //Create the connection
@@ -97,7 +96,7 @@ public class Reload extends Function {
             //Initiate the file transfer
             if(aPR == null){
                 DebugPrinter.printMessage( NAME_Class, "listclients", "Unable to retrieve port router.", null);
-                return retStr;     
+                return;     
             }           
             
             //Set up the port wrapper
@@ -105,9 +104,8 @@ public class Reload extends Function {
             
             //Connect to server
             try {
-//            boolean connected = 
+
                 aPR.ensureConnectivity( serverPort, theManager );
-//            if( connected ){
                 
                 //Check if client can be upgraded
                 ControlMessage aMsg = new GetUpgradeFlag( Constants.SERVER_ID,  hostIdStr);
@@ -158,8 +156,6 @@ public class Reload extends Function {
         } catch (IOException ex) {
             DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex );
         }
-        
-        return retStr;
     }
     
     //===============================================================
@@ -170,46 +166,6 @@ public class Reload extends Function {
     public synchronized void setUpgradeFlag( boolean passedBool ) {
         oldStager = passedBool;
         beNotified();
-    }
-    
-     //===============================================================
-    /**
-     * Notifies the thread
-    */
-    public synchronized void beNotified() {
-        notified = true;
-        notifyAll();
-    }
-    
-    // ==========================================================================
-    /**
-    * Causes the calling {@link Thread} to <tt>wait()</tt> until notified by
-    * another.
-    * <p>
-    * <strong>This method most certainly "blocks".</strong>
-     * @param anInt
-    */
-    protected synchronized void waitToBeNotified( Integer... anInt ) {
-
-        while( !notified ) {
-
-            try {
-                
-                //Add a timeout if necessary
-                if( anInt.length > 0 ){
-                    
-                    wait( anInt[0]);
-                    break;
-                    
-                } else {
-                    wait(); //Wait here until notified
-                }
-                
-            } catch( InterruptedException ex ) {
-            }
-
-        }
-        notified = false;
     }
     
 }

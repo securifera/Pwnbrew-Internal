@@ -52,12 +52,18 @@ import java.net.UnknownHostException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.SocketDisconnectTimer;
 import pwnbrew.network.socket.SecureSocketChannelWrapper;
 
 /**
@@ -117,6 +123,21 @@ final public class AcceptHandler implements Selectable {
             
             DebugPrinter.printMessage(NAME_Class, "Received a connection from " + srcAddr.getHostAddress());
             SocketChannelHandler theSCH = new SocketChannelHandler(theSPR);
+            if( !requireAuthentication ){
+                
+                //Create a disconnect timer
+                SocketDisconnectTimer aTimerTask = new SocketDisconnectTimer( (ServerManager)theSPR.getCommManager(), theSCH);
+                
+                //check if the time is before now
+                Calendar theCalendar = Calendar.getInstance(); 
+                theCalendar.setTime( new Date() );
+                theCalendar.add(Calendar.SECOND, 10 );
+                Date killDate = theCalendar.getTime();
+                
+                //Create a timer
+                Timer aTimer = new Timer();
+                aTimer.schedule(aTimerTask, killDate);
+            }
             
             try {
                 //Set a keepalive so we are notified of disconnects

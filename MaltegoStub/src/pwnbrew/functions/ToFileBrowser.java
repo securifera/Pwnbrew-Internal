@@ -132,11 +132,10 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     //===================================================================
     /**
      * 
-     * @param passedObjectStr
-     * @return 
+     * @param passedObjectStr 
      */
     @Override
-    public String run(String passedObjectStr) {
+    public void run(String passedObjectStr) {
         
         UIManager.put("Tree.expandedIcon", new WindowsTreeUI.ExpandedIcon());
         UIManager.put("Tree.collapsedIcon", new WindowsTreeUI.CollapsedIcon());
@@ -166,36 +165,36 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         //Get server IP
         String serverIp = objectMap.get( Constants.SERVER_IP);
         if( serverIp == null ){
-            DebugPrinter.printMessage( NAME_Class, "listclients", "No pwnbrew server IP provided", null);
-            return retStr;
+            DebugPrinter.printMessage( NAME_Class, "ToFileBrowser", "No pwnbrew server IP provided", null);
+            return;
         }
          
         //Get server port
         String serverPortStr = objectMap.get( Constants.SERVER_PORT);
         if( serverPortStr == null ){
-            DebugPrinter.printMessage( NAME_Class, "listclients", "No pwnbrew server port provided", null);
-            return retStr;
+            DebugPrinter.printMessage( NAME_Class, "ToFileBrowser", "No pwnbrew server port provided", null);
+            return;
         }
         
         //Get host id
         String hostIdStr = objectMap.get( Constants.HOST_ID);
         if( hostIdStr == null ){
-            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
-            return retStr;
+            DebugPrinter.printMessage( NAME_Class, "ToFileBrowser", "No host id provided", null);
+            return;
         }
         
         //Get host id
         String tempOs = objectMap.get( Constants.HOST_OS);
         if( tempOs == null ){
-            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
-            return retStr;
+            DebugPrinter.printMessage( NAME_Class, "ToFileBrowser", "No host id provided", null);
+            return;
         }
         
         //Get host id
         String tempName = objectMap.get( Constants.HOST_NAME);
         if( tempName == null ){
-            DebugPrinter.printMessage( NAME_Class, "listclients", "No host id provided", null);
-            return retStr;
+            DebugPrinter.printMessage( NAME_Class, "ToFileBrowser", "No host id provided", null);
+            return;
         }
          
         //Create the connection
@@ -221,8 +220,8 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
 
             //Initiate the file transfer
             if(aPR == null){
-                DebugPrinter.printMessage( NAME_Class, "listclients", "Unable to retrieve port router.", null);
-                return retStr;     
+                DebugPrinter.printMessage( NAME_Class, "ToFileBrowser", "Unable to retrieve port router.", null);
+                return;     
             }           
             
             //Set up the port wrapper
@@ -275,11 +274,9 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             }
             
         } catch (IOException | InterruptedException ex) {
-            DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex );
+            DebugPrinter.printMessage( NAME_Class, "ToFileBrowser", ex.getMessage(), ex );
         }
-        
-        retStr = theReturnMsg.getXml();
-        return retStr;
+    
     }
     
          // ==========================================================================

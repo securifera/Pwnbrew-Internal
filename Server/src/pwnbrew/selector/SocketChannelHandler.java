@@ -48,7 +48,6 @@ package pwnbrew.selector;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
@@ -94,6 +93,8 @@ public class SocketChannelHandler implements Selectable {
     private final Queue<byte[]> pendingByteArrs = new LinkedList<>();
     private byte currMsgType = 0;
     private ByteBuffer localMsgBuffer = null;
+    
+    private boolean receivedHelloFlag = false;
     // ==========================================================================
     /**
      * Constructor
@@ -754,4 +755,22 @@ public class SocketChannelHandler implements Selectable {
         return staging;
     }
 
-}/* END CLASS AccessHandler */
+    //===================================================================
+    /**
+     * 
+     * @return 
+     */
+    public boolean hasReceivedHello() {
+        return receivedHelloFlag;
+    }
+    
+    //===================================================================
+    /**
+     * 
+     * @param passedBool 
+     */
+    public void setReceivedHelloFlag( boolean passedBool ) {
+        receivedHelloFlag = passedBool;
+    }
+
+}

@@ -65,6 +65,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import pwnbrew.gui.panels.RunnerPane;
+import pwnbrew.shell.Shell;
 
 /**
  *
@@ -238,15 +239,18 @@ public class HostShellPanel extends javax.swing.JPanel {
         boolean retVal = true;
         RunnerPane theTextPane = getShellTextPane();
         //Check if the offset has been set, if it has reset it
-        int historyOffset = theListener.getShell().getHistoryOffset();
-        if( historyOffset != -1 ){ 
-            if( passedOffset >= historyOffset ){
-                theTextPane.setEndOffset(passedOffset);
-                return true;
-            } else {
-                return false;
-            }
-        }        
+        Shell theShell = theListener.getShell();
+        if( theShell != null ){
+            int historyOffset = theShell.getHistoryOffset();
+            if( historyOffset != -1 ){ 
+                if( passedOffset >= historyOffset ){
+                    theTextPane.setEndOffset(passedOffset);
+                    return true;
+                } else {
+                    return false;
+                }
+            } 
+        }       
         
         if( !theTextPane.isEnabled() || theTextPane.isUpdating() )
             return true;

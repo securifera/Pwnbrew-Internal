@@ -51,9 +51,11 @@ import java.net.UnknownHostException;
 import java.nio.channels.AlreadyConnectedException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.concurrent.LockingThread;
+import pwnbrew.functions.Function;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
@@ -252,6 +254,9 @@ public class ClientPortRouter extends PortRouter {
      */
     @Override
     public void socketClosed( SocketChannelHandler theHandler ){
+        Function theFunction = MaltegoStub.getMaltegoStub().getFunction();
+        theFunction.setExceptionMsg("Connection to server closed. Please verify the connection details.");
+        theFunction.beNotified();
     };
     
      //===============================================================

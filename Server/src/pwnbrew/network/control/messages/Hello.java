@@ -61,7 +61,6 @@ import pwnbrew.network.Nic;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.selector.SocketChannelHandler;
-import pwnbrew.tasks.TaskManager;
 
 /**
  *
@@ -200,9 +199,12 @@ public final class Hello extends ControlMessage {
                 DebugPrinter.printMessage(NAME_Class, "Accepted connection from host id: " + theClientId);
                 PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort() );
                 SocketChannelHandler aSCH = aPR.getSocketChannelHandler(theClientId);
-
+               
                 if( aSCH != null ){
 
+                    //Set flag
+                    aSCH.setReceivedHelloFlag(true);
+                     
                     //Send HostAck
                     HelloAck aHostAck = new HelloAck(theClientId);
                     DataManager.send( passedManager, aHostAck );
