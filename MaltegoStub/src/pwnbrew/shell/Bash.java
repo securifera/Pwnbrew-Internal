@@ -106,6 +106,8 @@ public class Bash extends Shell {
     public void printPreviousCommand(){
         
         ShellJTextPane thePane = theListener.getShellTextPane();
+        if( theHistoryOffset == -1 )
+            theHistoryOffset = thePane.getEndOffset();
         StyledDocument theSD = thePane.getStyledDocument();
             
         //Set the new length
@@ -124,6 +126,8 @@ public class Bash extends Shell {
     public void printNextCommand(){
         
         ShellJTextPane thePane = theListener.getShellTextPane();
+        if( theHistoryOffset == -1 )
+            theHistoryOffset = thePane.getEndOffset();
         StyledDocument theSD = thePane.getStyledDocument();
         
         //Set the new length

@@ -98,7 +98,7 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
      * @param passedOffset 
      */
     public void setEndOffset( int passedOffset ){
-        outputOffset = -1;
+        outputOffset = passedOffset;
     }
     
     //========================================================================
@@ -173,8 +173,9 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
                         
                         //Set the new length
                         int newLength = theSD.getLength();
-                        setCaretPosition( newLength );   
-                        outputOffset = newLength;
+                        setCaretPosition( newLength );
+                        
+                        theRunnerPane.setEndOffset(newLength);
 
                     } catch ( BadLocationException ex) {
                         DebugPrinter.printMessage( NAME_Class, "handleStdOut()", ex.getMessage(), ex );
