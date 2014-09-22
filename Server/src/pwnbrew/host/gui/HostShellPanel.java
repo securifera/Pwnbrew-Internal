@@ -238,6 +238,10 @@ public class HostShellPanel extends javax.swing.JPanel {
         
         boolean retVal = true;
         RunnerPane theTextPane = getShellTextPane();
+        
+        if( !theTextPane.isEnabled() )
+            return true;
+                
         //Check if the offset has been set, if it has reset it
         Shell theShell = theListener.getShell();
         if( theShell != null ){
@@ -252,7 +256,7 @@ public class HostShellPanel extends javax.swing.JPanel {
             } 
         }       
         
-        if( !theTextPane.isEnabled() || theTextPane.isUpdating() )
+        if(! theTextPane.isUpdating() )
             return true;
         
         if( passedOffset < theTextPane.getEndOffset() )

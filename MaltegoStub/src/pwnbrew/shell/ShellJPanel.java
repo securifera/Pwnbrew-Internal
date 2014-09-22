@@ -275,6 +275,10 @@ public class ShellJPanel extends javax.swing.JPanel {
          
         boolean retVal = true;
         ShellJTextPane theTextPane = getShellTextPane();
+        
+        if( !theTextPane.isEnabled() )
+            return true;
+        
         //Check if the offset has been set, if it has reset it
         int historyOffset = theListener.getShell().getHistoryOffset();
         if( historyOffset != -1 ){ 
