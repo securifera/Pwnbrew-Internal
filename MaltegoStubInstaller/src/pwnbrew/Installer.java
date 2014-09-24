@@ -38,8 +38,11 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -53,8 +56,13 @@ import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.StyledDocument;
 
 /**
  *
@@ -65,7 +73,19 @@ public class Installer {
     private static URL theURL;
     private static File classPath;
     
-    //Stub name
+    private static final String README_FILE = "README.txt";
+    
+    //Scripts
+    private static final String SERVER_START_WIN = "Start-Server.bat";
+    private static final String SERVER_START_UNIX = "Start-Server.sh";
+    private static final String SERVER_SSL_UTILITY_WIN = "Server-SSL-Utility.bat";
+    private static final String SERVER_SSL_UTILITY_UNIX = "Server-SSL-Utility.sh";
+    
+    private static final String CLIENT_JAR = "Client.jar";
+    private static final String STAGER_JAR = "Stager.jar";
+    private static final String MALTEGO_EXT_JAR = "MaltegoExt.jar";
+    private static final String SERVER_JAR = "Server.jar";
+    private static final String LICENSE_FILE = "LicenseAgreement.txt";
     private static final String IMPORT_FILE = "pwnbrew.mtz";
     private static final String MALTEGO_STUB = "MaltegoStub.jar";
     private static final String MALTEGO = "maltego";
@@ -115,7 +135,7 @@ public class Installer {
      * @param args the command line arguments
      * @throws java.io.IOException
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, BadLocationException {
         
         String lookAndFeelClassStr = "javax.swing.plaf.metal.MetalLookAndFeel";
         if( isWindows() )
@@ -126,19 +146,38 @@ public class Installer {
         } catch ( ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
         }
         
+        byte[] aByteArr = getJarElementBytes(LICENSE_FILE);
+         
+        JTextPane textPane = new JTextPane();
+        StyledDocument doc = textPane.getStyledDocument();
+        doc.insertString(0, new String(aByteArr), null);
+        
+        JPanel noWrapPanel = new JPanel(new BorderLayout());
+        noWrapPanel.setPreferredSize(new Dimension(400,300));
+        noWrapPanel.add(textPane);
+        JScrollPane scrollPane = new JScrollPane(noWrapPanel);
+        scrollPane.setPreferredSize(new Dimension(400,300));
+        scrollPane.setViewportView(textPane); // creates a wrapped scroll pane using the text pane as a viewport.
+                    
+        int dialogValue = JOptionPane.showConfirmDialog(null, scrollPane, "Do you accept the license agreement?", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+        if ( dialogValue != JOptionPane.YES_OPTION )
+            return;
+                            
         InstallerGui aIG = new InstallerGui();
         aIG.setLocationRelativeTo(null);
         Point parentLocation = aIG.getLocation();
-        aIG.setLocation(parentLocation.x - 500, parentLocation.y - 300);
+        aIG.setLocation(parentLocation.x - 300, parentLocation.y - 100);
          
         aIG.setAlwaysOnTop(true);
         aIG.setVisible(true);
         
         aIG.setButtonText("Cancel");
         aIG.addStatusString("Starting installation...\n");
+        aIG.addStatusString("Copying Pwnbrew Files...\n");
+        copyPwnbrewFiles();
         aIG.addStatusString("Copying Maltego Import File...\n");
         aIG.addStatusString("Copying Pwnbrew Maltego Plugin...\n");
-        copyPwnbrewFiles();
+        copyMaltegoPwnbrewFiles();
         
         aIG.addStatusString("Exporting SSL Public Key...\n");
         
@@ -184,12 +223,72 @@ public class Installer {
         
     }
     
-    //===========================================================================
+      //===========================================================================
     /**
      * 
      * @throws java.io.IOException
      */
     public static void copyPwnbrewFiles() throws IOException{ 
+        
+        JFileChooser theFileChooser = new JFileChooser();
+        theFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        theFileChooser.setMultiSelectionEnabled( false );
+        
+        int returnVal = theFileChooser.showDialog( null, "Select Install Directory" ); //Show the dialog
+        if( returnVal != JFileChooser.APPROVE_OPTION )
+            System.exit(0);
+
+        //Copy client
+        File dirFile = theFileChooser.getSelectedFile(); 
+        File destFile = new File( dirFile, CLIENT_JAR);
+        writeJarElementToDisk(destFile, CLIENT_JAR); 
+        
+        //Copy stager
+        destFile = new File( dirFile, STAGER_JAR);
+        writeJarElementToDisk(destFile, STAGER_JAR); 
+        
+        //Copy maltego ext
+        destFile = new File( dirFile, MALTEGO_EXT_JAR);
+        writeJarElementToDisk(destFile, MALTEGO_EXT_JAR); 
+        
+        //Copy server
+        destFile = new File( dirFile, SERVER_JAR);
+        writeJarElementToDisk(destFile, SERVER_JAR); 
+        
+        //Copy license file
+        destFile = new File( dirFile, LICENSE_FILE);
+        writeJarElementToDisk(destFile, LICENSE_FILE); 
+        
+        //Copy readme
+        destFile = new File( dirFile, README_FILE);
+        writeJarElementToDisk(destFile, README_FILE); 
+        
+       if( isWindows() ){
+            
+            destFile = new File( dirFile, SERVER_START_WIN);
+            writeJarElementToDisk(destFile, SERVER_START_WIN);
+            
+            destFile = new File( dirFile, SERVER_SSL_UTILITY_WIN);
+            writeJarElementToDisk(destFile, SERVER_SSL_UTILITY_WIN);
+            
+        } else if ( isUnix() ) {
+            
+            destFile = new File( dirFile, SERVER_SSL_UTILITY_UNIX);
+            writeJarElementToDisk(destFile, SERVER_SSL_UTILITY_UNIX);  
+            
+            destFile = new File( dirFile, SERVER_START_UNIX);
+            writeJarElementToDisk(destFile, SERVER_START_UNIX);
+            
+        }
+        
+    }
+    
+    //===========================================================================
+    /**
+     * 
+     * @throws java.io.IOException
+     */
+    public static void copyMaltegoPwnbrewFiles() throws IOException{ 
         
         JFileChooser theFileChooser = new JFileChooser();
         theFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -376,6 +475,60 @@ public class Installer {
             } 
 
         }
+
+    }
+    
+    // ==========================================================================
+    /**
+    * Writes the jar element to disk
+    *
+    * @param passedJarElementName
+     * @return 
+     * @throws java.io.IOException
+    */
+    public static byte[] getJarElementBytes( String passedJarElementName ) throws IOException {
+
+        byte[] aByteArr = null;
+        int bytesRead = 0;
+        if( passedJarElementName!=null ){
+                
+            InputStream theIS = Installer.class.getClassLoader().getResourceAsStream(passedJarElementName);
+            if( theIS != null ){
+
+                try {
+
+                    byte[] byteBuffer = new byte[ 4096 ];
+                    //Open the zip
+                    try (ByteArrayOutputStream aBOS = new ByteArrayOutputStream()) {
+
+                        //Read to the end
+                        while( bytesRead != -1){
+                            bytesRead = theIS.read(byteBuffer);
+                            if(bytesRead != -1)
+                                aBOS.write(byteBuffer, 0, bytesRead);                                   
+                        }
+
+                        aBOS.flush();
+                        aByteArr = aBOS.toByteArray();
+
+                    }
+                    
+
+                } finally {
+
+                    try {
+                        //Make sure an close the input stream
+                        theIS.close();
+                    } catch (IOException ex) {
+                        ex = null;
+                    }
+                }
+
+            } 
+
+        }
+        
+        return aByteArr;
 
     }
 
