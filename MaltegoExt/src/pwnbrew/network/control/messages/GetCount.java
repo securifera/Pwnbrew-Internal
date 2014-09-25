@@ -39,7 +39,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
-import java.net.SocketException;
 import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.host.Host;
@@ -54,7 +53,6 @@ import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.xmlBase.ServerConfig;
 
 /**
  *

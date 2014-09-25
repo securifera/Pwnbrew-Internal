@@ -52,7 +52,6 @@ import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.network.control.messages.GetCount;
 import pwnbrew.xml.maltego.Entities;
-import pwnbrew.xml.maltego.MaltegoMessage;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 import pwnbrew.xml.maltego.MaltegoTransformResponseMessage;
 import pwnbrew.xml.maltego.custom.Host;
@@ -64,8 +63,6 @@ import pwnbrew.xml.maltego.custom.Host;
 public class ListClients extends Function implements HostHandler, CountSeeker{
     
     private static final String NAME_Class = MaltegoStub.class.getSimpleName();
-    
-    private volatile boolean notified = false;
     private volatile int theClientCount = 0;   
     
     //==================================================================
@@ -80,13 +77,11 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
     //===================================================================
     /**
      * 
-     * @param passedObjectStr
-     * @return 
+     * @param passedObjectStr 
      */
     @Override
     public void run(String passedObjectStr) {
         
-        String retStr = "";
         Map<String, String> objectMap = getKeyValueMap(passedObjectStr); 
          
         //Get server IP

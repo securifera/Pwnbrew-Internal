@@ -109,9 +109,11 @@ public class ServerManager extends CommManager {
             //Create list to hold of the separate controllers
             Map<Host, List<XmlBase>> retMap = Utilities.rebuildLibrary(); //Get the Scripts in the library
             Set<Host> hostSet = retMap.keySet();
-            for( Host aHost : hostSet ){
-                HostController aController = new HostController(aHost, theGuiController);
-                theHostControllerMap.put( aHost.getId(), aController);
+            synchronized(theHostControllerMap){
+                for( Host aHost : hostSet ){
+                    HostController aController = new HostController(aHost, theGuiController);
+                    theHostControllerMap.put( aHost.getId(), aController);
+                }
             }
             
         }
@@ -314,7 +316,9 @@ public class ServerManager extends CommManager {
             }
             
         } else {
-            retController = theHostControllerMap.get(clientIdStr);
+            synchronized(theHostControllerMap){
+                retController = theHostControllerMap.get(clientIdStr);
+            }
         }
         return retController;
     }
@@ -332,7 +336,9 @@ public class ServerManager extends CommManager {
             MainGui theMainGui = (MainGui) theGuiController.getObject();
             aList.addAll(theMainGui.getJTree().getLibraryItemControllers( HostController.class ));
         } else {
-            aList.addAll( theHostControllerMap.values() );
+            synchronized(theHostControllerMap){
+                aList.addAll( theHostControllerMap.values() );
+            }
         }
         return aList;  
     }
@@ -501,7 +507,11 @@ public class ServerManager extends CommManager {
                         //Add the node at the end of the children of the parentNode
                         int index = parentNode.getChildCount();
                         treeModel.insertNodeInto( newParentNode, parentNode, index );  
-                    }              
+                    } else {
+                        synchronized(theHostControllerMap){
+                            theHostControllerMap.put( passedHost.getId(), aHostController);
+                        }
+                    }           
 
                 }
             });

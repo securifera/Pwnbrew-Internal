@@ -421,7 +421,10 @@ public class Utilities {
                             if( jarType.equals( JarItem.STAGER_TYPE )){
                                 String aStr = localProperties.getProperty(Constants.STAGER_URL);
                                 try {
-                                    boolean isValid = StandardValidation.validate( StandardValidation.KEYWORD_ClientConnect, aStr);
+                                    sun.misc.BASE64Decoder aDecoder = new sun.misc.BASE64Decoder();
+                                    byte[] decodedBytes = aDecoder.decodeBuffer(aStr);
+                                    String connectStr = new String(decodedBytes).replace("https://", "").trim();
+                                    boolean isValid = StandardValidation.validate( StandardValidation.KEYWORD_ClientConnect, connectStr);
                                     if( !isValid )
                                         throw new JarItemException("The JAR item does not contain a valid [IP Address:Port] connection string.");
                                     
@@ -1577,7 +1580,7 @@ public class Utilities {
         try{
             
             File payloadFile = Utilities.getPayloadFile(passedVersion);
-            if( payloadFile.exists() ){
+            if( payloadFile != null && payloadFile.exists() ){
 
                 byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
                 String[] stagedClasses = new String[]{ 

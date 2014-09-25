@@ -46,10 +46,13 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import pwnbrew.logging.Log;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
+import static pwnbrew.network.control.messages.SendStage.NAME_Class;
 import pwnbrew.utilities.Utilities;
 
 /**
@@ -116,7 +119,11 @@ public final class StageFlagAck extends ControlMessage{
     public void evaluate( CommManager passedManager ) {  
 
         Payload aPayload = Utilities.getClientPayload( theRelayClientId, theJvmVersion );
-        DataManager.send(passedManager, aPayload);  
+        if( aPayload != null )
+            DataManager.send(passedManager,aPayload);
+        else
+            Log.log(Level.SEVERE, NAME_Class, "evaluate()", "Unable to retrieve payload, ensure one has been loaded into the library", null );
+                 
        
     }
 

@@ -145,7 +145,7 @@ abstract public class Constants {
     
     public static final String PAYLOAD_VERSION_LABEL = "Version";
     public static final String STAGER_URL = "Private";
-    public static String CURRENT_VERSION = "1.0.5.0";
+    public static String CURRENT_VERSION = "1.0.5.1";
     
     public static String FILE_UPLOAD = "FILE_UPLOAD";
     public static String FILE_DOWNLOAD = "FILE_DOWNLOAD";

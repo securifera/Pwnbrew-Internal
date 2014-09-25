@@ -253,7 +253,11 @@ public final class SendStage extends ControlMessage{ // NO_UCD (use default)
                     //Turn on staging flag and send the payload if it isn't relayed
                     if( aSCH.setStaging(clientId, true, theJvmVersion) ) {
                         Payload aPayload = Utilities.getClientPayload(clientId, theJvmVersion);
-                        DataManager.send(passedManager,aPayload);
+                        if( aPayload != null )
+                            DataManager.send(passedManager,aPayload);
+                        else
+                            Log.log(Level.SEVERE, NAME_Class, "evaluate()", "Unable to retrieve payload, ensure one has been loaded into the library", null );
+                        
                     }
                 } catch (UnsupportedEncodingException ex) {
                 }

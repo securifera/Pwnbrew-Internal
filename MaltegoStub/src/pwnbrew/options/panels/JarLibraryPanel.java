@@ -277,12 +277,10 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
 
                     }
 
-                    //Reset value
-                    aStrArr = null;
                 }
 
                 //If a similar library already exist
-                if( aStrArr != null ){                        
+                if( rowToDelete != -1 ){                        
                     String theMessage = new StringBuilder("Would you like to replace the existing ")
                             .append( selJarType ).append(" named \"")
                             .append( selJarName ).append("\" versioned \"")
@@ -295,10 +293,11 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
                     } else {
                         return;
                     }
-                    
-                    //Queue the file to be sent
-                    getListener().sendJarFile( userSelectedFile, selVal);
-                }
+                }   
+                
+                //Queue the file to be sent
+                getListener().sendJarFile( userSelectedFile, selVal);
+                
             }
         }
     }
