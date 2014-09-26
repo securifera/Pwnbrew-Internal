@@ -116,7 +116,7 @@ public final class AddToJarLibrary extends JarItemMsg{ // NO_UCD (use default)
                 //Create a FileContentRef
                 JarItem aJarItem;
                 try {
-                    aJarItem = Utilities.getJavaItem( tempJarFile, theJarType);
+                    aJarItem = Utilities.getJavaItem( tempJarFile );
                 } catch (JarItemException ex) {
                     Log.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex);         
                     return;

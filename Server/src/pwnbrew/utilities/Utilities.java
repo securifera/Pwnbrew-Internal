@@ -342,11 +342,10 @@ public class Utilities {
      *  Get version
      * 
      * @param payloadFile
-     * @param jarType
      * @return 
      * @throws pwnbrew.xmlBase.JarItemException 
      */
-    public static JarItem getJavaItem( File payloadFile, String jarType ) throws JarItemException{
+    public static JarItem getJavaItem( File payloadFile ) throws JarItemException{
         
         //Remove JAR if that's how we are running
         JarItem aJarItem = null;        
@@ -358,6 +357,7 @@ public class Utilities {
                 aJarItem.setId( IdGenerator.next() );
                 String jarVersionString = "";
                 String jvmVersionString = "";
+                String jarType = "";
        
                 //Open the zip
                 ByteArrayOutputStream aBOS = new ByteArrayOutputStream();
@@ -410,6 +410,29 @@ public class Utilities {
                             //Get the input stream and modify the value
                             Properties localProperties = new Properties();
                             localProperties.load(theZipInputStream);
+                            
+                            //Get the type
+                            String type = localProperties.getProperty(Constants.MODULE_TYPE_LABEL);
+                            if( type == null )
+                                throw new JarItemException("The selected JAR is not a valid Pwnbrew module.");
+                            
+                            //Switch on string                            
+                            switch( type.trim().toLowerCase()) {
+                                case Constants.PAYLOAD_ALIAS_TYPE:
+                                    jarType = Constants.PAYLOAD_TYPE;
+                                    break;
+                                case Constants.STAGER_ALIAS_TYPE:
+                                    jarType = Constants.STAGER_TYPE;
+                                    break;
+                                case Constants.LOCAL_ALIAS_EXTENSION_TYPE:
+                                    jarType = Constants.LOCAL_EXTENSION_TYPE;
+                                    break;
+                                case Constants.REMOTE_ALIAS_EXTENSION_TYPE:
+                                    jarType = Constants.REMOTE_EXTENSION_TYPE;
+                                    break;
+                                default:
+                                    throw new JarItemException("The selected JAR is not a valid Pwnbrew module.");
+                            }
 
                             //Get the version
                             String version = localProperties.getProperty(Constants.PAYLOAD_VERSION_LABEL);
@@ -477,6 +500,10 @@ public class Utilities {
 
                     }
 
+                    //throw exception
+                    if( jarType.isEmpty() || jarVersionString.isEmpty() || jvmVersionString.isEmpty() )
+                        throw new JarItemException("The selected JAR is not a valid Pwnbrew module.");
+                    
                     aJarItem.setVersion(jarVersionString);
                     aJarItem.setJvmMajorVersion(jvmVersionString);
                     aJarItem.setFilename( payloadFile.getName() );

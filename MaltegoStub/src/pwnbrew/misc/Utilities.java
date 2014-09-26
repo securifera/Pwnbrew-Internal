@@ -109,7 +109,7 @@ public class Utilities {
     private static final String NAME_Class = Utilities.class.getSimpleName();
     
     public static final String IMAGE_PATH_IN_JAR= "pwnbrew/images";
-    private static SecureRandom aSR = new SecureRandom();
+    private static final SecureRandom aSR = new SecureRandom();
 
     private static URL ourUrl;
     private static File classPath;
@@ -791,10 +791,10 @@ public class Utilities {
      *  Get version
      * 
      * @param payloadFile
-     * @param jarType
      * @return 
+     * @throws pwnbrew.misc.JarItemException 
      */
-    public static String[] getJavaItem( File payloadFile, String jarType ) throws JarItemException {
+    public static String[] getJavaItem( File payloadFile ) throws JarItemException {
         
         //Remove JAR if that's how we are running
         String[] jarDetails = null;     
@@ -804,7 +804,8 @@ public class Utilities {
                 
                 String jarVersionString = "";
                 String jvmVersionString = "";
-       
+                String jarType = "";
+                
                 //Open the zip
                 ByteArrayOutputStream aBOS = new ByteArrayOutputStream();
                 ByteArrayInputStream aBIS;
@@ -840,6 +841,7 @@ public class Utilities {
                 //Open the zip input stream
                 ZipInputStream theZipInputStream = new ZipInputStream(aBIS);
                 ZipEntry anEntry;
+                
                 byte[] classHeader = new byte[]{ (byte)0xCA, (byte)0xFE, (byte)0xBA, (byte)0xBE};
                 try {
                     
@@ -856,6 +858,29 @@ public class Utilities {
                             //Get the input stream and modify the value
                             Properties localProperties = new Properties();
                             localProperties.load(theZipInputStream);
+                            
+                            //Get the type
+                            String type = localProperties.getProperty(Constants.MODULE_TYPE_LABEL);
+                            if( type == null )
+                                throw new JarItemException("The selected JAR is not a valid Pwnbrew module.");
+                            
+                            //Switch on string                            
+                            switch( type.trim().toLowerCase()) {
+                                case Constants.PAYLOAD_ALIAS_TYPE:
+                                    jarType = Constants.PAYLOAD_TYPE;
+                                    break;
+                                case Constants.STAGER_ALIAS_TYPE:
+                                    jarType = Constants.STAGER_TYPE;
+                                    break;
+                                case Constants.LOCAL_ALIAS_EXTENSION_TYPE:
+                                    jarType = Constants.LOCAL_EXTENSION_TYPE;
+                                    break;
+                                case Constants.REMOTE_ALIAS_EXTENSION_TYPE:
+                                    jarType = Constants.REMOTE_EXTENSION_TYPE;
+                                    break;
+                                default:
+                                    throw new JarItemException("The selected JAR is not a valid Pwnbrew module.");
+                            }
 
                             //Get the version
                             String version = localProperties.getProperty(Constants.PAYLOAD_VERSION_LABEL);
@@ -870,7 +895,7 @@ public class Utilities {
                                     
                                     sun.misc.BASE64Decoder aDecoder = new sun.misc.BASE64Decoder();
                                     byte[] decodedBytes = aDecoder.decodeBuffer(aStr);
-                                    String connectStr = new String(decodedBytes).replace("https://", "");
+                                    String connectStr = new String(decodedBytes).replace("https://", "").trim();
                                     boolean isValid = StandardValidation.validate( StandardValidation.KEYWORD_ClientConnect, connectStr);
                                     if( !isValid )
                                         throw new JarItemException("The JAR item does not contain a valid [IP Address:Port] connection string.");
@@ -920,12 +945,14 @@ public class Utilities {
                                 
                             }   
                             
-                            continue;
-                            
                         }
 
                     }
 
+                    //throw exception
+                    if( jarType.isEmpty() || jarVersionString.isEmpty() || jvmVersionString.isEmpty() )
+                        throw new JarItemException("The selected JAR is not a valid Pwnbrew module.");
+                      
                     jarDetails = new String[4];
                     jarDetails[0] = payloadFile.getName();
                     jarDetails[1] = jarType;

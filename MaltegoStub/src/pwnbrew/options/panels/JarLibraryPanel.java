@@ -196,22 +196,22 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
     private void selectJar() {
         
         //Have the user manually put in the server ip
-        JComboBox aCB = new JComboBox();
-        aCB.setRenderer(new pwnbrew.generic.gui.DefaultCellBorderRenderer(BorderFactory.createEmptyBorder(0, 4, 0, 0)));
-        List<String> jarTypes = Arrays.asList( new String[]{ Constants.PAYLOAD_TYPE, Constants.STAGER_TYPE, 
-            Constants.LOCAL_EXTENSION_TYPE, Constants.REMOTE_EXTENSION_TYPE} );
+//        JComboBox aCB = new JComboBox();
+//        aCB.setRenderer(new pwnbrew.generic.gui.DefaultCellBorderRenderer(BorderFactory.createEmptyBorder(0, 4, 0, 0)));
+//        List<String> jarTypes = Arrays.asList( new String[]{ Constants.PAYLOAD_TYPE, Constants.STAGER_TYPE, 
+//            Constants.LOCAL_EXTENSION_TYPE, Constants.REMOTE_EXTENSION_TYPE} );
+//        
+//        for( String aJarType : jarTypes )
+//            aCB.addItem(aJarType);
         
-        for( String aJarType : jarTypes )
-            aCB.addItem(aJarType);
-        
-        Object[] objMsg = new Object[]{ "Please select the type of JAR being imported.", " ", aCB};
-        Object retVal = JOptionPane.showOptionDialog(null, objMsg, "Select JAR type",
-               JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+//        Object[] objMsg = new Object[]{ "Please select the type of JAR being imported.", " ", aCB};
+//        Object retVal = JOptionPane.showOptionDialog(null, objMsg, "Select JAR type",
+//               JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
 
         //Check that they clicked ok
-        if((Integer)retVal == JOptionPane.OK_OPTION ) {
+//        if((Integer)retVal == JOptionPane.OK_OPTION ) {
             
-            String selVal = (String) aCB.getSelectedItem();
+//            String selVal = (String) aCB.getSelectedItem();
             File userSelectedFile = null;
 
             int returnVal = theJarChooser.showDialog( this, "Select JAR File" ); //Show the dialogue
@@ -237,7 +237,7 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
             //Create the java item
             String[] aStrArr;
             try {
-                aStrArr = Utilities.getJavaItem(userSelectedFile, selVal);
+                aStrArr = Utilities.getJavaItem(userSelectedFile );
             } catch (JarItemException ex) {
                 JOptionPane.showMessageDialog( this, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE );           
                 return;
@@ -296,9 +296,9 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
                 }   
                 
                 //Queue the file to be sent
-                getListener().sendJarFile( userSelectedFile, selVal);
+                getListener().sendJarFile( userSelectedFile, selJarType);
                 
-            }
+//            }
         }
     }
 

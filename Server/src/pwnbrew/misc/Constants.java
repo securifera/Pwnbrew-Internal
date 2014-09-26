@@ -158,9 +158,19 @@ abstract public class Constants {
    
     //Old stager marker 
     public static final byte[] OLD_STAGER_MARKER = new byte[]{ (byte)0xde, (byte)0xad, (byte)0xbe, (byte)0xef};
-//    public static final int SERVER_ID = -1;    
         
+    public static final String MODULE_TYPE_LABEL = "Type";
     public static final String PAYLOAD_ACTION_COMMAND = "Payload";
     public static final String STAGER_ACTION_COMMAND = "Stager";
+    
+    public static final String PAYLOAD_ALIAS_TYPE = "plib";
+    public static final String STAGER_ALIAS_TYPE = "slib";
+    public static final String LOCAL_ALIAS_EXTENSION_TYPE = "llib";
+    public static final String REMOTE_ALIAS_EXTENSION_TYPE = "rlib";
+    
+    public static final String PAYLOAD_TYPE = "PAYLOAD";
+    public static final String STAGER_TYPE = "STAGER";
+    public static final String LOCAL_EXTENSION_TYPE = "LOCAL EXTENSION";
+    public static final String REMOTE_EXTENSION_TYPE = "REMOTE EXTENSION";
     
 }

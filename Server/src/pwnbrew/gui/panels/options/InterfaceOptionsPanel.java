@@ -212,20 +212,20 @@ public class InterfaceOptionsPanel extends OptionsJPanel implements ProgressDriv
     private void selectJar() {
         
         //Have the user manually put in the server ip
-        JComboBox aCB = new JComboBox();
-        aCB.setRenderer(new pwnbrew.generic.gui.DefaultCellBorderRenderer(BorderFactory.createEmptyBorder(0, 4, 0, 0)));
-        List<String> jarTypes = JarItem.getTypes();
-        for( String aJarType : jarTypes )
-            aCB.addItem(aJarType);
-        
-        Object[] objMsg = new Object[]{ "Please select the type of JAR being imported.", " ", aCB};
-        Object retVal = JOptionPane.showOptionDialog(null, objMsg, "Select JAR type",
-               JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+//        JComboBox aCB = new JComboBox();
+//        aCB.setRenderer(new pwnbrew.generic.gui.DefaultCellBorderRenderer(BorderFactory.createEmptyBorder(0, 4, 0, 0)));
+//        List<String> jarTypes = JarItem.getTypes();
+//        for( String aJarType : jarTypes )
+//            aCB.addItem(aJarType);
+//        
+//        Object[] objMsg = new Object[]{ "Please select the type of JAR being imported.", " ", aCB};
+//        Object retVal = JOptionPane.showOptionDialog(null, objMsg, "Select JAR type",
+//               JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
 
         //Check that they clicked ok
-        if((Integer)retVal == JOptionPane.OK_OPTION ) {
+//        if((Integer)retVal == JOptionPane.OK_OPTION ) {
             
-            String selVal = (String) aCB.getSelectedItem();
+//            String selVal = (String) aCB.getSelectedItem();
             File userSelectedFile = null;
 
             int returnVal = theJarChooser.showDialog( this, "Select JAR File" ); //Show the dialogue
@@ -249,10 +249,10 @@ public class InterfaceOptionsPanel extends OptionsJPanel implements ProgressDriv
                 return;
             }
             
-            //Create a FileContentRef
-            JarItem aJarItem = null;
+            //Create a JarItem
+            JarItem aJarItem;
             try {
-                aJarItem = Utilities.getJavaItem(userSelectedFile, selVal);
+                aJarItem = Utilities.getJavaItem( userSelectedFile );
             } catch (JarItemException ex) {
                 JOptionPane.showMessageDialog( this, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE );           
                 return;
@@ -311,7 +311,7 @@ public class InterfaceOptionsPanel extends OptionsJPanel implements ProgressDriv
 
             GenericProgressDialog pDialog = new GenericProgressDialog(null, "Importing files to library...", this, false, theObjList);
             pDialog.setVisible(true);       
-        } 
+//        } 
                 
     }/* END selectJar() */
 
