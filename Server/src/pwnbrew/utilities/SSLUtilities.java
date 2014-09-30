@@ -496,24 +496,73 @@ final public class SSLUtilities {
      * @param args the command line arguments
      * @throws java.io.IOException
      */
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, KeyStoreException, LoggableException, CertificateException {
 
-        String lookAndFeelClassStr = "javax.swing.plaf.metal.MetalLookAndFeel";
-        if( Utilities.isWindows( Utilities.getOsName()) )
-            lookAndFeelClassStr = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
-        
-        try{
-            UIManager.setLookAndFeel( lookAndFeelClassStr );
-        } catch ( ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-        }
-        
-        /* Create and display the form */
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new SSLJFrame().setVisible(true);
+        if( args.length > 0 ){
+            
+            String anArg = args[0];
+            if( args.length == 1 && anArg.equals("-gui") ){            
+
+                String lookAndFeelClassStr = "javax.swing.plaf.metal.MetalLookAndFeel";
+                if( Utilities.isWindows( Utilities.getOsName()) )
+                    lookAndFeelClassStr = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
+
+                try{
+                    UIManager.setLookAndFeel( lookAndFeelClassStr );
+                } catch ( ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+                }
+
+                /* Create and display the form */
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        new SSLJFrame().setVisible(true);
+                    }
+                });
+                
+            } else {
+                
+                //import the cert
+                File cert = new File( anArg );
+                String filename = cert.getAbsolutePath();
+                if( cert.exists() && filename.endsWith(".der")){
+                    
+                    int index = filename.lastIndexOf('.');
+                    String certAlias = filename.substring(0, index);
+                    if( !certAlias.isEmpty() ){
+
+                        KeyStore aKeyStore = SSLUtilities.getKeystore();
+                        if( SSLUtilities.checkAlias(aKeyStore, certAlias)){
+                            
+                            byte[] aByteArr = new byte[1024];
+                            String theMessage = "A certificate already exists with the given alias. Would you like to overwrite it? (yes/no) ";
+                            System.out.print(theMessage);
+                            System.in.read( aByteArr );
+                            
+                            //Return if no is chosen
+                            String aStr = new String(aByteArr).toLowerCase();
+                            if( !aStr.equals("yes")){
+                                return;
+                            }
+                        }
+                    }
+
+                    //If a cert is returned then send it to the client                            
+                    byte[] certBytes = new byte[(int)cert.length()];
+                    try (FileInputStream aFOS = new FileInputStream(cert)) {
+                        aFOS.read(certBytes);                              
+                    }
+
+                    //Create a cert from the bytes
+                    Certificate aCert = new sun.security.x509.X509CertImpl( certBytes );
+                    SSLUtilities.importCertificate( certAlias, aCert);
+                    System.out.println("Certificate import complete.");
+                    
+                }
+                
             }
-        });
+            
+        } 
         
     }
         
