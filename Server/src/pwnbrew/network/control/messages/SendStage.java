@@ -164,38 +164,40 @@ public final class SendStage extends ControlMessage{ // NO_UCD (use default)
                             int bytesRead = 0;
                             String thePath = aClass;             
                             InputStream anIS = SendStage.class.getClassLoader().getResourceAsStream(thePath);
+                            if( anIS != null ){
 
-                            //Read the bytes into a byte array
-                            ByteArrayOutputStream theBOS = new ByteArrayOutputStream();
-                            try {
+                                //Read the bytes into a byte array
+                                ByteArrayOutputStream theBOS = new ByteArrayOutputStream();
+                                try {
 
-                                //Read to the end
-                                while( bytesRead != -1){
-                                    bytesRead = anIS.read(byteBuffer);
-                                    if(bytesRead != -1){
-                                        theBOS.write(byteBuffer, 0, bytesRead);
+                                    //Read to the end
+                                    while( bytesRead != -1){
+                                        bytesRead = anIS.read(byteBuffer);
+                                        if(bytesRead != -1){
+                                            theBOS.write(byteBuffer, 0, bytesRead);
+                                        }
                                     }
-                                }
 
-                                theBOS.flush();
+                                    theBOS.flush();
 
-                            } finally {
+                                } finally {
 
-                                //Close output stream
-                                theBOS.close();
-                            }            
+                                    //Close output stream
+                                    theBOS.close();
+                                }            
 
-                            //Queue up the classes to be sent
-                            tempArr = theBOS.toByteArray();
-                            byte[] theBytes = new byte[ tempArr.length + 4 ];
+                                //Queue up the classes to be sent
+                                tempArr = theBOS.toByteArray();
+                                byte[] theBytes = new byte[ tempArr.length + 4 ];
 
-                            byte[] classLen = SocketUtilities.intToByteArray(tempArr.length);
-                            System.arraycopy(classLen, 0, theBytes, 0, classLen.length); 
-                            System.arraycopy(tempArr, 0, theBytes, 4, tempArr.length);                
+                                byte[] classLen = SocketUtilities.intToByteArray(tempArr.length);
+                                System.arraycopy(classLen, 0, theBytes, 0, classLen.length); 
+                                System.arraycopy(tempArr, 0, theBytes, 4, tempArr.length);                
 
-                            //Queue the bytes
-                            classByteBuffer.put(theBytes);
-                            theBOS = null;
+                                //Queue the bytes
+                                classByteBuffer.put(theBytes);
+                                theBOS = null;
+                            }
                         }
 
                         //Add file ending byte

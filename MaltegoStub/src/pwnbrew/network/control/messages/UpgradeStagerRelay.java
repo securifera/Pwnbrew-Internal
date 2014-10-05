@@ -38,14 +38,14 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-public class UpgradeStagerRelay extends ControlMessage {
+public class UpgradeStagerRelay extends MaltegoMessage {
     
     private static final byte OPTION_HOST_ID = 100;
 

@@ -39,7 +39,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -60,7 +59,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
-public final class GetHosts extends ControlMessage{ // NO_UCD (use default)
+public final class GetHosts extends MaltegoMessage{ // NO_UCD (use default)
     
     private static final String NAME_Class = GetHosts.class.getSimpleName();
     private static final byte OPTION_HOST_ID = 124;

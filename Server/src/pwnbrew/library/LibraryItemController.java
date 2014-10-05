@@ -80,6 +80,15 @@ abstract public class LibraryItemController extends Controller implements Iconab
     private boolean justImported = false;
     protected static final String NAME_Class = LibraryItemController.class.getSimpleName();
     
+    //====================================================================
+    /**
+     * 
+     * @param passedBool 
+     */
+    public LibraryItemController( boolean passedBool ){
+        super(passedBool);
+    }
+    
     // ==========================================================================
     /**
     *   Action Listener implementation.
@@ -98,9 +107,12 @@ abstract public class LibraryItemController extends Controller implements Iconab
                 saveToDisk();
                 
                 //Disable the save button and repaint
-                LibraryItemPanel thePanel = (LibraryItemPanel) getRootPanel();
-                thePanel.setSaveButton( false );
-                thePanel.repaint();
+                JPanel aPanel = getRootPanel();
+                if( aPanel != null && aPanel instanceof LibraryItemPanel){
+                    LibraryItemPanel thePanel = (LibraryItemPanel) aPanel;
+                    thePanel.setSaveButton( false );
+                    thePanel.repaint();
+                }
                 
                 //Call for a repaint
                 getLibraryItemControllerListener().getListenerComponent().repaint();
@@ -135,8 +147,8 @@ abstract public class LibraryItemController extends Controller implements Iconab
 
         //Disable the save button and repaint
         JPanel aPanel = getRootPanel();
-        if( aPanel instanceof SavablePanel ){
-            SavablePanel thePanel = (SavablePanel) getRootPanel();
+        if( aPanel != null && aPanel instanceof SavablePanel ){
+            SavablePanel thePanel = (SavablePanel)aPanel;
             thePanel.setSaveButton(passedDirtyFlag);
         }
 
@@ -383,7 +395,7 @@ abstract public class LibraryItemController extends Controller implements Iconab
             
             //Change the name in the interface...
             JPanel jpanel = getRootPanel();
-            if( jpanel instanceof LibraryItemPanel )
+            if( jpanel != null && jpanel instanceof LibraryItemPanel )
                 ( (LibraryItemPanel)jpanel ).setLibraryItemName( name );
             
         }

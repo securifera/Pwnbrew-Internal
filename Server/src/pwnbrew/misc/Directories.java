@@ -61,7 +61,7 @@ final public class Directories {
     private static final String DELIM_Path = File.separator;
     
     // <root>
-    private static final String DEFAULT_Root_Windows = "C:";
+    private static final String DEFAULT_Root_Windows = "C:" + DELIM_Path + "Program Files";
     private static final String DEFAULT_Root_Unix = "/opt";
     private static String PATH_Root;
 
@@ -71,9 +71,9 @@ final public class Directories {
     private static String PATH_Home; // <root>/<home>
     
     // <root>/<home>/...
-    private static String PATH_Bin; // <root>/<home>/bin
+//    private static String PATH_Bin; // <root>/<home>/bin
     private static String PATH_Data; // <root>/<home>/data
-    private static String PATH_Doc; // <root>/<home>/doc    
+//    private static String PATH_Doc; // <root>/<home>/doc    
     private static String PATH_Log; // <root>/<home>/log
       
     // <root>/<home>/data/...
@@ -151,12 +151,12 @@ final public class Directories {
         strBldr.setLength( 0 ); //Reset the StringBuilder
         
         // <root>/<home>/...
-        PATH_Bin = strBldr.append( PATH_Home ).append( DELIM_Path ).append( "bin" ).toString();
-        strBldr.setLength( 0 );
+//        PATH_Bin = strBldr.append( PATH_Home ).append( DELIM_Path ).append( "bin" ).toString();
+//        strBldr.setLength( 0 );
         PATH_Data = strBldr.append( PATH_Home ).append( DELIM_Path ).append( "data" ).toString();
         strBldr.setLength( 0 );
-        PATH_Doc = strBldr.append( PATH_Home ).append( DELIM_Path ).append( "doc" ).toString();
-        strBldr.setLength( 0 );
+//        PATH_Doc = strBldr.append( PATH_Home ).append( DELIM_Path ).append( "doc" ).toString();
+//        strBldr.setLength( 0 );
         PATH_Log = strBldr.append( PATH_Home ).append( DELIM_Path ).append( "log" ).toString();
         strBldr.setLength( 0 );
         
@@ -193,9 +193,9 @@ final public class Directories {
         ensureDirectoryExists( PATH_Home );
 
         // <root>/<home>/...
-        ensureDirectoryExists( PATH_Bin );
+//        ensureDirectoryExists( PATH_Bin );
         ensureDirectoryExists( PATH_Data );
-        ensureDirectoryExists( PATH_Doc );
+//        ensureDirectoryExists( PATH_Doc );
         ensureDirectoryExists( PATH_Log );
         ensureDirectoryExists( PATH_JarLib );
         
@@ -318,15 +318,15 @@ final public class Directories {
         return PATH_Data;
     }/* END getDataPath() */
     
-    // ==========================================================================
-    /**
-     * Returns the path to the doc directory.
-     * 
-     * @return the path to the doc directory
-     */
-    public static String getDocPath() {
-        return PATH_Doc;
-    }/* END getDocPath() */
+//    // ==========================================================================
+//    /**
+//     * Returns the path to the doc directory.
+//     * 
+//     * @return the path to the doc directory
+//     */
+//    public static String getDocPath() {
+//        return PATH_Doc;
+//    }/* END getDocPath() */
     
      // ==========================================================================
     /**

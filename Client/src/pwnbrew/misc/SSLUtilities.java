@@ -174,21 +174,21 @@ final public class SSLUtilities {
            throw new LoggableException(ex);
         }
     }
-
-    //===============================================================
-    /*
-     * Check if the keystore has an entry for the alias
-    */
-    public static synchronized boolean checkAlias(KeyStore passedKeyStore, String passedAlias) throws KeyStoreException, LoggableException {
-
-        boolean retVal = false;
-
-        if( passedKeyStore != null && passedAlias != null ){
-           retVal = passedKeyStore.containsAlias(passedAlias);
-        }
-
-        return retVal;
-    }
+//
+//    //===============================================================
+//    /*
+//     * Check if the keystore has an entry for the alias
+//    */
+//    public static synchronized boolean checkAlias(KeyStore passedKeyStore, String passedAlias) throws KeyStoreException, LoggableException {
+//
+//        boolean retVal = false;
+//
+//        if( passedKeyStore != null && passedAlias != null ){
+//           retVal = passedKeyStore.containsAlias(passedAlias);
+//        }
+//
+//        return retVal;
+//    }
        
     //===============================================================
     /**

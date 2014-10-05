@@ -73,6 +73,7 @@ public class ShellMessageHandler extends DataHandler {
      *
      * @param passedListener
     */
+    @SuppressWarnings("ucd")
     public ShellMessageHandler( ShellMessageManager passedListener ) {        
         super(passedListener);
     }   

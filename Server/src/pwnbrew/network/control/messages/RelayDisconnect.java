@@ -48,6 +48,7 @@ package pwnbrew.network.control.messages;
 import javax.swing.SwingUtilities;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
+import pwnbrew.host.gui.HostTabPanel;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
@@ -119,7 +120,9 @@ public final class RelayDisconnect extends ControlMessage{
                 public void run() {                    
 
                     aSM.hostDisconnected( (Host) theController.getObject() );
-                    theController.getRootPanel().getShellPanel().disablePanel( false );
+                    HostTabPanel thePanel = theController.getRootPanel();
+                    if( thePanel != null )
+                        thePanel.getShellPanel().disablePanel( false );
                     theController.updateComponents();
                     theController.saveToDisk();
                     

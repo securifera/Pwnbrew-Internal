@@ -74,6 +74,7 @@ abstract public class ProcessMessage extends Message {
      * @param passedFunction
      * @param passedBB
     */
+    @SuppressWarnings("ucd")
     public ProcessMessage( byte passedFunction, ByteBuffer passedBB ) {
         super( PROCESS_MESSAGE_TYPE );
         function = passedFunction;
@@ -88,6 +89,7 @@ abstract public class ProcessMessage extends Message {
      * @param passedFunction
      * @param passedId
     */
+    @SuppressWarnings("ucd")
     public ProcessMessage( byte passedFunction, byte[] passedId) {
         super(PROCESS_MESSAGE_TYPE, passedId);
         function = passedFunction;

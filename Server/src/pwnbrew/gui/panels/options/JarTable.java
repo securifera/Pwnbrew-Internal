@@ -72,7 +72,7 @@ public class JarTable extends JTable {
         DefaultTableModel theTableModel = new javax.swing.table.DefaultTableModel(
             new Object [][] {},
             new String [] {
-                "Name", "Type", "Java Major Version", "Release Version"
+                "UID", "Type", "Java Major Version", "Release Version"
             }
         ){
             //Make the table uneditable

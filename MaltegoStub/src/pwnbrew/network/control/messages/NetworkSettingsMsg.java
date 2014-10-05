@@ -42,14 +42,14 @@ import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
 import pwnbrew.functions.ToServerConfiguration;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
 /**
  *
  * @author Securifera
  */
-public final class NetworkSettingsMsg extends ControlMessage {
+public final class NetworkSettingsMsg extends MaltegoMessage {
     
     private static final byte OPTION_SERVER_PORT = 54;  
     private static final byte OPTION_ISSUEE_NAME = 55;

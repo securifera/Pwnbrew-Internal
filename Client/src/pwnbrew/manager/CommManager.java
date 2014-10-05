@@ -108,6 +108,7 @@ public abstract class CommManager {
      * @param passedPort
      * @param aPR 
      */
+    @SuppressWarnings("ucd")
     public void setPortRouter(int passedPort, PortRouter aPR) {
         synchronized( thePortRouterMap ){
             thePortRouterMap.put( passedPort, aPR );

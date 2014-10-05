@@ -64,6 +64,7 @@ abstract public class Tasking extends ControlMessage {
     *
      * @param passedTaskId
     */
+    @SuppressWarnings("ucd")
     public Tasking( int passedTaskId ) {
         super();
 
@@ -81,6 +82,7 @@ abstract public class Tasking extends ControlMessage {
     /**
     * Constructor
     *
+     @SuppressWarnings("ucd")
      * @param passedId
     */
     public Tasking( byte[] passedId ) {

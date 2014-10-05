@@ -101,6 +101,7 @@ public class Http {
      * 
      * @param headerParts 
     */
+    @SuppressWarnings("ucd")
     public Http( String... headerParts ) {
         operation = new ExchangeDetails( headerParts );          
         setOption( Http.CONNECTION, "keep-alive");
@@ -111,6 +112,7 @@ public class Http {
      *  Sets the value of the passed key
      * 
      * @param passedKey
+     @SuppressWarnings("ucd")
      * @param passedVal 
      */
     public void setOption( String passedKey, String passedVal ){
@@ -124,6 +126,7 @@ public class Http {
      *  Gets the value of the passed key
      * 
      * @param passedKey
+     @SuppressWarnings("ucd")
      * @return 
     */
     public String getOption( String passedKey ){
@@ -193,6 +196,7 @@ public class Http {
     *  Returns a generic Http message of a certain kind.
      * @param passedType
      * @return 
+    @SuppressWarnings("ucd")
     */
     public static Http getGeneric( int passedType ) {
     

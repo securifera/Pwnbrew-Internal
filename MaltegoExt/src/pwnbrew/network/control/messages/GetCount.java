@@ -58,7 +58,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
-public final class GetCount extends ControlMessage{ // NO_UCD (use default)
+public final class GetCount extends MaltegoMessage{ // NO_UCD (use default)
     
     private static final String NAME_Class = GetCount.class.getSimpleName();    
     private static final byte OPTION_COUNT_ID = 80;

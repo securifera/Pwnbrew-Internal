@@ -38,14 +38,14 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-public final class GetCheckInSchedule extends ControlMessage{ 
+public final class GetCheckInSchedule extends MaltegoMessage{ 
     
     private static final byte OPTION_HOST_ID = 124;
 

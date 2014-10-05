@@ -72,6 +72,7 @@ public class StdErrMessage extends ProcessMessage {
      *
      * @param passedId
     */
+    @SuppressWarnings("ucd")
     public StdErrMessage( byte[] passedId ) {
         super( STD_ERR, passedId );
     }

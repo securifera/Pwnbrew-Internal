@@ -48,7 +48,7 @@ import java.nio.ByteBuffer;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *

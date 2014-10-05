@@ -40,6 +40,7 @@ package pwnbrew.options.panels;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
@@ -246,26 +247,26 @@ public class NetworkOptionsPanel extends OptionsJPanel {
         algoLabel = new javax.swing.JLabel();
         algoValLabel = new javax.swing.JLabel();
         certLabel3 = new javax.swing.JLabel();
+        importButton = new javax.swing.JButton();
+        expDateField = new javax.swing.JTextField();
         issuedToPanel = new javax.swing.JPanel();
-        certLabel4 = new javax.swing.JLabel();
-        certLabel5 = new javax.swing.JLabel();
-        algoLabel1 = new javax.swing.JLabel();
-        certLabel6 = new javax.swing.JLabel();
-        algoLabel2 = new javax.swing.JLabel();
-        certLabel7 = new javax.swing.JLabel();
+        certLabel8 = new javax.swing.JLabel();
+        certLabel9 = new javax.swing.JLabel();
+        algoLabel3 = new javax.swing.JLabel();
+        certLabel10 = new javax.swing.JLabel();
+        algoLabel4 = new javax.swing.JLabel();
+        certLabel11 = new javax.swing.JLabel();
         issueeName = new javax.swing.JTextField();
         issueeOrg = new javax.swing.JTextField();
         issueeCity = new javax.swing.JTextField();
         issueeOU = new javax.swing.JTextField();
         issueeState = new javax.swing.JTextField();
         issueeCountry = new javax.swing.JTextField();
-        importButton = new javax.swing.JButton();
-        issuedToPanel1 = new javax.swing.JPanel();
+        issuedByPanel = new javax.swing.JPanel();
         certLabel12 = new javax.swing.JLabel();
         certLabel13 = new javax.swing.JLabel();
         algoLabel5 = new javax.swing.JLabel();
         certLabel14 = new javax.swing.JLabel();
-        algoLabel6 = new javax.swing.JLabel();
         certLabel15 = new javax.swing.JLabel();
         issuerName = new javax.swing.JTextField();
         issuerOrg = new javax.swing.JTextField();
@@ -273,7 +274,7 @@ public class NetworkOptionsPanel extends OptionsJPanel {
         issuerOU = new javax.swing.JTextField();
         issuerState = new javax.swing.JTextField();
         issuerCountry = new javax.swing.JTextField();
-        expDateField = new javax.swing.JTextField();
+        certLabel16 = new javax.swing.JLabel();
         ctrlPortLabel = new javax.swing.JLabel();
         ctrlPortField = new javax.swing.JTextField();
         editCheckbox = new javax.swing.JCheckBox();
@@ -310,55 +311,32 @@ public class NetworkOptionsPanel extends OptionsJPanel {
 
         certLabel3.setText("Expiration:");
 
+        importButton.setText("Import");
+        importButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importButtonActionPerformed(evt);
+            }
+        });
+
+        expDateField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                expDateFieldKeyReleased(evt);
+            }
+        });
+
         issuedToPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Issued To"));
 
-        certLabel4.setText("Organization:");
+        certLabel8.setText("Organization:");
 
-        certLabel5.setText("OU:");
+        certLabel9.setText("OU:");
 
-        algoLabel1.setText("Name:");
+        algoLabel3.setText("Name:");
 
-        certLabel6.setText("State:");
+        certLabel10.setText("State:");
 
-        algoLabel2.setText("City:");
+        algoLabel4.setText("City:");
 
-        certLabel7.setText("Country:");
-
-        issueeName.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                issueeNameKeyReleased(evt);
-            }
-        });
-
-        issueeOrg.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                issueeOrgKeyReleased(evt);
-            }
-        });
-
-        issueeCity.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                issueeCityKeyReleased(evt);
-            }
-        });
-
-        issueeOU.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                issueeOUKeyReleased(evt);
-            }
-        });
-
-        issueeState.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                issueeStateKeyReleased(evt);
-            }
-        });
-
-        issueeCountry.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                issueeCountryKeyReleased(evt);
-            }
-        });
+        certLabel11.setText("Country:");
 
         javax.swing.GroupLayout issuedToPanelLayout = new javax.swing.GroupLayout(issuedToPanel);
         issuedToPanel.setLayout(issuedToPanelLayout);
@@ -367,63 +345,58 @@ public class NetworkOptionsPanel extends OptionsJPanel {
             .addGroup(issuedToPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(certLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(algoLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(issuedToPanelLayout.createSequentialGroup()
-                        .addComponent(issueeOU, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(16, 16, 16)
-                        .addComponent(algoLabel2)
-                        .addGap(6, 6, 6)
-                        .addComponent(issueeCity, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(certLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(algoLabel3)
+                            .addComponent(certLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(issueeState, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(issuedToPanelLayout.createSequentialGroup()
+                                .addComponent(issueeName, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(certLabel8))
+                            .addGroup(issuedToPanelLayout.createSequentialGroup()
+                                .addComponent(issueeOU, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(certLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(algoLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(certLabel7)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(issueeCountry, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(issueeCountry, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(issueeCity, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(issueeOrg, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(issuedToPanelLayout.createSequentialGroup()
-                        .addComponent(issueeName, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(certLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(issueeOrg)))
-                .addContainerGap(18, Short.MAX_VALUE))
+                        .addComponent(certLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(issueeState, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         issuedToPanelLayout.setVerticalGroup(
             issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(issuedToPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(algoLabel1)
-                    .addComponent(certLabel4)
+                    .addComponent(algoLabel3)
+                    .addComponent(certLabel8)
                     .addComponent(issueeName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(issueeOrg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(certLabel7, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(algoLabel2)
-                        .addComponent(certLabel6)
-                        .addComponent(issueeCity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(certLabel5)
-                        .addComponent(issueeOU, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(issueeState, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(issueeCountry, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(certLabel9)
+                    .addComponent(issueeOU, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(algoLabel4)
+                    .addComponent(issueeCity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(issuedToPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(certLabel10)
+                    .addComponent(issueeState, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(issueeCountry, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(certLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
-        importButton.setText("Import");
-        importButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                importButtonActionPerformed(evt);
-            }
-        });
-
-        issuedToPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Issued By"));
+        issuedByPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Issued By"));
 
         certLabel12.setText("Organization:");
 
@@ -433,107 +406,66 @@ public class NetworkOptionsPanel extends OptionsJPanel {
 
         certLabel14.setText("State:");
 
-        algoLabel6.setText("City:");
-
         certLabel15.setText("Country:");
 
-        issuerName.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                issuerNameKeyReleased(evt);
-            }
-        });
+        certLabel16.setText("City:");
 
-        issuerOrg.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                issuerOrgKeyReleased(evt);
-            }
-        });
-
-        issuerCity.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                issuerCityKeyReleased(evt);
-            }
-        });
-
-        issuerOU.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                issuerOUKeyReleased(evt);
-            }
-        });
-
-        issuerState.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                issuerStateKeyReleased(evt);
-            }
-        });
-
-        issuerCountry.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                issuerCountryKeyReleased(evt);
-            }
-        });
-
-        javax.swing.GroupLayout issuedToPanel1Layout = new javax.swing.GroupLayout(issuedToPanel1);
-        issuedToPanel1.setLayout(issuedToPanel1Layout);
-        issuedToPanel1Layout.setHorizontalGroup(
-            issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(issuedToPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout issuedByPanelLayout = new javax.swing.GroupLayout(issuedByPanel);
+        issuedByPanel.setLayout(issuedByPanelLayout);
+        issuedByPanelLayout.setHorizontalGroup(
+            issuedByPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(issuedByPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(certLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(algoLabel5))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(issuedToPanel1Layout.createSequentialGroup()
-                        .addComponent(issuerOU, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(16, 16, 16)
-                        .addComponent(algoLabel6)
-                        .addGap(6, 6, 6)
-                        .addComponent(issuerCity, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(issuedByPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(issuedByPanelLayout.createSequentialGroup()
                         .addComponent(certLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(issuerState, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(certLabel15)
+                        .addComponent(issuerState, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(issuedByPanelLayout.createSequentialGroup()
+                        .addGroup(issuedByPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(algoLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
+                            .addComponent(certLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(issuerCountry, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(issuedToPanel1Layout.createSequentialGroup()
-                        .addComponent(issuerName, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(certLabel12)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(issuerOrg)))
-                .addContainerGap(18, Short.MAX_VALUE))
+                        .addGroup(issuedByPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(issuerOU, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(issuerName, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(issuedByPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(certLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(certLabel15)
+                    .addComponent(certLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(issuedByPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(issuerOrg, javax.swing.GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE)
+                    .addComponent(issuerCity)
+                    .addComponent(issuerCountry))
+                .addContainerGap(20, Short.MAX_VALUE))
         );
-        issuedToPanel1Layout.setVerticalGroup(
-            issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(issuedToPanel1Layout.createSequentialGroup()
+        issuedByPanelLayout.setVerticalGroup(
+            issuedByPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(issuedByPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(issuedByPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(algoLabel5)
                     .addComponent(certLabel12)
                     .addComponent(issuerName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(issuerOrg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(certLabel15, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(issuedToPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(algoLabel6)
+                .addGroup(issuedByPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(certLabel13)
+                    .addComponent(issuerOU, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(issuerCity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(certLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(issuedByPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(issuedByPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(issuerCountry, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(certLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(issuedByPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(certLabel14)
-                        .addComponent(issuerCity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(certLabel13)
-                        .addComponent(issuerOU, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(issuerState, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(issuerCountry, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                        .addComponent(issuerState, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
-        expDateField.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                expDateFieldKeyReleased(evt);
-            }
-        });
 
         javax.swing.GroupLayout encryptionPanelLayout = new javax.swing.GroupLayout(encryptionPanel);
         encryptionPanel.setLayout(encryptionPanelLayout);
@@ -541,58 +473,55 @@ public class NetworkOptionsPanel extends OptionsJPanel {
             encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(encryptionPanelLayout.createSequentialGroup()
                 .addContainerGap()
+                .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(passwordLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(certLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(encryptionPanelLayout.createSequentialGroup()
+                        .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(noteLabel)
+                            .addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(46, 46, 46))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, encryptionPanelLayout.createSequentialGroup()
                         .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(passwordLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(certLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(encryptionPanelLayout.createSequentialGroup()
-                                .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(noteLabel)
-                                    .addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(46, 46, 46))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, encryptionPanelLayout.createSequentialGroup()
-                                .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(encryptionPanelLayout.createSequentialGroup()
-                                        .addGap(0, 0, Short.MAX_VALUE)
-                                        .addComponent(importButton))
-                                    .addComponent(certPathTextField))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(fileChooserButton, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(encryptionPanelLayout.createSequentialGroup()
-                        .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(issuedToPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(issuedToPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(encryptionPanelLayout.createSequentialGroup()
-                                .addComponent(algoLabel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(algoValLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(certLabel3)
-                                .addGap(18, 18, 18)
-                                .addComponent(expDateField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(importButton))
+                            .addComponent(certPathTextField))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(fileChooserButton, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
+            .addGroup(encryptionPanelLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(issuedToPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(issuedByPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(encryptionPanelLayout.createSequentialGroup()
+                        .addComponent(algoLabel)
+                        .addGap(18, 18, 18)
+                        .addComponent(algoValLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(certLabel3)
+                        .addGap(18, 18, 18)
+                        .addComponent(expDateField, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         encryptionPanelLayout.setVerticalGroup(
             encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(encryptionPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(algoValLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(encryptionPanelLayout.createSequentialGroup()
-                        .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(certLabel3)
-                            .addComponent(algoLabel)
-                            .addComponent(expDateField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(algoValLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(expDateField)
+                    .addComponent(certLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(algoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
                 .addComponent(issuedToPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(issuedToPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(35, 35, 35)
+                .addComponent(issuedByPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(certLabel)
                     .addComponent(certPathTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -625,7 +554,7 @@ public class NetworkOptionsPanel extends OptionsJPanel {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(encryptionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
@@ -638,18 +567,18 @@ public class NetworkOptionsPanel extends OptionsJPanel {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(ctrlPortField, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(ctrlPortLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(14, 14, 14))
+                        .addGap(17, 17, 17))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(editCheckbox)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
                 .addComponent(encryptionPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -676,54 +605,6 @@ public class NetworkOptionsPanel extends OptionsJPanel {
         setSaveButton(true);
     }//GEN-LAST:event_expDateFieldKeyReleased
 
-    private void issueeOUKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issueeOUKeyReleased
-        setSaveButton(true);
-    }//GEN-LAST:event_issueeOUKeyReleased
-
-    private void issueeNameKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issueeNameKeyReleased
-        setSaveButton(true);
-    }//GEN-LAST:event_issueeNameKeyReleased
-
-    private void issuerOUKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issuerOUKeyReleased
-        setSaveButton(true);
-    }//GEN-LAST:event_issuerOUKeyReleased
-
-    private void issuerNameKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issuerNameKeyReleased
-        setSaveButton(true);
-    }//GEN-LAST:event_issuerNameKeyReleased
-
-    private void issueeOrgKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issueeOrgKeyReleased
-        setSaveButton(true);
-    }//GEN-LAST:event_issueeOrgKeyReleased
-
-    private void issueeCityKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issueeCityKeyReleased
-        setSaveButton(true);
-    }//GEN-LAST:event_issueeCityKeyReleased
-
-    private void issueeStateKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issueeStateKeyReleased
-        setSaveButton(true);
-    }//GEN-LAST:event_issueeStateKeyReleased
-
-    private void issueeCountryKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issueeCountryKeyReleased
-        setSaveButton(true);
-    }//GEN-LAST:event_issueeCountryKeyReleased
-
-    private void issuerOrgKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issuerOrgKeyReleased
-        setSaveButton(true);
-    }//GEN-LAST:event_issuerOrgKeyReleased
-
-    private void issuerCityKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issuerCityKeyReleased
-        setSaveButton(true);
-    }//GEN-LAST:event_issuerCityKeyReleased
-
-    private void issuerStateKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issuerStateKeyReleased
-        setSaveButton(true);
-    }//GEN-LAST:event_issuerStateKeyReleased
-
-    private void issuerCountryKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_issuerCountryKeyReleased
-        setSaveButton(true);
-    }//GEN-LAST:event_issuerCountryKeyReleased
-
     private void importButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importButtonActionPerformed
         String certPath = certPathTextField.getText();
         char[] passArr = passwordField.getPassword();
@@ -741,21 +622,21 @@ public class NetworkOptionsPanel extends OptionsJPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel algoLabel;
-    private javax.swing.JLabel algoLabel1;
-    private javax.swing.JLabel algoLabel2;
+    private javax.swing.JLabel algoLabel3;
+    private javax.swing.JLabel algoLabel4;
     private javax.swing.JLabel algoLabel5;
-    private javax.swing.JLabel algoLabel6;
     private javax.swing.JLabel algoValLabel;
     private javax.swing.JLabel certLabel;
+    private javax.swing.JLabel certLabel10;
+    private javax.swing.JLabel certLabel11;
     private javax.swing.JLabel certLabel12;
     private javax.swing.JLabel certLabel13;
     private javax.swing.JLabel certLabel14;
     private javax.swing.JLabel certLabel15;
+    private javax.swing.JLabel certLabel16;
     private javax.swing.JLabel certLabel3;
-    private javax.swing.JLabel certLabel4;
-    private javax.swing.JLabel certLabel5;
-    private javax.swing.JLabel certLabel6;
-    private javax.swing.JLabel certLabel7;
+    private javax.swing.JLabel certLabel8;
+    private javax.swing.JLabel certLabel9;
     private javax.swing.JTextField certPathTextField;
     private javax.swing.JTextField ctrlPortField;
     private javax.swing.JLabel ctrlPortLabel;
@@ -764,8 +645,8 @@ public class NetworkOptionsPanel extends OptionsJPanel {
     private javax.swing.JTextField expDateField;
     private javax.swing.JButton fileChooserButton;
     private javax.swing.JButton importButton;
+    private javax.swing.JPanel issuedByPanel;
     private javax.swing.JPanel issuedToPanel;
-    private javax.swing.JPanel issuedToPanel1;
     private javax.swing.JTextField issueeCity;
     private javax.swing.JTextField issueeCountry;
     private javax.swing.JTextField issueeName;

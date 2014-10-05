@@ -41,7 +41,7 @@ package pwnbrew.network.control.messages;
  *
  * @author Securifera
  */
-public class GetJarItems extends ControlMessage{ // NO_UCD (use default)
+public class GetJarItems extends MaltegoMessage{ // NO_UCD (use default)
     
     // ==========================================================================
     /**

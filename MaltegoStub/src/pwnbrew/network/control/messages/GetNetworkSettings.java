@@ -41,7 +41,7 @@ package pwnbrew.network.control.messages;
  *
  * @author Securifera
  */
-public class GetNetworkSettings extends ControlMessage{ // NO_UCD (use default)
+public class GetNetworkSettings extends MaltegoMessage{ // NO_UCD (use default)
     
     // ==========================================================================
     /**

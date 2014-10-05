@@ -458,14 +458,6 @@ public class Utilities {
         return classPath;
     }
 
-    //==========================================================================
-    /*
-    * Returns the four bytes that compose an file header
-    */
-    public static byte[] getFileHeader(){
-        return new byte[]{ (byte)'P', (byte)'P',(byte)'F',(byte)0x00 };
-    }
-    
     // ==========================================================================
     /**
      *  Xor the data.
@@ -511,17 +503,17 @@ public class Utilities {
         }
     }
     
-  // ==========================================================================
-    /**
-    *    Wrapper function. 
-     * @param aFile
-     * @return 
-     * @throws java.security.NoSuchAlgorithmException 
-     * @throws java.io.IOException 
-    */
-    public static String getFileHash(File aFile) throws NoSuchAlgorithmException, IOException {
-        return getFileHash(aFile, false);
-    }
+//  // ==========================================================================
+//    /**
+//    *    Wrapper function. 
+//     * @param aFile
+//     * @return 
+//     * @throws java.security.NoSuchAlgorithmException 
+//     * @throws java.io.IOException 
+//    */
+//    public static String getFileHash(File aFile) throws NoSuchAlgorithmException, IOException {
+//        return getFileHash(aFile);
+//    }
 
     // ==========================================================================
     /**
@@ -538,7 +530,7 @@ public class Utilities {
     * @throws NoSuchAlgorithmException if the hash algorithm cannot be found
     * @throws NullPointerException if the given {@code File} is null
     */
-    private static String getFileHash(File aFile, boolean addHeader ) throws NoSuchAlgorithmException, IOException {
+    public static String getFileHash( File aFile ) throws NoSuchAlgorithmException, IOException {
 
         int bytesRead = 0;
         byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
@@ -553,8 +545,8 @@ public class Utilities {
             try {
 
                 //Add the header to the hash if it was removed
-                if(addHeader)
-                    hash.update( Utilities.getFileHeader() );
+//                if(addHeader)
+//                    hash.update( Utilities.getFileHeader() );
                 
 
                 //Read in the bytes and update the hash
@@ -805,6 +797,7 @@ public class Utilities {
                 String jarVersionString = "";
                 String jvmVersionString = "";
                 String jarType = "";
+                String jarUID = "";
                 
                 //Open the zip
                 ByteArrayOutputStream aBOS = new ByteArrayOutputStream();
@@ -881,6 +874,13 @@ public class Utilities {
                                 default:
                                     throw new JarItemException("The selected JAR is not a valid Pwnbrew module.");
                             }
+                            
+                            //Get the id
+                            String uid = localProperties.getProperty(Constants.UID_LABEL);
+                            if( uid != null ){
+                                //Set the jar uid
+                                jarUID = uid;
+                            }  
 
                             //Get the version
                             String version = localProperties.getProperty(Constants.PAYLOAD_VERSION_LABEL);
@@ -950,11 +950,11 @@ public class Utilities {
                     }
 
                     //throw exception
-                    if( jarType.isEmpty() || jarVersionString.isEmpty() || jvmVersionString.isEmpty() )
+                    if( jarType.isEmpty() || jarVersionString.isEmpty() || jvmVersionString.isEmpty() || jarUID.isEmpty() )
                         throw new JarItemException("The selected JAR is not a valid Pwnbrew module.");
                       
                     jarDetails = new String[4];
-                    jarDetails[0] = payloadFile.getName();
+                    jarDetails[0] = jarUID;
                     jarDetails[1] = jarType;
                     jarDetails[2] = jarVersionString;
                     jarDetails[3] = jvmVersionString;

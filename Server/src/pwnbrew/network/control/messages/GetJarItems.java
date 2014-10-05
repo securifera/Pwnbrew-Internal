@@ -51,7 +51,7 @@ import pwnbrew.xmlBase.JarItem;
  *
  * @author Securifera
  */
-public class GetJarItems extends ControlMessage{ // NO_UCD (use default)
+public class GetJarItems extends MaltegoMessage{ // NO_UCD (use default)
     
     private static final String NAME_Class = GetJarItems.class.getSimpleName();
     

@@ -39,7 +39,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew;
 
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *

@@ -37,12 +37,6 @@ The copyright on this package is held by Securifera, Inc
 */
 
 
-/*
- *  FileType.java
- *
- *  Created on Jun 7, 2013
- */
-
 package pwnbrew.network.control.messages;
 
 import pwnbrew.utilities.SocketUtilities;

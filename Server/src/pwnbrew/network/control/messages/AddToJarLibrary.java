@@ -122,67 +122,78 @@ public final class AddToJarLibrary extends JarItemMsg{ // NO_UCD (use default)
                     return;
                 }
                 
-                List<JarItem> jarList = Utilities.getJarItems();
-                try {
+                if( aJarItem != null ){
                     
-                    for( JarItem currentItem : jarList ){
+                    List<JarItem> jarList = Utilities.getJarItems();
+                    try {
 
-                        //Check if the jvm version is the same first
-                        if( aJarItem.getJvmMajorVersion().equals(currentItem.getJvmMajorVersion()) && 
-                                aJarItem.getType().equals( currentItem.getType()) ){
+                        for( JarItem currentItem : jarList ){
 
-                            //Only one Stager and Payload are allowed
-                            if( aJarItem.getType().equals(JarItem.STAGER_TYPE) || aJarItem.getType().equals(JarItem.PAYLOAD_TYPE)){
-                                Utilities.removeJarItem(currentItem);
-                                break;
-                            //Check if one with the same name exists
-                            } else if( aJarItem.getName().equals(currentItem.getName() )) {
-                                Utilities.removeJarItem(currentItem);
-                                break;
+                            //Check if the jvm version is the same first
+                            if( aJarItem.getJvmMajorVersion().equals(currentItem.getJvmMajorVersion()) && 
+                                    aJarItem.getType().equals( currentItem.getType()) ){
+
+                                //Only one Stager and Payload are allowed
+                                if( aJarItem.getType().equals(JarItem.STAGER_TYPE) || aJarItem.getType().equals(JarItem.PAYLOAD_TYPE)){
+                                    Utilities.removeJarItem(currentItem);
+                                    if( !currentItem.getFileHash().equals(aJarItem.getFileHash())){
+                                        currentItem.deleteSelfFromDirectory( new File( Directories.getJarLibPath() ));
+                                        currentItem.deleteFileContentFromLibrary();
+                                    }
+                                    break;
+                                //Check if one with the same name exists
+                                } else if( aJarItem.getName().equals(currentItem.getName() )) {
+                                    Utilities.removeJarItem(currentItem);
+                                    if( !currentItem.getFileHash().equals(aJarItem.getFileHash())){
+                                        currentItem.deleteSelfFromDirectory( new File( Directories.getJarLibPath() ));
+                                        currentItem.deleteFileContentFromLibrary();
+                                    }
+                                    break;
+                                }
                             }
                         }
+
+                        //Add the jar
+                        Utilities.addJarItem( aJarItem );
+
+                        //Write the file to disk
+                        String fileHash = FileUtilities.createHashedFile( tempJarFile, null );
+                        if( fileHash != null ) {
+
+                            //Create a FileContentRef
+                            aJarItem.setFileHash( fileHash ); //Set the file's hash
+
+                            //Write to disk
+                            aJarItem.writeSelfToDisk();
+
+                            //If it is a local extension then load it
+                            if( aJarItem.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
+
+                                //Load the jar
+                                File libraryFile = new File( Directories.getFileLibraryDirectory(), aJarItem.getFileHash() ); //Create a File to represent the library file to be copied
+                                List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
+                                for( Class aClass : theClasses )
+                                    addClassToMap(aClass);                            
+                            }
+
+                            try {
+
+                                //Send the msg
+                                AddToJarLibrary aMsg = new AddToJarLibrary( getSrcHostId(), aJarItem.toString(), theJarType, aJarItem.getJvmMajorVersion(), aJarItem.getVersion() );
+                                DataManager.send( passedManager, aMsg);
+
+                                //Delete the file
+                                tempJarFile.delete();
+
+                            } catch (UnsupportedEncodingException ex) {
+                                Log.log(Level.WARNING, NAME_Class, "deleteJarItem", ex.getMessage(), ex );
+                            }
+
+                        } 
+
+                    } catch ( NoSuchAlgorithmException | IOException ex) {
+                        Log.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex);     
                     }
-
-                    //Add the jar
-                    Utilities.addJarItem( aJarItem );
-
-                    //Write the file to disk
-                    String fileHash = FileUtilities.createHashedFile( tempJarFile, null );
-                    if( fileHash != null ) {
-
-                        //Create a FileContentRef
-                        aJarItem.setFileHash( fileHash ); //Set the file's hash
-
-                        //Write to disk
-                        aJarItem.writeSelfToDisk();
-
-                        //If it is a local extension then load it
-                        if( aJarItem.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
-
-                            //Load the jar
-                            File libraryFile = new File( Directories.getFileLibraryDirectory(), aJarItem.getFileHash() ); //Create a File to represent the library file to be copied
-                            List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
-                            for( Class aClass : theClasses )
-                                addClassToMap(aClass);                            
-                        }
-                        
-                        try {
-
-                            //Send the msg
-                            AddToJarLibrary aMsg = new AddToJarLibrary( getSrcHostId(), aJarItem.toString(), theJarType, aJarItem.getJvmMajorVersion(), aJarItem.getVersion() );
-                            DataManager.send( passedManager, aMsg);
-                            
-                            //Delete the file
-                            tempJarFile.delete();
-
-                        } catch (UnsupportedEncodingException ex) {
-                            Log.log(Level.WARNING, NAME_Class, "deleteJarItem", ex.getMessage(), ex );
-                        }
-                        
-                    } 
-
-                } catch ( NoSuchAlgorithmException | IOException ex) {
-                    Log.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex);     
                 }
                 
             }

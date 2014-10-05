@@ -48,7 +48,7 @@ import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.HostHandler;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.xml.maltego.custom.Host;
 
@@ -56,7 +56,7 @@ import pwnbrew.xml.maltego.custom.Host;
  *
  *  
  */
-public final class HostMsg extends ControlMessage{ 
+public final class HostMsg extends MaltegoMessage{ 
     
     private static final byte OPTION_HOSTNAME = 60;
     private static final byte OPTION_ARCH = 61;

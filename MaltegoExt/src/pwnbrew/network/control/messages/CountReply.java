@@ -52,7 +52,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
-public final class CountReply extends ControlMessage{ 
+public final class CountReply extends MaltegoMessage{ 
     
     private static final byte OPTION_COUNT = 70;    
     private static final byte OPTION_COUNT_ID = 80;

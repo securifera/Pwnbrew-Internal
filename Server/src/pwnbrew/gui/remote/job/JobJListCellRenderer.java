@@ -106,10 +106,10 @@ public class JobJListCellRenderer extends DefaultListCellRenderer {
             //Send the message here because now we know the listener is in place.
             //Update: Added state check because otherwise every job is sent on load of
             //the GUI.
-            if( theTask.getState().equals(  RemoteTask.TASK_INIT )){
-                theTask.setState( RemoteTask.TASK_START);
-                theTaskManager.startTask(theTask);
-            }
+//            if( theTask.getState().equals(  RemoteTask.TASK_INIT )){
+//                theTask.setState( RemoteTask.TASK_START);
+//                theTaskManager.startTask(theTask);
+//            }
 
             JobJProgressPanel theProgPanel = (JobJProgressPanel) theTaskController.getRootPanel();
 

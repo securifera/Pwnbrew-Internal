@@ -64,4 +64,15 @@ public interface JarLibraryPanelListener extends PanelListener {
      */
     public void sendJarFile(File userSelectedFile, String selVal);
 
+    //=======================================================================
+    /**
+     * 
+     * @param connectStr 
+     * @param passedName 
+     * @param passedType 
+     * @param passedJvmVersion 
+     * @param passedJarVersion 
+     */
+    public void  getStagerFile(String connectStr, String passedName, String passedType, String passedJvmVersion, String passedJarVersion);
+
 }

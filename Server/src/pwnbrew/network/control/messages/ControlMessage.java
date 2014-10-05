@@ -261,47 +261,6 @@ public abstract class ControlMessage extends Message {
             setOption(tempTlv);
         }
     }
-
-//       //===============================================================
-//    /**
-//     *   Parses out the tlv list form the passed byte array
-//     *
-//     * @param tlvArray
-//    */
-//    private void parseTlvByteArray(byte[] tlvArray) throws LoggableException  {
-//
-//        int marker = 0;
-//        final byte[] tempLen = new byte[2];
-//
-//        //Loop through the array and create tlvs
-//        while(marker < tlvArray.length){
-//
-//            byte localType = tlvArray[marker++];
-//            if(localType == 0){
-//                continue;
-//            }
-//
-//            //Ensure we won't get an out of bound exception
-//            if(marker + tempLen.length > tlvArray.length){
-//                throw new LoggableException("Error parsing length field in TLV.");
-//            }
-//
-//            System.arraycopy( tlvArray, marker, tempLen, 0, tempLen.length );
-//            marker = marker + tempLen.length;
-//            int localLen = SocketUtilities.byteArrayToInt(tempLen);
-//
-//            //And the length value with 0xff in case it is cnegative
-//            byte[] value = new byte[localLen & 0xffff];
-//
-//            //Copy value into tempArray
-//            System.arraycopy( tlvArray, marker, value, 0, value.length );
-//            marker = marker + value.length;
-//
-//            //Create the tlv and add it to the message
-//            ControlOption tempTlv = new ControlOption(localType, value);
-//            setOption(tempTlv);
-//        }
-//    }
     
     //===============================================================
     /**
@@ -337,6 +296,6 @@ public abstract class ControlMessage extends Message {
      * @param tempTlv 
      * @return  
      */
-    public boolean setOption( ControlOption tempTlv ){ return true; }
+    public boolean setOption( ControlOption tempTlv ){ return false; }
 
 }/* END CLASS ControlMessage */

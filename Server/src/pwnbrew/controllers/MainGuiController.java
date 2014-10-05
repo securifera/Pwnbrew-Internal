@@ -39,7 +39,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.controllers;
 
 import java.awt.Cursor;
-import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -55,8 +54,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import pwnbrew.Server;
-import pwnbrew.exception.FileContentException;
-import pwnbrew.exception.XmlBaseCreationException;
 import pwnbrew.gui.MainGui;
 import pwnbrew.gui.dialogs.OptionsJDialogListener;
 import pwnbrew.gui.dialogs.TasksJDialog;
@@ -65,22 +62,20 @@ import pwnbrew.gui.panels.RunnerPane;
 import pwnbrew.gui.tree.LibraryItemJTree;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
-import pwnbrew.host.HostFactory;
 import pwnbrew.library.Ancestor;
 import pwnbrew.library.LibraryItemController;
+import pwnbrew.library.LibraryItemControllerListener;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
-import pwnbrew.misc.Directories;
 import pwnbrew.misc.GarbageCollector;
 import pwnbrew.misc.ProgressListener;
 import pwnbrew.network.control.messages.Migrate;
 import pwnbrew.network.control.messages.RelayStart;
 import pwnbrew.network.control.messages.RelayStop;
 import pwnbrew.network.control.messages.Reload;
-import pwnbrew.network.control.messages.TaskNew;
 import pwnbrew.network.control.messages.TaskStatus;
 import pwnbrew.network.control.messages.Uninstall;
 import pwnbrew.network.control.messages.UpgradeStager;
@@ -93,20 +88,16 @@ import pwnbrew.utilities.GuiUtilities;
 import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.validation.StandardValidation;
-import pwnbrew.xmlBase.Bundle;
 import pwnbrew.xmlBase.JarItem;
 import pwnbrew.xmlBase.XmlBase;
-import pwnbrew.xmlBase.XmlBaseFactory;
-import pwnbrew.xmlBase.job.Job;
-import pwnbrew.xmlBase.job.JobSet;
+//import pwnbrew.xmlBase.job.JobSet;
 
 /**
  *
  *  
  */
 final public class MainGuiController extends Controller implements ActionListener, TreeSelectionListener,
-        JobSetControllerListener, OptionsJDialogListener,
-        TaskManager, ProgressListener {
+        LibraryItemControllerListener, OptionsJDialogListener, TaskManager, ProgressListener {
     
     public static final String ACTION_RunSelectedItem = "Run Selected Item";
     public static final String ACTION_StopSelectedItem = "Stop Selected Item";
@@ -115,7 +106,7 @@ final public class MainGuiController extends Controller implements ActionListene
     private static final String NAME_Class = MainGuiController.class.getSimpleName();
     
     private final List<LibraryItemController> justImportedObjects = new ArrayList<>();
-    private Map<String, Class> theActionClassMap;    
+//    private Map<String, Class> theActionClassMap;    
         
     protected final ServerManager theServerManager;
     //Map relating the msgid to the task
@@ -126,8 +117,10 @@ final public class MainGuiController extends Controller implements ActionListene
     /**
      *  Constructor
      * @param passedParent
+     * @param passedBool
     */
-    public MainGuiController( ServerManager passedParent ) {  
+    public MainGuiController( ServerManager passedParent, boolean passedBool ) {  
+        super(passedBool);
         theServerManager = passedParent;
         theMainGui = MainGui.createInstance( this ); 
         
@@ -315,39 +308,39 @@ final public class MainGuiController extends Controller implements ActionListene
 
         try{
             
-             if( theController instanceof JobController ) { 
-
-                JobController aJobController = (JobController) theController;
-                //Make sure the job isnt' running
-                if( aJobController.isRunning() ) {
-                    JOptionPane.showMessageDialog( theMainGui, "Unable to delete job.  The Job is currently running.","Error", JOptionPane.ERROR_MESSAGE );
-                    return null;
-                } 
-                
-                Job jobToDelete = (Job)aJobController.getObject();
-
-                //Delete the file
-                File rtnFile = new File( Directories.getLocalTasksDirectory(), jobToDelete.getId() );
-                if(rtnFile.exists()){
-                    FileUtilities.deleteFile( rtnFile ); //Delete any existing incarnation of the directory
-                }
-                    
-                //Remove the object from all job sets
-                HostController theHostController = aJobController.getHostController();
-                List<LibraryItemController> theObjSet = theMainGui.getJTree().getLibraryItemControllers( theHostController, JobSetController.class );
-                for(LibraryItemController aController : theObjSet){
-
-                    JobSetController aJobSetController = (JobSetController)aController;
-                    
-                    //Remove the controller and add the parent to the list
-                    if( aJobSetController.contains( aJobController )){
-                        aJobSetController.removeChild( aJobController );
-                        aJobSetController.saveToDisk();
-                        theParentList.add(aJobSetController);
-                    }                    
-                }
-
-            }
+//             if( theController instanceof JobController ) { 
+//
+//                JobController aJobController = (JobController) theController;
+//                //Make sure the job isnt' running
+//                if( aJobController.isRunning() ) {
+//                    JOptionPane.showMessageDialog( theMainGui, "Unable to delete job.  The Job is currently running.","Error", JOptionPane.ERROR_MESSAGE );
+//                    return null;
+//                } 
+//                
+//                Job jobToDelete = (Job)aJobController.getObject();
+//
+//                //Delete the file
+//                File rtnFile = new File( Directories.getLocalTasksDirectory(), jobToDelete.getId() );
+//                if(rtnFile.exists()){
+//                    FileUtilities.deleteFile( rtnFile ); //Delete any existing incarnation of the directory
+//                }
+//                    
+//                //Remove the object from all job sets
+//                HostController theHostController = aJobController.getHostController();
+//                List<LibraryItemController> theObjSet = theMainGui.getJTree().getLibraryItemControllers( theHostController, JobSetController.class );
+//                for(LibraryItemController aController : theObjSet){
+//
+//                    JobSetController aJobSetController = (JobSetController)aController;
+//                    
+//                    //Remove the controller and add the parent to the list
+//                    if( aJobSetController.contains( aJobController )){
+//                        aJobSetController.removeChild( aJobController );
+//                        aJobSetController.saveToDisk();
+//                        theParentList.add(aJobSetController);
+//                    }                    
+//                }
+//
+//            }
              
             theController.deleteFromLibrary(); //Delete the underlying object from disk
 
@@ -401,111 +394,111 @@ final public class MainGuiController extends Controller implements ActionListene
         
     }/* END getControllerByObjName( Class, String ) */
      
-    // ========================================================================
-    /**
-     * Runs the currently selected item.
-     * <p>
-     * If no item is selected this method does nothing.
-     * @param riController
-     */
-    public void runObject( RunnableItemController riController ) {        
-
-        if( riController.isRunning() ) { //If the item is already running...
-            theMainGui.informUserItemIsAlreadyRunning( riController );
-        } else { //If the item is not already running...
-
-            String cantRunMessage = riController.canRun(); //Determine if the item can be run
-            if( cantRunMessage == null ) { //If the item can be run...
-
-                //Prompt the user to confirm the run...
-                if( theMainGui.promptUserToConfirmRun( riController ) ) { //If the user confirms the run...
-                    riController.runItem( null ); //Run the item
-                }
-
-            } else { //If the item can't be run...
-                theMainGui.informUserItemCantRun( riController.getItemName(), cantRunMessage );
-            }
-
-        }
-        
-    }/* END runObject() */
+//    // ========================================================================
+//    /**
+//     * Runs the currently selected item.
+//     * <p>
+//     * If no item is selected this method does nothing.
+//     * @param riController
+//     */
+//    public void runObject( RunnableItemController riController ) {        
+//
+//        if( riController.isRunning() ) { //If the item is already running...
+//            theMainGui.informUserItemIsAlreadyRunning( riController );
+//        } else { //If the item is not already running...
+//
+//            String cantRunMessage = riController.canRun(); //Determine if the item can be run
+//            if( cantRunMessage == null ) { //If the item can be run...
+//
+//                //Prompt the user to confirm the run...
+//                if( theMainGui.promptUserToConfirmRun( riController ) ) { //If the user confirms the run...
+//                    riController.runItem( null ); //Run the item
+//                }
+//
+//            } else { //If the item can't be run...
+//                theMainGui.informUserItemCantRun( riController.getItemName(), cantRunMessage );
+//            }
+//
+//        }
+//        
+//    }/* END runObject() */
     
-    // ==========================================================================
-    /**
-    * Exports the selected object to a bundle
-    * <p>
-     * @param theObjList
-    */
-    public void exportLibraryObjects( List<LibraryItemController> theObjList ) {
-
-        File userSelectedFile = null;
-
-        if(theObjList == null){
-            JOptionPane.showMessageDialog( theMainGui, "Please select a job/job set before attempting to export.","Error", JOptionPane.ERROR_MESSAGE );
-            return;
-        }
-        
-        //Get the object
-        JFileChooser theFileChooser = theMainGui.getFileChooser();
-        File aFile;
-        if( theObjList.size() == 1 ){
-            XmlBase theObj = (XmlBase) theObjList.get(0).getObject();
-            aFile = new File(theObj.getName());
-            theFileChooser.setSelectedFile( aFile );
-        } 
-
-        theFileChooser.setFileFilter( Bundle.theFilenameFilterTool ); 
-        theFileChooser.setMultiSelectionEnabled( false ); 
-
-        int returnVal = theFileChooser.showDialog( theMainGui, "Export" ); 
-        switch( returnVal ) {
-
-            case JFileChooser.CANCEL_OPTION: 
-            case JFileChooser.ERROR_OPTION: 
-                break; 
-
-            case JFileChooser.APPROVE_OPTION: //If the user approved the selection...
-                userSelectedFile = theFileChooser.getSelectedFile(); //Get the file the user selected
-                break;
-            default:
-                break;
-
-        }
-
-        if(userSelectedFile != null){
-            //Create a Bundle and add the contents
-            Bundle aBundle = new Bundle();
-            String bundleSuffix = Bundle.FilenameSuffixStr;
-            String exportFileName = userSelectedFile.getName();
-
-            if(!Bundle.theFilenameFilterTool.endsWithCaseInsensitive(exportFileName, bundleSuffix)){
-                //If it already has an extension, take it off
-                if(exportFileName.contains(".")){
-                    exportFileName = exportFileName.split("\\.")[0];
-                }
-                userSelectedFile = new File(userSelectedFile.getParent(), exportFileName + bundleSuffix);
-            }
-
-            try{
-                
-                aBundle.addToBundle( theMainGui, theObjList );
-                aBundle.writeSelfToDisk(userSelectedFile.getParentFile(), userSelectedFile.getName());
-            
-            } catch(FileContentException ex){
-
-                //Alert the user that the file content write failed and delete the file
-                JOptionPane.showMessageDialog( theMainGui, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE );
-                Log.log(Level.SEVERE, NAME_Class, "exportSelectedObject()", ex.getMessage(), ex);
-                FileUtilities.deleteFile(userSelectedFile);
-
-            }  catch ( IOException | LoggableException ex) {
-
-                JOptionPane.showMessageDialog( theMainGui, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE );
-                Log.log(Level.SEVERE, NAME_Class, "exportSelectedObject()", ex.getMessage(), ex);
-
-            }
-        }
-    }
+//    // ==========================================================================
+//    /**
+//    * Exports the selected object to a bundle
+//    * <p>
+//     * @param theObjList
+//    */
+//    public void exportLibraryObjects( List<LibraryItemController> theObjList ) {
+//
+//        File userSelectedFile = null;
+//
+//        if(theObjList == null){
+//            JOptionPane.showMessageDialog( theMainGui, "Please select a job/job set before attempting to export.","Error", JOptionPane.ERROR_MESSAGE );
+//            return;
+//        }
+//        
+//        //Get the object
+//        JFileChooser theFileChooser = theMainGui.getFileChooser();
+//        File aFile;
+//        if( theObjList.size() == 1 ){
+//            XmlBase theObj = (XmlBase) theObjList.get(0).getObject();
+//            aFile = new File(theObj.getName());
+//            theFileChooser.setSelectedFile( aFile );
+//        } 
+//
+//        theFileChooser.setFileFilter( Bundle.theFilenameFilterTool ); 
+//        theFileChooser.setMultiSelectionEnabled( false ); 
+//
+//        int returnVal = theFileChooser.showDialog( theMainGui, "Export" ); 
+//        switch( returnVal ) {
+//
+//            case JFileChooser.CANCEL_OPTION: 
+//            case JFileChooser.ERROR_OPTION: 
+//                break; 
+//
+//            case JFileChooser.APPROVE_OPTION: //If the user approved the selection...
+//                userSelectedFile = theFileChooser.getSelectedFile(); //Get the file the user selected
+//                break;
+//            default:
+//                break;
+//
+//        }
+//
+//        if(userSelectedFile != null){
+//            //Create a Bundle and add the contents
+//            Bundle aBundle = new Bundle();
+//            String bundleSuffix = Bundle.FilenameSuffixStr;
+//            String exportFileName = userSelectedFile.getName();
+//
+//            if(!Bundle.theFilenameFilterTool.endsWithCaseInsensitive(exportFileName, bundleSuffix)){
+//                //If it already has an extension, take it off
+//                if(exportFileName.contains(".")){
+//                    exportFileName = exportFileName.split("\\.")[0];
+//                }
+//                userSelectedFile = new File(userSelectedFile.getParent(), exportFileName + bundleSuffix);
+//            }
+//
+//            try{
+//                
+//                aBundle.addToBundle( theMainGui, theObjList );
+//                aBundle.writeSelfToDisk(userSelectedFile.getParentFile(), userSelectedFile.getName());
+//            
+//            } catch(FileContentException ex){
+//
+//                //Alert the user that the file content write failed and delete the file
+//                JOptionPane.showMessageDialog( theMainGui, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE );
+//                Log.log(Level.SEVERE, NAME_Class, "exportSelectedObject()", ex.getMessage(), ex);
+//                FileUtilities.deleteFile(userSelectedFile);
+//
+//            }  catch ( IOException | LoggableException ex) {
+//
+//                JOptionPane.showMessageDialog( theMainGui, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE );
+//                Log.log(Level.SEVERE, NAME_Class, "exportSelectedObject()", ex.getMessage(), ex);
+//
+//            }
+//        }
+//    }
     
     //======================================================================
     /**
@@ -524,218 +517,218 @@ final public class MainGuiController extends Controller implements ActionListene
         return theRemoteTask;
     }
     
-    // ==========================================================================
-    /**
-    * Cancels the run of the currently selected item.
-     * <p>
-     * If no item is selected this method does nothing.
-     * @param theController
-    */
-    @Override
-    public void cancelRunForCurrentNode( RunnableItemController theController ) {
-        
-        //Run locally
-        HostController theHostController = getParentController(theController);
-        if( theHostController != null ){
-            
-            if( theHostController.isLocalHost() ){
-
-                theController.cancelRun();
-
-            } else {
-
-                //Cancel the job
-                if( theHostController.isConnected() && theController instanceof JobController ){
-
-                    int clientId = Integer.parseInt( theHostController.getId() );
-                    int theRemoteTaskId = ((JobController)theController).getRemoteTaskId();
-                    cancelTask( clientId, theRemoteTaskId );
-                    ((JobController)theController).setRemoteTaskId( 0 );
-
-                    //Update the gui
-                    RemoteTask theRemoteTask;
-                    synchronized(theActiveTaskMap){
-                        theRemoteTask = theActiveTaskMap.get( theRemoteTaskId );
-                    }
-                    
-                    if( theRemoteTask != null ){
-                        List<RemoteTaskListener> theListeners = theRemoteTask.getRemoteListeners();
-                        for(RemoteTaskListener aListener : theListeners){
-                            aListener.taskChanged(theRemoteTask);
-                        }
-                    }
-                }
-                
-            }
-        }
-    }
+//    // ==========================================================================
+//    /**
+//    * Cancels the run of the currently selected item.
+//     * <p>
+//     * If no item is selected this method does nothing.
+//     * @param theController
+//    */
+//    @Override
+//    public void cancelRunForCurrentNode( RunnableItemController theController ) {
+//        
+//        //Run locally
+//        HostController theHostController = getParentController(theController);
+//        if( theHostController != null ){
+//            
+//            if( theHostController.isLocalHost() ){
+//
+//                theController.cancelRun();
+//
+//            } else {
+//
+//                //Cancel the job
+//                if( theHostController.isConnected() && theController instanceof JobController ){
+//
+//                    int clientId = Integer.parseInt( theHostController.getId() );
+//                    int theRemoteTaskId = ((JobController)theController).getRemoteTaskId();
+//                    cancelTask( clientId, theRemoteTaskId );
+//                    ((JobController)theController).setRemoteTaskId( 0 );
+//
+//                    //Update the gui
+//                    RemoteTask theRemoteTask;
+//                    synchronized(theActiveTaskMap){
+//                        theRemoteTask = theActiveTaskMap.get( theRemoteTaskId );
+//                    }
+//                    
+//                    if( theRemoteTask != null ){
+//                        List<RemoteTaskListener> theListeners = theRemoteTask.getRemoteListeners();
+//                        for(RemoteTaskListener aListener : theListeners){
+//                            aListener.taskChanged(theRemoteTask);
+//                        }
+//                    }
+//                }
+//                
+//            }
+//        }
+//    }
     
     
-    //=======================================================================
-    /**
-    * Imports the selected bundle into the application
-    * <p>
-     * @param userSelectedFile
-    */
-    public void importBundle( File userSelectedFile ) {
+//    //=======================================================================
+//    /**
+//    * Imports the selected bundle into the application
+//    * <p>
+//     * @param userSelectedFile
+//    */
+//    public void importBundle( File userSelectedFile ) {
+//
+//        XmlBase anXRB = null;
+//        theMainGui.setJustImported( false );
+//        LibraryItemJTree mainJTree = theMainGui.getJTree();
+//
+//        if( userSelectedFile == null ) {
+//
+//            JFileChooser theFileChooser = theMainGui.getFileChooser();
+//            theFileChooser.setFileFilter( Bundle.theFilenameFilterTool ); 
+//            theFileChooser.setMultiSelectionEnabled( false ); //Let the user select multiple files
+//
+//            int returnVal = theFileChooser.showDialog( theMainGui, "Import" ); //Show the dialog
+//            switch( returnVal ) {
+//
+//                case JFileChooser.CANCEL_OPTION: //If the user canceled the selecting...
+//                case JFileChooser.ERROR_OPTION: //If the dialog was dismissed or an error occurred...
+//                    break; //Do nothing
+//
+//                case JFileChooser.APPROVE_OPTION: //If the user approved the selection...
+//                    userSelectedFile = theFileChooser.getSelectedFile(); //Get the file the user selected
+//                    break;
+//                default:
+//                    break;
+//
+//            }
+//
+//            //If the file chooser is canceled
+//            if(userSelectedFile == null ){
+//                return;
+//            }
+//
+//        }
+//
+//        JLabel message = new JLabel("<html><center>Importing a bundle will overwrite any matching library items.<br>Would you like to continue? &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<br><br></center></html>");
+//        message.setFont(new Font("Tahoma", Font.PLAIN, 12));
+//
+//        //Prompt the user to confirm the run...
+//        int usersChoice = JOptionPane.showConfirmDialog( theMainGui, message, //The message
+//            "Warning!", JOptionPane.YES_NO_OPTION ); //Dialog option
+//
+//        //If the chosen file is not null and exists
+//        if( usersChoice == JOptionPane.YES_OPTION && userSelectedFile.exists()){
+//
+//            try {
+//                anXRB = XmlBaseFactory.createFromXmlFile( userSelectedFile ); //Reconstruct the XmlBase
+//            } catch( XmlBaseCreationException ex ) {
+//                Log.log(Level.SEVERE, NAME_Class, "importBundle()", ex.getMessage(), ex);
+//            }
+//
+//            if(anXRB != null && anXRB instanceof Bundle){
+//
+//                //Iterate through the list and write them to the library
+//                Bundle aBundle = (Bundle)anXRB;
+//                List<JobSetController> importedJobSetCtrlList = new ArrayList<>();
+//
+//                DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode)theMainGui.getJTree().getModel().getLocalRoot();
+//                for( XmlBase currXB : aBundle.getBundleList() ){
+//
+//                    //Add them to their appropriate lists
+//                    LibraryItemController prevController;
+//                    LibraryItemController aController;
+//                    if( currXB instanceof JobSet ) {
+//
+//                        JobSet aJobSet = (JobSet)currXB;
+//                                            
+//                        //Create a controller and add it to the map
+//                        aController = aJobSet.instantiateController( this );
+//                        importedJobSetCtrlList.add((JobSetController)aController);
+//
+//                    } else if(currXB instanceof Job){ 
+//                        
+//                        //Get a controller for the library item and see if one exists already
+//                        Job aJob = (Job)currXB;
+//                        aController = aJob.instantiateController(this);
+//
+//                        //Find a controller for the object given the class
+//                        prevController = getControllerByObjName( HostFactory.LOCALHOST, aJob.getClass().getSimpleName(), aJob.getName() );                                   
+//                        //If a controller doesn't exists, create one
+//                        if( prevController == null ){
+//
+//                            //Add to the tree
+//                            mainJTree.addObjectToTree( aController, parentNode, -1 );
+//
+//                        } else {
+//
+//                            //If it already exists set the object and use the old one
+//                            prevController.setObject( aJob );
+//                            prevController.updateComponents();
+//                            aController = prevController;
+//                        }                           
+//
+//                        //Set to just imported
+//                        justImportedObjects.add(aController);
+//                        aController.setJustImported(true);
+//                        aController.saveToDisk(); 
+//                        
+//                    }                     
+//
+//                }
+//                
+//                //Add the job controllers to each job set
+//                List importedJobCtrlList = new ArrayList(justImportedObjects);
+//                for( JobSetController aJobSetCtrl : importedJobSetCtrlList){
+//                    
+//                    aJobSetCtrl.addJobControllerReferences( importedJobCtrlList );     
+//                    XmlBase anObj = (XmlBase) aJobSetCtrl.getObject();
+//                    LibraryItemController prevController = getControllerByObjName( HostFactory.LOCALHOST, anObj.getClass().getSimpleName(), anObj.getName() );
+//
+//                    //If a controller already exists then replace it else just add to root
+//                    if( prevController != null ){
+//                        replaceObjectInTree( prevController, aJobSetCtrl);
+//                    } else {
+//                        mainJTree.addObjectToTree( aJobSetCtrl, parentNode, -1 );
+//                    }
+//                    
+//                    //Save
+//                    aJobSetCtrl.saveToDisk();
+//                    
+//                    //Set just imported flags
+//                    justImportedObjects.add(aJobSetCtrl);
+//                    aJobSetCtrl.setJustImported(true);
+//                }
+//                
+//                //Ensure the root node is expanded
+//                TreePath thePath = GuiUtilities.getTreePath( parentNode );
+//                mainJTree.expandPath(thePath);
+//
+//                //Select something
+//                thePath = GuiUtilities.getTreePath(new DefaultMutableTreeNode(justImportedObjects.get(0)));
+//                mainJTree.setSelectionPath(thePath);
+//
+//                //Set just imported flag
+//                theMainGui.setJustImported(true);
+//
+//            } else {
+//                JOptionPane.showMessageDialog( theMainGui, "Unable to import bundle, not a valid XML bundle.","Error", JOptionPane.ERROR_MESSAGE );
+//            }
+//
+//        } else {
+//
+//            if(usersChoice == JOptionPane.YES_OPTION){
+//                JOptionPane.showMessageDialog( theMainGui, "Unable to import bundle, not a valid XML bundle.","Error", JOptionPane.ERROR_MESSAGE );
+//            }
+//        }
+//    }
 
-        XmlBase anXRB = null;
-        theMainGui.setJustImported( false );
-        LibraryItemJTree mainJTree = theMainGui.getJTree();
-
-        if( userSelectedFile == null ) {
-
-            JFileChooser theFileChooser = theMainGui.getFileChooser();
-            theFileChooser.setFileFilter( Bundle.theFilenameFilterTool ); 
-            theFileChooser.setMultiSelectionEnabled( false ); //Let the user select multiple files
-
-            int returnVal = theFileChooser.showDialog( theMainGui, "Import" ); //Show the dialog
-            switch( returnVal ) {
-
-                case JFileChooser.CANCEL_OPTION: //If the user canceled the selecting...
-                case JFileChooser.ERROR_OPTION: //If the dialog was dismissed or an error occurred...
-                    break; //Do nothing
-
-                case JFileChooser.APPROVE_OPTION: //If the user approved the selection...
-                    userSelectedFile = theFileChooser.getSelectedFile(); //Get the file the user selected
-                    break;
-                default:
-                    break;
-
-            }
-
-            //If the file chooser is canceled
-            if(userSelectedFile == null ){
-                return;
-            }
-
-        }
-
-        JLabel message = new JLabel("<html><center>Importing a bundle will overwrite any matching library items.<br>Would you like to continue? &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<br><br></center></html>");
-        message.setFont(new Font("Tahoma", Font.PLAIN, 12));
-
-        //Prompt the user to confirm the run...
-        int usersChoice = JOptionPane.showConfirmDialog( theMainGui, message, //The message
-            "Warning!", JOptionPane.YES_NO_OPTION ); //Dialog option
-
-        //If the chosen file is not null and exists
-        if( usersChoice == JOptionPane.YES_OPTION && userSelectedFile.exists()){
-
-            try {
-                anXRB = XmlBaseFactory.createFromXmlFile( userSelectedFile ); //Reconstruct the XmlBase
-            } catch( XmlBaseCreationException ex ) {
-                Log.log(Level.SEVERE, NAME_Class, "importBundle()", ex.getMessage(), ex);
-            }
-
-            if(anXRB != null && anXRB instanceof Bundle){
-
-                //Iterate through the list and write them to the library
-                Bundle aBundle = (Bundle)anXRB;
-                List<JobSetController> importedJobSetCtrlList = new ArrayList<>();
-
-                DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode)theMainGui.getJTree().getModel().getLocalRoot();
-                for( XmlBase currXB : aBundle.getBundleList() ){
-
-                    //Add them to their appropriate lists
-                    LibraryItemController prevController;
-                    LibraryItemController aController;
-                    if( currXB instanceof JobSet ) {
-
-                        JobSet aJobSet = (JobSet)currXB;
-                                            
-                        //Create a controller and add it to the map
-                        aController = aJobSet.instantiateController( this );
-                        importedJobSetCtrlList.add((JobSetController)aController);
-
-                    } else if(currXB instanceof Job){ 
-                        
-                        //Get a controller for the library item and see if one exists already
-                        Job aJob = (Job)currXB;
-                        aController = aJob.instantiateController(this);
-
-                        //Find a controller for the object given the class
-                        prevController = getControllerByObjName( HostFactory.LOCALHOST, aJob.getClass().getSimpleName(), aJob.getName() );                                   
-                        //If a controller doesn't exists, create one
-                        if( prevController == null ){
-
-                            //Add to the tree
-                            mainJTree.addObjectToTree( aController, parentNode, -1 );
-
-                        } else {
-
-                            //If it already exists set the object and use the old one
-                            prevController.setObject( aJob );
-                            prevController.updateComponents();
-                            aController = prevController;
-                        }                           
-
-                        //Set to just imported
-                        justImportedObjects.add(aController);
-                        aController.setJustImported(true);
-                        aController.saveToDisk(); 
-                        
-                    }                     
-
-                }
-                
-                //Add the job controllers to each job set
-                List importedJobCtrlList = new ArrayList(justImportedObjects);
-                for( JobSetController aJobSetCtrl : importedJobSetCtrlList){
-                    
-                    aJobSetCtrl.addJobControllerReferences( importedJobCtrlList );     
-                    XmlBase anObj = (XmlBase) aJobSetCtrl.getObject();
-                    LibraryItemController prevController = getControllerByObjName( HostFactory.LOCALHOST, anObj.getClass().getSimpleName(), anObj.getName() );
-
-                    //If a controller already exists then replace it else just add to root
-                    if( prevController != null ){
-                        replaceObjectInTree( prevController, aJobSetCtrl);
-                    } else {
-                        mainJTree.addObjectToTree( aJobSetCtrl, parentNode, -1 );
-                    }
-                    
-                    //Save
-                    aJobSetCtrl.saveToDisk();
-                    
-                    //Set just imported flags
-                    justImportedObjects.add(aJobSetCtrl);
-                    aJobSetCtrl.setJustImported(true);
-                }
-                
-                //Ensure the root node is expanded
-                TreePath thePath = GuiUtilities.getTreePath( parentNode );
-                mainJTree.expandPath(thePath);
-
-                //Select something
-                thePath = GuiUtilities.getTreePath(new DefaultMutableTreeNode(justImportedObjects.get(0)));
-                mainJTree.setSelectionPath(thePath);
-
-                //Set just imported flag
-                theMainGui.setJustImported(true);
-
-            } else {
-                JOptionPane.showMessageDialog( theMainGui, "Unable to import bundle, not a valid XML bundle.","Error", JOptionPane.ERROR_MESSAGE );
-            }
-
-        } else {
-
-            if(usersChoice == JOptionPane.YES_OPTION){
-                JOptionPane.showMessageDialog( theMainGui, "Unable to import bundle, not a valid XML bundle.","Error", JOptionPane.ERROR_MESSAGE );
-            }
-        }
-    }
-
-    //==========================================================================
-    /**
-    *   Returns the action class map.
-    * 
-    * @return 
-    */    
-    public  Map<String, Class> getActionClassMap(){
-        if( theActionClassMap == null ){
-            theActionClassMap = Utilities.getActionControllerClassMap();
-        }
-        return theActionClassMap;
-    }
+//    //==========================================================================
+//    /**
+//    *   Returns the action class map.
+//    * 
+//    * @return 
+//    */    
+//    public  Map<String, Class> getActionClassMap(){
+//        if( theActionClassMap == null ){
+//            theActionClassMap = Utilities.getActionControllerClassMap();
+//        }
+//        return theActionClassMap;
+//    }
     
     // ==========================================================================
     /**
@@ -993,9 +986,9 @@ final public class MainGuiController extends Controller implements ActionListene
         try {
             switch (actionCommand) {
 
-                case Constants.IMPORT_BUNDLE:
-                    importBundle( null );
-                    break;
+//                case Constants.IMPORT_BUNDLE:
+//                    importBundle( null );
+//                    break;
                 case Constants.ACTION_Rename:
 
                     List<LibraryItemController> theControllerList = theMainGui.getJTree().getSelectedObjectControllers();
@@ -1004,10 +997,10 @@ final public class MainGuiController extends Controller implements ActionListene
                     }
                     break;
 
-                case Constants.EXPORT_TO_BUNDLE:
-                    //Export the selected object
-                    exportLibraryObjects( theMainGui.getJTree().getSelectedObjectControllers() );
-                    break;
+//                case Constants.EXPORT_TO_BUNDLE:
+//                    //Export the selected object
+//                    exportLibraryObjects( theMainGui.getJTree().getSelectedObjectControllers() );
+//                    break;
 
                 case Constants.ACTION_SLEEP:
                     theControllerList = theMainGui.getJTree().getSelectedObjectControllers();
@@ -1168,42 +1161,42 @@ final public class MainGuiController extends Controller implements ActionListene
                     }
                     break;
                 default:
-                    //Check if the command is a creation action
-                    Map<String, Class> theMap = getActionClassMap();
-                    Class<?> theClass = theMap.get(actionCommand);
-                    if(theClass != null){
-
-                        try {
-
-                            Object anObj = theClass.newInstance();
-
-                            //Create a new object and add it to the 
-                            if( anObj instanceof LibraryItemController ){  
-                                LibraryItemController theController = (LibraryItemController)anObj;
-                                Object controllerObject = theController.createItem( this );
-                                if( controllerObject != null ){
-                                    
-                                    theController.setObject(controllerObject);
-
-                                    //Create a task and controller and display it
-                                    LibraryItemJTree theJTree = theMainGui.getJTree();
-                                    DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode)theJTree.getLastSelectedPathComponent();
-                                    if(parentNode != null){
-                                        //Add it to the tree
-                                        theJTree.addObjectToTree(theController, parentNode, 0);
-                                        theJTree.setSelectedObject( theController );
-                                    }
-                                    
-                                    theController.saveToDisk();
-                                }
-                            }  
-
-                        } catch (InstantiationException ex) {
-                            ex = null;
-                        } catch (IllegalAccessException ex) {
-                            ex = null;
-                        } 
-                    }
+//                    //Check if the command is a creation action
+//                    Map<String, Class> theMap = getActionClassMap();
+//                    Class<?> theClass = theMap.get(actionCommand);
+//                    if(theClass != null){
+//
+//                        try {
+//
+//                            Object anObj = theClass.newInstance();
+//
+//                            //Create a new object and add it to the 
+//                            if( anObj instanceof LibraryItemController ){  
+//                                LibraryItemController theController = (LibraryItemController)anObj;
+//                                Object controllerObject = theController.createItem( this );
+//                                if( controllerObject != null ){
+//                                    
+//                                    theController.setObject(controllerObject);
+//
+//                                    //Create a task and controller and display it
+//                                    LibraryItemJTree theJTree = theMainGui.getJTree();
+//                                    DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode)theJTree.getLastSelectedPathComponent();
+//                                    if(parentNode != null){
+//                                        //Add it to the tree
+//                                        theJTree.addObjectToTree(theController, parentNode, 0);
+//                                        theJTree.setSelectedObject( theController );
+//                                    }
+//                                    
+//                                    theController.saveToDisk();
+//                                }
+//                            }  
+//
+//                        } catch (InstantiationException ex) {
+//                            ex = null;
+//                        } catch (IllegalAccessException ex) {
+//                            ex = null;
+//                        } 
+//                    }
                     break;
             }
             
@@ -1290,18 +1283,18 @@ final public class MainGuiController extends Controller implements ActionListene
     }/* END valuesChanged( Controller ) */
 
      
-    // ==========================================================================
-    /**
-        *  Sets the selected object to the one double clicked 
-        * <p>
-        *
-     * @param aController
-     * @param showRunner
-    */
-    @Override
-    public void selectController(LibraryItemController aController, boolean showRunner){
-        theMainGui.setSelectedObject(aController, showRunner);
-    }/* END selectController( LibraryItemController, boolean ) */
+//    // ==========================================================================
+//    /**
+//        *  Sets the selected object to the one double clicked 
+//        * <p>
+//        *
+//     * @param aController
+//     * @param showRunner
+//    */
+//    @Override
+//    public void selectController(LibraryItemController aController, boolean showRunner){
+//        theMainGui.setSelectedObject(aController, showRunner);
+//    }/* END selectController( LibraryItemController, boolean ) */
    
     
     // ========================================================================
@@ -1409,92 +1402,92 @@ final public class MainGuiController extends Controller implements ActionListene
         
     }
     
-    // ==========================================================================
-    /**
-     *  Creates a remote job out of the selected component  
-     * @param passedController 
-    */    
-    @Override
-    public void sendRemoteJob( RunnableItemController passedController ){
-        
-        LibraryItemController theHostController = passedController.getHostController();
-        final List<RemoteTask> theTaskList = new LinkedList<>();
-
-        //Get the host controller
-        Host theHost = (Host) theHostController.getObject();
-        if( passedController instanceof JobSetController ){
-            
-            List<LibraryItemController> childList = ((JobSetController)passedController).getChildren();
-            for(LibraryItemController aChild : childList){
-                
-                //Add each child
-                if( aChild instanceof JobController ){
-                    
-                    JobController aJobController = (JobController)aChild;
-                    RemoteTask aRemoteTask = aJobController.generateRemoteTask( theHost );
-
-                    //Add it to the list
-                    theTaskList.add(aRemoteTask);
-                }
-            }
-            
-            //Find out if the reboot and concurrent flags are specified
-            JobSet theJobSet = (JobSet) passedController.getObject();
-            boolean reboot = theJobSet.rebootsAfter();
-            boolean stopOnError = theJobSet.stopsOnError();
-            boolean concurrent = theJobSet.runsConcurrently();
-                 
-            //Loop throught the tasks and set the flags appropriately
-            RemoteTask prevTask = null;
-            for(int i =0; i < theTaskList.size(); i++){
-
-                //Set the pointer for the next task
-                RemoteTask aTask = theTaskList.get(i);
-
-                //Set the stop on error flag
-                if(stopOnError){
-                    aTask.setStopFlag(stopOnError);    
-                }
-
-                if( prevTask != null && ( !concurrent )){
-                    prevTask.setNextTaskId(Integer.valueOf(aTask.getTaskId()));  
-                }
-
-                //Set the reboot flag on the last element if reboot is specified
-                if( (i == (theTaskList.size() - 1)) && reboot){
-                    aTask.setRebootFlag(reboot);  
-                }             
-
-                //Assign to next
-                prevTask = aTask;
-            }
-            
-            
-        } else if( passedController instanceof JobController ){
-
-            JobController aJobController = (JobController)passedController;
-            RemoteTask aRemoteTask = aJobController.generateRemoteTask( theHost );
-
-            //Add it to the list
-            theTaskList.add(aRemoteTask);            
-
-        }
-
-        //Display the task window
-        final TasksJDialog theTasksDialog = TasksJDialog.getTasksJDialog();
-        theTasksDialog.setVisible(true);
-
-        Constants.Executor.execute( new Runnable () {
-
-            @Override
-            public void run() {
-
-                //Add the tasks to the server
-                addTaskList(theTaskList);
-            }
-        } );        
-        
-    }
+//    // ==========================================================================
+//    /**
+//     *  Creates a remote job out of the selected component  
+//     * @param passedController 
+//    */    
+//    @Override
+//    public void sendRemoteJob( RunnableItemController passedController ){
+//        
+//        LibraryItemController theHostController = passedController.getHostController();
+//        final List<RemoteTask> theTaskList = new LinkedList<>();
+//
+//        //Get the host controller
+//        Host theHost = (Host) theHostController.getObject();
+//        if( passedController instanceof JobSetController ){
+//            
+//            List<LibraryItemController> childList = ((JobSetController)passedController).getChildren();
+//            for(LibraryItemController aChild : childList){
+//                
+//                //Add each child
+//                if( aChild instanceof JobController ){
+//                    
+//                    JobController aJobController = (JobController)aChild;
+//                    RemoteTask aRemoteTask = aJobController.generateRemoteTask( theHost );
+//
+//                    //Add it to the list
+//                    theTaskList.add(aRemoteTask);
+//                }
+//            }
+//            
+//            //Find out if the reboot and concurrent flags are specified
+////            JobSet theJobSet = (JobSet) passedController.getObject();
+////            boolean reboot = theJobSet.rebootsAfter();
+////            boolean stopOnError = theJobSet.stopsOnError();
+////            boolean concurrent = theJobSet.runsConcurrently();
+//                 
+//            //Loop throught the tasks and set the flags appropriately
+////            RemoteTask prevTask = null;
+////            for(int i =0; i < theTaskList.size(); i++){
+////
+////                //Set the pointer for the next task
+////                RemoteTask aTask = theTaskList.get(i);
+////
+////                //Set the stop on error flag
+////                if(stopOnError){
+////                    aTask.setStopFlag(stopOnError);    
+////                }
+////
+////                if( prevTask != null && ( !concurrent )){
+////                    prevTask.setNextTaskId(Integer.valueOf(aTask.getTaskId()));  
+////                }
+////
+////                //Set the reboot flag on the last element if reboot is specified
+////                if( (i == (theTaskList.size() - 1)) && reboot){
+////                    aTask.setRebootFlag(reboot);  
+////                }             
+////
+////                //Assign to next
+////                prevTask = aTask;
+////            }
+//            
+//            
+//        } else if( passedController instanceof JobController ){
+//
+//            JobController aJobController = (JobController)passedController;
+//            RemoteTask aRemoteTask = aJobController.generateRemoteTask( theHost );
+//
+//            //Add it to the list
+//            theTaskList.add(aRemoteTask);            
+//
+//        }
+//
+//        //Display the task window
+//        final TasksJDialog theTasksDialog = TasksJDialog.getTasksJDialog();
+//        theTasksDialog.setVisible(true);
+//
+//        Constants.Executor.execute( new Runnable () {
+//
+//            @Override
+//            public void run() {
+//
+//                //Add the tasks to the server
+//                addTaskList(theTaskList);
+//            }
+//        } );        
+//        
+//    }
     
      //===============================================================
     /**
@@ -1580,35 +1573,35 @@ final public class MainGuiController extends Controller implements ActionListene
 
         } else {
 
-            int clientId = Integer.parseInt( aTask.getClientId() );
-            final TaskNew aMessage = aTask.getControlMessage(clientId);
-
-            if( aMessage != null )
-                DataManager.send( theServerManager, aMessage );
+//            int clientId = Integer.parseInt( aTask.getClientId() );
+//            final TaskNew aMessage = aTask.getControlMessage(clientId);
+//
+//            if( aMessage != null )
+//                DataManager.send( theServerManager, aMessage );
             
         }
         
     }    
     
-    //===============================================================
-    /**
-     * Start the task
-     *
-     * @param theTask
-    */
-    @Override
-    public void startTask(RemoteTask theTask) {
-        
-        try {
-            
-            int dstHostId = Integer.parseInt( theTask.getClientId());
-            DataManager.send( theServerManager, theTask.getControlMessage(dstHostId) );
-
-        } catch ( LoggableException ex) {
-           Log.log(Level.WARNING, NAME_Class, "startTask()", ex.getMessage(), ex );
-        }
-        
-    }
+//    //===============================================================
+//    /**
+//     * Start the task
+//     *
+//     * @param theTask
+//    */
+//    @Override
+//    public void startTask(RemoteTask theTask) {
+//        
+//        try {
+//            
+//            int dstHostId = Integer.parseInt( theTask.getClientId());
+//            DataManager.send( theServerManager, theTask.getControlMessage(dstHostId) );
+//
+//        } catch ( LoggableException ex) {
+//           Log.log(Level.WARNING, NAME_Class, "startTask()", ex.getMessage(), ex );
+//        }
+//        
+//    }
     
      //===============================================================
     /**

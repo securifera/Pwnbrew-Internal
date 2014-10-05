@@ -47,20 +47,12 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.security.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.log.LoggableException;
 
 
 /**
@@ -139,6 +131,7 @@ public class Utilities {
     * @return {@code true} if the local OS is a flavor of UNIX, {@code false}
     * otherwise
     */
+    @SuppressWarnings("ucd")
     static public boolean isUnix() {
         return OS_FAMILY_Unix.contains( OS_NAME );
     }/* END isUnix() */
@@ -172,62 +165,62 @@ public class Utilities {
                 
         }
     }
-
-    // ==========================================================================
-    /**
-    * Writes the jar element to disk
-    *
-    * @param filePath
-    * @param passedRelativePathInJar
-    * @param passedJarElementName
-     * @throws pwnbrew.log.LoggableException
-    */
-    public static void writeJarElementToDisk( File filePath, String passedRelativePathInJar, String passedJarElementName ) throws LoggableException {
-
-        int bytesRead = 0;
-        if( passedRelativePathInJar!= null && passedJarElementName!=null ){
-                
-                String theResourceStr = passedRelativePathInJar + "/" + passedJarElementName;
-                InputStream theIS = Utilities.class.getClassLoader().getResourceAsStream(theResourceStr);
-                if( theIS != null ){
-                    
-                    try {
-
-                        if(filePath != null){
-
-                            byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
-                            FileOutputStream theOutStream = new FileOutputStream(filePath);
-                            try (BufferedOutputStream theBOS = new BufferedOutputStream(theOutStream)) {
-
-                                //Read to the end
-                                while( bytesRead != -1){
-                                    bytesRead = theIS.read(byteBuffer);
-                                    if(bytesRead != -1)
-                                        theBOS.write(byteBuffer, 0, bytesRead);                                   
-                                }
-
-                                theBOS.flush();
-
-                            }
-                        }
-                        
-                    } catch (IOException ex){
-                        throw new LoggableException(ex);
-                    } finally {
-                        
-                        try {
-                            //Make sure an close the input stream
-                            theIS.close();
-                        } catch (IOException ex) {
-                            ex = null;
-                        }
-                    }
-                    
-                } 
-            
-            }
-
-    }
+    
+//    // ==========================================================================
+//    /**
+//    * Writes the jar element to disk
+//    *
+//    * @param filePath
+//    * @param passedRelativePathInJar
+//    * @param passedJarElementName
+//     * @throws pwnbrew.log.LoggableException
+//    */
+//    public static void writeJarElementToDisk( File filePath, String passedRelativePathInJar, String passedJarElementName ) throws LoggableException {
+//
+//        int bytesRead = 0;
+//        if( passedRelativePathInJar!= null && passedJarElementName!=null ){
+//                
+//                String theResourceStr = passedRelativePathInJar + "/" + passedJarElementName;
+//                InputStream theIS = Utilities.class.getClassLoader().getResourceAsStream(theResourceStr);
+//                if( theIS != null ){
+//                    
+//                    try {
+//
+//                        if(filePath != null){
+//
+//                            byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
+//                            FileOutputStream theOutStream = new FileOutputStream(filePath);
+//                            try (BufferedOutputStream theBOS = new BufferedOutputStream(theOutStream)) {
+//
+//                                //Read to the end
+//                                while( bytesRead != -1){
+//                                    bytesRead = theIS.read(byteBuffer);
+//                                    if(bytesRead != -1)
+//                                        theBOS.write(byteBuffer, 0, bytesRead);                                   
+//                                }
+//
+//                                theBOS.flush();
+//
+//                            }
+//                        }
+//                        
+//                    } catch (IOException ex){
+//                        throw new LoggableException(ex);
+//                    } finally {
+//                        
+//                        try {
+//                            //Make sure an close the input stream
+//                            theIS.close();
+//                        } catch (IOException ex) {
+//                            ex = null;
+//                        }
+//                    }
+//                    
+//                } 
+//            
+//            }
+//
+//    }
     
     //===============================================================
     /**
@@ -263,123 +256,123 @@ public class Utilities {
         return aSB.toString();
     }
    
-        
-    //****************************************************************************
-    /**
-    *   Wrapper function for simpleEncrypt that takes a string and returns a Base64 encoded String.
-     * @param clearText
-     * @param preSharedKey
-     * @return 
-     * @throws pwnbrew.log.LoggableException 
-    */
-    public static String simpleEncrypt( String clearText, String preSharedKey) throws LoggableException {
-        
-        try {
-            
-            byte[] dataToEncrypt = clearText.getBytes("ISO-8859-1");
-            byte[] encryptedData = simpleEncrypt( dataToEncrypt, preSharedKey );
-            return Base64Converter.encode(encryptedData);
-            
-        } catch (IOException ex){
-           throw new LoggableException(ex);
-        }
-    }
+//        
+//    //****************************************************************************
+//    /**
+//    *   Wrapper function for simpleEncrypt that takes a string and returns a Base64 encoded String.
+//     * @param clearText
+//     * @param preSharedKey
+//     * @return 
+//     * @throws pwnbrew.log.LoggableException 
+//    */
+//    public static String simpleEncrypt( String clearText, String preSharedKey) throws LoggableException {
+//        
+//        try {
+//            
+//            byte[] dataToEncrypt = clearText.getBytes("ISO-8859-1");
+//            byte[] encryptedData = simpleEncrypt( dataToEncrypt, preSharedKey );
+//            return Base64Converter.encode(encryptedData);
+//            
+//        } catch (IOException ex){
+//           throw new LoggableException(ex);
+//        }
+//    }
     
-    //****************************************************************************
-    /**
-    * Takes a byte array and input key and encrypts using
-     * AES_Cipher 256
-     * @param dataToEncrypt
-     * @param preSharedKey
-     * @return 
-     * @throws pwnbrew.log.LoggableException 
-    */
-    public static byte[] simpleEncrypt( byte[] dataToEncrypt, String preSharedKey ) throws LoggableException {
+//    //****************************************************************************
+//    /**
+//    * Takes a byte array and input key and encrypts using
+//     * AES_Cipher 256
+//     * @param dataToEncrypt
+//     * @param preSharedKey
+//     * @return 
+//     * @throws pwnbrew.log.LoggableException 
+//    */
+//    public static byte[] simpleEncrypt( byte[] dataToEncrypt, String preSharedKey ) throws LoggableException {
+//
+//        byte[] encryptedData = null;
+//        try {
+//            Cipher theEncryptCipher = Cipher.getInstance( AES_CFB_ENCRYPTION  );
+//            byte[] initVect = new byte[ 16 ];
+//
+//            if(dataToEncrypt != null && preSharedKey != null){
+//                
+//                //Get a 256 bit key for the preshared input
+//                MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
+//                
+//                //Instantiate a secret key object from the SHA1 256 bit digest
+//                byte[] encryptionKey = hash.digest(preSharedKey.getBytes("ISO-8859-1"));
+//                SecretKeySpec key = new SecretKeySpec( encryptionKey, AES_Cipher );
+//                IvParameterSpec ivSpec = new IvParameterSpec( initVect );
+//                
+//                try {
+//                   theEncryptCipher.init( Cipher.ENCRYPT_MODE, key, ivSpec );
+//                } catch (InvalidKeyException ex) {
+//
+//                   //Use 128 bit since the policy file is obviously not in place
+//                   //for 256 bit encryption
+//                   key = new SecretKeySpec(encryptionKey, 0, 16, AES_Cipher);
+//                   theEncryptCipher = Cipher.getInstance( AES_CFB_ENCRYPTION  );
+//                   theEncryptCipher.init( Cipher.ENCRYPT_MODE, key, ivSpec );
+//                }
+//
+//                encryptedData = theEncryptCipher.doFinal( dataToEncrypt, 0, dataToEncrypt.length );
+//            }
+//
+//        } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchPaddingException | UnsupportedEncodingException ex) {
+//           throw new LoggableException(ex);
+//        }
+//
+//        return encryptedData;
+//
+//    }
 
-        byte[] encryptedData = null;
-        try {
-            Cipher theEncryptCipher = Cipher.getInstance( AES_CFB_ENCRYPTION  );
-            byte[] initVect = new byte[ 16 ];
-
-            if(dataToEncrypt != null && preSharedKey != null){
-                
-                //Get a 256 bit key for the preshared input
-                MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
-                
-                //Instantiate a secret key object from the SHA1 256 bit digest
-                byte[] encryptionKey = hash.digest(preSharedKey.getBytes("ISO-8859-1"));
-                SecretKeySpec key = new SecretKeySpec( encryptionKey, AES_Cipher );
-                IvParameterSpec ivSpec = new IvParameterSpec( initVect );
-                
-                try {
-                   theEncryptCipher.init( Cipher.ENCRYPT_MODE, key, ivSpec );
-                } catch (InvalidKeyException ex) {
-
-                   //Use 128 bit since the policy file is obviously not in place
-                   //for 256 bit encryption
-                   key = new SecretKeySpec(encryptionKey, 0, 16, AES_Cipher);
-                   theEncryptCipher = Cipher.getInstance( AES_CFB_ENCRYPTION  );
-                   theEncryptCipher.init( Cipher.ENCRYPT_MODE, key, ivSpec );
-                }
-
-                encryptedData = theEncryptCipher.doFinal( dataToEncrypt, 0, dataToEncrypt.length );
-            }
-
-        } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchPaddingException | UnsupportedEncodingException ex) {
-           throw new LoggableException(ex);
-        }
-
-        return encryptedData;
-
-    }
-
-    //****************************************************************************
-    /**
-     * Takes a base64 encrypted string and input key and returns the clear text after
-     * decoding the base 64 and decrypting using AES_Cipher 256.
-     * @param encryptedText
-     * @param preSharedKey
-     * @return 
-     * @throws pwnbrew.log.LoggableException 
-    */
-    public static byte[] simpleDecrypt ( byte[] encryptedText, String preSharedKey ) throws LoggableException {
-
-        byte[] retVal = null;
-
-        try {
-           Cipher theDecryptCipher = Cipher.getInstance( AES_CFB_ENCRYPTION  );
-           byte[] initVect = new byte[ 16 ];
-
-           if(encryptedText != null && preSharedKey != null){
-
-              //Get a 256 bit key for the preshared input
-              MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
-              byte[] decryptionKey = hash.digest(preSharedKey.getBytes("ISO-8859-1"));
-
-              SecretKeySpec key = new SecretKeySpec( decryptionKey, AES_Cipher );
-              IvParameterSpec ivSpec = new IvParameterSpec( initVect );
-
-              try {
-                 theDecryptCipher.init( Cipher.DECRYPT_MODE, key, ivSpec );
-              } catch (InvalidKeyException ex) {
-
-                 //Use 128 bit since the policy file is obviously not in place
-                 //for 256 bit encryption
-                 key = new SecretKeySpec(decryptionKey, 0, 16, AES_Cipher);
-                 theDecryptCipher = Cipher.getInstance( AES_CFB_ENCRYPTION  );
-                 theDecryptCipher.init( Cipher.DECRYPT_MODE, key, ivSpec );
-              }
-
-              retVal = theDecryptCipher.doFinal( encryptedText, 0, encryptedText.length );
-           }
-           
-        } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException | NoSuchAlgorithmException | UnsupportedEncodingException ex) {
-           throw new LoggableException(ex);
-        }
-
-        return retVal;
-
-    }
+//    //****************************************************************************
+//    /**
+//     * Takes a base64 encrypted string and input key and returns the clear text after
+//     * decoding the base 64 and decrypting using AES_Cipher 256.
+//     * @param encryptedText
+//     * @param preSharedKey
+//     * @return 
+//     * @throws pwnbrew.log.LoggableException 
+//    */
+//    public static byte[] simpleDecrypt ( byte[] encryptedText, String preSharedKey ) throws LoggableException {
+//
+//        byte[] retVal = null;
+//
+//        try {
+//           Cipher theDecryptCipher = Cipher.getInstance( AES_CFB_ENCRYPTION  );
+//           byte[] initVect = new byte[ 16 ];
+//
+//           if(encryptedText != null && preSharedKey != null){
+//
+//              //Get a 256 bit key for the preshared input
+//              MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
+//              byte[] decryptionKey = hash.digest(preSharedKey.getBytes("ISO-8859-1"));
+//
+//              SecretKeySpec key = new SecretKeySpec( decryptionKey, AES_Cipher );
+//              IvParameterSpec ivSpec = new IvParameterSpec( initVect );
+//
+//              try {
+//                 theDecryptCipher.init( Cipher.DECRYPT_MODE, key, ivSpec );
+//              } catch (InvalidKeyException ex) {
+//
+//                 //Use 128 bit since the policy file is obviously not in place
+//                 //for 256 bit encryption
+//                 key = new SecretKeySpec(decryptionKey, 0, 16, AES_Cipher);
+//                 theDecryptCipher = Cipher.getInstance( AES_CFB_ENCRYPTION  );
+//                 theDecryptCipher.init( Cipher.DECRYPT_MODE, key, ivSpec );
+//              }
+//
+//              retVal = theDecryptCipher.doFinal( encryptedText, 0, encryptedText.length );
+//           }
+//           
+//        } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException | NoSuchAlgorithmException | UnsupportedEncodingException ex) {
+//           throw new LoggableException(ex);
+//        }
+//
+//        return retVal;
+//
+//    }
     
     //======================================================================
     /**
@@ -641,7 +634,10 @@ public class Utilities {
 
         //Decode the base64   
         DebugPrinter.printMessage(NAME_Class, "Migrating to " + aSB.toString());
-        connectStr = Base64Converter.encode( aSB.toString().getBytes() );
+        
+        sun.misc.BASE64Encoder anEncoder = new sun.misc.BASE64Encoder();
+        connectStr = anEncoder.encodeBuffer(connectStr.getBytes());
+        
         String properties = Constants.PROP_FILE;
         String propLabel = Constants.URL_LABEL;  
 

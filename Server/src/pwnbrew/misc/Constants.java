@@ -143,6 +143,7 @@ abstract public class Constants {
     public static final String IMAGE_PATH_IN_JAR= "pwnbrew/images";   
     public static final String PROP_FILE ="META-INF/MANIFEST.MF";
     
+    public static final String UID_LABEL = "UID";
     public static final String PAYLOAD_VERSION_LABEL = "Version";
     public static final String STAGER_URL = "Private";
     public static String CURRENT_VERSION = "1.0.5.1";

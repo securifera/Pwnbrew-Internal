@@ -132,8 +132,10 @@ public final class HostController extends LibraryItemController implements Actio
      * 
      * @param passedHost 
      * @param passedController 
+     * @param passedBool 
     */
-    public HostController( Host passedHost, MainGuiController passedController ) {
+    public HostController( Host passedHost, MainGuiController passedController, boolean passedBool ) {
+        super(passedBool);
         setObject(passedHost);
         theMainGuiController = passedController;
     }
@@ -206,7 +208,7 @@ public final class HostController extends LibraryItemController implements Actio
     */
     @Override
     public HostTabPanel getRootPanel() {
-        if( theTabPanel == null ){ 
+        if( !headless && theTabPanel == null ){ 
             createTabPanel(); 
         }
         return theTabPanel;
@@ -230,26 +232,29 @@ public final class HostController extends LibraryItemController implements Actio
     @Override
     public void updateComponents() {
         
-        getRootPanel().setLibraryItemName( theHost.getHostname() );
-        refreshOverviewPanel(); 
-        
-        //Update the Shell Pane
-        int i = 1;
-        
-        JTabbedPane tabPane = getRootPanel().getTabCollection();
-        String title = tabPane.getTitleAt( i );
-        if( !title.equals( " Shell ")){
-            i++;
-            if( tabPane.getTabCount() > i ){
-                title = tabPane.getTitleAt( i);
-                if( !title.equals( " Shell ")){
-                    return;
+        HostTabPanel aPanel = getRootPanel();
+        if( aPanel != null ){
+            aPanel.setLibraryItemName( theHost.getHostname() );
+            refreshOverviewPanel(); 
+
+            //Update the Shell Pane
+            int i = 1;
+
+            JTabbedPane tabPane = aPanel.getTabCollection();
+            String title = tabPane.getTitleAt( i );
+            if( !title.equals( " Shell ")){
+                i++;
+                if( tabPane.getTabCount() > i ){
+                    title = tabPane.getTitleAt( i);
+                    if( !title.equals( " Shell ")){
+                        return;
+                    }
                 }
             }
+
+            //Set the visibility of the panel
+            tabPane.setEnabledAt(i, isConnected());
         }
-        
-        //Set the visibility of the panel
-        tabPane.setEnabledAt(i, isConnected());
         
     }
     
@@ -425,21 +430,21 @@ public final class HostController extends LibraryItemController implements Actio
         //Add separator
         if( !multi ){
             
-            popup.addSeparator();
-
-            //Loop through the controller types and add their creation strings
-            //to the right click menu
-            Iterator<String> anIter = theMainGuiController.getActionClassMap().keySet().iterator();
-            while( anIter.hasNext() ){        
-
-                String addString = anIter.next();
-                menuItem = new JMenuItem( addString );
-                menuItem.setActionCommand( addString );
-                menuItem.addActionListener( theMainGuiController );
-                menuItem.setEnabled( true );
-                popup.add( menuItem );   
-
-            }
+//            popup.addSeparator();
+//
+//            //Loop through the controller types and add their creation strings
+//            //to the right click menu
+//            Iterator<String> anIter = theMainGuiController.getActionClassMap().keySet().iterator();
+//            while( anIter.hasNext() ){        
+//
+//                String addString = anIter.next();
+//                menuItem = new JMenuItem( addString );
+//                menuItem.setActionCommand( addString );
+//                menuItem.addActionListener( theMainGuiController );
+//                menuItem.setEnabled( true );
+//                popup.add( menuItem );   
+//
+//            }
         }
         
         return popup;        
@@ -467,8 +472,11 @@ public final class HostController extends LibraryItemController implements Actio
     public void refreshOverviewPanel() {
         
         //Set the next check in time
-        HostDetailsPanel thePanel = getRootPanel().getOverviewPanel();
-        thePanel.populateComponents();            
+        HostTabPanel aPanel = getRootPanel();
+        if( aPanel != null ){
+            HostDetailsPanel thePanel = aPanel.getOverviewPanel();
+            thePanel.populateComponents();   
+        }         
     }
     
     // ==========================================================================
@@ -502,8 +510,11 @@ public final class HostController extends LibraryItemController implements Actio
         }
         
         //Enable the checkbox
-        HostSchedulerPanel thePanel = getRootPanel().getSchedulerPanel();
-        thePanel.setAutoSleepCheckboxEnablement( true );
+        HostTabPanel aPanel = getRootPanel();
+        if( aPanel != null ){
+            HostSchedulerPanel thePanel = aPanel.getSchedulerPanel();
+            thePanel.setAutoSleepCheckboxEnablement( true );
+        }
     }
     
     //=========================================================================
@@ -557,17 +568,22 @@ public final class HostController extends LibraryItemController implements Actio
     @Override
     public void removeCheckInDates( List<String> passedDateList ) {
         
-        HostSchedulerPanel thePanel = getRootPanel().getSchedulerPanel();
+        HostSchedulerPanel schedulePanel = null;
+        HostTabPanel aPanel = getRootPanel();
+        if( aPanel != null )
+            schedulePanel = getRootPanel().getSchedulerPanel();
         
         for( String aDateStr : passedDateList ){
             theHost.removeCheckInTime( aDateStr );
-            thePanel.removeCheckInDate( aDateStr );
+            if( schedulePanel != null )
+                schedulePanel.removeCheckInDate( aDateStr );
         }
-        
+
         //Set the checkbox enablement
         if( theHost.getCheckInList().isEmpty() ){
             theHost.setAutoSleepFlag(false);
-            thePanel.setAutoSleepCheckboxEnablement( false );
+            if( schedulePanel != null )
+                schedulePanel.setAutoSleepCheckboxEnablement( false );
         }
         
         //Set the dirty flag
@@ -858,7 +874,13 @@ public final class HostController extends LibraryItemController implements Actio
     */
     @Override
     public RunnerPane getShellTextPane() {
-        return  getRootPanel().getShellPanel().getShellTextPane();
+        
+        RunnerPane aRunnerPane = null;
+        HostTabPanel aPanel = getRootPanel();
+        if( aPanel != null )
+            aRunnerPane = aPanel.getShellPanel().getShellTextPane();
+                    
+        return  aRunnerPane;
     }
 
     //===============================================================
@@ -1017,35 +1039,38 @@ public final class HostController extends LibraryItemController implements Actio
                 }
 
                 //Get the jtree panel
-                HostDetailsPanel thePanel = getRootPanel().getOverviewPanel();
-                final FileTreePanel theFileTreePanel = thePanel.getFileTreePanel();
+                HostTabPanel aPanel = getRootPanel();
+                if( aPanel != null ){
+                    HostDetailsPanel thePanel = aPanel.getOverviewPanel();
+                    final FileTreePanel theFileTreePanel = thePanel.getFileTreePanel();
 
-                //Run in swing thread
-                final HostController thisController = this;
-                final TreePath aTreePath = new TreePath(parent.getPath());
-                SwingUtilities.invokeLater( new Runnable(){
+                    //Run in swing thread
+                    final HostController thisController = this;
+                    final TreePath aTreePath = new TreePath(parent.getPath());
+                    SwingUtilities.invokeLater( new Runnable(){
 
-                    @Override
-                    public void run() {
-                        
-                        //Reload the model
-                        theFileTreePanel.getTreeModel().reload(); 
-                        
-                        //Remote any listeners
-                        JTree theJTree = theFileTreePanel.getJTree();
-                        for( TreeExpansionListener aListener : theJTree.getTreeExpansionListeners()){
-                            if( aListener instanceof DirExpansionListener ){
-                                theJTree.removeTreeExpansionListener( aListener );
+                        @Override
+                        public void run() {
+
+                            //Reload the model
+                            theFileTreePanel.getTreeModel().reload(); 
+
+                            //Remote any listeners
+                            JTree theJTree = theFileTreePanel.getJTree();
+                            for( TreeExpansionListener aListener : theJTree.getTreeExpansionListeners()){
+                                if( aListener instanceof DirExpansionListener ){
+                                    theJTree.removeTreeExpansionListener( aListener );
+                                }
                             }
-                        }
-                        
-                        //Expand the last path
-                        theFileTreePanel.getJTree().expandPath(aTreePath);
-                        
-                        //Add the listener back
-                        theJTree.addTreeExpansionListener( new DirExpansionListener( thisController) );
-                    }               
-                });
+
+                            //Expand the last path
+                            theFileTreePanel.getJTree().expandPath(aTreePath);
+
+                            //Add the listener back
+                            theJTree.addTreeExpansionListener( new DirExpansionListener( thisController) );
+                        }               
+                    });
+                }
 
                 //Remote the task from the map
                 synchronized(theTaskMap){
@@ -1074,8 +1099,12 @@ public final class HostController extends LibraryItemController implements Actio
      * @param aNode 
      */
     public void updateFileDetailsPanel(FileNode aNode) {
-        HostDetailsPanel detailsPanel = getRootPanel().getOverviewPanel();
-        detailsPanel.updateFilePanel(aNode);
+        //Get the jtree panel
+        HostTabPanel aPanel = getRootPanel();
+        if( aPanel != null ){
+            HostDetailsPanel detailsPanel = aPanel.getOverviewPanel();
+            detailsPanel.updateFilePanel(aNode);
+        }
     }
 
     //=========================================================================
@@ -1149,23 +1178,26 @@ public final class HostController extends LibraryItemController implements Actio
      */
     public void refreshFileSystemJTree() {
         
-        HostDetailsPanel thePanel = getRootPanel().getOverviewPanel();
-        final FileTreePanel theFileTreePanel = thePanel.getFileTreePanel();
+        HostTabPanel aPanel = getRootPanel();
+        if( aPanel != null ){
+            HostDetailsPanel thePanel = aPanel.getOverviewPanel();
+            final FileTreePanel theFileTreePanel = thePanel.getFileTreePanel();
 
-        //Run in swing thread
-        SwingUtilities.invokeLater( new Runnable(){
+            //Run in swing thread
+            SwingUtilities.invokeLater( new Runnable(){
 
-            @Override
-            public void run() {
+                @Override
+                public void run() {
 
-                //Remote any listeners
-                JTree theJTree = theFileTreePanel.getJTree();
-                TreePath aTreePath = theJTree.getSelectionPath().getParentPath();
-        
-                theJTree.collapsePath(aTreePath);
-                theJTree.expandPath(aTreePath);
-            }
-        });
+                    //Remote any listeners
+                    JTree theJTree = theFileTreePanel.getJTree();
+                    TreePath aTreePath = theJTree.getSelectionPath().getParentPath();
+
+                    theJTree.collapsePath(aTreePath);
+                    theJTree.expandPath(aTreePath);
+                }
+            });
+        }
       
     }   
 

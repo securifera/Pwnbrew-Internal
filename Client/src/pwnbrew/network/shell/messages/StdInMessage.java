@@ -69,6 +69,7 @@ public class StdInMessage extends ProcessMessage {
      *
      * @param passedId
     */
+    @SuppressWarnings("ucd")
     public StdInMessage( byte[] passedId ) {
         super( STD_IN, passedId );
     }

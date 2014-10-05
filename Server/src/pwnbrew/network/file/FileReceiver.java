@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
@@ -61,7 +62,6 @@ import pwnbrew.misc.Directories;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.misc.ProgressListener;
 import pwnbrew.utilities.Utilities;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFileFin;
 
 /**
@@ -188,7 +188,12 @@ final public class FileReceiver {
     public synchronized void receiveFile(byte[] passedByteArray){
 
         try {
-
+            
+            if( passedByteArray.length + fileByteCounter > fileSize ){
+                int diff = (int) (fileSize - fileByteCounter);
+                passedByteArray = Arrays.copyOf(passedByteArray, diff);
+            }
+            
             //Copy over the bytes
             aFileStream.write(passedByteArray);
             fileByteCounter += passedByteArray.length;

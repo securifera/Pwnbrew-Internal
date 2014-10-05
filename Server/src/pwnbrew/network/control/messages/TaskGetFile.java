@@ -165,33 +165,33 @@ public final class TaskGetFile extends TaskStatus{
     @Override
     public void evaluate( CommManager passedManager ) {
         
-        try {
-
-            //Alert the manager of the change in the task
-            TaskManager aMgr = passedManager.getTaskManager();
-            if( aMgr != null )
-                aMgr.taskChanged(this);
-
-            File libDir = Directories.getFileLibraryDirectory();
-            String theHash = getHashToRetrieve();
-
-            //Debug
-            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received TaskGetFile for " + theHash);
-
-            File fileToSend = new File(libDir, theHash);
-            if(fileToSend.exists()){
-
-                //Queue the file to be sent
-                String fileHashNameStr = new StringBuilder().append(fileToSend.getName()).append(":").append(fileToSend.getName()).toString();
-
-                int clientId =  getSrcHostId();
-                PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.JOB_SUPPORT, clientId );
-                DataManager.send(passedManager,thePFM);
-            }
-
-        } catch (IOException ex) {
-            Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        }
+//        try {
+//
+//            //Alert the manager of the change in the task
+//            TaskManager aMgr = passedManager.getTaskManager();
+//            if( aMgr != null )
+//                aMgr.taskChanged(this);
+//
+//            File libDir = Directories.getFileLibraryDirectory();
+//            String theHash = getHashToRetrieve();
+//
+//            //Debug
+//            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received TaskGetFile for " + theHash);
+//
+//            File fileToSend = new File(libDir, theHash);
+//            if(fileToSend.exists()){
+//
+//                //Queue the file to be sent
+//                String fileHashNameStr = new StringBuilder().append(fileToSend.getName()).append(":").append(fileToSend.getName()).toString();
+//
+//                int clientId =  getSrcHostId();
+//                PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.JOB_SUPPORT, clientId );
+//                DataManager.send(passedManager,thePFM);
+//            }
+//
+//        } catch (IOException ex) {
+//            Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
+//        }
     }
 
 }

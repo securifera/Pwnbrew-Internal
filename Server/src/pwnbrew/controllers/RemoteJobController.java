@@ -70,7 +70,7 @@ public class RemoteJobController extends Controller implements RemoteTaskListene
      * @param passedManager
     */
     public RemoteJobController(RemoteTask passedTask, TaskManager passedManager ) {
-
+        super(passedManager.getServerManager().isHeadless());
         theTask = passedTask;
         theTask.addListener(this);
         theManager = passedManager;

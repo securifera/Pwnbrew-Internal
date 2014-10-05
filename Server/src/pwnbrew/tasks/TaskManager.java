@@ -47,12 +47,12 @@ import pwnbrew.network.control.messages.TaskStatus;
  */
 public interface TaskManager {
 
-    // ==========================================================================
-    /**
-    * Called by a {@link TaskProgressPanel} when a task is to be canceled.
-     * @param theTask
-    */
-    public void startTask(RemoteTask theTask);
+//    // ==========================================================================
+//    /**
+//    * Called by a {@link TaskProgressPanel} when a task is to be canceled.
+//     * @param theTask
+//    */
+//    public void startTask(RemoteTask theTask);
 
 
     // ==========================================================================

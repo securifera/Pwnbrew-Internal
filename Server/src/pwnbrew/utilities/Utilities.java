@@ -167,15 +167,15 @@ public class Utilities {
     public static final String OsName    = System.getProperty( PROPERTY_OsName ).toLowerCase();
     public static final String JAVA_ARCH    = System.getProperty( PROPERTY_OsArch ).toLowerCase();
 
-    // ==========================================================================
-    /**
-     *  Add the Controller to the Runnable Controller list
-     * @param passedClassPath
-     */
-    public static void addRunnableController( String passedClassPath ) {
-        if( passedClassPath != null && !passedClassPath.isEmpty() )
-            theControllerList.add(passedClassPath);
-    }
+//    // ==========================================================================
+//    /**
+//     *  Add the Controller to the Runnable Controller list
+//     * @param passedClassPath
+//     */
+//    public static void addRunnableController( String passedClassPath ) {
+//        if( passedClassPath != null && !passedClassPath.isEmpty() )
+//            theControllerList.add(passedClassPath);
+//    }
     
      // ==========================================================================
     /**
@@ -349,7 +349,7 @@ public class Utilities {
         
         //Remove JAR if that's how we are running
         JarItem aJarItem = null;        
-        if( payloadFile != null && payloadFile.getPath().endsWith(".jar")){ 
+        if( payloadFile != null ){ 
 
             try {                 
                 
@@ -358,6 +358,7 @@ public class Utilities {
                 String jarVersionString = "";
                 String jvmVersionString = "";
                 String jarType = "";
+                String jarUID = "";
        
                 //Open the zip
                 ByteArrayOutputStream aBOS = new ByteArrayOutputStream();
@@ -439,7 +440,14 @@ public class Utilities {
                             if( version != null ){
                                 //Set the jar version
                                 jarVersionString = version;
-                            }     
+                            }   
+                            
+                            //Get the id
+                            String uid = localProperties.getProperty(Constants.UID_LABEL);
+                            if( uid != null ){
+                                //Set the jar uid
+                                jarUID = uid;
+                            }  
                             
                             if( jarType.equals( JarItem.STAGER_TYPE )){
                                 String aStr = localProperties.getProperty(Constants.STAGER_URL);
@@ -501,9 +509,10 @@ public class Utilities {
                     }
 
                     //throw exception
-                    if( jarType.isEmpty() || jarVersionString.isEmpty() || jvmVersionString.isEmpty() )
+                    if( jarType.isEmpty() || jarVersionString.isEmpty() || jvmVersionString.isEmpty() || jarUID.isEmpty() )
                         throw new JarItemException("The selected JAR is not a valid Pwnbrew module.");
                     
+                    aJarItem.setId(jarUID);
                     aJarItem.setVersion(jarVersionString);
                     aJarItem.setJvmMajorVersion(jvmVersionString);
                     aJarItem.setFilename( payloadFile.getName() );
@@ -1625,38 +1634,40 @@ public class Utilities {
                     int bytesRead = 0;
                     String thePath = aClass;             
                     InputStream anIS = SendStage.class.getClassLoader().getResourceAsStream(thePath);
+                    if( anIS != null ){
 
-                    //Read the bytes into a byte array
-                    ByteArrayOutputStream theBOS = new ByteArrayOutputStream();
-                    try {
+                        //Read the bytes into a byte array
+                        ByteArrayOutputStream theBOS = new ByteArrayOutputStream();
+                        try {
 
-                        //Read to the end
-                        while( bytesRead != -1){
-                            bytesRead = anIS.read(byteBuffer);
-                            if(bytesRead != -1){
-                                theBOS.write(byteBuffer, 0, bytesRead);
+                            //Read to the end
+                            while( bytesRead != -1){
+                                bytesRead = anIS.read(byteBuffer);
+                                if(bytesRead != -1){
+                                    theBOS.write(byteBuffer, 0, bytesRead);
+                                }
                             }
-                        }
 
-                        theBOS.flush();
+                            theBOS.flush();
 
-                    } finally {
+                        } finally {
 
-                        //Close output stream
-                        theBOS.close();
-                    }            
+                            //Close output stream
+                            theBOS.close();
+                        }            
 
-                    //Queue up the classes to be sent
-                    byte[] tempArr = theBOS.toByteArray();
-                    byte[] theBytes = new byte[ tempArr.length + 4 ];
+                        //Queue up the classes to be sent
+                        byte[] tempArr = theBOS.toByteArray();
+                        byte[] theBytes = new byte[ tempArr.length + 4 ];
 
-                    byte[] classLen = SocketUtilities.intToByteArray(tempArr.length);
-                    System.arraycopy(classLen, 0, theBytes, 0, classLen.length); 
-                    System.arraycopy(tempArr, 0, theBytes, 4, tempArr.length);                
+                        byte[] classLen = SocketUtilities.intToByteArray(tempArr.length);
+                        System.arraycopy(classLen, 0, theBytes, 0, classLen.length); 
+                        System.arraycopy(tempArr, 0, theBytes, 4, tempArr.length);                
 
-                    //Queue the bytes
-                    classByteBuffer.put(theBytes);
-                    theBOS = null;
+                        //Queue the bytes
+                        classByteBuffer.put(theBytes);
+                        theBOS = null;
+                    }
 
                 }
 

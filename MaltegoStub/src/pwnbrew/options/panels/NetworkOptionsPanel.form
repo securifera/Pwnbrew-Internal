@@ -17,7 +17,7 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Component id="encryptionPanel" min="-2" max="-2" attributes="0"/>
                   <Group type="102" attributes="0">
@@ -34,7 +34,7 @@
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="1" attributes="0">
+          <Group type="102" attributes="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
@@ -42,12 +42,12 @@
                           <Component id="ctrlPortField" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
                           <Component id="ctrlPortLabel" alignment="3" max="32767" attributes="0"/>
                       </Group>
-                      <EmptySpace min="-2" pref="14" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="17" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="editCheckbox" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <Component id="encryptionPanel" min="-2" max="-2" attributes="0"/>
@@ -71,52 +71,51 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="1" attributes="0">
+                      <Component id="passwordLabel" alignment="1" min="-2" pref="60" max="-2" attributes="0"/>
+                      <Component id="certLabel" alignment="1" min="-2" pref="87" max="-2" attributes="1"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
-                          <Group type="103" groupAlignment="1" attributes="0">
-                              <Component id="passwordLabel" alignment="1" min="-2" pref="60" max="-2" attributes="0"/>
-                              <Component id="certLabel" alignment="1" min="-2" pref="87" max="-2" attributes="1"/>
-                          </Group>
-                          <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="noteLabel" min="-2" max="-2" attributes="0"/>
-                                      <Component id="passwordField" alignment="0" min="-2" pref="120" max="-2" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace min="-2" pref="46" max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="102" alignment="1" attributes="0">
-                                  <Group type="103" groupAlignment="1" attributes="0">
-                                      <Group type="102" attributes="0">
-                                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                                          <Component id="importButton" min="-2" max="-2" attributes="0"/>
-                                      </Group>
-                                      <Component id="certPathTextField" max="32767" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Component id="fileChooserButton" min="-2" pref="26" max="-2" attributes="0"/>
-                              </Group>
+                              <Component id="noteLabel" min="-2" max="-2" attributes="0"/>
+                              <Component id="passwordField" alignment="0" min="-2" pref="120" max="-2" attributes="0"/>
                           </Group>
+                          <EmptySpace min="-2" pref="46" max="-2" attributes="0"/>
                       </Group>
-                      <Group type="102" attributes="0">
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="issuedToPanel" min="-2" max="-2" attributes="0"/>
-                              <Component id="issuedToPanel1" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="algoLabel" min="-2" max="-2" attributes="1"/>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Component id="algoValLabel" min="-2" pref="100" max="-2" attributes="0"/>
-                                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                                  <Component id="certLabel3" min="-2" max="-2" attributes="1"/>
-                                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                                  <Component id="expDateField" min="-2" pref="140" max="-2" attributes="0"/>
+                      <Group type="102" alignment="1" attributes="0">
+                          <Group type="103" groupAlignment="1" attributes="0">
+                              <Group type="102" attributes="0">
+                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                  <Component id="importButton" min="-2" max="-2" attributes="0"/>
                               </Group>
+                              <Component id="certPathTextField" max="32767" attributes="0"/>
                           </Group>
-                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="fileChooserButton" min="-2" pref="26" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
+              </Group>
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="103" alignment="0" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="issuedToPanel" alignment="0" max="32767" attributes="0"/>
+                          <Component id="issuedByPanel" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="algoLabel" min="-2" max="-2" attributes="1"/>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Component id="algoValLabel" min="-2" pref="100" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
+                          <Component id="certLabel3" min="-2" max="-2" attributes="1"/>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Component id="expDateField" min="-2" pref="140" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -124,22 +123,17 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="algoValLabel" alignment="1" max="32767" attributes="0"/>
-                      <Group type="102" attributes="0">
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="certLabel3" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="algoLabel" min="-2" max="-2" attributes="0"/>
-                              <Component id="expDateField" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                      </Group>
+                  <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                      <Component id="algoValLabel" max="32767" attributes="0"/>
+                      <Component id="expDateField" alignment="1" max="32767" attributes="0"/>
+                      <Component id="certLabel3" alignment="0" max="32767" attributes="0"/>
+                      <Component id="algoLabel" alignment="1" max="32767" attributes="0"/>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace pref="10" max="32767" attributes="0"/>
                   <Component id="issuedToPanel" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="issuedToPanel1" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="35" max="-2" attributes="0"/>
+                  <Component id="issuedByPanel" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="certLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="certPathTextField" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
@@ -210,6 +204,19 @@
             <Property name="text" type="java.lang.String" value="Expiration:"/>
           </Properties>
         </Component>
+        <Component class="javax.swing.JButton" name="importButton">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Import"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="importButtonActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JTextField" name="expDateField">
+          <Events>
+            <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="expDateFieldKeyReleased"/>
+          </Events>
+        </Component>
         <Container class="javax.swing.JPanel" name="issuedToPanel">
           <Properties>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
@@ -225,35 +232,41 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="certLabel5" alignment="0" min="-2" pref="27" max="-2" attributes="1"/>
-                          <Component id="algoLabel1" alignment="0" min="-2" max="-2" attributes="1"/>
-                      </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Group type="102" attributes="0">
-                              <Component id="issueeOU" min="-2" pref="51" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="16" max="-2" attributes="0"/>
-                              <Component id="algoLabel2" min="-2" max="-2" attributes="1"/>
-                              <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
-                              <Component id="issueeCity" min="-2" pref="70" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="certLabel6" min="-2" pref="34" max="-2" attributes="1"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="algoLabel3" alignment="0" min="-2" max="-2" attributes="1"/>
+                                  <Component id="certLabel9" alignment="0" min="-2" pref="35" max="-2" attributes="1"/>
+                              </Group>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="issueeState" min="-2" pref="32" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="issueeName" min="-2" pref="109" max="-2" attributes="0"/>
+                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                      <Component id="certLabel8" min="-2" max="-2" attributes="1"/>
+                                  </Group>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="issueeOU" min="-2" pref="109" max="-2" attributes="0"/>
+                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Component id="certLabel11" alignment="0" max="32767" attributes="1"/>
+                                          <Component id="algoLabel4" alignment="0" max="32767" attributes="1"/>
+                                      </Group>
+                                  </Group>
+                              </Group>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="certLabel7" min="-2" max="-2" attributes="1"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="issueeCountry" min="-2" pref="37" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="issueeCountry" alignment="0" min="-2" pref="143" max="-2" attributes="0"/>
+                                  <Component id="issueeCity" alignment="0" min="-2" pref="143" max="-2" attributes="0"/>
+                                  <Component id="issueeOrg" alignment="0" min="-2" pref="143" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
-                          <Group type="102" attributes="0">
-                              <Component id="issueeName" min="-2" pref="112" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="certLabel4" min="-2" max="-2" attributes="1"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="issueeOrg" max="32767" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="certLabel10" min="-2" pref="34" max="-2" attributes="1"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="issueeState" min="-2" pref="109" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <EmptySpace pref="18" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -262,23 +275,24 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="algoLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="certLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="algoLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="certLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="issueeName" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="issueeOrg" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="certLabel7" alignment="1" min="-2" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="algoLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="certLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="issueeCity" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="certLabel5" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="issueeOU" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="issueeState" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="issueeCountry" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="certLabel9" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="issueeOU" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="algoLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="issueeCity" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="certLabel10" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="issueeState" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="issueeCountry" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="certLabel11" alignment="3" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
@@ -286,77 +300,51 @@
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JLabel" name="certLabel4">
+            <Component class="javax.swing.JLabel" name="certLabel8">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Organization:"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="certLabel5">
+            <Component class="javax.swing.JLabel" name="certLabel9">
               <Properties>
                 <Property name="text" type="java.lang.String" value="OU:"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="algoLabel1">
+            <Component class="javax.swing.JLabel" name="algoLabel3">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Name:"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="certLabel6">
+            <Component class="javax.swing.JLabel" name="certLabel10">
               <Properties>
                 <Property name="text" type="java.lang.String" value="State:"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="algoLabel2">
+            <Component class="javax.swing.JLabel" name="algoLabel4">
               <Properties>
                 <Property name="text" type="java.lang.String" value="City:"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="certLabel7">
+            <Component class="javax.swing.JLabel" name="certLabel11">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Country:"/>
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="issueeName">
-              <Events>
-                <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="issueeNameKeyReleased"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JTextField" name="issueeOrg">
-              <Events>
-                <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="issueeOrgKeyReleased"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JTextField" name="issueeCity">
-              <Events>
-                <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="issueeCityKeyReleased"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JTextField" name="issueeOU">
-              <Events>
-                <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="issueeOUKeyReleased"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JTextField" name="issueeState">
-              <Events>
-                <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="issueeStateKeyReleased"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JTextField" name="issueeCountry">
-              <Events>
-                <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="issueeCountryKeyReleased"/>
-              </Events>
             </Component>
           </SubComponents>
         </Container>
-        <Component class="javax.swing.JButton" name="importButton">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Import"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="importButtonActionPerformed"/>
-          </Events>
-        </Component>
-        <Container class="javax.swing.JPanel" name="issuedToPanel1">
+        <Container class="javax.swing.JPanel" name="issuedByPanel">
           <Properties>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -370,36 +358,37 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="certLabel13" alignment="0" min="-2" pref="27" max="-2" attributes="1"/>
-                          <Component id="algoLabel5" alignment="0" min="-2" max="-2" attributes="1"/>
-                      </Group>
-                      <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Group type="102" attributes="0">
-                              <Component id="issuerOU" min="-2" pref="51" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="16" max="-2" attributes="0"/>
-                              <Component id="algoLabel6" min="-2" max="-2" attributes="1"/>
-                              <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
-                              <Component id="issuerCity" min="-2" pref="70" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
                               <Component id="certLabel14" min="-2" pref="34" max="-2" attributes="1"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="issuerState" min="-2" pref="32" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="certLabel15" min="-2" max="-2" attributes="1"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="issuerCountry" min="-2" pref="37" max="-2" attributes="0"/>
+                              <Component id="issuerState" min="-2" pref="109" max="-2" attributes="0"/>
                           </Group>
-                          <Group type="102" attributes="0">
-                              <Component id="issuerName" min="-2" pref="112" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="certLabel12" min="-2" max="-2" attributes="1"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="issuerOrg" max="32767" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="algoLabel5" alignment="0" pref="34" max="32767" attributes="1"/>
+                                  <Component id="certLabel13" alignment="0" max="32767" attributes="1"/>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="issuerOU" alignment="0" min="-2" pref="109" max="-2" attributes="0"/>
+                                  <Component id="issuerName" alignment="0" min="-2" pref="109" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
                       </Group>
-                      <EmptySpace pref="18" max="32767" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="certLabel12" alignment="0" max="32767" attributes="1"/>
+                          <Component id="certLabel15" alignment="0" min="-2" max="-2" attributes="1"/>
+                          <Component id="certLabel16" alignment="0" max="32767" attributes="1"/>
+                      </Group>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="issuerOrg" alignment="0" pref="137" max="32767" attributes="0"/>
+                          <Component id="issuerCity" alignment="0" max="32767" attributes="0"/>
+                          <Component id="issuerCountry" alignment="0" max="32767" attributes="0"/>
+                      </Group>
+                      <EmptySpace pref="20" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -414,19 +403,24 @@
                           <Component id="issuerOrg" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="certLabel15" alignment="1" min="-2" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="algoLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="certLabel14" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="issuerCity" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="certLabel13" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="issuerOU" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="issuerState" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="issuerCountry" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="certLabel13" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="issuerOU" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="issuerCity" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="certLabel16" alignment="3" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                              <Component id="issuerCountry" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="certLabel15" alignment="3" max="32767" attributes="0"/>
+                          </Group>
+                          <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                              <Component id="certLabel14" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="issuerState" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -452,53 +446,30 @@
                 <Property name="text" type="java.lang.String" value="State:"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="algoLabel6">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="City:"/>
-              </Properties>
-            </Component>
             <Component class="javax.swing.JLabel" name="certLabel15">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Country:"/>
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="issuerName">
-              <Events>
-                <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="issuerNameKeyReleased"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JTextField" name="issuerOrg">
-              <Events>
-                <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="issuerOrgKeyReleased"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JTextField" name="issuerCity">
-              <Events>
-                <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="issuerCityKeyReleased"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JTextField" name="issuerOU">
-              <Events>
-                <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="issuerOUKeyReleased"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JTextField" name="issuerState">
-              <Events>
-                <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="issuerStateKeyReleased"/>
-              </Events>
             </Component>
             <Component class="javax.swing.JTextField" name="issuerCountry">
-              <Events>
-                <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="issuerCountryKeyReleased"/>
-              </Events>
+            </Component>
+            <Component class="javax.swing.JLabel" name="certLabel16">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="City:"/>
+              </Properties>
             </Component>
           </SubComponents>
         </Container>
-        <Component class="javax.swing.JTextField" name="expDateField">
-          <Events>
-            <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="expDateFieldKeyReleased"/>
-          </Events>
-        </Component>
       </SubComponents>
     </Container>
     <Component class="javax.swing.JLabel" name="ctrlPortLabel">

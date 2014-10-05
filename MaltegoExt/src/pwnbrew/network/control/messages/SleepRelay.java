@@ -48,14 +48,13 @@ import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
  *  
  */
-public class SleepRelay extends ControlMessage {
+public class SleepRelay extends MaltegoMessage {
     
     private static final byte OPTION_TARGET_HOST_ID = 22;
     private int hostId;

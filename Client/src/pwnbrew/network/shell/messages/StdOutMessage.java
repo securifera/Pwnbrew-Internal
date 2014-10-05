@@ -72,6 +72,7 @@ public class StdOutMessage extends ProcessMessage {
      *
      * @param passedId
     */
+    @SuppressWarnings("ucd")
     public StdOutMessage( byte[] passedId ) {
         super( STD_OUT, passedId );
     }

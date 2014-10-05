@@ -67,6 +67,7 @@ public class StreamReader extends ManagedRunnable {
     * Constructor
      * @param passedId
     */
+    @SuppressWarnings("ucd")
     public StreamReader( int passedId ){
         super(Constants.Executor);
         theStreamId = passedId;

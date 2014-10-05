@@ -87,6 +87,7 @@ abstract public class Constants {
     public static final String DIS_HOST_IMG_STR = "dis_computer_small.png";
     public static final String OPTIONS_IMG_STR = "system.png";
     
+    public static final String BUILD_STAGER_IMG_STR = "build_stager.png";
     public static final String DELETE_IMG_STR = "delete_icon.png";
     public static final String ADD_IMAGE_STR = "add.png";
     
@@ -111,6 +112,7 @@ abstract public class Constants {
     public static final String MANIFEST_FILE = "META-INF/MANIFEST.MF";
     public static final String CERT_ALIAS = "Alias";  
     public static final String CERT_PW = "PS";  
+    public static final String UID_LABEL = "UID";
     
     public static final String MODULE_TYPE_LABEL = "Type";
     public static final String PAYLOAD_VERSION_LABEL = "Version";

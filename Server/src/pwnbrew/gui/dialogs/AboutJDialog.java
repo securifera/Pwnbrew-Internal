@@ -188,7 +188,7 @@ public class AboutJDialog extends javax.swing.JDialog {
 
         mainPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        developerValueLabel.setText("<html>Ryan Wincey</html>");
+        developerValueLabel.setText("<html>Securifera</html>");
 
         versionValueLabel.setText("1.0.0.0");
 
@@ -239,7 +239,7 @@ public class AboutJDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(closeButton, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(mainPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addContainerGap(32, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

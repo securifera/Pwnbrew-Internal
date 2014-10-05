@@ -79,6 +79,7 @@ public abstract class ControlMessage extends Message {
     /*
      *  Contructor
      */
+    @SuppressWarnings("ucd")
     public ControlMessage( byte[] passedId ) {
         //Set id
         super( CONTROL_MESSAGE_TYPE, passedId);
@@ -276,6 +277,6 @@ public abstract class ControlMessage extends Message {
      * @param tempTlv 
      * @return  
      */
-    public boolean setOption( ControlOption tempTlv ){ return true; }
+    public boolean setOption( ControlOption tempTlv ){ return false; }
 
 }/* END CLASS ControlMessage */

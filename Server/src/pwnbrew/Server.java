@@ -197,13 +197,13 @@ public final class Server {
 
         try {
             
-            boolean showGui = false;
+            boolean showGui = true;
             int remManagePort = -1;
             
             //Assign the service name
             for( String aString : args ){
                 if(aString.equals( SHOW_GUI_ARG )){
-                    showGui = true;
+                    showGui = false;
                 } else if( aString.contains(REMOTE_MANAGEMENT_ARG)){
                     String[] argStrArr = aString.split("=");
                     if(argStrArr.length > 1 ){

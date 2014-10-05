@@ -324,6 +324,16 @@ public class OptionsJFrame extends JFrame implements JarLibraryPanelListener, Ne
     public void sendCertFile(File theCertFile, String string) {
         theListener.sendCertFile( theCertFile, string );
     }
+
+    //========================================================================
+    /**
+     * 
+     * @param connectStr 
+     */
+    @Override
+    public void getStagerFile(String connectStr, String passedName, String passedType, String passedJvmVersion, String passedJarVersion) {
+        theListener.getStagerFile( connectStr, passedName, passedType, passedJvmVersion, passedJarVersion );
+    }
     
     //========================================================================
     /**

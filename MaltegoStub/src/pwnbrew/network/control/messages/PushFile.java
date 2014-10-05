@@ -49,7 +49,7 @@ import java.util.Arrays;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.DebugPrinter;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import static pwnbrew.network.control.messages.FileMessage.OPTION_HASH_FILENAME;
 import pwnbrew.network.file.FileMessageManager;
@@ -74,6 +74,7 @@ public class PushFile extends FileMessage {
     public static final int FILE_DOWNLOAD = 3;
     public static final int JAR_UPLOAD = 4;
     public static final int CERT_UPLOAD = 5;
+    public static final int JAR_DOWNLOAD = 6;
   
      //Class name
     private static final String NAME_Class = PushFile.class.getSimpleName();
@@ -85,7 +86,7 @@ public class PushFile extends FileMessage {
      * @param taskId
      * @param dstHostId
      * @param fileHashNameStr
-     * @param passedType
+     * @param passedTypeO
      * @param passedLength
      * @throws java.io.IOException
     */
@@ -272,18 +273,14 @@ public class PushFile extends FileMessage {
     public void evaluate( PortManager passedManager ) {
                 
         try {
-            
-//            if( fileType == PushFile.JOB_RESULT){       
-//                passedManager.getTaskManager().taskChanged(new TaskStatus( getTaskId(), RemoteTask.TASK_XFER_RESULTS, -1 ));
-//            }
              
             //Get the file manager
             FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
             if( theFileMM == null ){
                 theFileMM = FileMessageManager.initialize( passedManager );
             }
-            
-//            DebugPrinter.printMessage(  getClass().getSimpleName(), "Received push file.");
+
+    //            DebugPrinter.printMessage(  getClass().getSimpleName(), "Received push file.");
             theFileMM.prepFilePush( this );
 
         } catch ( IOException | LoggableException ex) {

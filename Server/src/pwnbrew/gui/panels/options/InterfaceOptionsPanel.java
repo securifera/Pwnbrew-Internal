@@ -45,8 +45,6 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.BorderFactory;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -211,21 +209,6 @@ public class InterfaceOptionsPanel extends OptionsJPanel implements ProgressDriv
     */
     private void selectJar() {
         
-        //Have the user manually put in the server ip
-//        JComboBox aCB = new JComboBox();
-//        aCB.setRenderer(new pwnbrew.generic.gui.DefaultCellBorderRenderer(BorderFactory.createEmptyBorder(0, 4, 0, 0)));
-//        List<String> jarTypes = JarItem.getTypes();
-//        for( String aJarType : jarTypes )
-//            aCB.addItem(aJarType);
-//        
-//        Object[] objMsg = new Object[]{ "Please select the type of JAR being imported.", " ", aCB};
-//        Object retVal = JOptionPane.showOptionDialog(null, objMsg, "Select JAR type",
-//               JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
-
-        //Check that they clicked ok
-//        if((Integer)retVal == JOptionPane.OK_OPTION ) {
-            
-//            String selVal = (String) aCB.getSelectedItem();
             File userSelectedFile = null;
 
             int returnVal = theJarChooser.showDialog( this, "Select JAR File" ); //Show the dialogue
@@ -387,7 +370,8 @@ public class InterfaceOptionsPanel extends OptionsJPanel implements ProgressDriv
                     
         Utilities.removeJarItem(aJarItem);
         aJarItem.deleteSelfFromDirectory( new File( Directories.getJarLibPath() ));
-        
+        aJarItem.deleteFileContentFromLibrary();
+                
     }
     
 }

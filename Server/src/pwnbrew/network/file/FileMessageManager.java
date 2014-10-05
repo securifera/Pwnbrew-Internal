@@ -61,7 +61,6 @@ import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileAck;
 import pwnbrew.selector.SocketChannelHandler;
@@ -139,7 +138,7 @@ public class FileMessageManager extends DataManager {
     */
     @Override
     public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) {        
-        theFileManager.getDataHandler().processData(msgBytes);        
+        theFileManager.getDataHandler().processData( srcPortRouter, msgBytes);        
     }
     
      //===========================================================================
@@ -309,7 +308,7 @@ public class FileMessageManager extends DataManager {
      */
     public void sendFile(PushFileAck aMessage) {
         
-        FileSender aSender = new FileSender( getCommManager(), aMessage, getPort() );
+        FileSender aSender = new FileSender( getCommManager(), aMessage );
         
         int taskId = aMessage.getTaskId();
         int fileId = aMessage.getFileId();

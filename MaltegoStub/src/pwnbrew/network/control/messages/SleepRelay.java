@@ -39,14 +39,14 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-public class SleepRelay extends ControlMessage {
+public class SleepRelay extends MaltegoMessage {
     
     private static final byte OPTION_TARGET_HOST_ID = 22;
        

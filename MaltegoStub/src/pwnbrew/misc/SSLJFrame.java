@@ -38,6 +38,8 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.misc;
 
+import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.utilities.SSLUtilities;
 import java.awt.Cursor;
 import java.io.File;
 import java.io.FileInputStream;
@@ -396,10 +398,10 @@ public class SSLJFrame extends javax.swing.JFrame {
             .addGroup(encryptionPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(certLabel3)
-                    .addComponent(algoLabel)
                     .addComponent(expDateField)
-                    .addComponent(algoValLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(algoValLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(algoLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(certLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(issuedToPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

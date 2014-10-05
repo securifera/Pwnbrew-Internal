@@ -48,7 +48,6 @@ import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
-import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.xmlBase.ServerConfig;
 
@@ -56,7 +55,7 @@ import pwnbrew.xmlBase.ServerConfig;
  *
  * @author Securifera
  */
-public class GetNetworkSettings extends ControlMessage{ // NO_UCD (use default)
+public class GetNetworkSettings extends MaltegoMessage{ // NO_UCD (use default)
     
     private static final String NAME_Class = GetNetworkSettings.class.getSimpleName();
     
