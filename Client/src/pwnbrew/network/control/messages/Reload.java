@@ -51,7 +51,7 @@ import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 
 /**
  *
@@ -88,7 +88,7 @@ public final class Reload extends ControlMessage{ // NO_UCD (use default)
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {  
+    public void evaluate( PortManager passedManager ) {  
         
         try {
             

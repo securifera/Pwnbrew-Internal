@@ -55,7 +55,7 @@ import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.FileUtilities;
@@ -74,7 +74,7 @@ import pwnbrew.network.control.messages.PushFileAck;
  */
 public class FileSender extends ManagedRunnable implements LockListener {
 
-    private final CommManager theCommManager;
+    private final PortManager theCommManager;
     private final PushFileAck theFileAck;
     
 //    protected static final int CONNECT_RETRY = 3;
@@ -92,7 +92,7 @@ public class FileSender extends ManagedRunnable implements LockListener {
      *  Constructor
      */
     @SuppressWarnings("ucd")
-    public FileSender( CommManager passedExecutor, PushFileAck passedAck ) {
+    public FileSender( PortManager passedExecutor, PushFileAck passedAck ) {
         super( Constants.Executor);
         theCommManager = passedExecutor;
         theFileAck = passedAck;

@@ -55,7 +55,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
@@ -82,7 +82,7 @@ public class FileMessageManager extends DataManager {
     /*
      *  Constructor
      */
-    private FileMessageManager( CommManager passedCommManager ) {
+    private FileMessageManager( PortManager passedCommManager ) {
         
         super(passedCommManager); 
         //Set the port
@@ -110,7 +110,7 @@ public class FileMessageManager extends DataManager {
      * @return 
      * @throws java.io.IOException 
      */
-    public synchronized static FileMessageManager initialize( CommManager passedCommManager ) throws IOException {
+    public synchronized static FileMessageManager initialize( PortManager passedCommManager ) throws IOException {
 
         if( theFileManager == null ) {
             theFileManager = new FileMessageManager( passedCommManager );

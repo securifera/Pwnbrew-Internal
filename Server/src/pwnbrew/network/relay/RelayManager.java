@@ -42,7 +42,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
@@ -67,7 +67,7 @@ public class RelayManager extends DataManager {
     /*
      *  Constructor
      */
-    private RelayManager( CommManager passedCommManager ) throws IOException {
+    private RelayManager( PortManager passedCommManager ) throws IOException {
         
         super(passedCommManager);     
         
@@ -84,7 +84,7 @@ public class RelayManager extends DataManager {
      * @return 
      * @throws java.io.IOException 
      */
-    public synchronized static RelayManager initialize( CommManager passedCommManager ) throws IOException {
+    public synchronized static RelayManager initialize( PortManager passedCommManager ) throws IOException {
 
         //Create the manager
         if( theRelayManager == null ) {

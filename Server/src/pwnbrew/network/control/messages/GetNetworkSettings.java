@@ -45,7 +45,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.utilities.SSLUtilities;
@@ -76,7 +76,7 @@ public class GetNetworkSettings extends MaltegoMessage{ // NO_UCD (use default)
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {     
+    public void evaluate( PortManager passedManager ) {     
 
         //Populate the componenets
         try {

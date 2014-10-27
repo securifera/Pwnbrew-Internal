@@ -38,73 +38,82 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
-* ResetId.java
+* CommManager.java
 *
-* Created on December 11, 2013, 11:12:12 PM
+* Created on June 7, 2013, 11:49:21 PM
 */
 
-package pwnbrew.network.control.messages;
+package pwnbrew.manager;
 
-import pwnbrew.log.RemoteLog;
-import pwnbrew.log.LoggableException;
-import java.io.IOException;
-import java.util.logging.Level;
-import pwnbrew.ClientConfig;
-import pwnbrew.manager.PortManager;
-import pwnbrew.misc.SocketUtilities;
-import pwnbrew.network.control.ControlMessageManager;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import pwnbrew.network.PortRouter;
 
 /**
  *
  *  
  */
-public final class ResetId extends ControlMessage{ // NO_UCD (use default)
+public abstract class PortManager {
 
-     //Class name
-    private static final String NAME_Class = ResetId.class.getSimpleName();
-    
-    // ==========================================================================
-    /**
-     *  Constructor
+    //The map that relates the port to the port router
+    private final Map<Integer, PortRouter> thePortRouterMap = new HashMap<>();
+
+    //===========================================================================
+    /*
+     *  Returns the port router operating on the passed port
      * 
-     * @param passedId 
      */
-    public ResetId(byte[] passedId ) {
-        super( passedId );
+    public PortRouter getPortRouter( int operatingPort ) {
+        
+        PortRouter thePR;
+        synchronized( thePortRouterMap ){
+            thePR = thePortRouterMap.get( operatingPort );
+        }
+        return thePR;
     }
     
-      
     //===============================================================
     /**
-    *   Performs the logic specific to the message.
-    *
-     * @param passedManager
+     * Handles the shutdown tasks for the thread
+     *
     */
-    @Override
-    public void evaluate( PortManager passedManager ) {
-          
+    public void shutdown() {
         
-        try {
-            //Create a new client id
-            ClientConfig theConf = ClientConfig.getConfig();
-            Integer anInteger = SocketUtilities.getNextId();
-            theConf.setHostId(anInteger.toString());
-            theConf.writeSelfToDisk();
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
-                //Get the port router
-                String hostname = SocketUtilities.getHostname();
-
-                //Create a hello message and send it
-                Hello helloMessage = new Hello( hostname );
-                aCMManager.send(helloMessage);
-            }              
-                       
-        } catch (IOException | LoggableException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
+        //Shutdown each port router
+        synchronized( thePortRouterMap ){
+            for( Iterator<PortRouter> anIter = thePortRouterMap.values().iterator(); anIter.hasNext();  ){
+                anIter.next().shutdown();
+            }
         }
+    }
+    
+     //===============================================================
+    /**
+     *  Disconnect
+     */
+    public void disconnect(){
         
+        //Shutdown each port router
+        synchronized( thePortRouterMap ){
+            for( Iterator<PortRouter> anIter = thePortRouterMap.values().iterator(); anIter.hasNext();  ){
+                anIter.next().closeConnection();
+            }
+        }
     }
 
-}/* END CLASS ResetId */
+    //===========================================================================
+    /**
+     *  Sets the port router for the given port.
+     * @param passedPort
+     * @param aPR 
+     */
+    @SuppressWarnings("ucd")
+    public void setPortRouter(int passedPort, PortRouter aPR) {
+        synchronized( thePortRouterMap ){
+            thePortRouterMap.put( passedPort, aPR );
+        }
+    }
+
+
+}/*END CLASS CommManager */

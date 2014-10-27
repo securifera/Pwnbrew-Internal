@@ -52,7 +52,7 @@ import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.shell.Shell;
@@ -149,7 +149,7 @@ public final class CreateShell extends ControlMessage{
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) { 
+    public void evaluate( PortManager passedManager ) { 
         
         try {
             

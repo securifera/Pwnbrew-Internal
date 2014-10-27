@@ -45,7 +45,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
@@ -163,7 +163,7 @@ public class NetworkSettingsMsg extends MaltegoMessage {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {     
+    public void evaluate( PortManager passedManager ) {     
            
         //Populate the componenets
         try {

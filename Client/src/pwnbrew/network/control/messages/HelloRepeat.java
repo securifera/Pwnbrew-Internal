@@ -49,7 +49,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.control.ControlMessageManager;
 
@@ -92,7 +92,7 @@ public final class HelloRepeat extends ControlMessage {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {   
+    public void evaluate( PortManager passedManager ) {   
         
         ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
         if( aCMManager != null ){

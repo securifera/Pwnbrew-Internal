@@ -1715,6 +1715,55 @@ public class Utilities {
         return aPayload;
     }
     
+    //=========================================================================
+    /**
+     *  Gets the bytes for the passed class path
+     * @param passedClassPath
+     * @return 
+     */
+    public static byte[] getClassBytes( String passedClassPath ) {
+        
+        byte[] retBytes = null;  
+        try{
+
+            int bytesRead = 0;
+            passedClassPath = passedClassPath.replace(".", "/") + ".class";
+            InputStream anIS = Utilities.class.getClassLoader().getResourceAsStream(passedClassPath);
+
+            //Read the bytes into a byte array
+            if( anIS != null ){
+                
+                ByteArrayOutputStream theBOS = new ByteArrayOutputStream();
+                try {
+
+                    //Read to the end
+                    byte[] byteArr = new byte[1024];
+                    while( bytesRead != -1){
+                        bytesRead = anIS.read(byteArr);
+                        if(bytesRead != -1){
+                            theBOS.write(byteArr, 0, bytesRead);
+                        }
+                    }
+
+                    theBOS.flush();
+
+                } finally {
+
+                    //Close output stream
+                    theBOS.close();
+                }            
+
+                //Queue up the classes to be sent
+                retBytes = theBOS.toByteArray();
+            }
+            
+        } catch( IOException ex ){
+           Log.log(Level.SEVERE, NAME_Class, "getClassBytes()", ex.getMessage(), ex );
+        }
+        
+        return retBytes;
+    }
+    
     //=======================================================================
     /**
      * 

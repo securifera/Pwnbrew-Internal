@@ -46,7 +46,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.IOException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
 
@@ -115,7 +115,7 @@ public final class TaskProgress extends TaskStatus{
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {
+    public void evaluate( PortManager passedManager ) {
         
         int theProgress = getProgress();
         int taskId = getTaskId();

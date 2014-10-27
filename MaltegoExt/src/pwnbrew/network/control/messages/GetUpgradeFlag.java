@@ -41,7 +41,7 @@ package pwnbrew.network.control.messages;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
@@ -102,7 +102,7 @@ public final class GetUpgradeFlag extends MaltegoMessage{ // NO_UCD (use default
      * @throws pwnbrew.logging.LoggableException
     */
     @Override
-    public void evaluate( CommManager passedManager ) throws LoggableException {     
+    public void evaluate( PortManager passedManager ) throws LoggableException {     
         
         String hostIdStr = Integer.toString( hostId );
         if( hostId == -1 )

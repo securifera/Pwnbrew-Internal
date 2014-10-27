@@ -90,7 +90,7 @@ import pwnbrew.library.LibraryItemController;
 import pwnbrew.library.LibraryItemControllerListener;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
@@ -1259,7 +1259,7 @@ public final class HostController extends LibraryItemController implements Actio
      * @return 
      */
     @Override
-    public CommManager getCommManager() {
+    public PortManager getCommManager() {
         return theMainGuiController.getServer().getServerManager();
     }
 

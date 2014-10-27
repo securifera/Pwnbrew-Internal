@@ -51,7 +51,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.Message;
@@ -71,7 +71,7 @@ public class ControlMessageManager extends DataManager {
     /*
      *  Constructor
      */
-    private ControlMessageManager( CommManager passedCommManager ) {
+    private ControlMessageManager( PortManager passedCommManager ) {
         
         super(passedCommManager);        
         
@@ -91,7 +91,7 @@ public class ControlMessageManager extends DataManager {
      * @throws java.io.IOException 
      * @throws pwnbrew.log.LoggableException 
      */
-    public synchronized static ControlMessageManager initialize( CommManager passedCommManager ) throws IOException, LoggableException {
+    public synchronized static ControlMessageManager initialize( PortManager passedCommManager ) throws IOException, LoggableException {
 
         if( theControlManager == null ) {
             theControlManager = new ControlMessageManager( passedCommManager );
@@ -119,7 +119,7 @@ public class ControlMessageManager extends DataManager {
     */
     @Override
     public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) {        
-        theControlManager.getDataHandler().processData(msgBytes);        
+        theControlManager.getDataHandler().processData( srcPortRouter, msgBytes);        
     }
     
     //===============================================================

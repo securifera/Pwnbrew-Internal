@@ -43,7 +43,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.LoaderUtilities;
 import pwnbrew.misc.RuntimeRunnable;
 import pwnbrew.misc.Utilities;
@@ -95,7 +95,7 @@ final public class Persistence {
      * 
      * @param passedManager
      */
-    public static void uninstall( CommManager passedManager ) {    
+    public static void uninstall( PortManager passedManager ) {    
 
         if( Utilities.isStaged() ){
             

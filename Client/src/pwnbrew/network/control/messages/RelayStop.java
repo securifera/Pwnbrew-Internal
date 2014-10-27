@@ -44,7 +44,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.relay.RelayManager;
 
@@ -74,7 +74,7 @@ public final class RelayStop extends ControlMessage{
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) { 
+    public void evaluate( PortManager passedManager ) { 
         
         RelayManager aManager = RelayManager.getRelayManager();
         if( aManager != null ){

@@ -43,7 +43,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.xmlBase.ServerConfig;
 
@@ -63,7 +63,7 @@ public class ShellMessageManager extends DataManager {
     /*
      *  Constructor
      */
-    private ShellMessageManager( CommManager passedCommManager ) {
+    private ShellMessageManager( PortManager passedCommManager ) {
         
         super(passedCommManager);        
         
@@ -93,7 +93,7 @@ public class ShellMessageManager extends DataManager {
      * @return 
      * @throws java.io.IOException 
      */
-    public synchronized static ShellMessageManager initialize( CommManager passedCommManager ) throws IOException {
+    public synchronized static ShellMessageManager initialize( PortManager passedCommManager ) throws IOException {
 
         if( theShellMsgManager == null ) {
             theShellMsgManager = new ShellMessageManager( passedCommManager );

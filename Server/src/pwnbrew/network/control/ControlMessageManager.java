@@ -50,7 +50,7 @@ import java.util.logging.Level;
 import pwnbrew.exception.RemoteExceptionWrapper;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.network.PortRouter;
 import pwnbrew.xmlBase.ServerConfig;
@@ -69,7 +69,7 @@ public class ControlMessageManager extends DataManager {
     /*
      *  Constructor
      */
-    private ControlMessageManager( CommManager passedCommManager ) {
+    private ControlMessageManager( PortManager passedCommManager ) {
         
         super(passedCommManager);        
         
@@ -99,7 +99,7 @@ public class ControlMessageManager extends DataManager {
      * @return 
      * @throws java.io.IOException 
      */
-    public synchronized static ControlMessageManager initialize( CommManager passedCommManager ) throws IOException {
+    public synchronized static ControlMessageManager initialize( PortManager passedCommManager ) throws IOException {
 
         if( theControlManager == null ) {
             theControlManager = new ControlMessageManager( passedCommManager );

@@ -46,7 +46,7 @@ import java.util.List;
 import java.util.logging.Level;
 import static pwnbrew.Environment.addClassToMap;
 import pwnbrew.logging.Log;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.FileUtilities;
@@ -95,7 +95,7 @@ public final class AddToJarLibrary extends JarItemMsg{ // NO_UCD (use default)
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {   
+    public void evaluate( PortManager passedManager ) {   
         
         try {
             File aFile = File.createTempFile("tmp", null);

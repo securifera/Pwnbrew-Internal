@@ -43,7 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.misc.ReconnectTimer;
@@ -102,7 +102,7 @@ public class Migrate extends ControlMessage {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {        
+    public void evaluate( PortManager passedManager ) {        
         
         //Try and connect to the new server
         String connectStr = getConnectString().trim();

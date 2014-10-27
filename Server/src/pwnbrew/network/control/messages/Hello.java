@@ -52,7 +52,7 @@ import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.host.Host;
 import pwnbrew.logging.Log;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
@@ -186,7 +186,7 @@ public final class Hello extends ControlMessage {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {
+    public void evaluate( PortManager passedManager ) {
         
         //Get the address and connect
         try {

@@ -56,7 +56,7 @@ import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.NoOp;
 import pwnbrew.selector.SocketChannelHandler;
@@ -67,7 +67,7 @@ import pwnbrew.selector.SocketChannelHandler;
  */
 public class KeepAliveTimer extends ManagedRunnable {
     
-    private CommManager theCommManager = null;
+    private PortManager theCommManager = null;
     private final SecureRandom aSR = new SecureRandom();
     private volatile boolean connected = false;
     final Object syncedObject = new Object();
@@ -83,7 +83,7 @@ public class KeepAliveTimer extends ManagedRunnable {
      * @param passedManager
     */
     @SuppressWarnings("ucd")
-    public KeepAliveTimer(CommManager passedManager ) {
+    public KeepAliveTimer(PortManager passedManager ) {
         super(Constants.Executor);
         theCommManager = passedManager;
     }

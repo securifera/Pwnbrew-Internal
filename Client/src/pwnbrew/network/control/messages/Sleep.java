@@ -55,7 +55,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.LoaderUtilities;
 import pwnbrew.misc.Utilities;
@@ -144,7 +144,7 @@ public class Sleep extends ControlMessage {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {
+    public void evaluate( PortManager passedManager ) {
         
         //Pass it to the manager
         try {

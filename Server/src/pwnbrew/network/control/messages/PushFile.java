@@ -51,7 +51,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.logging.Level;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
@@ -275,7 +275,7 @@ public class PushFile extends FileMessage {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {
+    public void evaluate( PortManager passedManager ) {
                 
         try {
             

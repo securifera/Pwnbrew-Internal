@@ -55,7 +55,7 @@ import java.util.Map;
 import pwnbrew.ClientConfig;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.FileUtilities;
@@ -83,7 +83,7 @@ public class FileMessageManager extends DataManager implements LockListener {
     /*
      *  Constructor
      */
-    private FileMessageManager( CommManager passedCommManager ) {
+    private FileMessageManager( PortManager passedCommManager ) {
         
         super(passedCommManager); 
        
@@ -102,7 +102,7 @@ public class FileMessageManager extends DataManager implements LockListener {
      * @throws java.io.IOException 
      * @throws pwnbrew.log.LoggableException 
      */
-    public synchronized static FileMessageManager initialize( CommManager passedCommManager ) throws IOException, LoggableException {
+    public synchronized static FileMessageManager initialize( PortManager passedCommManager ) throws IOException, LoggableException {
 
         if( theFileManager == null ) {
             theFileManager = new FileMessageManager( passedCommManager );
@@ -130,7 +130,7 @@ public class FileMessageManager extends DataManager implements LockListener {
     */
     @Override
     public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) {        
-        theFileManager.getDataHandler().processData(msgBytes);        
+        theFileManager.getDataHandler().processData(srcPortRouter, msgBytes);        
     }
     
      //===========================================================================
@@ -250,7 +250,7 @@ public class FileMessageManager extends DataManager implements LockListener {
                     initFileTransfer( srcId, taskId, fileId, libDir, hashFileNameStr, passedMessage.getFileSize() );
 
                     //Send an ack to the sender to begin transfer
-                    DebugPrinter.printMessage(CommManager.class.getSimpleName(), "Sending ACK for " + hashFileNameStr);
+                    DebugPrinter.printMessage(PortManager.class.getSimpleName(), "Sending ACK for " + hashFileNameStr);
                     PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr);
                     aSFMA.setDestHostId( passedMessage.getSrcHostId() );
                     aCMManager.send(aSFMA);

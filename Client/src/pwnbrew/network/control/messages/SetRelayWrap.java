@@ -44,7 +44,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.ServerPortRouter;
@@ -111,7 +111,7 @@ public final class SetRelayWrap extends ControlMessage{
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {   
+    public void evaluate( PortManager passedManager ) {   
     
         switch( relayWrap){
             case NO_WRAP:

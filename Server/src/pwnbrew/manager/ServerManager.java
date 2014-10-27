@@ -77,7 +77,7 @@ import pwnbrew.xmlBase.XmlBase;
  *
  *  
  */
-public class ServerManager extends CommManager {
+public class ServerManager extends PortManager {
 
     private final Server theServer;
     private final boolean headless;

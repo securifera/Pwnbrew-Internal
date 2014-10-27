@@ -43,7 +43,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.host.HostController;
 import pwnbrew.logging.Log;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
@@ -146,7 +146,7 @@ public final class CheckInTimeMsg extends MaltegoMessage{
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {
+    public void evaluate( PortManager passedManager ) {
     
         //Get the host controller 
         String hostStr = Integer.toString( hostId );

@@ -82,8 +82,9 @@ public abstract class DataHandler extends ManagedRunnable {
     /**
      *  Process the passed byte array
      * 
+     * @param aPR
      * @param passedByteArray 
      */
-    abstract protected void processData( byte[] passedByteArray );
+    abstract protected void processData( PortRouter aPR, byte[] passedByteArray );
 
 }

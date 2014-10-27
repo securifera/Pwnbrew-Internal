@@ -46,7 +46,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.shell.messages;
 
 import java.nio.ByteBuffer;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 
 
 
@@ -83,7 +83,7 @@ public class StdInMessage extends ProcessMessage {
      * @param theManager 
     */
     @Override
-    public void evaluate(CommManager theManager) {
+    public void evaluate(PortManager theManager) {
     
     
     }

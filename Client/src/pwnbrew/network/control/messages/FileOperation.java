@@ -49,7 +49,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.Date;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.FileFinder;
 import pwnbrew.network.ControlOption;
@@ -131,7 +131,7 @@ public final class FileOperation extends Tasking {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {   
+    public void evaluate( PortManager passedManager ) {   
     
         //Perform the operation
         boolean retVal = false;

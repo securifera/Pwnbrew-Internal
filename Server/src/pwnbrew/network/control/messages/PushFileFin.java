@@ -47,7 +47,7 @@ package pwnbrew.network.control.messages;
 
 import pwnbrew.logging.LoggableException;
 import java.io.UnsupportedEncodingException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
 
@@ -123,7 +123,7 @@ public final class PushFileFin extends FileMessage {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {       
+    public void evaluate( PortManager passedManager ) {       
 
         DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received Fin message. Id: " + Integer.toString( getMsgId()));
        

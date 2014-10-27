@@ -53,6 +53,7 @@ import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
 import pwnbrew.network.DataHandler;
+import pwnbrew.network.PortRouter;
 import pwnbrew.network.shell.messages.ProcessMessage;
 
 
@@ -82,10 +83,11 @@ public class ShellMessageHandler extends DataHandler {
     /**
      *  Processes the most recent 
      * 
+     * @param srcPortRouter
      * @param passedByteArray 
      */
     @Override
-    public void processData( byte[] passedByteArray ) {
+    public void processData( PortRouter srcPortRouter, byte[] passedByteArray ) {
        
         if(passedByteArray.length > 0){
 

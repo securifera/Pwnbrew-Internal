@@ -57,7 +57,7 @@ import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.RelayDisconnect;
@@ -87,7 +87,7 @@ public class ServerPortRouter extends PortRouter {
      * @param passedExecutor
      * @throws IOException
     */
-    public ServerPortRouter( CommManager passedCommManager, boolean passedBool, Executor passedExecutor ) throws IOException {
+    public ServerPortRouter( PortManager passedCommManager, boolean passedBool, Executor passedExecutor ) throws IOException {
         super(passedCommManager, passedBool, passedExecutor);
     }
 

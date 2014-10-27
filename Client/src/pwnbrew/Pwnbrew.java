@@ -45,7 +45,7 @@ import java.net.UnknownHostException;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
@@ -66,7 +66,7 @@ import pwnbrew.task.TaskListener;
  *
  *  
  */
-public final class Pwnbrew extends CommManager implements TaskListener {
+public final class Pwnbrew extends PortManager implements TaskListener {
 
     private static final String NAME_Class = Pwnbrew.class.getSimpleName();
     private static final boolean debug = false;
@@ -393,7 +393,7 @@ public final class Pwnbrew extends CommManager implements TaskListener {
      * Returns the Comm Manager
      * @return 
     */
-    public CommManager getCommManager() {
+    public PortManager getCommManager() {
         return this;
     }
     

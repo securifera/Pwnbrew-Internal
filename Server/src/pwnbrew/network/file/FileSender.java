@@ -54,7 +54,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.execution.ManagedRunnable;
 import pwnbrew.manager.DataManager;
@@ -73,7 +73,7 @@ import pwnbrew.xmlBase.ServerConfig;
 @SuppressWarnings("ucd")
 public class FileSender extends ManagedRunnable {
 
-    private final CommManager theCommManager;
+    private final PortManager theCommManager;
     private final PushFileAck theFileAck;
 //    private final int thePort;
     
@@ -88,7 +88,7 @@ public class FileSender extends ManagedRunnable {
     /*
      *  Constructor
      */
-    FileSender( CommManager passedManager, PushFileAck passedAck ) {
+    FileSender( PortManager passedManager, PushFileAck passedAck ) {
         super( Constants.Executor);
         theCommManager = passedManager;
         theFileAck = passedAck;

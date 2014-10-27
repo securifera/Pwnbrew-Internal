@@ -45,17 +45,19 @@ package pwnbrew.network.control;
 * Created on June 7, 2013, 11:41:21 PM
 */
 
-import pwnbrew.network.DataHandler;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
+import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.DataManager;
-import pwnbrew.network.control.messages.ControlMessage;
+import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
+import pwnbrew.network.PortRouter;
+import pwnbrew.network.control.messages.ClassRequest;
+import pwnbrew.network.control.messages.ControlMessage;
 
 /**
  *
@@ -128,23 +130,35 @@ public class ControlMessageHandler extends DataHandler {
         }
     }
 
-    //===============================================================
+     //===============================================================
     /**
      *  Process the message
      * 
+     * @param srcPortRouter
      * @param passedByteArray 
      */
     @Override
-    public void processData( byte[] passedByteArray ) {
+    public void processData( PortRouter srcPortRouter, byte[] passedByteArray ) {
       
-       try {
-           
-           Message aMessage = ControlMessage.getMessage( ByteBuffer.wrap( passedByteArray ) );                           
-           processIncoming(aMessage);
-       
-       } catch (LoggableException | IOException ex) {
-           RemoteLog.log(Level.INFO, NAME_Class, "processData()", ex.getMessage(), ex );
-       }
+        try {
+
+            if( passedByteArray != null && passedByteArray.length > 0 ){
+                
+                Message aMessage = ControlMessage.getMessage( ByteBuffer.wrap( passedByteArray ) ); 
+                if(aMessage != null){
+
+                    //If the returned message is a class request then return to sender
+                    if( aMessage instanceof ClassRequest){
+                        byte[] byteArr = aMessage.getBytes();
+                        srcPortRouter.queueSend( byteArr, aMessage.getDestHostId());
+                    } else
+                        processIncoming(aMessage);
+                    
+                }
+            }
+        } catch (LoggableException | IOException ex) {
+            RemoteLog.log(Level.INFO, NAME_Class, "processData()", ex.getMessage(), ex );
+        }
         
     }
 

@@ -51,7 +51,7 @@ import java.util.Arrays;
 import java.util.concurrent.Executor;
 import javax.net.ssl.SSLContext;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.SSLUtilities;
 import pwnbrew.network.http.ServerHttpWrapper;
@@ -66,7 +66,7 @@ abstract public class PortRouter {
     
     protected final SelectionRouter theSelectionRouter;
     private final boolean encrypted;
-    protected final CommManager theCommManager;
+    protected final PortManager theCommManager;
     
     private volatile boolean notified = false;
     private volatile boolean waiting = false;
@@ -84,7 +84,7 @@ abstract public class PortRouter {
      * @param passedExecutor
      * @throws IOException
      */
-    public PortRouter(CommManager passedManager, boolean passedBool, Executor passedExecutor ) throws IOException { // NO_UCD (use default)
+    public PortRouter(PortManager passedManager, boolean passedBool, Executor passedExecutor ) throws IOException { // NO_UCD (use default)
 
         theCommManager = passedManager;       
         encrypted = passedBool;
@@ -111,7 +111,7 @@ abstract public class PortRouter {
      *
      * @return
      */
-    public CommManager getCommManager() {
+    public PortManager getCommManager() {
         return theCommManager;
     }
     

@@ -54,7 +54,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
@@ -130,7 +130,7 @@ public final class SendStage extends ControlMessage{ // NO_UCD (use default)
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {       
+    public void evaluate( PortManager passedManager ) {       
             
         ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
         if( aCMManager != null ){

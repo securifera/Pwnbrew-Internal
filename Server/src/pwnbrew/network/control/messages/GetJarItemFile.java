@@ -42,7 +42,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.ControlOption;
@@ -103,7 +103,7 @@ public final class GetJarItemFile extends JarItemMsg {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {
+    public void evaluate( PortManager passedManager ) {
      
         //Get the jar item
         JarItem theItem = Utilities.getStagerJarItem( theJvmVersion );

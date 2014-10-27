@@ -49,7 +49,7 @@ import java.io.UnsupportedEncodingException;
 import pwnbrew.host.HostController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LogLevel;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 
@@ -120,7 +120,7 @@ public class LogMsg extends ControlMessage {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {      
+    public void evaluate( PortManager passedManager ) {      
         
        if( passedManager instanceof ServerManager ){
         
