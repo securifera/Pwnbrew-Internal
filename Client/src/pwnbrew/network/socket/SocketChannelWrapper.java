@@ -64,6 +64,7 @@ public class SocketChannelWrapper {
      * @param passedListener
      * @throws IOException 
      */
+    @SuppressWarnings("ucd")
     public SocketChannelWrapper (final SocketChannel passedSocketChannel, final SocketChannelHandler passedListener) throws IOException {
 	theSocketChannel = passedSocketChannel;
         theSocketHandler = passedListener;

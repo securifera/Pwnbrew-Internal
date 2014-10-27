@@ -46,8 +46,8 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.gui.tree;
 
 import pwnbrew.controllers.MainGuiController;
-import pwnbrew.controllers.JobController;
-import pwnbrew.controllers.JobSetController;
+//import pwnbrew.controllers.JobController;
+//import pwnbrew.controllers.JobSetController;
 import pwnbrew.library.LibraryItemController;
 import pwnbrew.xmlBase.XmlBase;
 //import pwnbrew.scripting.languages.ScriptingLanguage;
@@ -230,129 +230,131 @@ public class IconTreeTransferHandler extends TransferHandler {
                             return false;
                         }
 
-                        if( theDestObj instanceof JobSetController ) { //If the destination is a JobSetController...
-                            //The user dragged something into a JobSet.
-                            
-                            if( !( theSourceObj instanceof JobController ) ) //If the source object is not a JobController...
-                                continue; //Skip it / Only Jobs can be added to a JobSet.
-                            
-                            //The user dragged a Job into a JobSet.
+//                        if( theDestObj instanceof JobSetController ) { //If the destination is a JobSetController...
+//                            //The user dragged something into a JobSet.
+//                            
+//                            if( !( theSourceObj instanceof JobController ) ) //If the source object is not a JobController...
+//                                continue; //Skip it / Only Jobs can be added to a JobSet.
+//                            
+//                            //The user dragged a Job into a JobSet.
+//
+//                            JobController sourceJobController = (JobController)theSourceObj;
+//                            JobSetController destinationJobSetController = (JobSetController)theDestObj;
+//
+//                            if( currParentObj instanceof JobSetController ) { //If the source node's parent node's Object is a JobSetController...
+//                                //The user dragged a Job from a JobSet to a JobSet.
+//                                
+//                                if( currParentObj == theDestObj ) { //If the transfer's destination is the same as the source's parent node...
+//                                    //The user dragged a Job from a JobSet to the same JobSet.
+//                                    
+//                                    destinationJobSetController.insertChild( sourceJobController, childIndex ); //Move the Job within the JobSet
+//                                    addNodeToTree( sourceNode, destNode, childIndex ); //Move the Job's node to the new position
+//                                    theMainGui.setDirtyFlag( destinationJobSetController, true, false ); //Update the gui
+//
+//                                } else { //If the transfer's destination is NOT the same as the source's parent node...
+//                                    //The user dragged a Job from one JobSet to another JobSet.
+//
+//                                    //If the destination JobSet does not already contain the Job...
+//                                    boolean found = false;                                    
+//                                    List<LibraryItemController> theContList = destinationJobSetController.getChildren();
+//                                    for( LibraryItemController aCont : theContList ){
+//                                        if( aCont.getItemName().equals(sourceJobController.getItemName()) 
+//                                                && aCont.getItemTypeDisplayName().equals( sourceJobController.getItemTypeDisplayName()) ){
+//                                            found = true;
+//                                        }
+//                                    }
+//                                    
+//                                    if( !found ) {
+//                                        
+//                                        //Remove the Job from the source JobSet...
+//                                        JobSetController sourceJobSet = (JobSetController)currParentObj;
+//                                        sourceJobSet.removeChild( sourceJobController ); //Remove the Job from the JobSet
+//                                        theTreeModel.removeNodeFromParent( sourceNode ); //Remove the Job's node from the JobSet's node
+//                                        theMainGui.setDirtyFlag( sourceJobSet, true, false ); //Update the gui
+//                                        
+//                                        //Add the Job to the destination JobSet...
+//                                        destinationJobSetController.insertChild( sourceJobController, childIndex ); //Add the Job to the JobSet
+//                                        addNodeToTree( sourceNode, destNode, childIndex ); //Add the Job's node to the JobSet's node
+//                                        theMainGui.setDirtyFlag( destinationJobSetController, true, false ); //Update the gui
+//
+//                                    } //Else, the destination JobSet already contains the Job; do nothing.
+//                                    
+//                                } //End of "} else { //If the transfer's destination is NOT the same as the source's parent node..."
+//
+//                            } else if( currParentObj instanceof HostController ) { //If the source node's parent node's Object is not a JobSetController...
+//                                //The user dragged a Job into a JobSet from somewhere that isn't a JobSet.
+//
+//                                //This will be the case if the source node's parent node is the root node. (It's Object is a Folder.)
+//                                HostController theHostController = (HostController)currParentObj;
+//                                if( destinationJobSetController.getHostController().equals(theHostController) ){
+////                                if( theHostController.isLocalHost()){
+//                                    //If the destination JobSet already contains the Job...
+//                                    if( destinationJobSetController.contains( sourceJobController ) )
+//                                        continue; //Do nothing
+//                                    //Else, if the destination JobSet does not already contain the Job...
+//
+//                                    //Add the Job to the destination JobSet...
+//                                    destinationJobSetController.insertChild( sourceJobController, childIndex ); //Add the Job to the JobSet
+//                                    addNodeToTree( new IconNode( sourceJobController, sourceJobController instanceof Ancestor ), destNode, childIndex );
+//                                    theMainGui.setDirtyFlag( destinationJobSetController, true, false ); //Update the gui
+//                                
+//                                } else {
+//                                
+//                                    //Remove from source 
+//                                    //Must be in this order
+//                                    ((LibraryItemController)theSourceObj).deleteFromLibrary();
+//                                    theTreeModel.removeNodeFromParent( sourceNode ); //Remove the Job's node from the JobSet's node
+//                                    
+//                                    continue;
+//                                }
+//                            }
+//
+//                            mainJTree.expandPath( destPath ); //Expand the destination path
 
-                            JobController sourceJobController = (JobController)theSourceObj;
-                            JobSetController destinationJobSetController = (JobSetController)theDestObj;
-
-                            if( currParentObj instanceof JobSetController ) { //If the source node's parent node's Object is a JobSetController...
-                                //The user dragged a Job from a JobSet to a JobSet.
-                                
-                                if( currParentObj == theDestObj ) { //If the transfer's destination is the same as the source's parent node...
-                                    //The user dragged a Job from a JobSet to the same JobSet.
-                                    
-                                    destinationJobSetController.insertChild( sourceJobController, childIndex ); //Move the Job within the JobSet
-                                    addNodeToTree( sourceNode, destNode, childIndex ); //Move the Job's node to the new position
-                                    theMainGui.setDirtyFlag( destinationJobSetController, true, false ); //Update the gui
-
-                                } else { //If the transfer's destination is NOT the same as the source's parent node...
-                                    //The user dragged a Job from one JobSet to another JobSet.
-
-                                    //If the destination JobSet does not already contain the Job...
-                                    boolean found = false;                                    
-                                    List<LibraryItemController> theContList = destinationJobSetController.getChildren();
-                                    for( LibraryItemController aCont : theContList ){
-                                        if( aCont.getItemName().equals(sourceJobController.getItemName()) 
-                                                && aCont.getItemTypeDisplayName().equals( sourceJobController.getItemTypeDisplayName()) ){
-                                            found = true;
-                                        }
-                                    }
-                                    
-                                    if( !found ) {
-                                        
-                                        //Remove the Job from the source JobSet...
-                                        JobSetController sourceJobSet = (JobSetController)currParentObj;
-                                        sourceJobSet.removeChild( sourceJobController ); //Remove the Job from the JobSet
-                                        theTreeModel.removeNodeFromParent( sourceNode ); //Remove the Job's node from the JobSet's node
-                                        theMainGui.setDirtyFlag( sourceJobSet, true, false ); //Update the gui
-                                        
-                                        //Add the Job to the destination JobSet...
-                                        destinationJobSetController.insertChild( sourceJobController, childIndex ); //Add the Job to the JobSet
-                                        addNodeToTree( sourceNode, destNode, childIndex ); //Add the Job's node to the JobSet's node
-                                        theMainGui.setDirtyFlag( destinationJobSetController, true, false ); //Update the gui
-
-                                    } //Else, the destination JobSet already contains the Job; do nothing.
-                                    
-                                } //End of "} else { //If the transfer's destination is NOT the same as the source's parent node..."
-
-                            } else if( currParentObj instanceof HostController ) { //If the source node's parent node's Object is not a JobSetController...
-                                //The user dragged a Job into a JobSet from somewhere that isn't a JobSet.
-
-                                //This will be the case if the source node's parent node is the root node. (It's Object is a Folder.)
-                                HostController theHostController = (HostController)currParentObj;
-                                if( destinationJobSetController.getHostController().equals(theHostController) ){
-//                                if( theHostController.isLocalHost()){
-                                    //If the destination JobSet already contains the Job...
-                                    if( destinationJobSetController.contains( sourceJobController ) )
-                                        continue; //Do nothing
-                                    //Else, if the destination JobSet does not already contain the Job...
-
-                                    //Add the Job to the destination JobSet...
-                                    destinationJobSetController.insertChild( sourceJobController, childIndex ); //Add the Job to the JobSet
-                                    addNodeToTree( new IconNode( sourceJobController, sourceJobController instanceof Ancestor ), destNode, childIndex );
-                                    theMainGui.setDirtyFlag( destinationJobSetController, true, false ); //Update the gui
-                                
-                                } else {
-                                
-                                    //Remove from source 
-                                    //Must be in this order
-                                    ((LibraryItemController)theSourceObj).deleteFromLibrary();
-                                    theTreeModel.removeNodeFromParent( sourceNode ); //Remove the Job's node from the JobSet's node
-                                    
-                                    continue;
-                                }
-                            }
-
-                            mainJTree.expandPath( destPath ); //Expand the destination path
-
-                        } else if( theDestObj instanceof HostController ){
+//                        } else 
+                        if( theDestObj instanceof HostController ){
                             
                             HostController theDestHostController = (HostController)(theDestObj);
                                     
                             //If the destination is a jobset
-                            if( currParentObj instanceof JobSetController ) {
-
-                                JobSetController jobSetController = (JobSetController)currParentObj;
-                                if( jobSetController.getHostController().equals(theDestHostController)){
-                                    //The destination is the root folder. (The user dragged the item to
-                                    //  the empty space in the panel; not to a particular node.)
-                                    JobController jobController = (JobController)theSourceObj;
-                                                             jobSetController.removeChild( jobController ); //Remove the Job from the JobSet
-                                    theTreeModel.removeNodeFromParent( sourceNode ); //Remove the Job's node from the JobSet's node
-
-                                    theMainGui.setDirtyFlag( jobSetController, true, true ); //Update the gui
-                                    continue;
+//                            if( currParentObj instanceof JobSetController ) {
+//
+//                                JobSetController jobSetController = (JobSetController)currParentObj;
+//                                if( jobSetController.getHostController().equals(theDestHostController)){
+//                                    //The destination is the root folder. (The user dragged the item to
+//                                    //  the empty space in the panel; not to a particular node.)
+//                                    JobController jobController = (JobController)theSourceObj;
+//                                                             jobSetController.removeChild( jobController ); //Remove the Job from the JobSet
+//                                    theTreeModel.removeNodeFromParent( sourceNode ); //Remove the Job's node from the JobSet's node
+//
+//                                    theMainGui.setDirtyFlag( jobSetController, true, true ); //Update the gui
+//                                    continue;
+//                                    
+//                                } else {
+//                                    
+//                                    LibraryItemController srcObjController = (LibraryItemController)theSourceObj;
+//                                    XmlBase anXMB = (XmlBase) srcObjController.getObject();
+//                                    
+//                                    //If the object already exists
+//                                    if( theMainController.getControllerByObjName( theDestHostController.getItemName(), 
+//                                            anXMB.getClass().getSimpleName(), anXMB.getName() ) != null) {
+//                                        continue;
+//                                    }
+//                                    
+//                                    //Add the Job to the destination JobSet...
+//                                    LibraryItemController copiedController = srcObjController.copy();
+//                                    
+//                                    //Must be in this order
+//                                    addNodeToTree( new IconNode( copiedController, copiedController instanceof Ancestor ), destNode, childIndex );
+//                                    copiedController.saveToDisk();
+//                                 
+//                                    mainJTree.expandPath( destPath ); //Expand the destination path
+//                                    continue;
+//                                    
+//                                }
                                     
-                                } else {
-                                    
-                                    LibraryItemController srcObjController = (LibraryItemController)theSourceObj;
-                                    XmlBase anXMB = (XmlBase) srcObjController.getObject();
-                                    
-                                    //If the object already exists
-                                    if( theMainController.getControllerByObjName( theDestHostController.getItemName(), 
-                                            anXMB.getClass().getSimpleName(), anXMB.getName() ) != null) {
-                                        continue;
-                                    }
-                                    
-                                    //Add the Job to the destination JobSet...
-                                    LibraryItemController copiedController = srcObjController.copy();
-                                    
-                                    //Must be in this order
-                                    addNodeToTree( new IconNode( copiedController, copiedController instanceof Ancestor ), destNode, childIndex );
-                                    copiedController.saveToDisk();
-                                 
-                                    mainJTree.expandPath( destPath ); //Expand the destination path
-                                    continue;
-                                    
-                                }
-                                    
-                            } else if( currParentObj instanceof HostController ){
+//                            } else 
+                            if( currParentObj instanceof HostController ){
                                 
                                 //Reorder the object
                                 if( theDestObj.equals( currParentObj ) ){
@@ -384,26 +386,26 @@ public class IconTreeTransferHandler extends TransferHandler {
                                     copiedController.saveToDisk();
                                     
                                     //Add the child nodes to the jobset
-                                    if( theSourceObj instanceof JobSetController ){
-                                        Enumeration<DefaultMutableTreeNode> e = sourceNode.children();
-                                        //Iterate through the nodes
-                                        while( e.hasMoreElements() ) {
-
-                                            DefaultMutableTreeNode currentNode = e.nextElement();
-                                            Object theObj = currentNode.getUserObject();
-                                            if( theObj instanceof JobController ){
-
-                                                //Add the Job to the destination JobSet...
-                                                srcObjController = (JobController)theObj;
-                                                copiedController = srcObjController.copy();
-
-                                                //Must be in this order
-                                                addNodeToTree( new IconNode( copiedController, copiedController instanceof Ancestor ), newNode, childIndex );
-                                                copiedController.saveToDisk();
-
-                                            }
-                                        }
-                                    }                                
+//                                    if( theSourceObj instanceof JobSetController ){
+//                                        Enumeration<DefaultMutableTreeNode> e = sourceNode.children();
+//                                        //Iterate through the nodes
+//                                        while( e.hasMoreElements() ) {
+//
+//                                            DefaultMutableTreeNode currentNode = e.nextElement();
+//                                            Object theObj = currentNode.getUserObject();
+//                                            if( theObj instanceof JobController ){
+//
+//                                                //Add the Job to the destination JobSet...
+//                                                srcObjController = (JobController)theObj;
+//                                                copiedController = srcObjController.copy();
+//
+//                                                //Must be in this order
+//                                                addNodeToTree( new IconNode( copiedController, copiedController instanceof Ancestor ), newNode, childIndex );
+//                                                copiedController.saveToDisk();
+//
+//                                            }
+//                                        }
+//                                    }                                
                                  
                                     mainJTree.expandPath( destPath ); //Expand the destination path
                                     continue;

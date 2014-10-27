@@ -47,14 +47,14 @@ import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.CountSeeker;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-public final class CountReply extends Tasking {
+public final class CountReply extends MaltegoMessage {
     
     private static final byte OPTION_COUNT = 70;        
     private static final byte OPTION_COUNT_ID = 80;

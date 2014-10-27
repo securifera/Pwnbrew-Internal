@@ -58,12 +58,11 @@ import java.util.logging.Level;
 import pwnbrew.execution.ExecutableItem;
 import pwnbrew.host.Host;
 import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.network.control.messages.TaskNew;
+//import pwnbrew.network.control.messages.TaskNew;
 import pwnbrew.xmlBase.AttributeCollection;
 import pwnbrew.xmlBase.DescriptiveXmlBase;
 import pwnbrew.xmlBase.FileContentRef;
@@ -287,35 +286,35 @@ public class RemoteTask extends DescriptiveXmlBase implements ExecutableItem{
         
     }/* END getCommandArgs() */
 
-    // ==========================================================================
-    /**
-     * Returns a control message for the current state of the task.
-     *
-     * @param dstHostId
-     * @return a Control Message
-     * @throws pwnbrew.logging.LoggableException
-     */
-    public TaskNew getControlMessage( int dstHostId ) throws LoggableException {
-
-        TaskNew taskMsg = null;
-        String[] cmdLineStrArr = getCommandArgs("");
-
-        try {
-            
-            if(cmdLineStrArr != null && cmdLineStrArr.length > 0){
-      
-               String theTaskId = getTaskId();
-               taskMsg = new TaskNew(Integer.valueOf(theTaskId), cmdLineStrArr, theFileContentRefMap.values(), dstHostId );
-
-            }
-
-        } catch (IOException ex){
-           throw new LoggableException(ex);
-        }
-
-        return taskMsg;
-
-    }/* END getControlMessage() */
+//    // ==========================================================================
+//    /**
+//     * Returns a control message for the current state of the task.
+//     *
+//     * @param dstHostId
+//     * @return a Control Message
+//     * @throws pwnbrew.logging.LoggableException
+//     */
+//    public TaskNew getControlMessage( int dstHostId ) throws LoggableException {
+//
+//        TaskNew taskMsg = null;
+//        String[] cmdLineStrArr = getCommandArgs("");
+//
+//        try {
+//            
+//            if(cmdLineStrArr != null && cmdLineStrArr.length > 0){
+//      
+//               String theTaskId = getTaskId();
+//               taskMsg = new TaskNew(Integer.valueOf(theTaskId), cmdLineStrArr, theFileContentRefMap.values(), dstHostId );
+//
+//            }
+//
+//        } catch (IOException ex){
+//           throw new LoggableException(ex);
+//        }
+//
+//        return taskMsg;
+//
+//    }/* END getControlMessage() */
 
      // ==========================================================================
     /**

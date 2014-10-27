@@ -47,13 +47,13 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.gui;
 
 import pwnbrew.library.LibraryItemController;
-import pwnbrew.controllers.RunnableItemController;
-import pwnbrew.controllers.JobSetController;
-import pwnbrew.controllers.JobController;
+//import pwnbrew.controllers.RunnableItemController;
+//import pwnbrew.controllers.JobSetController;
+//import pwnbrew.controllers.JobController;
 import pwnbrew.controllers.MainGuiController;
 import pwnbrew.xmlBase.XmlBase;
 import pwnbrew.xmlBase.job.Job;
-import pwnbrew.xmlBase.job.JobSet;
+//import pwnbrew.xmlBase.job.JobSet;
 import java.awt.*;
 import java.awt.dnd.DnDConstants;
 import java.awt.event.*;
@@ -242,8 +242,8 @@ public final class MainGui extends javax.swing.JFrame {
 
                 //Initialize the lists
                 List<LibraryItemController> theControllerList = new ArrayList<>();
-                List<JobController> jobControllerList = new ArrayList<>();
-                List<JobSetController> jobSetControllerList = new ArrayList<>();
+//                List<JobController> jobControllerList = new ArrayList<>();
+//                List<JobSetController> jobSetControllerList = new ArrayList<>();
 
                 //Iterate through the library items and create controllers for them
                 LibraryItemController theController;
@@ -258,14 +258,14 @@ public final class MainGui extends javax.swing.JFrame {
                         }
 
                         theController = aJob.instantiateController( theGuiController );
-                        jobControllerList.add( (JobController)theController );
+//                        jobControllerList.add( (JobController)theController );
 
-                    } else if( anXB instanceof JobSet ) {
-
-                        JobSet aJobSet = (JobSet)anXB;
-                        theController = aJobSet.instantiateController( theGuiController );
-                        
-                        jobSetControllerList.add( (JobSetController) theController );
+//                    } else if( anXB instanceof JobSet ) {
+//
+//                        JobSet aJobSet = (JobSet)anXB;
+//                        theController = aJobSet.instantiateController( theGuiController );
+//                        
+//                        jobSetControllerList.add( (JobSetController) theController );
                         
                     } else {
                         continue;    
@@ -274,14 +274,15 @@ public final class MainGui extends javax.swing.JFrame {
                     theControllerList.add( theController );
                 }
 
-                //Initialize the references to JobControllers in the JobSetControllers...
-                for( JobSetController jsController : jobSetControllerList ) { //For each JobSetController...
-                    jsController.addJobControllerReferences( jobControllerList );
-                }
+//                //Initialize the references to JobControllers in the JobSetControllers...
+//                for( JobSetController jsController : jobSetControllerList ) { //For each JobSetController...
+//                    jsController.addJobControllerReferences( jobControllerList );
+//                }
 
                 //Add the entry
                 Host aHost = anEntry.getKey();
-                theRtnMap.put( new HostController(aHost, theGuiController), theControllerList);
+                HostController aController = new HostController(aHost, theGuiController, theGuiController.isHeadless());
+                theRtnMap.put( aController, theControllerList);
             }
             
             populateTreeModel( theRtnMap ); //Populate the TreeModel
@@ -535,30 +536,30 @@ public final class MainGui extends javax.swing.JFrame {
                 popup = theController.getPopupJMenu( false );  
             }
         
-        } else {
-            
-            //Loop through the controller types and add their creation strings
-            //to the right click menu
-            Iterator<String> anIter = theGuiController.getActionClassMap().keySet().iterator();
-            while( anIter.hasNext() ){        
-
-                String addString = anIter.next();
-                menuItem = new JMenuItem( addString );
-                menuItem.setActionCommand( addString );
-                menuItem.addActionListener( theGuiController );
-                menuItem.setEnabled( true );
-                popup.add( menuItem );   
-
-            }
-
-            //Add separator
-            popup.addSeparator();
-
-            menuItem = new JMenuItem( Constants.IMPORT_BUNDLE );
-            menuItem.setActionCommand( Constants.IMPORT_BUNDLE );
-            menuItem.addActionListener( theGuiController );
-            menuItem.setEnabled( true );
-            popup.add( menuItem );
+//        } else {
+//            
+//            //Loop through the controller types and add their creation strings
+//            //to the right click menu
+//            Iterator<String> anIter = theGuiController.getActionClassMap().keySet().iterator();
+//            while( anIter.hasNext() ){        
+//
+//                String addString = anIter.next();
+//                menuItem = new JMenuItem( addString );
+//                menuItem.setActionCommand( addString );
+//                menuItem.addActionListener( theGuiController );
+//                menuItem.setEnabled( true );
+//                popup.add( menuItem );   
+//
+//            }
+//
+//            //Add separator
+//            popup.addSeparator();
+//
+//            menuItem = new JMenuItem( Constants.IMPORT_BUNDLE );
+//            menuItem.setActionCommand( Constants.IMPORT_BUNDLE );
+//            menuItem.addActionListener( theGuiController );
+//            menuItem.setEnabled( true );
+//            popup.add( menuItem );
         }
 
         if( popup != null && popup.getComponentCount() > 0 ) {
@@ -610,10 +611,10 @@ public final class MainGui extends javax.swing.JFrame {
     public void setSelectedObject( LibraryItemController theController, boolean showRunner ) {
 
         mainJTree.setSelectedObject( theController );
-        if(showRunner && theController instanceof JobController ){
-            JobController aJobController = (JobController)theController;
-            aJobController.showRunnerTab();
-        }
+//        if(showRunner && theController instanceof JobController ){
+//            JobController aJobController = (JobController)theController;
+//            aJobController.showRunnerTab();
+//        }
     }
 
     //======================================================================
@@ -742,61 +743,61 @@ public final class MainGui extends javax.swing.JFrame {
 
     }/* END populateEditMenu() */
 
-    // ==========================================================================
-    /**
-     * Displays a dialog prompting the user to confirm the run of the given {@link RunnableItemController}'s
-     * item.
-     * <p>
-     * If the argument is null this method does nothing and returns false.
-     *
-     * @param controller the {@code RunnableItemController}
-     *
-     * @return {@code true} if and only if the user selects the "Yes" option of
-     * the dialog confirming the run, {@code false} otherwise
-     *
-    */
-    public boolean promptUserToConfirmRun( RunnableItemController controller ) {
-
-        if( controller == null ) return false; //Check the argument
-        
-        //Create the prompt message...
-        StringBuilder messageBldr = new StringBuilder();
-        controller.createRunConfirmationMessage( messageBldr );
-        
-        //Prompt the user to confirm the run...
-        String itemName = controller.getItemName();
-        int usersChoice = JOptionPane.showConfirmDialog( this,
-                messageBldr.toString(), //The message
-                new StringBuilder( "Run " ).append( itemName ).append( "?" ).toString(),  //The title
-                JOptionPane.YES_NO_OPTION ); //Dialog option
-
-        //If the user chose "Yes" the run is confirmed. Otherwise, the user either chose
-        //  "No" or closed the dialog (which we'll treat as "No")
-        return JOptionPane.YES_OPTION == usersChoice;
-
-    }/* END promptUserToConfirmRun( RunnableItemController ) */
+//    // ==========================================================================
+//    /**
+//     * Displays a dialog prompting the user to confirm the run of the given {@link RunnableItemController}'s
+//     * item.
+//     * <p>
+//     * If the argument is null this method does nothing and returns false.
+//     *
+//     * @param controller the {@code RunnableItemController}
+//     *
+//     * @return {@code true} if and only if the user selects the "Yes" option of
+//     * the dialog confirming the run, {@code false} otherwise
+//     *
+//    */
+//    public boolean promptUserToConfirmRun( RunnableItemController controller ) {
+//
+//        if( controller == null ) return false; //Check the argument
+//        
+//        //Create the prompt message...
+//        StringBuilder messageBldr = new StringBuilder();
+//        controller.createRunConfirmationMessage( messageBldr );
+//        
+//        //Prompt the user to confirm the run...
+//        String itemName = controller.getItemName();
+//        int usersChoice = JOptionPane.showConfirmDialog( this,
+//                messageBldr.toString(), //The message
+//                new StringBuilder( "Run " ).append( itemName ).append( "?" ).toString(),  //The title
+//                JOptionPane.YES_NO_OPTION ); //Dialog option
+//
+//        //If the user chose "Yes" the run is confirmed. Otherwise, the user either chose
+//        //  "No" or closed the dialog (which we'll treat as "No")
+//        return JOptionPane.YES_OPTION == usersChoice;
+//
+//    }/* END promptUserToConfirmRun( RunnableItemController ) */
     
     
-    // ==========================================================================
-    /**
-     * Displays a dialog informing the user that the given {@link RunnableItemController}'s
-     * item is already running.
-     * <p>
-     * If the argument is null this method does nothing.
-     *
-     * @param controller the {@code RunnableItemController}
-     * 
-    */
-    public void informUserItemIsAlreadyRunning( RunnableItemController controller ) {
-
-        if( controller == null ) return; //Check the argument
-        
-        JOptionPane.showMessageDialog( this,
-                new StringBuilder( controller.getItemName() ).append( " is already running." ).toString(), //The message
-                "Already running",  //The title
-                JOptionPane.OK_OPTION ); //Dialog option
-
-    }/* END informUserIsAlreadyRunning( RunnableItemController ) */
+//    // ==========================================================================
+//    /**
+//     * Displays a dialog informing the user that the given {@link RunnableItemController}'s
+//     * item is already running.
+//     * <p>
+//     * If the argument is null this method does nothing.
+//     *
+//     * @param controller the {@code RunnableItemController}
+//     * 
+//    */
+//    public void informUserItemIsAlreadyRunning( RunnableItemController controller ) {
+//
+//        if( controller == null ) return; //Check the argument
+//        
+//        JOptionPane.showMessageDialog( this,
+//                new StringBuilder( controller.getItemName() ).append( " is already running." ).toString(), //The message
+//                "Already running",  //The title
+//                JOptionPane.OK_OPTION ); //Dialog option
+//
+//    }/* END informUserIsAlreadyRunning( RunnableItemController ) */
     
     
     // ========================================================================
@@ -1074,10 +1075,10 @@ public final class MainGui extends javax.swing.JFrame {
 
     private void helpUserManualJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_helpUserManualJMenuItemActionPerformed
        
-        String retString = GuiUtilities.displayUserManual();
-        if(retString != null){
-           JOptionPane.showMessageDialog( this, retString, "", JOptionPane.ERROR_MESSAGE );
-        }
+//        String retString = GuiUtilities.displayUserManual();
+//        if(retString != null){
+//           JOptionPane.showMessageDialog( this, retString, "", JOptionPane.ERROR_MESSAGE );
+//        }
       
 }//GEN-LAST:event_helpUserManualJMenuItemActionPerformed
 
@@ -1086,21 +1087,21 @@ public final class MainGui extends javax.swing.JFrame {
 }//GEN-LAST:event_helpAboutJMenuItemActionPerformed
 
     private void runMeuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runMeuItemActionPerformed
-        List<LibraryItemController> theControllerList = getJTree().getSelectedObjectControllers();
-        for( LibraryItemController aController : theControllerList ){
-            if( aController instanceof RunnableItemController ) {
-                theGuiController.runObject( (RunnableItemController)theControllerList );
-            }
-        }
+//        List<LibraryItemController> theControllerList = getJTree().getSelectedObjectControllers();
+//        for( LibraryItemController aController : theControllerList ){
+//            if( aController instanceof RunnableItemController ) {
+//                theGuiController.runObject( (RunnableItemController)theControllerList );
+//            }
+//        }
     }//GEN-LAST:event_runMeuItemActionPerformed
 
     private void stopMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopMenuItemActionPerformed
-        List<LibraryItemController> theControllerList = getJTree().getSelectedObjectControllers();
-        for( LibraryItemController aController : theControllerList ){
-            if( aController instanceof RunnableItemController ){
-                theGuiController.cancelRunForCurrentNode((RunnableItemController) aController);
-            }
-        }
+//        List<LibraryItemController> theControllerList = getJTree().getSelectedObjectControllers();
+//        for( LibraryItemController aController : theControllerList ){
+//            if( aController instanceof RunnableItemController ){
+//                theGuiController.cancelRunForCurrentNode((RunnableItemController) aController);
+//            }
+//        }
     }//GEN-LAST:event_stopMenuItemActionPerformed
 
     private void saveJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveJMenuItemActionPerformed
@@ -1112,11 +1113,11 @@ public final class MainGui extends javax.swing.JFrame {
     }//GEN-LAST:event_saveAllJMenuItemActionPerformed
 
     private void exportJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportJMenuItemActionPerformed
-        theGuiController.exportLibraryObjects( getJTree().getSelectedObjectControllers() );
+//        theGuiController.exportLibraryObjects( getJTree().getSelectedObjectControllers() );
     }//GEN-LAST:event_exportJMenuItemActionPerformed
 
     private void importJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importJMenuItemActionPerformed
-       theGuiController.importBundle( null );
+//       theGuiController.importBundle( null );
     }//GEN-LAST:event_importJMenuItemActionPerformed
 
     private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized

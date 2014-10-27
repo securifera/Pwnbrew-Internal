@@ -70,6 +70,7 @@ import pwnbrew.fileoperation.FileOperationUpdater;
 import pwnbrew.fileoperation.RemoteFileIO;
 import pwnbrew.fileoperation.RemoteFileIOListener;
 import pwnbrew.filesystem.FileBrowserListener;
+import pwnbrew.filesystem.FileJTable;
 import pwnbrew.filesystem.FileNode;
 import pwnbrew.filesystem.FileSystemJFrame;
 import pwnbrew.filesystem.FileTreePanel;
@@ -80,7 +81,7 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.ProgressListener;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.ControlOption;
@@ -612,57 +613,85 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     /**
      * 
      * @param theObjList 
-     * @param passedDir 
      */
     @Override
-    public void uploadFiles( List<File> theObjList, String passedDir ) {
+    public void uploadFiles( List<File> theObjList ) {
         
         if( theObjList != null ) { //If the user selected any files...
-                            
-            //Get the control message manager
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            for( Object anObj : theObjList) { //For each file path...
+            
+            JTree theJTree = theFsFrame.getFileTreePanel().getJTree();
+            TreePath aTreePath = theJTree.getSelectionPath();
+            
+            FileJTable theFileJTable = theFsFrame.getFileJTable();
+            int selRow = theFileJTable.getSelectedRow();
 
-                if(anObj instanceof File){
-                    File aFile = (File)anObj;
-                    if( aFile.exists() && aFile.canRead() ) { 
+            String filePath = null;
+            if( selRow != -1){
+                DefaultTableModel theTableModel = (DefaultTableModel) theFileJTable.getModel();            
 
-                        try {
+                //Get the directory
+                FileNode aFileNode = (FileNode)theTableModel.getValueAt(selRow, 0);
+                filePath = aFileNode.getFile().getAbsolutePath();
 
-                            int taskId = SocketUtilities.getNextId();
-
-                            //Set the remote task information
-                            RemoteFileIO aRemoteTask = new RemoteFileIO( aFile.getAbsolutePath(), Constants.FILE_UPLOAD, Constants.UPLOAD_IMG_STR );
-                            aRemoteTask.setTaskId(Integer.toString( taskId ));
-                            aRemoteTask.setState( RemoteFileIO.TASK_XFER_FILES);
-                            
-                            //Add support files and add to the task list
-                            addTask(aRemoteTask);
-
-                            //Queue the file to be sent
-                            String fileHashNameStr = new StringBuilder().append("0").append(":").append(aFile.getAbsolutePath()).toString();
-                            PushFile thePFM = new PushFile( taskId, fileHashNameStr, aFile.length(), PushFile.FILE_UPLOAD, theHostId );
-
-                            //Add the directory
-                            byte[] tempArr = passedDir.getBytes("US-ASCII");
-                            ControlOption aTlv = new ControlOption( PushFile.OPTION_REMOTE_DIR, tempArr);
-                            thePFM.addOption(aTlv);
-
-                            //Send the message
-                            aCMManager.send( thePFM );  
-
-                        } catch ( IOException ex) {
-                            JOptionPane.showMessageDialog( theFsFrame, ex.getMessage(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
-                        }
-
-                    } else { //If the file cannot be read...
-                       JOptionPane.showMessageDialog( theFsFrame, new StringBuilder( "\tThe file(s) could not be read: \"" )
-                                .append( aFile.getAbsolutePath() ).append( "\"" ).toString(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
+            } else {
+                 //Get the selected tree component
+                DefaultMutableTreeNode selNode = (DefaultMutableTreeNode) aTreePath.getLastPathComponent();
+                Object selObj = selNode.getUserObject();
+                if( selObj instanceof IconData ){
+                    IconData iconDataObj = (IconData)selNode.getUserObject();
+                    Object innerObj = iconDataObj.getObject();
+                    if( innerObj instanceof FileNode){
+                        FileNode aFileNode = (FileNode)innerObj;
+                        filePath = aFileNode.getFile().getAbsolutePath();
                     }
                 }
-
             }
+                            
+            //Get the control message manager
+            if( filePath != null ){
+                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+                for( Object anObj : theObjList) { //For each file path...
 
+                    if(anObj instanceof File){
+                        File aFile = (File)anObj;
+                        if( aFile.exists() && aFile.canRead() ) { 
+
+                            try {
+
+                                int taskId = SocketUtilities.getNextId();
+
+                                //Set the remote task information
+                                RemoteFileIO aRemoteTask = new RemoteFileIO( aFile.getAbsolutePath(), Constants.FILE_UPLOAD, Constants.UPLOAD_IMG_STR );
+                                aRemoteTask.setTaskId(Integer.toString( taskId ));
+                                aRemoteTask.setState( RemoteFileIO.TASK_XFER_FILES);
+
+                                //Add support files and add to the task list
+                                addTask(aRemoteTask);
+
+                                //Queue the file to be sent
+                                String fileHashNameStr = new StringBuilder().append("0").append(":").append(aFile.getAbsolutePath()).toString();
+                                PushFile thePFM = new PushFile( taskId, fileHashNameStr, aFile.length(), PushFile.FILE_UPLOAD, theHostId );
+
+                                //Add the directory
+                                byte[] tempArr = filePath.getBytes("US-ASCII");
+                                ControlOption aTlv = new ControlOption( PushFile.OPTION_REMOTE_DIR, tempArr);
+                                thePFM.addOption(aTlv);
+
+                                //Send the message
+                                aCMManager.send( thePFM );  
+
+                            } catch ( IOException ex) {
+                                JOptionPane.showMessageDialog( theFsFrame, ex.getMessage(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
+                            }
+
+                        } else { //If the file cannot be read...
+                           JOptionPane.showMessageDialog( theFsFrame, new StringBuilder( "\tThe file(s) could not be read: \"" )
+                                    .append( aFile.getAbsolutePath() ).append( "\"" ).toString(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
+                        }
+                    }
+
+                }
+            }
         }
         
     }   
@@ -894,14 +923,24 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     @Override
     public void fileTreePanelValueChanged(TreeSelectionEvent anEvent) {
         
-        TreePath aTreePath = theFsFrame.getFileTreePanel().getJTree().getSelectionPath();
+        boolean uploadEnable = false;
+        JTree theJTree = theFsFrame.getFileTreePanel().getJTree();
+        TreePath aTreePath = theJTree.getSelectionPath();
         if( aTreePath != null ){
             DefaultMutableTreeNode node = theFsFrame.getFileTreePanel().getTreeNode( anEvent.getPath() );    
             getChildren( node );
+            
+            FileJTable theFileJTable = theFsFrame.getFileJTable();
+            int selRow = theFileJTable.getSelectedRow();
+            
+            Object theRoot = theJTree.getModel().getRoot();
+            Object lastComponent = aTreePath.getLastPathComponent();
+            if( selRow == -1 && lastComponent != null && !theRoot.equals(lastComponent))
+                uploadEnable = true;   
         }
-
+        
         //Enable or disable the upload and download button
-        theFsFrame.setFileIOButtonEnablements( false, false );
+        theFsFrame.setFileIOButtonEnablements( uploadEnable, false );
     }
 
     //=================================================================

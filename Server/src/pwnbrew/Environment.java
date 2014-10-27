@@ -45,24 +45,27 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew;
 
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LogLevel;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.CodeSource;
+import java.security.NoSuchAlgorithmException;
 import java.security.ProtectionDomain;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import pwnbrew.controllers.RunnableItemController;
+import java.util.logging.Level;
 import pwnbrew.gui.panels.options.OptionsJPanel;
+import pwnbrew.logging.Log;
+import pwnbrew.logging.LogLevel;
 import pwnbrew.misc.Directories;
+import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.JarItem;
+import pwnbrew.xmlBase.JarItemException;
 import pwnbrew.xmlBase.XmlBase;
 import pwnbrew.xmlBase.XmlBaseFactory;
 
@@ -87,11 +90,18 @@ final public class Environment {
 
     private static boolean isRunningFromJar = false;
     private static boolean isRunningWithinIde = false;
+    
+    private static final String MODULE_PACKAGE = "pwnbrew/modules/";
+    private static final String CLIENT_MODULE = "10000";
+    private static final String STAGER_MODULE = "10002";
+    private static final String MALTEGO_MODULE = "10001";
+    private static final String[] DEFAULT_MODULE_LIST = new String[]{ CLIENT_MODULE, MALTEGO_MODULE, STAGER_MODULE };
 
     static {
         determineRunLocation();
         populateNameToClassMap();
-        loadExtensions();
+        loadSavedModules();
+        loadDefaultModules();
     }
 
     // ==========================================================================
@@ -105,7 +115,7 @@ final public class Environment {
     /**
      * Load any extension JARs
      */
-    private static void loadExtensions() {
+    private static void loadSavedModules() {
         
         //For local 
         File jarLibDir = new File( Directories.getJarLibPath());
@@ -132,6 +142,96 @@ final public class Environment {
         }        
         
     }
+    
+     // ==========================================================================
+    /**
+     * Load any extension JARs
+     */
+    private static void loadDefaultModules() {
+        
+        List<JarItem> jarList = Utilities.getJarItems();
+        for( String aModuleUID : DEFAULT_MODULE_LIST ){
+            boolean found = false;
+            for( JarItem aJarItem : jarList )
+                if( aJarItem.getId().equals(aModuleUID)){
+                    found = true;                
+                    break;
+                }
+            
+            //Write the JAR out and load it into the server
+            if( !found ){
+                 
+                try {
+                    int bytesRead = 0;
+                    //Create a temp file to write to
+                    File aFile = File.createTempFile("tmp", null);
+                    ClassLoader theClassLoader = Environment.class.getClassLoader();
+                    String jarPath = MODULE_PACKAGE + aModuleUID;
+                    //Get the resource
+                    try (InputStream anIS = theClassLoader.getResourceAsStream(jarPath)) {
+                        if( anIS != null ){
+                            
+                            byte[] byteBuffer = new byte[ 4096 ];
+                            FileOutputStream theOutStream = new FileOutputStream(aFile);
+                            try (BufferedOutputStream theBOS = new BufferedOutputStream(theOutStream)) {
+
+                                //Read to the end
+                                while( bytesRead != -1){
+                                    bytesRead = anIS.read(byteBuffer);
+                                    if(bytesRead != -1)
+                                        theBOS.write(byteBuffer, 0, bytesRead);                                   
+                                }
+                                theBOS.flush();
+                            }                            
+                        }
+                    }
+                    
+                    //Create a FileContentRef
+                    JarItem aJarItem = null;
+                    try {
+                        aJarItem = Utilities.getJavaItem( aFile );
+                    } catch (JarItemException ex) {
+                        Log.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex);         
+                        return;
+                    }
+                    
+                     //Add the jar
+                    if( aJarItem != null ){
+                        Utilities.addJarItem( aJarItem );
+
+                        //Write the file to disk
+                        String fileHash = FileUtilities.createHashedFile( aFile, null );
+                        if( fileHash != null ) {
+
+                            //Create a FileContentRef
+                            aJarItem.setFileHash( fileHash ); //Set the file's hash
+
+                            //Write to disk
+                            aJarItem.writeSelfToDisk();
+
+                            //If it is a local extension then load it
+                            if( aJarItem.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
+
+                                //Load the jar
+                                File libraryFile = new File( Directories.getFileLibraryDirectory(), aJarItem.getFileHash() ); //Create a File to represent the library file to be copied
+                                List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
+                                for( Class aClass : theClasses )
+                                    addClassToMap(aClass);                            
+                            }
+
+                        } 
+                    }
+                    
+                    //Delete the temp file
+                    aFile.delete();
+                } catch (IOException | NoSuchAlgorithmException ex) {
+                    Log.log( LogLevel.SEVERE, NAME_Class, "loadDefaultModules()", ex.getMessage(), ex );
+                }
+            }
+        }
+              
+    }    
+    
     
     // ==========================================================================
     /**
@@ -343,9 +443,9 @@ final public class Environment {
                     if( parentClass == XmlBase.class ){
                         thePathToClassMap.put( aClass.getSimpleName(), aClass ); //Map the path to the Class
                         break;
-                    } else if( parentClass == RunnableItemController.class ){
-                        Utilities.addRunnableController( aClass.getCanonicalName() );
-                        break;
+//                    } else if( parentClass == RunnableItemController.class ){
+//                        Utilities.addRunnableController( aClass.getCanonicalName() );
+//                        break;
                     } else if( parentClass == OptionsJPanel.class ){
                         Utilities.addOptionsJPanel( aClass.getCanonicalName() );
                         break;

@@ -72,6 +72,7 @@ public class ControlMessageHandler extends DataHandler {
      *
      * @param passedListener
       */
+    @SuppressWarnings("ucd")
     public ControlMessageHandler( DataManager passedListener ) {
         super( passedListener);
     }

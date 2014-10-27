@@ -36,7 +36,7 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-package pwnbrew.misc;
+package pwnbrew.utilities;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,6 +63,10 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
+import pwnbrew.misc.DebugPrinter;
+import pwnbrew.misc.SSLJFrame;
+import pwnbrew.misc.Utilities;
+import pwnbrew.misc.X509CertificateFactory;
 /**
  *
  *  

@@ -49,7 +49,7 @@ import javax.net.ssl.SSLContext;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
-import pwnbrew.misc.SSLUtilities;
+import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.selector.SelectionRouter;
 import pwnbrew.selector.SocketChannelHandler;
 

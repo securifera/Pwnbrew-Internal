@@ -54,6 +54,7 @@ import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.DataHandler;
+import pwnbrew.network.PortRouter;
 
 
 /**
@@ -82,10 +83,11 @@ public class FileHandler extends DataHandler {
     /**
      *  Processes the most recent 
      * 
+     * @param srcPortRouter
      * @param passedByteArray 
      */
     @Override
-    public void processData( byte[] passedByteArray ) {
+    public void processData( PortRouter srcPortRouter, byte[] passedByteArray ) {
        
         if(passedByteArray.length > 0){
 

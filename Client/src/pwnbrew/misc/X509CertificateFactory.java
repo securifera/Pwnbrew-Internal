@@ -89,6 +89,7 @@ public class X509CertificateFactory {
      * @throws java.io.IOException
      * @throws java.security.NoSuchAlgorithmException
      */
+    @SuppressWarnings("ucd")
     public static Object[] generateCertificate( String name, String issuer, int days, String algorithm, int KeySize )
             throws CertificateException, InvalidKeyException, IOException, NoSuchAlgorithmException,
             NoSuchProviderException, SignatureException {

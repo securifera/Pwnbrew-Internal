@@ -39,18 +39,18 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.options.panels;
 
 import java.awt.Color;
+import java.awt.Insets;
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import javax.swing.BorderFactory;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import pwnbrew.StubConfig;
 import pwnbrew.generic.gui.PanelListener;
+import pwnbrew.generic.gui.ValidTextField;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.FileFilterImp;
 import pwnbrew.misc.JarItemException;
+import pwnbrew.misc.StandardValidation;
 import pwnbrew.misc.Utilities;
 
 /**
@@ -92,6 +92,8 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
         
         Utilities.setComponentIcon(addFile,  15, 15, Constants.ADD_IMAGE_STR);
         Utilities.setComponentIcon(removeFile, 15, 15, Constants.DELETE_IMG_STR);
+        Utilities.setComponentIcon(buildStagerButton, 28, 28, Constants.BUILD_STAGER_IMG_STR);
+        buildStagerButton.setText("Build");
         
         addFile.setToolTipText("Add JAR to Library");
         removeFile.setToolTipText("Remove JAR from Library");
@@ -100,6 +102,15 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
         theJarTable = new JarTable( this );
         jarScrollPane.setViewportView(theJarTable);
         jarScrollPane.getViewport().setBackground(Color.WHITE);
+        
+        StubConfig theConf = StubConfig.getConfig();
+        String serverIp = theConf.getServerIp();
+        ((ValidTextField)ipTextField).setValidation( StandardValidation.KEYWORD_IpAddress);
+        ipTextField.setText(serverIp);
+        ipTextField.setMargin(new Insets(2,4,2,4));
+        
+        ((ValidTextField)portTextField).setValidation( StandardValidation.KEYWORD_Port);
+        portTextField.setMargin(new Insets(2,4,2,4));
         
     }
 
@@ -112,9 +123,62 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        stagerSetupPanel = new javax.swing.JPanel();
+        buildStagerButton = new javax.swing.JButton();
+        ipLabel = new javax.swing.JLabel();
+        ipTextField = ipTextField = new ValidTextField( "0.0.0.0" );
+        portLabel = new javax.swing.JLabel();
+        portTextField = portTextField = new ValidTextField( "443" );
         removeFile = new javax.swing.JButton();
         addFile = new javax.swing.JButton();
         jarScrollPane = new javax.swing.JScrollPane();
+
+        stagerSetupPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Stager Setup"));
+
+        buildStagerButton.setText("Build");
+        buildStagerButton.setIconTextGap(7);
+        buildStagerButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                buildStagerButtonActionPerformed(evt);
+            }
+        });
+
+        ipLabel.setText("Callback IP Address:");
+
+        portLabel.setText("Port:");
+
+        javax.swing.GroupLayout stagerSetupPanelLayout = new javax.swing.GroupLayout(stagerSetupPanel);
+        stagerSetupPanel.setLayout(stagerSetupPanelLayout);
+        stagerSetupPanelLayout.setHorizontalGroup(
+            stagerSetupPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, stagerSetupPanelLayout.createSequentialGroup()
+                .addGap(25, 25, 25)
+                .addComponent(ipLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(ipTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(40, 40, 40)
+                .addComponent(portLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(portTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 48, Short.MAX_VALUE)
+                .addComponent(buildStagerButton, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        stagerSetupPanelLayout.setVerticalGroup(
+            stagerSetupPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(stagerSetupPanelLayout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addGroup(stagerSetupPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(ipLabel)
+                    .addComponent(ipTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(portLabel)
+                    .addComponent(portTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(stagerSetupPanelLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(buildStagerButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         removeFile.setText(" ");
         removeFile.setIconTextGap(0);
@@ -140,26 +204,31 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 209, Short.MAX_VALUE)
-                        .addComponent(addFile)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(removeFile)
-                        .addGap(0, 209, Short.MAX_VALUE))
-                    .addComponent(jarScrollPane))
+                .addComponent(jarScrollPane)
+                .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(addFile)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(removeFile)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(stagerSetupPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(26, 26, 26)
-                .addComponent(jarScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap()
+                .addComponent(stagerSetupPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jarScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 335, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(addFile)
                     .addComponent(removeFile))
-                .addContainerGap(96, Short.MAX_VALUE))
+                .addContainerGap(52, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -173,11 +242,46 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
         selectJar();
     }//GEN-LAST:event_addFileActionPerformed
 
+    private void buildStagerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buildStagerButtonActionPerformed
+        ValidTextField ipField = (ValidTextField) ipTextField;
+        ValidTextField portField = (ValidTextField) portTextField;
+        if( ipField.isValid() && portField.isValid()){
+            
+            //See if the table already contains the entry
+            DefaultTableModel theModel = (DefaultTableModel) theJarTable.getModel();
+            for( int i =0; i < theModel.getRowCount(); i++ ){
+
+                //Get table entries
+                String jarType = (String) theJarTable.getValueAt(i, 1);
+                if(jarType.equals(Constants.STAGER_TYPE)){
+                    String connectStr = "https://" + ipField.getText().trim() + ":" + portTextField.getText().trim();
+                    //Get table entries
+                    String jarName = (String) theJarTable.getValueAt(i, 0);
+                    String jvmVersion = (String) theJarTable.getValueAt(i, 2);
+                    String jarVersion = (String) theJarTable.getValueAt(i, 3);
+                    getListener().getStagerFile( connectStr, jarName, jarType, jvmVersion, jarVersion );
+                    return;
+                }
+            }
+
+            JOptionPane.showMessageDialog( this, "No stager", "Unable to build Stager. No stager exist in the module library.", JOptionPane.ERROR_MESSAGE ); 
+        
+        } else {
+            JOptionPane.showMessageDialog( this, "Invalid values","Unable to build Stager. IP and port must be valid values.", JOptionPane.ERROR_MESSAGE ); 
+        }
+    }//GEN-LAST:event_buildStagerButtonActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addFile;
+    private javax.swing.JButton buildStagerButton;
+    private javax.swing.JLabel ipLabel;
+    private javax.swing.JTextField ipTextField;
     private javax.swing.JScrollPane jarScrollPane;
+    private javax.swing.JLabel portLabel;
+    private javax.swing.JTextField portTextField;
     private javax.swing.JButton removeFile;
+    private javax.swing.JPanel stagerSetupPanel;
     // End of variables declaration//GEN-END:variables
     
     // ==========================================================================
@@ -194,111 +298,93 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
     * Selects the client jar.
     */
     private void selectJar() {
-        
-        //Have the user manually put in the server ip
-//        JComboBox aCB = new JComboBox();
-//        aCB.setRenderer(new pwnbrew.generic.gui.DefaultCellBorderRenderer(BorderFactory.createEmptyBorder(0, 4, 0, 0)));
-//        List<String> jarTypes = Arrays.asList( new String[]{ Constants.PAYLOAD_TYPE, Constants.STAGER_TYPE, 
-//            Constants.LOCAL_EXTENSION_TYPE, Constants.REMOTE_EXTENSION_TYPE} );
-//        
-//        for( String aJarType : jarTypes )
-//            aCB.addItem(aJarType);
-        
-//        Object[] objMsg = new Object[]{ "Please select the type of JAR being imported.", " ", aCB};
-//        Object retVal = JOptionPane.showOptionDialog(null, objMsg, "Select JAR type",
-//               JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
 
-        //Check that they clicked ok
-//        if((Integer)retVal == JOptionPane.OK_OPTION ) {
-            
-//            String selVal = (String) aCB.getSelectedItem();
-            File userSelectedFile = null;
+        File userSelectedFile = null;
 
-            int returnVal = theJarChooser.showDialog( this, "Select JAR File" ); //Show the dialogue
-            switch( returnVal ) {
+        int returnVal = theJarChooser.showDialog( this, "Select JAR File" ); //Show the dialogue
+        switch( returnVal ) {
 
-               case JFileChooser.CANCEL_OPTION: //If the user canceled the selecting...
-                  break;
-               case JFileChooser.ERROR_OPTION: //If the dialogue was dismissed or an error occurred...
-                  break; //Do nothing
+           case JFileChooser.CANCEL_OPTION: //If the user canceled the selecting...
+              break;
+           case JFileChooser.ERROR_OPTION: //If the dialogue was dismissed or an error occurred...
+              break; //Do nothing
 
-               case JFileChooser.APPROVE_OPTION: //If the user approved the selection...
-                  userSelectedFile = theJarChooser.getSelectedFile(); //Get the files the user selected
-                  break;
-               default:
-                  break;
+           case JFileChooser.APPROVE_OPTION: //If the user approved the selection...
+              userSelectedFile = theJarChooser.getSelectedFile(); //Get the files the user selected
+              break;
+           default:
+              break;
 
-            }
+        }
 
-            //Check if the returned file is valid
-            if(userSelectedFile == null  || userSelectedFile.isDirectory() || !userSelectedFile.canRead())
-                return;
-            
-            //Create the java item
-            String[] aStrArr;
-            try {
-                aStrArr = Utilities.getJavaItem(userSelectedFile );
-            } catch (JarItemException ex) {
-                JOptionPane.showMessageDialog( this, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE );           
-                return;
-            }
-            
-            if( aStrArr != null ){
-                
-                String selJarName = aStrArr[0];
-                String selJarType = aStrArr[1];
-                String selJarVersion = aStrArr[2];
-                String selJarJvmVersion = aStrArr[3];
+        //Check if the returned file is valid
+        if(userSelectedFile == null  || userSelectedFile.isDirectory() || !userSelectedFile.canRead())
+            return;
 
-                //See if the table already contains the entry
-                DefaultTableModel theModel = (DefaultTableModel) theJarTable.getModel();
-                int rowToDelete = -1;
-                for( int i =0; i < theModel.getRowCount(); i++ ){
+        //Create the java item
+        String[] aStrArr;
+        try {
+            aStrArr = Utilities.getJavaItem(userSelectedFile );
+        } catch (JarItemException ex) {
+            JOptionPane.showMessageDialog( this, ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE );           
+            return;
+        }
 
-                    //Get table entries
-                    String jarName = (String) theJarTable.getValueAt(i, 0);
-                    String jarType = (String) theJarTable.getValueAt(i, 1);
-                    String jvmVersion = (String) theJarTable.getValueAt(i, 2);
-                    String jarVersion = (String) theJarTable.getValueAt(i, 3);
+        if( aStrArr != null ){
 
-                    //Check if the jvm version is the same first
-                    if( jvmVersion.equals(selJarJvmVersion) && 
-                            jarType.equals( selJarType) ){
+            String selJarName = aStrArr[0];
+            String selJarType = aStrArr[1];
+            String selJarVersion = aStrArr[2];
+            String selJarJvmVersion = aStrArr[3];
 
-                        //Only one Stager and Payload are allowed
-                        if( jarType.equals( Constants.STAGER_TYPE) || jarType.equals( Constants.PAYLOAD_TYPE)){
-                            rowToDelete = i;
-                            break;
-                        //Check if one with the same name exists
-                        } else if( jarName.equals( selJarName )) {
-                            rowToDelete = i;
-                            break;
-                        }
+            //See if the table already contains the entry
+            DefaultTableModel theModel = (DefaultTableModel) theJarTable.getModel();
+            int rowToDelete = -1;
+            for( int i =0; i < theModel.getRowCount(); i++ ){
 
+                //Get table entries
+                String jarName = (String) theJarTable.getValueAt(i, 0);
+                String jarType = (String) theJarTable.getValueAt(i, 1);
+                String jvmVersion = (String) theJarTable.getValueAt(i, 2);
+                String jarVersion = (String) theJarTable.getValueAt(i, 3);
+
+                //Check if the jvm version is the same first
+                if( jvmVersion.equals(selJarJvmVersion) && 
+                        jarType.equals( selJarType) ){
+
+                    //Only one Stager and Payload are allowed
+                    if( jarType.equals( Constants.STAGER_TYPE) || jarType.equals( Constants.PAYLOAD_TYPE)){
+                        rowToDelete = i;
+                        break;
+                    //Check if one with the same name exists
+                    } else if( jarName.equals( selJarName )) {
+                        rowToDelete = i;
+                        break;
                     }
 
                 }
 
-                //If a similar library already exist
-                if( rowToDelete != -1 ){                        
-                    String theMessage = new StringBuilder("Would you like to replace the existing ")
-                            .append( selJarType ).append(" named \"")
-                            .append( selJarName ).append("\" versioned \"")
-                            .append( selJarVersion ).append("\"?").toString();
-                    int dialogValue = JOptionPane.showConfirmDialog(this, theMessage, "Replace JAR Library?", JOptionPane.YES_NO_OPTION);
+            }
 
-                    //Add the JAR to utilities
-                    if ( dialogValue == JOptionPane.YES_OPTION ){
-                        deleteJarItem(rowToDelete);                    
-                    } else {
-                        return;
-                    }
-                }   
-                
-                //Queue the file to be sent
-                getListener().sendJarFile( userSelectedFile, selJarType);
-                
-//            }
+            //If a similar library already exist
+            if( rowToDelete != -1 ){                        
+                String theMessage = new StringBuilder("Would you like to replace the existing ")
+                        .append( selJarType ).append(" named \"")
+                        .append( selJarName ).append("\" versioned \"")
+                        .append( selJarVersion ).append("\"?").toString();
+                int dialogValue = JOptionPane.showConfirmDialog(this, theMessage, "Replace JAR Library?", JOptionPane.YES_NO_OPTION);
+
+                //Add the JAR to utilities
+                if ( dialogValue == JOptionPane.YES_OPTION ){
+                    deleteJarItem(rowToDelete);                    
+                } else {
+                    return;
+                }
+            }   
+
+            //Queue the file to be sent
+            getListener().sendJarFile( userSelectedFile, selJarType);
+
         }
     }
 

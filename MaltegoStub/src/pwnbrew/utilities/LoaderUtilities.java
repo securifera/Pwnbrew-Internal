@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
  *  Created on June 2, 2013
  */
 
-package pwnbrew.misc;
+package pwnbrew.utilities;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,6 +60,7 @@ import java.util.Iterator;
 import java.util.Vector;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
+import pwnbrew.misc.DebugPrinter;
 import sun.net.www.protocol.jar.JarURLConnection;
 
 /**

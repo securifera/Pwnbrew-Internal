@@ -36,25 +36,15 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- *  ShellMessageManager.java
- *
- *  Created on July 27, 2013
- */
-
 package pwnbrew.shell;
 
 import pwnbrew.network.PortRouter;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.network.shell.messages.ProcessMessage;
 import pwnbrew.xmlBase.ServerConfig;
 
 /**
@@ -131,33 +121,8 @@ public class ShellMessageManager extends DataManager {
     */
     @Override
     public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) {        
-        theShellMsgManager.getDataHandler().processData(msgBytes);        
+        theShellMsgManager.getDataHandler().processData( srcPortRouter, msgBytes);        
     }
-    
-//    //===============================================================
-//    /**
-//     *   Send the message out the given channel.
-//     *
-//     * @param passedMessage
-//     * @throws java.io.IOException
-//    */
-//    public void send( ProcessMessage passedMessage ) throws IOException {
-//
-//        
-//        ByteBuffer aByteBuffer;
-//        int msgLen = passedMessage.getLength();
-//        aByteBuffer = ByteBuffer.allocate( msgLen );
-//        passedMessage.append(aByteBuffer);
-//
-//        
-//        //Get the port router
-//        PortRouter thePR = theCommManager.getPortRouter( operatingPort );
-//                
-//        //Queue the message to be sent
-//        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId() );
-////        DebugPrinter.printMessage(this, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-//          
-//    }
     
     //===========================================================================
     /*

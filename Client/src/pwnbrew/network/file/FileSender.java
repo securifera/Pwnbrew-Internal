@@ -91,6 +91,7 @@ public class FileSender extends ManagedRunnable implements LockListener {
     /*
      *  Constructor
      */
+    @SuppressWarnings("ucd")
     public FileSender( CommManager passedExecutor, PushFileAck passedAck ) {
         super( Constants.Executor);
         theCommManager = passedExecutor;

@@ -51,6 +51,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import pwnbrew.fileoperation.TaskManager;
 import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
@@ -139,7 +140,9 @@ final public class FileReceiver {
         aFileStream = new FileOutputStream(fileLoc, true);
         
         //Set the progress listener
-        theListener = passedManager.getCommManager().getTaskManager().getProgressListener();
+        TaskManager theTaskManager = passedManager.getCommManager().getTaskManager();
+        theListener = ( theTaskManager != null ? theTaskManager.getProgressListener() : null );
+        
     }
     
     //===============================================================
@@ -184,19 +187,24 @@ final public class FileReceiver {
 
         try {
 
-            if( fileByteCounter == 0 ){
-                //Check the header
-                byte[] fileHeader = Utilities.getFileHeader();
-                if( passedByteArray.length >= fileHeader.length){
-
-                    byte[] firstBytes = Arrays.copyOf(passedByteArray, fileHeader.length);
-                    if( Arrays.equals(firstBytes, fileHeader)){
-                        fileByteCounter += fileHeader.length;
-                        fileDigest.update(firstBytes);
-                        passedByteArray = Arrays.copyOfRange(passedByteArray, 4, passedByteArray.length);
-                    }
-
-                }
+//            if( fileByteCounter == 0 ){
+//                //Check the header
+//                byte[] fileHeader = Utilities.getFileHeader();
+//                if( passedByteArray.length >= fileHeader.length){
+//
+//                    byte[] firstBytes = Arrays.copyOf(passedByteArray, fileHeader.length);
+//                    if( Arrays.equals(firstBytes, fileHeader)){
+//                        fileByteCounter += fileHeader.length;
+//                        fileDigest.update(firstBytes);
+//                        passedByteArray = Arrays.copyOfRange(passedByteArray, 4, passedByteArray.length);
+//                    }
+//
+//                }
+//            }
+            
+            if( passedByteArray.length + fileByteCounter > fileSize ){
+                int diff = (int) (fileSize - fileByteCounter);
+                passedByteArray = Arrays.copyOf(passedByteArray, diff);
             }
 
             //Copy over the bytes
@@ -257,6 +265,10 @@ final public class FileReceiver {
 
                 //Remove from the parent map
                 theFileMessageManager.removeFileReceiver( fileId );
+                
+                //Notify any functions that may be waiting
+                theFileMessageManager.fileReceiveComplete( taskId, fileLoc );
+                
 
             }
 

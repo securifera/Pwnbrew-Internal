@@ -587,6 +587,7 @@ public class Host extends Node {
      * @param passedHost 
      */
     public void updateData(Host passedHost) {
+        setHostname(passedHost.getHostname());
         addNicPairs( passedHost.getNicMap() );
         setJarVersion( passedHost.getJarVersion());
         setJvmArch( passedHost.getJvmArch());

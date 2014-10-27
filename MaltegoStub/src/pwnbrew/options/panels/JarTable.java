@@ -72,7 +72,7 @@ public class JarTable extends JTable {
         DefaultTableModel theTableModel = new javax.swing.table.DefaultTableModel(
             new Object [][] {},
             new String [] {
-                "Name", "Type", "Java Major Version", "Release Version"
+                "UID", "Type", "Java Major Version", "Release Version"
             }
         ){
             //Make the table uneditable
@@ -90,11 +90,11 @@ public class JarTable extends JTable {
         TableRowSorter theRowSorter = (TableRowSorter) getRowSorter();
         setRowSorter(theRowSorter);
         
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment( JLabel.CENTER );        
-        //Center values
-        for(int i=0; i < getColumnCount(); i++)
-            getColumnModel().getColumn(i).setCellRenderer( centerRenderer );
+//        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+//        centerRenderer.setHorizontalAlignment( JLabel.CENTER );        
+//        //Center values
+//        for(int i=0; i < getColumnCount(); i++)
+//            getColumnModel().getColumn(i).setCellRenderer( centerRenderer );
         
         //Set the background
         setBackground( Color.WHITE );
@@ -147,7 +147,7 @@ public class JarTable extends JTable {
         DefaultTableModel theTableModel = new javax.swing.table.DefaultTableModel(
             new Object [][] {},
             new String [] {
-                "Name", "Type", "Java Major Version", "Release Version"
+                "UID", "Type", "Java Major Version", "Release Version"
             }
         ){
             //Make the table uneditable

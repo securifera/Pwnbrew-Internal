@@ -82,6 +82,7 @@ public class KeepAliveTimer extends ManagedRunnable {
      *
      * @param passedManager
     */
+    @SuppressWarnings("ucd")
     public KeepAliveTimer(CommManager passedManager ) {
         super(Constants.Executor);
         theCommManager = passedManager;

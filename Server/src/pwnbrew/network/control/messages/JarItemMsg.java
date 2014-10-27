@@ -45,7 +45,7 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
-public class JarItemMsg extends ControlMessage{ 
+public class JarItemMsg extends MaltegoMessage { 
     
     private static final byte OPTION_JAR_NAME = 32;
     private static final byte OPTION_JAR_TYPE = 33;

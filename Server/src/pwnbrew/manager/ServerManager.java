@@ -57,6 +57,7 @@ import pwnbrew.gui.tree.MainGuiTreeModel;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.Session;
+import pwnbrew.host.gui.HostTabPanel;
 import pwnbrew.library.LibraryItemController;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.Constants;
@@ -79,7 +80,7 @@ import pwnbrew.xmlBase.XmlBase;
 public class ServerManager extends CommManager {
 
     private final Server theServer;
-    private boolean showGuiFlag = false;
+    private final boolean headless;
     private MainGuiController theGuiController = null;
 
     //Create the host map
@@ -98,12 +99,12 @@ public class ServerManager extends CommManager {
     public ServerManager( Server passedServer, boolean passedBool ) throws LoggableException, IOException {
 
         //The comm channels
-        showGuiFlag = passedBool;
+        headless = passedBool;
         theServer = passedServer;
         
         //Create the main controller and gui if flag is set            
-        if( showGuiFlag )
-            theGuiController = new MainGuiController( this );   
+        if( !headless )
+            theGuiController = new MainGuiController( this, headless );   
         else {
             
             //Create list to hold of the separate controllers
@@ -111,13 +112,22 @@ public class ServerManager extends CommManager {
             Set<Host> hostSet = retMap.keySet();
             synchronized(theHostControllerMap){
                 for( Host aHost : hostSet ){
-                    HostController aController = new HostController(aHost, theGuiController);
+                    HostController aController = new HostController(aHost, theGuiController, headless);
                     theHostControllerMap.put( aHost.getId(), aController);
                 }
             }
             
         }
             
+    }
+    
+    //===============================================================
+     /**
+      * 
+      * @return 
+      */
+    public boolean isHeadless(){
+        return headless;
     }
 
     //===============================================================
@@ -130,7 +140,7 @@ public class ServerManager extends CommManager {
 
         //Builds the sockets
         rebuildServerSockets();
-        if( showGuiFlag )
+        if( !headless )
             ((MainGui)theGuiController.getObject()).setVisible(true); 
     }
     
@@ -248,7 +258,10 @@ public class ServerManager extends CommManager {
                         for( HostController nextController: theHostList ){
                             hostDisconnected( (Host) nextController.getObject() );
 
-                            nextController.getRootPanel().getShellPanel().disablePanel( false );
+                            HostTabPanel thePanel = nextController.getRootPanel();
+                            if( thePanel != null )
+                                thePanel.getShellPanel().disablePanel( false );
+                                
                             nextController.updateComponents();
                             nextController.saveToDisk();
                         }
@@ -413,7 +426,7 @@ public class ServerManager extends CommManager {
         }
         
         final HostController theController = getHostController( clientIdStr );
-        if(theController != null && theController.getObject().equals(passedHost)){
+        if(theController != null /*&& theController.getObject().equals(passedHost)*/){
                 
             //Get the address
             Host theHost = (Host) theController.getObject();
@@ -487,7 +500,7 @@ public class ServerManager extends CommManager {
         } else {
 
             //Start in swing thread since it affects the gui
-            final HostController aHostController = new HostController( passedHost, theGuiController );
+            final HostController aHostController = new HostController( passedHost, theGuiController, headless );
             Session aSession = new Session();
             passedHost.addSession(aSession);
             

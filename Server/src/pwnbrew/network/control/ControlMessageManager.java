@@ -128,7 +128,7 @@ public class ControlMessageManager extends DataManager {
     */
     @Override
     public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) throws RemoteExceptionWrapper {        
-        theControlManager.getDataHandler().processData(msgBytes);        
+        theControlManager.getDataHandler().processData(srcPortRouter, msgBytes);        
     }
      
      //===========================================================================

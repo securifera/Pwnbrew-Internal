@@ -43,14 +43,14 @@ import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
 import pwnbrew.functions.ToSessionManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-public final class CheckInTimeMsg extends ControlMessage{ 
+public final class CheckInTimeMsg extends MaltegoMessage{ 
     
     private static final byte OPTION_HOST_ID = 124;
     private static final byte OPTION_CHECK_IN = 72;

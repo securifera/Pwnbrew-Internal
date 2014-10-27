@@ -56,7 +56,10 @@ import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
+import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.messages.ControlMessage;
+import pwnbrew.network.control.messages.MaltegoMessage;
+import pwnbrew.network.relay.RelayManager;
 
 /**
  *
@@ -135,14 +138,23 @@ public class ControlMessageHandler extends DataHandler {
     /**
      *  Process the message
      * 
+     * @param srcPortRouter
      * @param passedByteArray 
+     * @throws pwnbrew.exception.RemoteExceptionWrapper 
      */
     @Override
-    public void processData( byte[] passedByteArray ) throws RemoteExceptionWrapper {
+    public void processData( PortRouter srcPortRouter, byte[] passedByteArray ) throws RemoteExceptionWrapper {
       
         try {
-
-            ControlMessage aMessage = ControlMessage.getMessage( ByteBuffer.wrap( passedByteArray ) );                           
+            
+            ControlMessage aMessage = ControlMessage.getMessage( ByteBuffer.wrap( passedByteArray ) );        
+            if( aMessage instanceof MaltegoMessage ){
+                RelayManager theRelayManager = RelayManager.getRelayManager();
+                if( theRelayManager == null || !theRelayManager.getServerPorterRouter().equals(srcPortRouter) ){
+                    Log.log(Level.SEVERE, NAME_Class, "processData()", "*******Attempt to process maltego message from client.******", null );
+                    return;
+                }
+            }
             processIncoming(aMessage);
 
         } catch (LoggableException | IOException ex) {

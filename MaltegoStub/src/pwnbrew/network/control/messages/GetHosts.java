@@ -43,14 +43,14 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-public final class GetHosts extends ControlMessage{ // NO_UCD (use default)
+public final class GetHosts extends MaltegoMessage{ // NO_UCD (use default)
     
     private static final byte OPTION_HOST_ID = 124;
 

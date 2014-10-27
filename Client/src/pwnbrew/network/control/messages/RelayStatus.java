@@ -62,6 +62,7 @@ public final class RelayStatus extends ControlMessage{
      *
      * @param passedResult
     */
+    @SuppressWarnings("ucd")
     public RelayStatus( boolean passedResult ) {
         super();
         

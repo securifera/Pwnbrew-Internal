@@ -42,14 +42,14 @@ import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
 import pwnbrew.functions.ToSessionManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-public final class AutoSleep extends ControlMessage{ // NO_UCD (use default)
+public final class AutoSleep extends MaltegoMessage{ // NO_UCD (use default)
     
     private static final byte OPTION_HOST_ID = 67;
     private static final byte OPTION_OPERATION = 68;

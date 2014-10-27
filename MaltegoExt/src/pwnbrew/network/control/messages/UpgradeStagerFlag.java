@@ -44,7 +44,7 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
-public final class UpgradeStagerFlag extends ControlMessage{ 
+public final class UpgradeStagerFlag extends MaltegoMessage{ 
     
     private static final byte OPTION_UPGRADE_STAGER_FLAG = 78;
     

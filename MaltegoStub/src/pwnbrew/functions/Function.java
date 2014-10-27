@@ -38,6 +38,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.functions;
 
 import java.awt.Component;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -217,4 +218,12 @@ abstract public class Function {
         
         return theReturnMsg.getXml();
     }
+
+    //===============================================================
+    /**
+     * 
+     * @param taskId
+     * @param fileLoc 
+     */
+    public void fileReceived(int taskId, File fileLoc) { }
 }

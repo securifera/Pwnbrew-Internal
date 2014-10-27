@@ -303,29 +303,29 @@ public class GuiUtilities {
        }
     }     
     
-    //=========================================================================
-    /**
-    *  Displays the user manual
-     * @return 
-    */
-    public static String displayUserManual() {
-
-        String retString = null;
-        String theManualPath = new StringBuilder( Directories.getDocPath() )
-                .append( File.separator ).append( Constants.Manual_Name ).toString();
-
-        File actManual = new File(theManualPath);
-        if(actManual.exists()){
-            if(!FileUtilities.openFileInEditor(actManual, Desktop.Action.OPEN)){
-                retString = "Unable to find the default file editor.";
-            }
-        } else {
-            retString = "Unable to locate User Manual.  Location: " + theManualPath;
-        }
-
-        return retString;
-
-    }
+//    //=========================================================================
+//    /**
+//    *  Displays the user manual
+//     * @return 
+//    */
+//    public static String displayUserManual() {
+//
+//        String retString = null;
+//        String theManualPath = new StringBuilder( Directories.getDocPath() )
+//                .append( File.separator ).append( Constants.Manual_Name ).toString();
+//
+//        File actManual = new File(theManualPath);
+//        if(actManual.exists()){
+//            if(!FileUtilities.openFileInEditor(actManual, Desktop.Action.OPEN)){
+//                retString = "Unable to find the default file editor.";
+//            }
+//        } else {
+//            retString = "Unable to locate User Manual.  Location: " + theManualPath;
+//        }
+//
+//        return retString;
+//
+//    }
     
     
      // ==========================================================================

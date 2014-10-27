@@ -52,7 +52,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
-public final class HostMsg extends ControlMessage{ 
+public final class HostMsg extends MaltegoMessage{ 
     
     private static final byte OPTION_HOSTNAME = 60;
     private static final byte OPTION_ARCH = 61;

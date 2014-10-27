@@ -49,7 +49,6 @@ import pwnbrew.manager.CommManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
@@ -58,7 +57,7 @@ import pwnbrew.xmlBase.ServerConfig;
  *
  * @author Securifera
  */
-public class NetworkSettingsMsg extends ControlMessage {
+public class NetworkSettingsMsg extends MaltegoMessage {
     
     private static final byte OPTION_SERVER_PORT = 54;  
     private static final byte OPTION_ISSUEE_NAME = 55;

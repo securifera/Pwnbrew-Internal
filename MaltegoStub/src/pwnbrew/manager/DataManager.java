@@ -46,11 +46,8 @@ package pwnbrew.manager;
 
 import java.io.IOException;
 import pwnbrew.network.control.ControlMessageManager;
-import java.util.HashMap;
-import java.util.Map;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ClientPortRouter;
-//import pwnbrew.network.PortWrapper;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;

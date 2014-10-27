@@ -81,9 +81,7 @@ public class Installer {
     private static final String SERVER_SSL_UTILITY_WIN = "Server-SSL-Utility.bat";
     private static final String SERVER_SSL_UTILITY_UNIX = "Server-SSL-Utility.sh";
     
-    private static final String CLIENT_JAR = "Client.jar";
-    private static final String STAGER_JAR = "Stager.jar";
-    private static final String MALTEGO_EXT_JAR = "MaltegoExt.jar";
+    
     private static final String SERVER_JAR = "Server.jar";
     private static final String LICENSE_FILE = "LicenseAgreement.txt";
     private static final String IMPORT_FILE = "pwnbrew.mtz";
@@ -240,19 +238,9 @@ public class Installer {
 
         //Copy client
         File dirFile = theFileChooser.getSelectedFile(); 
-        File destFile = new File( dirFile, CLIENT_JAR);
-        writeJarElementToDisk(destFile, CLIENT_JAR); 
-        
-        //Copy stager
-        destFile = new File( dirFile, STAGER_JAR);
-        writeJarElementToDisk(destFile, STAGER_JAR); 
-        
-        //Copy maltego ext
-        destFile = new File( dirFile, MALTEGO_EXT_JAR);
-        writeJarElementToDisk(destFile, MALTEGO_EXT_JAR); 
-        
+                
         //Copy server
-        destFile = new File( dirFile, SERVER_JAR);
+        File destFile = new File( dirFile, SERVER_JAR);
         writeJarElementToDisk(destFile, SERVER_JAR); 
         
         //Copy license file

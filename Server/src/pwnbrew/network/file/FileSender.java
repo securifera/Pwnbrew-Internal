@@ -61,12 +61,9 @@ import pwnbrew.manager.DataManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFileAbort;
 import pwnbrew.network.control.messages.PushFileAck;
-import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.xmlBase.ServerConfig;
 
 /**
@@ -78,8 +75,7 @@ public class FileSender extends ManagedRunnable {
 
     private final CommManager theCommManager;
     private final PushFileAck theFileAck;
-    private final int thePort;
-    
+//    private final int thePort;
     
 //    private static int maxMsgLen = (256 * 256) - 8; 
     private static final int maxMsgLen = 12582 - 7;    
@@ -92,22 +88,22 @@ public class FileSender extends ManagedRunnable {
     /*
      *  Constructor
      */
-    FileSender( CommManager passedManager, PushFileAck passedAck, int passedPort ) {
+    FileSender( CommManager passedManager, PushFileAck passedAck ) {
         super( Constants.Executor);
         theCommManager = passedManager;
         theFileAck = passedAck;
-        thePort = passedPort;
+//        thePort = passedPort;
                         
     }   
     
     @Override
     protected void go() {
         
-         //Get the socket router
-        ServerPortRouter aPR = (ServerPortRouter) theCommManager.getPortRouter( thePort );
-                       
-        //Initiate the file transfer
-        if(aPR != null){
+//         //Get the socket router
+//        ServerPortRouter aPR = (ServerPortRouter) theCommManager.getPortRouter( thePort );
+//                       
+//        //Initiate the file transfer
+//        if(aPR != null){
             
             int fileId = theFileAck.getFileId();
             try {
@@ -134,7 +130,7 @@ public class FileSender extends ManagedRunnable {
                 DataManager.send(theCommManager, fileAbortMsg);
 
             }
-        }
+//        }
         
     } 
     
@@ -148,9 +144,9 @@ public class FileSender extends ManagedRunnable {
         
         //Get the port router
         int dstHostId = theFileAck.getSrcHostId();
-        DebugPrinter.printMessage(NAME_Class, "Port: " + thePort);
-        PortRouter thePR = theCommManager.getPortRouter( thePort );
-        SocketChannelHandler aHandler = thePR.getSocketChannelHandler( dstHostId );
+//        DebugPrinter.printMessage(NAME_Class, "Port: " + thePort);
+//        PortRouter thePR = theCommManager.getPortRouter( thePort );
+//        SocketChannelHandler aHandler = thePR.getSocketChannelHandler( dstHostId );
         DebugPrinter.printMessage(NAME_Class, "Sending file to: " + dstHostId);
         
         //Get the client id and dest id
@@ -159,7 +155,7 @@ public class FileSender extends ManagedRunnable {
         byte[] destIdArr = SocketUtilities.intToByteArray(dstHostId);
     
         //Get the id and port router
-        if( aHandler != null ){
+//        if( aHandler != null ){
 
             if( fileToBeSent.length() == 0 ){
 
@@ -216,9 +212,9 @@ public class FileSender extends ManagedRunnable {
                 }
             }
             
-        } else {
-            throw new IOException("Not connected to the client.");
-        }
+//        } else {
+//            throw new IOException("Not connected to the client.");
+//        }
     }
 
 }

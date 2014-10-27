@@ -37,7 +37,7 @@
                   <Component id="closeButton" alignment="1" min="-2" pref="84" max="-2" attributes="0"/>
                   <Component id="mainPanel" alignment="1" min="-2" max="-2" attributes="1"/>
               </Group>
-              <EmptySpace pref="18" max="32767" attributes="0"/>
+              <EmptySpace pref="32" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -122,7 +122,7 @@
       <SubComponents>
         <Component class="javax.swing.JLabel" name="developerValueLabel">
           <Properties>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;Ryan Wincey&lt;/html&gt;"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt;Securifera&lt;/html&gt;"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="versionValueLabel">

@@ -55,7 +55,7 @@ import pwnbrew.xml.maltego.custom.IpV4Address;
  *
  *  
  */
-public final class IpMsg extends ControlMessage{ 
+public final class IpMsg extends MaltegoMessage{ 
     
     private static final byte OPTION_IP = 72;    
     private String ip_address = null;

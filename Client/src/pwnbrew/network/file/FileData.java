@@ -158,6 +158,7 @@ public class FileData extends Message {
      * @return msgAddress
      * @throws pwnbrew.log.LoggableException
     */
+    @SuppressWarnings("ucd")
     public static FileData getMessage( ByteBuffer passedBuffer ) throws LoggableException {
 
         byte[] theMsgId = new byte[4], theFileId = new byte[4],clientId = new byte[4], tempHostId = new byte[4];

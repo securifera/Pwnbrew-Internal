@@ -55,6 +55,7 @@ public final class UpgradeStagerComplete extends ControlMessage{
      *
      * @param passedVersion
     */
+    @SuppressWarnings("ucd")
     public UpgradeStagerComplete( String passedVersion ) {
         super();
         

@@ -139,7 +139,7 @@ public class JarItem extends FileContentRef {
      */
     @Override
     public String toString(){
-        return getName();
+        return getId();
     }
     
     //=====================================================================

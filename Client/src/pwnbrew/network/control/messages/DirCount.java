@@ -64,6 +64,7 @@ public final class DirCount extends Tasking {
      * @param taskId
      * @param fileCount
     */
+    @SuppressWarnings("ucd")
     public DirCount( int taskId, int fileCount ) {
         super(taskId);
         

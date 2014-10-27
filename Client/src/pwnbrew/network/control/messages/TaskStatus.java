@@ -95,6 +95,7 @@ public class TaskStatus extends Tasking {
      * 
      * @param passedId 
      */
+    @SuppressWarnings("ucd")
     public TaskStatus( byte[] passedId ) {
        super(passedId);
     }

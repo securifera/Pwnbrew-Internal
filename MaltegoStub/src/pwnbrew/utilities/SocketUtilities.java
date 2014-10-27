@@ -42,7 +42,7 @@ The copyright on this package is held by Securifera, Inc
  *
  */
 
-package pwnbrew.misc;
+package pwnbrew.utilities;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -50,6 +50,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import pwnbrew.log.LoggableException;
+import pwnbrew.misc.RuntimeRunnable;
+import pwnbrew.misc.Utilities;
 
 
 /**

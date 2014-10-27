@@ -175,6 +175,7 @@ public class SelectionRouter extends ManagedRunnable{
      * @param passedChannel
      * @return 
     */
+    @SuppressWarnings("ucd")
     public int interestOps( SelectableChannel passedChannel ) {
         
         int retVal = 0;

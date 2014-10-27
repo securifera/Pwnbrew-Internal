@@ -49,49 +49,46 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 
 /**
  */
 abstract public class FileUtilities {
   
  
-    // ==========================================================================
-    /**
-    * Deletes the directory represented by the given {@link File}.
-    * @param dir
-    * @throws java.io.IOException
-    */
-    public static void deleteDir(File dir) throws IOException{
-
-        if(!dir.exists())
-            return;
-        else if(!dir.isDirectory())
-            throw new IOException("Not a directory " + dir);        
-
-        File[] files = dir.listFiles();
-        for( File aFile : files){
-
-            if(aFile.isDirectory())
-                deleteDir(aFile);
-            else {
-                boolean fileDeleted = aFile.delete();
-                if(!fileDeleted)
-                    throw new IOException("Unable to delete file " + aFile);                
-            }
-
-        }
-
-        //If unable to delete throw
-        if(!dir.delete())
-            throw new IOException("Unable to delete file " + dir);
-        
-    }
+//    // ==========================================================================
+//    /**
+//    * Deletes the directory represented by the given {@link File}.
+//    * @param dir
+//    * @throws java.io.IOException
+//    */
+//    public static void deleteDir(File dir) throws IOException{
+//
+//        if(!dir.exists())
+//            return;
+//        else if(!dir.isDirectory())
+//            throw new IOException("Not a directory " + dir);        
+//
+//        File[] files = dir.listFiles();
+//        for( File aFile : files){
+//
+//            if(aFile.isDirectory())
+//                deleteDir(aFile);
+//            else {
+//                boolean fileDeleted = aFile.delete();
+//                if(!fileDeleted)
+//                    throw new IOException("Unable to delete file " + aFile);                
+//            }
+//
+//        }
+//
+//        //If unable to delete throw
+//        if(!dir.delete())
+//            throw new IOException("Unable to delete file " + dir);
+//        
+//    }
     
     // ==========================================================================
     /**
@@ -165,58 +162,58 @@ abstract public class FileUtilities {
         return theHash;
 
     }
+//
+//    //===============================================================
+//    /**
+//     * Converts the library file to the File path passed
+//     *
+//     * @param fileHash
+//     * @param destFile
+//     * @param fileContentDir
+//     * @throws java.io.IOException
+//    */
+//    public static void renameLibFile(String fileHash, File destFile, File fileContentDir ) throws IOException {
+//    
+//        File aFile = new File(fileContentDir, fileHash);
+//        
+//        //Rename the file that already exists
+//        if(!aFile.renameTo(destFile)){
+//            //throw new IOException("Unable to rename file with the same hash.");
+//            FileUtilities.moveFile(aFile, destFile);
+//        }
+//        
+//    }
 
-    //===============================================================
-    /**
-     * Converts the library file to the File path passed
-     *
-     * @param fileHash
-     * @param destFile
-     * @param fileContentDir
-     * @throws java.io.IOException
-    */
-    public static void renameLibFile(String fileHash, File destFile, File fileContentDir ) throws IOException {
-    
-        File aFile = new File(fileContentDir, fileHash);
-        
-        //Rename the file that already exists
-        if(!aFile.renameTo(destFile)){
-            //throw new IOException("Unable to rename file with the same hash.");
-            FileUtilities.moveFile(aFile, destFile);
-        }
-        
-    }
-
-    // ==========================================================================
-    /**
-    * Moves one file to another using file channels
-    *
-    * @param srcFile a {@code File} representing the source file 
-    * @param dstFile a {@code File} representing the source file 
-    *
-    * @return 
-    *
-    * @throws FileNotFoundException if the given {@code File} represents a directory,
-    * or represents a file that doesn't exist or cannot be read by the application
-    * @throws IOException if a problem occurs while reading the file
-    * @throws NullPointerException if the given {@code File} is null
-    */
-    public static boolean moveFile( File srcFile, File dstFile ) throws IOException {
-        
-        try(    FileInputStream aFIS = new FileInputStream(srcFile); 
-                FileOutputStream aFOS = new FileOutputStream(dstFile)) {
-            //Copy the file manually
-            FileChannel inputChannel = aFIS.getChannel();
-                FileChannel outputChannel = aFOS.getChannel();
-            inputChannel.transferTo(0, inputChannel.size(), outputChannel);         
-
-        }
-        
-        //Delete the file later
-        srcFile.delete();
-        return true;
-    }
-    
-      
+//    // ==========================================================================
+//    /**
+//    * Moves one file to another using file channels
+//    *
+//    * @param srcFile a {@code File} representing the source file 
+//    * @param dstFile a {@code File} representing the source file 
+//    *
+//    * @return 
+//    *
+//    * @throws FileNotFoundException if the given {@code File} represents a directory,
+//    * or represents a file that doesn't exist or cannot be read by the application
+//    * @throws IOException if a problem occurs while reading the file
+//    * @throws NullPointerException if the given {@code File} is null
+//    */
+//    public static boolean moveFile( File srcFile, File dstFile ) throws IOException {
+//        
+//        try(    FileInputStream aFIS = new FileInputStream(srcFile); 
+//                FileOutputStream aFOS = new FileOutputStream(dstFile)) {
+//            //Copy the file manually
+//            FileChannel inputChannel = aFIS.getChannel();
+//                FileChannel outputChannel = aFOS.getChannel();
+//            inputChannel.transferTo(0, inputChannel.size(), outputChannel);         
+//
+//        }
+//        
+//        //Delete the file later
+//        srcFile.delete();
+//        return true;
+//    }
+//    
+//      
 
 }/* END CLASS FileUtilities */

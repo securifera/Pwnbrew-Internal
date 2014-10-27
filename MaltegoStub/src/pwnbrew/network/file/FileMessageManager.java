@@ -51,10 +51,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
+import pwnbrew.functions.Function;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFile;
@@ -204,45 +206,50 @@ public class FileMessageManager extends DataManager {
 
         boolean retVal = false;
         int taskId = passedMessage.getTaskId();
-        int fileId = passedMessage.getFileId();
+        int fileId = passedMessage.getFileId();        
+        int clientId = passedMessage.getSrcHostId();        
         
-        int clientId = passedMessage.getSrcHostId();
-        File aClientDir = theCommManager.getTaskManager().getDownloadDirectory();
-        if( aClientDir != null ){
-        
-            File libDir = null;
-            int fileType = passedMessage.getFileType();
-            switch(fileType){
-                case PushFile.FILE_DOWNLOAD:
+        File libDir = null;
+        int fileType = passedMessage.getFileType();
+        switch(fileType){
+            case PushFile.FILE_DOWNLOAD:
+                File aClientDir = theCommManager.getTaskManager().getDownloadDirectory();
+                if( aClientDir != null )
                     libDir = new File(aClientDir, Integer.toString(taskId));
-                    break;
-            }
-
-            //Get the control manager for sending messages
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( getCommManager() );
-            }
-
-            try {
-
-                //Get the hash/filename
-                String hashFileNameStr = passedMessage.getHashFilenameString();
-
-                //Try to begin the file transfer
-                initFileTransfer( passedMessage.getSrcHostId(), taskId, fileId, libDir, hashFileNameStr, passedMessage.getFileSize() );
-
-                //Send an ack to the sender to begin transfer
-//                DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);
-                PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr, clientId );
-                aCMManager.send( aSFMA );
-
-            } catch (IOException | NoSuchAlgorithmException ex){
-                throw new LoggableException(ex);
-            }
-            
-            retVal = true;
+                else
+                    return retVal;
+                break;
+            case PushFile.JAR_DOWNLOAD:
+                File aFile = File.createTempFile("tmp", null);
+                libDir = aFile.getParentFile();
+                break;
         }
+
+        //Get the control manager for sending messages
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        if( aCMManager == null ){
+            aCMManager = ControlMessageManager.initialize( getCommManager() );
+        }
+
+        try {
+
+            //Get the hash/filename
+            String hashFileNameStr = passedMessage.getHashFilenameString();
+
+            //Try to begin the file transfer
+            initFileTransfer( passedMessage.getSrcHostId(), taskId, fileId, libDir, hashFileNameStr, passedMessage.getFileSize() );
+
+            //Send an ack to the sender to begin transfer
+//                DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);
+            PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr, clientId );
+            aCMManager.send( aSFMA );
+
+        } catch (IOException | NoSuchAlgorithmException ex){
+            throw new LoggableException(ex);
+        }
+
+        retVal = true;
+        
 
         return retVal;
 
@@ -347,6 +354,18 @@ public class FileMessageManager extends DataManager {
             aSCH.clearQueue();
         }   
         
+    }
+
+    //===============================================================
+    /**
+     * 
+     * @param fileLoc
+     * @param taskId 
+     */
+    public void fileReceiveComplete( int taskId, File fileLoc) {
+        MaltegoStub theStub = MaltegoStub.getMaltegoStub();
+        Function aFunc = theStub.getFunction();
+        aFunc.fileReceived( taskId, fileLoc );
     }
     
 }

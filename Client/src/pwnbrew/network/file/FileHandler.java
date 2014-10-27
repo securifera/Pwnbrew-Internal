@@ -73,6 +73,7 @@ public class FileHandler extends DataHandler {
      *
      * @param passedListener
     */
+    @SuppressWarnings("ucd")
     public FileHandler( FileMessageManager passedListener ) {        
         super(passedListener);
     }

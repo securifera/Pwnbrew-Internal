@@ -38,17 +38,13 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
-import java.util.logging.Level;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
-import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.JarItem;
@@ -58,7 +54,7 @@ import pwnbrew.xmlBase.ServerConfig;
  *
  *  
  */
-public final class GetUpgradeFlag extends ControlMessage{ // NO_UCD (use default)
+public final class GetUpgradeFlag extends MaltegoMessage{ // NO_UCD (use default)
     
     private static final byte OPTION_HOST_ID = 100;
     private int hostId;

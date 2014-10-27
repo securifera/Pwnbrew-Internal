@@ -46,9 +46,10 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.IOException;
+import pwnbrew.fileoperation.TaskManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ControlOption;
+import pwnbrew.utilities.SocketUtilities;
 
 
 /**
@@ -119,7 +120,9 @@ public final class TaskProgress extends TaskStatus{
         
         int theProgress = getProgress();
         int taskId = getTaskId();
-        passedManager.getTaskManager().getProgressListener().progressChanged(taskId, theProgress);
+        TaskManager theTaskManager = passedManager.getTaskManager();
+        if( theTaskManager != null )
+            theTaskManager.getProgressListener().progressChanged(taskId, theProgress);
         
     }
 

@@ -495,6 +495,9 @@ final public class SSLUtilities {
      /**
      * @param args the command line arguments
      * @throws java.io.IOException
+     * @throws java.security.KeyStoreException
+     * @throws pwnbrew.logging.LoggableException
+     * @throws java.security.cert.CertificateException
      */
     public static void main(String[] args) throws IOException, KeyStoreException, LoggableException, CertificateException {
 
@@ -519,6 +522,8 @@ final public class SSLUtilities {
                         new SSLJFrame().setVisible(true);
                     }
                 });
+                
+                return;
                 
             } else {
                 
@@ -557,12 +562,17 @@ final public class SSLUtilities {
                     Certificate aCert = new sun.security.x509.X509CertImpl( certBytes );
                     SSLUtilities.importCertificate( certAlias, aCert);
                     System.out.println("Certificate import complete.");
+                    return;
                     
                 }
                 
             }
             
         } 
+        
+        System.out.println("Usage:  -gui  <Display SSL import GUI>\n"
+                          +"   or:  <(Host Certificate).der>\n");
+        
         
     }
         

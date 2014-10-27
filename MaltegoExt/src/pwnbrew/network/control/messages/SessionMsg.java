@@ -46,7 +46,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
-public final class SessionMsg extends ControlMessage{ 
+public final class SessionMsg extends MaltegoMessage{ 
     
     private static final byte OPTION_HOST_ID = 124;
     private static final byte OPTION_CHECK_IN = 72;

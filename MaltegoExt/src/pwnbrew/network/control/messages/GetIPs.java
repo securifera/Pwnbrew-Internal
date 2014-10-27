@@ -54,7 +54,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
-public final class GetIPs extends ControlMessage{ // NO_UCD (use default)
+public final class GetIPs extends MaltegoMessage{ // NO_UCD (use default)
     
     private static final byte OPTION_HOST_ID = 100;
     private int hostId;

@@ -42,8 +42,6 @@ package pwnbrew;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
@@ -54,7 +52,6 @@ import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.ReconnectTimer;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.network.control.messages.TaskNew;
 import pwnbrew.network.control.messages.TaskStatus;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.network.http.ClientHttpWrapper;
@@ -62,7 +59,7 @@ import pwnbrew.network.http.Http;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.shell.ShellMessageManager;
 import pwnbrew.task.TaskListener;
-import pwnbrew.task.TaskRunner;
+//import pwnbrew.task.TaskRunner;
 
 
 /**
@@ -75,7 +72,7 @@ public final class Pwnbrew extends CommManager implements TaskListener {
     private static final boolean debug = false;
   
     //The Server Details
-    private final Map<Integer, TaskRunner> theTaskMap = new HashMap<>();
+//    private final Map<Integer, TaskRunner> theTaskMap = new HashMap<>();
      
     //===============================================================
     /**
@@ -134,12 +131,12 @@ public final class Pwnbrew extends CommManager implements TaskListener {
             
             super.shutdown();
 
-            //Shutdown the task runners
-            synchronized(theTaskMap){
-                for( TaskRunner aRunner : theTaskMap.values()){
-                    aRunner.shutdown();
-                }
-            }       
+//            //Shutdown the task runners
+//            synchronized(theTaskMap){
+//                for( TaskRunner aRunner : theTaskMap.values()){
+//                    aRunner.shutdown();
+//                }
+//            }       
 
             //Shutdown the managers
             ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
@@ -187,15 +184,15 @@ public final class Pwnbrew extends CommManager implements TaskListener {
     @Override
     public void notifyHandler( int taskId, int fileOp ) {
 
-       TaskRunner theTaskRunner;
-       synchronized(theTaskMap){
-          theTaskRunner = theTaskMap.get(taskId);
-       }
-
-       //Notify the task runner thread
-       if(theTaskRunner != null){
-          theTaskRunner.notifyFileOp(fileOp);
-       }
+//       TaskRunner theTaskRunner;
+//       synchronized(theTaskMap){
+//          theTaskRunner = theTaskMap.get(taskId);
+//       }
+//
+//       //Notify the task runner thread
+//       if(theTaskRunner != null){
+//          theTaskRunner.notifyFileOp(fileOp);
+//       }
     }
 
      /**
@@ -270,32 +267,32 @@ public final class Pwnbrew extends CommManager implements TaskListener {
 
     }
 
-    //===============================================================
-    /**
-     * Adds a task runner to the map
-     *
-     * @param passedId
-     * @param passedRunner
-    */
-    private TaskRunner addTaskRunner(Integer passedId, TaskRunner passedRunner){
-        synchronized(theTaskMap){
-           return theTaskMap.put(passedId, passedRunner);
-        }
-    }
+//    //===============================================================
+//    /**
+//     * Adds a task runner to the map
+//     *
+//     * @param passedId
+//     * @param passedRunner
+//    */
+//    private TaskRunner addTaskRunner(Integer passedId, TaskRunner passedRunner){
+//        synchronized(theTaskMap){
+//           return theTaskMap.put(passedId, passedRunner);
+//        }
+//    }
 
-    //===============================================================
-    /**
-     * Returns the task handler for the specified id
-     *
-     * @param passedId
-    */
-    private TaskRunner getTaskRunner(Integer passedId){
-        TaskRunner theTaskRunner;
-        synchronized(theTaskMap){
-           theTaskRunner = theTaskMap.get(passedId);
-        }
-        return theTaskRunner;
-    }
+//    //===============================================================
+//    /**
+//     * Returns the task handler for the specified id
+//     *
+//     * @param passedId
+//    */
+//    private TaskRunner getTaskRunner(Integer passedId){
+//        TaskRunner theTaskRunner;
+//        synchronized(theTaskMap){
+//           theTaskRunner = theTaskMap.get(passedId);
+//        }
+//        return theTaskRunner;
+//    }
 
     //===============================================================
     /**
@@ -308,28 +305,29 @@ public final class Pwnbrew extends CommManager implements TaskListener {
         int taskId = passedMsg.getTaskId();
 
         String taskStatus = passedMsg.getStatus();
-        if(taskStatus.equals( TaskStatus.TASK_START) && passedMsg instanceof TaskNew){
+//        if(taskStatus.equals( TaskStatus.TASK_START) && passedMsg instanceof TaskNew){
+//
+//            TaskRunner theTaskRunner = getTaskRunner(Integer.valueOf(taskId));
+//            if( theTaskRunner == null){
+//                
+//                //Create a new task runner, add it to the map, and execute it
+//                TaskNew newTask = (TaskNew)passedMsg;
+//                TaskRunner aHandler = new TaskRunner(this, newTask);
+//                addTaskRunner(taskId, aHandler);
+//
+//                //Execute the runnable
+//                aHandler.start();
+//            }
+//
+//        //If a msg was received to cancel the task
+//        } else 
+        if (taskStatus.equals( TaskStatus.TASK_CANCELLED)){
 
-            TaskRunner theTaskRunner = getTaskRunner(Integer.valueOf(taskId));
-            if( theTaskRunner == null){
-                
-                //Create a new task runner, add it to the map, and execute it
-                TaskNew newTask = (TaskNew)passedMsg;
-                TaskRunner aHandler = new TaskRunner(this, newTask);
-                addTaskRunner(taskId, aHandler);
-
-                //Execute the runnable
-                aHandler.start();
-            }
-
-        //If a msg was received to cancel the task
-        } else if (taskStatus.equals( TaskStatus.TASK_CANCELLED)){
-
-            TaskRunner theTaskRunner = getTaskRunner(Integer.valueOf(taskId));
-            //Shutdown the runner
-            if(theTaskRunner != null){
-                theTaskRunner.shutdown();
-            }
+//            TaskRunner theTaskRunner = getTaskRunner(Integer.valueOf(taskId));
+//            //Shutdown the runner
+//            if(theTaskRunner != null){
+//                theTaskRunner.shutdown();
+//            }
             
             //Get the file manager
             try {

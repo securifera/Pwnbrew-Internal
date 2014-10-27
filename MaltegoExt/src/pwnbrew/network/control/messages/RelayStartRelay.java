@@ -44,14 +44,13 @@ import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
  *  
  */
-public final class RelayStartRelay extends ControlMessage{
+public final class RelayStartRelay extends MaltegoMessage{
     
     private static final byte OPTION_PORT = 24;
     private static final byte OPTION_TARGET_HOST_ID = 22;

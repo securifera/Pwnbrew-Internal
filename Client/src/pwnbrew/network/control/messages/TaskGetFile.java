@@ -38,9 +38,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.log.LoggableException;
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import pwnbrew.manager.CommManager;
 import pwnbrew.misc.DebugPrinter;
@@ -54,7 +52,7 @@ import pwnbrew.network.control.ControlMessageManager;
  */
 public final class TaskGetFile extends TaskStatus{
 
-    private File fileToRetrieve;
+//    private File fileToRetrieve;
     private String hashFilenameStr;
     
     //Class name
@@ -65,30 +63,29 @@ public final class TaskGetFile extends TaskStatus{
      * Constructor
      *
      * @param msgId
-     * @throws java.io.IOException
     */
     public TaskGetFile(byte[] msgId ) { // NO_UCD (use default)
         super(msgId);
     }
      
-    // ==========================================================================
-    /**
-     * Constructor
-     *
-     * @param taskId
-     * @param fileHash
-     * @param passedFile
-     * @throws java.io.IOException
-    */
-    public TaskGetFile(int taskId, File passedFile, String fileHash ) throws IOException  {
-        super(taskId , TaskStatus.TASK_XFER_FILES );
-        fileToRetrieve = passedFile;
-
-        String fileHashNameStr = new StringBuilder().append(fileHash).append(":").append(fileToRetrieve.getName()).toString();
-        byte[] strBytes = fileHashNameStr.getBytes();
-        ControlOption aTlv = new ControlOption(OPTION_HASH_FILENAME, strBytes);
-        addOption(aTlv);
-    }
+//    // ==========================================================================
+//    /**
+//     * Constructor
+//     *
+//     * @param taskId
+//     * @param fileHash
+//     * @param passedFile
+//     * @throws java.io.IOException
+//    */
+//    public TaskGetFile(int taskId, File passedFile, String fileHash ) throws IOException  {
+//        super(taskId , TaskStatus.TASK_XFER_FILES );
+//        fileToRetrieve = passedFile;
+//
+//        String fileHashNameStr = new StringBuilder().append(fileHash).append(":").append(fileToRetrieve.getName()).toString();
+//        byte[] strBytes = fileHashNameStr.getBytes();
+//        ControlOption aTlv = new ControlOption(OPTION_HASH_FILENAME, strBytes);
+//        addOption(aTlv);
+//    }
     
      //=========================================================================
     /**

@@ -52,7 +52,7 @@ public interface FileBrowserListener extends TaskManager {
 
     public void downloadFiles(List<RemoteFile> theFileList);
 
-    public void uploadFiles(List<File> theObjList, String filePath);
+    public void uploadFiles( List<File> theObjList );
     
     public String getId();
 

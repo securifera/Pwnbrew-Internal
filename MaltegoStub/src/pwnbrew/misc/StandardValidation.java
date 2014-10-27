@@ -54,12 +54,19 @@ public class StandardValidation {
     private static final String REGEX_Ipv4Octet = "25[0-5]|2[0-4]\\d|[01]?\\d?\\d";
     private static final String REGEX_Ipv4Address = "((" + REGEX_Ipv4Octet + ")\\.){3}(" + REGEX_Ipv4Octet + ")";
 
+    //IPv6 address regular expression...
+    private static final String REGEX_Ipv6Address = "^(((?=(?>.*?::)(?!.*::)))(::)?([0-9A-Fa-f]{1,4}::?){0,5}|([0-9A-Fa-f]{1,4}:){6})(\2([0-9A-Fa-f]{1,4}(::?|$)){0,2}|((25[0-5]|(2[0-4]|1\\d|[1-9])?\\d)(\\.|$)){4}|[0-9A-Fa-f]{1,4}:[0-9A-Fa-f]{1,4})(?<![^:]:|\\.)\\z";
+ 
+    
     //Add port to IPv4
     private static final String REGEX_PORT = "(6553[0-5]|655[0-2]\\d|65[0-4]\\d{2}|6[0-4]\\d{3}|5\\d{4}|[0-9]\\d{0,3})";
     //Special Validation for Client
     private static final String REGEX_Client_Connection = REGEX_Ipv4Address +"(:("+REGEX_PORT+"))";
 
     //StandardValidation keywords...
+    public static final String KEYWORD_IpAddress = "ipaddress";
+    public static final String KEYWORD_Ipv4Address = "ipv4address";    
+    private static final String KEYWORD_Ipv6Address = "ipv6address";
     public static final String KEYWORD_Port = "port";
     public static final String KEYWORD_ClientConnect = "clientconnect"; 
     //
@@ -67,7 +74,10 @@ public class StandardValidation {
     static {
         List<String> tempList = new ArrayList<>();
         tempList.add( KEYWORD_Port );
+        tempList.add( KEYWORD_IpAddress );
+        tempList.add( KEYWORD_Ipv4Address );
         tempList.add( KEYWORD_ClientConnect );
+        tempList.add( KEYWORD_Ipv6Address );
         KEYWORD_LIST = Collections.unmodifiableList( tempList );
     }
 
@@ -75,7 +85,10 @@ public class StandardValidation {
     private static final HashMap<String, String> theKeywordToMethodNameMap = new HashMap<>();
     static {
         theKeywordToMethodNameMap.put( KEYWORD_Port, "validatePort" );
+        theKeywordToMethodNameMap.put( KEYWORD_IpAddress, "validateIpAddress" );
+        theKeywordToMethodNameMap.put( KEYWORD_Ipv4Address, "validateIpv4Address" );
         theKeywordToMethodNameMap.put( KEYWORD_ClientConnect, "validateClientConnect" );
+        theKeywordToMethodNameMap.put( KEYWORD_Ipv6Address, "validateIpv6Address" );
     }
 
 
@@ -185,6 +198,76 @@ public class StandardValidation {
         return rtnBool;
 
     }
+    
+     // ==========================================================================
+    /**
+     * Determines if the given String is a valid IP v4 or v6 address.
+     * <p>
+     * If the argument is null this method returns false.
+     *
+     * @param address the String to test
+     *
+     * @return {@code true} if the given String is a valid IP v4 or v6 address;
+     * {@code false} otherwise
+     */
+    public static boolean validateIpAddress( String address ) {
+
+        if( address == null ) //If the String is null...
+            return false; //Do nothing
+
+        boolean rtnBool;
+
+        if( validateIpv4Address( address ) ) //If the String is a valid IPv4 address...
+            rtnBool = true; //The String is valid
+        else //If the String is not a valid IPv4 address...
+            rtnBool = validateIpv6Address( address ); //Determine if the String is a valid IPv6 address
+
+        return rtnBool;
+
+    }/* END validateIpAddress( String ) */
+    
+    
+    // ==========================================================================
+    /**
+     * Determines if the given String is a valid IPv4 address in the dotted-decimal
+     * notation. (ie. "172.16.254.1")
+     * <p>
+     * If the argument is null this method returns false.
+     *
+     * @param address the String to test
+     *
+     * @return {@code true} if the given String is a valid IPv4 address in the dotted-decimal
+     * notation; {@code false} otherwise
+     */
+    public static boolean validateIpv4Address( String address ) {
+
+        if( address == null ) //If the String is null...
+            return false; //Do nothing
+
+        return address.matches( REGEX_Ipv4Address ); //Determine if the String is a IPv4 address
+
+    }/* END validateIpv4Address( String ) */
+    
+    
+    // ==========================================================================
+    /**
+     * Determines if the given String is a valid IPv6 address.
+     * <p>
+     * If the argument is null this method returns false.
+     *
+     * @param address the String to test
+     *
+     * @return {@code true} if the given String is a valid IPv6 address; {@code false}
+     * otherwise
+     */
+    public static boolean validateIpv6Address( String address ) {
+
+        if( address == null ) //If the String is null...
+            return false; //Do nothing
+
+        return address.matches( REGEX_Ipv6Address ); //Determine if the String is a IPv6 address
+
+    }/* END validateIpv6Address( String ) */
 
      // ==========================================================================
     /**

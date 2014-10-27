@@ -51,7 +51,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import pwnbrew.log.LoggableException;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Message;
 
@@ -273,6 +273,6 @@ public abstract class ControlMessage extends Message {
      * @param tempTlv 
      * @return  
      */
-    public boolean setOption( ControlOption tempTlv ){ return true; }
+    public boolean setOption( ControlOption tempTlv ){ return false; }
 
 }/* END CLASS ControlMessage */

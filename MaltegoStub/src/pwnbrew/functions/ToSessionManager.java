@@ -52,7 +52,7 @@ import pwnbrew.misc.Constants;
 import pwnbrew.misc.CountSeeker;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.HostHandler;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;

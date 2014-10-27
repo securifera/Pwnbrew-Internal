@@ -48,7 +48,7 @@ package pwnbrew.library;
 import java.awt.Component;
 import javax.swing.JFrame;
 import pwnbrew.controllers.ControllerListener;
-import pwnbrew.controllers.RunnableItemController;
+//import pwnbrew.controllers.RunnableItemController;
 import pwnbrew.host.HostController;
 
 /**
@@ -87,20 +87,20 @@ public interface LibraryItemControllerListener extends ControllerListener {
      */
     public JFrame getParentJFrame();
 
-     // ==========================================================================
-    /**
-     *  Attempts to send the job to the remote client
-     * 
-     * @param aController 
-     */
-    public void sendRemoteJob( RunnableItemController aController );
-
-    // ==========================================================================
-    /**
-     *  Attempts to cancel the currently running job
-     * 
-     * @param aThis 
-     */
-    public void cancelRunForCurrentNode(RunnableItemController aThis);
+//     // ==========================================================================
+//    /**
+//     *  Attempts to send the job to the remote client
+//     * 
+//     * @param aController 
+//     */
+//    public void sendRemoteJob( RunnableItemController aController );
+//
+//    // ==========================================================================
+//    /**
+//     *  Attempts to cancel the currently running job
+//     * 
+//     * @param aThis 
+//     */
+//    public void cancelRunForCurrentNode(RunnableItemController aThis);
     
 }

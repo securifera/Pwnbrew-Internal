@@ -38,14 +38,14 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-public final class RelayStartRelay extends ControlMessage{
+public final class RelayStartRelay extends MaltegoMessage{
     
     private static final byte OPTION_PORT = 24;
     private static final byte OPTION_TARGET_HOST_ID = 22;
@@ -58,6 +58,7 @@ public final class RelayStartRelay extends ControlMessage{
      * Constructor
      *
      * @param passedPort
+     * @param targetHostId
      * @param passedDestHostId
     */
     public RelayStartRelay( int passedDestHostId, int targetHostId, int passedPort ) {

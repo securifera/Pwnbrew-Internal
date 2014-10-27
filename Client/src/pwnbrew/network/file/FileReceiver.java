@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.Persistence;
 import pwnbrew.log.RemoteLog;
@@ -105,6 +106,7 @@ final public class FileReceiver {
      * @throws java.io.IOException 
      * @throws java.security.NoSuchAlgorithmException 
      */
+    @SuppressWarnings("ucd")
     public FileReceiver( FileMessageManager passedManager, int passedSrcId, int passedTaskId, int passedFileId, long passedFileSize, File parentDir, String hashFilenameStr) 
             throws LoggableException, NoSuchAlgorithmException, IOException {
         
@@ -148,6 +150,7 @@ final public class FileReceiver {
     //===============================================================
     /**
     * Cleans up the file transfer
+    @SuppressWarnings("ucd")
     *
     */
     public void cleanupFileTransfer(){
@@ -178,12 +181,18 @@ final public class FileReceiver {
     /**
      * Receives the bytes from the socket channel and puts them into a file
      *
+     @SuppressWarnings("ucd")
      * @param passedByteArray
     */
 
     public void receiveFile(byte[] passedByteArray){
 
         try {
+            
+            if( passedByteArray.length + fileByteCounter > fileSize ){
+                int diff = (int) (fileSize - fileByteCounter);
+                passedByteArray = Arrays.copyOf(passedByteArray, diff);
+            }
 
             //Copy over the bytes
             aFileStream.write(passedByteArray);

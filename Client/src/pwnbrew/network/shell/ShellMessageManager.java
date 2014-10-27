@@ -132,6 +132,7 @@ public class ShellMessageManager extends DataManager {
      * @throws java.io.IOException
      * @throws pwnbrew.log.LoggableException
     */
+    @SuppressWarnings("ucd")
     public void send( ProcessMessage passedMessage ) throws IOException, LoggableException {
 
         //Allows for more specific handles to encode the message however necessary

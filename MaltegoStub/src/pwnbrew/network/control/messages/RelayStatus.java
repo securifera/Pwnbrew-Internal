@@ -44,7 +44,7 @@ import pwnbrew.functions.Function;
 import pwnbrew.functions.StopRelay;
 import pwnbrew.functions.ToRelay;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
 /**

@@ -38,7 +38,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.logging.Level;
@@ -51,14 +50,13 @@ import pwnbrew.manager.CommManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.relay.RelayManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
  *  
  */
-public final class GetSessions extends ControlMessage{ 
+public final class GetSessions extends MaltegoMessage{ 
     
     private static final byte OPTION_HOST_ID = 124;
     private int hostId;

@@ -45,7 +45,7 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
-public final class ImportCert extends ControlMessage { // NO_UCD (use default)
+public final class ImportCert extends MaltegoMessage { // NO_UCD (use default)
         
     private static final byte OPTION_CERT_FILENAME = 78;
     private static final byte OPTION_CERT_PASSWORD = 79;

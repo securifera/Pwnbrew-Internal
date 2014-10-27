@@ -85,6 +85,6 @@ public abstract class DataHandler extends ManagedRunnable {
      * @param passedByteArray 
      * @throws pwnbrew.exception.RemoteExceptionWrapper 
      */
-    abstract protected void processData( byte[] passedByteArray ) throws RemoteExceptionWrapper;
+    abstract protected void processData( PortRouter srcPortRouter, byte[] passedByteArray ) throws RemoteExceptionWrapper;
 
 }

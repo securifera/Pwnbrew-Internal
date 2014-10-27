@@ -187,36 +187,36 @@ public class NetworkInterfaceUtilities {
         return strBuf.toString().toUpperCase();
     }
   
-    // ==========================================================================
-    /**
-    * Returns a list of all {@link NetworkInterface}s for which 
-    * {@link NetworkInterface#isUp()} returns true.
-    * <p>
-    * NOTE: The loopback interface is excluded from the returned list.
-    * 
-    * @return a list of all {@link NetworkInterface}s for which 
-    * {@link NetworkInterface#isUp()} returns true
-    * 
-    * @throws java.net.SocketException
-    */
-    public static ArrayList<NetworkInterface> getAllUpInterfaces() throws SocketException {
-
-        ArrayList<NetworkInterface> rtnList = new ArrayList<>();
-        ArrayList<NetworkInterface> allNIs = getAllNetworkInterfaces(); //Get all of the NetworkInterfaces
-        for (NetworkInterface aNI : allNIs) {
-            //Remove the loopback NetworkInterface...
-            if( aNI.isLoopback() )
-                continue;
-            
-            //Remove any down NetworkInterfaces...
-            if( aNI.isUp() == false )
-                continue; 
-            
-            rtnList.add( aNI );
-        }
-
-        return rtnList;
-
-    }
+//    // ==========================================================================
+//    /**
+//    * Returns a list of all {@link NetworkInterface}s for which 
+//    * {@link NetworkInterface#isUp()} returns true.
+//    * <p>
+//    * NOTE: The loopback interface is excluded from the returned list.
+//    * 
+//    * @return a list of all {@link NetworkInterface}s for which 
+//    * {@link NetworkInterface#isUp()} returns true
+//    * 
+//    * @throws java.net.SocketException
+//    */
+//    public static ArrayList<NetworkInterface> getAllUpInterfaces() throws SocketException {
+//
+//        ArrayList<NetworkInterface> rtnList = new ArrayList<>();
+//        ArrayList<NetworkInterface> allNIs = getAllNetworkInterfaces(); //Get all of the NetworkInterfaces
+//        for (NetworkInterface aNI : allNIs) {
+//            //Remove the loopback NetworkInterface...
+//            if( aNI.isLoopback() )
+//                continue;
+//            
+//            //Remove any down NetworkInterfaces...
+//            if( aNI.isUp() == false )
+//                continue; 
+//            
+//            rtnList.add( aNI );
+//        }
+//
+//        return rtnList;
+//
+//    }
   
 }
