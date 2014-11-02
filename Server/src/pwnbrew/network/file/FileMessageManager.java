@@ -162,7 +162,7 @@ public class FileMessageManager extends DataManager {
             throws LoggableException, NoSuchAlgorithmException, IOException {
 
         //Get the socket router
-        ServerPortRouter aPR = (ServerPortRouter) theCommManager.getPortRouter( operatingPort );
+        ServerPortRouter aPR = (ServerPortRouter) thePortManager.getPortRouter( operatingPort );
                        
         //Initiate the file transfer
         if(aPR != null){
@@ -230,7 +230,7 @@ public class FileMessageManager extends DataManager {
         int fileId = passedMessage.getFileId();
         
         int clientId = passedMessage.getSrcHostId();
-        ServerManager aSM = (ServerManager)theCommManager;
+        ServerManager aSM = (ServerManager)thePortManager;
         File aClientDir = aSM.getHostDirectory( clientId );
 
         File libDir = null;
@@ -268,7 +268,7 @@ public class FileMessageManager extends DataManager {
                 //Send an ack to the sender to begin transfer
                 DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);
                 PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr, clientId );
-                DataManager.send(theCommManager, aSFMA);
+                DataManager.send(thePortManager, aSFMA);
             } 
 
         } catch (IOException | NoSuchAlgorithmException ex){
@@ -308,7 +308,7 @@ public class FileMessageManager extends DataManager {
      */
     public void sendFile(PushFileAck aMessage) {
         
-        FileSender aSender = new FileSender( getCommManager(), aMessage );
+        FileSender aSender = new FileSender( getPortManager(), aMessage );
         
         int taskId = aMessage.getTaskId();
         int fileId = aMessage.getFileId();
@@ -371,7 +371,7 @@ public class FileMessageManager extends DataManager {
         }
         
          //Clear the send buffer
-        ServerPortRouter aPR = (ServerPortRouter) theCommManager.getPortRouter( getPort() );
+        ServerPortRouter aPR = (ServerPortRouter) thePortManager.getPortRouter( getPort() );
         SocketChannelHandler aSCH = aPR.getSocketChannelHandler(clientId);
 
         //Set the wrapper

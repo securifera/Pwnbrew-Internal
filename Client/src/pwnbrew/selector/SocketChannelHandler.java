@@ -386,7 +386,7 @@ public class SocketChannelHandler implements Selectable {
 
                 RelayManager aManager = RelayManager.getRelayManager();
                 if( aManager == null){
-                    aManager = RelayManager.initialize( thePortRouter.getCommManager() );
+                    aManager = RelayManager.initialize( thePortRouter.getPortManager() );
                 }
 
                 //Get the port router and register the host

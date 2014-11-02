@@ -38,7 +38,7 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
-* CommManager.java
+* PortManager.java
 *
 * Created on June 7, 2013, 11:49:21 PM
 */
@@ -48,6 +48,8 @@ package pwnbrew.manager;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Stack;
+import pwnbrew.misc.DynamicClassLoader;
 import pwnbrew.network.PortRouter;
 
 /**
@@ -58,6 +60,18 @@ public abstract class PortManager {
 
     //The map that relates the port to the port router
     private final Map<Integer, PortRouter> thePortRouterMap = new HashMap<>();
+    private DynamicClassLoader theDynamicClassLoader = new DynamicClassLoader();
+    
+    //=======================================================================
+    /**
+     * 
+     */
+    public void resetDynamicClassLoader(){
+       Stack tempStack = theDynamicClassLoader.getClassDefStack();
+       theDynamicClassLoader = null;
+       theDynamicClassLoader = new DynamicClassLoader();
+       theDynamicClassLoader.setClassDefStack(tempStack);
+    }
 
     //===========================================================================
     /*
@@ -113,6 +127,15 @@ public abstract class PortManager {
         synchronized( thePortRouterMap ){
             thePortRouterMap.put( passedPort, aPR );
         }
+    }
+
+    //====================================================================
+    /**
+     * 
+     * @return 
+     */
+    public DynamicClassLoader getDynamicClassLoader(){
+        return theDynamicClassLoader;
     }
 
 

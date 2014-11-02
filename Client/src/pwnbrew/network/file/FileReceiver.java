@@ -239,7 +239,7 @@ final public class FileReceiver {
                 cleanupFileTransfer();
 
                 //Notify any task handlers waiting
-                PortManager theManager = theFileMessageManager.getCommManager();
+                PortManager theManager = theFileMessageManager.getPortManager();
                 if( theManager instanceof TaskListener ){
                     ((TaskListener)theManager).notifyHandler(taskId, Constants.FILE_RECEIVED);
                 }

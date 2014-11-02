@@ -151,7 +151,7 @@ public class ShellMessageHandler extends DataHandler {
         try {
             
             ProcessMessage aMessage = ProcessMessage.getMessage( currByteArray );
-            aMessage.evaluate( theDataManager.getCommManager() );           
+            aMessage.evaluate( theDataManager.getPortManager() );           
             
         } catch (LoggableException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "receiveByteArray()", ex.getMessage(), ex );

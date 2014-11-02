@@ -76,7 +76,7 @@ import pwnbrew.xmlBase.ServerConfig;
 abstract public class DataManager {    
 
     protected DataHandler theDataHandler;
-    protected final PortManager theCommManager;
+    protected final PortManager thePortManager;
     protected int operatingPort;
     
     private static final Map<Integer, PortWrapper> thePortWrapperMap = new HashMap<>();
@@ -89,7 +89,7 @@ abstract public class DataManager {
      * @param passedProvider
      */
     public DataManager( PortManager passedProvider ) {
-        theCommManager = passedProvider ;
+        thePortManager = passedProvider ;
     }  
     
     //===========================================================================
@@ -118,8 +118,8 @@ abstract public class DataManager {
     /*
      *  Returns the comm manager
      */
-    public PortManager getCommManager(){
-        return theCommManager;
+    public PortManager getPortManager(){
+        return thePortManager;
     }
     //===========================================================================
     /*

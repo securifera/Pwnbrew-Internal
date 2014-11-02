@@ -129,7 +129,7 @@ public class RelayManager extends DataManager {
         int tempId = SocketUtilities.byteArrayToInt(dstHostId);
                
         //Get the port router
-        PortRouter thePR = theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+        PortRouter thePR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
         if( thePR.equals( srcPortRouter))
              thePR = theServerPortRouter;
          

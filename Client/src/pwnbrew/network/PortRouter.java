@@ -100,7 +100,6 @@ abstract public class PortRouter {
      *
      * @return
     */
-//    @Override
     public SelectionRouter getSelRouter() {
         return theSelectionRouter;
     }
@@ -111,7 +110,7 @@ abstract public class PortRouter {
      *
      * @return
      */
-    public PortManager getCommManager() {
+    public PortManager getPortManager() {
         return theCommManager;
     }
     

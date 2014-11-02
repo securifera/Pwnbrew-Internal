@@ -122,7 +122,7 @@ public class RelayManager extends DataManager {
         //Get the port router
         try {
             
-            PortRouter thePR = theCommManager.getPortRouter( ServerConfig.getServerConfig().getSocketPort() );
+            PortRouter thePR = thePortManager.getPortRouter( ServerConfig.getServerConfig().getSocketPort() );
             if( thePR.equals( srcPortRouter))
                  thePR = theServerPortRouter;
 

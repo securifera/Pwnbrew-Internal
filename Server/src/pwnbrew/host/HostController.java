@@ -90,8 +90,8 @@ import pwnbrew.library.LibraryItemController;
 import pwnbrew.library.LibraryItemControllerListener;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.ControlOption;
@@ -803,7 +803,7 @@ public final class HostController extends LibraryItemController implements Actio
                     
                 //Start the shell
                 theShell.start();
-
+             
             } catch (  NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                 Log.log(Level.WARNING, NAME_Class, "spawnShell()", ex.getMessage(), ex );
             }

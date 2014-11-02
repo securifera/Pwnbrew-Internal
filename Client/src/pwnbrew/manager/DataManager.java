@@ -69,7 +69,8 @@ import pwnbrew.network.shell.ShellMessageManager;
 abstract public class DataManager {    
 
     protected DataHandler theDataHandler;
-    protected final PortManager theCommManager;
+    protected final PortManager thePortManager;
+    
     
     private static final Map<Integer, PortWrapper> thePortWrapperMap = new HashMap<>();
     private transient static final String NAME_Class = DataManager.class.getSimpleName();
@@ -81,7 +82,7 @@ abstract public class DataManager {
      * @param passedProvider
      */
     public DataManager( PortManager passedProvider ) {
-        theCommManager = passedProvider ;
+        thePortManager = passedProvider ;
     }  
     
     //===========================================================================
@@ -110,8 +111,8 @@ abstract public class DataManager {
     /*
      *  Returns the comm manager
      */
-    public PortManager getCommManager(){
-        return theCommManager;
+    public PortManager getPortManager(){
+        return thePortManager;
     }
     //===========================================================================
     /*
@@ -176,7 +177,7 @@ abstract public class DataManager {
         try {
                   
             //Get the comm manager
-            PortManager theCommManager = passedRouter.getCommManager();
+            PortManager theCommManager = passedRouter.getPortManager();
             
             //Get the config
             DataManager aManager = null;

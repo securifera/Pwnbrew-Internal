@@ -47,12 +47,14 @@ package pwnbrew.network.control;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
@@ -66,7 +68,7 @@ import pwnbrew.network.control.messages.ControlMessage;
 public class ControlMessageHandler extends DataHandler {
 
    private static final String NAME_Class = ControlMessageHandler.class.getSimpleName();
-   private final Queue<Message> incomingMsgQueue = new LinkedList<>();
+   private final Queue<Object[]> incomingMsgQueue = new LinkedList<>();
     
    //===============================================================
      /**
@@ -97,15 +99,39 @@ public class ControlMessageHandler extends DataHandler {
      * @param theMessage
      * @return 
     */
-    private void handleIncoming( final Message aMessage ) {  
+    private void handleIncoming( final Object[] anObjArr ) {  
         theExecutor.execute( new Runnable() {
 
             @Override
             public void run() {
-                try { 
-                    aMessage.evaluate( theDataManager.getCommManager() );
-                } catch (LoggableException ex) {
-                    RemoteLog.log(Level.INFO, NAME_Class, "processData()", ex.getMessage(), ex );
+                
+                if( anObjArr != null && anObjArr.length == 2 ){
+                    
+                    PortRouter aPR = (PortRouter) anObjArr[0];
+                    Message aMessage = (Message) anObjArr[1];
+                    try { 
+                        aMessage.evaluate( theDataManager.getPortManager() );
+                    } catch (LoggableException ex) {
+                        RemoteLog.log(Level.INFO, NAME_Class, "processData()", ex.getMessage(), ex );
+                    } catch (NoClassDefFoundError err){
+
+                        //Reset the class loader
+                        PortManager aPM = aPR.getPortManager();
+                        aPM.resetDynamicClassLoader();
+                        
+                        //Get the path
+                        String classPath = err.getMessage();
+                        byte[] msgBytes = aMessage.getBytes();
+                        
+                        //Remove the type and length fields
+                        msgBytes = Arrays.copyOfRange(msgBytes, 5, msgBytes.length );
+                        ClassRequest aClassRequest = new ClassRequest( classPath, msgBytes );
+
+                        //Get the class bytes
+                        byte[] byteArr = aClassRequest.getBytes();
+                        aPR.queueSend( byteArr, aClassRequest.getDestHostId());
+
+                    }
                 }
             }
         });
@@ -117,13 +143,13 @@ public class ControlMessageHandler extends DataHandler {
     *
     * @param passedMessage
     */
-    private void processIncoming( Message passedMessage) {
+    private void processIncoming( PortRouter aPR, Message passedMessage) {
 
         //Copy over the bytes
         if(passedMessage != null){
 
             synchronized(incomingMsgQueue) {
-                incomingMsgQueue.add(passedMessage);
+                incomingMsgQueue.add( new Object[]{aPR, passedMessage} );
             }
             beNotified();
 
@@ -152,7 +178,7 @@ public class ControlMessageHandler extends DataHandler {
                         byte[] byteArr = aMessage.getBytes();
                         srcPortRouter.queueSend( byteArr, aMessage.getDestHostId());
                     } else
-                        processIncoming(aMessage);
+                        processIncoming(srcPortRouter, aMessage);
                     
                 }
             }
@@ -169,8 +195,6 @@ public class ControlMessageHandler extends DataHandler {
     @Override
     protected void go() {
         
-        Message aMessage;
-
         while(!shutdownRequested) {
 
 
@@ -181,13 +205,14 @@ public class ControlMessageHandler extends DataHandler {
 
 
                 // Handle the next message
+                Object[] anObjArr;
                 synchronized(incomingMsgQueue) {
-                    aMessage = (Message)incomingMsgQueue.poll();
+                    anObjArr = (Object[])incomingMsgQueue.poll();
                 }
 
                 //Handles a message if there is one
-                if(aMessage != null){
-                    handleIncoming(aMessage);
+                if(anObjArr != null){
+                    handleIncoming(anObjArr);
                 }
             }
         }

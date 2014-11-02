@@ -48,15 +48,19 @@ package pwnbrew.network.control.messages;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.DebugPrinter;
+import pwnbrew.misc.DynamicClassLoader;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Message;
+import pwnbrew.network.control.ControlMessageManager;
 
 /**
  *
@@ -207,13 +211,27 @@ public abstract class ControlMessage extends Message {
         try {
             
             //Get the class
-            Class aClass = Class.forName(thePath);
-            Constructor aConstruct = aClass.getConstructor( byte[].class);
-            aMsg = (ControlMessage)aConstruct.newInstance(msgId);
+            Class aClass = null;
+            try {
+                aClass = Class.forName(thePath);
+            } catch( ClassNotFoundException ex ){
+                ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
+                if( aCMM != null ){
+                    PortManager aPM = aCMM.getPortManager();
+                    DynamicClassLoader aDCL = aPM.getDynamicClassLoader();
+                    aClass = Class.forName(thePath, true, aDCL);
+                }
+            }
+            
+            //Get a new message
+            if( aClass != null ){
+                Constructor aConstruct = aClass.getConstructor( byte[].class);
+                aMsg = (ControlMessage)aConstruct.newInstance(msgId);
+            }
 
         } catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             throw new LoggableException(ex);
-        }
+        } 
         
         return aMsg;
     }
