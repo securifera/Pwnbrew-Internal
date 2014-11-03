@@ -60,7 +60,7 @@ import pwnbrew.Persistence;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 
@@ -70,7 +70,7 @@ import pwnbrew.network.control.ControlMessageManager;
  */
 public class ReconnectTimer extends ManagedRunnable implements LockListener {
     
-    private CommManager theCommManager = null;
+    private PortManager theCommManager = null;
     
     //Static instance
     private static ReconnectTimer theTimer = null;
@@ -133,7 +133,7 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
      *   Sets the detector provider
      * @param passedProvider
     */
-    public synchronized void setCommManager( CommManager passedProvider ) {
+    public synchronized void setCommManager( PortManager passedProvider ) {
 
         if( passedProvider != null )
             theCommManager = passedProvider;  
@@ -248,7 +248,7 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
             }
             
             //Uninstall
-            Persistence.uninstall( (CommManager)theCommManager);    
+            Persistence.uninstall( (PortManager)theCommManager);    
             
         }     
      

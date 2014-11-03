@@ -40,7 +40,7 @@ package pwnbrew.network.control.messages;
 
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
@@ -97,7 +97,7 @@ public final class RelayStopRelay extends MaltegoMessage{
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {     
+    public void evaluate( PortManager passedManager ) {     
                 
         //Get the host controllers 
         String hostIdStr = Integer.toString(hostId);

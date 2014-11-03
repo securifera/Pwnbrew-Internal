@@ -49,7 +49,7 @@ import javax.swing.SwingUtilities;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.gui.HostTabPanel;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
@@ -105,7 +105,7 @@ public final class RelayDisconnect extends ControlMessage{
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) { 
+    public void evaluate( PortManager passedManager ) { 
     
         //Get the host and set the relay information
         String clientIdStr = Integer.toString( relayHostId );

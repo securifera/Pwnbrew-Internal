@@ -50,7 +50,7 @@ import pwnbrew.log.LoggableException;
 import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.control.ControlMessageManager;
 
@@ -81,7 +81,7 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {
+    public void evaluate( PortManager passedManager ) {
           
         
         try {

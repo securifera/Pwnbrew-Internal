@@ -52,7 +52,7 @@ import pwnbrew.concurrent.LockListener;
 import pwnbrew.concurrent.LockingThread;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.ReconnectTimer;
@@ -89,7 +89,7 @@ public class ClientPortRouter extends PortRouter {
      * @param passedBool
      * @throws IOException
     */
-    public ClientPortRouter( CommManager passedCommManager, boolean passedBool ) throws IOException {
+    public ClientPortRouter( PortManager passedCommManager, boolean passedBool ) throws IOException {
         super(passedCommManager, passedBool, Constants.Executor );
         
         theConnectionLock = new LockingThread( Constants.Executor );

@@ -49,7 +49,7 @@ package pwnbrew.network.control.messages;
 import java.util.Map;
 import java.util.Set;
 import pwnbrew.ClientConfig;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.relay.RelayManager;
@@ -82,7 +82,7 @@ public final class HelloAck extends ControlMessage {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {   
+    public void evaluate( PortManager passedManager ) {   
         
         //Get the address and connect    
         int theClientId = getSrcHostId();

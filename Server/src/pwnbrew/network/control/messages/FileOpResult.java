@@ -46,7 +46,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import pwnbrew.host.HostController;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 
@@ -106,7 +106,7 @@ public final class FileOpResult extends Tasking {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {   
+    public void evaluate( PortManager passedManager ) {   
     
         //If the return value is true
         if( opRetVal ){

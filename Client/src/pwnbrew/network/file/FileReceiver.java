@@ -56,7 +56,7 @@ import java.util.logging.Level;
 import pwnbrew.Persistence;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.FileUtilities;
@@ -239,7 +239,7 @@ final public class FileReceiver {
                 cleanupFileTransfer();
 
                 //Notify any task handlers waiting
-                CommManager theManager = theFileMessageManager.getCommManager();
+                PortManager theManager = theFileMessageManager.getPortManager();
                 if( theManager instanceof TaskListener ){
                     ((TaskListener)theManager).notifyHandler(taskId, Constants.FILE_RECEIVED);
                 }

@@ -47,7 +47,7 @@ package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
 import pwnbrew.host.HostController;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
@@ -129,7 +129,7 @@ public final class FileSystemMsg extends Tasking {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {   
+    public void evaluate( PortManager passedManager ) {   
     
         String clientIdStr = Integer.toString( getSrcHostId() );
         final ServerManager aSM = (ServerManager) passedManager;

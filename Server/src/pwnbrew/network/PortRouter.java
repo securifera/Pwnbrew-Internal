@@ -48,7 +48,7 @@ package pwnbrew.network;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.http.ServerHttpWrapper;
@@ -63,7 +63,7 @@ abstract public class PortRouter {
     
     protected final SelectionRouter theSelectionRouter;
     private final boolean encrypted;
-    protected final CommManager theCommManager;
+    protected final PortManager theCommManager;
     
     //===============================================================
     /**
@@ -73,7 +73,7 @@ abstract public class PortRouter {
      * @param passedBool
      * @throws IOException
      */
-    public PortRouter(CommManager passedManager, boolean passedBool ) throws IOException { // NO_UCD (use default)
+    public PortRouter(PortManager passedManager, boolean passedBool ) throws IOException { // NO_UCD (use default)
 
         theCommManager = passedManager;       
         encrypted = passedBool;
@@ -101,7 +101,7 @@ abstract public class PortRouter {
      *
      * @return
      */
-    public CommManager getCommManager() {
+    public PortManager getCommManager() {
         return theCommManager;
     }
     

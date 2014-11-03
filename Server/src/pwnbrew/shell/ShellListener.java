@@ -48,7 +48,7 @@ package pwnbrew.shell;
 import pwnbrew.gui.panels.RunnerPane;
 import java.io.File;
 import pwnbrew.host.Host;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 
 /**
  *
@@ -99,6 +99,6 @@ public interface ShellListener {
      * Returns the comm manager
      * @return 
      */
-    public CommManager getCommManager();
+    public PortManager getCommManager();
 
 }

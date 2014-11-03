@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.JarItem;
@@ -72,7 +72,7 @@ public class GetJarItems extends MaltegoMessage{ // NO_UCD (use default)
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {     
+    public void evaluate( PortManager passedManager ) {     
     
 
         List<JarItem> jarList = new ArrayList<>();

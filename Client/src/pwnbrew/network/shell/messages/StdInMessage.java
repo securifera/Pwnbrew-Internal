@@ -49,7 +49,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.shell.Shell;
 import pwnbrew.network.shell.ShellMessageManager;
 
@@ -81,7 +81,7 @@ public class StdInMessage extends ProcessMessage {
      * @param theManager 
     */
     @Override
-    public void evaluate(CommManager theManager) {
+    public void evaluate(PortManager theManager) {
     
         try {
             

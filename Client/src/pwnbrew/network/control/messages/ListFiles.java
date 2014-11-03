@@ -46,7 +46,7 @@ package pwnbrew.network.control.messages;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
 
@@ -110,7 +110,7 @@ public final class ListFiles extends Tasking {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {   
+    public void evaluate( PortManager passedManager ) {   
     
         ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
         if( aCMManager != null ){

@@ -51,7 +51,7 @@ import java.util.Map;
 import java.util.Timer;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.selector.AcceptHandler;
 import pwnbrew.selector.SocketChannelHandler;
@@ -80,7 +80,7 @@ public class ServerPortRouter extends PortRouter {
      * @param requireAuthentication
      * @throws IOException
     */
-    public ServerPortRouter( CommManager passedCommManager, boolean passedBool, boolean requireAuthentication ) throws IOException {
+    public ServerPortRouter( PortManager passedCommManager, boolean passedBool, boolean requireAuthentication ) throws IOException {
         super(passedCommManager, passedBool);
         authenticated = requireAuthentication;
     }

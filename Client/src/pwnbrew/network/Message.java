@@ -47,7 +47,7 @@ package pwnbrew.network;
 import java.nio.ByteBuffer;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.SocketUtilities;
 
 /**
@@ -204,7 +204,7 @@ public abstract class Message {
      * @param theManager
      * @throws pwnbrew.log.LoggableException
     */
-    public void evaluate( CommManager theManager ) throws LoggableException {    
+    public void evaluate( PortManager theManager ) throws LoggableException {    
     }
     
     //===============================================================

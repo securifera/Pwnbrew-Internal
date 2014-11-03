@@ -45,17 +45,22 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.log.LoggableException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import pwnbrew.log.LoggableException;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.DebugPrinter;
+import pwnbrew.misc.DynamicClassLoader;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Message;
+import pwnbrew.network.control.ControlMessageManager;
 
 /**
  *
@@ -138,70 +143,95 @@ public abstract class ControlMessage extends Message {
     */
     public static ControlMessage getMessage( ByteBuffer passedBuffer ) throws LoggableException, IOException {
 
-       byte[] theId = new byte[4], clientId = new byte[4], tempHostId = new byte[4];
-       ControlMessage aMessage;
+        byte[] theId = new byte[4], srcHostId = new byte[4], tempHostId = new byte[4];
+        byte[] classFqnLength = new byte[2];
+        ControlMessage aMessage = null;
 
-       //Copy over the client id
-       passedBuffer.get(clientId, 0, clientId.length);
-       
+        //Copy over the client id
+        passedBuffer.get(srcHostId, 0, srcHostId.length);
+
         //Copy over the dest host id
-       passedBuffer.get(tempHostId, 0, tempHostId.length);
-       
+        passedBuffer.get(tempHostId, 0, tempHostId.length);
+
         //Copy over the id
-       passedBuffer.get(theId, 0, theId.length);
-       
-       //Create a message
-       aMessage = instatiateMessage(theId, passedBuffer );
+        passedBuffer.get(theId, 0, theId.length);
 
-       DebugPrinter.printMessage(ControlMessage.class.getSimpleName(), "Received " + aMessage.getClass().getSimpleName() + " message.");
-       
-       //Set client id
-       int theClientId = SocketUtilities.byteArrayToInt(clientId);
-       aMessage.setClientId( theClientId );
-       
-        //Set dest host id
-       int theDestHostId= SocketUtilities.byteArrayToInt(tempHostId);
-       aMessage.setDestHostId( theDestHostId );
+        //Copy over the class path length
+        passedBuffer.get(classFqnLength, 0, classFqnLength.length);
 
-       //Parse the tlvs
-       aMessage.parseControlOptions(passedBuffer);
+        //Get the length of the class path
+        int theLength = SocketUtilities.byteArrayToInt(classFqnLength);
+        byte[] classPath = new byte[theLength];
 
-       return aMessage;
+        //Get the class path
+        passedBuffer.get(classPath, 0, classPath.length);
+        String thePath = new String(classPath);
+
+        try {
+            //Create a message
+            aMessage = instatiateMessage( theId, thePath );
+            
+            DebugPrinter.printMessage(ControlMessage.class.getSimpleName(), "Received " + aMessage.getClass().getSimpleName() + " message.");
+
+            //Set client id
+            int theClientId = SocketUtilities.byteArrayToInt(srcHostId);
+            aMessage.setClientId( theClientId );
+
+            //Set dest host id
+            int theDestHostId= SocketUtilities.byteArrayToInt(tempHostId);
+            aMessage.setDestHostId( theDestHostId );
+
+            //Parse the tlvs
+            aMessage.parseControlOptions(passedBuffer);
+            
+        } catch (ClassNotFoundException ex) {
+            
+            //Rewind the buffer
+            passedBuffer.rewind();
+            ClassRequest aClassRequest = new ClassRequest( thePath, Arrays.copyOf(passedBuffer.array(), passedBuffer.remaining()) );
+            aMessage = aClassRequest;
+            
+        }
+
+        return aMessage;
     }
-
     //===============================================================
     /**
      *  Create a message from the byte buffer
      * 
      * @param msgId
-     * @param passedBuffer
+     * @param thePath
      * @return 
      * @throws pwnbrew.log.LoggableException 
+     * @throws java.lang.ClassNotFoundException 
      */
-    public static ControlMessage instatiateMessage( byte[] msgId, ByteBuffer passedBuffer ) throws LoggableException{
+    public static ControlMessage instatiateMessage( byte[] msgId, String thePath ) throws LoggableException, ClassNotFoundException{
         
         ControlMessage aMsg = null;
-        byte[] classFqnLength = new byte[2];
-        passedBuffer.get(classFqnLength, 0, classFqnLength.length);
-        
-        //Get the length of the class path
-        int theLength = SocketUtilities.byteArrayToInt(classFqnLength);
-        byte[] classPath = new byte[theLength];
-        
-        //Get the class path
-        passedBuffer.get(classPath, 0, classPath.length);
-        String thePath = new String(classPath);
-        
         try {
             
             //Get the class
-            Class aClass = Class.forName(thePath);
-            Constructor aConstruct = aClass.getConstructor( byte[].class);
-            aMsg = (ControlMessage)aConstruct.newInstance(msgId);
+            Class aClass = null;
+            try {
+                aClass = Class.forName(thePath);
+            } catch( ClassNotFoundException ex ){
+                ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
+                if( aCMM != null ){
+                    PortManager aPM = aCMM.getPortManager();
+                    DynamicClassLoader aDCL = aPM.getDynamicClassLoader();
+                    aClass = Class.forName(thePath, true, aDCL);
+                }
+            }
+            
+            //Get a new message
+            if( aClass != null ){
+                Constructor aConstruct = aClass.getConstructor( byte[].class);
+                aMsg = (ControlMessage)aConstruct.newInstance(msgId);
+            }
 
-        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+        } catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             throw new LoggableException(ex);
-        }
+        } 
         
         return aMsg;
     }

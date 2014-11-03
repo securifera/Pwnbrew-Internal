@@ -52,7 +52,7 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import pwnbrew.ClientConfig;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.SocketUtilities;
@@ -76,7 +76,7 @@ public class RelayManager extends DataManager {
     /*
      *  Constructor
      */
-    private RelayManager( CommManager passedCommManager ) throws IOException {
+    private RelayManager( PortManager passedCommManager ) throws IOException {
         
         super(passedCommManager);   
         MyExecutor = Executors.newSingleThreadExecutor();
@@ -94,7 +94,7 @@ public class RelayManager extends DataManager {
      * @return 
      * @throws java.io.IOException 
      */
-    public synchronized static RelayManager initialize( CommManager passedCommManager ) throws IOException {
+    public synchronized static RelayManager initialize( PortManager passedCommManager ) throws IOException {
 
         //Create the manager
         if( theRelayManager == null ) {
@@ -129,7 +129,7 @@ public class RelayManager extends DataManager {
         int tempId = SocketUtilities.byteArrayToInt(dstHostId);
                
         //Get the port router
-        PortRouter thePR = theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+        PortRouter thePR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
         if( thePR.equals( srcPortRouter))
              thePR = theServerPortRouter;
          

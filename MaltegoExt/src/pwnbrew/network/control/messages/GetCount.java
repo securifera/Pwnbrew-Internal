@@ -47,7 +47,7 @@ import pwnbrew.host.HostFactory;
 import pwnbrew.library.LibraryItemController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
@@ -116,7 +116,7 @@ public final class GetCount extends MaltegoMessage{ // NO_UCD (use default)
      * @throws pwnbrew.logging.LoggableException
     */
     @Override
-    public void evaluate( CommManager passedManager ) throws LoggableException {     
+    public void evaluate( PortManager passedManager ) throws LoggableException {     
   
         int retCount = 0;
         ServerManager aSM = (ServerManager) passedManager;

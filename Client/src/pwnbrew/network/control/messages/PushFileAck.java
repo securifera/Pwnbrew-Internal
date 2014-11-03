@@ -51,7 +51,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.file.FileMessageManager;
@@ -173,7 +173,7 @@ public final class PushFileAck extends FileMessage {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {
+    public void evaluate( PortManager passedManager ) {
         
         //Debug
         DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received ACK for " + 

@@ -38,54 +38,47 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
- *  StdInMessage.java
- *
- *  Created on May 25, 2013
- */
+* NoOp.java
+*
+* Created on June 7, 2013, 9:55:42 PM
+*/
 
-package pwnbrew.network.shell.messages;
+package pwnbrew.network.control.messages;
 
-import java.nio.ByteBuffer;
-import pwnbrew.manager.PortManager;
-
-
+import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-public class StdInMessage extends ProcessMessage {
+@SuppressWarnings("ucd")
+public final class ClassResponse extends ControlMessage{
+    
+    private static final byte OPTION_MSG_TO_RESEND = 91;
+    private static final byte OPTION_CLASS_BYTES = 92;
+    
+     //Class name
+    private static final String NAME_Class = ClassResponse.class.getSimpleName();    
 
-     //==========================================================================
+
+    // ==========================================================================
     /**
      * Constructor
      *
-     * @param passedBB
-     * @param dstHostId
+     * @param destId
+     * @param classBytes
+     * @param msgBytes
     */
-    public StdInMessage( ByteBuffer passedBB, int dstHostId ) {
-        super( STD_IN, passedBB, dstHostId );
+    public ClassResponse( int destId, byte[] classBytes, byte[] msgBytes ) {
+        super(destId);
+        
+        //Add the bytes for the class
+        ControlOption aTlv = new ControlOption( OPTION_CLASS_BYTES, classBytes);
+        addOption(aTlv);
+        
+        //Add the bytes for the class
+        aTlv = new ControlOption( OPTION_MSG_TO_RESEND, msgBytes);
+        addOption(aTlv);
     }
-    //==========================================================================
-    /**
-     * Constructor
-     *
-     * @param passedId
-    */
-    public StdInMessage( byte[] passedId ) {
-        super( STD_IN, passedId );
-    }
-
-    //==========================================================================
-    /**
-     *  Process the incoming message
-     * 
-     * @param theManager 
-    */
-    @Override
-    public void evaluate(PortManager theManager) {
-    
-    
-    }
-
+ 
 }

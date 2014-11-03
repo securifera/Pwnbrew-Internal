@@ -48,7 +48,7 @@ import pwnbrew.host.HostFactory;
 import pwnbrew.library.LibraryItemController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
@@ -108,7 +108,7 @@ public final class GetHosts extends MaltegoMessage{ // NO_UCD (use default)
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {     
+    public void evaluate( PortManager passedManager ) {     
         
         ServerManager aSM = (ServerManager) passedManager;
         //Get the host controllers 

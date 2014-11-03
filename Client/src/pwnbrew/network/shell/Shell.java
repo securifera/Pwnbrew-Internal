@@ -54,7 +54,7 @@ import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.ManagedRunnable;
 import pwnbrew.output.StreamReader;
@@ -93,7 +93,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
     private final boolean redirect_stderr;
     
     private final int parentId;
-    private final CommManager theCommManager;
+    private final PortManager theCommManager;
     private static final String NAME_Class = Shell.class.getSimpleName();
       
     // ==========================================================================
@@ -108,7 +108,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
      * @param passedStartupCmd 
      * @param passedBool 
      */
-    public Shell( Executor passedExecutor, CommManager passedManager, 
+    public Shell( Executor passedExecutor, PortManager passedManager, 
             int passedSrcId, String passedEncoding, String[] passedArr, 
             String passedStartupCmd,boolean passedBool ) {
         super(passedExecutor);

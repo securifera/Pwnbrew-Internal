@@ -144,7 +144,7 @@ final public class FileReceiver {
         aFileStream = new FileOutputStream(fileLoc, true);
         
         //Set the progress listener
-        theListener = passedManager.getCommManager().getProgressListener();
+        theListener = passedManager.getPortManager().getProgressListener();
     }
     
     //===============================================================
@@ -254,7 +254,7 @@ final public class FileReceiver {
         try {
 
             PushFileFin finMessage = new PushFileFin( taskId, hexString+":"+fileLoc.getName(), clientId );
-            DataManager.send(theFileMessageManager.getCommManager(), finMessage);
+            DataManager.send(theFileMessageManager.getPortManager(), finMessage);
             
 
         } catch ( UnsupportedEncodingException ex) {

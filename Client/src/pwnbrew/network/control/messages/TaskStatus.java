@@ -47,7 +47,7 @@ package pwnbrew.network.control.messages;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.task.TaskListener;
 
@@ -146,7 +146,7 @@ public class TaskStatus extends Tasking {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {
+    public void evaluate( PortManager passedManager ) {
         
         //Pass it to the manager
         if( passedManager instanceof TaskListener ){

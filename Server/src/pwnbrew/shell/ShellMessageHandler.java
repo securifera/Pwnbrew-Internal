@@ -53,7 +53,7 @@ import java.util.logging.Level;
 import pwnbrew.host.HostController;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.DataHandler;
@@ -158,7 +158,7 @@ public class ShellMessageHandler extends DataHandler {
             byte[] msgBytes = aMessage.getMsgBytes();  
             
             ShellMessageManager theManager = getDataManager();
-            CommManager theCommManager = theManager.getCommManager();
+            PortManager theCommManager = theManager.getPortManager();
             if( theCommManager instanceof ServerManager ){
            
                 ServerManager aServMgr = (ServerManager)theCommManager;

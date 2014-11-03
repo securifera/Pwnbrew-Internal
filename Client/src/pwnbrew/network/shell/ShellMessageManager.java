@@ -53,7 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.network.shell.messages.ProcessMessage;
 
@@ -73,7 +73,7 @@ public class ShellMessageManager extends DataManager {
     /*
      *  Constructor
      */
-    private ShellMessageManager( CommManager passedCommManager ) {
+    private ShellMessageManager( PortManager passedCommManager ) {
         
         super(passedCommManager);        
         
@@ -93,7 +93,7 @@ public class ShellMessageManager extends DataManager {
      * @throws java.io.IOException 
      * @throws pwnbrew.log.LoggableException 
      */
-    public synchronized static ShellMessageManager initialize( CommManager passedCommManager ) throws IOException, LoggableException {
+    public synchronized static ShellMessageManager initialize( PortManager passedCommManager ) throws IOException, LoggableException {
 
         if( theShellMsgManager == null ) {
             theShellMsgManager = new ShellMessageManager( passedCommManager );
@@ -121,7 +121,7 @@ public class ShellMessageManager extends DataManager {
     */
     @Override
     public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) {        
-        theShellMsgManager.getDataHandler().processData(msgBytes);        
+        theShellMsgManager.getDataHandler().processData(srcPortRouter, msgBytes);        
     }
     
     //===============================================================
@@ -148,7 +148,7 @@ public class ShellMessageManager extends DataManager {
 //        }
         
         //Get the port router
-        PortRouter thePR = theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+        PortRouter thePR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
         
         //Queue the message to be sent
         thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());

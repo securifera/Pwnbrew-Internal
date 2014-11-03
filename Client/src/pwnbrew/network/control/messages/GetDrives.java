@@ -48,7 +48,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.control.ControlMessageManager;
 
 /**
@@ -78,7 +78,7 @@ public final class GetDrives extends Tasking {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {   
+    public void evaluate( PortManager passedManager ) {   
     
         ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
         if( aCMManager != null ){

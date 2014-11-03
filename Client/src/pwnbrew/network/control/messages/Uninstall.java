@@ -46,7 +46,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import pwnbrew.Persistence;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 
 /**
  *
@@ -71,7 +71,7 @@ public class Uninstall extends ControlMessage {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {
+    public void evaluate( PortManager passedManager ) {
         
         //Uninstall
         Persistence.uninstall(passedManager);        

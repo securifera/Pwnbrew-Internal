@@ -38,7 +38,7 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
-* CommManager.java
+* PortManager.java
 *
 * Created on June 7, 2013, 11:49:21 PM
 */
@@ -48,22 +48,30 @@ package pwnbrew.manager;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import pwnbrew.misc.ProgressListener;
+import java.util.Stack;
+import pwnbrew.misc.DynamicClassLoader;
 import pwnbrew.network.PortRouter;
-import pwnbrew.selector.SocketChannelHandler;
-import pwnbrew.tasks.TaskManager;
 
 /**
  *
  *  
  */
-public abstract class CommManager {
+public abstract class PortManager {
 
     //The map that relates the port to the port router
     private final Map<Integer, PortRouter> thePortRouterMap = new HashMap<>();
-    private final Map<Integer, Integer> theClientParentMap = new HashMap<>();
+    private DynamicClassLoader theDynamicClassLoader = new DynamicClassLoader();
     
-    abstract public void socketClosed( SocketChannelHandler thePortRouter );
+    //=======================================================================
+    /**
+     * 
+     */
+    public void resetDynamicClassLoader(){
+       Stack tempStack = theDynamicClassLoader.getClassDefStack();
+       theDynamicClassLoader = null;
+       theDynamicClassLoader = new DynamicClassLoader();
+       theDynamicClassLoader.setClassDefStack(tempStack);
+    }
 
     //===========================================================================
     /*
@@ -92,15 +100,21 @@ public abstract class CommManager {
                 anIter.next().shutdown();
             }
         }
-    }   
-
-   //===============================================================
+    }
+    
+     //===============================================================
     /**
-     *  Get the task manager
-     * 
-     * @return 
+     *  Disconnect
      */
-    abstract public TaskManager getTaskManager();
+    public void disconnect(){
+        
+        //Shutdown each port router
+        synchronized( thePortRouterMap ){
+            for( Iterator<PortRouter> anIter = thePortRouterMap.values().iterator(); anIter.hasNext();  ){
+                anIter.next().closeConnection();
+            }
+        }
+    }
 
     //===========================================================================
     /**
@@ -108,41 +122,20 @@ public abstract class CommManager {
      * @param passedPort
      * @param aPR 
      */
-    void setPortRouter(int passedPort, PortRouter aPR) {
+    @SuppressWarnings("ucd")
+    public void setPortRouter(int passedPort, PortRouter aPR) {
         synchronized( thePortRouterMap ){
             thePortRouterMap.put( passedPort, aPR );
         }
     }
 
-    //===========================================================================
+    //====================================================================
     /**
      * 
      * @return 
      */
-    abstract public ProgressListener getProgressListener();
-
-    //===========================================================================
-    /**
-     * 
-     * @param passedClientId
-     * @param passedParentId 
-     */
-    public void setClientParent(int passedClientId, int passedParentId) {        
-        synchronized( theClientParentMap ){
-            theClientParentMap.put(passedClientId, passedParentId);
-        }
-    }
-    
-     //===========================================================================
-    /**
-     * 
-     * @param passedClientId 
-     * @return  
-     */
-    public Integer getClientParent(int passedClientId) {        
-        synchronized( theClientParentMap ){
-            return theClientParentMap.get(passedClientId);
-        }
+    public DynamicClassLoader getDynamicClassLoader(){
+        return theDynamicClassLoader;
     }
 
 

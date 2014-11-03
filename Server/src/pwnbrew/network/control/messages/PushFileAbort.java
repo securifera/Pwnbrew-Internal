@@ -49,7 +49,7 @@ package pwnbrew.network.control.messages;
 import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.file.FileMessageManager;
 
 /**
@@ -89,7 +89,7 @@ public final class PushFileAbort extends FileMessage {
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {
+    public void evaluate( PortManager passedManager ) {
         
         //Get the control manager for sending messages
         try {

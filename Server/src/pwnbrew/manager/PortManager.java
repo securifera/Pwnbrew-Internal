@@ -48,16 +48,22 @@ package pwnbrew.manager;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import pwnbrew.misc.ProgressListener;
 import pwnbrew.network.PortRouter;
+import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.tasks.TaskManager;
 
 /**
  *
  *  
  */
-public abstract class CommManager {
+public abstract class PortManager {
 
     //The map that relates the port to the port router
     private final Map<Integer, PortRouter> thePortRouterMap = new HashMap<>();
+    private final Map<Integer, Integer> theClientParentMap = new HashMap<>();
+    
+    abstract public void socketClosed( SocketChannelHandler thePortRouter );
 
     //===========================================================================
     /*
@@ -86,21 +92,15 @@ public abstract class CommManager {
                 anIter.next().shutdown();
             }
         }
-    }
-    
-     //===============================================================
+    }   
+
+   //===============================================================
     /**
-     *  Disconnect
+     *  Get the task manager
+     * 
+     * @return 
      */
-    public void disconnect(){
-        
-        //Shutdown each port router
-        synchronized( thePortRouterMap ){
-            for( Iterator<PortRouter> anIter = thePortRouterMap.values().iterator(); anIter.hasNext();  ){
-                anIter.next().closeConnection();
-            }
-        }
-    }
+    abstract public TaskManager getTaskManager();
 
     //===========================================================================
     /**
@@ -108,10 +108,40 @@ public abstract class CommManager {
      * @param passedPort
      * @param aPR 
      */
-    @SuppressWarnings("ucd")
-    public void setPortRouter(int passedPort, PortRouter aPR) {
+    void setPortRouter(int passedPort, PortRouter aPR) {
         synchronized( thePortRouterMap ){
             thePortRouterMap.put( passedPort, aPR );
+        }
+    }
+
+    //===========================================================================
+    /**
+     * 
+     * @return 
+     */
+    abstract public ProgressListener getProgressListener();
+
+    //===========================================================================
+    /**
+     * 
+     * @param passedClientId
+     * @param passedParentId 
+     */
+    public void setClientParent(int passedClientId, int passedParentId) {        
+        synchronized( theClientParentMap ){
+            theClientParentMap.put(passedClientId, passedParentId);
+        }
+    }
+    
+     //===========================================================================
+    /**
+     * 
+     * @param passedClientId 
+     * @return  
+     */
+    public Integer getClientParent(int passedClientId) {        
+        synchronized( theClientParentMap ){
+            return theClientParentMap.get(passedClientId);
         }
     }
 

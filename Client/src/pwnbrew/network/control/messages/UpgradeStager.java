@@ -52,7 +52,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.manager.CommManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.LoaderUtilities;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ControlOption;
@@ -116,7 +116,7 @@ public final class UpgradeStager extends ControlMessage{
      * @param passedManager
     */
     @Override
-    public void evaluate( CommManager passedManager ) {   
+    public void evaluate( PortManager passedManager ) {   
         
         if( stagerBytes != null && Utilities.isStaged()){
             

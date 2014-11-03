@@ -69,7 +69,8 @@ import pwnbrew.network.shell.ShellMessageManager;
 abstract public class DataManager {    
 
     protected DataHandler theDataHandler;
-    protected final CommManager theCommManager;
+    protected final PortManager thePortManager;
+    
     
     private static final Map<Integer, PortWrapper> thePortWrapperMap = new HashMap<>();
     private transient static final String NAME_Class = DataManager.class.getSimpleName();
@@ -80,8 +81,8 @@ abstract public class DataManager {
      *  Constructor
      * @param passedProvider
      */
-    public DataManager( CommManager passedProvider ) {
-        theCommManager = passedProvider ;
+    public DataManager( PortManager passedProvider ) {
+        thePortManager = passedProvider ;
     }  
     
     //===========================================================================
@@ -110,8 +111,8 @@ abstract public class DataManager {
     /*
      *  Returns the comm manager
      */
-    public CommManager getCommManager(){
-        return theCommManager;
+    public PortManager getPortManager(){
+        return thePortManager;
     }
     //===========================================================================
     /*
@@ -176,7 +177,7 @@ abstract public class DataManager {
         try {
                   
             //Get the comm manager
-            CommManager theCommManager = passedRouter.getCommManager();
+            PortManager theCommManager = passedRouter.getPortManager();
             
             //Get the config
             DataManager aManager = null;
@@ -252,7 +253,7 @@ abstract public class DataManager {
      * @param passedPort
      * @throws java.io.IOException
      */
-    public synchronized static void createPortRouter( CommManager passedManager, int passedPort, boolean encrypted ) throws IOException{
+    public synchronized static void createPortRouter( PortManager passedManager, int passedPort, boolean encrypted ) throws IOException{
         PortRouter aPR = passedManager.getPortRouter( passedPort );
         if( aPR == null ){
             aPR = new ClientPortRouter( passedManager, encrypted );
