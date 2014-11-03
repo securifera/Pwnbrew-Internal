@@ -74,6 +74,10 @@ public class DebugPrinter implements Runnable {
      */
     public static synchronized void enable( boolean passedBool ){
         enabled = passedBool;
+        if( !passedBool && staticSelf != null ){
+            DebugPrinter.shutdown();
+            staticSelf = null;
+        }
     }
     
      //===============================================================

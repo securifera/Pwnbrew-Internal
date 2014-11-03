@@ -127,15 +127,8 @@ final public class AcceptHandler implements Selectable {
                 //Create a disconnect timer
                 SocketDisconnectTimer aTimerTask = new SocketDisconnectTimer( (ServerManager)theSPR.getCommManager(), theSCH);
                 
-                //check if the time is before now
-                Calendar theCalendar = Calendar.getInstance(); 
-                theCalendar.setTime( new Date() );
-                theCalendar.add(Calendar.SECOND, 10 );
-                Date killDate = theCalendar.getTime();
-                
                 //Create a timer
-                Timer aTimer = new Timer();
-                aTimer.schedule(aTimerTask, killDate);
+                theSPR.schedulerKillTimer(aTimerTask);
             }
             
             try {

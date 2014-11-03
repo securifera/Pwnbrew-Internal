@@ -74,19 +74,13 @@ public class Installer {
     private static File classPath;
     
     private static final String README_FILE = "README.txt";
-    
-    //Scripts
-    private static final String SERVER_START_WIN = "Start-Server.bat";
-    private static final String SERVER_START_UNIX = "Start-Server.sh";
-    private static final String SERVER_SSL_UTILITY_WIN = "Server-SSL-Utility.bat";
-    private static final String SERVER_SSL_UTILITY_UNIX = "Server-SSL-Utility.sh";
-    
-    
+        
     private static final String SERVER_JAR = "Server.jar";
     private static final String LICENSE_FILE = "LicenseAgreement.txt";
     private static final String IMPORT_FILE = "pwnbrew.mtz";
     private static final String MALTEGO_STUB = "MaltegoStub.jar";
     private static final String MALTEGO = "maltego";
+    private static File MALTEGO_INSTALL_DIR = null;
     private static File INSTALL_DIR = null;
     
     //OS properties...
@@ -177,17 +171,17 @@ public class Installer {
         aIG.addStatusString("Copying Pwnbrew Maltego Plugin...\n");
         copyMaltegoPwnbrewFiles();
         
-        aIG.addStatusString("Exporting SSL Public Key...\n");
+        aIG.addStatusString("Exporting SSL Public Key to " + INSTALL_DIR.getAbsolutePath() + "...\n");
         
         //Export the SSL Cert to a file specified by the user
-        File aFile = new File(INSTALL_DIR, MALTEGO_STUB );
-        String[] cmdArgs = new String[]{"java", "-cp", aFile.getAbsolutePath(), "pwnbrew.misc.SSLUtilities", "-install"};
-        executeCmd(cmdArgs, aFile.getParentFile());
+        File aFile = new File(MALTEGO_INSTALL_DIR, MALTEGO_STUB );
+        String[] cmdArgs = new String[]{"java", "-cp", aFile.getAbsolutePath(), "pwnbrew.utilities.SSLUtilities", "-install", INSTALL_DIR.getAbsolutePath() };
+        executeCmd(cmdArgs, aFile.getParentFile(), true);
         
         aIG.addStatusString("Attemping to run Maltego for Pwnbrew import...\n");
         
         //Attempt to run maltego so the entities can be imported
-        aFile = new File(INSTALL_DIR, IMPORT_FILE );
+        aFile = new File(MALTEGO_INSTALL_DIR, IMPORT_FILE );
         String msg = "To Import Pwnbrew Entities & Transforms,\n\n"
                 + "Click Maltego Logo in the top left corner of the Maltego application.\n"
                 + "Select Import->Import Configuration.\n"
@@ -199,21 +193,23 @@ public class Installer {
         parentLocation = aIG.getLocation();
         
         JOptionPane aPane = new JOptionPane(msg , JOptionPane.INFORMATION_MESSAGE);
+        aPane.setOptions(new Object[]{"Finished Importing"});
         JDialog aDialog = aPane.createDialog(aIG, "Import Pwnbrew Entities & Transforms");
         aDialog.setLocation( parentLocation.x + 500, parentLocation.y);
         aDialog.setModal(false);
         aDialog.setAlwaysOnTop(true);
         aDialog.setVisible(true); 
         
+        
         File maltegoExe = null;
         if( isWindows() )
-            maltegoExe = new File(INSTALL_DIR.getParentFile(), "bin" + FILE_SEPARATOR + MALTEGO + ".exe" );
+            maltegoExe = new File(MALTEGO_INSTALL_DIR.getParentFile(), "bin" + FILE_SEPARATOR + MALTEGO + ".exe" );
         else if ( isUnix() )   
-            maltegoExe = new File(INSTALL_DIR.getParentFile(), MALTEGO );
+            maltegoExe = new File(MALTEGO_INSTALL_DIR.getParentFile(), MALTEGO );
         
         if( maltegoExe != null ){
             cmdArgs = new String[]{ maltegoExe.getAbsolutePath() };
-            executeCmd(cmdArgs, maltegoExe.getParentFile());
+            executeCmd(cmdArgs, maltegoExe.getParentFile(), false);
         }
         
         aIG.addStatusString("Installation complete.\n");
@@ -237,38 +233,20 @@ public class Installer {
             System.exit(0);
 
         //Copy client
-        File dirFile = theFileChooser.getSelectedFile(); 
+        INSTALL_DIR = theFileChooser.getSelectedFile(); 
                 
         //Copy server
-        File destFile = new File( dirFile, SERVER_JAR);
+        File destFile = new File( INSTALL_DIR, SERVER_JAR);
         writeJarElementToDisk(destFile, SERVER_JAR); 
         
         //Copy license file
-        destFile = new File( dirFile, LICENSE_FILE);
+        destFile = new File( INSTALL_DIR, LICENSE_FILE);
         writeJarElementToDisk(destFile, LICENSE_FILE); 
         
         //Copy readme
-        destFile = new File( dirFile, README_FILE);
+        destFile = new File( INSTALL_DIR, README_FILE);
         writeJarElementToDisk(destFile, README_FILE); 
-        
-       if( isWindows() ){
-            
-            destFile = new File( dirFile, SERVER_START_WIN);
-            writeJarElementToDisk(destFile, SERVER_START_WIN);
-            
-            destFile = new File( dirFile, SERVER_SSL_UTILITY_WIN);
-            writeJarElementToDisk(destFile, SERVER_SSL_UTILITY_WIN);
-            
-        } else if ( isUnix() ) {
-            
-            destFile = new File( dirFile, SERVER_SSL_UTILITY_UNIX);
-            writeJarElementToDisk(destFile, SERVER_SSL_UTILITY_UNIX);  
-            
-            destFile = new File( dirFile, SERVER_START_UNIX);
-            writeJarElementToDisk(destFile, SERVER_START_UNIX);
-            
-        }
-        
+              
     }
     
     //===========================================================================
@@ -335,16 +313,16 @@ public class Installer {
             //Move the JAR to the install dir
             if( malDir !=null && malDir.exists()){
                 
-                INSTALL_DIR = new File( malDir, "pwnbrew");
+                MALTEGO_INSTALL_DIR = new File( malDir, "pwnbrew");
                 //Make the underlying dirs
-                INSTALL_DIR.mkdirs();
+                MALTEGO_INSTALL_DIR.mkdirs();
                 
                 //Create the maltego import file
-                File destFile = new File( INSTALL_DIR, IMPORT_FILE);
+                File destFile = new File( MALTEGO_INSTALL_DIR, IMPORT_FILE);
                 writeJarElementToDisk(destFile, IMPORT_FILE);
                 
                 //Create the maltego jar
-                destFile = new File( INSTALL_DIR, MALTEGO_STUB);
+                destFile = new File( MALTEGO_INSTALL_DIR, MALTEGO_STUB);
                 writeJarElementToDisk(destFile, MALTEGO_STUB);
             }
             
@@ -374,16 +352,16 @@ public class Installer {
             //Move the JAR to the install dir
             if( aDir !=null && aDir.exists()){
                 
-                INSTALL_DIR = new File( aDir, "bin" + FILE_SEPARATOR + "pwnbrew");
+                MALTEGO_INSTALL_DIR = new File( aDir, "bin" + FILE_SEPARATOR + "pwnbrew");
                 //Make the underlying dirs
-                INSTALL_DIR.mkdirs();
+                MALTEGO_INSTALL_DIR.mkdirs();
                  
                 //Create the maltego import file
-                File destFile = new File( INSTALL_DIR, IMPORT_FILE);
+                File destFile = new File( MALTEGO_INSTALL_DIR, IMPORT_FILE);
                 writeJarElementToDisk(destFile, IMPORT_FILE);   
                 
                 //Create the maltego jar
-                destFile = new File( INSTALL_DIR, MALTEGO_STUB);
+                destFile = new File( MALTEGO_INSTALL_DIR, MALTEGO_STUB);
                 writeJarElementToDisk(destFile, MALTEGO_STUB); 
                                
             }
@@ -524,12 +502,12 @@ public class Installer {
     /**
      * 
      */
-    private static void executeCmd( String[] cmdArgs, File workingDir ) {
+    private static void executeCmd( String[] cmdArgs, File workingDir, boolean waitFor ) {
 
         Process theProcess;
         try {
 
-            if( INSTALL_DIR != null ){
+            if( MALTEGO_INSTALL_DIR != null ){
                 
                 ProcessBuilder theProcessBuilder = new ProcessBuilder( cmdArgs );
                 theProcessBuilder.directory(workingDir);
@@ -548,16 +526,18 @@ public class Installer {
                 }
 
                 //Wait for the process to complete...
-                int exitValue = Integer.MIN_VALUE;
-                while( exitValue == Integer.MIN_VALUE ) { //Until the exit value is obtained...
+                if( waitFor ){
+                    int exitValue = Integer.MIN_VALUE;
+                    while( exitValue == Integer.MIN_VALUE ) { //Until the exit value is obtained...
 
-                    try {
-                        exitValue = theProcess.waitFor();
-                    } catch( InterruptedException ex ) {
-                        //Do nothing / Continue to wait for the process to exit
-                        ex = null;
+                        try {
+                            exitValue = theProcess.waitFor();
+                        } catch( InterruptedException ex ) {
+                            //Do nothing / Continue to wait for the process to exit
+                            ex = null;
+                        }
+
                     }
-
                 }
             }
         } finally {

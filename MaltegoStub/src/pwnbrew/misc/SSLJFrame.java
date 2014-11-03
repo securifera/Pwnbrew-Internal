@@ -449,7 +449,7 @@ public class SSLJFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void exportButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportButtonActionPerformed
-       exportCertificate();
+       exportCertificate(null);
     }//GEN-LAST:event_exportButtonActionPerformed
 
     private void importButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importButtonActionPerformed
@@ -908,8 +908,9 @@ public class SSLJFrame extends javax.swing.JFrame {
     //==============================================================
     /**
      * 
+     * @param passedDir
      */
-    public void exportCertificate(){
+    public void exportCertificate( File passedDir ){
         
         String hostname;
         try {
@@ -922,8 +923,12 @@ public class SSLJFrame extends javax.swing.JFrame {
         String theAlias = new StringBuilder().append(hostname)
            .append("_").append( new Date().getTime()).toString();
         
-        File selFile = new File(theAlias + ".der");
-        selFile = getFilePath(selFile);
+        File selFile;
+        if( passedDir == null || !passedDir.exists() )
+            selFile = getFilePath(new File(theAlias + ".der"));
+        else 
+            selFile = new File( passedDir, theAlias + ".der");
+        
         
         setCursor( Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) );
         try {
@@ -953,7 +958,8 @@ public class SSLJFrame extends javax.swing.JFrame {
                         }
                     }
 
-                    JOptionPane.showMessageDialog(this, "Export Complete", "Export Complete", JOptionPane.INFORMATION_MESSAGE);
+                    if( passedDir == null )
+                        JOptionPane.showMessageDialog(this, "Export Complete", "Export Complete", JOptionPane.INFORMATION_MESSAGE);
 
                 } catch (IOException | KeyStoreException | LoggableException | CertificateEncodingException ex) {
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

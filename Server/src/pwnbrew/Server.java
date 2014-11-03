@@ -45,13 +45,20 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.logging.Level;
 import javax.swing.JDialog;
 import javax.swing.UIManager;
@@ -66,13 +73,14 @@ import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.ServerPortRouter;
-import pwnbrew.utilities.FileUtilities;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.network.http.Http;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.shell.ShellMessageManager;
+import pwnbrew.utilities.FileUtilities;
+import pwnbrew.utilities.SSLUtilities;
 
 /**
  *
@@ -88,7 +96,7 @@ public final class Server {
     private static final String lckFileName = "srv.lck";
     private FileLock theLock = null;
     private FileChannel theLockFileChannel = null;    
-    private static final boolean debug = true;
+    private static final boolean debug = false;
     
     private static final String SHOW_GUI_ARG = "-gui";
     private static final String REMOTE_MANAGEMENT_ARG = "-rmp";
@@ -153,6 +161,49 @@ public final class Server {
             
         }
         
+        //Start input loop
+        if( theServerManager.isHeadless() ){
+            
+            StringBuilder aStr = new StringBuilder();
+            aStr.append("\nCommands:\n\n")
+                .append("   i\tImport SSL Certificate\n")
+                .append("   d\tToggle Debug Messages\n")
+                .append("   q\tShutdown");
+            
+            BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
+            boolean loop = true;
+            while(loop){
+                System.out.print("\n>");
+                String line=buffer.readLine().toLowerCase();
+                switch(line){
+                    case "i":
+                        System.out.print("Please enter the path to the certificate:");
+                        String filePath = buffer.readLine().toLowerCase();
+                        File aFile = new File(filePath);
+                        if(aFile.exists()){
+                            importCertificate(aFile);
+                        } else 
+                            System.out.println("***Error: File does not exist.");
+                        
+                        break;
+                    case "d":
+                        boolean isEnabled = !DebugPrinter.isEnabled();
+                        DebugPrinter.enable(isEnabled);
+                        String toggleStr = ( isEnabled ? "Enabled" : "Disabled ");
+                        System.out.println("\n***Debug Messages " + toggleStr);
+                        break;
+                    case "q":
+                    case "quit":
+                    case "exit":
+                        shutdown();
+                        loop = false;
+                        break;
+                    default:  
+                        System.out.println(aStr.toString());
+                }                
+            }     
+        }   
+        
     }
 
     //===============================================================
@@ -188,6 +239,7 @@ public final class Server {
         //Debug
         DebugPrinter.shutdown();        
         Constants.Executor.shutdownNow();
+        
     }
 
     /**
@@ -214,7 +266,13 @@ public final class Server {
                         }
                     }                    
                 }
-            }          
+            }     
+            
+            //Assign the service name
+            if( remManagePort == -1 ){
+                System.out.println("Usage:\tjava -jar Server.jar -rmp=<Maltego Listening Port>");
+                return;
+            }
             
             staticSelf = new Server( showGui );
             staticSelf.start( remManagePort );
@@ -280,6 +338,49 @@ public final class Server {
 
         return true;
     
+    }
+    
+    //===============================================================
+    /*
+    * Import the cert in to key store
+    */
+    private void importCertificate(File cert) throws LoggableException, KeyStoreException, IOException, CertificateException{
+        
+        //import the cert
+        String filename = cert.getAbsolutePath();
+        if( cert.exists() && filename.endsWith(".der")){
+
+            int index = filename.lastIndexOf('.');
+            String certAlias = filename.substring(0, index);
+            if( !certAlias.isEmpty() ){
+
+                KeyStore aKeyStore = SSLUtilities.getKeystore();
+                if( SSLUtilities.checkAlias(aKeyStore, certAlias)){
+
+                    byte[] aByteArr = new byte[1024];
+                    String theMessage = "A certificate already exists with the given alias. Would you like to overwrite it? (yes/no) ";
+                    System.out.print(theMessage);
+                    System.in.read( aByteArr );
+
+                    //Return if no is chosen
+                    String aStr = new String(aByteArr).toLowerCase();
+                    if( !aStr.equals("yes"))
+                        return;                    
+                }
+            }
+
+            //If a cert is returned then send it to the client                            
+            byte[] certBytes = new byte[(int)cert.length()];
+            try (FileInputStream aFOS = new FileInputStream(cert)) {
+                aFOS.read(certBytes);                              
+            }
+
+            //Create a cert from the bytes
+            Certificate aCert = new sun.security.x509.X509CertImpl( certBytes );
+            SSLUtilities.importCertificate( certAlias, aCert);
+            System.out.println("***Certificate import complete.");
+        
+        }
     }
     
     //===============================================================

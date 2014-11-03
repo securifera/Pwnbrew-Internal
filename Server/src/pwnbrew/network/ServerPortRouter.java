@@ -44,8 +44,11 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.security.GeneralSecurityException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.manager.CommManager;
@@ -63,7 +66,8 @@ public class ServerPortRouter extends PortRouter {
     private ServerSocketChannel theServerSocketChannel = null;
     private final Map<Integer, SocketChannelHandler> hostHandlerMap = new HashMap<>();
     private final boolean authenticated;
-        
+    private final Timer aTimer = new Timer();    
+    
     private static final String NAME_Class = ServerPortRouter.class.getSimpleName();
   
       
@@ -239,6 +243,26 @@ public class ServerPortRouter extends PortRouter {
                 ex = null;
             }
         }
+        
+        //Kill all threads and purge
+        aTimer.cancel();
+        aTimer.purge();
     }   
+
+    //======================================================================
+    /*
+    * Cancel and kill timers
+    */
+    public void schedulerKillTimer(SocketDisconnectTimer aTimerTask) {
+         
+        //check if the time is before now
+        Calendar theCalendar = Calendar.getInstance(); 
+        theCalendar.setTime( new Date() );
+        theCalendar.add(Calendar.SECOND, 20 );
+        Date killDate = theCalendar.getTime();
+
+        //Create a timer
+        aTimer.schedule(aTimerTask, killDate);
+    }
    
 }/* END CLASS ServerPortRouter */

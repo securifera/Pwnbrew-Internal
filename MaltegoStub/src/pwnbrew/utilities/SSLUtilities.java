@@ -333,11 +333,19 @@ final public class SSLUtilities {
     public static void main(String[] args) throws IOException {
           
         final boolean install;
+        final File installDir;
         if( args.length > 0 ){
             String anArg = args[0];
             install = anArg.equals("-install");            
         } else
             install = false;
+        
+        //Make su
+        if( args.length > 1)
+            installDir = new File(args[1]);
+        else 
+            installDir = null;
+        
         
         String lookAndFeelClassStr = "javax.swing.plaf.metal.MetalLookAndFeel";
         if( Utilities.isWindows() )
@@ -356,7 +364,7 @@ final public class SSLUtilities {
                 if( !install ){
                     aFrame.setVisible(true);
                 } else {
-                    aFrame.exportCertificate();
+                    aFrame.exportCertificate( installDir );
                     aFrame.dispose();
                 }
             }
