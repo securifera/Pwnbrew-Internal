@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
  *  Created on May 19, 2013
  */
 
-package pwnbrew.shell;
+package pwnbrew.network.shell;
 
 import java.awt.Color;
 import java.io.BufferedOutputStream;

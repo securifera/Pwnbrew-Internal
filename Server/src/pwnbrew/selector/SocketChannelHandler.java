@@ -85,7 +85,8 @@ public class SocketChannelHandler implements Selectable {
 
     private PortRouter thePortRouter = null;
     private int rootHostId = -1;
-    private int state = 0;
+//    private int state = 0;
+    private int channelId = -1;
          
     private volatile boolean wrappingFlag = true;
     private volatile boolean staging = false;
@@ -145,7 +146,7 @@ public class SocketChannelHandler implements Selectable {
                 DebugPrinter.printException(ex);
             }            
             
-            thePortRouter.getCommManager().socketClosed( this );
+            thePortRouter.getPortManager().socketClosed( this );
             
         }
 
@@ -305,7 +306,7 @@ public class SocketChannelHandler implements Selectable {
 
                                 byte[] clientIdArr = Arrays.copyOf(msgByteArr, 4);
                                 int tempId = SocketUtilities.byteArrayToInt(clientIdArr);
-                                if( !registerId(tempId))    
+                                if( !registerId(tempId, currMsgType))    
                                     return;
                                 
                                 //Get dest id
@@ -355,10 +356,11 @@ public class SocketChannelHandler implements Selectable {
     /**
      *  Register the client
      * 
-     * @param passedId
+     * @param passedClientId
+     * @param passedChannelId
      * @return 
      */
-    public boolean registerId( int passedId ){        
+    public boolean registerId( int passedClientId, int passedChannelId ){        
              
         //Get the comm manager to register children ids
         try {
@@ -367,27 +369,33 @@ public class SocketChannelHandler implements Selectable {
             String localhostId = localHost.getId();
             if( rootHostId == -1 ){
 
-
-                    SocketChannelHandler aHandler = thePortRouter.getSocketChannelHandler(passedId);
+                    channelId = passedChannelId;
+                    SocketChannelHandler aHandler = thePortRouter.getSocketChannelHandler(passedClientId, passedChannelId);
+                    //If handler doesn't exist
                     if( aHandler == null ){
 
                         //Register the handler
-                        rootHostId = passedId;
-                        thePortRouter.registerHandler(rootHostId, Integer.parseInt(localhostId), this);
-
+                        rootHostId = passedClientId;
+                        if( !thePortRouter.registerHandler(rootHostId, Integer.parseInt(localhostId), passedChannelId, this) )
+                            return false;
+                        
+                        
+                    //If handler exist but is this one
                     } else if( aHandler == this ){
 
                         //Set the clientId
-                        rootHostId = passedId;
-
+                        rootHostId = passedClientId;
+                        
+                    //If handler exist but is not this one
                     } else {
 
                         if( theSCW.getSocketChannel().socket().getInetAddress().equals( 
                                 aHandler.getSocketChannelWrapper().getSocketChannel().socket().getInetAddress())){
 
                             //Register the new one
-                            rootHostId = passedId;
-                            thePortRouter.registerHandler(rootHostId, Integer.parseInt(localhostId), this);
+                            rootHostId = passedClientId;
+                            if( !thePortRouter.registerHandler(rootHostId, Integer.parseInt(localhostId), passedChannelId, this) )
+                                return false;
 
                             //Shutdown the previous one
                             aHandler.shutdown();
@@ -395,7 +403,7 @@ public class SocketChannelHandler implements Selectable {
                         } else {    
 
                             //Send message to tell client to reset their id
-                            ResetId resetIdMsg = new ResetId(passedId);
+                            ResetId resetIdMsg = new ResetId(passedClientId);
                             ByteBuffer aByteBuffer;
 
                             int msgLen = resetIdMsg.getLength();
@@ -430,10 +438,12 @@ public class SocketChannelHandler implements Selectable {
 
                 //Register the relay
                 int parentId = rootHostId;
-                if( passedId == rootHostId )
+                if( passedClientId == rootHostId )
                     parentId = Integer.parseInt(localhostId);
                 
-                thePortRouter.registerHandler(passedId, parentId, this);            
+                if( !thePortRouter.registerHandler(passedClientId, parentId, passedChannelId, this) )
+                    return false;
+                      
 
             }
         } catch(LoggableException ex){
@@ -573,6 +583,17 @@ public class SocketChannelHandler implements Selectable {
     *
     * @return
     */
+    public int getType(){
+        return currMsgType;
+    }
+    
+    //===============================================================
+    /**
+    * Returns the Inet Address associated with the channel io for the
+    * access handler
+    *
+    * @return
+    */
     public int getPort(){
         
         int port = 0;
@@ -582,16 +603,16 @@ public class SocketChannelHandler implements Selectable {
         return port;
     }
 
-    //===============================================================
-    /**
-    * Returns the state of the channel
-    *
-    * @return
-    */
-    public synchronized int getState(){
-        //Get the current state
-        return state;      
-    }
+//    //===============================================================
+//    /**
+//    * Returns the state of the channel
+//    *
+//    * @return
+//    */
+//    public synchronized int getState(){
+//        //Get the current state
+//        return state;      
+//    }
 
     //===============================================================
     /**
@@ -613,15 +634,15 @@ public class SocketChannelHandler implements Selectable {
        return rootHostId;
     }
 
-    //===============================================================
-    /**
-    * Sets the state of the underlying
-    *
-     * @param passedState
-    */
-    public synchronized void setState(int passedState) {
-        state = passedState;
-    }
+//    //===============================================================
+//    /**
+//    * Sets the state of the underlying
+//    *
+//     * @param passedState
+//    */
+//    public synchronized void setState(int passedState) {
+//        state = passedState;
+//    }
 
     //===============================================================
     /**

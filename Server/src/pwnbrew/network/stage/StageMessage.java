@@ -38,22 +38,19 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
-* ControlMessage.java
+* StageMessage.java
 *
-* Created on June 7, 2013, 8:05:08 PM
+* Created on April 27, 2013, 8:05:08 PM
 */
 
-package pwnbrew.network.control.messages;
+package pwnbrew.network.stage;
 
+import pwnbrew.network.control.messages.*;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import pwnbrew.exception.RemoteExceptionWrapper;
-import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
@@ -64,9 +61,11 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
-public abstract class ControlMessage extends Message {
+public class StageMessage extends Message {
     
-    private static final String NAME_Class = ControlMessage.class.getSimpleName();
+    private static final String NAME_Class = StageMessage.class.getSimpleName();    
+    private static final int JAVA_PAYLOAD = 18;
+    
         
     //Data members
     protected List<ControlOption> optionList = new ArrayList<>();
@@ -75,18 +74,18 @@ public abstract class ControlMessage extends Message {
     /*
      *  Contructor
      */
-    public ControlMessage( int passedDestHostId ) { // NO_UCD (use default)
+    public StageMessage( int passedDestHostId ) { // NO_UCD (use default)
         //Set id
-        super( CONTROL_MESSAGE_TYPE, passedDestHostId );
+        super( STAGING_MESSAGE_TYPE, passedDestHostId );
     }
 
     //=========================================================================
     /*
      *  Contructor
      */
-    public ControlMessage( byte[] passedId ) {
+    public StageMessage( byte[] passedId ) {
         //Set id
-        super( CONTROL_MESSAGE_TYPE, passedId);
+        super( STAGING_MESSAGE_TYPE, passedId);
     }
 
     
@@ -102,16 +101,16 @@ public abstract class ControlMessage extends Message {
         //Add the parent
         super.append(rtnBuffer);
         
-        byte[] classPathLenArr = new byte[2];
-        byte[] classPathStrArr = getClass().getCanonicalName().getBytes();
-        
-        //Get the length
-        int classPathLen = classPathStrArr.length;
-        SocketUtilities.intToByteArray(classPathLenArr, classPathLen);
-        
-        //Add the classpath
-        rtnBuffer.put(classPathLenArr);
-        rtnBuffer.put(classPathStrArr);
+//        byte[] classPathLenArr = new byte[2];
+//        byte[] classPathStrArr = getClass().getCanonicalName().getBytes();
+//        
+//        //Get the length
+//        int classPathLen = classPathStrArr.length;
+//        SocketUtilities.intToByteArray(classPathLenArr, classPathLen);
+//        
+//        //Add the classpath
+//        rtnBuffer.put(classPathLenArr);
+//        rtnBuffer.put(classPathStrArr);
         
         //Add the options
         for( ControlOption aTlv : optionList){            
@@ -140,10 +139,10 @@ public abstract class ControlMessage extends Message {
      * @throws java.io.IOException
      * @throws pwnbrew.exception.RemoteExceptionWrapper
     */
-    public static ControlMessage getMessage( ByteBuffer passedBuffer ) throws LoggableException, IOException, RemoteExceptionWrapper {
+    public static StageMessage getMessage( ByteBuffer passedBuffer ) throws LoggableException, IOException, RemoteExceptionWrapper {
 
         byte[] theId = new byte[4],  clientId = new byte[4], destHostId = new byte[4];
-        ControlMessage aMessage = null;
+        StageMessage aMessage = null;
 
         //Copy over the client id
         passedBuffer.get(clientId, 0, clientId.length);
@@ -153,14 +152,16 @@ public abstract class ControlMessage extends Message {
 
         //Copy over the id
         passedBuffer.get(theId, 0, theId.length);
+        
 
-        try {
-            //Create a message
-            aMessage = instatiateMessage(theId, passedBuffer );
-             
+        //Create a message
+        aMessage = instatiateMessage( theId );
+        if( aMessage != null ){
+
+
             //Ignore NoOps
             if( !aMessage.getClass().equals( NoOp.class ))
-                DebugPrinter.printMessage(ControlMessage.class.getSimpleName(), "Received " + aMessage.getClass().getSimpleName() + " message.");
+                DebugPrinter.printMessage(StageMessage.class.getSimpleName(), "Received " + aMessage.getClass().getSimpleName() + " message.");
 
             //Set client id
             int theClientId = SocketUtilities.byteArrayToInt(clientId);
@@ -173,15 +174,7 @@ public abstract class ControlMessage extends Message {
             //Parse the tlvs
             aMessage.parseControlOptions(passedBuffer);
             
-        } catch (ClassNotFoundException ex) {
-            
-            //Convert the clientid
-            int theClientId = SocketUtilities.byteArrayToInt(clientId);
-            String retStr = "Unable to run the Pwnbrew transform.\nPlease ensure the appropriate extension has been loaded into the target Pwnbrew server.";
-            RemoteException anException = new RemoteException(theClientId, retStr);
-            throw new RemoteExceptionWrapper(anException);
-            
-        }
+        }        
 
         return aMessage;
     }
@@ -191,35 +184,17 @@ public abstract class ControlMessage extends Message {
      *  Create a message from the byte buffer
      * 
      * @param msgId
-     * @param passedBuffer
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
      * @throws java.lang.ClassNotFoundException 
      */
-    public static ControlMessage instatiateMessage( byte[] msgId, ByteBuffer passedBuffer ) throws LoggableException, ClassNotFoundException{
+    public static StageMessage instatiateMessage( byte[] msgId ) {
         
-        ControlMessage aMsg = null;
-        byte[] classFqnLength = new byte[2];
-        passedBuffer.get(classFqnLength, 0, classFqnLength.length);
+        StageMessage aMsg = null;
         
-        //Get the length of the class path
-        int theLength = SocketUtilities.byteArrayToInt(classFqnLength);
-        byte[] classPath = new byte[theLength];
-        
-        passedBuffer.get(classPath, 0, classPath.length);
-        String thePath = new String(classPath);
-        
-        try {
-            
-            //Get the class
-            Class aClass = Class.forName(thePath);
-            Constructor aConstruct = aClass.getConstructor( byte[].class);
-            aMsg = (ControlMessage)aConstruct.newInstance(msgId);
-
-        } catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Log.log(Level.SEVERE, NAME_Class, "instatiateMessage()", ex.getMessage(), ex );  
-            throw new LoggableException(ex);
-        } 
+        int stageId = SocketUtilities.byteArrayToInt(msgId);
+        if( stageId == JAVA_PAYLOAD ){
+            aMsg = new SendStage(msgId);
+        }
         
         return aMsg;
     }
@@ -273,11 +248,7 @@ public abstract class ControlMessage extends Message {
     
         int count = 0;
         count += super.getLength();
-        
-        //Add the function
-        count += 2;
-        count += getClass().getCanonicalName().getBytes().length;
-        
+                
         //Add the options
         for( ControlOption aTlv : optionList){  
             count += aTlv.getLength();
@@ -298,4 +269,4 @@ public abstract class ControlMessage extends Message {
      */
     public boolean setOption( ControlOption tempTlv ){ return false; }
 
-}/* END CLASS ControlMessage */
+}/* END CLASS StageMessage */

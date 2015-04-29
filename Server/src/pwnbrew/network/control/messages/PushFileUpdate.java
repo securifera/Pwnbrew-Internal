@@ -120,7 +120,7 @@ public final class PushFileUpdate extends FileMessage {
         try {
               
             //Get the file manager
-            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+            FileMessageManager theFileMM = FileMessageManager.getMessageManager();
             if( theFileMM == null )
                 theFileMM = FileMessageManager.initialize( passedManager );            
             

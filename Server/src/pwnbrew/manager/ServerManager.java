@@ -170,7 +170,7 @@ public class ServerManager extends PortManager {
         boolean retVal = true;
         try {
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            ControlMessageManager aCMManager = ControlMessageManager.getMessageManager();
             if( aCMManager == null )
                 aCMManager = ControlMessageManager.initialize( this );            
             
@@ -192,7 +192,7 @@ public class ServerManager extends PortManager {
         
         try {
              
-            FileMessageManager aFileMManager = FileMessageManager.getFileMessageManager();
+            FileMessageManager aFileMManager = FileMessageManager.getMessageManager();
             if( aFileMManager == null ){
                 aFileMManager = FileMessageManager.initialize( this );
             }
@@ -224,18 +224,19 @@ public class ServerManager extends PortManager {
     public void socketClosed( SocketChannelHandler theHandler ) {
 
         //Should ever return null since it's a closing socket
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        ControlMessageManager aCMManager = ControlMessageManager.getMessageManager();
         int controlPort = aCMManager.getPort();
         
         ServerPortRouter aSPR = (ServerPortRouter)getPortRouter( controlPort );
         int clientId = theHandler.getRootHostId();
-        SocketChannelHandler aHandler = aSPR.getSocketChannelHandler( clientId );
+        int handlerType = theHandler.getType();
+        SocketChannelHandler aHandler = aSPR.getSocketChannelHandler( clientId, handlerType );
         
         if( aHandler != null && aHandler.equals( theHandler )){
             
             //If the connection was closed
             String clientIdStr = Integer.toString( clientId );
-            aSPR.removeHandler(clientId);
+            aSPR.removeHandler(clientId, handlerType);
             HostController theController = getHostController(clientIdStr);
 
             if( theController != null ){

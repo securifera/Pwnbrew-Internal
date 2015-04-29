@@ -125,7 +125,7 @@ final public class AcceptHandler implements Selectable {
             if( !requireAuthentication ){
                 
                 //Create a disconnect timer
-                SocketDisconnectTimer aTimerTask = new SocketDisconnectTimer( (ServerManager)theSPR.getCommManager(), theSCH);
+                SocketDisconnectTimer aTimerTask = new SocketDisconnectTimer( (ServerManager)theSPR.getPortManager(), theSCH);
                 
                 //Create a timer
                 theSPR.schedulerKillTimer(aTimerTask);
@@ -147,10 +147,10 @@ final public class AcceptHandler implements Selectable {
             //Register the new socket with this handler
             theSPR.getSelRouter().register(theSocketChannel, SelectionKey.OP_READ | SelectionKey.OP_WRITE, theSCH);
 
-            //Set to connected
-            if( theSCH.getState() == Constants.DISCONNECTED){
-                theSCH.setState(Constants.CONNECTED);
-            }           
+//            //Set to connected
+//            if( theSCH.getState() == Constants.DISCONNECTED){
+//                theSCH.setState(Constants.CONNECTED);
+//            }           
 
         } catch ( IOException | LoggableException | InterruptedException ex) {
             Log.log(Level.WARNING, NAME_Class, "handle()", ex.getMessage(), ex);

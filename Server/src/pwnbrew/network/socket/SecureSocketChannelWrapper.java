@@ -179,7 +179,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
             //If finished
             case FINISHED:
                 initialHSComplete = true;
-                theParentHandler.setState(Constants.CONNECTED);
+//                theParentHandler.setState(Constants.CONNECTED);
                 theParentHandler.getPortRouter().getSelRouter().changeOps(theSocketChannel, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
         
                 setRead = true;
@@ -534,7 +534,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
             }
 
             //Set the state and change to read
-            theParentHandler.setState( Constants.CONNECTED);
+//            theParentHandler.setState( Constants.CONNECTED);
             theParentHandler.getPortRouter().getSelRouter().changeOps(theSocketChannel, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
             
             return;
@@ -603,7 +603,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
                         DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
 
                         //Set the state and change to read
-                        theParentHandler.setState( Constants.CONNECTED);
+//                        theParentHandler.setState( Constants.CONNECTED);
                         theParentHandler.getPortRouter().getSelRouter().changeOps(theSocketChannel, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
                                    
                         break;
@@ -670,7 +670,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
                     DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
 
                     //Set the state and change to read
-                    theParentHandler.setState( Constants.CONNECTED);
+//                    theParentHandler.setState( Constants.CONNECTED);
                     theParentHandler.getPortRouter().getSelRouter().changeOps(theSocketChannel, SelectionKey.OP_READ | SelectionKey.OP_WRITE );
                                                
                     break;

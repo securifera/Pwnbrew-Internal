@@ -132,7 +132,7 @@ public class ServerHttpWrapper extends HttpWrapper {
                                             
                                             byte [] tempIdArr = Arrays.copyOf( msgBytes, 4);
                                             int tempId = SocketUtilities.byteArrayToInt(tempIdArr);
-                                            if( !passedHandler.registerId(tempId)){
+                                            if( !passedHandler.registerId(tempId, type)){
                                                 return;
                                             }
                                             
@@ -150,43 +150,43 @@ public class ServerHttpWrapper extends HttpWrapper {
                                         
                                     } else {
                                         
-                                        //Try to process the previous version's protocol
-                                        byte[] prevLenArr = Arrays.copyOf(msgLenArr, 2);
-                                        msgLen = SocketUtilities.byteArrayToInt(prevLenArr);
-                                        if( msgLen == msgBB.remaining() + 2){
-                                        
-                                            byte[] msgBytes = new byte[msgLen];
-                                            System.arraycopy(msgLenArr, 2, msgBytes, 0, 2);
-                                            msgBB.get(msgBytes, 2, msgLen - 2);
-
-                                            //Get the id If the client is already registered then return
-                                            if( msgBytes.length > 3 ){
-
-                                                byte[] tempIdArr = Arrays.copyOf( msgBytes, 4);
-                                                int tempId = SocketUtilities.byteArrayToInt(tempIdArr);
-                                                if( !passedHandler.registerId(tempId)){
-                                                    return;
-                                                }
-                                                
-                                                //Get dest id
-                                                byte[] dstHostId = Arrays.copyOfRange(msgBytes, 4, 8);
-                                                int dstId = SocketUtilities.byteArrayToInt(dstHostId);
-                                                
-                                                //Set the marker so the handler will know to send a different stage
-                                                System.arraycopy(Constants.OLD_STAGER_MARKER, 0, msgBytes, 8, Constants.OLD_STAGER_MARKER.length);
-
-                                                try{
-                                                    DataManager.routeMessage( passedHandler.getPortRouter(), type, dstId, msgBytes );
-                                                } catch(Exception ex ){
-                                                    Log.log( Level.SEVERE, NAME_Class, "processHeader()", ex.toString(), ex);
-                                                }
-                                                return;
-                                            }
-                                        
-                                            
-                                        } else {
-                                            Log.log( Level.WARNING, NAME_Class, "processHeader()", "Message size doesn't match remaing size.", null);
-                                        }
+//                                        //Try to process the previous version's protocol
+//                                        byte[] prevLenArr = Arrays.copyOf(msgLenArr, 2);
+//                                        msgLen = SocketUtilities.byteArrayToInt(prevLenArr);
+//                                        if( msgLen == msgBB.remaining() + 2){
+//                                        
+//                                            byte[] msgBytes = new byte[msgLen];
+//                                            System.arraycopy(msgLenArr, 2, msgBytes, 0, 2);
+//                                            msgBB.get(msgBytes, 2, msgLen - 2);
+//
+//                                            //Get the id If the client is already registered then return
+//                                            if( msgBytes.length > 3 ){
+//
+//                                                byte[] tempIdArr = Arrays.copyOf( msgBytes, 4);
+//                                                int tempId = SocketUtilities.byteArrayToInt(tempIdArr);
+//                                                if( !passedHandler.registerId(tempId, type)){
+//                                                    return;
+//                                                }
+//                                                
+//                                                //Get dest id
+//                                                byte[] dstHostId = Arrays.copyOfRange(msgBytes, 4, 8);
+//                                                int dstId = SocketUtilities.byteArrayToInt(dstHostId);
+//                                                
+//                                                //Set the marker so the handler will know to send a different stage
+//                                                System.arraycopy(Constants.OLD_STAGER_MARKER, 0, msgBytes, 8, Constants.OLD_STAGER_MARKER.length);
+//
+//                                                try{
+//                                                    DataManager.routeMessage( passedHandler.getPortRouter(), type, dstId, msgBytes );
+//                                                } catch(Exception ex ){
+//                                                    Log.log( Level.SEVERE, NAME_Class, "processHeader()", ex.toString(), ex);
+//                                                }
+//                                                return;
+//                                            }
+//                                        
+//                                            
+//                                        } else {
+//                                            Log.log( Level.WARNING, NAME_Class, "processHeader()", "Message size doesn't match remaing size.", null);
+//                                        }
                                     }
                                 }
                             }

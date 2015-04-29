@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
  *  Created on Jun 2, 2013
  */
 
-package pwnbrew.network.control;
+package pwnbrew.network.stage;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -59,17 +59,17 @@ import pwnbrew.xmlBase.ServerConfig;
  *
  *  
  */
-public class ControlMessageManager extends DataManager {
+public class StagingMessageManager extends DataManager {
 
-    private static ControlMessageManager theControlManager;
+    private static StagingMessageManager theStagingManager;
         
-    private static final String NAME_Class = ControlMessageManager.class.getSimpleName();
+    private static final String NAME_Class = StagingMessageManager.class.getSimpleName();
     
     //===========================================================================
     /*
      *  Constructor
      */
-    private ControlMessageManager( PortManager passedCommManager ) {
+    private StagingMessageManager( PortManager passedCommManager ) {
         
         super(passedCommManager);        
         
@@ -81,11 +81,11 @@ public class ControlMessageManager extends DataManager {
             setPort( thePort );
             
         } catch (LoggableException ex) {
-            Log.log( Level.SEVERE, NAME_Class, "ControlMessageManager()", ex.getMessage(), ex);
+            Log.log( Level.SEVERE, NAME_Class, "StagingMessageManager()", ex.getMessage(), ex);
         }
         
         //Create the handler
-        ControlMessageHandler theMessageHandler = new ControlMessageHandler( this );
+        StagingMessageHandler theMessageHandler = new StagingMessageHandler( this );
         theMessageHandler.start();
        
         //Set the data handler
@@ -99,14 +99,14 @@ public class ControlMessageManager extends DataManager {
      * @return 
      * @throws java.io.IOException 
      */
-    public synchronized static ControlMessageManager initialize( PortManager passedCommManager ) throws IOException {
+    public synchronized static StagingMessageManager initialize( PortManager passedCommManager ) throws IOException {
 
-        if( theControlManager == null ) {
-            theControlManager = new ControlMessageManager( passedCommManager );
-            createPortRouter( passedCommManager, theControlManager.getPort(), true );
+        if( theStagingManager == null ) {
+            theStagingManager = new StagingMessageManager( passedCommManager );
+            createPortRouter( passedCommManager, theStagingManager.getPort(), true );
         }
         
-        return theControlManager;
+        return theStagingManager;
 
     }/* END initialize() */
     
@@ -115,8 +115,8 @@ public class ControlMessageManager extends DataManager {
      *   Gets the ControlMessageManager
      * @return 
      */
-    public synchronized static ControlMessageManager getMessageManager(){
-        return theControlManager;
+    public synchronized static StagingMessageManager getMessageManager(){
+        return theStagingManager;
     }
     
     //===============================================================
@@ -128,16 +128,17 @@ public class ControlMessageManager extends DataManager {
     */
     @Override
     public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) throws RemoteExceptionWrapper {        
-        theControlManager.getDataHandler().processData(srcPortRouter, msgBytes);        
+        theStagingManager.getDataHandler().processData(srcPortRouter, msgBytes);        
     }
      
      //===========================================================================
-    /*
-     *  Returns the data handler
-    */
+    /**
+     * 
+     * @return 
+     */
     @Override
-    public ControlMessageHandler getDataHandler() {
-        return (ControlMessageHandler)theDataHandler;
+    public StagingMessageHandler getDataHandler() {
+        return (StagingMessageHandler)theDataHandler;
     }      
     
 }

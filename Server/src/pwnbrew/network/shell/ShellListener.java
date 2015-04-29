@@ -38,77 +38,67 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
-* PushFileAbort.java
-*
-* Created on June 7, 2013, 9:32:33 PM
+ *  ShellListener.java
+ *
+ *  Created on May 19, 2013
 */
 
-package pwnbrew.network.control.messages;
+package pwnbrew.network.shell;
 
-
-import java.io.IOException;
-import java.util.logging.Level;
-import pwnbrew.logging.Log;
+import pwnbrew.gui.panels.RunnerPane;
+import java.io.File;
+import pwnbrew.host.Host;
 import pwnbrew.manager.PortManager;
-import pwnbrew.network.file.FileMessageManager;
 
 /**
  *
  *  
  */
-public final class PushFileAbort extends FileMessage {
+public interface ShellListener {
     
-     //Class name
-    private static final String NAME_Class = PushFileAbort.class.getSimpleName();
+     //===============================================================
+    /**
+     * Returns the runner text pane
+     *
+     * @return 
+    */
+    public RunnerPane getShellTextPane();
 
-    // ==========================================================================
+     //===============================================================
     /**
-     * Constructor
+     * Returns the shell log dir.
      *
-     * @param passedId
-     * @param dstHostId
+     * @return 
     */
-    public PushFileAbort( int passedId, int dstHostId ) {
-        super( passedId, dstHostId );
-    }
-    
-    // ==========================================================================
+    public File getShellLogDir();
+
+    //===============================================================
     /**
-     * Constructor
+     * Returns OsName
      *
-     * @param passedId
+     * @return 
     */
-    public PushFileAbort( byte[] passedId ) {
-        super(passedId);
-    }
+    public String getOsName();
+
+    //===============================================================
+    /**
+     * Returns
+     * @return 
+     */
+    public boolean isLocalHost();
     
     //===============================================================
     /**
-    *   Performs the logic specific to the message.
-    *
-     * @param passedManager
-    */
-    @Override
-    public void evaluate( PortManager passedManager ) {
-        
-        //Get the control manager for sending messages
-        try {
-            
-            FileMessageManager theFileMM = FileMessageManager.getMessageManager();
-            if( theFileMM == null ){
-                theFileMM = FileMessageManager.initialize( passedManager );
-            }
-
-            //Abort the file message
-            int theFileId = getFileId();
-
-            //Cleanup the file transfer
-            theFileMM.abortFileReceive( theFileId );
-            
-        } catch (IOException ex) {
-            Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        }
-                    
-    }
+     * Returns the host
+     * @return 
+     */
+    public Host getHost();
+    
+    //===============================================================
+    /**
+     * Returns the comm manager
+     * @return 
+     */
+    public PortManager getCommManager();
 
 }

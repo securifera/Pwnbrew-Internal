@@ -46,12 +46,8 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import pwnbrew.manager.PortManager;
-import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
-import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.selector.SelectionRouter;
 import pwnbrew.selector.SocketChannelHandler;
 
@@ -63,7 +59,7 @@ abstract public class PortRouter {
     
     protected final SelectionRouter theSelectionRouter;
     private final boolean encrypted;
-    protected final PortManager theCommManager;
+    protected final PortManager thePortManager;
     
     //===============================================================
     /**
@@ -75,7 +71,7 @@ abstract public class PortRouter {
      */
     public PortRouter(PortManager passedManager, boolean passedBool ) throws IOException { // NO_UCD (use default)
 
-        theCommManager = passedManager;       
+        thePortManager = passedManager;       
         encrypted = passedBool;
         
         //Create the selection router and start it
@@ -83,7 +79,7 @@ abstract public class PortRouter {
         theSelectionRouter.start();
     }
     
-    abstract public SocketChannelHandler getSocketChannelHandler(Integer passedInt );
+    abstract public SocketChannelHandler getSocketChannelHandler(Integer passedInt, Integer passedType );
 
     //===============================================================
     /**
@@ -101,8 +97,8 @@ abstract public class PortRouter {
      *
      * @return
      */
-    public PortManager getCommManager() {
-        return theCommManager;
+    public PortManager getPortManager() {
+        return thePortManager;
     }
     
     //===============================================================
@@ -112,35 +108,20 @@ abstract public class PortRouter {
      *
      * @param passedClientId
      * @param parentId
+     * @param handlerType
      * @param theHandler
+     * @return 
      */
-    abstract public void registerHandler(int passedClientId, int parentId, SocketChannelHandler theHandler);
+    abstract public boolean registerHandler(int passedClientId, int parentId, int channelId, SocketChannelHandler theHandler);
 
     //===============================================================
     /**
      *  Removes the client id
      * 
      * @param clientId 
+     * @param channelId 
     */
-    abstract public void removeHandler(int clientId);
-    
-    //===============================================================
-    /**
-    * Checks if the host is connected to the specified address
-    *
-    * @param passedClientId 
-    * @return
-    */
-//    @Override
-    public int getState( Integer passedClientId ){
-
-        int retVal = 0;
-        SocketChannelHandler theHandler = getSocketChannelHandler( passedClientId  );
-        if(theHandler != null){
-            retVal = theHandler.getState();
-        }
-        return retVal;
-    }
+    abstract public void removeHandler(int clientId, int channelId);
     
     //===============================================================
     /**
@@ -150,41 +131,6 @@ abstract public class PortRouter {
     final public boolean isEncrypted() {
         return encrypted;
     }
-
-//    //===============================================================
-//    /**
-//     *  Queues the byte array to be sent
-//     * @param byteArr
-//     * @param passedClientId
-//     * @throws java.io.IOException
-//     */
-//    public void queueSend( byte[] byteArr, Integer passedClientId ) throws IOException {
-//        
-//        SocketChannelHandler theHandler = getSocketChannelHandler( passedClientId );
-//        if( theHandler != null ){
-//            
-//            //If wrapping is necessary then wrap it
-//            if( theHandler.isWrapping() ){
-//                PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
-//                if( aWrapper != null ){
-//                    
-//                    //Set the staged wrapper if necessary
-//                    if( aWrapper instanceof ServerHttpWrapper ){
-//                        ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
-//                        aSrvWrapper.setStaging( theHandler.isStaged());
-//                    }
-//                    
-//                    ByteBuffer aByteBuffer = aWrapper.wrapBytes( byteArr );  
-//                    byteArr = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
-//                } 
-//            }
-//            
-//            theHandler.queueBytes(byteArr);
-//        } else {
-//            throw new IOException("Not connected to the specified client.");
-//        }
-//                
-//    }
 
     //===============================================================
     /**

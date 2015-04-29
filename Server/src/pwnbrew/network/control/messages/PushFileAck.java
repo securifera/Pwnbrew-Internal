@@ -202,7 +202,7 @@ public final class PushFileAck extends FileMessage {
         try {
             
             //Get the control manager for sending messages
-            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+            FileMessageManager theFileMM = FileMessageManager.getMessageManager();
             if( theFileMM == null ){
                 theFileMM = FileMessageManager.initialize( passedManager );
             }

@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
 * Created on July 27, 2013, 2:14:11 PM
 */
 
-package pwnbrew.shell;
+package pwnbrew.network.shell;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

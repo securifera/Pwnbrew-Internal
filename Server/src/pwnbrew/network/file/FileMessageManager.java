@@ -55,12 +55,13 @@ import java.util.Map;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.control.messages.FileMessage;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileAck;
 import pwnbrew.selector.SocketChannelHandler;
@@ -126,7 +127,7 @@ public class FileMessageManager extends DataManager {
      *   Gets the FileMessageManager
      * @return 
      */
-    public synchronized static FileMessageManager getFileMessageManager(){
+    public synchronized static FileMessageManager getMessageManager(){
         return theFileManager;
     }
     
@@ -372,7 +373,7 @@ public class FileMessageManager extends DataManager {
         
          //Clear the send buffer
         ServerPortRouter aPR = (ServerPortRouter) thePortManager.getPortRouter( getPort() );
-        SocketChannelHandler aSCH = aPR.getSocketChannelHandler(clientId);
+        SocketChannelHandler aSCH = aPR.getSocketChannelHandler(clientId, (int)FileMessage.FILE_MESSAGE_TYPE);
 
         //Set the wrapper
         if( aSCH != null )

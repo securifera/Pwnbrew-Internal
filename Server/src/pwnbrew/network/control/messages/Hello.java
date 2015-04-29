@@ -191,14 +191,14 @@ public final class Hello extends ControlMessage {
         //Get the address and connect
         try {
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            ControlMessageManager aCMManager = ControlMessageManager.getMessageManager();
             if( aCMManager != null ){
            
                 //Register the host
                 Integer theClientId = getSrcHostId();
                 DebugPrinter.printMessage(NAME_Class, "Accepted connection from host id: " + theClientId);
                 PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort() );
-                SocketChannelHandler aSCH = aPR.getSocketChannelHandler(theClientId);
+                SocketChannelHandler aSCH = aPR.getSocketChannelHandler(theClientId, (int)ControlMessage.CONTROL_MESSAGE_TYPE);
                
                 if( aSCH != null ){
 

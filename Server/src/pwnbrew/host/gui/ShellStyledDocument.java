@@ -35,70 +35,66 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
+package pwnbrew.host.gui;
 
-
-/*
- *  ShellListener.java
- *
- *  Created on May 19, 2013
-*/
-
-package pwnbrew.shell;
-
-import pwnbrew.gui.panels.RunnerPane;
-import java.io.File;
-import pwnbrew.host.Host;
-import pwnbrew.manager.PortManager;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
 
 /**
  *
- *  
+ * @author Securifera
  */
-public interface ShellListener {
-    
-     //===============================================================
-    /**
-     * Returns the runner text pane
-     *
-     * @return 
-    */
-    public RunnerPane getShellTextPane();
+public class ShellStyledDocument extends DefaultStyledDocument {
 
-     //===============================================================
-    /**
-     * Returns the shell log dir.
-     *
-     * @return 
-    */
-    public File getShellLogDir();
-
-    //===============================================================
-    /**
-     * Returns OsName
-     *
-     * @return 
-    */
-    public String getOsName();
-
-    //===============================================================
-    /**
-     * Returns
-     * @return 
-     */
-    public boolean isLocalHost();
+    public static final int USER_INPUT = 0;
+    public static final int SHELL_OUTPUT = 1;
     
-    //===============================================================
-    /**
-     * Returns the host
-     * @return 
-     */
-    public Host getHost();
+    private final HostShellPanel theHostShellPanel;
+    private volatile int theInputSrc = USER_INPUT;
     
-    //===============================================================
+    //============================================================
     /**
-     * Returns the comm manager
-     * @return 
+     * 
+     * @param passedPanel
      */
-    public PortManager getCommManager();
+    public ShellStyledDocument( HostShellPanel passedPanel ) {
+        theHostShellPanel = passedPanel;
+    }   
+    
+    //============================================================
+    /**
+     * 
+     * @param passedType 
+     */
+    public void setInputSource( int passedType ){
+        theInputSrc = passedType;
+    }
+    
+    //============================================================
+    /*
+     *  Insert the string if it is at the end of the textpane
+     */
+    @Override
+    public void insertString( int offset, String str, AttributeSet a) throws BadLocationException{
+        
+        if( str.equals("\n") && theInputSrc == USER_INPUT )
+            return;
+        
+        synchronized( this ){
+            if( theHostShellPanel.updateCaret( theHostShellPanel.getShellTextPane(), offset ) )
+                super.insertString(offset, str, a);  
+        }
+    }
+
+    //============================================================
+    /*
+     *  Remove the string if it is at the end of the textpane
+     */
+    @Override
+    public void remove( int theOffset, int len) throws BadLocationException{
+        if( theHostShellPanel.canRemove( theOffset ) )
+            super.remove(theOffset, len);
+    }
 
 }

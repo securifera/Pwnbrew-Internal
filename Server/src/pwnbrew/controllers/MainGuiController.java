@@ -1624,7 +1624,7 @@ final public class MainGuiController extends Controller implements ActionListene
             //Cancel any file transfers that might be going on.
             try {                
                
-                FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
+                FileMessageManager aFMM = FileMessageManager.getMessageManager();
                 if( aFMM == null ){
                     aFMM = FileMessageManager.initialize( theServerManager );
                 }

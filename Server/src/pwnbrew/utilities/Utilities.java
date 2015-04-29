@@ -1620,11 +1620,11 @@ public class Utilities {
 
                 byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
                 String[] stagedClasses = new String[]{ 
-                    "pwnbrew/stage/Stage",
-                    "pwnbrew/stage/MemoryJarFile",
-                    "pwnbrew/stage/MemoryBufferURLConnection",
-                    "pwnbrew/stage/MemoryBufferURLStreamHandler",
-                    "pwnbrew/stage/Pwnbrew",
+                    "pwnbrew/network/stage/Stage",
+                    "pwnbrew/network/stage/MemoryJarFile",
+                    "pwnbrew/network/stage/MemoryBufferURLConnection",
+                    "pwnbrew/network/stage/MemoryBufferURLStreamHandler",
+                    "pwnbrew/network/stage/Pwnbrew",
                 };
 
                 //Send each staged class

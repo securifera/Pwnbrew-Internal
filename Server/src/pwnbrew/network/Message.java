@@ -57,7 +57,8 @@ import pwnbrew.xmlBase.ServerConfig;
  */
 public abstract class Message {
     
-    public static final byte CONTROL_MESSAGE_TYPE = 88;
+    public static final byte STAGING_MESSAGE_TYPE = 0;
+    public static final byte CONTROL_MESSAGE_TYPE = 1;
     public static final byte PROCESS_MESSAGE_TYPE = 89;
     public static final byte FILE_MESSAGE_TYPE = 90;
 
@@ -136,6 +137,16 @@ public abstract class Message {
         count += destHostId.length;
 
         return count;
+    }
+    
+    //===============================================================
+    /**
+     * Returns the integer representation of the msgId
+     *
+     * @return
+    */
+    public int getType(){
+       return type;
     }
 
     //===============================================================

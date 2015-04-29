@@ -287,7 +287,7 @@ public class PushFile extends FileMessage {
             
              
             //Get the file manager
-            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+            FileMessageManager theFileMM = FileMessageManager.getMessageManager();
             if( theFileMM == null ){
                 theFileMM = FileMessageManager.initialize( passedManager );
             }

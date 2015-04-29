@@ -53,6 +53,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.*;
+import pwnbrew.host.gui.ShellStyledDocument;
 import pwnbrew.logging.Log;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.EditMenuUpdater;
@@ -162,34 +163,45 @@ public class RunnerPane extends JTextPane implements CaretListener, StreamReceiv
 
                         //Get the current length of the document
                         StyledDocument theSD = theRunnerPane.getStyledDocument(); 
-                        String newStr = passedStr;
-                        if( passedStr.contains("\b")){
-                            int totalLength = theSD.getLength();
+                        if( theSD instanceof ShellStyledDocument ){
+                            
+                            ShellStyledDocument aSSD = (ShellStyledDocument) theSD;
+                            String newStr = passedStr;
+                            if( passedStr.contains("\b")){
+                                int totalLength = aSSD.getLength();
 
-                            //Get the length of the passed string and remove any backspaces
-                            int strLen = passedStr.length();
-                            newStr = passedStr.replaceAll("\b", "");
+                                //Get the length of the passed string and remove any backspaces
+                                int strLen = passedStr.length();
+                                newStr = passedStr.replaceAll("\b", "");
 
-                            //Number of backspaces
-                            int numBack = strLen - newStr.length();                       
-                             
-                            //Set the new offset
-                            theRunnerPane.setEndOffset( totalLength - numBack);
+                                //Number of backspaces
+                                int numBack = strLen - newStr.length();                       
 
-                            //Remove the previous one
-                            theRunnerPane.setUpdatingFlag(true);
-                            theSD.remove(totalLength - numBack, numBack);
-                            theRunnerPane.setUpdatingFlag(false);                            
-                        }      
+                                //Set the new offset
+                                theRunnerPane.setEndOffset( totalLength - numBack);
+
+                                //Remove the previous one
+                                theRunnerPane.setUpdatingFlag(true);
+                                aSSD.remove(totalLength - numBack, numBack);
+                                theRunnerPane.setUpdatingFlag(false);                            
+                            }      
+
+                            //Insert the string
+                            synchronized( aSSD ){
+                                aSSD.setInputSource(ShellStyledDocument.SHELL_OUTPUT);
+                                aSSD.insertString(aSSD.getLength(), newStr, aSet);
+
+                                //Set the type back
+                                aSSD.setInputSource(ShellStyledDocument.USER_INPUT);
+                            }
+
+                            //Set the new length
+                            int newLength = aSSD.getLength();
+                            setCaretPosition( newLength );
+
+                            theRunnerPane.setEndOffset(newLength);
+                        }
                         
-                        //Insert the string
-                        theSD.insertString(theSD.getLength(), newStr, aSet);
-                        
-                        //Set the new length
-                        int newLength = theSD.getLength();
-                        setCaretPosition( newLength );
-                        
-                        theRunnerPane.setEndOffset(newLength);
 
                     } catch ( BadLocationException ex) {
                         Log.log(Level.SEVERE, NAME_Class, "handleStdOut()", ex.getMessage(), ex );

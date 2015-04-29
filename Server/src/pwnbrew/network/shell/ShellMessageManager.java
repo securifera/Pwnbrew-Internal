@@ -36,7 +36,7 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-package pwnbrew.shell;
+package pwnbrew.network.shell;
 
 import pwnbrew.network.PortRouter;
 import java.io.IOException;
@@ -109,7 +109,7 @@ public class ShellMessageManager extends DataManager {
      *   Gets the ShellMessageManager
      * @return 
      */
-    public synchronized static ShellMessageManager getShellMessageManager(){
+    public synchronized static ShellMessageManager getMessageManager(){
         return theShellMsgManager;
     }
     

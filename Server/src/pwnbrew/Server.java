@@ -78,7 +78,7 @@ import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.network.http.Http;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
-import pwnbrew.shell.ShellMessageManager;
+import pwnbrew.network.shell.ShellMessageManager;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.SSLUtilities;
 
@@ -96,7 +96,7 @@ public final class Server {
     private static final String lckFileName = "srv.lck";
     private FileLock theLock = null;
     private FileChannel theLockFileChannel = null;    
-    private static final boolean debug = false;
+    private static final boolean debug = true;
     
     private static final String SHOW_GUI_ARG = "-gui";
     private static final String REMOTE_MANAGEMENT_ARG = "-rmp";
@@ -118,7 +118,7 @@ public final class Server {
                                  
         try {
 
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            ControlMessageManager aCMManager = ControlMessageManager.getMessageManager();
             if( aCMManager == null ){
                 aCMManager = ControlMessageManager.initialize( theServerManager );
             }
@@ -216,17 +216,17 @@ public final class Server {
         theServerManager.shutdown();
 
         //Shutdown the control and file message managers
-        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
+        ControlMessageManager aCMM = ControlMessageManager.getMessageManager();
         if( aCMM != null ){
             aCMM.shutdown();
         }
         
-        FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
+        FileMessageManager aFMM = FileMessageManager.getMessageManager();
         if( aFMM != null ){
             aFMM.shutdown();
         }
         
-        ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
+        ShellMessageManager aSMM = ShellMessageManager.getMessageManager();
         if( aSMM != null ){
             aSMM.shutdown();
         }

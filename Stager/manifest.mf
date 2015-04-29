@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 X-COMMENT: Main-Class will be added automatically by build
-Version: 1.0.5.0
+UID: 10002
+Version: 1.0.5.2
 Type: slib
-Private: aHR0cHM6Ly8xOTIuMTY4LjIxMS4xOjQ0MyAg
+Private: aHR0cHM6Ly8xMjcuMC4wLjE6NDQzICAg
 

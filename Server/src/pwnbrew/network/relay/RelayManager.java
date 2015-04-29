@@ -126,7 +126,7 @@ public class RelayManager extends DataManager {
             if( thePR.equals( srcPortRouter))
                  thePR = theServerPortRouter;
 
-            SocketChannelHandler theHandler = thePR.getSocketChannelHandler(tempId);
+            SocketChannelHandler theHandler = thePR.getSocketChannelHandler(tempId, (int)msgBytes[0]);
             if( theHandler != null ){
                 theHandler.queueBytes(msgBytes);
             } else {

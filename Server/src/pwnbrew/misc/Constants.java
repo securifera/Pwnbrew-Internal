@@ -157,9 +157,6 @@ abstract public class Constants {
     
     public static final SimpleDateFormat SHELL_DATE_FORMAT = new SimpleDateFormat("MM-dd-yyyy--HHmm");    
    
-    //Old stager marker 
-    public static final byte[] OLD_STAGER_MARKER = new byte[]{ (byte)0xde, (byte)0xad, (byte)0xbe, (byte)0xef};
-        
     public static final String MODULE_TYPE_LABEL = "Type";
     public static final String PAYLOAD_ACTION_COMMAND = "Payload";
     public static final String STAGER_ACTION_COMMAND = "Stager";

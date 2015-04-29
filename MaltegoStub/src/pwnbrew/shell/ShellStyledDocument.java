@@ -35,68 +35,66 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-
-
-/*
- *  CommandPrompt.java
- *
- *  Created on May 21, 2013
- */
-
 package pwnbrew.shell;
 
-import java.util.concurrent.Executor;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
 
 /**
  *
- *  
+ * @author Securifera
  */
-public class CommandPrompt extends Shell {
+public class ShellStyledDocument extends DefaultStyledDocument {
+
+    public static final int USER_INPUT = 0;
+    public static final int SHELL_OUTPUT = 1;
     
-    private static final String[] CMD_EXE_STR = new String[]{ "cmd", "/k"};
-    private static final String ENCODING = "UTF-8";
-    private static final String PROMPT_REGEX = "^[a-zA-Z]:(\\\\|(\\\\[^\\\\/:*\"<>|]+)+)>";
-     
-    // ==========================================================================
+    private final ShellJPanel theHostShellPanel;
+    private volatile int theInputSrc = USER_INPUT;
+    
+    //============================================================
     /**
-     *  Constructor
      * 
-     * @param passedExecutor
-     * @param passedListener 
+     * @param passedPanel
      */
-    public CommandPrompt(Executor passedExecutor, ShellListener passedListener) {
-        super(passedExecutor, passedListener);
+    public ShellStyledDocument( ShellJPanel passedPanel ) {
+        theHostShellPanel = passedPanel;
+    }   
+    
+    //============================================================
+    /**
+     * 
+     * @param passedType 
+     */
+    public void setInputSource( int passedType ){
+        theInputSrc = passedType;
     }
     
-    // ==========================================================================
-    /**
-     *  Get the command string
-     * 
-     * @return 
-     */
-    @Override
-    public String[] getCommandStringArray(){                
-        return CMD_EXE_STR;
-    }
-    
-    // ==========================================================================
-    /**
-     *  Get character encoding.
-     * 
-     * @return 
+    //============================================================
+    /*
+     *  Insert the string if it is at the end of the textpane
      */
     @Override
-    public String getEncoding() {
-        return ENCODING;
+    public void insertString( int offset, String str, AttributeSet a) throws BadLocationException{
+        
+        if( str.equals("\n") && theInputSrc == USER_INPUT )
+            return;
+        
+        synchronized( this ){
+            if( theHostShellPanel.updateCaret( theHostShellPanel.getShellTextPane(), offset ) )
+                super.insertString(offset, str, a);  
+        }
     }
-    
-    // ==========================================================================
-    /**
-     * 
-     * @return 
+
+    //============================================================
+    /*
+     *  Remove the string if it is at the end of the textpane
      */
     @Override
-    public String toString(){
-        return "Command Prompt";
+    public void remove( int theOffset, int len) throws BadLocationException{
+        if( theHostShellPanel.canRemove( theOffset ) )
+            super.remove(theOffset, len);
     }
+
 }

@@ -38,77 +38,65 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
-* PushFileAbort.java
-*
-* Created on June 7, 2013, 9:32:33 PM
-*/
+ *  CommandPrompt.java
+ *
+ *  Created on May 21, 2013
+ */
 
-package pwnbrew.network.control.messages;
+package pwnbrew.network.shell;
 
-
-import java.io.IOException;
-import java.util.logging.Level;
-import pwnbrew.logging.Log;
-import pwnbrew.manager.PortManager;
-import pwnbrew.network.file.FileMessageManager;
+import java.util.concurrent.Executor;
 
 /**
  *
  *  
  */
-public final class PushFileAbort extends FileMessage {
+public class CommandPrompt extends Shell {
     
-     //Class name
-    private static final String NAME_Class = PushFileAbort.class.getSimpleName();
-
+    private static final String[] CMD_EXE_STR = new String[]{ "cmd", "/k"};
+    private static final String ENCODING = "UTF-8";
+    private static final String PROMPT_REGEX = "^[a-zA-Z]:(\\\\|(\\\\[^\\\\/:*\"<>|]+)+)>";
+     
     // ==========================================================================
     /**
-     * Constructor
-     *
-     * @param passedId
-     * @param dstHostId
-    */
-    public PushFileAbort( int passedId, int dstHostId ) {
-        super( passedId, dstHostId );
+     *  Constructor
+     * 
+     * @param passedExecutor
+     * @param passedListener 
+     */
+    public CommandPrompt(Executor passedExecutor, ShellListener passedListener) {
+        super(passedExecutor, passedListener);
     }
     
     // ==========================================================================
     /**
-     * Constructor
-     *
-     * @param passedId
-    */
-    public PushFileAbort( byte[] passedId ) {
-        super(passedId);
-    }
-    
-    //===============================================================
-    /**
-    *   Performs the logic specific to the message.
-    *
-     * @param passedManager
-    */
+     *  Get the command string
+     * 
+     * @return 
+     */
     @Override
-    public void evaluate( PortManager passedManager ) {
-        
-        //Get the control manager for sending messages
-        try {
-            
-            FileMessageManager theFileMM = FileMessageManager.getMessageManager();
-            if( theFileMM == null ){
-                theFileMM = FileMessageManager.initialize( passedManager );
-            }
-
-            //Abort the file message
-            int theFileId = getFileId();
-
-            //Cleanup the file transfer
-            theFileMM.abortFileReceive( theFileId );
-            
-        } catch (IOException ex) {
-            Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        }
-                    
+    public String[] getCommandStringArray(){                
+        return CMD_EXE_STR;
     }
-
+    
+    // ==========================================================================
+    /**
+     *  Get character encoding.
+     * 
+     * @return 
+     */
+    @Override
+    public String getEncoding() {
+        return ENCODING;
+    }
+    
+    // ==========================================================================
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public String toString(){
+        return "Command Prompt";
+    }
 }

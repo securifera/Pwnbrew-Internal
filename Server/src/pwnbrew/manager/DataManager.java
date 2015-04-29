@@ -51,7 +51,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import pwnbrew.exception.RemoteExceptionWrapper;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
@@ -65,8 +64,9 @@ import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
+import pwnbrew.network.shell.ShellMessageManager;
+import pwnbrew.network.stage.StagingMessageManager;
 import pwnbrew.selector.SocketChannelHandler;
-import pwnbrew.shell.ShellMessageManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
 /**
@@ -130,6 +130,8 @@ abstract public class DataManager {
         boolean retVal = true;
         switch(type){
             
+            case Message.STAGING_MESSAGE_TYPE:
+                break;
             case Message.CONTROL_MESSAGE_TYPE:
                 break;
             case Message.PROCESS_MESSAGE_TYPE:
@@ -176,16 +178,16 @@ abstract public class DataManager {
      *  Handles the passed message with the correct manager
      * 
      * @param passedRouter
-     * @param msgType
+     * @param channelId
      * @param msgBytes  
      * @param dstId  
      */
-    public static void routeMessage( PortRouter passedRouter, byte msgType, int dstId, byte[] msgBytes ) {
+    public static void routeMessage( PortRouter passedRouter, byte channelId, int dstId, byte[] msgBytes ) {
         
         try {
             
             //Get the comm manager
-            PortManager theCommManager = passedRouter.getCommManager();
+            PortManager theCommManager = passedRouter.getPortManager();
                         
             //Get the config
             DataManager aManager = null;
@@ -201,7 +203,7 @@ abstract public class DataManager {
                 //Reconstruct the msg
                 byte[] msgLen = new byte[Message.MSG_LEN_SIZE];
                 byte[] tmpBytes = new byte[msgBytes.length + msgLen.length + 1];
-                tmpBytes[0] = msgType;
+                tmpBytes[0] = channelId;
 
                 //Copy length
                 SocketUtilities.intToByteArray(msgLen, msgBytes.length );
@@ -216,23 +218,30 @@ abstract public class DataManager {
             } else {
             
                 //Pass the message to the right handler
-                switch( msgType ){            
+                switch( channelId ){   
+                     case Message.STAGING_MESSAGE_TYPE:
+
+                        aManager = StagingMessageManager.getMessageManager();
+                        if( aManager == null){
+                            aManager = StagingMessageManager.initialize(theCommManager);
+                        }
+                        break;
                     case Message.CONTROL_MESSAGE_TYPE:
 
-                        aManager = ControlMessageManager.getControlMessageManager();
+                        aManager = ControlMessageManager.getMessageManager();
                         if( aManager == null){
                             aManager = ControlMessageManager.initialize(theCommManager);
                         }
                         break;
                     case Message.PROCESS_MESSAGE_TYPE:
 
-                        aManager = ShellMessageManager.getShellMessageManager();
+                        aManager = ShellMessageManager.getMessageManager();
                         if( aManager == null){
                             aManager = ShellMessageManager.initialize(theCommManager);
                         }
                         break;
                     case Message.FILE_MESSAGE_TYPE:
-                        aManager = FileMessageManager.getFileMessageManager();
+                        aManager = FileMessageManager.getMessageManager();
                         if( aManager == null){
                             aManager = FileMessageManager.initialize(theCommManager);
                         }
@@ -250,7 +259,7 @@ abstract public class DataManager {
         } catch (LoggableException | IOException ex) {
             DebugPrinter.printMessage(DataManager.class.getSimpleName(), "No manager for bytes");                                 
         } catch (RemoteExceptionWrapper ex) {
-            send( passedRouter.getCommManager(), ex.getRemoteExceptionMsg() );
+            send( passedRouter.getPortManager(), ex.getRemoteExceptionMsg() );
         }
     }
     
@@ -269,10 +278,11 @@ abstract public class DataManager {
             ServerConfig aConf = ServerConfig.getServerConfig();
             int serverPort = aConf.getSocketPort();
             int destClientId = passedMessage.getDestHostId();
+            int messageType = passedMessage.getType();
             
             //Try the default port router
             PortRouter thePR = passedCommManager.getPortRouter( serverPort );
-            SocketChannelHandler theHandler = thePR.getSocketChannelHandler(destClientId);
+            SocketChannelHandler theHandler = thePR.getSocketChannelHandler(destClientId, messageType);
             if( theHandler == null ){
                 
                 RelayManager aRelayManager = RelayManager.getRelayManager();
@@ -281,7 +291,7 @@ abstract public class DataManager {
                 
                 //See if the relay port router has the client id
                 thePR = aRelayManager.getServerPorterRouter();
-                theHandler = thePR.getSocketChannelHandler(destClientId);
+                theHandler = thePR.getSocketChannelHandler(destClientId, messageType);
                 if( theHandler == null ){
                     Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified client.", null);      
                     return;

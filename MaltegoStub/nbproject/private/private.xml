@@ -3,17 +3,7 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/functions/ToShell.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/shell/Bash.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/sessions/SessionsJFrame.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/shell/Powershell.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/shell/CommandPrompt.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/functions/ToSessionManager.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/shell/ShellJTextPane.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/shell/Shell.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/shell/ShellListener.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/shell/ShellJPanelListener.java</file>
-            <file>file:/C:/Users/jagger/Documents/GitHub/Pwnbrew/MaltegoStub/src/pwnbrew/shell/ShellJPanel.java</file>
+            <file>file:/E:/Pwnbrew/Pwnbrew/MaltegoStub/src/pwnbrew/network/Message.java</file>
         </group>
     </open-files>
 </project-private>

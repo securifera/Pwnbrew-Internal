@@ -36,7 +36,7 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-package pwnbrew.shell;
+package pwnbrew.network.shell;
 
 import java.util.concurrent.Executor;
 import javax.swing.text.StyledDocument;

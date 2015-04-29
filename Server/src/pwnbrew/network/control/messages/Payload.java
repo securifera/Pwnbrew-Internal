@@ -46,13 +46,14 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import pwnbrew.network.ControlOption;
+import pwnbrew.network.stage.StageMessage;
 
 /**
  *
  *  
  */
 @SuppressWarnings("ucd")
-public final class Payload extends ControlMessage{
+public final class Payload extends StageMessage{
     
     private static final byte OPTION_PAYLOAD = 32;
     
