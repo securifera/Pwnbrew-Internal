@@ -87,6 +87,7 @@ public class SocketChannelHandler implements Selectable {
     private volatile boolean wrappingFlag = true;
     private volatile boolean staging = false;
 
+    private Byte channelId = 0;
     private int clientId = -1;
     private int state = 0;
     
@@ -587,6 +588,26 @@ public class SocketChannelHandler implements Selectable {
     */
     public int getClientId() {
        return clientId;
+    }
+    
+    //===============================================================
+    /**
+    * Sets the channel id
+    *
+     * @param passedId
+    */
+    public void setChannelId(Byte passedId) {
+        channelId = passedId;
+    }
+    
+    //===============================================================
+    /**
+    * Gets the channel id
+    *
+    * @return
+    */
+    public Byte getChannelId() {
+       return channelId;
     }
 
     //===============================================================

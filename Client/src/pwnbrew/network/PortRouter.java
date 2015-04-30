@@ -66,7 +66,7 @@ abstract public class PortRouter {
     
     protected final SelectionRouter theSelectionRouter;
     private final boolean encrypted;
-    protected final PortManager theCommManager;
+    protected final PortManager thePortManager;
     
     private volatile boolean notified = false;
     private volatile boolean waiting = false;
@@ -86,7 +86,7 @@ abstract public class PortRouter {
      */
     public PortRouter(PortManager passedManager, boolean passedBool, Executor passedExecutor ) throws IOException { // NO_UCD (use default)
 
-        theCommManager = passedManager;       
+        thePortManager = passedManager;       
         encrypted = passedBool;
         
         //Create the selection router and start it
@@ -111,7 +111,7 @@ abstract public class PortRouter {
      * @return
      */
     public PortManager getPortManager() {
-        return theCommManager;
+        return thePortManager;
     }
     
      //===============================================================
@@ -147,7 +147,7 @@ abstract public class PortRouter {
      * @param passedInt
      * @return 
     */  
-    abstract public SocketChannelHandler getSocketChannelHandler( Integer... passedInt );
+    abstract public SocketChannelHandler getSocketChannelHandler( Integer passedInt );
 
     //===============================================================
     /**
@@ -277,13 +277,7 @@ abstract public class PortRouter {
     * Closes and removes any connections provided by passed InetAddress
     *
     */
-    public synchronized void closeConnection() { // NO_UCD (use default)
-    
-        SocketChannelHandler theHandler = getSocketChannelHandler();
-        if( theHandler != null)            
-            theHandler.shutdown();
-        
-    }
+    abstract public void closeConnections();
      
 
     //===============================================================

@@ -69,8 +69,9 @@ public class KeepAliveTimer extends ManagedRunnable {
     
     private PortManager theCommManager = null;
     private final SecureRandom aSR = new SecureRandom();
-    private volatile boolean connected = false;
+    private volatile boolean connected = true;
     final Object syncedObject = new Object();
+    final Byte channelId;
     
     //Static instance
     private static final String NAME_Class = KeepAliveTimer.class.getSimpleName();
@@ -83,9 +84,10 @@ public class KeepAliveTimer extends ManagedRunnable {
      * @param passedManager
     */
     @SuppressWarnings("ucd")
-    public KeepAliveTimer(PortManager passedManager ) {
+    public KeepAliveTimer(PortManager passedManager, Byte passedId ) {
         super(Constants.Executor);
         theCommManager = passedManager;
+        channelId = passedId;
     }
     
     // ==========================================================================
@@ -97,7 +99,7 @@ public class KeepAliveTimer extends ManagedRunnable {
     public void go() {
                        
         //While not shutdown    
-        while(!shutdownRequested){
+//        while(!shutdownRequested){
             
             //Loop while connected
             while( isConnected() && !shutdownRequested ){
@@ -121,12 +123,10 @@ public class KeepAliveTimer extends ManagedRunnable {
                     //Get the socket router
 //                    int thePort = aCMManager.getPort();
                     ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
-
-                    //Initiate the file transfer
                     if(aPR != null){
                         
                         //Create the connection
-                        SocketChannelHandler aHandler = aPR.getSocketChannelHandler();
+                        SocketChannelHandler aHandler = aPR.getSocketChannelHandler(channelId.intValue());
                         if( aHandler != null && aHandler.getState() == Constants.CONNECTED ){
                             //Send noop to keepalive
                             NoOp aNoOp = new NoOp();                        
@@ -139,11 +139,11 @@ public class KeepAliveTimer extends ManagedRunnable {
                 }         
                 
             }
-            
-            //Wait until notified that we've been connected
-            waitToBeNotified();
-            
-        }
+//            
+//            //Wait until notified that we've been connected
+//            waitToBeNotified();
+//            
+//        }
        
         
     }

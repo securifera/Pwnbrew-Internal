@@ -182,7 +182,7 @@ public class ServerPortRouter extends PortRouter {
             
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
             if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( theCommManager );
+                aCMManager = ControlMessageManager.initialize( thePortManager );
             }
             
             //Send a disconnect msg
