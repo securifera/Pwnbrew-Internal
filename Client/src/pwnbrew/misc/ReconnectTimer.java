@@ -210,7 +210,7 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
                 if( theDate != null ){
                     
                     waitUntil(theDate);  
-                    connected = aPR.ensureConnectivity( serverIp, thePort, this );
+                    connected = aPR.getConnectionManager().ensureConnectivity( serverIp, thePort, this );
                     theDate = null;
                    
                 } else  {

@@ -51,8 +51,9 @@ import java.util.Arrays;
 import java.util.concurrent.Executor;
 import javax.net.ssl.SSLContext;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.PortManager;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.SSLUtilities;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.selector.SelectionRouter;
@@ -114,23 +115,23 @@ abstract public class PortRouter {
         return thePortManager;
     }
     
-     //===============================================================
-     /**
-     *  Registers the provided SocketChannelHandler with the server under the
-     * given InetAddress.
-     *
-     * @param passedClientId
-     * @param theHandler
-     */
-    abstract public void registerHandler(int passedClientId, SocketChannelHandler theHandler);
-
-    //===============================================================
-    /**
-     *  Removes the client id
-     * 
-     * @param clientId 
-    */
-    abstract public void removeHandler(int clientId);
+//     //===============================================================
+//     /**
+//     *  Registers the provided SocketChannelHandler with the server under the
+//     * given InetAddress.
+//     *
+//     * @param passedClientId
+//     * @param theHandler
+//     */
+//    abstract public void registerHandler(int passedClientId, SocketChannelHandler theHandler);
+//
+//    //===============================================================
+//    /**
+//     *  Removes the client id
+//     * 
+//     * @param clientId 
+//    */
+//    abstract public void removeHandler(int clientId);
     
     //===============================================================
     /**
@@ -147,20 +148,20 @@ abstract public class PortRouter {
      * @param passedInt
      * @return 
     */  
-    abstract public SocketChannelHandler getSocketChannelHandler( Integer passedInt );
+//    abstract public SocketChannelHandler getSocketChannelHandler( Integer passedInt );
 
-    //===============================================================
-    /**
-    * Closes and removes any connections provided by passed Inetaddress
-    *
-     * @param passedId
-    */
-    public synchronized void closeConnection( int passedId ) { // NO_UCD (use default)
-    
-        SocketChannelHandler theHandler = getSocketChannelHandler(passedId);
-        if( theHandler != null)              
-            theHandler.shutdown();       
-    }
+//    //===============================================================
+//    /**
+//    * Closes and removes any connections provided by passed Inetaddress
+//    *
+//     * @param passedId
+//    */
+//    public synchronized void closeConnection( int passedId ) { // NO_UCD (use default)
+//    
+//        SocketChannelHandler theHandler = getConnectionManager().getSocketChannelHandler(passedId);
+//        if( theHandler != null)              
+//            theHandler.shutdown();       
+//    }
     
     //===============================================================
     /**
@@ -175,11 +176,11 @@ abstract public class PortRouter {
     /**
      *  Queues the byte array to be sent
      * @param byteArr
-     * @param clientId
+     * @param channelId
      */
-    public void queueSend( byte[] byteArr, int clientId ) {
+    public void queueSend( byte[] byteArr, byte channelId ) {
         
-        SocketChannelHandler theHandler = getSocketChannelHandler( clientId );
+        SocketChannelHandler theHandler = getConnectionManager().getSocketChannelHandler( channelId );
         if( theHandler != null ){
             
             //If wrapping is necessary then wrap it
@@ -276,8 +277,9 @@ abstract public class PortRouter {
     /**
     * Closes and removes any connections provided by passed InetAddress
     *
+     * @return 
     */
-    abstract public void closeConnections();
+    abstract public ConnectionManager getConnectionManager();
      
 
     //===============================================================

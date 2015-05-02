@@ -110,9 +110,9 @@ public abstract class PortManager {
         
         //Shutdown each port router
         synchronized( thePortRouterMap ){
-            for( Iterator<PortRouter> anIter = thePortRouterMap.values().iterator(); anIter.hasNext();  ){
-                anIter.next().closeConnections();
-            }
+            for( Iterator<PortRouter> anIter = thePortRouterMap.values().iterator(); anIter.hasNext();  )
+                anIter.next().getConnectionManager().closeConnections();
+            
         }
     }
 

@@ -547,13 +547,8 @@ public class SocketChannelHandler implements Selectable {
                 } catch (InterruptedException ex1) {
                     ex1 = null;
                 }
-                
-//                try {
+
                 queueBytes(byteArr);
-//                    thePortRouter.queueSend( byteArr, getRootHostId() );
-//                } catch (IOException ex) {
-//                    Log.log(Level.INFO, NAME_Class, "retrySend()", ex.getMessage(), ex );
-//                }
                 
             }
 
@@ -603,17 +598,6 @@ public class SocketChannelHandler implements Selectable {
         return port;
     }
 
-//    //===============================================================
-//    /**
-//    * Returns the state of the channel
-//    *
-//    * @return
-//    */
-//    public synchronized int getState(){
-//        //Get the current state
-//        return state;      
-//    }
-
     //===============================================================
     /**
      * Sets the socket channel wrapper
@@ -633,16 +617,6 @@ public class SocketChannelHandler implements Selectable {
     public int getRootHostId() {
        return rootHostId;
     }
-
-//    //===============================================================
-//    /**
-//    * Sets the state of the underlying
-//    *
-//     * @param passedState
-//    */
-//    public synchronized void setState(int passedState) {
-//        state = passedState;
-//    }
 
     //===============================================================
     /**

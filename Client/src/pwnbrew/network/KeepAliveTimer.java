@@ -97,54 +97,44 @@ public class KeepAliveTimer extends ManagedRunnable {
     */
     @Override
     public void go() {
-                       
-        //While not shutdown    
-//        while(!shutdownRequested){
-            
-            //Loop while connected
-            while( isConnected() && !shutdownRequested ){
-            
-                //Get the next sleep time
-                int sleepTime = Math.abs( aSR.nextInt() % 300 );
-        
-                Calendar theCalendar = Calendar.getInstance(); 
-                theCalendar.setTime( new Date() );
-                theCalendar.add(Calendar.SECOND, sleepTime );
-            
-                //Wait until the random time
-                waitUntil(theCalendar.getTime());  
-                try {
+                                   
+        //Loop while connected
+        while( isConnected() && !shutdownRequested ){
 
-                    ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                    if( aCMManager == null ){
-                        aCMManager = ControlMessageManager.initialize( theCommManager );
+            //Get the next sleep time
+            int sleepTime = Math.abs( aSR.nextInt() % 300 );
+
+            Calendar theCalendar = Calendar.getInstance(); 
+            theCalendar.setTime( new Date() );
+            theCalendar.add(Calendar.SECOND, sleepTime );
+
+            //Wait until the random time
+            waitUntil(theCalendar.getTime());  
+            try {
+
+                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+                if( aCMManager == null ){
+                    aCMManager = ControlMessageManager.initialize( theCommManager );
+                }
+
+                //Get the socket router
+                ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+                if(aPR != null){
+
+                    //Create the connection
+                    SocketChannelHandler aHandler = aPR.getConnectionManager().getSocketChannelHandler(channelId);
+                    if( aHandler != null && aHandler.getState() == Constants.CONNECTED ){
+                        //Send noop to keepalive
+                        NoOp aNoOp = new NoOp();                        
+                        aCMManager.send( aNoOp );
                     }
+                }
 
-                    //Get the socket router
-//                    int thePort = aCMManager.getPort();
-                    ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
-                    if(aPR != null){
-                        
-                        //Create the connection
-                        SocketChannelHandler aHandler = aPR.getSocketChannelHandler(channelId.intValue());
-                        if( aHandler != null && aHandler.getState() == Constants.CONNECTED ){
-                            //Send noop to keepalive
-                            NoOp aNoOp = new NoOp();                        
-                            aCMManager.send( aNoOp );
-                        }
-                    }
+            } catch ( IOException | LoggableException ex) {
+                RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
+            }         
 
-                } catch ( IOException | LoggableException ex) {
-                    RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
-                }         
-                
-            }
-//            
-//            //Wait until notified that we've been connected
-//            waitToBeNotified();
-//            
-//        }
-       
+        }
         
     }
     
@@ -204,7 +194,8 @@ public class KeepAliveTimer extends ManagedRunnable {
     *  Shut down the detector
     */
     @Override
-    public synchronized void shutdown(){
+    public void shutdown(){
+        
         super.shutdown();
         
         //Stop the timer
