@@ -42,8 +42,9 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.PortManager;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
@@ -126,7 +127,13 @@ public class RelayManager extends DataManager {
             if( thePR.equals( srcPortRouter))
                  thePR = theServerPortRouter;
 
-            SocketChannelHandler theHandler = thePR.getSocketChannelHandler(tempId, (int)msgBytes[0]);
+            //Get the channel id
+            byte[] channelIdArr = Arrays.copyOfRange(msgBytes, Message.CHANNEL_ID_OFFSET, Message.CHANNEL_ID_OFFSET + 4);
+            int channelId = SocketUtilities.byteArrayToInt(channelIdArr);
+            
+            //Get the socketchannel handler
+            ConnectionManager aCM = thePR.getConnectionManager(tempId);
+            SocketChannelHandler theHandler = aCM.getSocketChannelHandler( channelId );
             if( theHandler != null ){
                 theHandler.queueBytes(msgBytes);
             } else {

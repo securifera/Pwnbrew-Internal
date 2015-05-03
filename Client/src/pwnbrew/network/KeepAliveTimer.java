@@ -71,7 +71,7 @@ public class KeepAliveTimer extends ManagedRunnable {
     private final SecureRandom aSR = new SecureRandom();
     private volatile boolean connected = true;
     final Object syncedObject = new Object();
-    final Byte channelId;
+    final int channelId;
     
     //Static instance
     private static final String NAME_Class = KeepAliveTimer.class.getSimpleName();
@@ -84,7 +84,7 @@ public class KeepAliveTimer extends ManagedRunnable {
      * @param passedManager
     */
     @SuppressWarnings("ucd")
-    public KeepAliveTimer(PortManager passedManager, Byte passedId ) {
+    public KeepAliveTimer(PortManager passedManager, int passedId ) {
         super(Constants.Executor);
         theCommManager = passedManager;
         channelId = passedId;

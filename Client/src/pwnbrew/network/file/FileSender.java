@@ -85,6 +85,7 @@ public class FileSender extends ManagedRunnable implements LockListener {
     private static final String NAME_Class = FileSender.class.getSimpleName();
     
     private int lockVal = 0;
+    private int channelId = 0;
     
     
     //=========================================================================
@@ -111,34 +112,37 @@ public class FileSender extends ManagedRunnable implements LockListener {
         if(aPR != null){
 
             int fileId = theFileAck.getFileId();
-            aPR.ensureConnectivity( serverIp, socketPort, this );       
-            try {
+            channelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
+            if(channelId != 0 ){
+                
+                try {
 
-                File fileToSend = new File( theFileAck.getFilename());
-                if( !fileToSend.exists()){
-                    
-                    File libDir = FileUtilities.getTempDir();
-                    fileToSend = new File(libDir, theFileAck.getFilename());
+                    File fileToSend = new File( theFileAck.getFilename());
+                    if( !fileToSend.exists()){
+
+                        File libDir = FileUtilities.getTempDir();
+                        fileToSend = new File(libDir, theFileAck.getFilename());
+                    }
+
+                    //If the file exist
+                    if( fileToSend.exists() ){
+                        sendFile( aPR, fileToSend,  fileId); 
+                    } else {
+                        throw new IOException("File does not exist");
+                    }            
+
+                } catch (Exception ex) {
+
+                    RemoteLog.log(Level.INFO, NAME_Class, "go()", ex.getMessage(), ex );
+
+                    ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+                    if( aCMManager != null ){
+                        //Send message to cleanup the file transfer on the client side
+                        PushFileAbort fileAbortMsg = new PushFileAbort( fileId );
+                        aCMManager.send(fileAbortMsg);
+                    }
+
                 }
-
-                //If the file exist
-                if( fileToSend.exists() ){
-                    sendFile( aPR, fileToSend,  fileId); 
-                } else {
-                    throw new IOException("File does not exist");
-                }            
-
-            } catch (Exception ex) {
-
-                RemoteLog.log(Level.INFO, NAME_Class, "go()", ex.getMessage(), ex );
-
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager != null ){
-                    //Send message to cleanup the file transfer on the client side
-                    PushFileAbort fileAbortMsg = new PushFileAbort( fileId );
-                    aCMManager.send(fileAbortMsg);
-                }
-
             }
         }       
         
@@ -204,8 +208,10 @@ public class FileSender extends ManagedRunnable implements LockListener {
                     SocketUtilities.intToByteArray(msgLen, readCount + clientIdArr.length + destIdArr.length + theFileId.length );
                     fileChannelBB.flip();
                     
+                    //Set the data and channel id
                     byte[] fileBytes = Arrays.copyOf(fileChannelBB.array(), fileChannelBB.limit());
                     FileData fileDataMsg = new FileData(passedId, fileBytes);
+                    fileDataMsg.setChannelId(channelId);
                     fileDataMsg.setDestHostId(dstHostId);
                     
                     thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
@@ -261,6 +267,15 @@ public class FileSender extends ManagedRunnable implements LockListener {
         lockVal = 0;
         
         return retVal;
+    }
+
+    //=====================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getChannelId() {
+        return channelId;
     }
 
 }

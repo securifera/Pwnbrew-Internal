@@ -126,7 +126,7 @@ public final class PushFileFin extends FileMessage {
     @Override
     public void evaluate( PortManager passedManager ) {
 
-        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received Fin message. Id: " + Integer.toString( getMsgId()));
+        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received Fin message. Id: " + Integer.toString( getChannelId()));
 
         //Notify any handlers waiting with tasks
         if( passedManager instanceof TaskListener ){

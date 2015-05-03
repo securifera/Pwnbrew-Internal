@@ -278,11 +278,16 @@ abstract public class DataManager {
             ServerConfig aConf = ServerConfig.getServerConfig();
             int serverPort = aConf.getSocketPort();
             int destClientId = passedMessage.getDestHostId();
-            int messageType = passedMessage.getType();
+//            int messageType = passedMessage.getType();
+            int channelId = passedMessage.getChannelId();
             
             //Try the default port router
             PortRouter thePR = passedCommManager.getPortRouter( serverPort );
-            SocketChannelHandler theHandler = thePR.getSocketChannelHandler(destClientId, messageType);
+            ConnectionManager aCM = thePR.getConnectionManager(destClientId);
+            
+            //Get the scoket handler
+            SocketChannelHandler theHandler = aCM.getSocketChannelHandler(channelId);
+//            SocketChannelHandler theHandler = thePR.getSocketChannelHandler(destClientId, messageType);
             if( theHandler == null ){
                 
                 RelayManager aRelayManager = RelayManager.getRelayManager();
@@ -291,7 +296,10 @@ abstract public class DataManager {
                 
                 //See if the relay port router has the client id
                 thePR = aRelayManager.getServerPorterRouter();
-                theHandler = thePR.getSocketChannelHandler(destClientId, messageType);
+                aCM = thePR.getConnectionManager(destClientId);
+                theHandler = aCM.getSocketChannelHandler(channelId);
+                
+                
                 if( theHandler == null ){
                     Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified client.", null);      
                     return;

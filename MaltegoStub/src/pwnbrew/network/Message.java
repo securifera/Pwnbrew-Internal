@@ -67,7 +67,7 @@ public abstract class Message {
     protected final byte[] length = new byte[MSG_LEN_SIZE];
     private final byte[] srcHostId = new byte[4];
     private final byte[] destHostId = new byte[4];
-    protected final byte[] msgId = new byte[4];
+    protected byte[] channelId = new byte[4];
     
     public static final int SRC_HOST_ID_OFFSET = 5;
     public static final int DEST_HOST_ID_OFFSET = 9;
@@ -82,7 +82,7 @@ public abstract class Message {
         StubConfig theConf = StubConfig.getConfig();
         SocketUtilities.intToByteArray(srcHostId, Integer.parseInt(theConf.getHostId())); 
         SocketUtilities.intToByteArray(destHostId, destClientId );         
-        SocketUtilities.intToByteArray(msgId, SocketUtilities.getNextId());        
+        SocketUtilities.intToByteArray(channelId, 0);        
         
         //Set the base length
         length[3] = 11;
@@ -93,9 +93,9 @@ public abstract class Message {
         type = passedType;
 
         if(passedId != null){
-           System.arraycopy( passedId, 0, msgId, 0, msgId.length );          
+           System.arraycopy( passedId, 0, channelId, 0, channelId.length );          
         } else {
-           SocketUtilities.intToByteArray(msgId, SocketUtilities.getNextId());
+           SocketUtilities.intToByteArray(channelId, 0);
         }
         
         //Set the base length
@@ -119,7 +119,7 @@ public abstract class Message {
         count += length.length;
 
         //Add the ID
-        count += msgId.length;
+        count += channelId.length;
 
         //Add Client ID
         count += srcHostId.length;
@@ -136,8 +136,18 @@ public abstract class Message {
      *
      * @return
     */
-    public int getMsgId(){
-       return SocketUtilities.byteArrayToInt(msgId);
+    public int getChannelId(){
+       return SocketUtilities.byteArrayToInt(channelId);
+    }
+    
+    //===============================================================
+    /**
+     * Sets the channel id
+     *
+     * @param passedId
+    */
+    public void setChannelId( int passedId ){
+       channelId = SocketUtilities.intToByteArray(passedId);
     }
     
     //===============================================================
@@ -217,7 +227,7 @@ public abstract class Message {
         rtnBuffer.put(destHostId, 0, destHostId.length );
 
         //Add the ID
-        rtnBuffer.put(msgId, 0, msgId.length );
+        rtnBuffer.put(channelId, 0, channelId.length );
 
     }
     

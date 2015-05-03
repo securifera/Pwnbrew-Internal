@@ -59,6 +59,7 @@ import java.util.logging.Level;
 import javax.net.ssl.SSLException;
 import pwnbrew.ClientConfig;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.SocketUtilities;
 import pwnbrew.network.Message;
@@ -87,7 +88,7 @@ public class SocketChannelHandler implements Selectable {
     private volatile boolean wrappingFlag = true;
     private volatile boolean staging = false;
 
-    private Byte channelId = 0;
+    private int channelId = 0;
     private int clientId = -1;
     private int state = 0;
     
@@ -391,13 +392,22 @@ public class SocketChannelHandler implements Selectable {
                 }
 
                 //Get the port router and register the host
+                SocketChannelHandler aSCH = null;
                 ServerPortRouter aSPR = aManager.getServerPorterRouter();
-                SocketChannelHandler aSCH = aSPR.getSocketChannelHandler(srcId);
+                IncomingConnectionManager anICM = aSPR.getConnectionManager(srcId);
+                if( anICM == null ){
+                    anICM = new IncomingConnectionManager(srcId);
+                    aSPR.setConnectionManager( anICM, srcId );
+                } else {
+                    aSCH = anICM.getSocketChannelHandler(srcId);
+                }
+                
+                //If the Handler doesn't exist then register it
                 if( aSCH == null ){
-                    aSPR.registerHandler(srcId, this);
+                    anICM.registerHandler(srcId, this);
                     clientId = srcId;
-                }                    
-
+                }    
+               
             } 
             
         } catch (IOException ex) {
@@ -556,7 +566,7 @@ public class SocketChannelHandler implements Selectable {
     public synchronized int getState(){
 
         //Get the current state
-        return Integer.valueOf(state);
+        return state;
       
     }
 
@@ -596,7 +606,7 @@ public class SocketChannelHandler implements Selectable {
     *
      * @param passedId
     */
-    public void setChannelId(Byte passedId) {
+    public void setChannelId(int passedId) {
         channelId = passedId;
     }
     
@@ -606,7 +616,7 @@ public class SocketChannelHandler implements Selectable {
     *
     * @return
     */
-    public Byte getChannelId() {
+    public int getChannelId() {
        return channelId;
     }
 

@@ -39,17 +39,14 @@ package pwnbrew.manager;
 
 import java.util.HashMap;
 import java.util.Map;
-import pwnbrew.network.Message;
+import java.util.Set;
 import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
  * @author Securifera
  */
-public class ClientConnectionManager {
-    
-    public final static int STAGE_CHANNEL_ID = Message.STAGING_MESSAGE_TYPE;
-    public final static int COMM_CHANNEL_ID = Message.CONTROL_MESSAGE_TYPE;
+public class IncomingConnectionManager extends ConnectionManager {
     
     private final int theClientId;
     private final Map<Integer, SocketChannelHandler> channelIdHandlerMap = new HashMap<>();
@@ -59,7 +56,7 @@ public class ClientConnectionManager {
      * 
      * @param passedClientId 
      */
-    public ClientConnectionManager(int passedClientId) {
+    public IncomingConnectionManager(int passedClientId) {
         theClientId = passedClientId;
     }
 
@@ -98,6 +95,7 @@ public class ClientConnectionManager {
      * 
      * @param channelId 
      */
+    @Override
     public void removeHandler( int channelId ) {
         
         synchronized(channelIdHandlerMap){
@@ -118,7 +116,7 @@ public class ClientConnectionManager {
      * @param channelId
      * @return 
      */
-    public SocketChannelHandler getHandler(Integer channelId) {
+    public SocketChannelHandler getSocketChannelHandler(Integer channelId) {
         SocketChannelHandler aHandler;
         synchronized(channelIdHandlerMap){
             aHandler = channelIdHandlerMap.get(channelId);
@@ -154,6 +152,39 @@ public class ClientConnectionManager {
         
         return retVal;
         
+    }
+//
+//    @Override
+//    public void closeConnections() {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
+
+    //====================================================================
+    /**
+     * 
+     */
+    @Override
+    public void shutdown() {
+          
+        //Shutdown everything
+        synchronized(channelIdHandlerMap){
+            Set<Integer> channelKeySet = channelIdHandlerMap.keySet();
+            for( Integer aKey : channelKeySet ){
+                SocketChannelHandler aHandler = channelIdHandlerMap.get(aKey);
+                aHandler.shutdown();
+            }
+            channelIdHandlerMap.clear();
+        }
+    }
+
+//    @Override
+//    public SocketChannelHandler getSocketChannelHandler(int passedInt) {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
+
+    @Override
+    public void registerHandler(int passedchannelId, SocketChannelHandler theHandler) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
@@ -336,6 +337,7 @@ public class FileMessageManager extends DataManager {
      */
     public void cancelFileTransfer( int clientId, int taskId ) {
         
+        int channelId = 0;
         synchronized( theFileReceiverMap ){
             
             List<Integer> fileIds = new ArrayList<>(theFileReceiverMap.keySet());
@@ -346,6 +348,7 @@ public class FileMessageManager extends DataManager {
                     int receiverId = aReceiver.getTaskId();
                     if( receiverId == taskId ){
                         aReceiver.cleanupFileTransfer();
+                        channelId = aReceiver.getChannelId();
                         theFileReceiverMap.remove( anId );
                     }
                 }
@@ -359,11 +362,14 @@ public class FileMessageManager extends DataManager {
             for( Integer aTaskId : taskIds ){
                 
                 Map<Integer, FileSender> aSenderMap = theFileSenderMap.get(aTaskId);
-                List<Integer> aFileId = new ArrayList<>(aSenderMap.keySet());
-                for( Integer anId : aFileId ){
-                    FileSender aSender = aSenderMap.get(anId);
-                    aSender.shutdown();
-                    aSenderMap.remove( anId );
+                if( aSenderMap != null ){
+                    List<Integer> aFileId = new ArrayList<>(aSenderMap.keySet());
+                    for( Integer anId : aFileId ){
+                        FileSender aSender = aSenderMap.get(anId);
+                        channelId = aSender.getChannelId();
+                        aSender.shutdown();
+                        aSenderMap.remove( anId );
+                    }
                 }
                 
                 //Remove from the map
@@ -372,12 +378,16 @@ public class FileMessageManager extends DataManager {
         }
         
          //Clear the send buffer
-        ServerPortRouter aPR = (ServerPortRouter) thePortManager.getPortRouter( getPort() );
-        SocketChannelHandler aSCH = aPR.getSocketChannelHandler(clientId, (int)FileMessage.FILE_MESSAGE_TYPE);
+        if( channelId != 0 ){
+            
+            ServerPortRouter aPR = (ServerPortRouter) thePortManager.getPortRouter( getPort() );
+            ConnectionManager aCM = aPR.getConnectionManager(clientId);
+            SocketChannelHandler aSCH = aCM.getSocketChannelHandler( channelId );
 
-        //Set the wrapper
-        if( aSCH != null )
-            aSCH.clearQueue();          
+            //Set the wrapper
+            if( aSCH != null )
+                aSCH.clearQueue();  
+        }        
         
     }
 

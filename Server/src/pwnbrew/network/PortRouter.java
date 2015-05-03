@@ -46,10 +46,10 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network;
 
 import java.io.IOException;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.selector.SelectionRouter;
-import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
@@ -79,7 +79,7 @@ abstract public class PortRouter {
         theSelectionRouter.start();
     }
     
-    abstract public SocketChannelHandler getSocketChannelHandler(Integer passedInt, Integer passedType );
+//    abstract public SocketChannelHandler getSocketChannelHandler(Integer passedInt, Integer passedType );
 
     //===============================================================
     /**
@@ -102,26 +102,35 @@ abstract public class PortRouter {
     }
     
     //===============================================================
-     /**
-     *  Registers the provided SocketChannelHandler with the server under the
-     * given InetAddress.
-     *
-     * @param passedClientId
-     * @param parentId
-     * @param handlerType
-     * @param theHandler
-     * @return 
-     */
-    abstract public boolean registerHandler(int passedClientId, int parentId, int channelId, SocketChannelHandler theHandler);
-
-    //===============================================================
     /**
-     *  Removes the client id
-     * 
-     * @param clientId 
-     * @param channelId 
+    * Closes and removes any connections provided by passed InetAddress
+    *
+     * @param passedId
+     * @return 
     */
-    abstract public void removeHandler(int clientId, int channelId);
+    abstract public ConnectionManager getConnectionManager( Integer... passedId );
+    
+//    //===============================================================
+//     /**
+//     *  Registers the provided SocketChannelHandler with the server under the
+//     * given InetAddress.
+//     *
+//     * @param passedClientId
+//     * @param parentId
+//     * @param handlerType
+//     * @param theHandler
+//     * @return 
+//     */
+//    abstract public boolean registerHandler(int passedClientId, int parentId, int channelId, SocketChannelHandler theHandler);
+//
+//    //===============================================================
+//    /**
+//     *  Removes the client id
+//     * 
+//     * @param clientId 
+//     * @param channelId 
+//    */
+//    abstract public void removeHandler(int clientId, int channelId);
     
     //===============================================================
     /**

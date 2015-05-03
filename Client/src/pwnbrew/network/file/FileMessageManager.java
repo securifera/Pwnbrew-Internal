@@ -161,7 +161,7 @@ public class FileMessageManager extends DataManager implements LockListener {
         //Initiate the file transfer
         if(aPR != null){
             
-            aPR.ensureConnectivity( serverIp, socketPort, this );       
+//            aPR.ensureConnectivity( serverIp, socketPort, this );       
             
             //Initialize the file transfer
             synchronized( theFileReceiverMap ){
@@ -319,9 +319,10 @@ public class FileMessageManager extends DataManager implements LockListener {
      * 
      * @param taskId 
      */
-    public void cancelFileTransfer(int taskId) {
+    public void cancelFileTransfer( int taskId ) {
         
         //Cancel file receives
+        int channelId = 0;
         synchronized( theFileReceiverMap ){
             
             List<Integer> fileIds = new ArrayList<>(theFileReceiverMap.keySet());
@@ -331,6 +332,7 @@ public class FileMessageManager extends DataManager implements LockListener {
                 int receiverId = aReceiver.getTaskId();
                 if( receiverId == taskId ){
                     aReceiver.cleanupFileTransfer();
+                    channelId = aReceiver.getChannelId();
                     theFileReceiverMap.remove( anId );
                 }
                 
@@ -347,6 +349,7 @@ public class FileMessageManager extends DataManager implements LockListener {
                 List<Integer> aFileId = new ArrayList<>(aSenderMap.keySet());
                 for( Integer anId : aFileId ){
                     FileSender aSender = aSenderMap.get(anId);
+                    channelId = aSender.getChannelId();
                     aSender.shutdown();
                     aSenderMap.remove( anId );
                 }
@@ -357,13 +360,15 @@ public class FileMessageManager extends DataManager implements LockListener {
         }
         
         //Clear the send buffer
-        PortRouter aPR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
-        SocketChannelHandler aSCH = aPR.getSocketChannelHandler();
+        if( channelId != 0 ){
+            PortRouter aPR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+            SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler(channelId);
 
-        //Set the wrapper
-        if( aSCH != null ){
-            aSCH.clearQueue();
-        }    
+            //Set the wrapper
+            if( aSCH != null ){
+                aSCH.clearQueue();
+            }  
+        }  
         
         
     }

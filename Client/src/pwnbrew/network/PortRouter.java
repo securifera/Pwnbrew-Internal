@@ -53,6 +53,7 @@ import javax.net.ssl.SSLContext;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.SSLUtilities;
 import pwnbrew.network.http.ServerHttpWrapper;
@@ -74,6 +75,7 @@ abstract public class PortRouter {
     
     private SSLContext theSSLContext = null;
     
+    public static final int CONTROL_CHANNEL_ID = 1;
     private static final String NAME_Class = PortRouter.class.getSimpleName();
   
     //===============================================================
@@ -115,24 +117,6 @@ abstract public class PortRouter {
         return thePortManager;
     }
     
-//     //===============================================================
-//     /**
-//     *  Registers the provided SocketChannelHandler with the server under the
-//     * given InetAddress.
-//     *
-//     * @param passedClientId
-//     * @param theHandler
-//     */
-//    abstract public void registerHandler(int passedClientId, SocketChannelHandler theHandler);
-//
-//    //===============================================================
-//    /**
-//     *  Removes the client id
-//     * 
-//     * @param clientId 
-//    */
-//    abstract public void removeHandler(int clientId);
-    
     //===============================================================
     /**
      *  Handles when the socket is closed
@@ -141,27 +125,6 @@ abstract public class PortRouter {
     */
     abstract public void socketClosed( SocketChannelHandler thePortRouter );
  
-    //===============================================================
-    /**
-     *  Returns the SocketChannelHandler for the passed id.
-     * 
-     * @param passedInt
-     * @return 
-    */  
-//    abstract public SocketChannelHandler getSocketChannelHandler( Integer passedInt );
-
-//    //===============================================================
-//    /**
-//    * Closes and removes any connections provided by passed Inetaddress
-//    *
-//     * @param passedId
-//    */
-//    public synchronized void closeConnection( int passedId ) { // NO_UCD (use default)
-//    
-//        SocketChannelHandler theHandler = getConnectionManager().getSocketChannelHandler(passedId);
-//        if( theHandler != null)              
-//            theHandler.shutdown();       
-//    }
     
     //===============================================================
     /**
@@ -178,7 +141,7 @@ abstract public class PortRouter {
      * @param byteArr
      * @param channelId
      */
-    public void queueSend( byte[] byteArr, byte channelId ) {
+    public void queueSend( byte[] byteArr, int channelId ) {
         
         SocketChannelHandler theHandler = getConnectionManager().getSocketChannelHandler( channelId );
         if( theHandler != null ){
@@ -277,9 +240,18 @@ abstract public class PortRouter {
     /**
     * Closes and removes any connections provided by passed InetAddress
     *
+     * @param passedId
      * @return 
     */
-    abstract public ConnectionManager getConnectionManager();
+    abstract public ConnectionManager getConnectionManager( Integer... passedId );
+    
+    //==========================================================================
+    /**
+     * 
+     * @param srcId
+     * @param anICM 
+     */
+    abstract public void setConnectionManager( ConnectionManager anICM, Integer... srcId );
      
 
     //===============================================================

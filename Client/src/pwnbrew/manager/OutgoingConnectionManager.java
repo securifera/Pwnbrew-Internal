@@ -40,81 +40,33 @@ package pwnbrew.manager;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
+import pwnbrew.misc.ReconnectTimer;
 import pwnbrew.network.KeepAliveTimer;
-import pwnbrew.network.Message;
 import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
  * @author Securifera
  */
-public class ServerConnectionManager extends ConnectionManager{
+public class OutgoingConnectionManager extends ConnectionManager {
     
-    public final static int COMM_CHANNEL_ID = Message.CONTROL_MESSAGE_TYPE; 
     
-    private final Stack<Byte> availableKeys = new Stack(); 
-    private final Map<Byte, SocketChannelHandler> channelIdHandlerMap = new HashMap<>();
-    private final Map<Byte, KeepAliveTimer> theKeepAliveTimerMap = new HashMap<>();
+    private final Map<Integer, SocketChannelHandler> channelIdHandlerMap = new HashMap<>();
+    private final Map<Integer, KeepAliveTimer> theKeepAliveTimerMap = new HashMap<>();
+    private final Map<Integer, ReconnectTimer> theReconnectTimerMap = new HashMap<>();
+    
+    //Channel Id generator
+    private static int messageCounter = 2;
  
 
     //==========================================================================
     /**
      * 
      */
-    public ServerConnectionManager() {        
-        //Initialize 
-        for( byte i = 2; i < 0xff; i++){
-            availableKeys.add(i);
-        }
+    public OutgoingConnectionManager() {        
     }
 
-//    //==========================================================================
-//    /**
-//     * 
-//     * @return 
-//     */
-//    public int getClientId() {
-//        return theClientId;
-//    }
-
-//    //==========================================================================
-//    /**
-//     * 
-//     * @param channelId
-//     * @param theHandler
-//     * @return 
-//     */
-//    public boolean setHandler(int channelId, SocketChannelHandler theHandler) {        
-//         
-//        boolean retVal;
-//        
-//        retVal = verifyHandlerId(channelId);
-//        if( retVal ){
-//            synchronized(channelIdHandlerMap){
-//                channelIdHandlerMap.put(channelId, theHandler);
-//            }
-//        }
-//        
-//        return retVal;
-//    }
-    
-//   
-//    //==========================================================================
-//    /**
-//     * Return the socket handler
-//     * @param channelId
-//     * @return 
-//     */
-//    public SocketChannelHandler getHandler( byte channelId) {
-//        SocketChannelHandler aHandler;
-//        synchronized(channelIdHandlerMap){
-//            aHandler = channelIdHandlerMap.get(channelId);
-//        }
-//        return aHandler;
-//    }
-
-       //===============================================================
+    //===============================================================
     /**
      * Sets the access handler for the server
      *
@@ -124,7 +76,7 @@ public class ServerConnectionManager extends ConnectionManager{
     @Override
     public void registerHandler( int passedId, SocketChannelHandler theAccessHandler ) {
         synchronized( channelIdHandlerMap){
-            channelIdHandlerMap.put( (byte)( passedId & 0xff ), theAccessHandler);
+            channelIdHandlerMap.put( passedId, theAccessHandler);
         }
     }
     
@@ -137,11 +89,7 @@ public class ServerConnectionManager extends ConnectionManager{
     @Override
     public void removeHandler( int passedId ) {
         synchronized( channelIdHandlerMap ){
-            channelIdHandlerMap.remove((byte)( passedId & 0xff ));
-            //Add the key back
-            synchronized( availableKeys){
-                availableKeys.push((byte)( passedId & 0xff ));
-            }
+            channelIdHandlerMap.remove( passedId );
         }
     }
  
@@ -151,7 +99,7 @@ public class ServerConnectionManager extends ConnectionManager{
      * @param passedId
      * @return 
      */
-    public KeepAliveTimer getKeepAliveTimer( Byte passedId ) {
+    public KeepAliveTimer getKeepAliveTimer( int passedId ) {
         
         KeepAliveTimer theTimer;
         synchronized(theKeepAliveTimerMap){
@@ -162,27 +110,38 @@ public class ServerConnectionManager extends ConnectionManager{
     
     //==========================================================================
     /**
-     * 
+     *  Returns the reconnect timer
+     * @param passedId
+     * @return 
      */
-    @Override
-    public void closeConnections() {
-  
-        synchronized( channelIdHandlerMap ){
-            
-            synchronized(availableKeys){
-                Set<Byte> aSet = channelIdHandlerMap.keySet();
-                for( Byte aKey : aSet ){
-                    SocketChannelHandler theHandler = getSocketChannelHandler(aKey);
-                    if( theHandler != null){      
-                        theHandler.shutdown();
-                        availableKeys.push(aKey);
-                    }
-
-                }
-            }
+    public ReconnectTimer getReconnectTimer( int passedId ) {
         
+        ReconnectTimer theTimer;
+        synchronized(theReconnectTimerMap){
+            theTimer = theReconnectTimerMap.get(passedId);
         }
+        return theTimer;
     }
+    
+//    //==========================================================================
+//    /**
+//     * 
+//     */
+//    @Override
+//    public void closeConnections() {
+//  
+//        synchronized( channelIdHandlerMap ){
+//            
+//            Set<Integer> aSet = channelIdHandlerMap.keySet();
+//            for( Integer aKey : aSet ){
+//                SocketChannelHandler theHandler = getSocketChannelHandler(aKey);
+//                if( theHandler != null){      
+//                    theHandler.shutdown();
+//                }
+//            }
+//            
+//        }
+//    }
     
     //===============================================================
     /**
@@ -192,10 +151,10 @@ public class ServerConnectionManager extends ConnectionManager{
      * @return 
     */  
     @Override
-    public SocketChannelHandler getSocketChannelHandler( int passedId ){
+    public SocketChannelHandler getSocketChannelHandler( Integer passedId ){
         SocketChannelHandler aSCH;
         synchronized( channelIdHandlerMap){
-            aSCH = channelIdHandlerMap.get((byte)( passedId & 0xff ));
+            aSCH = channelIdHandlerMap.get( passedId );
         }
         return aSCH;
     }
@@ -208,28 +167,35 @@ public class ServerConnectionManager extends ConnectionManager{
     public void shutdown() {
         
          //Shutdown the handlers and there keepalives
-        Set<Byte> theKeys = theKeepAliveTimerMap.keySet();
-        for( Byte aKey : theKeys )
+        Set<Integer> theKeys = theKeepAliveTimerMap.keySet();
+        for( Integer aKey : theKeys )
             theKeepAliveTimerMap.get(aKey).shutdown();
         
         theKeys = channelIdHandlerMap.keySet();
-        for( Byte aKey : theKeys )
+        for( Integer aKey : theKeys )
             channelIdHandlerMap.get(aKey).shutdown();
     }
 
-    //================================================================
+     //===============================================================
     /**
-     * 
-     * @return 
-     */
-    public Byte getNextChannelId() {
-        
-        Byte aChannelId;
-        synchronized(availableKeys){
-            aChannelId = availableKeys.pop();
-        }
-        return aChannelId;
-        
-    }
+    * Returns an integer to be used for packet ids
+    *
+    * @return
+    */
+    public int getNextChannelId(){
 
+        SocketChannelHandler aSH;
+        int channelId;
+                
+        synchronized( channelIdHandlerMap){
+            do {
+                channelId = messageCounter++;
+                aSH = channelIdHandlerMap.get( channelId );
+            } while( aSH != null );
+        }       
+
+        return channelId;
+    }
+    
+   
 }

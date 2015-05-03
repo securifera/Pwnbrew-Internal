@@ -61,7 +61,6 @@ import pwnbrew.manager.DataManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.messages.PushFileAbort;
 import pwnbrew.network.control.messages.PushFileAck;
 import pwnbrew.xmlBase.ServerConfig;
@@ -79,6 +78,7 @@ public class FileSender extends ManagedRunnable {
     
 //    private static int maxMsgLen = (256 * 256) - 8; 
     private static final int maxMsgLen = 12582 - 7;    
+    private int channelId;
     
     //Class name
     private static final String NAME_Class = FileSender.class.getSimpleName();
@@ -160,6 +160,7 @@ public class FileSender extends ManagedRunnable {
             if( fileToBeSent.length() == 0 ){
 
                 FileData fileDataMsg = new FileData(fileId, new byte[0]);
+                fileDataMsg.setChannelId(channelId);
                 fileDataMsg.setSrcHostId(SocketUtilities.byteArrayToInt(clientIdArr));
                 fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) );           
 
@@ -191,6 +192,7 @@ public class FileSender extends ManagedRunnable {
 
                         byte[] fileBytes = Arrays.copyOf(fileChannelBB.array(), fileChannelBB.limit());
                         FileData fileDataMsg = new FileData(fileId, fileBytes);
+                        fileDataMsg.setChannelId(channelId);
                         fileDataMsg.setSrcHostId(SocketUtilities.byteArrayToInt(clientIdArr));
                         fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) ); 
                         
@@ -215,6 +217,15 @@ public class FileSender extends ManagedRunnable {
 //        } else {
 //            throw new IOException("Not connected to the client.");
 //        }
+    }
+
+    //=====================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getChannelId() {
+        return channelId;
     }
 
 }

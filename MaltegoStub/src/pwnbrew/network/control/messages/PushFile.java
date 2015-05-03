@@ -243,7 +243,7 @@ public class PushFile extends FileMessage {
             String hashFileStr = getHashFilenameString();
             String otherHFStr = passedMessage.getHashFilenameString();
 
-            if(Arrays.equals(msgId, passedMessage.msgId ) &&
+            if(Arrays.equals(channelId, passedMessage.channelId ) &&
                     hashFileStr.equals(otherHFStr) ){
                 return true;
             }       

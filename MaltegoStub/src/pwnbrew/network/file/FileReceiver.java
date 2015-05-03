@@ -80,6 +80,7 @@ final public class FileReceiver {
     private final int clientId;
     private final int taskId;
     private final int fileId;
+    private final int channelId = 0;
     private final String fileHash;
     
     private FileOutputStream aFileStream = null;
@@ -292,6 +293,15 @@ final public class FileReceiver {
      */
     public int getTaskId() {
         return taskId;
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getChannelId() {
+        return channelId;
     }
 
 }

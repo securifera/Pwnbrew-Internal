@@ -52,8 +52,9 @@ import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.host.Host;
 import pwnbrew.logging.Log;
-import pwnbrew.manager.PortManager;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
@@ -198,8 +199,10 @@ public final class Hello extends ControlMessage {
                 Integer theClientId = getSrcHostId();
                 DebugPrinter.printMessage(NAME_Class, "Accepted connection from host id: " + theClientId);
                 PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort() );
-                SocketChannelHandler aSCH = aPR.getSocketChannelHandler(theClientId, (int)ControlMessage.CONTROL_MESSAGE_TYPE);
-               
+                
+                //Get connectino manager
+                ConnectionManager aCM = aPR.getConnectionManager(theClientId);
+                SocketChannelHandler aSCH = aCM.getSocketChannelHandler( ConnectionManager.COMM_CHANNEL_ID );
                 if( aSCH != null ){
 
                     //Set flag

@@ -48,6 +48,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
@@ -131,8 +132,8 @@ public final class SendStage extends StageMessage { // NO_UCD (use default)
 
             PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort());
             //If it is an old stager then the msg id will be set 
-            int tmpId = getMsgId();
-            byte[] tempArr = SocketUtilities.intToByteArray(tmpId);
+//            int tmpId = getMsgId();
+//            byte[] tempArr = SocketUtilities.intToByteArray(tmpId);
 //            if( Arrays.equals( tempArr, Constants.OLD_STAGER_MARKER)){
               
 //                try {
@@ -244,7 +245,8 @@ public final class SendStage extends StageMessage { // NO_UCD (use default)
                 try {
                     //Get the socketchannel handler
                     int clientId = getSrcHostId();
-                    SocketChannelHandler aSCH = aPR.getSocketChannelHandler( clientId, (int)ControlMessage.STAGING_MESSAGE_TYPE );
+                    ConnectionManager aCM = aPR.getConnectionManager(clientId);
+                    SocketChannelHandler aSCH = aCM.getSocketChannelHandler( ConnectionManager.STAGE_CHANNEL_ID );
 
                     //Turn on staging flag and send the payload if it isn't relayed
                     if( aSCH != null && aSCH.setStaging(clientId, true, theJvmVersion) ) {

@@ -35,23 +35,51 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-package pwnbrew.network;
+package pwnbrew.manager;
+
+import pwnbrew.network.Message;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
  * @author Securifera
  */
-public class DataMessage extends Message {
+public abstract class ConnectionManager {
     
-     
-    //==========================================================================
+    public final static int STAGE_CHANNEL_ID = Message.STAGING_MESSAGE_TYPE;
+    public final static int COMM_CHANNEL_ID = 1;
+   
+    
+//    abstract public void closeConnections();
+    
+    abstract public void shutdown();
+    
+    //===============================================================
     /**
-     * Constructor
+     *  Returns the SocketChannelHandler for the passed id.
+     * 
+     * @param passedInt
+     * @return 
+    */  
+    abstract public SocketChannelHandler getSocketChannelHandler( Integer passedInt );
+    
+     //===============================================================
+     /**
+     *  Registers the provided SocketChannelHandler with the server under the
+     * given channel id.
      *
-     * @param passedType
-     * @param passedId
+     * @param channelId
+     * @param theHandler
+     * @return 
+     */
+    abstract public boolean setHandler( int channelId, SocketChannelHandler theHandler);
+
+    //===============================================================
+    /**
+     *  Removes the channel id
+     * 
+     * @param channelId 
     */
-    public DataMessage( byte passedType, byte[] passedId) {
-        super(passedType, passedId);
-    }
+    abstract public void removeHandler(int channelId);
+
 }

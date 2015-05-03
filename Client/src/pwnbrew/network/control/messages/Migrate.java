@@ -39,16 +39,16 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.manager.PortManager;
-import pwnbrew.network.ControlOption;
 import pwnbrew.log.RemoteLog;
+import pwnbrew.manager.OutgoingConnectionManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.misc.ReconnectTimer;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
+import pwnbrew.network.ControlOption;
 import pwnbrew.selector.SocketChannelHandler;
 
 /**
@@ -138,7 +138,7 @@ public class Migrate extends ControlMessage {
                     theConf.setServerId(-1);
                     
                     //Get the handler
-                    SocketChannelHandler aSCH = aCPR.getSocketChannelHandler();
+                    SocketChannelHandler aSCH = aCPR.getConnectionManager().getSocketChannelHandler(OutgoingConnectionManager.COMM_CHANNEL_ID);
                     aCPR.setReconnectFlag(false);
 
                     //Set the wrapping flag
@@ -148,7 +148,8 @@ public class Migrate extends ControlMessage {
                     //Tell it not to reconnect
                     passedManager.disconnect();
                     
-                    ReconnectTimer aReconnectTimer = ReconnectTimer.getReconnectTimer();  
+                    //Change the ip of the reconnect timer
+                    ReconnectTimer aReconnectTimer = aCPR.getConnectionManager().getReconnectTimer( OutgoingConnectionManager.COMM_CHANNEL_ID );        
                     aReconnectTimer.setBackupServerIp(serverIp);
                     aReconnectTimer.setBackupServerPort(serverPort);
                     aReconnectTimer.start();

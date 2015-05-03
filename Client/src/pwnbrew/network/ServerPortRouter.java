@@ -55,8 +55,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
+import pwnbrew.log.RemoteLog;
+import pwnbrew.manager.ConnectionManager;
+import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.control.ControlMessageManager;
@@ -72,7 +74,10 @@ import pwnbrew.selector.SocketChannelHandler;
 public class ServerPortRouter extends PortRouter {
 
     private ServerSocketChannel theServerSocketChannel = null;
-    private final Map<Integer, SocketChannelHandler> hostHandlerMap = new HashMap<>();
+    private final Map<Integer, IncomingConnectionManager> clientIdManagerMap= new HashMap<>();
+     
+    
+//    private final Map<Integer, SocketChannelHandler> hostHandlerMap = new HashMap<>();
     
     private AcceptHandler currentHandler = null;    
     private static final String NAME_Class = ServerPortRouter.class.getSimpleName();
@@ -101,73 +106,95 @@ public class ServerPortRouter extends PortRouter {
         return theServerSocketChannel;
     }
     
-     //===============================================================
-     /**
-     *  Registers the provided AccessHandler with the server under the
-     * given InetAddress.
-     *
-     * @param passedClientId
-     */
-    @Override
-    public void registerHandler(int passedClientId, SocketChannelHandler theHandler) {
-
-        if( theHandler != null){
-//            DebugPrinter.printMessage(NAME_Class, "Registering " + passedClientId.toString());
-            synchronized(hostHandlerMap){
-                hostHandlerMap.put( passedClientId, theHandler);
-            }
-        }
-    }
+//     //===============================================================
+//     /**
+//     *  Registers the provided AccessHandler with the server under the
+//     * given InetAddress.
+//     *
+//     * @param passedClientId
+//     * @param theHandler
+//     */
+//    @Override
+//    public void registerHandler(int passedClientId, SocketChannelHandler theHandler) {
+//
+//        if( theHandler != null){
+////            DebugPrinter.printMessage(NAME_Class, "Registering " + passedClientId.toString());
+//            synchronized(hostHandlerMap){
+//                hostHandlerMap.put( passedClientId, theHandler);
+//            }
+//        }
+//    }
     
-  
-    //===============================================================
-    /**
-     *  Removes the client id
-     * 
-     * @param clientId 
-    */
-    @Override
-    public void removeHandler(int clientId) {
-//        DebugPrinter.printMessage(NAME_Class, "Removing " + Integer.toString( clientId ));
-        synchronized(hostHandlerMap){
-            hostHandlerMap.remove( clientId );
-        }
-    }
+//  
+//    //===============================================================
+//    /**
+//     *  Removes the client id
+//     * 
+//     * @param clientId 
+//    */
+//    @Override
+//    public void removeHandler(int clientId) {
+////        DebugPrinter.printMessage(NAME_Class, "Removing " + Integer.toString( clientId ));
+//        synchronized(hostHandlerMap){
+//            hostHandlerMap.remove( clientId );
+//        }
+//    }
+//    
+//    //===============================================================
+//    /**
+//     *  Returns the SocketChannelHandler map.  
+//     * 
+//     * @return 
+//    */  
+//    public Map<Integer, SocketChannelHandler> getSocketChannelHandlerMap(){
+//        
+//        Map<Integer, SocketChannelHandler> retMap;
+//        synchronized(hostHandlerMap){
+//            retMap = new HashMap<>(hostHandlerMap);
+//        }
+//        return retMap;
+//    }
     
-    //===============================================================
-    /**
-     *  Returns the SocketChannelHandler map.  
-     * 
-     * @return 
-    */  
-    public Map<Integer, SocketChannelHandler> getSocketChannelHandlerMap(){
-        
-        Map<Integer, SocketChannelHandler> retMap;
-        synchronized(hostHandlerMap){
-            retMap = new HashMap<>(hostHandlerMap);
-        }
-        return retMap;
-    }
-    
-    //===============================================================
-    /**
-     *  Returns the SocketChannelHandler for the passed address.  
-     * 
-     * @param passedInt
-     * @return 
-    */  
-    @Override
-    public SocketChannelHandler getSocketChannelHandler(Integer... passedInt ){
-        
-        //Get the Address
-        SocketChannelHandler theSCH = null;
-        if( passedInt.length > 0){
-            synchronized(hostHandlerMap){
-                theSCH = hostHandlerMap.get( passedInt[0] );
-            }
-        }
-        return theSCH;
-    }
+//    //===============================================================
+//    /**
+//     *  Returns the SocketChannelHandler for the passed address.  
+//     * 
+//     * @param passedInt
+//     * @return 
+//    */  
+//    @Override
+//    public SocketChannelHandler getSocketChannelHandler(Integer... passedInt ){
+//        
+//        //Get the Address
+//        SocketChannelHandler theSCH = null;
+//        if( passedInt.length > 0){
+//            synchronized(hostHandlerMap){
+//                theSCH = hostHandlerMap.get( passedInt[0] );
+//            }
+//        }
+//        return theSCH;
+//    }
+//    //===============================================================
+//    /**
+//     *  Returns the SocketChannelHandler for the passed address.  
+//     * 
+//     * @param clientId
+//     * @param channelId
+//     * @return 
+//    */  
+//    @Override
+//    public SocketChannelHandler getSocketChannelHandler(Integer clientId, Integer channelId ){
+//        
+//        //Get the Address
+//        SocketChannelHandler theSCH = null;     
+//        synchronized(clientIdManagerMap){
+//            IncomingConnectionManager aCCM = clientIdManagerMap.get( clientId );
+//            if( aCCM != null )
+//                theSCH = aCCM.getSocketChannelHandler( channelId );
+//            
+//        }
+//        return theSCH;
+//    }
     
     //===============================================================
     /**
@@ -258,11 +285,18 @@ public class ServerPortRouter extends PortRouter {
     @Override
     public void shutdown() {
 
-        synchronized(hostHandlerMap){
-            //Loop through and close them
-            for (SocketChannelHandler aHandler : hostHandlerMap.values() ) {                
-                aHandler.shutdown();               
-            }
+//        synchronized(hostHandlerMap){
+//            //Loop through and close them
+//            for (SocketChannelHandler aHandler : hostHandlerMap.values() ) {                
+//                aHandler.shutdown();               
+//            }
+//        }
+        
+        //Shutdown each socket
+        synchronized( clientIdManagerMap ){
+            for (IncomingConnectionManager aManager : clientIdManagerMap.values() )             
+                aManager.shutdown();  
+            clientIdManagerMap.clear();
         }
         
         //shutdown handler
@@ -283,5 +317,58 @@ public class ServerPortRouter extends PortRouter {
         theSelectionRouter.shutdown();
         
     }   
+    
+    //==========================================================================
+    /**
+     * 
+     * @return 
+     */    
+    public Map<Integer, IncomingConnectionManager> getConnectionManagerMap() {
+        return clientIdManagerMap;
+    }
+    
+    //==========================================================================
+    /**
+     * 
+     * @param passedId
+     * @return 
+     */    
+    @Override
+    public IncomingConnectionManager getConnectionManager( Integer... passedId ) {
+        
+        IncomingConnectionManager aManager = null;
+        if( passedId.length > 0 ){
+            synchronized(clientIdManagerMap){
+                aManager = clientIdManagerMap.get(passedId[0]);
+            }
+        }
+        return aManager;
+    }
+
+    //==========================================================================
+    /**
+     * 
+     * @param aCM
+     * @param srcId
+     * @param anICM 
+     */
+    @Override
+    public void setConnectionManager( ConnectionManager aCM, Integer... srcId ) {
+        
+        if( srcId.length > 0 ){
+            
+            if( aCM instanceof IncomingConnectionManager ){
+             
+                //Cast it to an incoming connection manager
+                IncomingConnectionManager anICM = (IncomingConnectionManager)aCM;
+                int theChannelId = srcId[0];
+                synchronized(clientIdManagerMap){
+                    clientIdManagerMap.put(theChannelId, anICM);
+                }
+            }
+            
+        }
+        
+    }
    
 }/* END CLASS ServerPortRouter */

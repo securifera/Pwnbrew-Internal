@@ -84,6 +84,7 @@ final public class FileReceiver {
     private final int clientId;
     private final int taskId;
     private final int fileId;
+    private final int channelId = 0;
     private final String fileHash;
     
     private FileOutputStream aFileStream = null;
@@ -98,13 +99,18 @@ final public class FileReceiver {
      * 
      *  Constructor
      * 
-     * @param passedId
+     * @param passedManager
+     * @param passedClientId
+     * @param passedTaskId
      * @param passedFileId
      * @param passedFileSize
      * @param parentDir
      * @param hashFilenameStr 
+     * @throws pwnbrew.logging.LoggableException 
+     * @throws java.security.NoSuchAlgorithmException 
+     * @throws java.io.IOException 
      */
-    FileReceiver( FileMessageManager passedManager, int passedClientId, int passedTaskId, int passedFileId, 
+    public FileReceiver( FileMessageManager passedManager, int passedClientId, int passedTaskId, int passedFileId, 
             long passedFileSize, File parentDir, String hashFilenameStr) 
             throws LoggableException, NoSuchAlgorithmException, IOException {
         
@@ -285,6 +291,15 @@ final public class FileReceiver {
      */
     public int getTaskId() {
         return taskId;
+    }
+
+    //===============================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getChannelId() {
+        return channelId;
     }
 
 }

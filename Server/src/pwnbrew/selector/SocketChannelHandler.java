@@ -62,11 +62,13 @@ import pwnbrew.host.HostFactory;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.PortWrapper;
+import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.messages.ResetId;
 import pwnbrew.network.control.messages.SetRelayWrap;
 import pwnbrew.network.control.messages.StageFlag;
@@ -85,7 +87,6 @@ public class SocketChannelHandler implements Selectable {
 
     private PortRouter thePortRouter = null;
     private int rootHostId = -1;
-//    private int state = 0;
     private int channelId = -1;
          
     private volatile boolean wrappingFlag = true;
@@ -367,25 +368,33 @@ public class SocketChannelHandler implements Selectable {
             
             Host localHost = HostFactory.getLocalHost();
             String localhostId = localHost.getId();
-            if( rootHostId == -1 ){
+            ServerPortRouter aSPR = (ServerPortRouter)thePortRouter;
+            if( rootHostId == -1 && thePortRouter instanceof ServerPortRouter ){
 
-                    channelId = passedChannelId;
-                    SocketChannelHandler aHandler = thePortRouter.getSocketChannelHandler(passedClientId, passedChannelId);
-                    //If handler doesn't exist
-                    if( aHandler == null ){
+                channelId = passedChannelId;
+                IncomingConnectionManager aICM = (IncomingConnectionManager) aSPR.getConnectionManager(passedClientId);
+                if( aICM == null ){
+//                    aICM = new IncomingConnectionManager(passedClientId);
 
-                        //Register the handler
-                        rootHostId = passedClientId;
-                        if( !thePortRouter.registerHandler(rootHostId, Integer.parseInt(localhostId), passedChannelId, this) )
-                            return false;
-                        
-                        
-                    //If handler exist but is this one
-                    } else if( aHandler == this ){
+//                SocketChannelHandler aHandler = aICM.getSocketChannelHandler( passedChannelId );
+//                //If handler doesn't exist
+//                if( aHandler == null ){
+
+                    //Register the handler
+                    rootHostId = passedClientId;
+                    if( !aSPR.registerHandler(passedClientId, Integer.parseInt(localhostId), passedChannelId, this) )
+                        return false;
+
+
+                //If handler exist but is this one
+                } else {
+                    
+                    SocketChannelHandler aHandler = aICM.getSocketChannelHandler( passedChannelId );
+                    if( aHandler == this ){
 
                         //Set the clientId
                         rootHostId = passedClientId;
-                        
+
                     //If handler exist but is not this one
                     } else {
 
@@ -394,7 +403,7 @@ public class SocketChannelHandler implements Selectable {
 
                             //Register the new one
                             rootHostId = passedClientId;
-                            if( !thePortRouter.registerHandler(rootHostId, Integer.parseInt(localhostId), passedChannelId, this) )
+                            if( !aSPR.registerHandler(passedClientId, Integer.parseInt(localhostId), passedChannelId, this) )
                                 return false;
 
                             //Shutdown the previous one
@@ -433,6 +442,7 @@ public class SocketChannelHandler implements Selectable {
                             return false;
                         }
                     }
+                }
 
             } else {
 
@@ -441,13 +451,14 @@ public class SocketChannelHandler implements Selectable {
                 if( passedClientId == rootHostId )
                     parentId = Integer.parseInt(localhostId);
                 
-                if( !thePortRouter.registerHandler(passedClientId, parentId, passedChannelId, this) )
+                if( !aSPR.registerHandler(passedClientId, parentId, passedChannelId, this) )
                     return false;
                       
 
             }
+            
         } catch(LoggableException ex){
-            Log.log(Level.INFO, NAME_Class, "send()", ex.getMessage(), ex );
+            Log.log(Level.INFO, NAME_Class, "registerId()", ex.getMessage(), ex );
         }
 
         
@@ -580,6 +591,16 @@ public class SocketChannelHandler implements Selectable {
     */
     public int getType(){
         return currMsgType;
+    }
+    
+    //===============================================================
+    /**
+    * Returns the channelId
+    *
+    * @return
+    */
+    public int getChannelId(){
+        return channelId;
     }
     
     //===============================================================

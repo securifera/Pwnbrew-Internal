@@ -49,6 +49,8 @@ package pwnbrew.network.control.messages;
 import java.util.Map;
 import java.util.Set;
 import pwnbrew.ClientConfig;
+import pwnbrew.manager.IncomingConnectionManager;
+import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
@@ -91,12 +93,12 @@ public final class HelloAck extends ControlMessage {
         if( aPR != null ){
 
             //Get the handler
-            SocketChannelHandler aSCH = aPR.getSocketChannelHandler();
+            SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler(OutgoingConnectionManager.COMM_CHANNEL_ID);
 
             //Set the wrapping flag
-            if( aSCH != null ){
+            if( aSCH != null )
                 aSCH.setWrapping(false);
-            }
+            
             
             //Set the server id
             theClientConfig.setServerId( theClientId );
@@ -105,13 +107,18 @@ public final class HelloAck extends ControlMessage {
             RelayManager theManager = RelayManager.getRelayManager();
             if( theManager != null ){
                 ServerPortRouter aSPR = theManager.getServerPorterRouter();
-                Map<Integer, SocketChannelHandler> aMap = aSPR.getSocketChannelHandlerMap();
-                if( !aMap.isEmpty() ){
-                    Set<Integer> keySet = aMap.keySet();
-                    for( Integer aInt : keySet){
-                        HelloRepeat aRepeatMsg = new HelloRepeat(aInt);
-                        theManager.send(aRepeatMsg);                    
+                Map<Integer, IncomingConnectionManager> connectionManagerMap = aSPR.getConnectionManagerMap();
+                if( !connectionManagerMap.isEmpty() ){
+                    
+                    //Loop through the connection map
+                    if( !connectionManagerMap.isEmpty() ){
+                        Set<Integer> keySet = connectionManagerMap.keySet();
+                        for( Integer aInt : keySet){
+                            HelloRepeat aRepeatMsg = new HelloRepeat(aInt);
+                            theManager.send(aRepeatMsg);                    
+                        } 
                     }
+                    
                 }     
             }       
             

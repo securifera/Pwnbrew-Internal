@@ -48,7 +48,6 @@ package pwnbrew.network.file;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -81,6 +80,7 @@ final public class FileReceiver {
     private int srcHostId = 0;
     private int taskId = 0;
     private int fileId = 0;
+    private int channelId = 0;
     private String fileHash = null;
     
     private FileOutputStream aFileStream = null;
@@ -273,6 +273,15 @@ final public class FileReceiver {
      */
     public int getTaskId() {
         return taskId;
+    }
+
+    //===============================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getChannelId() {
+        return channelId;
     }
 
 }
