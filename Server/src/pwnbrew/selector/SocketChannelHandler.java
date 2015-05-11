@@ -430,10 +430,8 @@ public class SocketChannelHandler implements Selectable {
 
                 //Register the relay
                 int parentId = rootHostId;
-                if( passedId == rootHostId )
-                    parentId = Integer.parseInt(localhostId);
-                
-                thePortRouter.registerHandler(passedId, parentId, this);            
+                if( passedId != rootHostId )
+                    thePortRouter.registerHandler(passedId, parentId, this);                         
 
             }
         } catch(LoggableException ex){
