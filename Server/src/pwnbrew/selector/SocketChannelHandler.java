@@ -453,9 +453,7 @@ public class SocketChannelHandler implements Selectable {
                     parentId = Integer.parseInt(localhostId);
                 
                 ServerPortRouter aSPR = (ServerPortRouter)thePortRouter;
-                if( !aSPR.registerHandler(passedClientId, parentId, passedChannelId, this) )
-                    return false;
-                      
+                aSPR.registerHandler(passedClientId, parentId, passedChannelId, this);                       
 
             }
             
