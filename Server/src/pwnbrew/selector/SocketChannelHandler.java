@@ -449,11 +449,10 @@ public class SocketChannelHandler implements Selectable {
 
                 //Register the relay
                 int parentId = rootHostId;
-                if( passedClientId == rootHostId )
-                    parentId = Integer.parseInt(localhostId);
-                
-                ServerPortRouter aSPR = (ServerPortRouter)thePortRouter;
-                aSPR.registerHandler(passedClientId, parentId, passedChannelId, this);                       
+                if( passedClientId != parentId ){
+                    ServerPortRouter aSPR = (ServerPortRouter)thePortRouter;
+                    aSPR.registerHandler(passedClientId, parentId, passedChannelId, this);        
+                }               
 
             }
             
