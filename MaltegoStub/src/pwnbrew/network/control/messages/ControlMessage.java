@@ -51,9 +51,10 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import pwnbrew.log.LoggableException;
-import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Message;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
@@ -73,6 +74,7 @@ public abstract class ControlMessage extends Message {
     public ControlMessage( int passedDestHostId ) { // NO_UCD (use default)
         //Set id
         super( CONTROL_MESSAGE_TYPE, passedDestHostId );
+        setChannelId( Constants.COMM_CHANNEL_ID );
     }
 
     //=========================================================================

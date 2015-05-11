@@ -151,7 +151,7 @@ public class ShellMessageManager extends DataManager {
         PortRouter thePR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
         
         //Queue the message to be sent
-        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
+        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getChannelId() );
 //        DebugPrinter.printMessage(this, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
           
     }

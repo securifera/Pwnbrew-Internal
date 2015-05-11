@@ -140,9 +140,11 @@ abstract public class PortRouter {
      *  Queues the byte array to be sent
      * @param byteArr
      * @param channelId
+     * @return 
      */
-    public void queueSend( byte[] byteArr, int channelId ) {
+    public boolean queueSend( byte[] byteArr, int channelId ) {
         
+        boolean retVal = false;
         SocketChannelHandler theHandler = getConnectionManager().getSocketChannelHandler( channelId );
         if( theHandler != null ){
             
@@ -163,9 +165,10 @@ abstract public class PortRouter {
             }
 
             theHandler.queueBytes(byteArr);
+            retVal = true;
             
         }
-        
+        return retVal;
     }
     
      // ==========================================================================

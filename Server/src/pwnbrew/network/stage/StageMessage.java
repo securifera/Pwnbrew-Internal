@@ -141,7 +141,7 @@ public class StageMessage extends Message {
     */
     public static StageMessage getMessage( ByteBuffer passedBuffer ) throws LoggableException, IOException, RemoteExceptionWrapper {
 
-        byte[] theId = new byte[4],  clientId = new byte[4], destHostId = new byte[4];
+        byte[] channelId = new byte[4],  clientId = new byte[4], destHostId = new byte[4], stageId = new byte[4];
         StageMessage aMessage = null;
 
         //Copy over the client id
@@ -150,12 +150,14 @@ public class StageMessage extends Message {
         //Copy over the dst host id
         passedBuffer.get(destHostId, 0, destHostId.length);
 
-        //Copy over the id
-        passedBuffer.get(theId, 0, theId.length);
+        //Copy over the channelid
+        passedBuffer.get(channelId, 0, channelId.length);  
         
+        //Copy over the staging id
+        passedBuffer.get(stageId, 0, stageId.length);  
 
         //Create a message
-        aMessage = instatiateMessage( theId );
+        aMessage = instatiateMessage( stageId );
         if( aMessage != null ){
 
 
@@ -170,6 +172,10 @@ public class StageMessage extends Message {
             //Set dest host id
             int theDestHostId= SocketUtilities.byteArrayToInt(destHostId);
             aMessage.setDestHostId( theDestHostId );
+            
+            //Set the channel id
+            int theChanId= SocketUtilities.byteArrayToInt(channelId);
+            aMessage.setChannelId( theChanId );
 
             //Parse the tlvs
             aMessage.parseControlOptions(passedBuffer);

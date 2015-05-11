@@ -138,8 +138,8 @@ public class ControlMessageManager extends DataManager {
         PortRouter thePR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
         
         //Queue the message to be sent
-        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
-        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+        if( thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getChannelId() ))
+            DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
         
     }
     

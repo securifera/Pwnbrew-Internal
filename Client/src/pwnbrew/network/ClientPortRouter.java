@@ -283,11 +283,12 @@ public class ClientPortRouter extends PortRouter {
         
         //Stop the keepalive
         KeepAliveTimer aKAT = aSCM.getKeepAliveTimer( channelId );
-        aKAT.shutdown();
+        if( aKAT != null )
+            aKAT.shutdown();
 
         DebugPrinter.printMessage(NAME_Class, "Socket closed.");
         ReconnectTimer aReconnectTimer = aSCM.getReconnectTimer(channelId);
-        if( !aReconnectTimer.isRunning() && reconnectEnable ){
+        if( aReconnectTimer != null && !aReconnectTimer.isRunning() && reconnectEnable ){
             
             aReconnectTimer.clearTimes();
                         

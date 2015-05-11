@@ -109,13 +109,27 @@ public final class Pwnbrew extends PortManager implements TaskListener {
     */
     private void start() throws UnknownHostException, LoggableException {
 
+        //Create the Timer
+        ReconnectTimer aReconnectTimer = new ReconnectTimer(OutgoingConnectionManager.COMM_CHANNEL_ID); 
+        
+        //Start the timer
+        aReconnectTimer.setCommManager( this );
+        aReconnectTimer.start();
+            
         //Try and connect to the server
         int thePort = ClientConfig.getConfig().getSocketPort();
         ClientPortRouter aPR = (ClientPortRouter) getPortRouter( thePort );
-        ReconnectTimer aReconnectTimer = aPR.getConnectionManager().getReconnectTimer( OutgoingConnectionManager.COMM_CHANNEL_ID );        
         
-        aReconnectTimer.setCommManager( this );
-        aReconnectTimer.start();
+        //Create the timer
+        if( aPR != null ){
+            
+//            ReconnectTimer aReconnectTimer = new ReconnectTimer(OutgoingConnectionManager.COMM_CHANNEL_ID); 
+            aPR.getConnectionManager().setReconnectTimer( OutgoingConnectionManager.COMM_CHANNEL_ID, aReconnectTimer );  
+
+            //Start the timer
+//            aReconnectTimer.setCommManager( this );
+//            aReconnectTimer.start();
+        }
 
     }
      
@@ -240,9 +254,11 @@ public final class Pwnbrew extends PortManager implements TaskListener {
         } catch (Throwable ex) {
            
             ex.printStackTrace();
+          
+            //Try to send the remote log first
+            RemoteLog.log(Level.WARNING, NAME_Class, "main()", ex.getMessage(), ex);
             DebugPrinter.shutdown();
             Constants.Executor.shutdownNow();
-            RemoteLog.log(Level.WARNING, NAME_Class, "main()", ex.getMessage(), ex);
             throw ex;
            
         } 

@@ -55,6 +55,7 @@ import java.util.logging.Level;
 import pwnbrew.exception.RemoteExceptionWrapper;
 import pwnbrew.logging.Log;
 import pwnbrew.logging.LoggableException;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Message;
@@ -78,6 +79,7 @@ public abstract class ControlMessage extends Message {
     public ControlMessage( int passedDestHostId ) { // NO_UCD (use default)
         //Set id
         super( CONTROL_MESSAGE_TYPE, passedDestHostId );
+        setChannelId( ConnectionManager.COMM_CHANNEL_ID );
     }
 
     //=========================================================================

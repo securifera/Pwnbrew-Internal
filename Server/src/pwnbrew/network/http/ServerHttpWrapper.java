@@ -51,7 +51,6 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.logging.Log;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.Constants;
 import pwnbrew.network.Message;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
@@ -130,9 +129,15 @@ public class ServerHttpWrapper extends HttpWrapper {
                                         //Get the id If the client is already registered then return
                                         if( msgBytes.length > Message.MSG_LEN_SIZE + 1 ){
                                             
+                                            //Get the client id
                                             byte [] tempIdArr = Arrays.copyOf( msgBytes, 4);
                                             int tempId = SocketUtilities.byteArrayToInt(tempIdArr);
-                                            if( !passedHandler.registerId(tempId, type)){
+                                            
+                                            //Get the channel id
+                                            byte [] chanIdArr = Arrays.copyOfRange( msgBytes, 8, 12);
+                                            int chanId = SocketUtilities.byteArrayToInt(chanIdArr);                                            
+                                            
+                                            if( !passedHandler.registerId(tempId, chanId)){
                                                 return;
                                             }
                                             

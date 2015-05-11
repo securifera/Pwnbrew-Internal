@@ -307,7 +307,12 @@ public class SocketChannelHandler implements Selectable {
 
                                 byte[] clientIdArr = Arrays.copyOf(msgByteArr, 4);
                                 int tempId = SocketUtilities.byteArrayToInt(clientIdArr);
-                                if( !registerId(tempId, currMsgType))    
+                                
+                                //Get the channel id
+                                byte [] chanIdArr = Arrays.copyOfRange( msgByteArr, 8, 12);
+                                int chanId = SocketUtilities.byteArrayToInt(chanIdArr); 
+                                
+                                if( !registerId(tempId, chanId))    
                                     return;
                                 
                                 //Get dest id
@@ -368,81 +373,77 @@ public class SocketChannelHandler implements Selectable {
             
             Host localHost = HostFactory.getLocalHost();
             String localhostId = localHost.getId();
-            ServerPortRouter aSPR = (ServerPortRouter)thePortRouter;
             if( rootHostId == -1 && thePortRouter instanceof ServerPortRouter ){
 
+                ServerPortRouter aSPR = (ServerPortRouter)thePortRouter;
                 channelId = passedChannelId;
                 IncomingConnectionManager aICM = (IncomingConnectionManager) aSPR.getConnectionManager(passedClientId);
-                if( aICM == null ){
-//                    aICM = new IncomingConnectionManager(passedClientId);
-
-//                SocketChannelHandler aHandler = aICM.getSocketChannelHandler( passedChannelId );
-//                //If handler doesn't exist
-//                if( aHandler == null ){
-
-                    //Register the handler
-                    rootHostId = passedClientId;
-                    if( !aSPR.registerHandler(passedClientId, Integer.parseInt(localhostId), passedChannelId, this) )
-                        return false;
-
-
-                //If handler exist but is this one
-                } else {
+                if( aICM != null ){
                     
                     SocketChannelHandler aHandler = aICM.getSocketChannelHandler( passedChannelId );
-                    if( aHandler == this ){
+                    if( aHandler != null ){
+                        
+                        if( aHandler == this ){
 
-                        //Set the clientId
-                        rootHostId = passedClientId;
-
-                    //If handler exist but is not this one
-                    } else {
-
-                        if( theSCW.getSocketChannel().socket().getInetAddress().equals( 
-                                aHandler.getSocketChannelWrapper().getSocketChannel().socket().getInetAddress())){
-
-                            //Register the new one
+                            //Set the clientId
                             rootHostId = passedClientId;
-                            if( !aSPR.registerHandler(passedClientId, Integer.parseInt(localhostId), passedChannelId, this) )
+                            return true;
+
+                        //If handler exist but is not this one
+                        } else {
+
+                            if( theSCW.getSocketChannel().socket().getInetAddress().equals( 
+                                    aHandler.getSocketChannelWrapper().getSocketChannel().socket().getInetAddress())){
+
+                                //Register the new one
+                                rootHostId = passedClientId;
+                                if( !aSPR.registerHandler(passedClientId, Integer.parseInt(localhostId), passedChannelId, this) )
+                                    return false;
+
+                                //Shutdown the previous one
+                                aHandler.shutdown();
+                                return true;
+
+                            } else {    
+
+                                //Send message to tell client to reset their id
+                                ResetId resetIdMsg = new ResetId(passedClientId);
+                                ByteBuffer aByteBuffer;
+
+                                int msgLen = resetIdMsg.getLength();
+                                aByteBuffer = ByteBuffer.allocate( msgLen );
+                                resetIdMsg.append(aByteBuffer);
+
+                                //Queue to be sent
+                                byte[] msgBytes = Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position());
+
+                                //If wrapping is necessary then wrap it
+                                if( isWrapping() ){
+                                    PortWrapper aWrapper = DataManager.getPortWrapper( getPort() );        
+                                    if( aWrapper != null ){
+
+                                        //Set the staged wrapper if necessary
+                                        if( aWrapper instanceof ServerHttpWrapper ){
+                                            ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+                                            aSrvWrapper.setStaging( isStaged());
+                                        }
+
+                                        ByteBuffer anotherBB = aWrapper.wrapBytes( msgBytes );  
+                                        msgBytes = Arrays.copyOf(anotherBB.array(), anotherBB.position());
+                                    } 
+                                }
+
+                                queueBytes(msgBytes);
                                 return false;
-
-                            //Shutdown the previous one
-                            aHandler.shutdown();
-
-                        } else {    
-
-                            //Send message to tell client to reset their id
-                            ResetId resetIdMsg = new ResetId(passedClientId);
-                            ByteBuffer aByteBuffer;
-
-                            int msgLen = resetIdMsg.getLength();
-                            aByteBuffer = ByteBuffer.allocate( msgLen );
-                            resetIdMsg.append(aByteBuffer);
-
-                            //Queue to be sent
-                            byte[] msgBytes = Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position());
-
-                            //If wrapping is necessary then wrap it
-                            if( isWrapping() ){
-                                PortWrapper aWrapper = DataManager.getPortWrapper( getPort() );        
-                                if( aWrapper != null ){
-
-                                    //Set the staged wrapper if necessary
-                                    if( aWrapper instanceof ServerHttpWrapper ){
-                                        ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
-                                        aSrvWrapper.setStaging( isStaged());
-                                    }
-
-                                    ByteBuffer anotherBB = aWrapper.wrapBytes( msgBytes );  
-                                    msgBytes = Arrays.copyOf(anotherBB.array(), anotherBB.position());
-                                } 
                             }
-
-                            queueBytes(msgBytes);
-                            return false;
                         }
                     }
                 }
+                
+                //Register the handler
+                rootHostId = passedClientId;
+                if( !aSPR.registerHandler(passedClientId, Integer.parseInt(localhostId), passedChannelId, this) )
+                    return false;
 
             } else {
 
@@ -451,6 +452,7 @@ public class SocketChannelHandler implements Selectable {
                 if( passedClientId == rootHostId )
                     parentId = Integer.parseInt(localhostId);
                 
+                ServerPortRouter aSPR = (ServerPortRouter)thePortRouter;
                 if( !aSPR.registerHandler(passedClientId, parentId, passedChannelId, this) )
                     return false;
                       

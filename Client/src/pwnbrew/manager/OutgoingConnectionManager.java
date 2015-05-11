@@ -123,6 +123,19 @@ public class OutgoingConnectionManager extends ConnectionManager {
         return theTimer;
     }
     
+     //==========================================================================
+    /**
+     *  Returns the reconnect timer
+     * @param passedId
+     * @param passedTimer 
+     */
+    public void setReconnectTimer( int passedId, ReconnectTimer passedTimer ) {
+        
+        synchronized(theReconnectTimerMap){
+            theReconnectTimerMap.put(passedId, passedTimer);
+        }
+    }
+    
 //    //==========================================================================
 //    /**
 //     * 

@@ -60,10 +60,11 @@ public class LoaderTest {
 //        /* class path */              };
         byte[] msgByteArr = new byte[]{
             0,
-            0,0,0,18,                                        //length
+            0,0,0,22,                                        //length
             0,0,0,0,                                         //src client id
             (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff,  //dst client id
-            0,0,0,18              //Payload Id
+            0,0,0,0,                                         //channel id
+            0,0,0,18                                         //Payload Id
 //            0, 42,
 //            0x70, 0x77, 0x6E, 0x62, 0x72, 0x65, 0x77, 0x2E,
 //            0x6E, 0x65, 0x74, 0x77, 0x6F, 0x72, 0x6B, 0x2E, 0x63, 0x6F, 0x6E,
