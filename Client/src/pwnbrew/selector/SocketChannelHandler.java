@@ -405,7 +405,7 @@ public class SocketChannelHandler implements Selectable {
                 
                 //If the Handler doesn't exist then register it
                 if( aSCH == null ){
-                    anICM.registerHandler(srcId, this);
+                    anICM.setHandler(srcId, this);
                     clientId = srcId;
                 }    
                

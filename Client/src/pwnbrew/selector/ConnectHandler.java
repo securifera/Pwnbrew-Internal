@@ -126,7 +126,8 @@ public class ConnectHandler implements Selectable {
             SocketChannelHandler theSCH = theClientPortRouter.getConnectionManager().getSocketChannelHandler(channelId);
             if( theSCH == null ){
                 theSCH = new SocketChannelHandler(theClientPortRouter, SocketChannelHandler.CLIENT_TYPE );
-                theClientPortRouter.getConnectionManager().registerHandler( channelId, theSCH );
+                theSCH.setChannelId(channelId);
+                theClientPortRouter.getConnectionManager().setHandler( channelId, theSCH );
             }
 
             //Attach the accesshandler

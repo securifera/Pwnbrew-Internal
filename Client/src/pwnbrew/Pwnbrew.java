@@ -120,17 +120,6 @@ public final class Pwnbrew extends PortManager implements TaskListener {
         int thePort = ClientConfig.getConfig().getSocketPort();
         ClientPortRouter aPR = (ClientPortRouter) getPortRouter( thePort );
         
-        //Create the timer
-        if( aPR != null ){
-            
-//            ReconnectTimer aReconnectTimer = new ReconnectTimer(OutgoingConnectionManager.COMM_CHANNEL_ID); 
-            aPR.getConnectionManager().setReconnectTimer( OutgoingConnectionManager.COMM_CHANNEL_ID, aReconnectTimer );  
-
-            //Start the timer
-//            aReconnectTimer.setCommManager( this );
-//            aReconnectTimer.start();
-        }
-
     }
      
     //===============================================================

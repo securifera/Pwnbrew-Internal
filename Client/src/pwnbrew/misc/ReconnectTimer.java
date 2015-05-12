@@ -94,21 +94,6 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
         theChannelId = channelId;
     }
     
-//    // ==========================================================================
-//    /**
-//     *   Ensures that there is only ever one DetectionManager instance
-//     * @return 
-//     */
-//    public synchronized static ReconnectTimer getReconnectTimer() {
-//
-//        if( theTimer == null ) {
-//            theTimer = new ReconnectTimer();
-//        }
-//        
-//        return theTimer;
-//
-//    }/* END getReconnectTimer() */
-    
      // ==========================================================================
     /**
      *   Sets the IP address for the backup server
@@ -173,7 +158,11 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
             aPR = (ClientPortRouter) theCommManager.getPortRouter( thePort );
             if(aPR == null)
                 return;
+            
         }
+        
+        //Set the reconnect timer
+        aPR.getConnectionManager().setReconnectTimer( theChannelId, this );  
         
         try {                 
             

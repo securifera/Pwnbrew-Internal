@@ -71,7 +71,7 @@ public abstract class ConnectionManager {
      * @param passedchannelId
      * @param theHandler
      */
-    abstract public void registerHandler(int passedchannelId, SocketChannelHandler theHandler);
+    abstract public boolean setHandler(int passedchannelId, SocketChannelHandler theHandler);
 
     //===============================================================
     /**

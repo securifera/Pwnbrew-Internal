@@ -72,12 +72,14 @@ public class OutgoingConnectionManager extends ConnectionManager {
      *
      * @param passedId
      * @param theAccessHandler
+     * @return 
      */
     @Override
-    public void registerHandler( int passedId, SocketChannelHandler theAccessHandler ) {
+    public boolean setHandler( int passedId, SocketChannelHandler theAccessHandler ) {
         synchronized( channelIdHandlerMap){
             channelIdHandlerMap.put( passedId, theAccessHandler);
         }
+        return true;
     }
     
      //===============================================================
@@ -136,26 +138,6 @@ public class OutgoingConnectionManager extends ConnectionManager {
         }
     }
     
-//    //==========================================================================
-//    /**
-//     * 
-//     */
-//    @Override
-//    public void closeConnections() {
-//  
-//        synchronized( channelIdHandlerMap ){
-//            
-//            Set<Integer> aSet = channelIdHandlerMap.keySet();
-//            for( Integer aKey : aSet ){
-//                SocketChannelHandler theHandler = getSocketChannelHandler(aKey);
-//                if( theHandler != null){      
-//                    theHandler.shutdown();
-//                }
-//            }
-//            
-//        }
-//    }
-    
     //===============================================================
     /**
      *  Returns the SocketChannelHandler for the server.
@@ -210,5 +192,4 @@ public class OutgoingConnectionManager extends ConnectionManager {
         return channelId;
     }
     
-   
 }

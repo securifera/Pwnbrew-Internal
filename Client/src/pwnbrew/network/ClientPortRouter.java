@@ -290,6 +290,7 @@ public class ClientPortRouter extends PortRouter {
         ReconnectTimer aReconnectTimer = aSCM.getReconnectTimer(channelId);
         if( aReconnectTimer != null && !aReconnectTimer.isRunning() && reconnectEnable ){
             
+            DebugPrinter.printMessage(NAME_Class, "Starting Reconnect Timer");
             aReconnectTimer.clearTimes();
                         
             //Create the calendar

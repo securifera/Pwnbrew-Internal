@@ -76,6 +76,7 @@ public class IncomingConnectionManager extends ConnectionManager {
      * @param theHandler
      * @return 
      */
+    @Override
     public boolean setHandler(int channelId, SocketChannelHandler theHandler) {        
          
         boolean retVal;
@@ -116,6 +117,7 @@ public class IncomingConnectionManager extends ConnectionManager {
      * @param channelId
      * @return 
      */
+    @Override
     public SocketChannelHandler getSocketChannelHandler(Integer channelId) {
         SocketChannelHandler aHandler;
         synchronized(channelIdHandlerMap){
@@ -153,11 +155,6 @@ public class IncomingConnectionManager extends ConnectionManager {
         return retVal;
         
     }
-//
-//    @Override
-//    public void closeConnections() {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    }
 
     //====================================================================
     /**
@@ -175,16 +172,6 @@ public class IncomingConnectionManager extends ConnectionManager {
             }
             channelIdHandlerMap.clear();
         }
-    }
-
-//    @Override
-//    public SocketChannelHandler getSocketChannelHandler(int passedInt) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    }
-
-    @Override
-    public void registerHandler(int passedchannelId, SocketChannelHandler theHandler) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }
