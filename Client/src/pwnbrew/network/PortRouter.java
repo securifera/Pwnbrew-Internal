@@ -55,7 +55,7 @@ import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.SSLUtilities;
+import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.selector.SelectionRouter;
 import pwnbrew.selector.SocketChannelHandler;

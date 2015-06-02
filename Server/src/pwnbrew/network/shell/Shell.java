@@ -115,6 +115,8 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     private final ArrayList<String> history = new ArrayList<>();
     private ListIterator<String> historyIterator = null;
     
+    private int channelId = -1;
+    
     //===========================================================================
     /**
      *  Constructor
@@ -552,7 +554,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
 
             //Create the message
             int dstHostId = Integer.parseInt( theListener.getHost().getId() );
-            KillShell aShellMsg = new KillShell(dstHostId);
+            KillShell aShellMsg = new KillShell(dstHostId, channelId );
             DataManager.send(theListener.getCommManager(), aShellMsg );
 
         }
@@ -625,6 +627,15 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
      */
     public boolean getStderrRedirectFlag() {
         return stderrRedirectFlag;
+    }
+
+    // ==========================================================================
+    /**
+     * 
+     * @param passedId
+     */
+    public void setChannelId(int passedId) {
+        channelId = passedId;   
     }
 
 }

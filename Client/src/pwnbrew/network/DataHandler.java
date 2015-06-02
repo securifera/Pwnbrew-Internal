@@ -46,8 +46,8 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network;
 
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.ManagedRunnable;
+import pwnbrew.utilities.Constants;
+import pwnbrew.utilities.ManagedRunnable;
 
 /**
  *

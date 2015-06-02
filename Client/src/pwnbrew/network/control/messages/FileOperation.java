@@ -50,8 +50,8 @@ import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.Date;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.FileFinder;
+import pwnbrew.utilities.Constants;
+import pwnbrew.utilities.FileFinder;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
 

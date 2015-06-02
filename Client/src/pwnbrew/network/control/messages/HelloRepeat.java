@@ -50,7 +50,7 @@ import java.util.logging.Level;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.control.ControlMessageManager;
 
 /**

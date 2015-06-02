@@ -60,7 +60,7 @@ import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.DebugPrinter;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.RelayDisconnect;
 import pwnbrew.selector.AcceptHandler;

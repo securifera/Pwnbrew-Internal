@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
  * Created on August 26, 2013, 11:12 PM
  */
 
-package pwnbrew.misc;
+package pwnbrew.utilities;
 
 import java.io.IOException;
 import java.io.StringWriter;

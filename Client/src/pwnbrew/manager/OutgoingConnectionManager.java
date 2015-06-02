@@ -40,8 +40,9 @@ package pwnbrew.manager;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import pwnbrew.misc.ReconnectTimer;
+import pwnbrew.utilities.ReconnectTimer;
 import pwnbrew.network.KeepAliveTimer;
+import pwnbrew.network.shell.Shell;
 import pwnbrew.selector.SocketChannelHandler;
 
 /**
@@ -57,6 +58,7 @@ public class OutgoingConnectionManager extends ConnectionManager {
     
     //Channel Id generator
     private static int messageCounter = 2;
+    private Shell theShell = null;
  
 
     //==========================================================================
@@ -65,6 +67,26 @@ public class OutgoingConnectionManager extends ConnectionManager {
      */
     public OutgoingConnectionManager() {        
     }
+    
+     //===========================================================================
+    /*
+     *  Set the shell
+     */
+    public void setShell( Shell passedShell ) {
+        //Kill the previous shell
+        if( theShell != null )
+            theShell.shutdown();
+        
+        theShell = passedShell;
+    }
+    
+    //===========================================================================
+    /*
+     *  Return the shell
+     */
+    public Shell getShell() {
+        return theShell;
+    } 
 
     //===============================================================
     /**
@@ -169,6 +191,10 @@ public class OutgoingConnectionManager extends ConnectionManager {
         theKeys = channelIdHandlerMap.keySet();
         for( Integer aKey : theKeys )
             channelIdHandlerMap.get(aKey).shutdown();
+        
+        //Shutdown the shell if it exists
+        if( theShell != null )
+            theShell.shutdown();
     }
 
      //===============================================================
@@ -191,5 +217,19 @@ public class OutgoingConnectionManager extends ConnectionManager {
 
         return channelId;
     }
+
+    //===========================================================
+    /**
+     * 
+     */
+    public void closeShell() {
+        
+        //Shut it down and set to null
+        if( theShell != null ){
+            theShell.shutdown();
+            theShell = null;
+        }
+    }
+    
     
 }

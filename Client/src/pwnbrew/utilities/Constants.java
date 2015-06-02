@@ -38,65 +38,51 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
- *  StdInMessage.java
- *
- *  Created on May 25, 2013
- */
+* Constants.java
+*
+* Created on May 12, 2013, 8:22:12PM
+*/
 
-package pwnbrew.network.shell.messages;
+package pwnbrew.utilities;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import pwnbrew.ClientConfig;
-import pwnbrew.log.LoggableException;
-import pwnbrew.log.RemoteLog;
-import pwnbrew.manager.OutgoingConnectionManager;
-import pwnbrew.manager.PortManager;
-import pwnbrew.network.ClientPortRouter;
-import pwnbrew.network.shell.Shell;
-import pwnbrew.network.shell.ShellMessageManager;
-
-
+import java.text.SimpleDateFormat;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  *
  *  
  */
-public class StdInMessage extends ProcessMessage {
-    
-    private static final String NAME_Class = StdInMessage.class.getSimpleName();
+abstract public class Constants {
+
+    // Network states
+    public static final int DISCONNECTED = 0;
+    public static final int CONNECTED = 2;
  
-    //==========================================================================
-    /**
-     * Constructor
-     *
-     * @param passedId
-    */
-    @SuppressWarnings("ucd")
-    public StdInMessage( byte[] passedId ) {
-        super( STD_IN, passedId );
-    }
-
-    //==========================================================================
-    /**
-     *  Process the incoming message
-     * 
-     * @param theManager 
-    */
-    @Override
-    public void evaluate(PortManager theManager) {
+    //File notification messages for the taskruner
+    public static final int FILE_SENT = 1000;
+    public static final int FILE_RECEIVED = 1001;
     
-        //Get config
-        ClientConfig theConf = ClientConfig.getConfig();
-        int socketPort = theConf.getSocketPort();
-        
-        //Get port router and connection manager
-        ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( socketPort );
-        OutgoingConnectionManager aOCM = aPR.getConnectionManager( getChannelId() );
-        if( aOCM != null ){
-            Shell aShell = aOCM.getShell();
-            aShell.sendInput( new String( getMsgBytes()) );        
-        }
-    }
-
-}
+    //The hash algorithm used by all message digest functions
+    public static final String HASH_FUNCTION = "SHA-256";
+    
+    public static final int  MAX_MESSAGE_SIZE = 1500;
+    public static final int  GENERIC_BUFFER_SIZE = 4096;
+               
+    public static final ExecutorService Executor = Executors.newCachedThreadPool();
+    public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");
+    
+    //Constants for process streams
+    public static final int STD_OUT_ID = 41;
+    public static final int STD_ERR_ID = 42;    
+    
+    //FileLock variables
+    public static final String URL_LABEL ="Private";
+    public static final String SERV_LABEL ="S";
+    public static final String SLEEP_LABEL ="JVM-ID";
+    public static final String HOST_ID_LABEL ="ID";
+    public static final String PORT_LABEL ="P";
+    public static final String PROP_FILE ="META-INF/MANIFEST.MF";
+    public static final String PAYLOAD_VERSION_LABEL = "Version";
+    
+}/* END CLASS Constants */

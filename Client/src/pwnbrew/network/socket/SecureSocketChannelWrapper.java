@@ -54,8 +54,8 @@ import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLException;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.DebugPrinter;
+import pwnbrew.utilities.Constants;
+import pwnbrew.utilities.DebugPrinter;
 
 /**
  * A helper class which performs I/O using the SSLEngine API.

@@ -52,8 +52,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.DebugPrinter;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.file.FileMessageManager;
 

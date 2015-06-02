@@ -44,20 +44,31 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import pwnbrew.network.ControlOption;
+import pwnbrew.utilities.SocketUtilities;
+
 /**
  *
  *  
  */
 public final class KillShell extends ControlMessage{ // NO_UCD (use default)
+    
+    private static final byte OPTION_CHANNEL_ID = 102; 
+   
 
     // ==========================================================================
     /**
      * Constructor
      *
      * @param dstHostId
+     * @param passedChannelId
     */
-    public KillShell( int dstHostId ) {
+    public KillShell( int dstHostId, int passedChannelId ) {
         super( dstHostId );
+        
+        byte[] tempArr = SocketUtilities.intToByteArray(passedChannelId);
+        ControlOption aTlv = new ControlOption( OPTION_CHANNEL_ID, tempArr);
+        addOption(aTlv);
     }
 
 }/* END CLASS KillShell */

@@ -51,7 +51,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.control.ControlMessageManager;
 
 /**

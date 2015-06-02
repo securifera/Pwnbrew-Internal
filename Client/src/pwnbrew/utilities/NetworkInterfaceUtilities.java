@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
  * Created on November 24, 2013, 2:12 PM
  */
 
-package pwnbrew.misc;
+package pwnbrew.utilities;
 
 import java.net.NetworkInterface;
 import java.net.SocketException;

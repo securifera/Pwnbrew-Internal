@@ -55,8 +55,8 @@ import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.DebugPrinter;
+import pwnbrew.utilities.Constants;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.socket.SecureSocketChannelWrapper;
 

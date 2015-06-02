@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
  * Created on Nov 11, 2013, 7:00:14 PM
  */
 
-package pwnbrew.misc;
+package pwnbrew.utilities;
 
 import java.io.IOException;
 import java.math.BigInteger;

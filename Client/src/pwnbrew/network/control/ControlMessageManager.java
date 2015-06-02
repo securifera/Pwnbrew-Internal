@@ -53,7 +53,7 @@ import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.DebugPrinter;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.Message;
 
 /**

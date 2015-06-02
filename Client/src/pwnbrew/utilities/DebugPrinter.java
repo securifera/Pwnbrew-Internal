@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
 * Created on July 22, 2013, 7:35:23 PM
 */
 
-package pwnbrew.misc;
+package pwnbrew.utilities;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

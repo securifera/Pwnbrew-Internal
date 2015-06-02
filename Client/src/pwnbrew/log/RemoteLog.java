@@ -49,7 +49,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.misc.DebugPrinter;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.control.messages.LogMsg;
 
 /**

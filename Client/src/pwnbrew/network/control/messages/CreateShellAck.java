@@ -38,51 +38,36 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
-* Constants.java
+* KillShell.java
 *
-* Created on May 12, 2013, 8:22:12PM
+* Created on Oct 18, 2013, 10:12:33 PM
 */
 
-package pwnbrew.misc;
+package pwnbrew.network.control.messages;
 
-import java.text.SimpleDateFormat;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-abstract public class Constants {
+public final class CreateShellAck extends ControlMessage{ // NO_UCD (use default)
 
-    // Network states
-    public static final int DISCONNECTED = 0;
-    public static final int CONNECTED = 2;
- 
-    //File notification messages for the taskruner
-    public static final int FILE_SENT = 1000;
-    public static final int FILE_RECEIVED = 1001;
+    private static final byte OPTION_CHANNEL_ID = 102; 
     
-    //The hash algorithm used by all message digest functions
-    public static final String HASH_FUNCTION = "SHA-256";
-    
-    public static final int  MAX_MESSAGE_SIZE = 1500;
-    public static final int  GENERIC_BUFFER_SIZE = 4096;
-               
-    public static final ExecutorService Executor = Executors.newCachedThreadPool();
-    public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");
-    
-    //Constants for process streams
-    public static final int STD_OUT_ID = 41;
-    public static final int STD_ERR_ID = 42;    
-    
-    //FileLock variables
-    public static final String URL_LABEL ="Private";
-    public static final String SERV_LABEL ="S";
-    public static final String SLEEP_LABEL ="JVM-ID";
-    public static final String HOST_ID_LABEL ="ID";
-    public static final String PORT_LABEL ="P";
-    public static final String PROP_FILE ="META-INF/MANIFEST.MF";
-    public static final String PAYLOAD_VERSION_LABEL = "Version";
-    
-}/* END CLASS Constants */
+    // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param passedChannelId
+    */
+    public CreateShellAck( int passedChannelId ) {
+        super();
+        
+        byte[] tempArr = SocketUtilities.intToByteArray(passedChannelId);
+        ControlOption aTlv = new ControlOption( OPTION_CHANNEL_ID, tempArr);
+        addOption(aTlv);
+    }
+
+}/* END CLASS KillShell */

@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
  * Created on June 2, 2013  10:21 PM
  */
 
-package pwnbrew.misc;
+package pwnbrew.utilities;
 
 import java.util.concurrent.Executor;
 

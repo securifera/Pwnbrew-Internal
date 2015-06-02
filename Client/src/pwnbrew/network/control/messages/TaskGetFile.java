@@ -41,7 +41,7 @@ package pwnbrew.network.control.messages;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.DebugPrinter;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
 

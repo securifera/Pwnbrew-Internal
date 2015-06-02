@@ -1,3 +1,5 @@
+package pwnbrew.utilities;
+
 ///*
 //
 //Copyright (C) 2013-2014, Securifera, Inc 
@@ -38,61 +40,25 @@
 //
 //
 ///*
-// *  Base64Converter.java
-// *
-// * Created on Oct 19, 2008, 3:00 PM
-// *
-// */
+//* ProgressListener.java
+//*
+//* Created on June 7, 2013, 12:43:22 AM
+//*/
 //
 //package pwnbrew.misc;
-//
-//
-//import java.io.IOException;
 //
 ///**
 // *
 // *  
 // */
-//public class Base64Converter {
-//  
-//   
-//   
-// // ==========================================================================
-//  /**
-//   *  This method reads the <code>byte</code> array
-//   *  and then converts the byte[] into base64 <code>byte</code> array
-//   *
-//   *  @param  passedByteArray
-//   *
-//   *  @return the <code>byte</code> array in b64
-//     * @throws java.io.IOException
-//   */
-//   @SuppressWarnings("ucd")
-//   public static String encode(byte[] passedByteArray) throws IOException {
+//public interface ProgressListener {
 //
-//       //TODO files larger than 30M will cause heap overflow.
-//       //Need to come back and stream all B64 incrementally straight to the disk
-//       
-//      sun.misc.BASE64Encoder anEncoder = new sun.misc.BASE64Encoder();
-//      return anEncoder.encode(passedByteArray);
-//   }
+//    //==================================================================
+//    /**
+//     * 
+//     * @param msgId
+//     * @param progress 
+//     */
+//    public void progressChanged(int msgId, int progress);
 //
-//   // ==========================================================================
-//   /**
-//   *  This method reads the base64 encoded <code>byte</code> array
-//   *  and then decodes it into a <code>byte</code> array
-//   *
-//     * @param passedString
-//   *
-//   *  @return the <code>byte</code> array in b64
-//     * @throws java.io.IOException
-//   */
-//
-//   public static byte[] decode(String passedString) throws IOException {
-//
-//      sun.misc.BASE64Decoder aDecoder = new sun.misc.BASE64Decoder();
-//      return aDecoder.decodeBuffer(passedString);
-//   }
-//
-//  
-//}//End Class
+//}

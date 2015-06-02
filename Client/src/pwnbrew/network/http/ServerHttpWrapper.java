@@ -51,8 +51,8 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.SocketUtilities;
-import pwnbrew.misc.Utilities;
+import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.utilities.Utilities;
 import pwnbrew.network.Message;
 import pwnbrew.selector.SocketChannelHandler;
 

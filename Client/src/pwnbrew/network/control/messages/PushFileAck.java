@@ -52,7 +52,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.DebugPrinter;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.file.FileMessageManager;
 

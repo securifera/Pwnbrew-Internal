@@ -46,7 +46,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.IOException;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
 

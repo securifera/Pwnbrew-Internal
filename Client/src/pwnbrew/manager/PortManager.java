@@ -49,7 +49,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Stack;
-import pwnbrew.misc.DynamicClassLoader;
+import pwnbrew.utilities.DynamicClassLoader;
 import pwnbrew.network.PortRouter;
 
 /**

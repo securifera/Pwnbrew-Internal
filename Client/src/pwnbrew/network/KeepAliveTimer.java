@@ -45,7 +45,9 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network;
 
-import pwnbrew.misc.*;
+import pwnbrew.utilities.ManagedRunnable;
+import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.Constants;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Calendar;

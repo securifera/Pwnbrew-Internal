@@ -52,7 +52,7 @@ import java.util.Queue;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.misc.DebugPrinter;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.PortRouter;
 

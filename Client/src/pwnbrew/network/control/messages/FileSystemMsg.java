@@ -47,8 +47,8 @@ package pwnbrew.network.control.messages;
 
 import java.io.File;
 import java.util.Date;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.Constants;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
 /**

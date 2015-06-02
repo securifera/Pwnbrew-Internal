@@ -37,58 +37,35 @@ The copyright on this package is held by Securifera, Inc
 */
 
 
-/*
-* Tasking.java
-*
-* Created on June 7, 2013, 10:27:32 PM
-*/
-
 package pwnbrew.network.control.messages;
 
-import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.MaltegoStub;
+import pwnbrew.functions.Function;
+import pwnbrew.functions.ToShell;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
+import pwnbrew.shell.Shell;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
  *  
  */
-abstract public class Tasking extends ControlMessage {
-    
-    
-    private static final byte OPTION_TASK_ID = 22;
-    private int taskId = 0;
+public final class CreateShellAck extends ControlMessage{ // NO_UCD (use default)
+
+    private static final byte OPTION_CHANNEL_ID = 102; 
+    private int theChannelId = 0;    
     
     // ==========================================================================
     /**
-    * Constructor
-    *
-     * @param passedTaskId
-    */
-    @SuppressWarnings("ucd")
-    public Tasking( int passedTaskId ) {
-        super();
-
-        //Copy the task Id
-        taskId = passedTaskId;
-        byte[] tempId = SocketUtilities.intToByteArray(taskId);
-        
-        //Add the option
-        ControlOption aTlv = new ControlOption(OPTION_TASK_ID, tempId);
-        addOption(aTlv);
-
-    }
-    
-     // ==========================================================================
-    /**
-    * Constructor
-    *
-     @SuppressWarnings("ucd")
+     * Constructor
+     *
      * @param passedId
     */
-    public Tasking( byte[] passedId ) {
+    public CreateShellAck(byte[] passedId ) {
         super( passedId );
     }
-       
+    
      //=========================================================================
     /**
      *  Sets the variable in the message related to this TLV
@@ -97,29 +74,47 @@ abstract public class Tasking extends ControlMessage {
      * @return  
      */
     @Override
-    public boolean setOption( ControlOption tempTlv ){      
-        
-        boolean retVal = true;       
-        byte[] theValue = tempTlv.getValue();
-        switch( tempTlv.getType()){
-            case OPTION_TASK_ID:
-                taskId = SocketUtilities.byteArrayToInt(theValue);
-                break;  
-            default:
-                retVal = false;
-                break;              
-        }       
+    public boolean setOption( ControlOption tempTlv ){        
+
+        boolean retVal = true;    
+        if( !super.setOption(tempTlv)){
+            
+            byte[] theValue = tempTlv.getValue();
+            switch( tempTlv.getType()){
+                case OPTION_CHANNEL_ID:
+                    theChannelId = SocketUtilities.byteArrayToInt(theValue);
+                    break;
+                default:
+                    retVal = false;
+                    break;
+            }           
+        }
         return retVal;
-    }  
-    
-    //===============================================================
-    /**
-     * Returns the integer representation of the msgId
-     *
-     * @return
-    */
-    public int getTaskId(){
-       return taskId;
     }
-  
-}/* END CLASS Tasking */
+    
+     //===============================================================
+    /**
+    *   Performs the logic specific to the message.
+    *
+     * @param passedManager
+    */
+    @Override
+    public void evaluate( PortManager passedManager ) {   
+    
+        if( passedManager instanceof MaltegoStub ){
+
+            MaltegoStub maltegoManager = (MaltegoStub)passedManager;
+            Function theFunction = maltegoManager.getFunction();
+            if( theFunction instanceof ToShell ){
+
+                ToShell toShellFunc = (ToShell)theFunction;
+                Shell theShell = toShellFunc.getShell();
+                if( theShell != null )
+                    theShell.setChannelId( theChannelId );
+            
+            }
+        }
+    
+    }
+
+}/* END CLASS CreateShellAck */

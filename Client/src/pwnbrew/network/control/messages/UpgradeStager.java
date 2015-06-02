@@ -53,8 +53,8 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.LoaderUtilities;
-import pwnbrew.misc.Utilities;
+import pwnbrew.utilities.LoaderUtilities;
+import pwnbrew.utilities.Utilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
 

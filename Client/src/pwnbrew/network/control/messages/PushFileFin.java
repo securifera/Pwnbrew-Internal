@@ -49,8 +49,8 @@ import pwnbrew.log.LoggableException;
 import java.io.UnsupportedEncodingException;
 import pwnbrew.task.TaskListener;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.DebugPrinter;
+import pwnbrew.utilities.Constants;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.ControlOption;
 
 /**

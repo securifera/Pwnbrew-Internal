@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
 * Created on Nov 2, 2013, 10:11:23 PM
 */
 
-package pwnbrew.misc;
+package pwnbrew.utilities;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;

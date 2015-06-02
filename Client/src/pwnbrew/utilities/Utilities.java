@@ -38,7 +38,7 @@ The copyright on this package is held by Securifera, Inc
 
 
 
-package pwnbrew.misc;
+package pwnbrew.utilities;
 
 import java.beans.IntrospectionException;
 import java.io.*;

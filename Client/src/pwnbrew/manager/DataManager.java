@@ -53,7 +53,7 @@ import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.PortWrapper;
 import pwnbrew.network.DataHandler;
