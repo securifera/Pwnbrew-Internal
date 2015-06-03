@@ -52,10 +52,12 @@ import pwnbrew.ClientConfig;
 import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
+import pwnbrew.network.ControlOption;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
@@ -66,6 +68,9 @@ public final class HelloAck extends ControlMessage {
 
     //Class name
     private static final String NAME_Class = HelloAck.class.getSimpleName();
+    private static final byte OPTION_CHANNEL_ID = 102; 
+    private int theChannelId = 0;    
+    
      
     // ==========================================================================
     /**
@@ -75,6 +80,32 @@ public final class HelloAck extends ControlMessage {
      */
     public HelloAck( byte[] passedId ) {
        super(passedId );
+    }
+    
+      //=========================================================================
+    /**
+     *  Sets the variable in the message related to this TLV
+     * 
+     * @param tempTlv 
+     * @return  
+     */
+    @Override
+    public boolean setOption( ControlOption tempTlv ){        
+
+        boolean retVal = true;    
+        if( !super.setOption(tempTlv)){
+            
+            byte[] theValue = tempTlv.getValue();
+            switch( tempTlv.getType()){
+                case OPTION_CHANNEL_ID:
+                    theChannelId = SocketUtilities.byteArrayToInt(theValue);
+                    break;
+                default:
+                    retVal = false;
+                    break;
+            }           
+        }
+        return retVal;
     }
       
     //===============================================================
@@ -93,7 +124,7 @@ public final class HelloAck extends ControlMessage {
         if( aPR != null ){
 
             //Get the handler
-            SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler(OutgoingConnectionManager.COMM_CHANNEL_ID);
+            SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( theChannelId );
 
             //Set the wrapping flag
             if( aSCH != null )
@@ -114,7 +145,7 @@ public final class HelloAck extends ControlMessage {
                     if( !connectionManagerMap.isEmpty() ){
                         Set<Integer> keySet = connectionManagerMap.keySet();
                         for( Integer aInt : keySet){
-                            HelloRepeat aRepeatMsg = new HelloRepeat(aInt);
+                            HelloRepeat aRepeatMsg = new HelloRepeat( aInt );
                             theManager.send(aRepeatMsg);                    
                         } 
                     }

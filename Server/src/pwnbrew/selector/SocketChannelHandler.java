@@ -407,7 +407,7 @@ public class SocketChannelHandler implements Selectable {
                             } else {    
 
                                 //Send message to tell client to reset their id
-                                ResetId resetIdMsg = new ResetId(passedClientId);
+                                ResetId resetIdMsg = new ResetId( passedClientId, passedChannelId );
                                 ByteBuffer aByteBuffer;
 
                                 int msgLen = resetIdMsg.getLength();

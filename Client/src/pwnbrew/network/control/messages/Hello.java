@@ -62,6 +62,7 @@ import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.NetworkInterfaceUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.network.ControlOption;
+import pwnbrew.utilities.SocketUtilities;
 /**
  *
  *  
@@ -69,6 +70,7 @@ import pwnbrew.network.ControlOption;
 public final class Hello extends ControlMessage {
 
     private static final byte OPTION_HOSTNAME = 6;
+    private static final byte OPTION_CHANNEL_ID = 102;
     private static final byte OPTION_OS_NAME = 14;    
     private static final byte OPTION_JAVA_ARCH = 15;   
     private static final byte OPTION_NIC_INFO = 18;
@@ -80,15 +82,20 @@ public final class Hello extends ControlMessage {
      * Constructor
      *
      * @param passedHostname
+     * @param passedChannelId
      * @throws java.io.IOException
      * @throws java.net.SocketException
     */
-    public Hello( String passedHostname ) throws SocketException, IOException {
+    public Hello( String passedHostname, int passedChannelId ) throws SocketException, IOException {
         super();
 
+        byte[] strBytes = SocketUtilities.intToByteArray(passedChannelId);
+        ControlOption aTlv = new ControlOption( OPTION_CHANNEL_ID, strBytes);
+        addOption(aTlv);
+        
         //Add hostname
-        byte[] strBytes = passedHostname.getBytes();
-        ControlOption aTlv = new ControlOption( OPTION_HOSTNAME, strBytes);
+        strBytes = passedHostname.getBytes();
+        aTlv = new ControlOption( OPTION_HOSTNAME, strBytes);
         addOption(aTlv);
         
         //Add the OS Name

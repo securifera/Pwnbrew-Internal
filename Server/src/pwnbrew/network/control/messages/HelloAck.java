@@ -40,6 +40,8 @@ package pwnbrew.network.control.messages;
 
 
 import java.io.IOException;
+import pwnbrew.network.ControlOption;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
@@ -47,6 +49,8 @@ import java.io.IOException;
  */
 @SuppressWarnings("ucd")
 public final class HelloAck extends ControlMessage {
+    
+    private static final byte OPTION_CHANNEL_ID = 102;
 
     // ==========================================================================
     /**
@@ -55,8 +59,12 @@ public final class HelloAck extends ControlMessage {
      * @param dstHostId
      * @throws java.io.IOException
     */
-    public HelloAck( int dstHostId ) throws IOException {
-       super( dstHostId );
+    public HelloAck( int dstHostId, int passedChannelId ) throws IOException {
+        super( dstHostId );
+       
+        byte[] strBytes = SocketUtilities.intToByteArray(passedChannelId);
+        ControlOption aTlv = new ControlOption( OPTION_CHANNEL_ID, strBytes);
+        addOption(aTlv);
     }
 
 }/* END CLASS HelloAck */

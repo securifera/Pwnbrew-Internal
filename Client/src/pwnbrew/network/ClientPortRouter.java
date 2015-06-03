@@ -244,7 +244,7 @@ public class ClientPortRouter extends PortRouter {
                             
                             //Create a hello message and send it
                             //TODO look at what to do for other channel types
-                            Hello helloMessage = new Hello( hostname );
+                            Hello helloMessage = new Hello( hostname, channedId );
                             aCMManager.send( helloMessage );
                             
                         } catch(IOException ex){

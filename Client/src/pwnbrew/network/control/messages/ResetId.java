@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.manager.PortManager;
+import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.control.ControlMessageManager;
 
@@ -62,6 +63,8 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
 
      //Class name
     private static final String NAME_Class = ResetId.class.getSimpleName();
+    private static final byte OPTION_CHANNEL_ID = 102; 
+    private int theChannelId = 0;
     
     // ==========================================================================
     /**
@@ -71,6 +74,34 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
      */
     public ResetId(byte[] passedId ) {
         super( passedId );
+        
+    }
+    
+    
+     //=========================================================================
+    /**
+     *  Sets the variable in the message related to this TLV
+     * 
+     * @param tempTlv 
+     * @return  
+     */
+    @Override
+    public boolean setOption( ControlOption tempTlv ){        
+
+        boolean retVal = true;    
+        if( !super.setOption(tempTlv)){
+            
+            byte[] theValue = tempTlv.getValue();
+            switch( tempTlv.getType()){
+                case OPTION_CHANNEL_ID:
+                    theChannelId = SocketUtilities.byteArrayToInt(theValue);
+                    break;
+                default:
+                    retVal = false;
+                    break;
+            }           
+        }
+        return retVal;
     }
     
       
@@ -97,7 +128,7 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
                 String hostname = SocketUtilities.getHostname();
 
                 //Create a hello message and send it
-                Hello helloMessage = new Hello( hostname );
+                Hello helloMessage = new Hello( hostname, theChannelId );
                 aCMManager.send(helloMessage);
             }              
                        

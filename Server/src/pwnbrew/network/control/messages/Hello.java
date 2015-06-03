@@ -62,6 +62,7 @@ import pwnbrew.network.Nic;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
@@ -76,13 +77,15 @@ public final class Hello extends ControlMessage {
     private static final byte OPTION_NIC_INFO = 18;
     private static final byte OPTION_JAR_VERSION = 19;    
     private static final byte OPTION_JRE_VERSION = 20;
-    
+    private static final byte OPTION_CHANNEL_ID = 102; 
+        
     private String clientHostname = null;
     private final List<String> theNicInfoList = new ArrayList();
     private String os_name = null;
     private String jar_version = null;
     private String jre_version = null;
     private String java_arch = null;
+    private int theChannelId = 0; 
     
     //Class name
     private static final String NAME_Class = Hello.class.getSimpleName();    
@@ -125,6 +128,9 @@ public final class Hello extends ControlMessage {
                     break;
                 case OPTION_JAVA_ARCH:
                     java_arch = new String(theValue, "US-ASCII");
+                    break;
+                case OPTION_CHANNEL_ID:
+                    theChannelId = SocketUtilities.byteArrayToInt(theValue);
                     break;
                 case OPTION_NIC_INFO:
                     
@@ -202,14 +208,14 @@ public final class Hello extends ControlMessage {
                 
                 //Get connectino manager
                 ConnectionManager aCM = aPR.getConnectionManager(theClientId);
-                SocketChannelHandler aSCH = aCM.getSocketChannelHandler( ConnectionManager.COMM_CHANNEL_ID );
+                SocketChannelHandler aSCH = aCM.getSocketChannelHandler( theChannelId );
                 if( aSCH != null ){
 
                     //Set flag
                     aSCH.setReceivedHelloFlag(true);
                      
                     //Send HostAck
-                    HelloAck aHostAck = new HelloAck(theClientId);
+                    HelloAck aHostAck = new HelloAck( theClientId, theChannelId );
                     DataManager.send( passedManager, aHostAck );
 
                     //Turn off wrapping
