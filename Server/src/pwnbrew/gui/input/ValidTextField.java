@@ -38,8 +38,8 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.gui.input;
 
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;

@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
  * Created on Nov 12, 2013, 9:12:31 PM
  */
 
-package pwnbrew.logging;
+package pwnbrew.log;
 
 import java.io.File;
 import java.io.IOException;

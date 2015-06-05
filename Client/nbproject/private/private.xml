@@ -11,12 +11,12 @@
             <file>file:/E:/Pwnbrew/Client/src/pwnbrew/network/control/messages/ControlMessage.java</file>
             <file>file:/E:/Pwnbrew/Client/src/pwnbrew/manager/IncomingConnectionManager.java</file>
             <file>file:/E:/Pwnbrew/Client/src/pwnbrew/utilities/ManagedRunnable.java</file>
+            <file>file:/E:/Pwnbrew/Client/src/pwnbrew/network/control/messages/HelloAck.java</file>
             <file>file:/E:/Pwnbrew/Client/src/pwnbrew/manager/OutgoingConnectionManager.java</file>
             <file>file:/E:/Pwnbrew/Client/src/pwnbrew/network/control/messages/CreateShellAck.java</file>
             <file>file:/E:/Pwnbrew/Client/src/pwnbrew/network/ClientPortRouter.java</file>
             <file>file:/E:/Pwnbrew/Client/src/pwnbrew/manager/ConnectionManager.java</file>
             <file>file:/E:/Pwnbrew/Client/src/pwnbrew/network/control/messages/CreateShell.java</file>
-            <file>file:/E:/Pwnbrew/Client/src/pwnbrew/network/control/messages/HelloRepeat.java</file>
             <file>file:/E:/Pwnbrew/Client/src/pwnbrew/network/file/FileSender.java</file>
             <file>file:/E:/Pwnbrew/Client/src/pwnbrew/network/shell/Shell.java</file>
             <file>file:/E:/Pwnbrew/Client/src/pwnbrew/network/shell/messages/ProcessMessage.java</file>

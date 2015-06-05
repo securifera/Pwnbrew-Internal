@@ -49,11 +49,14 @@ import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.DataManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.network.Message;
+import pwnbrew.network.RegisterMessage;
 import pwnbrew.selector.SocketChannelHandler;
 
 /**
@@ -133,14 +136,18 @@ public class ServerHttpWrapper extends HttpWrapper {
                                             byte[] dstHostId = Arrays.copyOfRange(msgBytes, 4, 8);
                                             int dstId = SocketUtilities.byteArrayToInt(dstHostId);
                                             
-                                            byte [] tempIdArr = Arrays.copyOf( msgBytes, 4);
-                                            int tempId = SocketUtilities.byteArrayToInt(tempIdArr);
-                                            if( !passedHandler.registerId(tempId, dstId)){
-                                                return;
+                                            if( type == Message.REGISTER_MESSAGE_TYPE ){
+                                            
+                                                RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgBytes ));                                                
+                                                int srcId = aMsg.getSrcHostId();
+                                         
+                                                if( aMsg.getFunction() == RegisterMessage.REG )
+                                                    passedHandler.registerId(srcId, dstId); 
+                                                    
+                                                
+                                            } else {
+                                                DataManager.routeMessage( passedHandler.getPortRouter(), type, dstId, msgBytes );
                                             }
-                                           
-                                            DataManager.routeMessage( passedHandler.getPortRouter(), type, dstId, msgBytes );
-                                        
                                         }
                                         
                                     } else {
@@ -157,6 +164,8 @@ public class ServerHttpWrapper extends HttpWrapper {
                             
                             //Do nothing because it doesn't fit the criteria
                             ex = null;
+                        } catch (LoggableException ex) {
+                            Logger.getLogger(ServerHttpWrapper.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 }

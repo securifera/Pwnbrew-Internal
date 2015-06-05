@@ -123,6 +123,8 @@ abstract public class DataManager {
         boolean retVal = true;
         switch(type){
             
+            case Message.REGISTER_MESSAGE_TYPE:
+                break;
             case Message.CONTROL_MESSAGE_TYPE:
                 break;
             case Message.PROCESS_MESSAGE_TYPE:

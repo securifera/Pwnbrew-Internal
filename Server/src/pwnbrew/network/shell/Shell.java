@@ -66,7 +66,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import pwnbrew.execution.ManagedRunnable;
 import pwnbrew.gui.panels.RunnerPane;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.control.messages.CreateShell;

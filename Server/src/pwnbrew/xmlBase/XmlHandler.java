@@ -51,8 +51,8 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 
 
 /**

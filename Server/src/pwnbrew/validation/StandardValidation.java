@@ -46,7 +46,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.validation;
 
 import pwnbrew.exception.NoSuchValidationException;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.LoggableException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;

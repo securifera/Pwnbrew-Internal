@@ -144,47 +144,6 @@ public class ServerPortRouter extends PortRouter {
         
         return true;
     }
-//    
-//  
-//    //===============================================================
-//    /**
-//     *  Removes the client id
-//     * 
-//     * @param clientId 
-//     * @param channelId 
-//    */
-//    @Override
-//    public void removeHandler( int clientId, int channelId ) {
-////        DebugPrinter.printMessage(NAME_Class, "Removing " + Integer.toString( clientId ));
-//        synchronized(clientIdManagerMap){
-//            IncomingConnectionManager aCCM = clientIdManagerMap.get( clientId );
-//            if( aCCM != null )
-//                aCCM.removeHandler( channelId );                
-//            
-//        }
-//    }
-//    
-//    //===============================================================
-//    /**
-//     *  Returns the SocketChannelHandler for the passed address.  
-//     * 
-//     * @param clientId
-//     * @param channelId
-//     * @return 
-//    */  
-//    @Override
-//    public SocketChannelHandler getSocketChannelHandler(Integer clientId, Integer channelId ){
-//        
-//        //Get the Address
-//        SocketChannelHandler theSCH = null;     
-//        synchronized(clientIdManagerMap){
-//            IncomingConnectionManager aCCM = clientIdManagerMap.get( clientId );
-//            if( aCCM != null )
-//                theSCH = aCCM.getHandler( channelId );
-//            
-//        }
-//        return theSCH;
-//    }
     
      //===============================================================
     /**

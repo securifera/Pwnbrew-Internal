@@ -52,8 +52,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import pwnbrew.exception.RemoteExceptionWrapper;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
@@ -130,6 +130,8 @@ abstract public class DataManager {
         boolean retVal = true;
         switch(type){
             
+            case Message.REGISTER_MESSAGE_TYPE:
+                break;
             case Message.STAGING_MESSAGE_TYPE:
                 break;
             case Message.CONTROL_MESSAGE_TYPE:
@@ -178,11 +180,11 @@ abstract public class DataManager {
      *  Handles the passed message with the correct manager
      * 
      * @param passedRouter
-     * @param channelId
+     * @param type
      * @param msgBytes  
      * @param dstId  
      */
-    public static void routeMessage( PortRouter passedRouter, byte channelId, int dstId, byte[] msgBytes ) {
+    public static void routeMessage( PortRouter passedRouter, byte type, int dstId, byte[] msgBytes ) {
         
         try {
             
@@ -203,7 +205,7 @@ abstract public class DataManager {
                 //Reconstruct the msg
                 byte[] msgLen = new byte[Message.MSG_LEN_SIZE];
                 byte[] tmpBytes = new byte[msgBytes.length + msgLen.length + 1];
-                tmpBytes[0] = channelId;
+                tmpBytes[0] = type;
 
                 //Copy length
                 SocketUtilities.intToByteArray(msgLen, msgBytes.length );
@@ -218,7 +220,7 @@ abstract public class DataManager {
             } else {
             
                 //Pass the message to the right handler
-                switch( channelId ){   
+                switch( type ){   
                      case Message.STAGING_MESSAGE_TYPE:
 
                         aManager = StagingMessageManager.getMessageManager();
@@ -278,7 +280,6 @@ abstract public class DataManager {
             ServerConfig aConf = ServerConfig.getServerConfig();
             int serverPort = aConf.getSocketPort();
             int destClientId = passedMessage.getDestHostId();
-//            int messageType = passedMessage.getType();
             int channelId = passedMessage.getChannelId();
             
             //Try the default port router
@@ -287,7 +288,6 @@ abstract public class DataManager {
             
             //Get the scoket handler
             SocketChannelHandler theHandler = aCM.getSocketChannelHandler(channelId);
-//            SocketChannelHandler theHandler = thePR.getSocketChannelHandler(destClientId, messageType);
             if( theHandler == null ){
                 
                 RelayManager aRelayManager = RelayManager.getRelayManager();
@@ -298,7 +298,6 @@ abstract public class DataManager {
                 thePR = aRelayManager.getServerPorterRouter();
                 aCM = thePR.getConnectionManager(destClientId);
                 theHandler = aCM.getSocketChannelHandler(channelId);
-                
                 
                 if( theHandler == null ){
                     Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified client.", null);      

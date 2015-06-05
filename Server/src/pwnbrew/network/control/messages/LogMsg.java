@@ -47,8 +47,8 @@ package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
 import pwnbrew.host.HostController;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LogLevel;
+import pwnbrew.log.Log;
+import pwnbrew.log.LogLevel;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
@@ -129,13 +129,15 @@ public class LogMsg extends ControlMessage {
             
             //Get the host controller
             HostController theController = theManager.getHostController( clientIdStr );
-            String hostStr = theController.getItemName();
-               
-            StringBuilder aSB = new StringBuilder();
-            aSB.append("Remote Exception: ").append(hostStr).append("-").append(theMessage);
-            
-            //Log it
-            Log.log( LogLevel.SEVERE, NAME_Class, "evaluate()", aSB.toString(), null );
+            if( theController != null ){
+                String hostStr = theController.getItemName();
+
+                StringBuilder aSB = new StringBuilder();
+                aSB.append("Remote Exception: ").append(hostStr).append("-").append(theMessage);
+
+                //Log it
+                Log.log( LogLevel.SEVERE, NAME_Class, "evaluate()", aSB.toString(), null );
+            }
         }
     }
 

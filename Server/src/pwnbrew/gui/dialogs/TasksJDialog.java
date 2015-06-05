@@ -61,7 +61,7 @@ import pwnbrew.gui.MainGui;
 import pwnbrew.gui.remote.job.JobJList;
 import pwnbrew.gui.remote.job.JobUpdater;
 import pwnbrew.gui.remote.job.JobJListCellRenderer;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.Utilities;
 

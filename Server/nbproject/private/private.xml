@@ -5,6 +5,7 @@
         <group>
             <file>file:/E:/Pwnbrew/Server/src/pwnbrew/network/control/messages/PushFileAbort.java</file>
             <file>file:/E:/Pwnbrew/Server/src/pwnbrew/manager/DataManager.java</file>
+            <file>file:/E:/Pwnbrew/Server/src/pwnbrew/selector/SocketChannelHandler.java</file>
             <file>file:/E:/Pwnbrew/Server/src/pwnbrew/network/control/messages/Payload.java</file>
             <file>file:/E:/Pwnbrew/Server/src/pwnbrew/network/shell/Shell.java</file>
             <file>file:/E:/Pwnbrew/Server/src/pwnbrew/network/shell/ShellMessageHandler.java</file>
@@ -12,6 +13,7 @@
             <file>file:/E:/Pwnbrew/Server/src/pwnbrew/network/control/messages/GetNetworkSettings.java</file>
             <file>file:/E:/Pwnbrew/Server/src/pwnbrew/Server.java</file>
             <file>file:/E:/Pwnbrew/Server/src/pwnbrew/network/control/messages/DirCount.java</file>
+            <file>file:/E:/Pwnbrew/Server/src/pwnbrew/network/control/messages/Hello.java</file>
             <file>file:/E:/Pwnbrew/Server/src/pwnbrew/network/control/messages/HelloAck.java</file>
             <file>file:/E:/Pwnbrew/Server/src/pwnbrew/network/control/messages/CreateShellAck.java</file>
             <file>file:/E:/Pwnbrew/Server/src/pwnbrew/network/shell/messages/StdOutMessage.java</file>

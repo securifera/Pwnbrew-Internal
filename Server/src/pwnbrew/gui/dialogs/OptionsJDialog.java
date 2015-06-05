@@ -58,8 +58,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 import pwnbrew.gui.panels.options.OptionsJPanel;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import pwnbrew.utilities.Utilities;
 
 /**

@@ -59,7 +59,7 @@ import pwnbrew.host.HostController;
 import pwnbrew.host.Session;
 import pwnbrew.host.gui.HostTabPanel;
 import pwnbrew.library.LibraryItemController;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.misc.ProgressListener;

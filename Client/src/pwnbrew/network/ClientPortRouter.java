@@ -242,10 +242,15 @@ public class ClientPortRouter extends PortRouter {
                                 aCMManager = ControlMessageManager.initialize(thePortManager);
                             }
                             
-                            //Create a hello message and send it
-                            //TODO look at what to do for other channel types
-                            Hello helloMessage = new Hello( hostname, channedId );
-                            aCMManager.send( helloMessage );
+                            //Send register message
+                            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, channedId);
+                            aCMManager.send( aMsg );
+                            
+//                            if( channedId == ConnectionManager.COMM_CHANNEL_ID ){                               
+//                                //Create a hello message and send it
+//                                Hello helloMessage = new Hello( hostname, channedId );
+//                                aCMManager.send( helloMessage );
+//                            }
                             
                         } catch(IOException ex){
                             throw new LoggableException(ex);

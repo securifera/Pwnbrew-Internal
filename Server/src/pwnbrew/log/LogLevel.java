@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
  * Created on Nov 6, 2013, 9:22:39 PM
  */
 
-package pwnbrew.logging;
+package pwnbrew.log;
 
 import java.util.logging.Level;
 

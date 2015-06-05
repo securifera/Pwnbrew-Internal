@@ -46,7 +46,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.gui.dialogs;
 
 import javax.swing.JFrame;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.LoggableException;
 
 /**
  *

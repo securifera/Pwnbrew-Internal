@@ -52,7 +52,7 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.FileUtilities;

@@ -51,7 +51,7 @@ import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.execution.ManagedRunnable;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.misc.Constants;
 
 

@@ -54,7 +54,7 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.text.*;
 import pwnbrew.host.gui.ShellStyledDocument;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.EditMenuUpdater;
 import pwnbrew.misc.StreamReceiver;

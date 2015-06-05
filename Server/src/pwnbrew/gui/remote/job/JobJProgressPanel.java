@@ -60,7 +60,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import javax.swing.*;
 import pwnbrew.generic.gui.ImageJButton;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.misc.Constants;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.Utilities;

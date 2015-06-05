@@ -59,8 +59,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import pwnbrew.gui.panels.options.OptionsJPanel;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LogLevel;
+import pwnbrew.log.Log;
+import pwnbrew.log.LogLevel;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.Utilities;
@@ -182,48 +182,87 @@ final public class Environment {
                                         theBOS.write(byteBuffer, 0, bytesRead);                                   
                                 }
                                 theBOS.flush();
-                            }                            
+                            }      
+                                                         
+                            //Create a FileContentRef
+                            JarItem aJarItem = null;
+                            try {
+                                aJarItem = Utilities.getJavaItem( aFile );
+                            } catch (JarItemException ex) {
+                                Log.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex);         
+                                return;
+                            }
+                            
+                            //Add the jar
+                            if( aJarItem != null ){
+                                Utilities.addJarItem( aJarItem );
+
+                                //Write the file to disk
+                                String fileHash = FileUtilities.createHashedFile( aFile, null );
+                                if( fileHash != null ) {
+
+                                    //Create a FileContentRef
+                                    aJarItem.setFileHash( fileHash ); //Set the file's hash
+
+                                    //Write to disk
+                                    aJarItem.writeSelfToDisk();
+
+                                    //If it is a local extension then load it
+                                    if( aJarItem.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
+
+                                        //Load the jar
+                                        File libraryFile = new File( Directories.getFileLibraryDirectory(), aJarItem.getFileHash() ); //Create a File to represent the library file to be copied
+                                        List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
+                                        for( Class aClass : theClasses )
+                                            addClassToMap(aClass);                            
+                                    }
+
+                                } 
+                            }
+
+                            //Delete the temp file
+                            aFile.delete();
                         }
                     }
                     
-                    //Create a FileContentRef
-                    JarItem aJarItem = null;
-                    try {
-                        aJarItem = Utilities.getJavaItem( aFile );
-                    } catch (JarItemException ex) {
-                        Log.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex);         
-                        return;
-                    }
+//                    //Create a FileContentRef
+//                    JarItem aJarItem = null;
+//                    try {
+//                        aJarItem = Utilities.getJavaItem( aFile );
+//                    } catch (JarItemException ex) {
+//                        Log.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex);         
+//                        return;
+//                    }
                     
-                     //Add the jar
-                    if( aJarItem != null ){
-                        Utilities.addJarItem( aJarItem );
-
-                        //Write the file to disk
-                        String fileHash = FileUtilities.createHashedFile( aFile, null );
-                        if( fileHash != null ) {
-
-                            //Create a FileContentRef
-                            aJarItem.setFileHash( fileHash ); //Set the file's hash
-
-                            //Write to disk
-                            aJarItem.writeSelfToDisk();
-
-                            //If it is a local extension then load it
-                            if( aJarItem.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
-
-                                //Load the jar
-                                File libraryFile = new File( Directories.getFileLibraryDirectory(), aJarItem.getFileHash() ); //Create a File to represent the library file to be copied
-                                List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
-                                for( Class aClass : theClasses )
-                                    addClassToMap(aClass);                            
-                            }
-
-                        } 
-                    }
-                    
-                    //Delete the temp file
-                    aFile.delete();
+//                     //Add the jar
+//                    if( aJarItem != null ){
+//                        Utilities.addJarItem( aJarItem );
+//
+//                        //Write the file to disk
+//                        String fileHash = FileUtilities.createHashedFile( aFile, null );
+//                        if( fileHash != null ) {
+//
+//                            //Create a FileContentRef
+//                            aJarItem.setFileHash( fileHash ); //Set the file's hash
+//
+//                            //Write to disk
+//                            aJarItem.writeSelfToDisk();
+//
+//                            //If it is a local extension then load it
+//                            if( aJarItem.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
+//
+//                                //Load the jar
+//                                File libraryFile = new File( Directories.getFileLibraryDirectory(), aJarItem.getFileHash() ); //Create a File to represent the library file to be copied
+//                                List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
+//                                for( Class aClass : theClasses )
+//                                    addClassToMap(aClass);                            
+//                            }
+//
+//                        } 
+//                    }
+//                    
+//                    //Delete the temp file
+//                    aFile.delete();
                 } catch (IOException | NoSuchAlgorithmException ex) {
                     Log.log( LogLevel.SEVERE, NAME_Class, "loadDefaultModules()", ex.getMessage(), ex );
                 }

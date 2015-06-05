@@ -50,6 +50,7 @@ import pwnbrew.log.LoggableException;
 import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
@@ -63,8 +64,6 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
 
      //Class name
     private static final String NAME_Class = ResetId.class.getSimpleName();
-    private static final byte OPTION_CHANNEL_ID = 102; 
-    private int theChannelId = 0;
     
     // ==========================================================================
     /**
@@ -74,37 +73,8 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
      */
     public ResetId(byte[] passedId ) {
         super( passedId );
-        
     }
     
-    
-     //=========================================================================
-    /**
-     *  Sets the variable in the message related to this TLV
-     * 
-     * @param tempTlv 
-     * @return  
-     */
-    @Override
-    public boolean setOption( ControlOption tempTlv ){        
-
-        boolean retVal = true;    
-        if( !super.setOption(tempTlv)){
-            
-            byte[] theValue = tempTlv.getValue();
-            switch( tempTlv.getType()){
-                case OPTION_CHANNEL_ID:
-                    theChannelId = SocketUtilities.byteArrayToInt(theValue);
-                    break;
-                default:
-                    retVal = false;
-                    break;
-            }           
-        }
-        return retVal;
-    }
-    
-      
     //===============================================================
     /**
     *   Performs the logic specific to the message.
@@ -128,7 +98,7 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
                 String hostname = SocketUtilities.getHostname();
 
                 //Create a hello message and send it
-                Hello helloMessage = new Hello( hostname, theChannelId );
+                Hello helloMessage = new Hello( hostname, ConnectionManager.COMM_CHANNEL_ID );
                 aCMManager.send(helloMessage);
             }              
                        

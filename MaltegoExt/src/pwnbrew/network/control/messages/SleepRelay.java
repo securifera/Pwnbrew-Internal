@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;

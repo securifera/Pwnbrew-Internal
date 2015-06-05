@@ -45,7 +45,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.generic;
 
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;

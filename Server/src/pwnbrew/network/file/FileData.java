@@ -47,7 +47,7 @@ package pwnbrew.network.file;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.LoggableException;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.Message;
 

@@ -57,6 +57,7 @@ public final class HelloAck extends ControlMessage {
      * Constructor
      *
      * @param dstHostId
+     * @param passedChannelId
      * @throws java.io.IOException
     */
     public HelloAck( int dstHostId, int passedChannelId ) throws IOException {

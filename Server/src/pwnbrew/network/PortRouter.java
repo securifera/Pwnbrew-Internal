@@ -110,28 +110,6 @@ abstract public class PortRouter {
     */
     abstract public ConnectionManager getConnectionManager( Integer... passedId );
     
-//    //===============================================================
-//     /**
-//     *  Registers the provided SocketChannelHandler with the server under the
-//     * given InetAddress.
-//     *
-//     * @param passedClientId
-//     * @param parentId
-//     * @param handlerType
-//     * @param theHandler
-//     * @return 
-//     */
-//    abstract public boolean registerHandler(int passedClientId, int parentId, int channelId, SocketChannelHandler theHandler);
-//
-//    //===============================================================
-//    /**
-//     *  Removes the client id
-//     * 
-//     * @param clientId 
-//     * @param channelId 
-//    */
-//    abstract public void removeHandler(int clientId, int channelId);
-    
     //===============================================================
     /**
      *  Returns whether the comm is using encryption.

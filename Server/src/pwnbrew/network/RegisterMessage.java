@@ -36,51 +36,39 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- *  ProcessMessage.java
- *
- *  Created on July 25, 2013
- */
-
-package pwnbrew.network.shell.messages;
+package pwnbrew.network;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import pwnbrew.log.LoggableException;
-import pwnbrew.network.Message;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
  *  
  */
-abstract public class ProcessMessage extends Message {
-    
-    byte[] messageBytes = new byte[0];
-    
+public class RegisterMessage extends Message {
+      
     //Functions
-    public static final byte STD_IN = 2;
-    public static final byte STD_OUT = 3;
-    public static final byte STD_ERR = 4;
-    
+    public static final byte REG = (byte)90;
+    public static final byte REG_ACK = (byte)91;
+       
     private final byte function;
-   
+    
     //==========================================================================
     /**
      * Constructor
      *
      * @param passedFunction
-     * @param dstHostId
-     * @param passedBB
+     * @param passedChannelId
+     * @param destId
     */
-    public ProcessMessage( byte passedFunction, ByteBuffer passedBB, int dstHostId ) {
-        super( PROCESS_MESSAGE_TYPE, dstHostId );
+    @SuppressWarnings("ucd")
+    public RegisterMessage( byte passedFunction, int destId, int passedChannelId ) {
+        super( REGISTER_MESSAGE_TYPE, destId );
+        channelId = SocketUtilities.intToByteArray( passedChannelId );
         function = passedFunction;
-          
-        setBytes(passedBB);
     }
-
+    
     //==========================================================================
     /**
      * Constructor
@@ -88,20 +76,12 @@ abstract public class ProcessMessage extends Message {
      * @param passedFunction
      * @param passedId
     */
-    public ProcessMessage( byte passedFunction, byte[] passedId) {
-        super(PROCESS_MESSAGE_TYPE, passedId);
+    @SuppressWarnings("ucd")
+    public RegisterMessage( byte passedFunction, byte[] passedId) {
+        super(REGISTER_MESSAGE_TYPE, passedId);
         function = passedFunction;
     }
-    
-    //==========================================================================
-    /*
-     *  Sets the process bytes
-    */     
-    void setBytes( ByteBuffer passedBB ){
-        messageBytes = new byte[passedBB.remaining()];
-        passedBB.get(messageBytes, 0, messageBytes.length);
-    }
-    
+      
     //===============================================================
     /**
     *   Returns a byte array representing the control message
@@ -116,10 +96,7 @@ abstract public class ProcessMessage extends Message {
         
          //Add the function
         rtnBuffer.put( function );
-        
-        //Add the message bytes
-        rtnBuffer.put( messageBytes );
-        
+                
     }
     
      //===============================================================
@@ -136,10 +113,7 @@ abstract public class ProcessMessage extends Message {
        
         //Add function
         count++;
-          
-        //Add message bytes
-        count += messageBytes.length;
-        
+                
         //Set the length
         SocketUtilities.intToByteArray(length, count );
         
@@ -152,38 +126,25 @@ abstract public class ProcessMessage extends Message {
      *
      * @param passedBuffer
      * @return msgAddress
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
-    public static ProcessMessage getMessage( ByteBuffer passedBuffer ) throws LoggableException {
+    public static RegisterMessage getMessage( ByteBuffer passedBuffer ) throws LoggableException {
 
-       ProcessMessage aMessage;       
-       byte[] theId = new byte[4], clientId = new byte[4], tempHostId = new byte[4];;
-      
+       RegisterMessage aMessage;       
+       byte[] theId = new byte[4], clientId = new byte[4], tempHostId = new byte[4];
+
        //Copy over the client id
        passedBuffer.get(clientId, 0, clientId.length);
        
-        //Copy over the host id
+       //Copy over the host id
        passedBuffer.get(tempHostId, 0, tempHostId.length);
        
-       //Copy over the id
+        //Copy over the id
        passedBuffer.get(theId, 0, theId.length);
 
        //Copy over the id
        byte tmpFunc = passedBuffer.get();
-
-       switch(tmpFunc){
-           case STD_IN:
-               aMessage = new StdInMessage( theId );
-               break;
-           case STD_OUT:
-               aMessage = new StdOutMessage( theId );
-               break;
-           case STD_ERR:
-               aMessage = new StdErrMessage( theId );
-               break;           
-           default:
-               throw new LoggableException("Unknown message type encountered.");
-       }
+       aMessage = new RegisterMessage(tmpFunc, theId );
        
        //Set client id
        int theClientId = SocketUtilities.byteArrayToInt(clientId);
@@ -192,21 +153,8 @@ abstract public class ProcessMessage extends Message {
        //Set dest host id
        int theDestHostId= SocketUtilities.byteArrayToInt(tempHostId);
        aMessage.setDestHostId( theDestHostId );
-       
-       //Set bytes
-       aMessage.setBytes(passedBuffer);
-
+      
        return aMessage;
-    }
-    
-    //===============================================================
-    /**
-     *  Gets the message bytes
-     * 
-     * @return 
-     */
-    public byte[] getMsgBytes() {
-        return Arrays.copyOf(messageBytes, messageBytes.length);    
     }
     
 }

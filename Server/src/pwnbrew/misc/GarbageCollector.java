@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.logging.Level;
 import javax.swing.tree.DefaultMutableTreeNode;
 import pwnbrew.host.HostController;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 
 /**
  *

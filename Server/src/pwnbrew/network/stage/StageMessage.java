@@ -51,7 +51,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import pwnbrew.exception.RemoteExceptionWrapper;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Message;

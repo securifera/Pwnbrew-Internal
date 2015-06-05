@@ -56,11 +56,12 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.SSLException;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostFactory;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.misc.Constants;
@@ -68,6 +69,7 @@ import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.PortWrapper;
+import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.messages.ResetId;
 import pwnbrew.network.control.messages.SetRelayWrap;
@@ -96,7 +98,7 @@ public class SocketChannelHandler implements Selectable {
     private byte currMsgType = 0;
     private ByteBuffer localMsgBuffer = null;
     
-    private boolean receivedHelloFlag = false;
+    private boolean isRegistered = false;
     // ==========================================================================
     /**
      * Constructor
@@ -135,7 +137,7 @@ public class SocketChannelHandler implements Selectable {
                 passedSelKey.cancel();
             }
             
-        } catch ( CancelledKeyException | IOException ex ){
+        } catch ( CancelledKeyException | LoggableException | IOException ex ){
             
             //Cancel the key
             passedSelKey.cancel();
@@ -149,7 +151,7 @@ public class SocketChannelHandler implements Selectable {
             
             thePortRouter.getPortManager().socketClosed( this );
             
-        }
+        } 
 
         //TODO handle the case a RuntimeException is thrown doing SSL handshake
     }
@@ -206,7 +208,7 @@ public class SocketChannelHandler implements Selectable {
      * @param sk the Selection Key
      * @throws IOException 
     */
-    private void receive(SelectionKey sk) throws IOException {
+    private void receive(SelectionKey sk) throws IOException, LoggableException {
 	
         try {
             
@@ -305,24 +307,34 @@ public class SocketChannelHandler implements Selectable {
                             byte [] msgByteArr = Arrays.copyOf( localMsgBuffer.array(), localMsgBuffer.position());
                             if( msgByteArr.length > 3 ){
 
-                                byte[] clientIdArr = Arrays.copyOf(msgByteArr, 4);
-                                int tempId = SocketUtilities.byteArrayToInt(clientIdArr);
-                                
-                                //Get the channel id
-                                byte [] chanIdArr = Arrays.copyOfRange( msgByteArr, 8, 12);
-                                int chanId = SocketUtilities.byteArrayToInt(chanIdArr); 
-                                
-                                if( !registerId(tempId, chanId))    
-                                    return;
-                                
-                                //Get dest id
-                                byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
-                                int dstId = SocketUtilities.byteArrayToInt(dstHostId);
+                                //Register the handler
+                                if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
+                                    
+                                    RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));  
+                                    int srcId = aMsg.getSrcHostId();
+                                    int chanId = aMsg.getChannelId();
 
-                                try{
-                                    DataManager.routeMessage( thePortRouter, currMsgType, dstId, msgByteArr ); 
-                                } catch(Exception ex ){
-                                    Log.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
+                                    if( registerId(srcId, chanId) ){
+                                        setRegisteredFlag(true);                                           
+
+                                        RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, srcId, chanId);
+                                        DataManager.send( getPortRouter().getPortManager(), retMsg);
+                                        
+                                        //Set wrapping after it is sent
+                                        setWrapping( srcId, false);
+                                    }
+                                    
+                                } else {
+                                
+                                    //Get dest id
+                                    byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
+                                    int dstId = SocketUtilities.byteArrayToInt(dstHostId);
+
+                                    try{
+                                        DataManager.routeMessage( thePortRouter, currMsgType, dstId, msgByteArr ); 
+                                    } catch(Exception ex ){
+                                        Log.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
+                                    }
                                 }
                             }
 
@@ -407,7 +419,7 @@ public class SocketChannelHandler implements Selectable {
                             } else {    
 
                                 //Send message to tell client to reset their id
-                                ResetId resetIdMsg = new ResetId( passedClientId, passedChannelId );
+                                ResetId resetIdMsg = new ResetId( passedClientId );
                                 ByteBuffer aByteBuffer;
 
                                 int msgLen = resetIdMsg.getLength();
@@ -775,8 +787,8 @@ public class SocketChannelHandler implements Selectable {
      * 
      * @return 
      */
-    public boolean hasReceivedHello() {
-        return receivedHelloFlag;
+    public boolean hasRegistered() {
+        return isRegistered;
     }
     
     //===================================================================
@@ -784,8 +796,8 @@ public class SocketChannelHandler implements Selectable {
      * 
      * @param passedBool 
      */
-    public void setReceivedHelloFlag( boolean passedBool ) {
-        receivedHelloFlag = passedBool;
+    public void setRegisteredFlag( boolean passedBool ) {
+        isRegistered = passedBool;
     }
 
 }

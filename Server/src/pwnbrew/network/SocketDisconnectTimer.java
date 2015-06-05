@@ -69,7 +69,7 @@ public class SocketDisconnectTimer extends TimerTask {
      */
     @Override
     public void run() {
-        if( !theHandler.hasReceivedHello()){
+        if( !theHandler.hasRegistered()){
             theHandler.shutdown();        
             theManager.socketClosed(theHandler);
         }

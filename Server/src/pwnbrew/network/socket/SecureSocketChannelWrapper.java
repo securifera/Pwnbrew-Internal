@@ -40,8 +40,8 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.socket;
 
 import pwnbrew.selector.SocketChannelHandler;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;

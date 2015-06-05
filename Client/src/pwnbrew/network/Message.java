@@ -57,6 +57,7 @@ import pwnbrew.utilities.SocketUtilities;
 public abstract class Message {
     
     public static final byte STAGING_MESSAGE_TYPE = 0;
+    public static final byte REGISTER_MESSAGE_TYPE = 40;
     public static final byte GENERIC_MESSAGE_TYPE = 87;
     public static final byte CONTROL_MESSAGE_TYPE = 88;
     public static final byte PROCESS_MESSAGE_TYPE = 89;
@@ -203,7 +204,7 @@ public abstract class Message {
      *
      * @param passedId
     */
-    public void setClientId( int passedId ){
+    public void setSrcHostId( int passedId ){
         SocketUtilities.intToByteArray( srcHostId, passedId );
     }
 

@@ -42,7 +42,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.host.HostController;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;

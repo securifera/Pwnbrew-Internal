@@ -46,7 +46,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network;
 
 import java.nio.ByteBuffer;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
@@ -58,6 +58,7 @@ import pwnbrew.xmlBase.ServerConfig;
 public abstract class Message {
     
     public static final byte STAGING_MESSAGE_TYPE = 0;
+    public static final byte REGISTER_MESSAGE_TYPE = 40;
     public static final byte CONTROL_MESSAGE_TYPE = 88;
     public static final byte PROCESS_MESSAGE_TYPE = 89;
     public static final byte FILE_MESSAGE_TYPE = 90;

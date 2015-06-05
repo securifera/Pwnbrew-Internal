@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
 * Created on Oct 19, 2013, 11:34:22 PM
 */
 
-package pwnbrew.logging;
+package pwnbrew.log;
 
 /**
  *

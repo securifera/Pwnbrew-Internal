@@ -47,7 +47,7 @@ package pwnbrew.network.control.messages;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;

@@ -50,7 +50,6 @@ import java.util.Map;
 import java.util.Set;
 import pwnbrew.ClientConfig;
 import pwnbrew.manager.IncomingConnectionManager;
-import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.PortRouter;
@@ -124,11 +123,11 @@ public final class HelloAck extends ControlMessage {
         if( aPR != null ){
 
             //Get the handler
-            SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( theChannelId );
+//            SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( theChannelId );
 
-            //Set the wrapping flag
-            if( aSCH != null )
-                aSCH.setWrapping(false);
+//            //Set the wrapping flag
+//            if( aSCH != null )
+//                aSCH.setWrapping(false);
             
             
             //Set the server id

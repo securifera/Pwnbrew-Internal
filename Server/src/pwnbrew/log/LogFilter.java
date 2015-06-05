@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
  * Created on Dec 22, 2013, 9:21:12 PM
  */
 
-package pwnbrew.logging;
+package pwnbrew.log;
 
 import java.util.ArrayList;
 import java.util.HashMap;

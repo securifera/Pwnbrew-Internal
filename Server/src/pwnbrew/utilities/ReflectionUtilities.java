@@ -45,7 +45,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.utilities;
 
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.LoggableException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

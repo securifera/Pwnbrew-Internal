@@ -45,8 +45,8 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.xmlBase;
 
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;

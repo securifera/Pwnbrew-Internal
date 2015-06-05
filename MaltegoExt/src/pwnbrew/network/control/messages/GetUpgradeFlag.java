@@ -40,7 +40,7 @@ package pwnbrew.network.control.messages;
 
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;

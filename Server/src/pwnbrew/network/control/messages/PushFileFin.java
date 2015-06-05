@@ -45,7 +45,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.LoggableException;
 import java.io.UnsupportedEncodingException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.DebugPrinter;

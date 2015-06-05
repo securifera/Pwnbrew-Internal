@@ -56,8 +56,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.SSLException;
 import pwnbrew.ClientConfig;
+import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.utilities.Constants;
@@ -65,6 +67,7 @@ import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.PortWrapper;
+import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.socket.SocketChannelWrapper;
@@ -136,7 +139,7 @@ public class SocketChannelHandler implements Selectable {
                 passedSelKey.cancel();
             }
             
-        } catch ( CancelledKeyException | IOException ex ){
+        } catch ( LoggableException | CancelledKeyException | IOException ex ){
             
             //Cancel the key
             passedSelKey.cancel();
@@ -145,7 +148,7 @@ public class SocketChannelHandler implements Selectable {
             shutdown();
             thePortRouter.socketClosed( this );
             
-        }
+        } 
 
         //TODO handle the case a RuntimeException is thrown doing SSL handshake
     }
@@ -233,7 +236,7 @@ public class SocketChannelHandler implements Selectable {
      * @param sk the Selection Key
      * @throws IOException 
     */
-    private void receive(SelectionKey sk) throws IOException {
+    private void receive(SelectionKey sk) throws IOException, LoggableException {
 	
         try {
             
@@ -321,21 +324,25 @@ public class SocketChannelHandler implements Selectable {
                             byte [] msgByteArr = Arrays.copyOf( localMsgBuffer.array(), localMsgBuffer.position());
                             if( msgByteArr.length > 3 ){
 
-                                //Get the src id
-                                byte[] clientIdArr = Arrays.copyOf(msgByteArr, 4);
-                                int srcId = SocketUtilities.byteArrayToInt(clientIdArr);
-
                                 //Get dest id
                                 byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
                                 int dstId = SocketUtilities.byteArrayToInt(dstHostId);
-
-                                if( !registerId(srcId, dstId))    
-                                    return;
-
-                                try{
-                                    DataManager.routeMessage( thePortRouter, currMsgType, dstId, msgByteArr );                      
-                                } catch(Exception ex ){
-                                    RemoteLog.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
+                                
+                                if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
+                                    
+                                    RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));                                                
+                                    int srcId = aMsg.getSrcHostId();
+                                    aMsg.evaluate(thePortRouter.getPortManager());
+                                   
+                                    if( aMsg.getFunction() == RegisterMessage.REG && !registerId(srcId, dstId))    
+                                        return;
+                                                                        
+                                } else {
+                                    try{
+                                        DataManager.routeMessage( thePortRouter, currMsgType, dstId, msgByteArr );                      
+                                    } catch(Exception ex ){
+                                        RemoteLog.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
+                                    }
                                 }
                             }
 

@@ -45,8 +45,8 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
