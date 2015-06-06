@@ -203,6 +203,9 @@ public class RegisterMessage extends Message {
                         //Set the wrapping flag
                         if( aSCH != null )
                             aSCH.setWrapping(false);
+                        
+                        //Notify the port router to continue
+                        aPR.beNotified(); 
 
                         //Create a hello message and send it
                         if( getChannelId() == ConnectionManager.COMM_CHANNEL_ID ){

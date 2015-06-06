@@ -109,12 +109,15 @@ public class OutgoingConnectionManager extends ConnectionManager {
      *  Removes the client id
      * 
      * @param passedId 
+     * @return  
     */
     @Override
-    public void removeHandler( int passedId ) {
+    public SocketChannelHandler removeHandler( int passedId ) {
+        SocketChannelHandler aSCH;
         synchronized( channelIdHandlerMap ){
-            channelIdHandlerMap.remove( passedId );
+            aSCH = channelIdHandlerMap.remove( passedId );
         }
+        return aSCH;
     }
  
     //==========================================================================
@@ -221,13 +224,37 @@ public class OutgoingConnectionManager extends ConnectionManager {
     //===========================================================
     /**
      * 
+     * @param passedId
      */
-    public void closeShell() {
+    public void closeShell( int passedId ) {
         
         //Shut it down and set to null
         if( theShell != null ){
             theShell.shutdown();
             theShell = null;
+        }
+        
+        //Kill the timers
+        KeepAliveTimer aKAT = getKeepAliveTimer(passedId);
+        if( aKAT != null )
+            aKAT.shutdown();
+        
+        //Kill the timers
+        ReconnectTimer aRT = getReconnectTimer(passedId);
+        if( aRT != null )
+            aRT.shutdown();
+        
+    }
+
+    //=======================================================================
+    /**
+     * 
+     * @param passedId
+     * @param theKeepAliveTimer 
+     */
+    public void setKeepAliveTimer(int passedId, KeepAliveTimer theKeepAliveTimer) {
+        synchronized(theKeepAliveTimerMap){
+            theKeepAliveTimerMap.put(passedId, theKeepAliveTimer);
         }
     }
     

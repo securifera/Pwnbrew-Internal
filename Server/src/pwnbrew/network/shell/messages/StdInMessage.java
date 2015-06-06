@@ -60,11 +60,12 @@ public class StdInMessage extends ProcessMessage {
     /**
      * Constructor
      *
+     * @param passedChannelId
      * @param passedBB
      * @param dstHostId
     */
-    public StdInMessage( ByteBuffer passedBB, int dstHostId ) {
-        super( STD_IN, passedBB, dstHostId );
+    public StdInMessage( int passedChannelId, ByteBuffer passedBB, int dstHostId ) {
+        super( STD_IN, passedChannelId, passedBB, dstHostId );
     }
     //==========================================================================
     /**

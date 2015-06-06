@@ -78,7 +78,7 @@ public class ClientPortRouter extends PortRouter {
     private final LockingThread theConnectionLock;
        
     private static final String NAME_Class = ClientPortRouter.class.getSimpleName();
-    private OutgoingConnectionManager aSCM;
+    private OutgoingConnectionManager theOCM;
     
     volatile boolean reconnectEnable = true;
     
@@ -95,7 +95,7 @@ public class ClientPortRouter extends PortRouter {
         super(passedPortManager, passedBool, Constants.Executor );
         
         //Create server connection manager
-        aSCM = new OutgoingConnectionManager();
+        theOCM = new OutgoingConnectionManager();
         
         theConnectionLock = new LockingThread( Constants.Executor );
         theConnectionLock.start();
@@ -108,7 +108,7 @@ public class ClientPortRouter extends PortRouter {
       * @return 
     */
     public OutgoingConnectionManager getSCM() {
-        return aSCM;
+        return theOCM;
     }
     
     
@@ -121,7 +121,7 @@ public class ClientPortRouter extends PortRouter {
     */
     private boolean connect( int channelId, InetAddress hostAddress, int passedPort ) throws LoggableException {
 
-        SocketChannelHandler theSCH = aSCM.getSocketChannelHandler( channelId );
+        SocketChannelHandler theSCH = theOCM.getSocketChannelHandler( channelId );
         try {
             
             if( theSCH == null || theSCH.getState() == Constants.DISCONNECTED ){
@@ -154,7 +154,7 @@ public class ClientPortRouter extends PortRouter {
                 }
 
                 //If we returned but we are not connected
-                theSCH = aSCM.getSocketChannelHandler( channelId );
+                theSCH = theOCM.getSocketChannelHandler( channelId );
                 if( theSCH == null || theSCH.getState() == Constants.DISCONNECTED){
 
                     //Shutdown the first connect handler and set it to null
@@ -224,14 +224,14 @@ public class ClientPortRouter extends PortRouter {
                 } else {
 
                      //Send the hello message
-                    String hostname;
-                    try {
-                        hostname = SocketUtilities.getHostname();
-                    } catch (IOException ex) {
-                        throw new LoggableException(ex);
-                    }
+//                    String hostname;
+//                    try {
+//                        hostname = SocketUtilities.getHostname();
+//                    } catch (IOException ex) {
+//                        throw new LoggableException(ex);
+//                    }
 
-                    SocketChannelHandler aSC = aSCM.getSocketChannelHandler( channedId );   
+                    SocketChannelHandler aSC = theOCM.getSocketChannelHandler( channedId );   
                     if( aSC != null ){
 
                         //Get the message sender
@@ -245,6 +245,9 @@ public class ClientPortRouter extends PortRouter {
                             //Send register message
                             RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, channedId);
                             aCMManager.send( aMsg );
+                            
+                            //Wait for the registration to complete
+                            waitForConnection();
                             
 //                            if( channedId == ConnectionManager.COMM_CHANNEL_ID ){                               
 //                                //Create a hello message and send it
@@ -284,15 +287,15 @@ public class ClientPortRouter extends PortRouter {
     public void socketClosed( SocketChannelHandler theHandler ){
         
         int channelId = theHandler.getChannelId();
-        aSCM.removeHandler( channelId );
+        theOCM.removeHandler( channelId );
         
         //Stop the keepalive
-        KeepAliveTimer aKAT = aSCM.getKeepAliveTimer( channelId );
+        KeepAliveTimer aKAT = theOCM.getKeepAliveTimer( channelId );
         if( aKAT != null )
             aKAT.shutdown();
 
         DebugPrinter.printMessage(NAME_Class, "Socket closed.");
-        ReconnectTimer aReconnectTimer = aSCM.getReconnectTimer(channelId);
+        ReconnectTimer aReconnectTimer = theOCM.getReconnectTimer(channelId);
         if( aReconnectTimer != null && !aReconnectTimer.isRunning() && reconnectEnable ){
             
             DebugPrinter.printMessage(NAME_Class, "Starting Reconnect Timer");
@@ -363,7 +366,7 @@ public class ClientPortRouter extends PortRouter {
         theConnectionLock.shutdown();
         
         //Shut down the handler 
-        aSCM.shutdown();
+        theOCM.shutdown();
 
     }
     
@@ -378,7 +381,7 @@ public class ClientPortRouter extends PortRouter {
      * @param passedIdArr
      * @return 
     */
-    public int ensureConnectivity( String serverIp, int passedPort, LockListener passedListener, Integer... passedIdArr ) {
+    public synchronized int ensureConnectivity( String serverIp, int passedPort, LockListener passedListener, Integer... passedIdArr ) {
 
         int channelId = 0;
         try {
@@ -387,11 +390,11 @@ public class ClientPortRouter extends PortRouter {
             if( passedIdArr.length > 0){
                 channelId = passedIdArr[0];
             } else {
-                channelId = aSCM.getNextChannelId();
+                channelId = theOCM.getNextChannelId();
             }
             
             //Get the handler
-            SocketChannelHandler aSC = aSCM.getSocketChannelHandler( channelId );            
+            SocketChannelHandler aSC = theOCM.getSocketChannelHandler( channelId );            
             if(aSC == null || aSC.getState() == Constants.DISCONNECTED){            
            
                 //Get the inet
@@ -404,7 +407,7 @@ public class ClientPortRouter extends PortRouter {
                 } else {
                 
                     //Set flag
-                    aSC = aSCM.getSocketChannelHandler( channelId );  
+                    aSC = theOCM.getSocketChannelHandler( channelId );  
                     if( aSC == null || aSC.getState() == Constants.DISCONNECTED ){
                         channelId = 0x0;
                     } else {
@@ -412,6 +415,9 @@ public class ClientPortRouter extends PortRouter {
                         //Set the connected flag
                         KeepAliveTimer theKeepAliveTimer = new KeepAliveTimer( thePortManager, channelId);
                         theKeepAliveTimer.start();   
+                        
+                        //Set timer
+                        theOCM.setKeepAliveTimer( channelId, theKeepAliveTimer );
                         
                     }
                 }
@@ -433,7 +439,7 @@ public class ClientPortRouter extends PortRouter {
      */    
     @Override
     public OutgoingConnectionManager getConnectionManager( Integer... passedId ) {
-        return aSCM;
+        return theOCM;
     }
     
     //==========================================================================
@@ -447,7 +453,7 @@ public class ClientPortRouter extends PortRouter {
                     
         if( aCM instanceof OutgoingConnectionManager ){
             OutgoingConnectionManager anOCM = (OutgoingConnectionManager)aCM;
-            aSCM = anOCM;
+            theOCM = anOCM;
         }
       
     }

@@ -45,15 +45,11 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.concurrent.LockListener;
-import pwnbrew.log.LoggableException;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.Constants;
@@ -61,7 +57,6 @@ import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.shell.Shell;
-import pwnbrew.network.shell.ShellMessageManager;
 
 /**
  *

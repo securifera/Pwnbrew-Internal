@@ -297,13 +297,17 @@ abstract public class DataManager {
                 //See if the relay port router has the client id
                 thePR = aRelayManager.getServerPorterRouter();
                 aCM = thePR.getConnectionManager(destClientId);
-                theHandler = aCM.getSocketChannelHandler(channelId);
-                
-                if( theHandler == null ){
+                if( aCM != null ){
+                    theHandler = aCM.getSocketChannelHandler(channelId);
+                    if( theHandler == null ){
+                        Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified channel.", null);      
+                        return;
+                    }
+                    
+                } else {
                     Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified client.", null);      
                     return;
                 }
-                
             }                        
 
             ByteBuffer aByteBuffer;

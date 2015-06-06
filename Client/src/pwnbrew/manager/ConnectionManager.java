@@ -49,9 +49,6 @@ public abstract class ConnectionManager {
     public final static int STAGE_CHANNEL_ID = Message.STAGING_MESSAGE_TYPE;
     public final static int COMM_CHANNEL_ID = 1;
    
-    
-//    abstract public void closeConnections();
-    
     abstract public void shutdown();
     
     //===============================================================
@@ -79,6 +76,6 @@ public abstract class ConnectionManager {
      * 
      * @param channelId 
     */
-    abstract public void removeHandler(int channelId);
+    abstract public SocketChannelHandler removeHandler(int channelId);
 
 }

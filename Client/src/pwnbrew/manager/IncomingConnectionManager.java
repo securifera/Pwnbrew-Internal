@@ -95,12 +95,14 @@ public class IncomingConnectionManager extends ConnectionManager {
     /**
      * 
      * @param channelId 
+     * @return  
      */
     @Override
-    public void removeHandler( int channelId ) {
+    public SocketChannelHandler removeHandler( int channelId ) {
         
+        SocketChannelHandler aSCH;
         synchronized(channelIdHandlerMap){
-            channelIdHandlerMap.remove(channelId);
+            aSCH = channelIdHandlerMap.remove(channelId);
             if( channelId == COMM_CHANNEL_ID ){
                 //Shutdown the rest if the comm channel is being removed them clear
                 for( SocketChannelHandler aHandler : channelIdHandlerMap.values() ){
@@ -109,6 +111,7 @@ public class IncomingConnectionManager extends ConnectionManager {
                 channelIdHandlerMap.clear();
             }                           
         }
+        return aSCH;
     }
 
     //==========================================================================

@@ -74,9 +74,10 @@ abstract public class ProcessMessage extends Message {
      * @param dstHostId
      * @param passedBB
     */
-    public ProcessMessage( byte passedFunction, ByteBuffer passedBB, int dstHostId ) {
+    public ProcessMessage( byte passedFunction, int passedChannelId, ByteBuffer passedBB, int dstHostId ) {
         super( PROCESS_MESSAGE_TYPE, dstHostId );
         function = passedFunction;
+        channelId = SocketUtilities.intToByteArray( passedChannelId );
           
         setBytes(passedBB);
     }

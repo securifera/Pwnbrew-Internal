@@ -54,16 +54,16 @@ import pwnbrew.manager.PortManager;
  */
 public class StdErrMessage extends ProcessMessage {
 
-     //==========================================================================
-    /**
-     * Constructor
-     *
-     * @param passedBB
-     * @param dstHostId
-    */
-    public StdErrMessage( ByteBuffer passedBB, int dstHostId ) {
-        super( STD_ERR, passedBB, dstHostId );
-    }
+//     //==========================================================================
+//    /**
+//     * Constructor
+//     *
+//     * @param passedBB
+//     * @param dstHostId
+//    */
+//    public StdErrMessage( ByteBuffer passedBB, int dstHostId ) {
+//        super( STD_ERR, passedBB, dstHostId );
+//    }
     
     //==========================================================================
     /**

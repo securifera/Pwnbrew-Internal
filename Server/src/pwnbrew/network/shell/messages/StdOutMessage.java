@@ -54,17 +54,17 @@ import pwnbrew.manager.PortManager;
  */
 public class StdOutMessage extends ProcessMessage {
 
-    //==========================================================================
-    /**
-     * Constructor
-     *
-     * @param passedBB
-     * @param dstHostId
-    */
-    public StdOutMessage( ByteBuffer passedBB, int dstHostId ) {
-        super( STD_OUT, passedBB, dstHostId );
-    }
-    
+//    //==========================================================================
+//    /**
+//     * Constructor
+//     *
+//     * @param passedBB
+//     * @param dstHostId
+//    */
+//    public StdOutMessage( ByteBuffer passedBB, int dstHostId ) {
+//        super( STD_OUT, passedBB, dstHostId );
+//    }
+//    
     //==========================================================================
     /**
      * Constructor

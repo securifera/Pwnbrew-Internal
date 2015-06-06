@@ -495,7 +495,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
                 } else {
 
                     int dstHostId = Integer.parseInt( theListener.getHost().getId());
-                    StdInMessage aMsg = new StdInMessage( ByteBuffer.wrap(theStr.getBytes()), dstHostId);  
+                    StdInMessage aMsg = new StdInMessage( channelId, ByteBuffer.wrap(theStr.getBytes()), dstHostId);  
                     //Send the message
                     DataManager.send(theListener.getCommManager(), aMsg);
 

@@ -123,10 +123,10 @@ public final class KillShell extends ControlMessage{ // NO_UCD (use default)
         ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
         
         //Get the connection manager
-        OutgoingConnectionManager aOCM = aPR.getConnectionManager(theChannelId);
-        if( aOCM != null ){
-            aOCM.closeShell();        
-        }
+        OutgoingConnectionManager aOCM = aPR.getConnectionManager( getSrcHostId() );
+        if( aOCM != null )
+            aOCM.closeShell( theChannelId );   
+        
     }
 
 }
