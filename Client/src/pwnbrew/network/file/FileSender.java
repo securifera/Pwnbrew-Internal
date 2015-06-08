@@ -97,6 +97,7 @@ public class FileSender extends ManagedRunnable implements LockListener {
         super( Constants.Executor);
         theCommManager = passedExecutor;
         theFileAck = passedAck;
+        channelId = theFileAck.getFileChannelId();
     }   
     
     @Override
@@ -105,15 +106,15 @@ public class FileSender extends ManagedRunnable implements LockListener {
         //Get the socket router
         ClientConfig theConf = ClientConfig.getConfig();
         int socketPort = theConf.getSocketPort();
-        String serverIp = theConf.getServerIp();
+//        String serverIp = theConf.getServerIp();
         ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( socketPort );
 
         //Initiate the file transfer
         if(aPR != null){
 
             int fileId = theFileAck.getFileId();
-            channelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
-            if(channelId != 0 ){
+//            channelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
+//            if(channelId != 0 ){
                 
                 try {
 
@@ -126,7 +127,7 @@ public class FileSender extends ManagedRunnable implements LockListener {
 
                     //If the file exist
                     if( fileToSend.exists() ){
-                        sendFile( aPR, fileToSend,  fileId); 
+                        sendFile( aPR, fileToSend,  fileId ); 
                     } else {
                         throw new IOException("File does not exist");
                     }            
@@ -143,7 +144,7 @@ public class FileSender extends ManagedRunnable implements LockListener {
                     }
 
                 }
-            }
+//            }
         }       
         
     } 
@@ -214,7 +215,7 @@ public class FileSender extends ManagedRunnable implements LockListener {
                     fileDataMsg.setChannelId(channelId);
                     fileDataMsg.setDestHostId(dstHostId);
                     
-                    thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
+                    thePR.queueSend( fileDataMsg.getBytes(), channelId );
 
                 }
 

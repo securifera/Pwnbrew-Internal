@@ -167,18 +167,18 @@ public final class Pwnbrew extends PortManager implements TaskListener {
         }
     }
 
-    //===============================================================
-     /**
-     * Notifies the task handler that a file was successfully sent
-     *
-     * @param taskId the task id
-     * @param fileOp the kind of file notification
-      *
-    */
-    @Override
-    public void notifyHandler( int taskId, int fileOp ) {
-
-    }
+//    //===============================================================
+//     /**
+//     * Notifies the task handler that a file was successfully sent
+//     *
+//     * @param taskId the task id
+//     * @param fileOp the kind of file notification
+//      *
+//    */
+//    @Override
+//    public void notifyHandler( int taskId, int fileOp ) {
+//
+//    }
 
      /**
      * @param args the command line arguments
@@ -284,35 +284,35 @@ public final class Pwnbrew extends PortManager implements TaskListener {
 
     }
 
-    //===============================================================
-    /**
-     * Handles the completion of a task
-     *
-     * @param taskId
-     * @param resultStatus
-    */
-    @Override
-    public void taskFinished(Integer taskId, String resultStatus ) {
-        
-     
-        //Send out task fin
-        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sent task finish for " + taskId);
-
-        try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( this );
-            }
-            
-            TaskStatus finMessage = new TaskStatus( taskId, resultStatus );
-            aCMManager.send(finMessage);
-            
-        } catch (IOException | LoggableException ex ){
-           RemoteLog.log(Level.SEVERE, NAME_Class, "taskFinished()", ex.getMessage(), ex);
-        }
-
-    }
+//    //===============================================================
+//    /**
+//     * Handles the completion of a task
+//     *
+//     * @param taskId
+//     * @param resultStatus
+//    */
+//    @Override
+//    public void taskFinished(Integer taskId, String resultStatus ) {
+//        
+//     
+//        //Send out task fin
+//        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sent task finish for " + taskId);
+//
+//        try {
+//            
+//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//            if( aCMManager == null ){
+//                aCMManager = ControlMessageManager.initialize( this );
+//            }
+//            
+//            TaskStatus finMessage = new TaskStatus( taskId, resultStatus );
+//            aCMManager.send(finMessage);
+//            
+//        } catch (IOException | LoggableException ex ){
+//           RemoteLog.log(Level.SEVERE, NAME_Class, "taskFinished()", ex.getMessage(), ex);
+//        }
+//
+//    }
 
     //===============================================================
     /**

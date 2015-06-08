@@ -56,13 +56,18 @@ import java.util.logging.Level;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Directories;
-import pwnbrew.utilities.FileUtilities;
 import pwnbrew.misc.ProgressListener;
-import pwnbrew.utilities.Utilities;
+import pwnbrew.network.PortRouter;
+import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileFin;
+import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.FileUtilities;
+import pwnbrew.utilities.Utilities;
+import pwnbrew.xmlBase.ServerConfig;
 
 /**
  *
@@ -81,10 +86,10 @@ final public class FileReceiver {
     
     //For progress
     private int sndFileProgress = 0;                
-    private final int clientId;
+    private final int srcId;
     private final int taskId;
     private final int fileId;
-    private final int channelId = 0;
+    private final int channelId;
     private final String fileHash;
     
     private FileOutputStream aFileStream = null;
@@ -94,34 +99,92 @@ final public class FileReceiver {
     
     private static final String NAME_Class = FileReceiver.class.getSimpleName();
 
-    //===========================================================================
+//    //===========================================================================
+//    /**
+//     * 
+//     *  Constructor
+//     * 
+//     * @param passedManager
+//     * @param passedClientId
+//     * @param passedTaskId
+//     * @param passedFileId
+//     * @param passedFileSize
+//     * @param parentDir
+//     * @param hashFilenameStr 
+//     * @throws pwnbrew.logging.LoggableException 
+//     * @throws java.security.NoSuchAlgorithmException 
+//     * @throws java.io.IOException 
+//     */
+//    public FileReceiver( FileMessageManager passedManager, int passedClientId, int passedTaskId, int passedFileId, 
+//            long passedFileSize, File parentDir, String hashFilenameStr) 
+//            throws LoggableException, NoSuchAlgorithmException, IOException {
+//        
+//        theFileMessageManager = passedManager;
+//        taskId = passedTaskId;
+//        fileId = passedFileId;
+//        fileSize = passedFileSize;
+//        clientId = passedClientId;
+//
+//        //Set the hash
+//        String[] fileHashFileNameArr = hashFilenameStr.split(":", 2);
+//        if( fileHashFileNameArr.length != 2 )
+//            throw new LoggableException("Passed hash filename string is not correct.");
+//            
+//        fileHash = fileHashFileNameArr[0];
+//      
+//        //Create the file digest
+//        fileDigest = MessageDigest.getInstance(Constants.HASH_FUNCTION);
+//        
+//        //Ensure the parent directory exists
+//        Directories.ensureDirectoryExists(parentDir);
+//
+//        String filePath = new File( fileHashFileNameArr[1] ).getName();        
+//        fileLoc = new File( parentDir,  filePath);
+//        if(fileLoc.exists()){
+//
+//            //If file already exists and the hash is the same
+//            String localFileHash = FileUtilities.getFileHash(fileLoc);
+//            if( !localFileHash.equals(fileHash) && !fileLoc.delete()){
+//                cleanupFileTransfer();
+//                throw new LoggableException("File already exists, the hash does not match, and was unable to remove it.");
+//            }
+//
+//        }
+//
+//        //Open the file stream
+//        aFileStream = new FileOutputStream(fileLoc, true);
+//        
+//        //Set the progress listener
+//        theListener = passedManager.getPortManager().getProgressListener();
+//    }
+    
+      //===========================================================================
     /**
      * 
      *  Constructor
      * 
      * @param passedManager
-     * @param passedClientId
-     * @param passedTaskId
-     * @param passedFileId
-     * @param passedFileSize
-     * @param parentDir
-     * @param hashFilenameStr 
-     * @throws pwnbrew.logging.LoggableException 
+     * @param passedMsg
+     * @param parentDir 
+     * @throws pwnbrew.log.LoggableException 
      * @throws java.security.NoSuchAlgorithmException 
      * @throws java.io.IOException 
      */
-    public FileReceiver( FileMessageManager passedManager, int passedClientId, int passedTaskId, int passedFileId, 
-            long passedFileSize, File parentDir, String hashFilenameStr) 
+    public FileReceiver( FileMessageManager passedManager, PushFile passedMsg, File parentDir ) 
             throws LoggableException, NoSuchAlgorithmException, IOException {
-        
+            
         theFileMessageManager = passedManager;
-        taskId = passedTaskId;
-        fileId = passedFileId;
-        fileSize = passedFileSize;
-        clientId = passedClientId;
+        taskId = passedMsg.getTaskId();
+        fileId = passedMsg.getFileId();
+        fileSize = passedMsg.getFileSize();
+        srcId = passedMsg.getSrcHostId();
+        channelId = passedMsg.getFileChannelId();
+        
+        //Get file hash
+        String hashFileNameStr = passedMsg.getHashFilenameString();
 
         //Set the hash
-        String[] fileHashFileNameArr = hashFilenameStr.split(":", 2);
+        String[] fileHashFileNameArr = hashFileNameStr.split(":", 2);
         if( fileHashFileNameArr.length != 2 )
             throw new LoggableException("Passed hash filename string is not correct.");
             
@@ -171,7 +234,7 @@ final public class FileReceiver {
             }
 
         } catch (IOException ex) {
-            ex = null;
+            Log.log(Level.SEVERE, NAME_Class, "cleanupFileTransfer()", ex.getMessage(), ex);
         } 
 
         //Close the file stream
@@ -180,8 +243,27 @@ final public class FileReceiver {
                 aFileStream.close();
             }
         } catch (IOException ex) {
-            ex = null;
+            Log.log(Level.SEVERE, NAME_Class, "cleanupFileTransfer()", ex.getMessage(), ex);
         }  
+        
+        //Close the socket
+        try {
+            
+            ServerConfig theConfig = ServerConfig.getServerConfig();
+            int socketPort = theConfig.getSocketPort();
+
+            //Shutdown the socket
+            PortRouter aSPR = theFileMessageManager.getPortManager().getPortRouter(socketPort);
+            IncomingConnectionManager aICM = (IncomingConnectionManager)aSPR.getConnectionManager(srcId);
+            if( aICM != null ){
+                SocketChannelHandler aSCH = aICM.removeHandler(channelId);
+                if( aSCH != null )
+                    aSCH.shutdown();
+            }
+            
+        } catch (LoggableException ex) {
+            Log.log(Level.SEVERE, NAME_Class, "cleanupFileTransfer()", ex.getMessage(), ex);
+        } 
     }
     
     //===============================================================
@@ -259,7 +341,7 @@ final public class FileReceiver {
         //Send fin message to host
         try {
 
-            PushFileFin finMessage = new PushFileFin( taskId, hexString+":"+fileLoc.getName(), clientId );
+            PushFileFin finMessage = new PushFileFin( taskId, hexString+":"+fileLoc.getName(), srcId, channelId );
             DataManager.send(theFileMessageManager.getPortManager(), finMessage);
             
 

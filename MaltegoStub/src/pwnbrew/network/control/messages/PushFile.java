@@ -63,7 +63,7 @@ public class PushFile extends FileMessage {
     private static final byte OPTION_DATASIZE = 4;
     private static final byte OPTION_FILE_TYPE = 10;    
     public static final byte OPTION_REMOTE_DIR = 12;
-    
+   
     private String hashFilenameStr;
     private long fileSize = 0;
     protected int fileType = -1;

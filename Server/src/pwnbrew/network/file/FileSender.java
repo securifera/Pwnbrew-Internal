@@ -126,7 +126,7 @@ public class FileSender extends ManagedRunnable {
 
                 //Send message to cleanup the file transfer on the client side
                 int clientId = theFileAck.getSrcHostId();
-                PushFileAbort fileAbortMsg = new PushFileAbort( fileId, clientId );
+                PushFileAbort fileAbortMsg = new PushFileAbort( clientId, channelId, fileId );
                 DataManager.send(theCommManager, fileAbortMsg);
 
             }

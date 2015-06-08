@@ -77,6 +77,7 @@ public class PushFile extends FileMessage {
     private static final byte OPTION_DATASIZE = 4;
     private static final byte OPTION_FILE_TYPE = 10;
     public static final byte OPTION_REMOTE_DIR = 12;
+   
   
      //Class name
     private static final String NAME_Class = PushFile.class.getSimpleName();
@@ -86,15 +87,20 @@ public class PushFile extends FileMessage {
      * Constructor
      *
      * @param taskId
+     * @param channelId
      * @param passedType
      * @param fileHashNameStr
      * @param passedLength
     */
-    public PushFile( int taskId, String fileHashNameStr, long passedLength, int passedType ) { // NO_UCD (use default)
+    public PushFile( int taskId, int channelId, String fileHashNameStr, long passedLength, int passedType ) { // NO_UCD (use default)
         super( taskId );
         
         byte[] strBytes = fileHashNameStr.getBytes();
         ControlOption aTlv = new ControlOption(OPTION_HASH_FILENAME, strBytes);
+        addOption(aTlv);       
+         
+        byte[] tempArr = SocketUtilities.intToByteArray(channelId);
+        aTlv = new ControlOption( OPTION_CHANNEL_ID, tempArr);
         addOption(aTlv);
 
         fileSize = passedLength;
@@ -103,7 +109,7 @@ public class PushFile extends FileMessage {
         addOption(aTlv);
         
         fileType = passedType;
-        byte[] tempArr = SocketUtilities.intToByteArray(fileType);
+        tempArr = SocketUtilities.intToByteArray(fileType);
         aTlv = new ControlOption( OPTION_FILE_TYPE, tempArr);
         addOption(aTlv);
         

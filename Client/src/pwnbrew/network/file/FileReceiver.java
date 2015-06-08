@@ -63,7 +63,6 @@ import pwnbrew.utilities.Utilities;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFileFin;
 import pwnbrew.network.control.messages.TaskProgress;
-import pwnbrew.task.TaskListener;
 
 /**
  *
@@ -238,12 +237,7 @@ final public class FileReceiver {
                 //Get the msg Id before clearing all values
                 cleanupFileTransfer();
 
-                //Notify any task handlers waiting
-                PortManager theManager = theFileMessageManager.getPortManager();
-                if( theManager instanceof TaskListener ){
-                    ((TaskListener)theManager).notifyHandler(taskId, Constants.FILE_RECEIVED);
-                }
-                
+                  
                 PushFileFin finMessage = new PushFileFin( taskId, fileId, hexString );
                 finMessage.setDestHostId(srcHostId);
                 if( theCMM != null )

@@ -287,55 +287,61 @@ abstract public class DataManager {
             ConnectionManager aCM = thePR.getConnectionManager(destClientId);
             
             //Get the scoket handler
-            SocketChannelHandler theHandler = aCM.getSocketChannelHandler(channelId);
-            if( theHandler == null ){
-                
-                RelayManager aRelayManager = RelayManager.getRelayManager();
-                if( aRelayManager == null )
-                    aRelayManager = RelayManager.initialize(passedCommManager);
-                
-                //See if the relay port router has the client id
-                thePR = aRelayManager.getServerPorterRouter();
-                aCM = thePR.getConnectionManager(destClientId);
-                if( aCM != null ){
-                    theHandler = aCM.getSocketChannelHandler(channelId);
-                    if( theHandler == null ){
-                        Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified channel.", null);      
+            if( aCM != null ){
+                SocketChannelHandler theHandler = aCM.getSocketChannelHandler(channelId);
+                if( theHandler == null ){
+
+                    RelayManager aRelayManager = RelayManager.getRelayManager();
+                    if( aRelayManager == null )
+                        aRelayManager = RelayManager.initialize(passedCommManager);
+
+                    //See if the relay port router has the client id
+                    thePR = aRelayManager.getServerPorterRouter();
+                    aCM = thePR.getConnectionManager(destClientId);
+                    if( aCM != null ){
+                        theHandler = aCM.getSocketChannelHandler(channelId);
+                        if( theHandler == null ){
+                            Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified channel.", null);      
+                            return;
+                        }
+
+                    } else {
+                        Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified client.", null);      
                         return;
                     }
-                    
-                } else {
-                    Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified client.", null);      
-                    return;
-                }
-            }                        
-
-            ByteBuffer aByteBuffer;
-            int msgLen = passedMessage.getLength();
-            aByteBuffer = ByteBuffer.allocate( msgLen );
-            passedMessage.append(aByteBuffer);
-        
-            //Create a byte array from the messagen byte buffer
-            byte[] msgBytes = Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position());
-         
-            //If wrapping is necessary then wrap it
-            if( theHandler.isWrapping() ){
-                PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
-                if( aWrapper != null ){
-                    
-                    //Set the staged wrapper if necessary
-                    if( aWrapper instanceof ServerHttpWrapper ){
-                        ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
-                        aSrvWrapper.setStaging( theHandler.isStaged());
-                    }
-                    
-                    aByteBuffer = aWrapper.wrapBytes( msgBytes );  
-                    msgBytes = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
                 } 
-            }
-            
-            theHandler.queueBytes(msgBytes);
-    //        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+
+                ByteBuffer aByteBuffer;
+                int msgLen = passedMessage.getLength();
+                aByteBuffer = ByteBuffer.allocate( msgLen );
+                passedMessage.append(aByteBuffer);
+
+                //Create a byte array from the messagen byte buffer
+                byte[] msgBytes = Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position());
+
+                //If wrapping is necessary then wrap it
+                if( theHandler.isWrapping() ){
+                    PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
+                    if( aWrapper != null ){
+
+                        //Set the staged wrapper if necessary
+                        if( aWrapper instanceof ServerHttpWrapper ){
+                            ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+                            aSrvWrapper.setStaging( theHandler.isStaged());
+                        }
+
+                        aByteBuffer = aWrapper.wrapBytes( msgBytes );  
+                        msgBytes = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
+                    } 
+                }
+
+                theHandler.queueBytes(msgBytes);
+                //DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+                
+            } else {
+                Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified client.", null);      
+            } 
+                                
         } catch (IOException | LoggableException ex) {
             Log.log( Level.SEVERE, NAME_Class, "send()", ex.getMessage(), ex);           
         }

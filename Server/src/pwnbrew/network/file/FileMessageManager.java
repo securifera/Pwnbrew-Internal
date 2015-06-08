@@ -62,7 +62,6 @@ import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
-import pwnbrew.network.control.messages.FileMessage;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileAck;
 import pwnbrew.selector.SocketChannelHandler;
@@ -152,16 +151,50 @@ public class FileMessageManager extends DataManager {
         return (FileHandler)theDataHandler;
     }  
     
-    //===============================================================
+//    //===============================================================
+//    /**
+//    * Sets up for a file transfer
+//    *
+//    * @param fileToTransfer
+//    * @return
+//    */
+//    private void initFileTransfer( int clientId, int passedTaskId, int passedFileId, 
+//            File parentDir, String hashFilenameStr, long passedFileSize) 
+//            throws LoggableException, NoSuchAlgorithmException, IOException {
+//
+//        //Get the socket router
+//        ServerPortRouter aPR = (ServerPortRouter) thePortManager.getPortRouter( operatingPort );
+//                       
+//        //Initiate the file transfer
+//        if(aPR != null){
+//            
+//            //Initialize the file transfer
+//            synchronized( theFileReceiverMap ){
+//                
+//                FileReceiver theReceiver = theFileReceiverMap.get(passedFileId);
+//                //If the receive flag is not set
+//                if( theReceiver == null ){
+//
+//                    theReceiver = new FileReceiver( this, clientId, passedTaskId, passedFileId, passedFileSize, parentDir, hashFilenameStr );
+//                    theFileReceiverMap.put(passedFileId, theReceiver);
+//
+//                } else {
+//                    throw new LoggableException("A file receive is already in progress.");
+//                } 
+//            }
+//
+//        }
+//        
+//    }
+//    
+     //===============================================================
     /**
     * Sets up for a file transfer
     *
     * @param fileToTransfer
     * @return
     */
-    private void initFileTransfer( int clientId, int passedTaskId, int passedFileId, 
-            File parentDir, String hashFilenameStr, long passedFileSize) 
-            throws LoggableException, NoSuchAlgorithmException, IOException {
+    private void initFileTransfer( PushFile passedMsg, File parentDir ) throws LoggableException {
 
         //Get the socket router
         ServerPortRouter aPR = (ServerPortRouter) thePortManager.getPortRouter( operatingPort );
@@ -172,12 +205,18 @@ public class FileMessageManager extends DataManager {
             //Initialize the file transfer
             synchronized( theFileReceiverMap ){
                 
-                FileReceiver theReceiver = theFileReceiverMap.get(passedFileId);
+                int fileId = passedMsg.getFileId();
+                FileReceiver theReceiver = theFileReceiverMap.get(fileId);
                 //If the receive flag is not set
                 if( theReceiver == null ){
 
-                    theReceiver = new FileReceiver( this, clientId, passedTaskId, passedFileId, passedFileSize, parentDir, hashFilenameStr );
-                    theFileReceiverMap.put(passedFileId, theReceiver);
+                    try {
+                        //theReceiver = new FileReceiver( this, clientId, passedTaskId, passedFileId, passedFileSize, parentDir, hashFilenameStr );
+                        theReceiver = new FileReceiver( this, passedMsg, parentDir );
+                        theFileReceiverMap.put(fileId, theReceiver);
+                    } catch (NoSuchAlgorithmException | IOException ex) {
+                        throw new LoggableException("Unable to create a new file receiver.");
+                    }
 
                 } else {
                     throw new LoggableException("A file receive is already in progress.");
@@ -230,10 +269,11 @@ public class FileMessageManager extends DataManager {
         boolean retVal = false;
         int taskId = passedMessage.getTaskId();
         int fileId = passedMessage.getFileId();
+        int fileChannelId = passedMessage.getFileChannelId();
         
-        int clientId = passedMessage.getSrcHostId();
+        int srcId = passedMessage.getSrcHostId();
         ServerManager aSM = (ServerManager)thePortManager;
-        File aClientDir = aSM.getHostDirectory( clientId );
+        File aClientDir = aSM.getHostDirectory( srcId );
 
         File libDir = null;
         int fileType = passedMessage.getFileType();
@@ -256,26 +296,27 @@ public class FileMessageManager extends DataManager {
                 break;
         }
 
-        try {
+//        try {
 
             //Get the hash/filename
             String hashFileNameStr = passedMessage.getHashFilenameString();
 
             //Try to begin the file transfer
             long fileSize = passedMessage.getFileSize();
-            initFileTransfer( passedMessage.getSrcHostId(), taskId, fileId, libDir, hashFileNameStr, fileSize );
+//            initFileTransfer( passedMessage.getSrcHostId(), taskId, fileId, libDir, hashFileNameStr, fileSize );
+            initFileTransfer( passedMessage, libDir );
 
             //If filesize == -1 then it is streaming
             if( fileSize >= 0 ){
                 //Send an ack to the sender to begin transfer
                 DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);
-                PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr, clientId );
+                PushFileAck aSFMA = new PushFileAck(taskId, fileId, fileChannelId, hashFileNameStr, srcId );
                 DataManager.send(thePortManager, aSFMA);
             } 
 
-        } catch (IOException | NoSuchAlgorithmException ex){
-            throw new LoggableException(ex);
-        }
+//        } catch (IOException | NoSuchAlgorithmException ex){
+//            throw new LoggableException(ex);
+//        }
 
         retVal = true;  
 

@@ -79,7 +79,8 @@ public abstract class ConnectionManager {
      *  Removes the channel id
      * 
      * @param channelId 
+     * @return  
     */
-    abstract public void removeHandler(int channelId);
+    abstract public SocketChannelHandler removeHandler(int channelId);
 
 }

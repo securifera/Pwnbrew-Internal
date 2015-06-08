@@ -59,6 +59,7 @@ import java.util.Date;
 import java.util.ListIterator;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
@@ -67,14 +68,20 @@ import javax.swing.text.StyledDocument;
 import pwnbrew.execution.ManagedRunnable;
 import pwnbrew.gui.panels.RunnerPane;
 import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.misc.Constants;
+import pwnbrew.network.PortRouter;
+import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.messages.CreateShell;
 import pwnbrew.network.control.messages.KillShell;
 import pwnbrew.network.shell.messages.StdInMessage;
 import pwnbrew.output.StreamReader;
 import pwnbrew.output.StreamReaderListener;
+import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.Utilities;
+import pwnbrew.xmlBase.ServerConfig;
 
 /**
  *
@@ -167,7 +174,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
                 int dstHostId = Integer.parseInt( theListener.getHost().getId());
                 CreateShell aShellMsg = new CreateShell( dstHostId, getCommandStringArray(),
                         getEncoding(), startupStr, getStderrRedirectFlag() );
-                DataManager.send(theListener.getCommManager(), aShellMsg );
+                DataManager.send(theListener.getPortManager(), aShellMsg );
 
             } catch ( UnsupportedEncodingException ex) {
                 Log.log(Level.WARNING, NAME_Class, "spawnShell()", ex.getMessage(), ex );
@@ -497,7 +504,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
                     int dstHostId = Integer.parseInt( theListener.getHost().getId());
                     StdInMessage aMsg = new StdInMessage( channelId, ByteBuffer.wrap(theStr.getBytes()), dstHostId);  
                     //Send the message
-                    DataManager.send(theListener.getCommManager(), aMsg);
+                    DataManager.send(theListener.getPortManager(), aMsg);
 
                 }
             }
@@ -551,11 +558,30 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
             }
             
         } else {
-
-            //Create the message
-            int dstHostId = Integer.parseInt( theListener.getHost().getId() );
-            KillShell aShellMsg = new KillShell(dstHostId, channelId );
-            DataManager.send(theListener.getCommManager(), aShellMsg );
+            
+            try {
+                
+                //Create the message
+                int dstHostId = Integer.parseInt( theListener.getHost().getId() );
+                ServerConfig theConfig = ServerConfig.getServerConfig();
+                int socketPort = theConfig.getSocketPort();
+                
+                //Shutdown the socket
+                PortRouter aSPR = theListener.getPortManager().getPortRouter(socketPort);
+                IncomingConnectionManager aICM = (IncomingConnectionManager)aSPR.getConnectionManager(dstHostId);
+                if( aICM != null ){
+                    SocketChannelHandler aSCH = aICM.removeHandler(channelId);
+                    if( aSCH != null )
+                        aSCH.shutdown();
+                }
+                
+                //Create the message
+                KillShell aShellMsg = new KillShell(dstHostId, channelId );
+                DataManager.send(theListener.getPortManager(), aShellMsg );
+                
+            } catch (LoggableException ex) {
+                Logger.getLogger(Shell.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
         }
     }

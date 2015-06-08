@@ -111,7 +111,7 @@ public class DirExpansionListener implements TreeExpansionListener {
             
             //Send a message
             theController.addRemoteFileSystemTask(aRFST);
-            DataManager.send( theController.getCommManager(), aTaskMessage);
+            DataManager.send( theController.getPortManager(), aTaskMessage);
             
         }
 

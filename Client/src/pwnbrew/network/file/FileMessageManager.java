@@ -155,7 +155,7 @@ public class FileMessageManager extends DataManager implements LockListener {
         //Get the socket router
         ClientConfig theConf = ClientConfig.getConfig();
         int socketPort = theConf.getSocketPort();
-        String serverIp = theConf.getServerIp();
+//        String serverIp = theConf.getServerIp();
         ClientPortRouter aPR = (ClientPortRouter) thePortManager.getPortRouter( socketPort );
                        
         //Initiate the file transfer

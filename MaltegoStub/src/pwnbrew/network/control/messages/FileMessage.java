@@ -56,7 +56,9 @@ public class FileMessage extends Tasking {
         
     protected static final byte OPTION_HASH_FILENAME = 3;
     private static final byte OPTION_FILE_ID = 23;
-  
+    private static final byte OPTION_CHANNEL_ID = 102; 
+   
+    protected int fileChannelId = 0;    
     private int fileId = 0;
     
     // ==========================================================================
@@ -124,7 +126,10 @@ public class FileMessage extends Tasking {
             switch( tempTlv.getType()){
                 case OPTION_FILE_ID:
                     fileId = SocketUtilities.byteArrayToInt(theValue);
-                    break;  
+                    break; 
+                case OPTION_CHANNEL_ID:
+                    fileChannelId = SocketUtilities.byteArrayToInt(theValue);
+                    break;
                 default:
                     retVal = false;
                     break;              
@@ -141,6 +146,16 @@ public class FileMessage extends Tasking {
     */
     public int getFileId(){
        return fileId;
+    }
+    
+    //===============================================================
+    /**
+     * Returns the integer representation of the file id
+     *
+     * @return
+    */
+    public int getFileChannelId(){
+       return fileChannelId;
     }
 
 }

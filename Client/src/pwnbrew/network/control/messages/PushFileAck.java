@@ -65,7 +65,7 @@ public final class PushFileAck extends FileMessage {
 
     private File fileToReceive = null;
     private String hashFilenameStr;
-
+   
      //Class name
     private static final String NAME_Class = PushFileAck.class.getSimpleName();
     
