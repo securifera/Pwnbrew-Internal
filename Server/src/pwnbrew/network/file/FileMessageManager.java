@@ -57,6 +57,7 @@ import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
@@ -64,6 +65,7 @@ import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileAck;
+import pwnbrew.network.control.messages.PushFileFin;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.xmlBase.ServerConfig;
 
@@ -366,6 +368,52 @@ public class FileMessageManager extends DataManager {
         }
         
         aSender.start();
+        
+    }
+    
+    //===============================================================
+    /**
+     *  Send the file referenced by the message.
+     * 
+     * @param passedMsg 
+     */
+    public void cleanupFileSender(PushFileFin passedMsg) {
+        
+         
+        //Close the socket
+        try {
+            
+            int srcId = passedMsg.getSrcHostId();
+            int taskId = passedMsg.getTaskId();
+            int fileId = passedMsg.getFileId();
+            int channelId = passedMsg.getFileChannelId();
+            
+            ServerConfig theConfig = ServerConfig.getServerConfig();
+            int socketPort = theConfig.getSocketPort();
+
+            //Shutdown the socket
+            PortRouter aSPR = getPortManager().getPortRouter(socketPort);
+            IncomingConnectionManager aICM = (IncomingConnectionManager)aSPR.getConnectionManager(srcId);
+            if( aICM != null ){
+                SocketChannelHandler aSCH = aICM.removeHandler(channelId);
+                if( aSCH != null )
+                    aSCH.shutdown();
+            }
+            
+        
+                
+            synchronized( theFileSenderMap ){
+                Map<Integer, FileSender> senderMap = theFileSenderMap.get(taskId);
+                if( senderMap != null){
+                    FileSender aFileSender = senderMap.remove(fileId);
+                    if( aFileSender != null )
+                        aFileSender.shutdown();
+                }
+            }
+        
+        } catch (LoggableException ex) {
+            Log.log(Level.SEVERE, NAME_Class, "cleanupFileTransfer()", ex.getMessage(), ex);
+        } 
         
     }
 

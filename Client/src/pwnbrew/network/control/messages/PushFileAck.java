@@ -73,12 +73,13 @@ public final class PushFileAck extends FileMessage {
     /**
      * Constructor
      *
-     * @param passedId
+     * @param passedChannelId
+     * @param passedTaskId
      * @param hashFileNameStr
      * @param passedFileId
     */
-    public PushFileAck(int passedId, int passedFileId, String hashFileNameStr ) {
-       super(passedId, passedFileId );
+    public PushFileAck(int passedChannelId, int passedTaskId, int passedFileId, String hashFileNameStr ) {
+       super(passedChannelId, passedTaskId, passedFileId );
 
        byte[] strBytes = hashFileNameStr.getBytes();
        ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);

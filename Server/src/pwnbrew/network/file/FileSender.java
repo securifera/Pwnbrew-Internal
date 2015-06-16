@@ -106,6 +106,7 @@ public class FileSender extends ManagedRunnable {
 //        if(aPR != null){
             
             int fileId = theFileAck.getFileId();
+            channelId = theFileAck.getChannelId();
             try {
 
                 File fileToSend = new File( theFileAck.getFilename());

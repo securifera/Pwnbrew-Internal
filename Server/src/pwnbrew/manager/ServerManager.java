@@ -243,38 +243,40 @@ public class ServerManager extends PortManager {
                 String clientIdStr = Integer.toString( clientId );
                 aCM.removeHandler(channelId);
                 
-                //Get the host controller
-                HostController theController = getHostController(clientIdStr);
-                if( theController != null ){
+                if( channelId == ConnectionManager.COMM_CHANNEL_ID ){
+                    //Get the host controller
+                    HostController theController = getHostController(clientIdStr);
+                    if( theController != null ){
 
-                    final List<HostController> theHostList = new ArrayList<>();
-                    theHostList.add(theController);
+                        final List<HostController> theHostList = new ArrayList<>();
+                        theHostList.add(theController);
 
-                    //Add any pivoting hosts
-                    List<String> theInternalHosts = theController.getHost().getConnectedHostIdList();
-                    for( String idStr : theInternalHosts ){
-                        HostController aController = getHostController(idStr);
-                        theHostList.add(aController);
-                    }         
+                        //Add any pivoting hosts
+                        List<String> theInternalHosts = theController.getHost().getConnectedHostIdList();
+                        for( String idStr : theInternalHosts ){
+                            HostController aController = getHostController(idStr);
+                            theHostList.add(aController);
+                        }         
 
-                    SwingUtilities.invokeLater( new Runnable() {
+                        SwingUtilities.invokeLater( new Runnable() {
 
-                        @Override
-                        public void run() {                    
+                            @Override
+                            public void run() {                    
 
-                            for( HostController nextController: theHostList ){
-                                hostDisconnected( (Host) nextController.getObject() );
+                                for( HostController nextController: theHostList ){
+                                    hostDisconnected( (Host) nextController.getObject() );
 
-                                HostTabPanel thePanel = nextController.getRootPanel();
-                                if( thePanel != null )
-                                    thePanel.getShellPanel().disablePanel( false );
+                                    HostTabPanel thePanel = nextController.getRootPanel();
+                                    if( thePanel != null )
+                                        thePanel.getShellPanel().disablePanel( false );
 
-                                nextController.updateComponents();
-                                nextController.saveToDisk();
+                                    nextController.updateComponents();
+                                    nextController.saveToDisk();
+                                }
                             }
-                        }
-                    });
+                        });
 
+                    }
                 }
             }
         }

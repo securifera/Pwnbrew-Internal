@@ -100,8 +100,8 @@ public class FileMessage extends Tasking {
         addOption(aTlv);
         
          //Add the option
-        byte[] channelId = SocketUtilities.intToByteArray(passedChannelId);
-        aTlv = new ControlOption(OPTION_CHANNEL_ID, channelId);
+        byte[] tempChannelId = SocketUtilities.intToByteArray(passedChannelId);
+        aTlv = new ControlOption(OPTION_CHANNEL_ID, tempChannelId);
         addOption(aTlv);
     }
     

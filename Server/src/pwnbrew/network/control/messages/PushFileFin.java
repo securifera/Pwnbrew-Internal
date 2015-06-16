@@ -45,11 +45,12 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.log.LoggableException;
 import java.io.UnsupportedEncodingException;
+import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
+import pwnbrew.network.file.FileMessageManager;
 
 /**
  *
@@ -127,6 +128,9 @@ public final class PushFileFin extends FileMessage {
     public void evaluate( PortManager passedManager ) {       
 
         DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received Fin message. Id: " + Integer.toString( getChannelId()));
+        FileMessageManager aFMM = FileMessageManager.getMessageManager();
+        if( aFMM != null )
+            aFMM.cleanupFileSender(this);        
        
     }
 

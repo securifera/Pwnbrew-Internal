@@ -51,7 +51,6 @@ import pwnbrew.ClientConfig;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ClientPortRouter;
-import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.selector.SocketChannelHandler;
@@ -68,12 +67,13 @@ public final class PushFileFin extends FileMessage {
     /**
      * Constructor
      *
-     * @param passedId
+     * @param passedChannelId
+     * @param passedTaskId
      * @param passedFileId
      * @param hashFileNameStr
     */
-    public PushFileFin( int passedId, int passedFileId, String hashFileNameStr ) {
-       super(passedId, passedFileId );     
+    public PushFileFin( int passedChannelId, int passedTaskId, int passedFileId, String hashFileNameStr ) {
+       super(passedChannelId, passedTaskId, passedFileId );     
          
        byte[] strBytes = hashFileNameStr.getBytes();
        ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);

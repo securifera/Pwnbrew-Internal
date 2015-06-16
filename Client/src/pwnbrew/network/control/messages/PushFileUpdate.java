@@ -53,12 +53,13 @@ public final class PushFileUpdate extends FileMessage {
     /**
      * Constructor
      *
-     * @param passedId
+     * @param passedChannelId
+     * @param passedTaskId
      * @param passedFileId
      * @param passedFileSize
     */
-    public PushFileUpdate( int passedId, int passedFileId, long passedFileSize ) {
-        super(passedId, passedFileId );     
+    public PushFileUpdate( int passedChannelId, int passedTaskId, int passedFileId, long passedFileSize ) {
+        super(passedChannelId, passedTaskId, passedFileId );     
 
         byte[] tempArr = SocketUtilities.longToByteArray(passedFileSize);
         ControlOption aTlv = new ControlOption( OPTION_DATASIZE, tempArr);

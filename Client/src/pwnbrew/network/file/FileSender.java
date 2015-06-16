@@ -139,7 +139,7 @@ public class FileSender extends ManagedRunnable implements LockListener {
                     ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
                     if( aCMManager != null ){
                         //Send message to cleanup the file transfer on the client side
-                        PushFileAbort fileAbortMsg = new PushFileAbort( fileId );
+                        PushFileAbort fileAbortMsg = new PushFileAbort( channelId, fileId );
                         aCMManager.send(fileAbortMsg);
                     }
 
