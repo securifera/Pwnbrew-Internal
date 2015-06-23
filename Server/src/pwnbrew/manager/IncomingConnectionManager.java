@@ -49,7 +49,7 @@ import pwnbrew.selector.SocketChannelHandler;
 public class IncomingConnectionManager extends ConnectionManager {
           
     private final int theClientId;
-    private final Map<Integer, SocketChannelHandler> channelIdHandlerMap = new HashMap<>();
+    protected final Map<Integer, SocketChannelHandler> channelIdHandlerMap = new HashMap<>();
 
     //==========================================================================
     /**
@@ -112,20 +112,6 @@ public class IncomingConnectionManager extends ConnectionManager {
             }                           
         }
         return aSCH;
-    }
-
-    //==========================================================================
-    /**
-     * Return the socket handler
-     * @param channelId
-     * @return 
-     */
-    public SocketChannelHandler getHandler(Integer channelId) {
-        SocketChannelHandler aHandler;
-        synchronized(channelIdHandlerMap){
-            aHandler = channelIdHandlerMap.get(channelId);
-        }
-        return aHandler;
     }
 
     //==========================================================================

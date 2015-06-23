@@ -285,30 +285,37 @@ abstract public class DataManager {
             //Try the default port router
             PortRouter thePR = passedCommManager.getPortRouter( serverPort );
             ConnectionManager aCM = thePR.getConnectionManager(destClientId);
+            if( aCM == null ){
+                RelayManager aRelayManager = RelayManager.getRelayManager();
+                if( aRelayManager != null ){
+                    thePR = aRelayManager.getServerPorterRouter();
+                    aCM = thePR.getConnectionManager(destClientId);                
+                }
+            }
             
-            //Get the scoket handler
+            //Get the socket handler
             if( aCM != null ){
                 SocketChannelHandler theHandler = aCM.getSocketChannelHandler(channelId);
                 if( theHandler == null ){
-
-                    RelayManager aRelayManager = RelayManager.getRelayManager();
-                    if( aRelayManager == null )
-                        aRelayManager = RelayManager.initialize(passedCommManager);
-
-                    //See if the relay port router has the client id
-                    thePR = aRelayManager.getServerPorterRouter();
-                    aCM = thePR.getConnectionManager(destClientId);
-                    if( aCM != null ){
-                        theHandler = aCM.getSocketChannelHandler(channelId);
-                        if( theHandler == null ){
-                            Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified channel.", null);      
-                            return;
-                        }
-
-                    } else {
+//
+////                    RelayManager aRelayManager = RelayManager.getRelayManager();
+////                    if( aRelayManager == null )
+////                        aRelayManager = RelayManager.initialize(passedCommManager);
+//
+//                    //See if the relay port router has the client id
+//                    thePR = aRelayManager.getServerPorterRouter();
+//                    aCM = thePR.getConnectionManager(destClientId);
+//                    if( aCM != null ){
+//                        theHandler = aCM.getSocketChannelHandler(channelId);
+//                        if( theHandler == null ){
+//                            Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified channel.", null);      
+//                            return;
+//                        }
+//
+//                    } else {
                         Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified client.", null);      
                         return;
-                    }
+//                    }
                 } 
 
                 ByteBuffer aByteBuffer;
@@ -342,7 +349,7 @@ abstract public class DataManager {
                 Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified client.", null);      
             } 
                                 
-        } catch (IOException | LoggableException ex) {
+        } catch (LoggableException ex) {
             Log.log( Level.SEVERE, NAME_Class, "send()", ex.getMessage(), ex);           
         }
     }

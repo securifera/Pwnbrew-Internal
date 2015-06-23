@@ -174,7 +174,7 @@ public final class Server {
             boolean loop = true;
             while(loop){
                 System.out.print("\n>");
-                String line=buffer.readLine().toLowerCase();
+                String line = buffer.readLine().toLowerCase();
                 switch(line){
                     case "i":
                         System.out.print("Please enter the path to the certificate:");

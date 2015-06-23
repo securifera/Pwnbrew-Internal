@@ -56,6 +56,7 @@ import pwnbrew.utilities.SocketUtilities;
  */
 public abstract class Message {
     
+    public static final byte REGISTER_MESSAGE_TYPE = 40;
     public static final byte CONTROL_MESSAGE_TYPE = 88;
     public static final byte PROCESS_MESSAGE_TYPE = 89;
     public static final byte FILE_MESSAGE_TYPE = 90;

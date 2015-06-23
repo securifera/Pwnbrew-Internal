@@ -150,7 +150,7 @@ public class ControlMessageHandler extends DataHandler {
             ControlMessage aMessage = ControlMessage.getMessage( ByteBuffer.wrap( passedByteArray ) );        
             if( aMessage instanceof MaltegoMessage ){
                 RelayManager theRelayManager = RelayManager.getRelayManager();
-                if( theRelayManager == null || !theRelayManager.getServerPorterRouter().equals(srcPortRouter) ){
+                if( theRelayManager != null && !theRelayManager.getServerPorterRouter().equals(srcPortRouter) ){
                     Log.log(Level.SEVERE, NAME_Class, "processData()", "*******Attempt to process maltego message from client.******", null );
                     return;
                 }

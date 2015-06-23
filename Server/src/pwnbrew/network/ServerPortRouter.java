@@ -52,8 +52,10 @@ import java.util.Timer;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.manager.IncomingConnectionManager;
+import pwnbrew.manager.MaltegoConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.selector.AcceptHandler;
 import pwnbrew.selector.SocketChannelHandler;
 
@@ -114,7 +116,12 @@ public class ServerPortRouter extends PortRouter {
             synchronized(clientIdManagerMap){
                 IncomingConnectionManager aCCM = clientIdManagerMap.get( passedClientId );
                 if( aCCM == null ){
-                    aCCM = new IncomingConnectionManager( passedClientId );
+                    RelayManager theRelayManager = RelayManager.getRelayManager();
+                    if( theRelayManager != null && theRelayManager.getServerPorterRouter().equals(this) )
+                        aCCM = new MaltegoConnectionManager( passedClientId );
+                    else
+                        aCCM = new IncomingConnectionManager( passedClientId );
+                    
                 }
                 
                 //Set the handler for the channelId

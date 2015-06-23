@@ -53,13 +53,17 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.SSLException;
+import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
+import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.socket.SocketChannelWrapper;
 
 /**
@@ -126,7 +130,7 @@ public class SocketChannelHandler implements Selectable {
             } else {
                 passedSelKey.cancel();
             }
-        } catch ( CancelledKeyException | IOException ex ){
+        } catch ( CancelledKeyException | IOException | LoggableException ex ){
             
             //Cancel the key
             passedSelKey.cancel();
@@ -135,7 +139,7 @@ public class SocketChannelHandler implements Selectable {
             shutdown();
             thePortRouter.socketClosed( this );
             
-        }
+        } 
 
         //TODO handle the case a RuntimeException is thrown doing SSL handshake
     }
@@ -222,7 +226,7 @@ public class SocketChannelHandler implements Selectable {
      * @param sk the Selection Key
      * @throws IOException 
     */
-    private void receive(SelectionKey sk) throws IOException {
+    private void receive(SelectionKey sk) throws IOException, LoggableException {
 	
         try {
             
@@ -317,11 +321,19 @@ public class SocketChannelHandler implements Selectable {
                                 //Get dest id
                                 byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
                                 int dstId = SocketUtilities.byteArrayToInt(dstHostId);
+                                
+                                if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
+                                    
+                                    RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));                                                
+                                    aMsg.evaluate(thePortRouter.getPortManager());
+                                                                                                       
+                                } else {                                
 
-                                try{
-                                    DataManager.routeMessage( thePortRouter.getCommManager(), currMsgType, dstId, msgByteArr );                      
-                                } catch(Exception ex ){
-                                    DebugPrinter.printMessage( NAME_Class, "receive", ex.getMessage(), ex);
+                                    try{
+                                        DataManager.routeMessage( thePortRouter.getPortManager(), currMsgType, dstId, msgByteArr );                      
+                                    } catch(Exception ex ){
+                                        DebugPrinter.printMessage( NAME_Class, "receive", ex.getMessage(), ex);
+                                    }
                                 }
                             }
 

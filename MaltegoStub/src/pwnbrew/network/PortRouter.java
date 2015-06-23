@@ -61,7 +61,7 @@ abstract public class PortRouter {
     
     protected final SelectionRouter theSelectionRouter;
     private final boolean encrypted;
-    protected final PortManager theCommManager;
+    protected final PortManager thePortManager;
     
     private volatile boolean notified = false;
     private volatile boolean waiting = false;
@@ -80,7 +80,7 @@ abstract public class PortRouter {
      */
     public PortRouter(PortManager passedManager, boolean passedBool ) throws IOException { // NO_UCD (use default)
 
-        theCommManager = passedManager;       
+        thePortManager = passedManager;       
         encrypted = passedBool;
         
         //Create the selection router and start it
@@ -105,8 +105,8 @@ abstract public class PortRouter {
      *
      * @return
      */
-    public PortManager getCommManager() {
-        return theCommManager;
+    public PortManager getPortManager() {
+        return thePortManager;
     }
     
      //===============================================================
@@ -238,6 +238,7 @@ abstract public class PortRouter {
             notified = true;
             notifyAll(); //Notify the thread
         }
+        
     }/* END beNotified() */
      
     //===============================================================
