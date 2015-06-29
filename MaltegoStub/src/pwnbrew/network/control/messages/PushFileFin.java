@@ -69,10 +69,11 @@ public final class PushFileFin extends FileMessage {
      * @param taskId
      * @param dstHostId
      * @param hashFileNameStr
+     * @param passedChannelId
      * @throws java.io.UnsupportedEncodingException
     */
-    public PushFileFin( int taskId, String hashFileNameStr, int dstHostId ) throws UnsupportedEncodingException  {
-        super(taskId, dstHostId  );       
+    public PushFileFin( int taskId, String hashFileNameStr, int dstHostId, int passedChannelId ) throws UnsupportedEncodingException  {
+        super( dstHostId, passedChannelId, taskId  );       
 
         byte[] strBytes = hashFileNameStr.getBytes("US-ASCII");
         ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);

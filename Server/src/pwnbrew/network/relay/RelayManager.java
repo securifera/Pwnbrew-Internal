@@ -133,11 +133,13 @@ public class RelayManager extends DataManager {
             
             //Get the socketchannel handler
             ConnectionManager aCM = thePR.getConnectionManager(tempId);
-            SocketChannelHandler theHandler = aCM.getSocketChannelHandler( channelId );
-            if( theHandler != null ){
-                theHandler.queueBytes(msgBytes);
-            } else {
-                Log.log( Level.SEVERE, NAME_Class, "handleMessage()", "No socket handler found for the given id.", null);    
+            if( aCM != null ){
+                SocketChannelHandler theHandler = aCM.getSocketChannelHandler( channelId );
+                if( theHandler != null ){
+                    theHandler.queueBytes(msgBytes);
+                } else {
+                    Log.log( Level.SEVERE, NAME_Class, "handleMessage()", "No socket handler found for the given id.", null);    
+                }
             }
             
         } catch (LoggableException ex) {

@@ -55,10 +55,11 @@ public class OutgoingConnectionManager extends ConnectionManager {
     private final Map<Integer, SocketChannelHandler> channelIdHandlerMap = new HashMap<>();
     private final Map<Integer, KeepAliveTimer> theKeepAliveTimerMap = new HashMap<>();
     private final Map<Integer, ReconnectTimer> theReconnectTimerMap = new HashMap<>();
+    private final Map<Integer, Shell> theShellMap = new HashMap<>();
     
     //Channel Id generator
     private static int messageCounter = 2;
-    private Shell theShell = null;
+//    private Shell theShell = null;
  
 
     //==========================================================================
@@ -72,19 +73,26 @@ public class OutgoingConnectionManager extends ConnectionManager {
     /*
      *  Set the shell
      */
-    public void setShell( Shell passedShell ) {
+    public void setShell( int channelId, Shell passedShell ) {
         //Kill the previous shell
-        if( theShell != null )
-            theShell.shutdown();
-        
-        theShell = passedShell;
+        synchronized( theShellMap ){
+            Shell theShell = theShellMap.get(channelId);
+            if( theShell != null )
+                theShell.shutdown();
+
+            theShellMap.put(channelId, passedShell);
+        }
     }
     
     //===========================================================================
     /*
      *  Return the shell
      */
-    public Shell getShell() {
+    public Shell getShell( int channelId ) {
+        Shell theShell;
+        synchronized( theShellMap ){
+            theShell = theShellMap.get(channelId);
+        }
         return theShell;
     } 
 
@@ -195,9 +203,10 @@ public class OutgoingConnectionManager extends ConnectionManager {
         for( Integer aKey : theKeys )
             channelIdHandlerMap.get(aKey).shutdown();
         
-        //Shutdown the shell if it exists
-        if( theShell != null )
-            theShell.shutdown();
+        //Shutdown the shells any exists
+        theKeys = theShellMap.keySet();
+        for( Integer aKey : theKeys )
+            theShellMap.get(aKey).shutdown();
     }
 
      //===============================================================
@@ -228,11 +237,10 @@ public class OutgoingConnectionManager extends ConnectionManager {
      */
     public void closeShell( int passedId ) {
         
-        //Shut it down and set to null
-        if( theShell != null ){
+        //Shut down the shell
+        Shell theShell = getShell(passedId);
+        if( theShell != null )
             theShell.shutdown();
-            theShell = null;
-        }
         
         //Kill the timers
         KeepAliveTimer aKAT = getKeepAliveTimer(passedId);
@@ -243,6 +251,11 @@ public class OutgoingConnectionManager extends ConnectionManager {
         ReconnectTimer aRT = getReconnectTimer(passedId);
         if( aRT != null )
             aRT.shutdown();
+        
+        //Close the connection
+        SocketChannelHandler aSCH = removeHandler(passedId);
+        if( aSCH != null )
+            aSCH.shutdown();
         
     }
 

@@ -58,6 +58,7 @@ import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.ProgressListener;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileFin;
 
 /**
@@ -77,10 +78,10 @@ final public class FileReceiver {
     
     //For progress
     private int sndFileProgress = 0;                
-    private final int clientId;
+    private final int srcHostId;
     private final int taskId;
     private final int fileId;
-    private final int channelId = 0;
+    private int channelId = 0;
     private final String fileHash;
     
     private FileOutputStream aFileStream = null;
@@ -90,27 +91,50 @@ final public class FileReceiver {
     
     private static final String NAME_Class = FileReceiver.class.getSimpleName();
 
-    //===========================================================================
+//    //===========================================================================
+//    /**
+//     * 
+//     *  Constructor
+//     * 
+//     * @param passedId
+//     * @param passedFileId
+//     * @param passedFileSize
+//     * @param parentDir
+//     * @param hashFilenameStr 
+//     */
+//    FileReceiver( FileMessageManager passedManager, int passedClientId, int passedTaskId, int passedFileId, 
+//            long passedFileSize, File parentDir, String hashFilenameStr) 
+//            throws LoggableException, NoSuchAlgorithmException, IOException {
+      //===========================================================================
     /**
      * 
      *  Constructor
      * 
-     * @param passedId
-     * @param passedFileId
-     * @param passedFileSize
-     * @param parentDir
-     * @param hashFilenameStr 
+     * @param passedManager
+     * @param passedMsg
+     * @param parentDir 
+     * @throws pwnbrew.log.LoggableException 
+     * @throws java.security.NoSuchAlgorithmException 
+     * @throws java.io.IOException 
      */
-    FileReceiver( FileMessageManager passedManager, int passedClientId, int passedTaskId, int passedFileId, 
-            long passedFileSize, File parentDir, String hashFilenameStr) 
+    public FileReceiver( FileMessageManager passedManager, PushFile passedMsg, File parentDir ) 
             throws LoggableException, NoSuchAlgorithmException, IOException {
         
         theFileMessageManager = passedManager;
-        taskId = passedTaskId;
-        fileId = passedFileId;
-        fileSize = passedFileSize;
-        clientId = passedClientId;
+//        taskId = passedTaskId;
+//        fileId = passedFileId;
+//        fileSize = passedFileSize;
+//        srcHostId = passedClientId;
+        taskId = passedMsg.getTaskId();
+        fileId = passedMsg.getFileId();
+        fileSize = passedMsg.getFileSize();
+        srcHostId = passedMsg.getSrcHostId();
+        channelId = passedMsg.getFileChannelId();
 
+        
+        //Get file hash
+        String hashFilenameStr = passedMsg.getHashFilenameString();
+        
         //Set the hash
         String[] fileHashFileNameArr = hashFilenameStr.split(":", 2);
         if( fileHashFileNameArr.length != 2 )
@@ -252,7 +276,7 @@ final public class FileReceiver {
                 //Send fin message to host
                 try {
                     
-                    PushFileFin finMessage = new PushFileFin( taskId, hexString, clientId );
+                    PushFileFin finMessage = new PushFileFin( taskId, hexString, srcHostId, channelId );
                    
                     //Returns if it should unlock or not
                     ControlMessageManager theCMM = ControlMessageManager.getControlMessageManager();

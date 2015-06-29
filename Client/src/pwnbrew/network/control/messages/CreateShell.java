@@ -196,24 +196,25 @@ public final class CreateShell extends ControlMessage implements LockListener {
         ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
         int theClientId = getSrcHostId();
 
-        int retId = aPR.ensureConnectivity( serverIp, socketPort, this );   
-        if(retId != 0 ){
+        int retChannelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
+        if(retChannelId != 0 ){
             
             //Send ack back to set channel id
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
             if( aCMManager != null ){
-                CreateShellAck retMsg = new CreateShellAck( retId );
+                CreateShellAck retMsg = new CreateShellAck( retChannelId );
+                retMsg.setDestHostId( theClientId );
                 aCMManager.send(retMsg); 
             }
 
             //Create the shell and set it
             Shell aShell = new Shell( Constants.Executor, passedManager, 
-                    theClientId, retId, encoding, cmdString, startupCmd, redirectStderr );
+                    theClientId, retChannelId, encoding, cmdString, startupCmd, redirectStderr );
             aShell.start();                
 
             //Register the shell
-            OutgoingConnectionManager aOCM = aPR.getConnectionManager(retId);
-            aOCM.setShell( aShell );
+            OutgoingConnectionManager aOCM = aPR.getConnectionManager();
+            aOCM.setShell( retChannelId, aShell );
 
         }
         

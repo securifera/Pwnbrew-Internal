@@ -72,12 +72,13 @@ public final class PushFileAck extends FileMessage {
      *
      * @param passedId
      * @param dstHostId
+     * @param passedChannelId
      * @param passedFileId
      * @param hashFileNameStr
      * @throws java.io.IOException
     */
-    public PushFileAck(int passedId, int passedFileId, String hashFileNameStr, int dstHostId ) throws IOException  {
-       super(passedId, passedFileId, dstHostId  );
+    public PushFileAck(int passedId, int passedFileId, int passedChannelId, String hashFileNameStr, int dstHostId ) throws IOException  {
+       super(dstHostId, passedChannelId, passedId, passedFileId  );
 
        byte[] strBytes = hashFileNameStr.getBytes("US-ASCII");
        ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);

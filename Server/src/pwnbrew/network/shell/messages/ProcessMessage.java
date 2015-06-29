@@ -71,6 +71,7 @@ abstract public class ProcessMessage extends Message {
      * Constructor
      *
      * @param passedFunction
+     * @param passedChannelId
      * @param dstHostId
      * @param passedBB
     */

@@ -86,12 +86,12 @@ public class PushFile extends FileMessage {
      * @param taskId
      * @param dstHostId
      * @param fileHashNameStr
-     * @param passedTypeO
+     * @param passedType
      * @param passedLength
      * @throws java.io.IOException
     */
     public PushFile(int taskId, String fileHashNameStr, long passedLength, int passedType, int dstHostId ) throws IOException {
-        super(taskId ,dstHostId );
+        super( dstHostId, 0 , taskId );
 
         byte[] tempArr = fileHashNameStr.getBytes("US-ASCII");
         ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, tempArr);
@@ -113,10 +113,11 @@ public class PushFile extends FileMessage {
      *
      * @param taskId
      * @param dstHostId
+     * @param passedChannelId
      * @throws pwnbrew.log.LoggableException
     */
-    public PushFile( int taskId , int dstHostId ) throws LoggableException { // NO_UCD (use default)
-        super( taskId, dstHostId );
+    public PushFile( int taskId , int dstHostId, int passedChannelId ) throws LoggableException { // NO_UCD (use default)
+        super( dstHostId, passedChannelId, taskId);
     }
     
     // ==========================================================================

@@ -145,9 +145,10 @@ public class SocketChannelHandler implements Selectable {
             //Flush any remaining packets from the queue in the handler
             shutdown();
             
-            if( !ex.getMessage().contains("closed")){
+            //Print the message if it exists
+            if( ex != null && !ex.getMessage().contains("closed"))
                 DebugPrinter.printException(ex);
-            }            
+                        
             
             thePortRouter.getPortManager().socketClosed( this );
             

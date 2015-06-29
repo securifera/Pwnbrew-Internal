@@ -61,24 +61,44 @@ public class FileMessage extends Tasking {
     protected int fileChannelId = 0;    
     private int fileId = 0;
     
-    // ==========================================================================
-    /**
-     * Constructor
-     *
-     * @param taskId
-     * @param dstHostId
-    */
-    public FileMessage( int taskId, int dstHostId ) { // NO_UCD (use default)
-        super( taskId, dstHostId );
-        
-        //Copy the task Id
-        fileId = SocketUtilities.getNextId();
-        byte[] fileIdArr = SocketUtilities.intToByteArray(fileId);
-        
-        //Add the option
-        ControlOption aTlv = new ControlOption(OPTION_FILE_ID, fileIdArr);
-        addOption(aTlv);
-    }
+//    // ==========================================================================
+//    /**
+//     * Constructor
+//     *
+//     * @param taskId
+//     * @param dstHostId
+//    */
+//    public FileMessage( int taskId, int dstHostId ) { // NO_UCD (use default)
+//        super( taskId, dstHostId );
+//        
+//        //Copy the task Id
+//        fileId = SocketUtilities.getNextId();
+//        byte[] fileIdArr = SocketUtilities.intToByteArray(fileId);
+//        
+//        //Add the option
+//        ControlOption aTlv = new ControlOption(OPTION_FILE_ID, fileIdArr);
+//        addOption(aTlv);
+//    }
+    
+//    // ==========================================================================
+//    /**
+//     * Constructor
+//     *
+//     * @param taskId
+//     * @param dstHostId
+//     * @param passedFileId
+//    */
+//    public FileMessage( int taskId, int passedFileId, int dstHostId ) { // NO_UCD (use default)
+//        super( taskId, dstHostId );
+//        
+//        //Copy the task Id
+//        fileId = passedFileId;
+//        byte[] fileIdArr = SocketUtilities.intToByteArray(fileId);
+//        
+//        //Add the option
+//        ControlOption aTlv = new ControlOption(OPTION_FILE_ID, fileIdArr);
+//        addOption(aTlv);
+//    }
     
     // ==========================================================================
     /**
@@ -86,17 +106,26 @@ public class FileMessage extends Tasking {
      *
      * @param taskId
      * @param dstHostId
+     * @param passedChannelId
      * @param passedFileId
     */
-    public FileMessage( int taskId, int passedFileId, int dstHostId ) { // NO_UCD (use default)
+    public FileMessage( int dstHostId, int passedChannelId, int taskId, Integer... passedFileId ) { // NO_UCD (use default)
         super( taskId, dstHostId );
         
-        //Copy the task Id
-        fileId = passedFileId;
+        if( passedFileId.length == 0 )
+            fileId = SocketUtilities.getNextId();
+        else 
+            fileId = passedFileId[0];
+        
         byte[] fileIdArr = SocketUtilities.intToByteArray(fileId);
         
         //Add the option
         ControlOption aTlv = new ControlOption(OPTION_FILE_ID, fileIdArr);
+        addOption(aTlv);
+        
+         //Add the option
+        byte[] tempChannelId = SocketUtilities.intToByteArray(passedChannelId);
+        aTlv = new ControlOption(OPTION_CHANNEL_ID, tempChannelId);
         addOption(aTlv);
     }
     

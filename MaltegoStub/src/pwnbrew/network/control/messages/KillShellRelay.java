@@ -36,36 +36,40 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
+package pwnbrew.network.control.messages;
 
-/*
- *  StdInMessage.java
- *
- */
-
-package pwnbrew.network.shell.messages;
-
-import java.nio.ByteBuffer;
-import static pwnbrew.network.shell.messages.ProcessMessage.STD_IN;
-
-
+import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.network.ControlOption;
 
 /**
  *
  *  
  */
-public class StdInMessage extends ProcessMessage {
-
-     
-    //==========================================================================
+public final class KillShellRelay extends MaltegoMessage{
+    
+    private static final byte OPTION_TARGET_HOST_ID = 22;
+    private static final byte OPTION_TARGET_CHANNEL_ID = 23;
+    
+     // ==========================================================================
     /**
      * Constructor
      *
-     * @param passedChannelId
-     * @param passedBB
-     * @param dstHostId
+     * @param targetHostId
+     * @param passedDestHostId
+     * @param channelId
     */
-    public StdInMessage( int passedChannelId, ByteBuffer passedBB, int dstHostId ) {
-        super( STD_IN, passedChannelId, passedBB, dstHostId );
+    public KillShellRelay( int passedDestHostId, int targetHostId, int channelId ) {
+        super( passedDestHostId );
+        
+        byte[] strBytes = SocketUtilities.intToByteArray(targetHostId);
+        ControlOption aTlv = new ControlOption(OPTION_TARGET_HOST_ID, strBytes);
+        addOption(aTlv);
+        
+        strBytes = SocketUtilities.intToByteArray(channelId);
+        aTlv = new ControlOption(OPTION_TARGET_CHANNEL_ID, strBytes);
+        addOption(aTlv);
+
     }
-    
-}
+  
+
+}/* END CLASS KillShellRelay */

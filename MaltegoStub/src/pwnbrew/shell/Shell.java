@@ -68,7 +68,7 @@ import pwnbrew.misc.ManagedRunnable;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.CreateShell;
-import pwnbrew.network.control.messages.KillShell;
+import pwnbrew.network.control.messages.KillShellRelay;
 import pwnbrew.network.shell.messages.StdInMessage;
 import pwnbrew.output.StreamReader;
 import pwnbrew.output.StreamReaderListener;
@@ -481,7 +481,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
                 }
 
                 int clientId = theListener.getHostId();
-                StdInMessage aMsg = new StdInMessage( ByteBuffer.wrap(theStr.getBytes()), clientId );  
+                StdInMessage aMsg = new StdInMessage( channelId, ByteBuffer.wrap(theStr.getBytes()), clientId );  
 
                 ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
                 if( aSMM == null){
@@ -518,7 +518,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         if( aCMManager != null ){
              //Create the message
             int clientId = theListener.getHostId();
-            KillShell aShellMsg = new KillShell(clientId, channelId);
+            KillShellRelay aShellMsg = new KillShellRelay( Constants.SERVER_ID, clientId, channelId );
             aCMManager.send(aShellMsg );
         }
 

@@ -99,6 +99,9 @@ public class FileSender extends ManagedRunnable {
     protected void go() {
         
             int fileId = theFileAck.getFileId();
+            int taskId = theFileAck.getTaskId();
+            channelId = theFileAck.getChannelId();
+            
             try {
 
                 File fileToSend = new File( theFileAck.getFilename());
@@ -122,8 +125,8 @@ public class FileSender extends ManagedRunnable {
                     }
 
                     //Send message to cleanup the file transfer on the client side
-                    int clientId = theFileAck.getSrcHostId();
-                    PushFileAbort fileAbortMsg = new PushFileAbort( fileId, clientId );
+                    int srcHostId = theFileAck.getSrcHostId();
+                    PushFileAbort fileAbortMsg = new PushFileAbort( taskId, srcHostId, channelId, fileId );
                     aCMManager.send(fileAbortMsg ); 
                     
                 } catch( IOException ex1 ){

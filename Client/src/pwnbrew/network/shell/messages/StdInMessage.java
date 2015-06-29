@@ -90,11 +90,14 @@ public class StdInMessage extends ProcessMessage {
         ClientConfig theConf = ClientConfig.getConfig();
         int socketPort = theConf.getSocketPort();
         
+        //The channel id
+        int channelId = getChannelId();
+        
         //Get port router and connection manager
         ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( socketPort );
-        OutgoingConnectionManager aOCM = aPR.getConnectionManager( getChannelId() );
+        OutgoingConnectionManager aOCM = aPR.getConnectionManager();
         if( aOCM != null ){
-            Shell aShell = aOCM.getShell();
+            Shell aShell = aOCM.getShell( channelId );
             aShell.sendInput( new String( getMsgBytes()) );        
         }
     }
