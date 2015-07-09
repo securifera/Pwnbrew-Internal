@@ -297,25 +297,8 @@ abstract public class DataManager {
             if( aCM != null ){
                 SocketChannelHandler theHandler = aCM.getSocketChannelHandler(channelId);
                 if( theHandler == null ){
-//
-////                    RelayManager aRelayManager = RelayManager.getRelayManager();
-////                    if( aRelayManager == null )
-////                        aRelayManager = RelayManager.initialize(passedCommManager);
-//
-//                    //See if the relay port router has the client id
-//                    thePR = aRelayManager.getServerPorterRouter();
-//                    aCM = thePR.getConnectionManager(destClientId);
-//                    if( aCM != null ){
-//                        theHandler = aCM.getSocketChannelHandler(channelId);
-//                        if( theHandler == null ){
-//                            Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified channel.", null);      
-//                            return;
-//                        }
-//
-//                    } else {
-                        Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified client.", null);      
-                        return;
-//                    }
+                    Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified client.", null);      
+                    return;
                 } 
 
                 ByteBuffer aByteBuffer;

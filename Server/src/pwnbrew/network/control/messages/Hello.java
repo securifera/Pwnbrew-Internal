@@ -214,7 +214,7 @@ public final class Hello extends ControlMessage {
                     if( aSCH != null ){
 
                         //Send HostAck
-                        HelloAck aHostAck = new HelloAck( theClientId, theChannelId );
+                        HelloAck aHostAck = new HelloAck( theClientId );
                         DataManager.send( passedManager, aHostAck );
 
                         //Turn off wrapping

@@ -50,22 +50,15 @@ import pwnbrew.utilities.SocketUtilities;
 @SuppressWarnings("ucd")
 public final class HelloAck extends ControlMessage {
     
-    private static final byte OPTION_CHANNEL_ID = 102;
-
     // ==========================================================================
     /**
      * Constructor
      *
      * @param dstHostId
-     * @param passedChannelId
      * @throws java.io.IOException
     */
-    public HelloAck( int dstHostId, int passedChannelId ) throws IOException {
+    public HelloAck( int dstHostId ) throws IOException {
         super( dstHostId );
-       
-        byte[] strBytes = SocketUtilities.intToByteArray(passedChannelId);
-        ControlOption aTlv = new ControlOption( OPTION_CHANNEL_ID, strBytes);
-        addOption(aTlv);
     }
 
 }/* END CLASS HelloAck */

@@ -56,12 +56,12 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.net.ssl.SSLException;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostFactory;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.misc.Constants;
@@ -312,20 +312,34 @@ public class SocketChannelHandler implements Selectable {
                                 if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
                                     
                                     RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));  
-                                    int srcId = aMsg.getSrcHostId();
+                                    int srcHostId = aMsg.getSrcHostId();
                                     int chanId = aMsg.getChannelId();
 
-                                    if( registerId(srcId, chanId) ){
+                                    if( registerId(srcHostId, chanId) ){
                                         setRegisteredFlag(true);                                           
 
-                                        RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, srcId, chanId);
+                                        RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, srcHostId, chanId);
                                         DataManager.send( getPortRouter().getPortManager(), retMsg);
                                         
                                         //Set wrapping after it is sent
-                                        setWrapping( srcId, false);
+                                        setWrapping( srcHostId, false);
                                     }
                                     
                                 } else {
+                                    
+                                    if( currMsgType == Message.STAGING_MESSAGE_TYPE ){
+                                        
+                                        //Get src id
+                                        byte[] srcHostIdArr = Arrays.copyOfRange(msgByteArr, 0, 4);
+                                        int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);
+                                        
+                                        //Register the relay
+                                        int parentId = rootHostId;
+                                        if( srcHostId != parentId ){
+                                            ServerPortRouter aSPR = (ServerPortRouter)thePortRouter;
+                                            aSPR.registerHandler(srcHostId, parentId, ConnectionManager.STAGE_CHANNEL_ID, this);        
+                                        }                                      
+                                    }
                                 
                                     //Get dest id
                                     byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);

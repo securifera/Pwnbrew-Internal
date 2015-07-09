@@ -52,7 +52,6 @@ import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
-import static pwnbrew.network.control.messages.SendStage.NAME_Class;
 import pwnbrew.utilities.Utilities;
 
 /**

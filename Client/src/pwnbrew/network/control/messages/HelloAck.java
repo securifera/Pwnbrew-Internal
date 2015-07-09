@@ -67,8 +67,6 @@ public final class HelloAck extends ControlMessage {
 
     //Class name
     private static final String NAME_Class = HelloAck.class.getSimpleName();
-    private static final byte OPTION_CHANNEL_ID = 102; 
-    private int theChannelId = 0;    
     
      
     // ==========================================================================
@@ -96,9 +94,6 @@ public final class HelloAck extends ControlMessage {
             
             byte[] theValue = tempTlv.getValue();
             switch( tempTlv.getType()){
-                case OPTION_CHANNEL_ID:
-                    theChannelId = SocketUtilities.byteArrayToInt(theValue);
-                    break;
                 default:
                     retVal = false;
                     break;
@@ -121,15 +116,7 @@ public final class HelloAck extends ControlMessage {
         ClientConfig theClientConfig = ClientConfig.getConfig();
         PortRouter aPR = passedManager.getPortRouter( theClientConfig.getSocketPort() );
         if( aPR != null ){
-
-            //Get the handler
-//            SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( theChannelId );
-
-//            //Set the wrapping flag
-//            if( aSCH != null )
-//                aSCH.setWrapping(false);
-            
-            
+           
             //Set the server id
             theClientConfig.setServerId( theClientId );
             

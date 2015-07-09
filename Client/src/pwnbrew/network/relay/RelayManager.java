@@ -52,6 +52,7 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import pwnbrew.ClientConfig;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.utilities.DebugPrinter;
@@ -125,15 +126,19 @@ public class RelayManager extends DataManager {
     public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) {        
                         
         //Get the dest id
-        byte[] dstHostId = Arrays.copyOfRange(msgBytes, Message.DEST_HOST_ID_OFFSET, Message.DEST_HOST_ID_OFFSET + 4);
-        int tempId = SocketUtilities.byteArrayToInt(dstHostId);
+        byte[] channelIdArr = Arrays.copyOfRange(msgBytes, Message.CHANNEL_ID_OFFSET, Message.CHANNEL_ID_OFFSET + 4);
+        int channelId = SocketUtilities.byteArrayToInt(channelIdArr);
+        
+        //If it is a staging message just send on the comm channel
+        if( channelId == ConnectionManager.STAGE_CHANNEL_ID )
+            channelId = ConnectionManager.COMM_CHANNEL_ID;
                
         //Get the port router
         PortRouter thePR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
         if( thePR.equals( srcPortRouter))
              thePR = theServerPortRouter;
          
-        thePR.queueSend( msgBytes, tempId ); 
+        thePR.queueSend( msgBytes, channelId ); 
         
     }
     

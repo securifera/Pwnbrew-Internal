@@ -56,10 +56,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.net.ssl.SSLException;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.utilities.Constants;
@@ -332,12 +332,28 @@ public class SocketChannelHandler implements Selectable {
                                     
                                     RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));                                                
                                     int srcId = aMsg.getSrcHostId();
+                                    int chanId = aMsg.getChannelId();
+                                    
                                     aMsg.evaluate(thePortRouter.getPortManager());
                                    
-                                    if( aMsg.getFunction() == RegisterMessage.REG && !registerId(srcId, dstId))    
+                                    if( aMsg.getFunction() == RegisterMessage.REG && !registerId(srcId, dstId, chanId))    
                                         return;
                                                                         
                                 } else {
+                                    
+                                     if( currMsgType == Message.STAGING_MESSAGE_TYPE ){
+
+                                        //Get src id
+                                        byte[] srcHostIdArr = Arrays.copyOfRange(msgByteArr, 0, 4);
+                                        int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);
+
+                                        //Register the relay
+                                        ServerPortRouter aSPR = (ServerPortRouter)getPortRouter();
+                                        if( !aSPR.registerHandler(srcHostId, ConnectionManager.STAGE_CHANNEL_ID, this) )
+                                            return;
+
+                                    }
+                                    
                                     try{
                                         DataManager.routeMessage( thePortRouter, currMsgType, dstId, msgByteArr );                      
                                     } catch(Exception ex ){
@@ -384,9 +400,10 @@ public class SocketChannelHandler implements Selectable {
      * 
      * @param srcId
      * @param dstId
+     * @param passedChannelId
      * @return 
      */
-    public boolean registerId( int srcId, int dstId ){
+    public boolean registerId( int srcId, int dstId, int passedChannelId ){
         
         try {
                 
@@ -402,19 +419,19 @@ public class SocketChannelHandler implements Selectable {
                 //Get the port router and register the host
                 SocketChannelHandler aSCH = null;
                 ServerPortRouter aSPR = aManager.getServerPorterRouter();
-                IncomingConnectionManager anICM = aSPR.getConnectionManager(srcId);
-                if( anICM == null ){
-                    anICM = new IncomingConnectionManager(srcId);
-                    aSPR.setConnectionManager( anICM, srcId );
-                } else {
-                    aSCH = anICM.getSocketChannelHandler(srcId);
-                }
-                
-                //If the Handler doesn't exist then register it
-                if( aSCH == null ){
-                    anICM.setHandler(srcId, this);
-                    clientId = srcId;
-                }    
+//                IncomingConnectionManager anICM = aSPR.getConnectionManager(srcId);
+//                if( anICM == null ){
+//                    anICM = new IncomingConnectionManager(srcId);
+//                    aSPR.setConnectionManager( anICM, srcId );
+//                } else {
+//                    aSCH = anICM.getSocketChannelHandler(srcId);
+//                }
+//                
+//                //If the Handler doesn't exist then register it
+//                if( aSCH == null ){
+//                    anICM.setHandler(srcId, this);
+//                    clientId = srcId;
+//                }    
                
             } 
             

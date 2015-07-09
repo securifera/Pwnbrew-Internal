@@ -65,6 +65,7 @@ public abstract class Message {
 
     public static final int SRC_HOST_ID_OFFSET = 5;
     public static final int DEST_HOST_ID_OFFSET = 9;
+    public static final int CHANNEL_ID_OFFSET = 13;
     
     public static final int MSG_LEN_SIZE = 4;
     

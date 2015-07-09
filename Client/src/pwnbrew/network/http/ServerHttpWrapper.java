@@ -52,11 +52,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.network.Message;
 import pwnbrew.network.RegisterMessage;
+import pwnbrew.network.ServerPortRouter;
 import pwnbrew.selector.SocketChannelHandler;
 
 /**
@@ -116,8 +118,8 @@ public class ServerHttpWrapper extends HttpWrapper {
 
                                 //Handle the message
                                 ByteBuffer msgBB = ByteBuffer.wrap(ctrlMsg);
-                                byte type = msgBB.get();
-                                if( DataManager.isValidType( type ) ){
+                                byte currMsgType = msgBB.get();
+                                if( DataManager.isValidType( currMsgType ) ){
                                     
                                     //Get the length
                                     byte[] msgLenArr = new byte[Message.MSG_LEN_SIZE];
@@ -126,27 +128,43 @@ public class ServerHttpWrapper extends HttpWrapper {
                                     //Verify that it matches
                                     int msgLen = SocketUtilities.byteArrayToInt(msgLenArr);
                                     if( msgLen == msgBB.remaining()){
-                                        byte[] msgBytes = new byte[msgLen];
-                                        msgBB.get(msgBytes);
+                                        byte[] msgByteArr = new byte[msgLen];
+                                        msgBB.get(msgByteArr);
                                         
                                         //Get the id If the client is already registered then return
-                                        if( msgBytes.length > 3 ){
+                                        if( msgByteArr.length > 3 ){
                                             
                                             //Get dest id
-                                            byte[] dstHostId = Arrays.copyOfRange(msgBytes, 4, 8);
+                                            byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
                                             int dstId = SocketUtilities.byteArrayToInt(dstHostId);
                                             
-                                            if( type == Message.REGISTER_MESSAGE_TYPE ){
+                                            if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
                                             
-                                                RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgBytes ));                                                
+                                                RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));                                                
                                                 int srcId = aMsg.getSrcHostId();
+                                                int chanId = aMsg.getChannelId();
                                          
                                                 if( aMsg.getFunction() == RegisterMessage.REG )
-                                                    passedHandler.registerId(srcId, dstId); 
+                                                    passedHandler.registerId(srcId, dstId, chanId); 
                                                     
                                                 
                                             } else {
-                                                DataManager.routeMessage( passedHandler.getPortRouter(), type, dstId, msgBytes );
+                                                
+                                                if( currMsgType == Message.STAGING_MESSAGE_TYPE ){
+
+                                                    //Get src id
+                                                    byte[] srcHostIdArr = Arrays.copyOfRange(msgByteArr, 0, 4);
+                                                    int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);
+
+                                                    //Register the relay
+                                                    ServerPortRouter aSPR = (ServerPortRouter)passedHandler.getPortRouter();
+                                                    if( !aSPR.registerHandler(srcHostId, ConnectionManager.STAGE_CHANNEL_ID, passedHandler) )
+                                                        return;
+                                                                                          
+                                                }
+                                                
+                                                
+                                                DataManager.routeMessage( passedHandler.getPortRouter(), currMsgType, dstId, msgByteArr );
                                             }
                                         }
                                         
