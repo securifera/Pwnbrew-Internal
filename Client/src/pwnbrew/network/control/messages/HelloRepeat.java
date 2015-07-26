@@ -53,7 +53,6 @@ import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.network.control.ControlMessageManager;
 
 /**
  *
@@ -95,23 +94,18 @@ public final class HelloRepeat extends ControlMessage {
     */
     @Override
     public void evaluate( PortManager passedManager ) {   
-        
-//        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//        if( aCMManager != null ){
             
-            try {
-                //Get the port router
-                String hostname = SocketUtilities.getHostname();
+        try {
+            //Get the port router
+            String hostname = SocketUtilities.getHostname();
 
-                //Create a hello message and send it
-                Hello helloMessage = new Hello( hostname, ConnectionManager.COMM_CHANNEL_ID );
-                DataManager.send(passedManager, helloMessage);
-//                aCMManager.send(helloMessage); 
-                
-            } catch ( IOException | LoggableException ex) {
-                RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-            }
-//        }  
+            //Create a hello message and send it
+            Hello helloMessage = new Hello( hostname, ConnectionManager.COMM_CHANNEL_ID );
+            DataManager.send(passedManager, helloMessage);
+
+        } catch ( IOException | LoggableException ex) {
+            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
+        }
 
     }
 

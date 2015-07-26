@@ -63,6 +63,7 @@ public class RegisterMessage extends Message {
     //Functions
     public static final byte REG = (byte)90;
     public static final byte REG_ACK = (byte)91;
+    public static final byte REG_RST = (byte)92;
        
     private final byte function;
     
@@ -222,6 +223,29 @@ public class RegisterMessage extends Message {
                     RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
                 }
 //            }  
+        } else if( function == RegisterMessage.REG_RST ){
+        
+            //Get new id
+            ClientConfig theConf = ClientConfig.getConfig();
+            int theSocketPort = theConf.getSocketPort();
+            PortRouter thePR = passedManager.getPortRouter( theSocketPort );
+
+            //Get the connection manager for the server
+            ConnectionManager aCM = thePR.getConnectionManager(-1);
+            int tempChanId = SocketUtilities.SecureRandomGen.nextInt();
+            while( aCM.getSocketChannelHandler( tempChanId ) != null ){
+                //Try to send back
+                tempChanId = SocketUtilities.SecureRandomGen.nextInt();
+            }
+            
+            //Remove previous registration
+            SocketChannelHandler aSCH = aCM.removeHandler(tempChanId);
+            aCM.setHandler(tempChanId, aSCH);
+            
+            //Send register message
+            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, tempChanId);
+            DataManager.send( passedManager, aMsg );
+        
         }
 
     }

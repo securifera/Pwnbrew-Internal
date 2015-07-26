@@ -309,13 +309,14 @@ abstract public class DataManager {
             SocketChannelHandler theHandler = aCM.getSocketChannelHandler( channelId );
             if( theHandler != null ){
                 
-                ByteBuffer aByteBuffer;
-                int msgLen = passedMessage.getLength();
-                aByteBuffer = ByteBuffer.allocate( msgLen );
-                passedMessage.append(aByteBuffer);
-
-                //Create a byte array from the messagen byte buffer
-                byte[] msgBytes = Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position());
+//                ByteBuffer aByteBuffer;
+//                int msgLen = passedMessage.getLength();
+//                aByteBuffer = ByteBuffer.allocate( msgLen );
+//                passedMessage.append(aByteBuffer);
+//
+//                //Create a byte array from the messagen byte buffer
+//                byte[] msgBytes = Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position());
+                byte[] msgBytes = passedMessage.getBytes();
 
                 //If wrapping is necessary then wrap it
                 if( theHandler.isWrapping() ){
@@ -328,7 +329,7 @@ abstract public class DataManager {
                             aSrvWrapper.setStaging( theHandler.isStaged());
                         }
 
-                        aByteBuffer = aWrapper.wrapBytes( msgBytes );  
+                        ByteBuffer aByteBuffer = aWrapper.wrapBytes( msgBytes );  
                         msgBytes = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
                     } 
                 }

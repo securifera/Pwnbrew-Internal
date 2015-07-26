@@ -380,6 +380,19 @@ public class SocketChannelHandler implements Selectable, LockListener{
                                                 int srcChannelId = aMsg.getChannelId();
                                                 if( srcChannelId != ConnectionManager.COMM_CHANNEL_ID ){
                                                     
+//                                                    //Check if it already exists
+//                                                    boolean sendReset = false;
+//                                                    while( aCM.getSocketChannelHandler( srcChannelId ) != null ){
+//                                                        //Try to send back
+//                                                        srcChannelId = SocketUtilities.SecureRandomGen.nextInt();
+//                                                        sendReset = true;
+//                                                    }
+//                                                    
+//                                                    //Send reset flag if we had to change the channel id
+//                                                    if( sendReset ){
+//                                                        
+//                                                    }
+                                                    
                                                     //Send back the ack
                                                     RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
                                                     retMsg.setDestHostId(srcHostId);
