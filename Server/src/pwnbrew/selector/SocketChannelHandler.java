@@ -729,17 +729,17 @@ public class SocketChannelHandler implements Selectable {
     public synchronized void setWrapping(int passedClientId, boolean passedBool ) {
         if( rootHostId == passedClientId ){
             wrappingFlag = passedBool;
-        } else {   
-            //Reset the wrapper
-            SetRelayWrap wrapMsg = new SetRelayWrap( rootHostId, passedClientId, (byte)0x0);
-            ByteBuffer aByteBuffer;
-
-            int msgLen = wrapMsg.getLength();
-            aByteBuffer = ByteBuffer.allocate( msgLen );
-            wrapMsg.append(aByteBuffer);
-
-            //Queue to be sent
-            queueBytes(Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position())); 
+//        } else {   
+//            //Reset the wrapper
+//            SetRelayWrap wrapMsg = new SetRelayWrap( rootHostId, passedClientId, (byte)0x0);
+//            ByteBuffer aByteBuffer;
+//
+//            int msgLen = wrapMsg.getLength();
+//            aByteBuffer = ByteBuffer.allocate( msgLen );
+//            wrapMsg.append(aByteBuffer);
+//
+//            //Queue to be sent
+//            queueBytes(Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position())); 
             
         }
     }

@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.List;
 import pwnbrew.ClientConfig;
 import pwnbrew.concurrent.LockListener;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.Constants;
@@ -200,12 +201,13 @@ public final class CreateShell extends ControlMessage implements LockListener {
         if(retChannelId != 0 ){
             
             //Send ack back to set channel id
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
+//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//            if( aCMManager != null ){
                 CreateShellAck retMsg = new CreateShellAck( retChannelId );
                 retMsg.setDestHostId( theClientId );
-                aCMManager.send(retMsg); 
-            }
+                DataManager.send(passedManager, retMsg);
+//                aCMManager.send(retMsg); 
+//            }
 
             //Create the shell and set it
             Shell aShell = new Shell( Constants.Executor, passedManager, 

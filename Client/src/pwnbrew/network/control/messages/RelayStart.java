@@ -139,13 +139,14 @@ public final class RelayStart extends ControlMessage{
         }
         
         //Get the control message manager send an ack        
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
+//        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//        if( aCMManager != null ){
             //Send the message
             RelayStatus aMsg = new RelayStatus( retVal );
             aMsg.setDestHostId( getSrcHostId() );
-            aCMManager.send(aMsg);
-        }
+            DataManager.send(passedManager, aMsg);
+//            aCMManager.send(aMsg);
+//        }
         
     }
 

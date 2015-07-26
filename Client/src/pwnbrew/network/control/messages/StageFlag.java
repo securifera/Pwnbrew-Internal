@@ -47,12 +47,12 @@ package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
 import pwnbrew.manager.ConnectionManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.ServerPortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.selector.SocketChannelHandler;
 
@@ -136,16 +136,17 @@ public final class StageFlag extends ControlMessage{
             IncomingConnectionManager theICM = theSPR.getConnectionManager(theRelayClientId);
             if( theICM != null ){
                 
-                SocketChannelHandler aHandler = theICM.getSocketChannelHandler(ConnectionManager.COMM_CHANNEL_ID);
+                SocketChannelHandler aHandler = theICM.getSocketChannelHandler(ConnectionManager.STAGE_CHANNEL_ID );
                 if( aHandler != null )
                     aHandler.setStaging(true);                     
 
                 //Send the ack
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager != null ){
-                    StageFlagAck ackFlag = new StageFlagAck( theRelayClientId, theJvmVersion );
-                    aCMManager.send(ackFlag);
-                }            
+//                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//                if( aCMManager != null ){
+                StageFlagAck ackFlag = new StageFlagAck( theRelayClientId, theJvmVersion );
+                DataManager.send(passedManager, ackFlag);
+//                    aCMManager.send(ackFlag);
+//                }            
             }
         }    
     }

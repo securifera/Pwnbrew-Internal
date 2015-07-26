@@ -56,6 +56,7 @@ import pwnbrew.ClientConfig;
 import pwnbrew.Persistence;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.utilities.Constants;
@@ -241,7 +242,7 @@ final public class FileReceiver {
 //            DebugPrinter.printMessage(NAME_Class, "Receiving file, bytes: " + fileByteCounter);
             
             //Returns if it should unlock or not
-            ControlMessageManager theCMM = ControlMessageManager.getControlMessageManager();
+//            ControlMessageManager theCMM = ControlMessageManager.getControlMessageManager();
                                     
             int tempProgressInt = 0;
             if(fileSize != 0){
@@ -253,12 +254,13 @@ final public class FileReceiver {
                 
                 //Send a progress update
                 sndFileProgress = tempProgressInt;
-                if( theCMM != null ){                    
+//                if( theCMM != null ){                    
                     TaskProgress aProgMsg = new TaskProgress(taskId, sndFileProgress );
                     aProgMsg.setDestHostId(srcHostId);
-                    theCMM.send(aProgMsg);
+                    DataManager.send( theFileMessageManager.getPortManager(), aProgMsg);
+//                    theCMM.send(aProgMsg);
                    
-                }
+//                }
             }            
             
             //If the byte count has passed the file size than send a finished message
@@ -281,8 +283,9 @@ final public class FileReceiver {
                   
                 PushFileFin finMessage = new PushFileFin( channelId, taskId, fileId, hexString );
                 finMessage.setDestHostId(srcHostId);
-                if( theCMM != null )
-                    theCMM.send(finMessage);
+                DataManager.send( theFileMessageManager.getPortManager(), finMessage);
+//                if( theCMM != null )
+//                    theCMM.send(finMessage);
                 
                 //Remove from the parent map
                 theFileMessageManager.removeFileReceiver( fileId );

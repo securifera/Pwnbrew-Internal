@@ -124,37 +124,37 @@ public class ShellMessageManager extends DataManager {
         theShellMsgManager.getDataHandler().processData(srcPortRouter, msgBytes);        
     }
     
-    //===============================================================
-    /**
-     *   Send the message out the given channel.
-     *
-     * @param passedMessage
-     * @throws java.io.IOException
-     * @throws pwnbrew.log.LoggableException
-    */
-    @SuppressWarnings("ucd")
-    public void send( ProcessMessage passedMessage ) throws IOException, LoggableException {
-
-        //Allows for more specific handles to encode the message however necessary
-//        PortWrapper aWrapper = DataManager.getPortWrapper( operatingPort );
-        
-        ByteBuffer aByteBuffer;
-//        if( aWrapper != null ){
-//            aByteBuffer = aWrapper.wrapBytes( passedMessage.getBytes() );        
-//        } else {
-            int msgLen = passedMessage.getLength() + 3;
-            aByteBuffer = ByteBuffer.allocate( msgLen );
-            passedMessage.append(aByteBuffer);
-//        }
-        
-        //Get the port router
-        PortRouter thePR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
-        
-        //Queue the message to be sent
-        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getChannelId() );
-//        DebugPrinter.printMessage(this, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-          
-    }
+//    //===============================================================
+//    /**
+//     *   Send the message out the given channel.
+//     *
+//     * @param passedMessage
+//     * @throws java.io.IOException
+//     * @throws pwnbrew.log.LoggableException
+//    */
+//    @SuppressWarnings("ucd")
+//    public void send( ProcessMessage passedMessage ) throws IOException, LoggableException {
+//
+//        //Allows for more specific handles to encode the message however necessary
+////        PortWrapper aWrapper = DataManager.getPortWrapper( operatingPort );
+//        
+//        ByteBuffer aByteBuffer;
+////        if( aWrapper != null ){
+////            aByteBuffer = aWrapper.wrapBytes( passedMessage.getBytes() );        
+////        } else {
+//            int msgLen = passedMessage.getLength() + 3;
+//            aByteBuffer = ByteBuffer.allocate( msgLen );
+//            passedMessage.append(aByteBuffer);
+////        }
+//        
+//        //Get the port router
+//        PortRouter thePR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+//        
+//        //Queue the message to be sent
+//        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getChannelId() );
+////        DebugPrinter.printMessage(this, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+//          
+//    }
     
     //===========================================================================
     /*

@@ -58,6 +58,7 @@ import java.util.logging.Level;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.DebugPrinter;
@@ -115,20 +116,13 @@ public class ServerPortRouter extends PortRouter {
     @Override
     public void socketClosed( SocketChannelHandler theHandler ){
         
-        try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( thePortManager );
-            }
-            
-            //Send a disconnect msg
-            RelayDisconnect aMsg = new RelayDisconnect( theHandler.getClientId() );
-            aCMManager.send(aMsg);
-            
-        } catch( LoggableException | IOException ex ){
-            RemoteLog.log(Level.INFO, NAME_Class, "socketClosed()", ex.getMessage(), null );                    
-        }
+        //Remove the handler from the map
+        ConnectionManager aCM = getConnectionManager(theHandler.getClientId());
+        if( aCM != null )
+            aCM.removeHandler(theHandler.getChannelId());
+        
+        RelayDisconnect aMsg = new RelayDisconnect( theHandler.getClientId(), theHandler.getChannelId() );
+        DataManager.send(thePortManager, aMsg);
         
     }
         
@@ -273,6 +267,10 @@ public class ServerPortRouter extends PortRouter {
             if ( !anICM.setHandler(channelId, passedHandler))
                 return false;
     
+        //Set flags
+        passedHandler.setChannelId(channelId);
+        passedHandler.setRegisteredFlag(true);    
+        passedHandler.setClientId(passedSrcHostId);
         return true;
     }
 

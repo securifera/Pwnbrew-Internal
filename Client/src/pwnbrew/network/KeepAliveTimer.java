@@ -58,6 +58,7 @@ import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.NoOp;
@@ -112,28 +113,17 @@ public class KeepAliveTimer extends ManagedRunnable {
 
             //Wait until the random time
             waitUntil(theCalendar.getTime());  
-            try {
-
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager == null ){
-                    aCMManager = ControlMessageManager.initialize( theCommManager );
+            ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+            if(aPR != null){
+                
+                //Create the connection
+                SocketChannelHandler aHandler = aPR.getConnectionManager().getSocketChannelHandler(channelId);
+                if( aHandler != null && aHandler.getState() == Constants.CONNECTED ){
+                    //Send noop to keepalive
+                    NoOp aNoOp = new NoOp();
+                    DataManager.send(theCommManager, aNoOp);
+//                        aCMManager.send( aNoOp );
                 }
-
-                //Get the socket router
-                ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
-                if(aPR != null){
-
-                    //Create the connection
-                    SocketChannelHandler aHandler = aPR.getConnectionManager().getSocketChannelHandler(channelId);
-                    if( aHandler != null && aHandler.getState() == Constants.CONNECTED ){
-                        //Send noop to keepalive
-                        NoOp aNoOp = new NoOp();                        
-                        aCMManager.send( aNoOp );
-                    }
-                }
-
-            } catch ( IOException | LoggableException ex) {
-                RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
             }         
 
         }

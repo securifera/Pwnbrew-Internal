@@ -36,61 +36,38 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-/*
-* RelayStop.java
-*
-* Created on Dec 2, 2013, 9:22:22 PM
-*/
+package pwnbrew.network;
 
-package pwnbrew.network.control.messages;
-
-import pwnbrew.manager.DataManager;
-import pwnbrew.manager.PortManager;
-import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.network.relay.RelayManager;
+import java.util.TimerTask;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
- *  
+ * @author Securifera
  */
-public final class RelayStop extends ControlMessage{
+public class SocketDisconnectTimer extends TimerTask {
+    
+    private final SocketChannelHandler theHandler;
 
-    //Class name
-    private static final String NAME_Class = RelayStop.class.getSimpleName();
-    
-    // ==========================================================================
+    //==========================================================
     /**
-     * Constructor
-     *
-     * @param passedId
-    */
-    public RelayStop( byte[] passedId ) {
-        super(passedId);
-    }
+     * 
+     * @param passedHandler
+     */
+    public SocketDisconnectTimer( SocketChannelHandler passedHandler ) {
+        theHandler = passedHandler;
+    } 
     
-    //===============================================================
+
+    //==========================================================
     /**
-    *   Performs the logic specific to the message.
-    *
-     * @param passedManager
-    */
+     * 
+     */
     @Override
-    public void evaluate( PortManager passedManager ) { 
-        
-        RelayManager aManager = RelayManager.getRelayManager();
-        if( aManager != null ){
-            aManager.shutdown();
-        }       
-        
-//        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//        if( aCMManager != null ){
-            //Send the message
-        RelayStatus aMsg = new RelayStatus( false );
-        aMsg.setDestHostId( getSrcHostId() );
-        DataManager.send(passedManager, aMsg);
-//            aCMManager.send(aMsg);
-//        }
-        
+    public void run() {
+        if( !theHandler.hasRegistered()){
+            theHandler.shutdown();        
+        }
     }
-
+    
 }

@@ -135,41 +135,41 @@ abstract public class PortRouter {
         return encrypted;
     }
 
-    //===============================================================
-    /**
-     *  Queues the byte array to be sent
-     * @param byteArr
-     * @param channelId
-     * @return 
-     */
-    public boolean queueSend( byte[] byteArr, int channelId ) {
-        
-        boolean retVal = false;
-        SocketChannelHandler theHandler = getConnectionManager().getSocketChannelHandler( channelId );
-        if( theHandler != null ){
-            
-            //If wrapping is necessary then wrap it
-            if( theHandler.isWrapping() ){
-                PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
-                if( aWrapper != null ){
-                    
-                     //Set the staged wrapper if necessary
-                    if( aWrapper instanceof ServerHttpWrapper ){
-                        ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
-                        aSrvWrapper.setStaging( theHandler.isStaged());
-                    }
-                    
-                    ByteBuffer aByteBuffer = aWrapper.wrapBytes( byteArr );  
-                    byteArr = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
-                } 
-            }
-
-            theHandler.queueBytes(byteArr);
-            retVal = true;
-            
-        }
-        return retVal;
-    }
+//    //===============================================================
+//    /**
+//     *  Queues the byte array to be sent
+//     * @param byteArr
+//     * @param channelId
+//     * @return 
+//     */
+//    public boolean queueSend( byte[] byteArr, int channelId ) {
+//        
+//        boolean retVal = false;
+//        SocketChannelHandler theHandler = getConnectionManager().getSocketChannelHandler( channelId );
+//        if( theHandler != null ){
+//            
+//            //If wrapping is necessary then wrap it
+//            if( theHandler.isWrapping() ){
+//                PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
+//                if( aWrapper != null ){
+//                    
+//                     //Set the staged wrapper if necessary
+//                    if( aWrapper instanceof ServerHttpWrapper ){
+//                        ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+//                        aSrvWrapper.setStaging( theHandler.isStaged());
+//                    }
+//                    
+//                    ByteBuffer aByteBuffer = aWrapper.wrapBytes( byteArr );  
+//                    byteArr = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
+//                } 
+//            }
+//
+//            theHandler.queueBytes(byteArr);
+//            retVal = true;
+//            
+//        }
+//        return retVal;
+//    }
     
      // ==========================================================================
     /**

@@ -122,8 +122,7 @@ public final class StageFlagAck extends ControlMessage{
             DataManager.send(passedManager,aPayload);
         else
             Log.log(Level.SEVERE, NAME_Class, "evaluate()", "Unable to retrieve payload, ensure one has been loaded into the library", null );
-                 
-       
+     
     }
 
 }

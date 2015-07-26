@@ -253,9 +253,9 @@ public class FileMessageManager extends DataManager implements LockListener {
                 
         if( libDir != null ){
             
-            //Get the control manager for sending messages
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
+//            //Get the control manager for sending messages
+//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//            if( aCMManager != null ){
                 
                 String hashFileNameStr = passedMessage.getHashFilenameString();
                 initFileTransfer( passedMessage, libDir );
@@ -265,9 +265,10 @@ public class FileMessageManager extends DataManager implements LockListener {
                 aSFMA.setDestHostId( passedMessage.getSrcHostId() );
                 
                 //Send the message
-                aCMManager.send(aSFMA);
+                DataManager.send(thePortManager, aSFMA);
+//                aCMManager.send(aSFMA);
                 retVal = true;
-            }
+//            }
 
         }
 

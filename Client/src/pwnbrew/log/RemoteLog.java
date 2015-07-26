@@ -48,6 +48,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
+import pwnbrew.manager.DataManager;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.control.messages.LogMsg;
@@ -82,7 +83,8 @@ final public class RemoteLog {
         if( aCMManager != null ){ 
             
             LogMsg aMsg = new LogMsg( aSB.toString() );
-            aCMManager.send(aMsg);
+            DataManager.send(aCMManager.getPortManager(), aMsg);
+//            aCMManager.send(aMsg);
             
         }
         DebugPrinter.printMessage(RemoteLog.class.getSimpleName(), aSB.toString());

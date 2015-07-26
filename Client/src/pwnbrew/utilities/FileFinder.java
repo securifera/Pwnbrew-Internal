@@ -50,6 +50,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
+import pwnbrew.manager.DataManager;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.FileOpResult;
 import pwnbrew.network.control.messages.FileSystemMsg;
@@ -162,7 +163,8 @@ public class FileFinder extends ManagedRunnable {
                                 //Send a message per file                                                
                                 FileSystemMsg aMsg = new FileSystemMsg( theTaskId, aFile.toFile(), false );
                                 aMsg.setDestHostId( theSrcId );
-                                aCMManager.send(aMsg);                               
+                                DataManager.send(aCMManager.getPortManager(), aMsg);
+//                                aCMManager.send(aMsg);                               
                             }
                         }                                                                       
 
@@ -183,7 +185,8 @@ public class FileFinder extends ManagedRunnable {
                     //Send complete message
                     FileOpResult aMsg = new FileOpResult( theTaskId, (byte)0x1 );
                     aMsg.setDestHostId( theSrcId );
-                    aCMManager.send( aMsg );     
+                    DataManager.send(aCMManager.getPortManager(), aMsg);
+//                    aCMManager.send( aMsg );     
                     
                 } catch (IOException ex) {
                     RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        

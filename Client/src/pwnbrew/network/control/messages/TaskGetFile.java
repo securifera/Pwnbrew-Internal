@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import pwnbrew.ClientConfig;
 import pwnbrew.concurrent.LockListener;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.utilities.DebugPrinter;
@@ -123,8 +124,8 @@ public final class TaskGetFile extends TaskStatus implements LockListener {
     @Override
     public void evaluate( PortManager passedManager ) {       
             
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
+//        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//        if( aCMManager != null ){
 
             //Get the filename hash 
             String theHashFilenameStr = getHashFilenameString();
@@ -152,11 +153,12 @@ public final class TaskGetFile extends TaskStatus implements LockListener {
 
                         PushFile thePFM = new PushFile( getTaskId(), retChannelId, fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
                         thePFM.setDestHostId( getSrcHostId() );
-                        aCMManager.send(thePFM);
+                        DataManager.send(passedManager, thePFM);
+//                        aCMManager.send(thePFM);
                     }
                 }
             }
-        }     
+//        }     
     }
     
     //===============================================================

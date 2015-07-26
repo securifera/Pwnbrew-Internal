@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.LoaderUtilities;
 import pwnbrew.utilities.Utilities;
@@ -152,11 +153,12 @@ public final class UpgradeStager extends ControlMessage{
                 LoaderUtilities.reloadLib(theStager); 
                 
                 //Send back upgrade complete message
-                ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
-                if( aCMM != null ){                    
+//                ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
+//                if( aCMM != null ){                    
                     UpgradeStagerComplete aUSC = new UpgradeStagerComplete(jar_version);
-                    aCMM.send(aUSC);
-                }
+                    DataManager.send(passedManager, aUSC);
+//                    aCMM.send(aUSC);
+//                }
                 
             } catch (ClassNotFoundException | IllegalArgumentException | FileNotFoundException ex) {
                 RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        

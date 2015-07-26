@@ -55,20 +55,26 @@ import pwnbrew.network.ControlOption;
 public final class RelayDisconnect extends ControlMessage{
     
     private static final byte OPTION_ID = 25; 
+    private static final byte OPTION_CHANNEL_ID = 102; 
     
      // ==========================================================================
     /**
      * Constructor
      *
      * @param passedId
+     * @param passedChannelId
     */
-    public RelayDisconnect( int passedId ) {
+    public RelayDisconnect( int passedId, int passedChannelId ) {
         super();
         
         //Convert to bytes
         byte[] strBytes = SocketUtilities.intToByteArray(passedId);
-
         ControlOption aTlv = new ControlOption(OPTION_ID, strBytes);
+        addOption(aTlv);
+        
+        //Convert to bytes
+        strBytes = SocketUtilities.intToByteArray(passedChannelId);
+        aTlv = new ControlOption(OPTION_CHANNEL_ID, strBytes);
         addOption(aTlv);
     }
     

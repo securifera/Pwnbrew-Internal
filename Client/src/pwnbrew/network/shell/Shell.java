@@ -54,6 +54,7 @@ import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.ManagedRunnable;
@@ -158,17 +159,18 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
                     return;
             }
 
-            try {
+//            try {
 
-                ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
-                if( aSMM == null){
-                    aSMM = ShellMessageManager.initialize( theCommManager );
-                }
-                aSMM.send(aMsg);
+//                ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
+//                if( aSMM == null){
+//                    aSMM = ShellMessageManager.initialize( theCommManager );
+//                }
+                DataManager.send(theCommManager, aMsg);
+//                aSMM.send(aMsg);
 
-            } catch (IOException | LoggableException ex) {
-                RemoteLog.log( Level.SEVERE, NAME_Class, "handleBytesRead()", ex.getMessage(), null);
-            }
+//            } catch (IOException | LoggableException ex) {
+//                RemoteLog.log( Level.SEVERE, NAME_Class, "handleBytesRead()", ex.getMessage(), null);
+//            }
             
         } else {
             

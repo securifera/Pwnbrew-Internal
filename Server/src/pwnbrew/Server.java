@@ -79,6 +79,7 @@ import pwnbrew.network.http.Http;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.shell.ShellMessageManager;
+import pwnbrew.network.stage.StagingMessageManager;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.SSLUtilities;
 
@@ -234,6 +235,11 @@ public final class Server {
         RelayManager aRMM = RelayManager.getRelayManager();
         if( aRMM != null ){
             aRMM.shutdown();
+        }
+        
+        StagingMessageManager aStMM = StagingMessageManager.getMessageManager();
+        if( aStMM != null ){
+            aStMM.shutdown();
         }
 
         //Debug

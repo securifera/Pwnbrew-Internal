@@ -45,11 +45,12 @@ import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import static pwnbrew.network.Message.REGISTER_MESSAGE_TYPE;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.Hello;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -190,9 +191,9 @@ public class RegisterMessage extends Message {
         
         if( function == RegisterMessage.REG_ACK ){
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
-
+//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//            if( aCMManager != null ){
+              DebugPrinter.printMessage(NAME_Class, "Received REG ACK, Sending Hello");
                 try {
 
                     ClientConfig theClientConfig = ClientConfig.getConfig();
@@ -212,14 +213,15 @@ public class RegisterMessage extends Message {
                             //Get the port router
                             String hostname = SocketUtilities.getHostname();
                             Hello helloMessage = new Hello( hostname, ConnectionManager.COMM_CHANNEL_ID );
-                            aCMManager.send(helloMessage); 
+                            DataManager.send(passedManager, helloMessage);
+//                            aCMManager.send(helloMessage); 
                         }
                     }
 
                 } catch ( IOException | LoggableException ex) {
                     RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
                 }
-            }  
+//            }  
         }
 
     }

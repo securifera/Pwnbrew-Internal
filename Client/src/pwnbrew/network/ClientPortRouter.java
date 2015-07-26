@@ -49,19 +49,21 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.EmptyStackException;
 import java.util.logging.Level;
+import pwnbrew.ClientConfig;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.concurrent.LockingThread;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
-import pwnbrew.manager.PortManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.OutgoingConnectionManager;
-import pwnbrew.utilities.Constants;
-import pwnbrew.utilities.DebugPrinter;
-import pwnbrew.utilities.ReconnectTimer;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.selector.ConnectHandler;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.Constants;
+import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.ReconnectTimer;
 
 
 /**
@@ -226,23 +228,23 @@ public class ClientPortRouter extends PortRouter {
                     if( aSC != null ){
 
                         //Get the message sender
-                        try {
+//                        try {
                             
-                            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                            if( aCMManager == null ){
-                                aCMManager = ControlMessageManager.initialize(thePortManager);
-                            }
+//                            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//                            if( aCMManager == null ){
+//                                aCMManager = ControlMessageManager.initialize(thePortManager);
+//                            }
                             
                             //Send register message
                             RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, channedId);
-                            aCMManager.send( aMsg );
+                            DataManager.send( thePortManager, aMsg );
                             
                             //Wait for the registration to complete
                             waitForConnection();
                             
-                        } catch(IOException ex){
-                            throw new LoggableException(ex);
-                        }
+//                        } catch(IOException ex){
+//                            throw new LoggableException(ex);
+//                        }
 
 
                     } else {
@@ -427,10 +429,18 @@ public class ClientPortRouter extends PortRouter {
     //==========================================================================
     /**
      * 
+     * @param passedIdArr
      * @return 
      */    
     @Override
-    public OutgoingConnectionManager getConnectionManager( Integer... passedId ) {
+    public OutgoingConnectionManager getConnectionManager( Integer... passedIdArr ) {
+        ClientConfig theClientConfig = ClientConfig.getConfig();
+        int servId = theClientConfig.getServerId();
+        if( passedIdArr.length != 0){
+            int passedId = passedIdArr[0];
+            if( passedId != -1 && passedId != servId )
+                return null;            
+        }
         return theOCM;
     }
     

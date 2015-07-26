@@ -45,14 +45,20 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import java.util.logging.Level;
 import javax.swing.SwingUtilities;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.gui.HostTabPanel;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
+import pwnbrew.network.PortRouter;
 import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.xmlBase.ServerConfig;
 
 /**
  *
@@ -60,8 +66,12 @@ import pwnbrew.utilities.SocketUtilities;
  */
 public final class RelayDisconnect extends ControlMessage{
     
+    private static final String NAME_Class = RelayDisconnect.class.getSimpleName();
+    
     private static final byte OPTION_ID = 25; 
+    private static final byte OPTION_CHANNEL_ID = 102; 
     private int relayHostId;
+    private int relayChannelId;    
     
     // ==========================================================================
     /**
@@ -90,6 +100,9 @@ public final class RelayDisconnect extends ControlMessage{
             case OPTION_ID:                    
                 relayHostId = SocketUtilities.byteArrayToInt(theValue);                 
                 break;
+            case OPTION_CHANNEL_ID:                    
+                relayChannelId = SocketUtilities.byteArrayToInt(theValue);                 
+                break;
             default:
                 retVal = false;
                 break;
@@ -110,6 +123,21 @@ public final class RelayDisconnect extends ControlMessage{
         //Get the host and set the relay information
         String clientIdStr = Integer.toString( relayHostId );
         final ServerManager aSM = (ServerManager) passedManager;
+        
+        //Remove the connection in the map
+        try {
+            ServerConfig aConf = ServerConfig.getServerConfig();
+            int serverPort = aConf.getSocketPort();
+            PortRouter aSPR = aSM.getPortRouter(serverPort);
+            ConnectionManager aCM = aSPR.getConnectionManager(relayHostId);
+            if( aCM != null )
+                aCM.removeHandler(relayChannelId);
+            
+            
+        } catch (LoggableException ex) {
+            Log.log(Level.SEVERE, NAME_Class, "main()", ex.getMessage(), ex );
+        }
+        
         final HostController theController = aSM.getHostController(clientIdStr);
 
         if( theController != null ){

@@ -49,6 +49,7 @@ package pwnbrew.network.control.messages;
 import java.util.Map;
 import java.util.Set;
 import pwnbrew.ClientConfig;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
@@ -132,7 +133,8 @@ public final class HelloAck extends ControlMessage {
                         Set<Integer> keySet = connectionManagerMap.keySet();
                         for( Integer aInt : keySet){
                             HelloRepeat aRepeatMsg = new HelloRepeat( aInt );
-                            theManager.send(aRepeatMsg);                    
+                            DataManager.send(passedManager, aRepeatMsg);
+//                            theManager.send(aRepeatMsg);                    
                         } 
                     }
                     
