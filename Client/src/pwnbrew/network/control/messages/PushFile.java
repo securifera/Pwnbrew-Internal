@@ -103,10 +103,6 @@ public class PushFile extends FileMessage implements LockListener {
         byte[] strBytes = fileHashNameStr.getBytes();
         ControlOption aTlv = new ControlOption(OPTION_HASH_FILENAME, strBytes);
         addOption(aTlv);       
-//         
-//        byte[] tempArr = SocketUtilities.intToByteArray(channelId);
-//        aTlv = new ControlOption( OPTION_CHANNEL_ID, tempArr);
-//        addOption(aTlv);
 
         fileSize = passedLength;
         byte[] fileSizeArray = SocketUtilities.longToByteArray(fileSize);

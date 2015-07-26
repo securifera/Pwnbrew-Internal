@@ -311,6 +311,7 @@ public class SocketChannelHandler implements Selectable {
                                 //Register the handler
                                 if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
                                     
+                                    DebugPrinter.printMessage(NAME_Class, "Received register message.");
                                     RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));  
                                     int srcHostId = aMsg.getSrcHostId();
                                     int chanId = aMsg.getChannelId();
@@ -323,6 +324,8 @@ public class SocketChannelHandler implements Selectable {
                                         
                                         //Set wrapping after it is sent
                                         setWrapping( srcHostId, false);
+                                    } else {
+                                        DebugPrinter.printMessage(NAME_Class, "Error unable to register handler.");
                                     }
                                     
                                 } else {

@@ -44,6 +44,7 @@ import pwnbrew.utilities.ReconnectTimer;
 import pwnbrew.network.KeepAliveTimer;
 import pwnbrew.network.shell.Shell;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
@@ -58,7 +59,7 @@ public class OutgoingConnectionManager extends ConnectionManager {
     private final Map<Integer, Shell> theShellMap = new HashMap<>();
     
     //Channel Id generator
-    private static int messageCounter = 2;
+//    private static int messageCounter = 2;
 //    private Shell theShell = null;
  
 
@@ -222,7 +223,7 @@ public class OutgoingConnectionManager extends ConnectionManager {
                 
         synchronized( channelIdHandlerMap){
             do {
-                channelId = messageCounter++;
+                channelId = SocketUtilities.SecureRandomGen.nextInt();
                 aSH = channelIdHandlerMap.get( channelId );
             } while( aSH != null );
         }       

@@ -138,24 +138,25 @@ public final class RelayDisconnect extends ControlMessage{
             Log.log(Level.SEVERE, NAME_Class, "main()", ex.getMessage(), ex );
         }
         
-        final HostController theController = aSM.getHostController(clientIdStr);
+        if( relayChannelId == ConnectionManager.COMM_CHANNEL_ID ){
+            final HostController theController = aSM.getHostController(clientIdStr);
+            if( theController != null ){
 
-        if( theController != null ){
+                SwingUtilities.invokeLater( new Runnable() {
 
-            SwingUtilities.invokeLater( new Runnable() {
+                    @Override
+                    public void run() {                    
 
-                @Override
-                public void run() {                    
+                        aSM.hostDisconnected( (Host) theController.getObject() );
+                        HostTabPanel thePanel = theController.getRootPanel();
+                        if( thePanel != null )
+                            thePanel.getShellPanel().disablePanel( false );
+                        theController.updateComponents();
+                        theController.saveToDisk();
 
-                    aSM.hostDisconnected( (Host) theController.getObject() );
-                    HostTabPanel thePanel = theController.getRootPanel();
-                    if( thePanel != null )
-                        thePanel.getShellPanel().disablePanel( false );
-                    theController.updateComponents();
-                    theController.saveToDisk();
-                    
-                }
-            });
+                    }
+                });
+            }
         }
     }
     

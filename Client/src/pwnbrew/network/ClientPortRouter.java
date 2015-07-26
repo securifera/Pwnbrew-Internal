@@ -58,7 +58,6 @@ import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.selector.ConnectHandler;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.Constants;

