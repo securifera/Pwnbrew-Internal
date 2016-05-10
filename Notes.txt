@@ -1,0 +1,2 @@
+Add XDignore.symbol.file to project so Java 8 can create self signed certs.
+http://www.pixelstech.net/article/1406724116-Generate-certificate-in-Java----Self-signed-certificate
