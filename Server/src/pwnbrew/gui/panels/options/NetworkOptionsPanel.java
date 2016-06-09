@@ -283,7 +283,6 @@ public class NetworkOptionsPanel extends OptionsJPanel {
         issueeOU = new javax.swing.JTextField();
         issueeState = new javax.swing.JTextField();
         issueeCountry = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
         issuedToPanel1 = new javax.swing.JPanel();
         certLabel12 = new javax.swing.JLabel();
         certLabel13 = new javax.swing.JLabel();
@@ -440,8 +439,6 @@ public class NetworkOptionsPanel extends OptionsJPanel {
                 .addContainerGap())
         );
 
-        jButton1.setText("Import");
-
         issuedToPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Issued By"));
 
         certLabel12.setText("Organization:");
@@ -573,11 +570,7 @@ public class NetworkOptionsPanel extends OptionsJPanel {
                                     .addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(46, 46, 46))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, encryptionPanelLayout.createSequentialGroup()
-                                .addGroup(encryptionPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(encryptionPanelLayout.createSequentialGroup()
-                                        .addGap(0, 0, Short.MAX_VALUE)
-                                        .addComponent(jButton1))
-                                    .addComponent(certPathTextField))
+                                .addComponent(certPathTextField)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(fileChooserButton, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(encryptionPanelLayout.createSequentialGroup()
@@ -622,9 +615,7 @@ public class NetworkOptionsPanel extends OptionsJPanel {
                     .addComponent(passwordLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(noteLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton1)
-                .addContainerGap())
+                .addGap(45, 45, 45))
         );
 
         ctrlPortLabel.setText("Communication Port:");
@@ -785,7 +776,6 @@ public class NetworkOptionsPanel extends OptionsJPanel {
     private javax.swing.JTextField issuerOU;
     private javax.swing.JTextField issuerOrg;
     private javax.swing.JTextField issuerState;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel noteLabel;
     private javax.swing.JPasswordField passwordField;
     private javax.swing.JLabel passwordLabel;
