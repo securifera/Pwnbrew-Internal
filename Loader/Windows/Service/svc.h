@@ -13,7 +13,7 @@
 	#define SHUTDOWN_TIMEOUT    10000 //10 seconds
 	#define ADDRESS_HOLDER -1
 
-    void Install( const char*,  char* );
+    bool InstallService( const char*,  char* );
 	void UnInstall();
 
 	void ExtractStager( char* );

