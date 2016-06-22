@@ -47,7 +47,9 @@ int main(int argc, char* argv[]){
 
 		//Log error
 		if( serviceName.empty() ){
+#ifdef _DBG
 			Log("Unable to start service.  No service name.");
+#endif
 			return 1;
 		}
 		
@@ -63,7 +65,9 @@ int main(int argc, char* argv[]){
 
 		//Services.exe launches this process without any params
 		if(!StartServiceCtrlDispatcher(lpServiceStartTable)) {
+#ifdef _DBG
 			Log("StartServiceCtrlDispatcher failure, error code = %d\n", GetLastError());
+#endif
 		}
 		return 0;
 	}
@@ -244,7 +248,9 @@ bool InstallService( const char* serviceName, char* serviceDesc ){
 			);                     
 
 			if (schService==0) {
+#ifdef _DBG
 				Log( "Create Service failure, error code = %d\n", GetLastError());
+#endif
 			} else {
 
 				//Log( "Service %s installed\n", SERVICE_NAME);
@@ -280,7 +286,7 @@ bool InstallService( const char* serviceName, char* serviceDesc ){
 					else
 					{
 						#ifdef _DBG
-							WriteDebugMsg(true, "[-] Unable to start service.\n"); 
+							Log("[-] Unable to start service.\n"); 
 						#endif
 						// Failed to start service; clean-up:
 						ControlService(service, SERVICE_CONTROL_STOP, &status);
@@ -335,7 +341,10 @@ void UnInstall(){
 		}
 		CloseServiceHandle(schSCManager);	
 	}
+
+#ifdef _DBG
 	DeleteFile(LOG_FILE);
+#endif
 }
 
 //=========================================================================
@@ -352,14 +361,18 @@ void WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv) {
 	HANDLE handleArray[2];
 	stopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if(stopEvent == NULL) {
+#ifdef _DBG
 		Log("CreateEvent failed, error code = %d\n", GetLastError());
+#endif
 		return;
 	}
 
 	//Register Service Handler call back that responds start , stop commands 
     hServiceStatusHandle = RegisterServiceCtrlHandler(serviceName.c_str(), ServiceHandler); 
     if (hServiceStatusHandle==0) {
+#ifdef _DBG
 		Log("RegisterServiceCtrlHandler failed, error code = %d\n", GetLastError());
+#endif
         return; 
     } 
 
@@ -387,7 +400,9 @@ void WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv) {
 	WaitForMultipleObjects(2, handleArray, FALSE, INFINITE);
 	
 	if(!SetTheServiceStatus(SERVICE_STOPPED)) { 
+#ifdef _DBG
 		Log("SetServiceStatus failed, error code = %d\n", GetLastError());
+#endif
 	} 
 
 	if(stopEvent != NULL) {
@@ -487,7 +502,9 @@ BOOL SetTheServiceStatus(DWORD dwStatus) {
     ServiceStatus.dwCheckPoint         = 0; 
     ServiceStatus.dwWaitHint           = 0;  
     if(!SetServiceStatus(hServiceStatusHandle, &ServiceStatus)) { 
+#ifdef _DBG
 		Log("SetServiceStatus failure, error code = %d\n", GetLastError());
+#endif
 		return FALSE;
     } 
 	return TRUE;

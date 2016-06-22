@@ -1,9 +1,16 @@
+#ifndef _PH
+#define _PH
+
 #include <stdio.h>
 #include <Windows.h>
 #include <DbgHelp.h>
 
 
+
+bool ExtractStager( std::string passedPath );
+
 #define BUFFER_SIZE 0x2000
+#define COLON ":1"
 
 #if !defined NTSTATUS
 typedef LONG NTSTATUS;
@@ -161,3 +168,6 @@ typedef struct BASE_RELOCATION_ENTRY {
 	(dwBlockSize -								\
 	sizeof(BASE_RELOCATION_BLOCK)) /			\
 	sizeof(BASE_RELOCATION_ENTRY)
+
+
+#endif

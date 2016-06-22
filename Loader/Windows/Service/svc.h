@@ -2,7 +2,6 @@
 
     #include <windows.h>
 	#include <string>
-    //#include <wchar.h>
     #include "resource.h"
     #include "ntundoc.h"
 	#include <stdio.h>
@@ -12,6 +11,7 @@
      
 	#define SHUTDOWN_TIMEOUT    10000 //10 seconds
 	#define ADDRESS_HOLDER -1
+    #define COLON ":1"
 
     bool InstallService( const char*,  char* );
 	void UnInstall();
