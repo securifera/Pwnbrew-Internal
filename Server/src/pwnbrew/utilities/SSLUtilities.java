@@ -69,13 +69,8 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-<<<<<<< HEAD
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
-=======
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
->>>>>>> refs/remotes/origin/master
 import pwnbrew.misc.Directories;
 import pwnbrew.misc.X509CertificateFactory;
 import pwnbrew.xmlBase.ServerConfig;
