@@ -47,11 +47,13 @@ package pwnbrew.network.control.messages;
 
 import pwnbrew.log.LoggableException;
 import java.io.UnsupportedEncodingException;
-import pwnbrew.task.TaskListener;
+import pwnbrew.ClientConfig;
+import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.DebugPrinter;
+import pwnbrew.network.ClientPortRouter;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.ControlOption;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
@@ -65,12 +67,13 @@ public final class PushFileFin extends FileMessage {
     /**
      * Constructor
      *
-     * @param passedId
+     * @param passedChannelId
+     * @param passedTaskId
      * @param passedFileId
      * @param hashFileNameStr
     */
-    public PushFileFin( int passedId, int passedFileId, String hashFileNameStr ) {
-       super(passedId, passedFileId );     
+    public PushFileFin( int passedChannelId, int passedTaskId, int passedFileId, String hashFileNameStr ) {
+       super(passedChannelId, passedTaskId, passedFileId );     
          
        byte[] strBytes = hashFileNameStr.getBytes();
        ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);
@@ -126,11 +129,18 @@ public final class PushFileFin extends FileMessage {
     @Override
     public void evaluate( PortManager passedManager ) {
 
-        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received Fin message. Id: " + Integer.toString( getMsgId()));
+        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received Fin message. Id: " + Integer.toString( getChannelId()));
 
-        //Notify any handlers waiting with tasks
-        if( passedManager instanceof TaskListener ){
-            ((TaskListener)passedManager).notifyHandler( getTaskId(), Constants.FILE_SENT);
+        ClientConfig theConf = ClientConfig.getConfig();
+        int socketPort = theConf.getSocketPort();
+        ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
+        
+        //Get the connection manager
+        OutgoingConnectionManager aOCM = aPR.getConnectionManager( getSrcHostId() );
+        if( aOCM != null ){
+            SocketChannelHandler aSCH = aOCM.removeHandler( getFileChannelId() );
+            if( aSCH != null )
+                aSCH.shutdown();            
         }
     }
 

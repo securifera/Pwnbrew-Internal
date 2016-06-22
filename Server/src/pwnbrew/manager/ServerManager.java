@@ -59,7 +59,7 @@ import pwnbrew.host.HostController;
 import pwnbrew.host.Session;
 import pwnbrew.host.gui.HostTabPanel;
 import pwnbrew.library.LibraryItemController;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.misc.ProgressListener;
@@ -170,7 +170,7 @@ public class ServerManager extends PortManager {
         boolean retVal = true;
         try {
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            ControlMessageManager aCMManager = ControlMessageManager.getMessageManager();
             if( aCMManager == null )
                 aCMManager = ControlMessageManager.initialize( this );            
             
@@ -192,7 +192,7 @@ public class ServerManager extends PortManager {
         
         try {
              
-            FileMessageManager aFileMManager = FileMessageManager.getFileMessageManager();
+            FileMessageManager aFileMManager = FileMessageManager.getMessageManager();
             if( aFileMManager == null ){
                 aFileMManager = FileMessageManager.initialize( this );
             }
@@ -224,50 +224,60 @@ public class ServerManager extends PortManager {
     public void socketClosed( SocketChannelHandler theHandler ) {
 
         //Should ever return null since it's a closing socket
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        ControlMessageManager aCMManager = ControlMessageManager.getMessageManager();
         int controlPort = aCMManager.getPort();
         
         ServerPortRouter aSPR = (ServerPortRouter)getPortRouter( controlPort );
         int clientId = theHandler.getRootHostId();
-        SocketChannelHandler aHandler = aSPR.getSocketChannelHandler( clientId );
+        int channelId = theHandler.getChannelId();
         
-        if( aHandler != null && aHandler.equals( theHandler )){
+        //Get the connection manager for the id
+        ConnectionManager aCM = aSPR.getConnectionManager(clientId);
+        if( aCM != null ){
             
-            //If the connection was closed
-            String clientIdStr = Integer.toString( clientId );
-            aSPR.removeHandler(clientId);
-            HostController theController = getHostController(clientIdStr);
+            //Get the socket channel handler
+            SocketChannelHandler aHandler = aCM.getSocketChannelHandler( channelId );
+            if( aHandler != null && aHandler.equals( theHandler )){
 
-            if( theController != null ){
+                //If the connection was closed
+                String clientIdStr = Integer.toString( clientId );
+                aCM.removeHandler(channelId);
                 
-                final List<HostController> theHostList = new ArrayList<>();
-                theHostList.add(theController);
+                if( channelId == ConnectionManager.COMM_CHANNEL_ID ){
+                    //Get the host controller
+                    HostController theController = getHostController(clientIdStr);
+                    if( theController != null ){
 
-                //Add any pivoting hosts
-                List<String> theInternalHosts = theController.getHost().getConnectedHostIdList();
-                for( String idStr : theInternalHosts ){
-                    HostController aController = getHostController(idStr);
-                    theHostList.add(aController);
-                }         
+                        final List<HostController> theHostList = new ArrayList<>();
+                        theHostList.add(theController);
 
-                SwingUtilities.invokeLater( new Runnable() {
+                        //Add any pivoting hosts
+                        List<String> theInternalHosts = theController.getHost().getConnectedHostIdList();
+                        for( String idStr : theInternalHosts ){
+                            HostController aController = getHostController(idStr);
+                            theHostList.add(aController);
+                        }         
 
-                    @Override
-                    public void run() {                    
+                        SwingUtilities.invokeLater( new Runnable() {
 
-                        for( HostController nextController: theHostList ){
-                            hostDisconnected( (Host) nextController.getObject() );
+                            @Override
+                            public void run() {                    
 
-                            HostTabPanel thePanel = nextController.getRootPanel();
-                            if( thePanel != null )
-                                thePanel.getShellPanel().disablePanel( false );
-                                
-                            nextController.updateComponents();
-                            nextController.saveToDisk();
-                        }
+                                for( HostController nextController: theHostList ){
+                                    hostDisconnected( (Host) nextController.getObject() );
+
+                                    HostTabPanel thePanel = nextController.getRootPanel();
+                                    if( thePanel != null )
+                                        thePanel.getShellPanel().disablePanel( false );
+
+                                    nextController.updateComponents();
+                                    nextController.saveToDisk();
+                                }
+                            }
+                        });
+
                     }
-                });
-
+                }
             }
         }
     }   

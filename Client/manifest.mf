@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 X-COMMENT: Main-Class will be added automatically by build
-Version: 1.0.5.0
+UID: 10000
+Version: 1.0.6.0
 Type: plib
 S: 127.0.0.1
 P: 443

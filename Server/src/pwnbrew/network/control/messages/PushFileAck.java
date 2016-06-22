@@ -49,7 +49,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
@@ -74,12 +74,13 @@ public final class PushFileAck extends FileMessage {
      *
      * @param passedId
      * @param dstHostId
+     * @param passedFileChannelId
      * @param passedFileId
      * @param hashFileNameStr
      * @throws java.io.IOException
     */
-    public PushFileAck(int passedId, int passedFileId, String hashFileNameStr, int dstHostId ) throws IOException  {
-       super(passedId, passedFileId, dstHostId  );
+    public PushFileAck(int passedId, int passedFileId, int passedFileChannelId, String hashFileNameStr, int dstHostId ) throws IOException  {
+       super(dstHostId, passedFileChannelId, passedId, passedFileId  );
 
        byte[] strBytes = hashFileNameStr.getBytes("US-ASCII");
        ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);
@@ -197,12 +198,12 @@ public final class PushFileAck extends FileMessage {
         
         //Debug
         DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received ACK for " + 
-                getFileToReceive().getName() + " Id: " + Integer.toString( getMsgId()));
+                getFileToReceive().getName() + " Id: " + Integer.toString( getChannelId()));
 
         try {
             
             //Get the control manager for sending messages
-            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+            FileMessageManager theFileMM = FileMessageManager.getMessageManager();
             if( theFileMM == null ){
                 theFileMM = FileMessageManager.initialize( passedManager );
             }

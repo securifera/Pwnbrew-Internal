@@ -48,7 +48,7 @@ package pwnbrew.network.shell.messages;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import pwnbrew.log.LoggableException;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.Message;
 import static pwnbrew.network.Message.PROCESS_MESSAGE_TYPE;
 
@@ -72,12 +72,14 @@ abstract public class ProcessMessage extends Message {
      * Constructor
      *
      * @param passedFunction
+     * @param passedChannelId
      * @param passedBB
     */
     @SuppressWarnings("ucd")
-    public ProcessMessage( byte passedFunction, ByteBuffer passedBB ) {
+    public ProcessMessage( byte passedFunction, int passedChannelId, ByteBuffer passedBB ) {
         super( PROCESS_MESSAGE_TYPE );
         function = passedFunction;
+        channelId = SocketUtilities.intToByteArray( passedChannelId );
           
         setBytes(passedBB);
     }
@@ -189,7 +191,7 @@ abstract public class ProcessMessage extends Message {
        
        //Set client id
        int theClientId = SocketUtilities.byteArrayToInt(clientId);
-       aMessage.setClientId( theClientId );
+       aMessage.setSrcHostId( theClientId );
        
        //Set dest host id
        int theDestHostId= SocketUtilities.byteArrayToInt(tempHostId);

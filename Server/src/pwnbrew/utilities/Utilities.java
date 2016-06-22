@@ -77,8 +77,8 @@ import pwnbrew.exception.NoSuchValidationException;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostFactory;
 import pwnbrew.library.LibraryItemController;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Base64Converter;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
@@ -1620,11 +1620,11 @@ public class Utilities {
 
                 byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
                 String[] stagedClasses = new String[]{ 
-                    "pwnbrew/stage/Stage",
-                    "pwnbrew/stage/MemoryJarFile",
-                    "pwnbrew/stage/MemoryBufferURLConnection",
-                    "pwnbrew/stage/MemoryBufferURLStreamHandler",
-                    "pwnbrew/stage/Pwnbrew",
+                    "pwnbrew/network/stage/Stage",
+                    "pwnbrew/network/stage/MemoryJarFile",
+                    "pwnbrew/network/stage/MemoryBufferURLConnection",
+                    "pwnbrew/network/stage/MemoryBufferURLStreamHandler",
+                    "pwnbrew/network/stage/Pwnbrew",
                 };
 
                 //Send each staged class

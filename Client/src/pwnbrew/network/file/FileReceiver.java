@@ -48,23 +48,26 @@ package pwnbrew.network.file;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.logging.Level;
+import pwnbrew.ClientConfig;
 import pwnbrew.Persistence;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.PortManager;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.DebugPrinter;
-import pwnbrew.misc.FileUtilities;
-import pwnbrew.misc.Utilities;
+import pwnbrew.manager.DataManager;
+import pwnbrew.manager.OutgoingConnectionManager;
+import pwnbrew.network.ClientPortRouter;
+import pwnbrew.utilities.Constants;
+import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.FileUtilities;
+import pwnbrew.utilities.Utilities;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileFin;
 import pwnbrew.network.control.messages.TaskProgress;
-import pwnbrew.task.TaskListener;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
@@ -81,6 +84,7 @@ final public class FileReceiver {
     private int srcHostId = 0;
     private int taskId = 0;
     private int fileId = 0;
+    private int channelId = 0;
     private String fileHash = null;
     
     private FileOutputStream aFileStream = null;
@@ -90,31 +94,56 @@ final public class FileReceiver {
     
     private static final String NAME_Class = FileReceiver.class.getSimpleName();
 
-    //===========================================================================
+//    //===========================================================================
+//    /**
+//     * 
+//     *  Constructor
+//     * 
+//     * @param passedManager
+//     * @param passedSrcId
+//     * @param passedTaskId
+//     * @param passedFileId
+//     * @param passedFileSize
+//     * @param parentDir
+//     * @param hashFilenameStr 
+//     * @throws pwnbrew.log.LoggableException 
+//     * @throws java.io.IOException 
+//     * @throws java.security.NoSuchAlgorithmException 
+//     */
+//    @SuppressWarnings("ucd")
+//    public FileReceiver( FileMessageManager passedManager, int passedSrcId, int passedTaskId, int passedFileId, long passedFileSize, File parentDir, String hashFilenameStr) 
+//            throws LoggableException, NoSuchAlgorithmException, IOException {
+        
+          //===========================================================================
     /**
      * 
      *  Constructor
      * 
      * @param passedManager
-     * @param passedSrcId
-     * @param passedTaskId
-     * @param passedFileId
-     * @param passedFileSize
-     * @param parentDir
-     * @param hashFilenameStr 
+     * @param passedMsg
+     * @param parentDir 
      * @throws pwnbrew.log.LoggableException 
-     * @throws java.io.IOException 
      * @throws java.security.NoSuchAlgorithmException 
+     * @throws java.io.IOException 
      */
-    @SuppressWarnings("ucd")
-    public FileReceiver( FileMessageManager passedManager, int passedSrcId, int passedTaskId, int passedFileId, long passedFileSize, File parentDir, String hashFilenameStr) 
+    public FileReceiver( FileMessageManager passedManager, PushFile passedMsg, File parentDir ) 
             throws LoggableException, NoSuchAlgorithmException, IOException {
-        
+            
         theFileMessageManager = passedManager;
-        srcHostId = passedSrcId;
-        taskId = passedTaskId;
-        fileId = passedFileId;
-        fileSize = passedFileSize;
+        taskId = passedMsg.getTaskId();
+        fileId = passedMsg.getFileId();
+        fileSize = passedMsg.getFileSize();
+        srcHostId = passedMsg.getSrcHostId();
+        channelId = passedMsg.getFileChannelId();
+        
+//        theFileMessageManager = passedManager;
+//        srcHostId = passedSrcId;
+//        taskId = passedTaskId;
+//        fileId = passedFileId;
+//        fileSize = passedFileSize;
+        
+         //Get file hash
+        String hashFilenameStr = passedMsg.getHashFilenameString();
 
         //Set the hash
         String[] fileHashFileNameArr = hashFilenameStr.split(":", 2);
@@ -175,6 +204,18 @@ final public class FileReceiver {
         } catch (IOException ex) {
             ex = null;
         }  
+        
+        ClientConfig theConf = ClientConfig.getConfig();
+        int socketPort = theConf.getSocketPort();
+        ClientPortRouter aPR = (ClientPortRouter) theFileMessageManager.getPortManager().getPortRouter( socketPort );
+        
+        //Get the connection manager
+        OutgoingConnectionManager aOCM = aPR.getConnectionManager( srcHostId );
+        if( aOCM != null ){
+            SocketChannelHandler aSCH = aOCM.removeHandler( channelId );
+            if( aSCH != null )
+                aSCH.shutdown();            
+        }
     }
     
     //===============================================================
@@ -201,7 +242,7 @@ final public class FileReceiver {
 //            DebugPrinter.printMessage(NAME_Class, "Receiving file, bytes: " + fileByteCounter);
             
             //Returns if it should unlock or not
-            ControlMessageManager theCMM = ControlMessageManager.getControlMessageManager();
+//            ControlMessageManager theCMM = ControlMessageManager.getControlMessageManager();
                                     
             int tempProgressInt = 0;
             if(fileSize != 0){
@@ -213,12 +254,13 @@ final public class FileReceiver {
                 
                 //Send a progress update
                 sndFileProgress = tempProgressInt;
-                if( theCMM != null ){                    
+//                if( theCMM != null ){                    
                     TaskProgress aProgMsg = new TaskProgress(taskId, sndFileProgress );
                     aProgMsg.setDestHostId(srcHostId);
-                    theCMM.send(aProgMsg);
+                    DataManager.send( theFileMessageManager.getPortManager(), aProgMsg);
+//                    theCMM.send(aProgMsg);
                    
-                }
+//                }
             }            
             
             //If the byte count has passed the file size than send a finished message
@@ -238,16 +280,12 @@ final public class FileReceiver {
                 //Get the msg Id before clearing all values
                 cleanupFileTransfer();
 
-                //Notify any task handlers waiting
-                PortManager theManager = theFileMessageManager.getPortManager();
-                if( theManager instanceof TaskListener ){
-                    ((TaskListener)theManager).notifyHandler(taskId, Constants.FILE_RECEIVED);
-                }
-                
-                PushFileFin finMessage = new PushFileFin( taskId, fileId, hexString );
+                  
+                PushFileFin finMessage = new PushFileFin( channelId, taskId, fileId, hexString );
                 finMessage.setDestHostId(srcHostId);
-                if( theCMM != null )
-                    theCMM.send(finMessage);
+                DataManager.send( theFileMessageManager.getPortManager(), finMessage);
+//                if( theCMM != null )
+//                    theCMM.send(finMessage);
                 
                 //Remove from the parent map
                 theFileMessageManager.removeFileReceiver( fileId );
@@ -273,6 +311,15 @@ final public class FileReceiver {
      */
     public int getTaskId() {
         return taskId;
+    }
+
+    //===============================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getChannelId() {
+        return channelId;
     }
 
 }

@@ -45,7 +45,9 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network;
 
-import pwnbrew.misc.*;
+import pwnbrew.utilities.ManagedRunnable;
+import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.Constants;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Calendar;
@@ -56,6 +58,7 @@ import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.NoOp;
@@ -69,8 +72,9 @@ public class KeepAliveTimer extends ManagedRunnable {
     
     private PortManager theCommManager = null;
     private final SecureRandom aSR = new SecureRandom();
-    private volatile boolean connected = false;
+    private volatile boolean connected = true;
     final Object syncedObject = new Object();
+    final int channelId;
     
     //Static instance
     private static final String NAME_Class = KeepAliveTimer.class.getSimpleName();
@@ -83,9 +87,10 @@ public class KeepAliveTimer extends ManagedRunnable {
      * @param passedManager
     */
     @SuppressWarnings("ucd")
-    public KeepAliveTimer(PortManager passedManager ) {
+    public KeepAliveTimer(PortManager passedManager, int passedId ) {
         super(Constants.Executor);
         theCommManager = passedManager;
+        channelId = passedId;
     }
     
     // ==========================================================================
@@ -95,56 +100,33 @@ public class KeepAliveTimer extends ManagedRunnable {
     */
     @Override
     public void go() {
-                       
-        //While not shutdown    
-        while(!shutdownRequested){
-            
-            //Loop while connected
-            while( isConnected() && !shutdownRequested ){
-            
-                //Get the next sleep time
-                int sleepTime = Math.abs( aSR.nextInt() % 300 );
-        
-                Calendar theCalendar = Calendar.getInstance(); 
-                theCalendar.setTime( new Date() );
-                theCalendar.add(Calendar.SECOND, sleepTime );
-            
-                //Wait until the random time
-                waitUntil(theCalendar.getTime());  
-                try {
+                                   
+        //Loop while connected
+        while( isConnected() && !shutdownRequested ){
 
-                    ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                    if( aCMManager == null ){
-                        aCMManager = ControlMessageManager.initialize( theCommManager );
-                    }
+            //Get the next sleep time
+            int sleepTime = Math.abs( aSR.nextInt() % 300 );
 
-                    //Get the socket router
-//                    int thePort = aCMManager.getPort();
-                    ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+            Calendar theCalendar = Calendar.getInstance(); 
+            theCalendar.setTime( new Date() );
+            theCalendar.add(Calendar.SECOND, sleepTime );
 
-                    //Initiate the file transfer
-                    if(aPR != null){
-                        
-                        //Create the connection
-                        SocketChannelHandler aHandler = aPR.getSocketChannelHandler();
-                        if( aHandler != null && aHandler.getState() == Constants.CONNECTED ){
-                            //Send noop to keepalive
-                            NoOp aNoOp = new NoOp();                        
-                            aCMManager.send( aNoOp );
-                        }
-                    }
-
-                } catch ( IOException | LoggableException ex) {
-                    RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
-                }         
+            //Wait until the random time
+            waitUntil(theCalendar.getTime());  
+            ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+            if(aPR != null){
                 
-            }
-            
-            //Wait until notified that we've been connected
-            waitToBeNotified();
-            
+                //Create the connection
+                SocketChannelHandler aHandler = aPR.getConnectionManager().getSocketChannelHandler(channelId);
+                if( aHandler != null && aHandler.getState() == Constants.CONNECTED ){
+                    //Send noop to keepalive
+                    NoOp aNoOp = new NoOp();
+                    DataManager.send(theCommManager, aNoOp);
+//                        aCMManager.send( aNoOp );
+                }
+            }         
+
         }
-       
         
     }
     
@@ -204,7 +186,8 @@ public class KeepAliveTimer extends ManagedRunnable {
     *  Shut down the detector
     */
     @Override
-    public synchronized void shutdown(){
+    public void shutdown(){
+        
         super.shutdown();
         
         //Stop the timer

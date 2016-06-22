@@ -51,7 +51,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import pwnbrew.misc.ManagedRunnable;
+import pwnbrew.utilities.ManagedRunnable;
 
 /**
  *

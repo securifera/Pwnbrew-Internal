@@ -65,8 +65,8 @@ import pwnbrew.host.HostController;
 import pwnbrew.library.Ancestor;
 import pwnbrew.library.LibraryItemController;
 import pwnbrew.library.LibraryItemControllerListener;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
@@ -1624,7 +1624,7 @@ final public class MainGuiController extends Controller implements ActionListene
             //Cancel any file transfers that might be going on.
             try {                
                
-                FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
+                FileMessageManager aFMM = FileMessageManager.getMessageManager();
                 if( aFMM == null ){
                     aFMM = FileMessageManager.initialize( theServerManager );
                 }

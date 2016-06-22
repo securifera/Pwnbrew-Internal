@@ -68,7 +68,7 @@ import pwnbrew.misc.ManagedRunnable;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.CreateShell;
-import pwnbrew.network.control.messages.KillShell;
+import pwnbrew.network.control.messages.KillShellRelay;
 import pwnbrew.network.shell.messages.StdInMessage;
 import pwnbrew.output.StreamReader;
 import pwnbrew.output.StreamReaderListener;
@@ -110,6 +110,8 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     
     private final ArrayList<String> history = new ArrayList<>();
     private ListIterator<String> historyIterator = null;
+    
+    private int channelId = -1;
 
     //===========================================================================
     /**
@@ -118,9 +120,9 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
      * @param passedExecutor
      * @param passedListener 
     */
-    Shell( Executor passedExecutor, ShellListener passedListener ) {
+    public Shell( Executor passedExecutor, ShellListener passedListener ) {
         super(passedExecutor);
-        theListener = passedListener;        
+        theListener = passedListener;   
     }  
     
     //===============================================================
@@ -479,7 +481,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
                 }
 
                 int clientId = theListener.getHostId();
-                StdInMessage aMsg = new StdInMessage( ByteBuffer.wrap(theStr.getBytes()), clientId );  
+                StdInMessage aMsg = new StdInMessage( channelId, ByteBuffer.wrap(theStr.getBytes()), clientId );  
 
                 ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
                 if( aSMM == null){
@@ -516,7 +518,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         if( aCMManager != null ){
              //Create the message
             int clientId = theListener.getHostId();
-            KillShell aShellMsg = new KillShell(clientId);
+            KillShellRelay aShellMsg = new KillShellRelay( Constants.SERVER_ID, clientId, channelId );
             aCMManager.send(aShellMsg );
         }
 
@@ -588,6 +590,15 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
      */
     public boolean getStderrRedirectFlag() {
         return stderrRedirectFlag;
+    }
+
+     // ==========================================================================
+    /**
+     * 
+     * @param passedId
+     */
+    public void setChannelId(int passedId ) {
+        channelId = passedId;
     }
 
 }

@@ -49,10 +49,14 @@ import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.logging.Level;
-import pwnbrew.logging.Log;
+import java.util.logging.Logger;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.Constants;
 import pwnbrew.network.Message;
+import pwnbrew.network.RegisterMessage;
+import pwnbrew.network.ServerPortRouter;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.selector.SocketChannelHandler;
@@ -114,8 +118,8 @@ public class ServerHttpWrapper extends HttpWrapper {
 
                                 //Handle the message
                                 ByteBuffer msgBB = ByteBuffer.wrap(ctrlMsg);
-                                byte type = msgBB.get();
-                                if( DataManager.isValidType( type ) ){
+                                byte currMsgType = msgBB.get();
+                                if( DataManager.isValidType( currMsgType ) ){
                                     
                                     //Get the length
                                     byte[] msgLenArr = new byte[ Message.MSG_LEN_SIZE ];
@@ -124,69 +128,62 @@ public class ServerHttpWrapper extends HttpWrapper {
                                     //Verify that it matches
                                     int msgLen = SocketUtilities.byteArrayToInt(msgLenArr);
                                     if( msgLen == msgBB.remaining()){
-                                        byte[] msgBytes = new byte[msgLen];
-                                        msgBB.get(msgBytes);
+                                        byte[] msgByteArr = new byte[msgLen];
+                                        msgBB.get(msgByteArr);
                                         
                                         //Get the id If the client is already registered then return
-                                        if( msgBytes.length > Message.MSG_LEN_SIZE + 1 ){
+                                        if( msgByteArr.length > Message.MSG_LEN_SIZE + 1 ){
                                             
-                                            byte [] tempIdArr = Arrays.copyOf( msgBytes, 4);
-                                            int tempId = SocketUtilities.byteArrayToInt(tempIdArr);
-                                            if( !passedHandler.registerId(tempId)){
+                                            //Register the handler
+                                            if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
+                                                
+                                                RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));                                                
+                                                int srcId = aMsg.getSrcHostId();
+                                                int chanId = aMsg.getChannelId();
+      
+                                                if( passedHandler.registerId(srcId, chanId) ){
+                                                    passedHandler.setRegisteredFlag(true);                                                    
+                                                     
+                                                    RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, srcId, chanId);
+                                                    DataManager.send(passedHandler.getPortRouter().getPortManager(), retMsg);
+                                                    
+                                                    //Set wrapping after it is sent
+                                                    passedHandler.setWrapping( srcId, false);
+                                                }    
+                                                
                                                 return;
-                                            }
-                                            
-                                            //Get dest id
-                                            byte[] dstHostId = Arrays.copyOfRange(msgBytes, 4, 8);
-                                            int dstId = SocketUtilities.byteArrayToInt(dstHostId);
-                                            
-                                            try{
-                                                DataManager.routeMessage( passedHandler.getPortRouter(), type, dstId, msgBytes );
-                                            } catch(Exception ex ){
-                                                Log.log( Level.SEVERE, NAME_Class, "processHeader()", ex.toString(), ex);
-                                            }
-                                            return;
-                                        }
-                                        
-                                    } else {
-                                        
-                                        //Try to process the previous version's protocol
-                                        byte[] prevLenArr = Arrays.copyOf(msgLenArr, 2);
-                                        msgLen = SocketUtilities.byteArrayToInt(prevLenArr);
-                                        if( msgLen == msgBB.remaining() + 2){
-                                        
-                                            byte[] msgBytes = new byte[msgLen];
-                                            System.arraycopy(msgLenArr, 2, msgBytes, 0, 2);
-                                            msgBB.get(msgBytes, 2, msgLen - 2);
+                                                
+                                            } else {
+                                                
+                                                if( currMsgType == Message.STAGING_MESSAGE_TYPE ){
 
-                                            //Get the id If the client is already registered then return
-                                            if( msgBytes.length > 3 ){
+                                                    //Get src id
+                                                    byte[] srcHostIdArr = Arrays.copyOfRange(msgByteArr, 0, 4);
+                                                    int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);
 
-                                                byte[] tempIdArr = Arrays.copyOf( msgBytes, 4);
-                                                int tempId = SocketUtilities.byteArrayToInt(tempIdArr);
-                                                if( !passedHandler.registerId(tempId)){
-                                                    return;
+                                                    //Register the relay
+                                                    int parentId = passedHandler.getRootHostId();
+                                                    if( srcHostId != parentId ){
+                                                        ServerPortRouter aSPR = (ServerPortRouter)passedHandler.getPortRouter();
+                                                        aSPR.registerHandler(srcHostId, parentId, ConnectionManager.STAGE_CHANNEL_ID, passedHandler);        
+                                                    }                                      
                                                 }
-                                                
+
                                                 //Get dest id
-                                                byte[] dstHostId = Arrays.copyOfRange(msgBytes, 4, 8);
+                                                byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
                                                 int dstId = SocketUtilities.byteArrayToInt(dstHostId);
-                                                
-                                                //Set the marker so the handler will know to send a different stage
-                                                System.arraycopy(Constants.OLD_STAGER_MARKER, 0, msgBytes, 8, Constants.OLD_STAGER_MARKER.length);
 
                                                 try{
-                                                    DataManager.routeMessage( passedHandler.getPortRouter(), type, dstId, msgBytes );
+                                                    DataManager.routeMessage( passedHandler.getPortRouter(), currMsgType, dstId, msgByteArr );
                                                 } catch(Exception ex ){
                                                     Log.log( Level.SEVERE, NAME_Class, "processHeader()", ex.toString(), ex);
                                                 }
                                                 return;
                                             }
-                                        
-                                            
-                                        } else {
-                                            Log.log( Level.WARNING, NAME_Class, "processHeader()", "Message size doesn't match remaing size.", null);
                                         }
+                                        
+                                    } else {
+
                                     }
                                 }
                             }
@@ -199,6 +196,8 @@ public class ServerHttpWrapper extends HttpWrapper {
                             
                             //Do nothing because it doesn't fit the criteria
                             ex = null;
+                        } catch (LoggableException ex) {
+                            Logger.getLogger(ServerHttpWrapper.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 }

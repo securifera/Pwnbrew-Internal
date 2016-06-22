@@ -48,8 +48,8 @@ package pwnbrew.network.control;
 import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.exception.RemoteExceptionWrapper;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.network.PortRouter;
@@ -115,7 +115,7 @@ public class ControlMessageManager extends DataManager {
      *   Gets the ControlMessageManager
      * @return 
      */
-    public synchronized static ControlMessageManager getControlMessageManager(){
+    public synchronized static ControlMessageManager getMessageManager(){
         return theControlManager;
     }
     

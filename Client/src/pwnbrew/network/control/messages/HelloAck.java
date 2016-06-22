@@ -49,11 +49,15 @@ package pwnbrew.network.control.messages;
 import java.util.Map;
 import java.util.Set;
 import pwnbrew.ClientConfig;
+import pwnbrew.manager.DataManager;
+import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.manager.PortManager;
+import pwnbrew.network.ControlOption;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
@@ -64,6 +68,7 @@ public final class HelloAck extends ControlMessage {
 
     //Class name
     private static final String NAME_Class = HelloAck.class.getSimpleName();
+    
      
     // ==========================================================================
     /**
@@ -73,6 +78,29 @@ public final class HelloAck extends ControlMessage {
      */
     public HelloAck( byte[] passedId ) {
        super(passedId );
+    }
+    
+      //=========================================================================
+    /**
+     *  Sets the variable in the message related to this TLV
+     * 
+     * @param tempTlv 
+     * @return  
+     */
+    @Override
+    public boolean setOption( ControlOption tempTlv ){        
+
+        boolean retVal = true;    
+        if( !super.setOption(tempTlv)){
+            
+            byte[] theValue = tempTlv.getValue();
+            switch( tempTlv.getType()){
+                default:
+                    retVal = false;
+                    break;
+            }           
+        }
+        return retVal;
     }
       
     //===============================================================
@@ -89,15 +117,7 @@ public final class HelloAck extends ControlMessage {
         ClientConfig theClientConfig = ClientConfig.getConfig();
         PortRouter aPR = passedManager.getPortRouter( theClientConfig.getSocketPort() );
         if( aPR != null ){
-
-            //Get the handler
-            SocketChannelHandler aSCH = aPR.getSocketChannelHandler();
-
-            //Set the wrapping flag
-            if( aSCH != null ){
-                aSCH.setWrapping(false);
-            }
-            
+           
             //Set the server id
             theClientConfig.setServerId( theClientId );
             
@@ -105,13 +125,19 @@ public final class HelloAck extends ControlMessage {
             RelayManager theManager = RelayManager.getRelayManager();
             if( theManager != null ){
                 ServerPortRouter aSPR = theManager.getServerPorterRouter();
-                Map<Integer, SocketChannelHandler> aMap = aSPR.getSocketChannelHandlerMap();
-                if( !aMap.isEmpty() ){
-                    Set<Integer> keySet = aMap.keySet();
-                    for( Integer aInt : keySet){
-                        HelloRepeat aRepeatMsg = new HelloRepeat(aInt);
-                        theManager.send(aRepeatMsg);                    
+                Map<Integer, IncomingConnectionManager> connectionManagerMap = aSPR.getConnectionManagerMap();
+                if( !connectionManagerMap.isEmpty() ){
+                    
+                    //Loop through the connection map
+                    if( !connectionManagerMap.isEmpty() ){
+                        Set<Integer> keySet = connectionManagerMap.keySet();
+                        for( Integer aInt : keySet){
+                            HelloRepeat aRepeatMsg = new HelloRepeat( aInt );
+                            DataManager.send(passedManager, aRepeatMsg);
+//                            theManager.send(aRepeatMsg);                    
+                        } 
                     }
+                    
                 }     
             }       
             

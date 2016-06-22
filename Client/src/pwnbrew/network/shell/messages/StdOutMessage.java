@@ -59,10 +59,11 @@ public class StdOutMessage extends ProcessMessage {
      * Constructor
      *
      * @param dstId
+     * @param channeldId
      * @param passedBB
     */
-    public StdOutMessage( int dstId, ByteBuffer passedBB ) {
-        super( STD_OUT, passedBB );
+    public StdOutMessage( int dstId, int channeldId, ByteBuffer passedBB ) {
+        super( STD_OUT, channeldId, passedBB );
         setDestHostId(dstId);
     }
     

@@ -69,8 +69,8 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Directories;
 import pwnbrew.misc.X509CertificateFactory;
 import pwnbrew.xmlBase.ServerConfig;
@@ -529,7 +529,7 @@ final public class SSLUtilities {
                 }    
             }     
             
-            if( args.length == 1 && !headless ){            
+            if( args.length == 1 && !headless ){ 
 
                 String lookAndFeelClassStr = "javax.swing.plaf.metal.MetalLookAndFeel";
                 if( Utilities.isWindows( Utilities.getOsName()) )

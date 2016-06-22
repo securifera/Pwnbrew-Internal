@@ -39,7 +39,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.FileFinder;
+import pwnbrew.utilities.FileFinder;
 
 /**
  *

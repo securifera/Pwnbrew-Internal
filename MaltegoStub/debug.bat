@@ -1,1 +1,1 @@
-java -jar dist\MaltegoStub.jar ToOptions "Pwnbrew Server" "name=Pwnbrew Server#hostid=-1#serverip=127.0.0.1#serverport=8443"
+java -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8888 -jar dist\MaltegoStub.jar ToFileBrowser dsys "os=windows 7#arch=amd64#hostid=1953991280#name=dsys#serverip=127.0.0.1#serverport=8443"

@@ -38,7 +38,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.host.gui;
 
-import pwnbrew.shell.Shell;
+import pwnbrew.network.shell.Shell;
 import java.util.List;
 
 /**

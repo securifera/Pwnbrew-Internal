@@ -49,9 +49,10 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.Date;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.FileFinder;
+import pwnbrew.utilities.Constants;
+import pwnbrew.utilities.FileFinder;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
 
@@ -180,12 +181,13 @@ public final class FileOperation extends Tasking {
         if( retVal)
             retByte = 1;        
         
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
-            FileOpResult theResult = new FileOpResult( getTaskId(), retByte);
-            theResult.setDestHostId( getSrcHostId() );
-            aCMManager.send(theResult);
-        }       
+//        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//        if( aCMManager != null ){
+        FileOpResult theResult = new FileOpResult( getTaskId(), retByte);
+        theResult.setDestHostId( getSrcHostId() );
+        DataManager.send(passedManager, theResult);
+//            aCMManager.send(theResult);
+//        }       
     
     }
    

@@ -52,7 +52,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.DebugPrinter;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.file.FileMessageManager;
 
@@ -65,7 +65,7 @@ public final class PushFileAck extends FileMessage {
 
     private File fileToReceive = null;
     private String hashFilenameStr;
-
+   
      //Class name
     private static final String NAME_Class = PushFileAck.class.getSimpleName();
     
@@ -73,12 +73,13 @@ public final class PushFileAck extends FileMessage {
     /**
      * Constructor
      *
-     * @param passedId
+     * @param passedChannelId
+     * @param passedTaskId
      * @param hashFileNameStr
      * @param passedFileId
     */
-    public PushFileAck(int passedId, int passedFileId, String hashFileNameStr ) {
-       super(passedId, passedFileId );
+    public PushFileAck(int passedChannelId, int passedTaskId, int passedFileId, String hashFileNameStr ) {
+       super(passedChannelId, passedTaskId, passedFileId );
 
        byte[] strBytes = hashFileNameStr.getBytes();
        ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);
@@ -177,7 +178,7 @@ public final class PushFileAck extends FileMessage {
         
         //Debug
         DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received ACK for " + 
-                getFileToReceive().getName() + " Id: " + Integer.toString( getMsgId()));
+                getFileToReceive().getName() + " Id: " + Integer.toString( getChannelId()));
 
         try {
 

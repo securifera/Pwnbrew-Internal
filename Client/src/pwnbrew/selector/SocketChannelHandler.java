@@ -45,7 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.selector;
 
-import pwnbrew.log.RemoteLog;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
@@ -58,21 +57,28 @@ import java.util.Queue;
 import java.util.logging.Level;
 import javax.net.ssl.SSLException;
 import pwnbrew.ClientConfig;
+import pwnbrew.concurrent.LockListener;
+import pwnbrew.log.LoggableException;
+import pwnbrew.log.RemoteLog;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.PortWrapper;
+import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.socket.SocketChannelWrapper;
+import pwnbrew.utilities.Constants;
+import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
  *  
  */
-public class SocketChannelHandler implements Selectable {
+public class SocketChannelHandler implements Selectable, LockListener{
 
     public static final int SERVER_TYPE = 124;
     public static final int CLIENT_TYPE = 125;
@@ -87,7 +93,8 @@ public class SocketChannelHandler implements Selectable {
     private volatile boolean wrappingFlag = true;
     private volatile boolean staging = false;
 
-    private int clientId = -1;
+    private int channelId = 0;
+    private int hostId = -1;
     private int state = 0;
     
     private final Queue< byte[] > pendingByteArrs = new LinkedList<>();
@@ -95,6 +102,10 @@ public class SocketChannelHandler implements Selectable {
     //The byte buffer for holding received bytes
     private byte currMsgType = 0;
     private ByteBuffer localMsgBuffer = null;
+    
+    private boolean isRegistered = false;
+    
+    private int lockVal = 0;
     
     // ==========================================================================
     /**
@@ -134,7 +145,7 @@ public class SocketChannelHandler implements Selectable {
                 passedSelKey.cancel();
             }
             
-        } catch ( CancelledKeyException | IOException ex ){
+        } catch ( LoggableException | CancelledKeyException | IOException ex ){
             
             //Cancel the key
             passedSelKey.cancel();
@@ -143,7 +154,7 @@ public class SocketChannelHandler implements Selectable {
             shutdown();
             thePortRouter.socketClosed( this );
             
-        }
+        } 
 
         //TODO handle the case a RuntimeException is thrown doing SSL handshake
     }
@@ -221,8 +232,27 @@ public class SocketChannelHandler implements Selectable {
             }
         }
         
+        
     }
-
+    
+     //===================================================================
+    /**
+     * 
+     * @return 
+     */
+    public boolean hasRegistered() {
+        return isRegistered;
+    }
+    
+    //===================================================================
+    /**
+     * 
+     * @param passedBool 
+     */
+    public void setRegisteredFlag( boolean passedBool ) {
+        isRegistered = passedBool;
+    }
+    
     //===============================================================
     /**
      *  Method that handles the reception of bytes from the socket channel.
@@ -230,7 +260,7 @@ public class SocketChannelHandler implements Selectable {
      * @param sk the Selection Key
      * @throws IOException 
     */
-    private void receive(SelectionKey sk) throws IOException {
+    private void receive(SelectionKey sk) throws IOException, LoggableException {
 	
         try {
             
@@ -318,21 +348,154 @@ public class SocketChannelHandler implements Selectable {
                             byte [] msgByteArr = Arrays.copyOf( localMsgBuffer.array(), localMsgBuffer.position());
                             if( msgByteArr.length > 3 ){
 
-                                //Get the src id
-                                byte[] clientIdArr = Arrays.copyOf(msgByteArr, 4);
-                                int srcId = SocketUtilities.byteArrayToInt(clientIdArr);
-
                                 //Get dest id
                                 byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
                                 int dstId = SocketUtilities.byteArrayToInt(dstHostId);
+                                
+                                if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
+                                    
+                                    RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));                                                
+                                    int srcHostId = aMsg.getSrcHostId();
+                                    int chanId = aMsg.getChannelId();
+                                    
+                                    if( aMsg.getFunction() == RegisterMessage.REG ){
+                                        //Register the relay
+                                        ServerPortRouter aSPR = (ServerPortRouter)getPortRouter();
+                                        if( aSPR.registerHandler(srcHostId, chanId, this) ){
+                                        
+                                            //Send to the server
+                                            aMsg.setDestHostId(-1);
 
-                                if( !registerId(srcId, dstId))    
-                                    return;
+                                            //Try the default port router
+                                            ClientConfig theConf = ClientConfig.getConfig();
+                                            int theSocketPort = theConf.getSocketPort();
+                                            String serverIp = theConf.getServerIp();
+                                            PortRouter thePR = aSPR.getPortManager().getPortRouter( theSocketPort );
 
-                                try{
-                                    DataManager.routeMessage( thePortRouter, currMsgType, dstId, msgByteArr );                      
-                                } catch(Exception ex ){
-                                    RemoteLog.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
+                                            //Get the connection manager for the server
+                                            ConnectionManager aCM = thePR.getConnectionManager(-1);
+                                            if( aCM != null ){
+                                                 
+                                                //Create a new channel if not comms
+                                                int srcChannelId = aMsg.getChannelId();
+                                                if( srcChannelId != ConnectionManager.COMM_CHANNEL_ID ){
+                                                    
+//                                                    //Check if it already exists
+//                                                    boolean sendReset = false;
+//                                                    while( aCM.getSocketChannelHandler( srcChannelId ) != null ){
+//                                                        //Try to send back
+//                                                        srcChannelId = SocketUtilities.SecureRandomGen.nextInt();
+//                                                        sendReset = true;
+//                                                    }
+//                                                    
+//                                                    //Send reset flag if we had to change the channel id
+//                                                    if( sendReset ){
+//                                                        
+//                                                    }
+                                                    
+                                                    //Send back the ack
+                                                    RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
+                                                    retMsg.setDestHostId(srcHostId);
+                                                    //Try to send back
+                                                    DataManager.send(aSPR.getPortManager(), retMsg);
+                                                    setWrapping( false);
+                                                         
+                                                    if( thePR instanceof ClientPortRouter ){
+                                                        
+                                                        //TODO need to check if the id is taken
+                                                        ClientPortRouter aCPR = (ClientPortRouter)thePR;
+                                                        srcChannelId = aCPR.ensureConnectivity(serverIp, theSocketPort, this);
+
+//                                                        //Set route in relaymanager
+//                                                        RelayManager theRelayManager = RelayManager.getRelayManager();
+//                                                        theRelayManager.addRelayRoute( srcChannelId, retChannelId );
+//
+//                                                        //Set the new channel
+//                                                        aMsg.setChannelId(retChannelId);
+                                                    }
+                                                }
+                                                SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
+                                                if( srvHandler != null ){
+                                                    byte[] regBytes = aMsg.getBytes();
+                                                    srvHandler.queueBytes(regBytes);
+                                                }
+                                            }
+//                                                        RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
+//                                                        retMsg.setDestHostId(srcHostId);
+//                                                        
+//                                                        PortRouter thePR = aSPR.getPortManager().getPortRouter( ClientConfig.getConfig().getSocketPort() );
+//                                                        RelayManager.getRelayManager().handleMessage(thePR, retMsg.getBytes());
+//                                                        DataManager.send( aSPR.getPortManager(), retMsg);
+
+                                            //Set wrapping after it is sent
+//                                            setWrapping( false);
+                                        }
+//                                        //Register the relay
+//                                        ServerPortRouter aSPR = (ServerPortRouter)getPortRouter();
+//                                        if( aSPR.registerHandler(srcHostId, chanId, this) ){
+//                                            setRegisteredFlag(true);                                           
+//
+//                                            RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
+//                                            retMsg.setDestHostId(srcHostId);
+//                                            
+//                                            PortRouter thePR = aSPR.getPortManager().getPortRouter( ClientConfig.getConfig().getSocketPort() );
+//                                            RelayManager.getRelayManager().handleMessage(thePR, retMsg.getBytes());
+////                                                    
+////                                            DataManager.send( aSPR.getPortManager(), retMsg);
+//
+//                                            //Set wrapping after it is sent
+//                                            setWrapping( false);
+//                                        }
+                                    
+                                    } else if( aMsg.getFunction() == RegisterMessage.REG_ACK ) {
+                                        
+                                        DebugPrinter.printMessage(NAME_Class, "Received register acknowledge message.");
+                                        //Process it if it's meant this host or send it on
+                                        if( dstId == hostId )
+                                            aMsg.evaluate(thePortRouter.getPortManager());
+                                        else {
+                                            
+                                            //Send the message then set wrapping
+                                            DataManager.send( getPortRouter().getPortManager(), aMsg);
+                                            RelayManager aRelayManager = RelayManager.getRelayManager();
+                                            if( aRelayManager != null ){
+                                                ServerPortRouter thePR = aRelayManager.getServerPorterRouter();
+                                                ConnectionManager aCM = thePR.getConnectionManager(dstId);    
+                                                
+                                                //Get the socket handler
+                                                if( aCM != null ){
+                                                    SocketChannelHandler theHandler = aCM.getSocketChannelHandler( chanId );
+                                                    if( theHandler != null )
+                                                        theHandler.setWrapping(false);                                                    
+                                                }
+                                            }
+                                        }
+                                        
+                                    }
+                                                                        
+                                } else {
+                                    
+                                     if( currMsgType == Message.STAGING_MESSAGE_TYPE ){
+
+                                        //Get src id
+                                        byte[] srcHostIdArr = Arrays.copyOfRange(msgByteArr, 0, 4);
+                                        int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);
+
+                                        //Register the relay
+                                        PortRouter aPR = getPortRouter();
+                                        if( aPR instanceof ServerPortRouter){                                            
+                                            ServerPortRouter aSPR = (ServerPortRouter)aPR;
+                                            if( !aSPR.registerHandler(srcHostId, ConnectionManager.STAGE_CHANNEL_ID, this) )
+                                                return;
+                                        }
+
+                                    }
+                                    
+                                    try{
+                                        DataManager.routeMessage( thePortRouter, currMsgType, dstId, msgByteArr );                      
+                                    } catch(Exception ex ){
+                                        RemoteLog.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
+                                    }
                                 }
                             }
 
@@ -368,44 +531,54 @@ public class SocketChannelHandler implements Selectable {
 
     }
     
-     //===============================================================
-    /**
-     *  Register the client
-     * 
-     * @param srcId
-     * @param dstId
-     * @return 
-     */
-    public boolean registerId( int srcId, int dstId ){
-        
-        try {
-                
-            ClientConfig aConf = ClientConfig.getConfig();
-            int localId = Integer.parseInt( aConf.getHostId() );            
-            if( localId != dstId && ( dstId == aConf.getServerId() || dstId == -1) ){ 
-
-                RelayManager aManager = RelayManager.getRelayManager();
-                if( aManager == null){
-                    aManager = RelayManager.initialize( thePortRouter.getPortManager() );
-                }
-
-                //Get the port router and register the host
-                ServerPortRouter aSPR = aManager.getServerPorterRouter();
-                SocketChannelHandler aSCH = aSPR.getSocketChannelHandler(srcId);
-                if( aSCH == null ){
-                    aSPR.registerHandler(srcId, this);
-                    clientId = srcId;
-                }                    
-
-            } 
-            
-        } catch (IOException ex) {
-            RemoteLog.log( Level.SEVERE, NAME_Class, "registerId()", ex.getMessage(), null);
-        }
-        
-        return true;
-        
-    }
+//     //===============================================================
+//    /**
+//     *  Register the client
+//     * 
+//     * @param srcId
+//     * @param dstId
+//     * @param passedChannelId
+//     * @return 
+//     */
+//    public boolean registerId( int srcId, int dstId, int passedChannelId ){
+//        
+//        try {
+//                
+//            ClientConfig aConf = ClientConfig.getConfig();
+//            int localId = Integer.parseInt( aConf.getHostId() );            
+//            if( localId != dstId && ( dstId == aConf.getServerId() || dstId == -1) ){ 
+//
+//                RelayManager aManager = RelayManager.getRelayManager();
+//                if( aManager == null){
+//                    aManager = RelayManager.initialize( thePortRouter.getPortManager() );
+//                }
+//
+//                //Get the port router and register the host
+//                SocketChannelHandler aSCH = null;
+//                ServerPortRouter aSPR = aManager.getServerPorterRouter();
+////                IncomingConnectionManager anICM = aSPR.getConnectionManager(srcId);
+////                if( anICM == null ){
+////                    anICM = new IncomingConnectionManager(srcId);
+////                    aSPR.setConnectionManager( anICM, srcId );
+////                } else {
+////                    aSCH = anICM.getSocketChannelHandler(srcId);
+////                }
+////                
+////                //If the Handler doesn't exist then register it
+////                if( aSCH == null ){
+////                    anICM.setHandler(srcId, this);
+////                    hostId = srcId;
+////                }    
+//               
+//            } 
+//            
+//        } catch (IOException ex) {
+//            RemoteLog.log( Level.SEVERE, NAME_Class, "registerId()", ex.getMessage(), null);
+//        }
+//        
+//        return true;
+//        
+//    }
 
     //===============================================================
     /**
@@ -500,11 +673,12 @@ public class SocketChannelHandler implements Selectable {
                 } catch (InterruptedException ex1) {
                     ex1 = null;
                 }
-
-                //Get the dest id
-                byte[] dstHostId = Arrays.copyOfRange(byteArr, Message.DEST_HOST_ID_OFFSET, Message.DEST_HOST_ID_OFFSET + 4);
-                int tempId = SocketUtilities.byteArrayToInt(dstHostId);
-                thePortRouter.queueSend( byteArr, tempId );
+                
+                queueBytes(byteArr);
+//                //Get the dest id
+//                byte[] dstHostId = Arrays.copyOfRange(byteArr, Message.DEST_HOST_ID_OFFSET, Message.DEST_HOST_ID_OFFSET + 4);
+//                int tempId = SocketUtilities.byteArrayToInt(dstHostId);
+//                thePortRouter.queueSend( byteArr, tempId );
                 
             }
 
@@ -555,7 +729,7 @@ public class SocketChannelHandler implements Selectable {
     public synchronized int getState(){
 
         //Get the current state
-        return Integer.valueOf(state);
+        return state;
       
     }
 
@@ -576,7 +750,7 @@ public class SocketChannelHandler implements Selectable {
      * @param passedInt
     */
     public void setClientId(int passedInt) {
-        clientId = passedInt;
+        hostId = passedInt;
     }
 
     //===============================================================
@@ -586,7 +760,27 @@ public class SocketChannelHandler implements Selectable {
     * @return
     */
     public int getClientId() {
-       return clientId;
+       return hostId;
+    }
+    
+    //===============================================================
+    /**
+    * Sets the channel id
+    *
+     * @param passedId
+    */
+    public void setChannelId(int passedId) {
+        channelId = passedId;
+    }
+    
+    //===============================================================
+    /**
+    * Gets the channel id
+    *
+    * @return
+    */
+    public int getChannelId() {
+       return channelId;
     }
 
     //===============================================================
@@ -663,6 +857,41 @@ public class SocketChannelHandler implements Selectable {
      */
     public synchronized boolean isWrapping() {
         return wrappingFlag;
+    }
+    
+     //===============================================================
+    /**
+     * 
+     * @param lockOp 
+     */
+    @Override
+    public synchronized void lockUpdate(int lockOp) {
+        lockVal = lockOp;
+        notifyAll();
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @return  
+     */
+    @Override
+    public synchronized int waitForLock() {
+        
+        int retVal;        
+        while( lockVal == 0 ){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                continue;
+            }
+        }
+        
+        //Set to temp and reset
+        retVal = lockVal;
+        lockVal = 0;
+        
+        return retVal;
     }
 
 }/* END CLASS AccessHandler */

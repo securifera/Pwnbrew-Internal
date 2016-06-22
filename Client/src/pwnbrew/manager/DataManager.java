@@ -46,6 +46,8 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.manager;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import pwnbrew.network.control.ControlMessageManager;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,15 +55,17 @@ import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.PortWrapper;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.file.FileMessageManager;
+import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.shell.ShellMessageManager;
+import pwnbrew.selector.SocketChannelHandler;
 /**
  *
  *  
@@ -123,6 +127,10 @@ abstract public class DataManager {
         boolean retVal = true;
         switch(type){
             
+            case Message.REGISTER_MESSAGE_TYPE:
+                break;
+            case Message.STAGING_MESSAGE_TYPE:
+                break;
             case Message.CONTROL_MESSAGE_TYPE:
                 break;
             case Message.PROCESS_MESSAGE_TYPE:
@@ -269,4 +277,68 @@ abstract public class DataManager {
         theDataHandler.shutdown();
     }
     
+    
+     //===============================================================
+    /**
+     *  Queues the byte array to be sent
+     * @param passedCommManager
+     * @param passedMessage
+     */
+    public static void send( PortManager passedCommManager, Message passedMessage ) {
+        
+//        boolean retVal = false;
+        int destClientId = passedMessage.getDestHostId();
+        int channelId = passedMessage.getChannelId();
+        
+        //Try the default port router
+        ClientConfig aConf = ClientConfig.getConfig();
+        int thePort = aConf.getSocketPort();
+        PortRouter thePR = passedCommManager.getPortRouter( thePort );
+        ConnectionManager aCM = thePR.getConnectionManager(destClientId);
+        if( aCM == null ){
+            RelayManager aRelayManager = RelayManager.getRelayManager();
+            if( aRelayManager != null ){
+                thePR = aRelayManager.getServerPorterRouter();
+                aCM = thePR.getConnectionManager(destClientId);                
+            }
+        }
+
+        //Get the socket handler
+        if( aCM != null ){
+        
+            SocketChannelHandler theHandler = aCM.getSocketChannelHandler( channelId );
+            if( theHandler != null ){
+                
+//                ByteBuffer aByteBuffer;
+//                int msgLen = passedMessage.getLength();
+//                aByteBuffer = ByteBuffer.allocate( msgLen );
+//                passedMessage.append(aByteBuffer);
+//
+//                //Create a byte array from the messagen byte buffer
+//                byte[] msgBytes = Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position());
+                byte[] msgBytes = passedMessage.getBytes();
+
+                //If wrapping is necessary then wrap it
+                if( theHandler.isWrapping() ){
+                    PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
+                    if( aWrapper != null ){
+
+                         //Set the staged wrapper if necessary
+                        if( aWrapper instanceof ServerHttpWrapper ){
+                            ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+                            aSrvWrapper.setStaging( theHandler.isStaged());
+                        }
+
+                        ByteBuffer aByteBuffer = aWrapper.wrapBytes( msgBytes );  
+                        msgBytes = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
+                    } 
+                }
+
+                theHandler.queueBytes(msgBytes);
+//                retVal = true;
+
+            }
+        }
+//        return;
+    }
 }

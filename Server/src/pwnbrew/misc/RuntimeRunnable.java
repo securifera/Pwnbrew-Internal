@@ -48,7 +48,7 @@ package pwnbrew.misc;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.logging.Level;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.output.StreamCollector;
 
 /**

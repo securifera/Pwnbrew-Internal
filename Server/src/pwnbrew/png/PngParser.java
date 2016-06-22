@@ -50,7 +50,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.LoggableException;
 import pwnbrew.png.Png.PngChunk;
 import pwnbrew.utilities.SocketUtilities;
 

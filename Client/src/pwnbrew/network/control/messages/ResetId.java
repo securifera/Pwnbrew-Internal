@@ -45,14 +45,17 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.log.RemoteLog;
-import pwnbrew.log.LoggableException;
 import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
+import pwnbrew.log.LoggableException;
+import pwnbrew.log.RemoteLog;
+import pwnbrew.manager.ConnectionManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
@@ -73,7 +76,6 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
         super( passedId );
     }
     
-      
     //===============================================================
     /**
     *   Performs the logic specific to the message.
@@ -91,15 +93,16 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
             theConf.setHostId(anInteger.toString());
             theConf.writeSelfToDisk();
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
+//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//            if( aCMManager != null ){
                 //Get the port router
                 String hostname = SocketUtilities.getHostname();
 
                 //Create a hello message and send it
-                Hello helloMessage = new Hello( hostname );
-                aCMManager.send(helloMessage);
-            }              
+                Hello helloMessage = new Hello( hostname, ConnectionManager.COMM_CHANNEL_ID );
+                DataManager.send(passedManager, helloMessage);
+//                aCMManager.send(helloMessage);
+//            }              
                        
         } catch (IOException | LoggableException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );

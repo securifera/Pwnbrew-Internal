@@ -58,7 +58,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.CRC32;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.LoggableException;
 import pwnbrew.utilities.SocketUtilities;
 
 /**

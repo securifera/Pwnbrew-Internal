@@ -53,26 +53,9 @@ import pwnbrew.network.control.messages.TaskStatus;
  */
 public interface TaskListener {
 
-     //===============================================================
-     /**
-     * Notifies the task handler that a file was successfully sent
-     *
-     * @param taskId the task id
-     * @param fileOp the kind of file notification
-      *
-    */
-    public void notifyHandler( int taskId, int fileOp );
     
-     //===============================================================
-    /**
-     * Handles the completion of a task
-     *
-     * @param taskId
-     * @param resultStatus
-    */
-    public void taskFinished(Integer taskId, String resultStatus );
-    
-     //===============================================================
+     
+    //===============================================================
     /**
      * Handles a task change event
      *

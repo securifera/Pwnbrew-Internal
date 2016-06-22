@@ -45,13 +45,12 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
-import pwnbrew.log.LoggableException;
+import pwnbrew.ClientConfig;
+import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.network.shell.Shell;
-import pwnbrew.network.shell.ShellMessageManager;
+import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.network.ClientPortRouter;
+import pwnbrew.network.ControlOption;
 
 /**
  *
@@ -61,6 +60,8 @@ public final class KillShell extends ControlMessage{ // NO_UCD (use default)
     
      //Class name
     private static final String NAME_Class = KillShell.class.getSimpleName();
+    private static final byte OPTION_CHANNEL_ID = 102; 
+    private int theChannelId = 0;
   
 
     // ==========================================================================
@@ -82,6 +83,31 @@ public final class KillShell extends ControlMessage{ // NO_UCD (use default)
        super( passedId );
     }
     
+      //=========================================================================
+    /**
+     *  Sets the variable in the message related to this TLV
+     * 
+     * @param tempTlv 
+     * @return  
+     */
+    @Override
+    public boolean setOption( ControlOption tempTlv ){        
+
+        boolean retVal = true;    
+        if( !super.setOption(tempTlv)){
+            
+            byte[] theValue = tempTlv.getValue();
+            switch( tempTlv.getType()){
+                case OPTION_CHANNEL_ID:
+                    theChannelId = SocketUtilities.byteArrayToInt(theValue);
+                    break;
+                default:
+                    retVal = false;
+                    break;
+            }           
+        }
+        return retVal;
+    }
       
     //===============================================================
     /**
@@ -92,21 +118,15 @@ public final class KillShell extends ControlMessage{ // NO_UCD (use default)
     @Override
     public void evaluate( PortManager passedManager ) {        
         
-        try {
-            
-            ShellMessageManager aShellMsgManager = ShellMessageManager.getShellMessageManager();
-            if( aShellMsgManager == null ){
-                aShellMsgManager = ShellMessageManager.initialize( passedManager );
-            }
-            
-            Shell aShell = aShellMsgManager.removeShell( getSrcHostId() );
-            if( aShell != null){            
-                aShell.shutdown();
-            }
-            
-        } catch(IOException | LoggableException ex ){
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null);        
-        }
+        ClientConfig theConf = ClientConfig.getConfig();
+        int socketPort = theConf.getSocketPort();
+        ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
+        
+        //Get the connection manager
+        OutgoingConnectionManager aOCM = aPR.getConnectionManager( theConf.getServerId() );
+        if( aOCM != null )
+            aOCM.closeShell( theChannelId );   
+        
     }
 
 }

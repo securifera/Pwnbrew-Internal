@@ -87,7 +87,7 @@ public class DirExpansionListener implements TreeExpansionListener {
         if (firstNode==null)    // No flag
             return;
 
-        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
+        ControlMessageManager aCMM = ControlMessageManager.getMessageManager();
         int hostId = Integer.parseInt( theController.getId() );
         Object anObj = node.getUserObject();
 
@@ -111,7 +111,7 @@ public class DirExpansionListener implements TreeExpansionListener {
             
             //Send a message
             theController.addRemoteFileSystemTask(aRFST);
-            DataManager.send( theController.getCommManager(), aTaskMessage);
+            DataManager.send( theController.getPortManager(), aTaskMessage);
             
         }
 

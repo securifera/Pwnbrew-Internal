@@ -127,9 +127,10 @@ public class ControlMessageHandler extends DataHandler {
                         msgBytes = Arrays.copyOfRange(msgBytes, 5, msgBytes.length );
                         ClassRequest aClassRequest = new ClassRequest( classPath, msgBytes );
 
+                        DataManager.send( aPM, aClassRequest);
                         //Get the class bytes
-                        byte[] byteArr = aClassRequest.getBytes();
-                        aPR.queueSend( byteArr, aClassRequest.getDestHostId());
+//                        byte[] byteArr = aClassRequest.getBytes();
+//                        aPR.queueSend( byteArr, aClassRequest.getDestHostId());
 
                     }
                 }
@@ -175,8 +176,9 @@ public class ControlMessageHandler extends DataHandler {
 
                     //If the returned message is a class request then return to sender
                     if( aMessage instanceof ClassRequest){
-                        byte[] byteArr = aMessage.getBytes();
-                        srcPortRouter.queueSend( byteArr, aMessage.getDestHostId());
+                        DataManager.send( srcPortRouter.getPortManager(), aMessage);
+//                        byte[] byteArr = aMessage.getBytes();
+//                        srcPortRouter.queueSend( byteArr, aMessage.getDestHostId());
                     } else
                         processIncoming(srcPortRouter, aMessage);
                     

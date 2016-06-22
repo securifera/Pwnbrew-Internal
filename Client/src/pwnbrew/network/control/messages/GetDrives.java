@@ -48,6 +48,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.control.ControlMessageManager;
 
@@ -80,8 +81,8 @@ public final class GetDrives extends Tasking {
     @Override
     public void evaluate( PortManager passedManager ) {   
     
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
+//        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//        if( aCMManager != null ){
             //Get the roots
             File[] theRoots = File.listRoots();
             int taskId = getTaskId();
@@ -89,14 +90,16 @@ public final class GetDrives extends Tasking {
             //Create a dircount message and send it back
             ControlMessage aMsg = new DirCount(taskId, theRoots.length);
             aMsg.setDestHostId( getSrcHostId() );
-            aCMManager.send(aMsg);
+            DataManager.send(passedManager, aMsg);
+//            aCMManager.send(aMsg);
             
             for (File aFile : theRoots) {
                 aMsg = new FileSystemMsg( taskId, aFile, true );
                 aMsg.setDestHostId( getSrcHostId() );
-                aCMManager.send(aMsg);
+                DataManager.send(passedManager, aMsg);
+//                aCMManager.send(aMsg);
             }
-        }
+//        }
         
     }
    

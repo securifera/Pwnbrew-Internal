@@ -56,7 +56,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -88,8 +87,8 @@ import pwnbrew.host.gui.RemoteFile;
 import pwnbrew.host.gui.RemoteFileSystemTask;
 import pwnbrew.library.LibraryItemController;
 import pwnbrew.library.LibraryItemControllerListener;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
@@ -99,11 +98,11 @@ import pwnbrew.network.control.messages.FileOperation;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.Sleep;
 import pwnbrew.network.control.messages.TaskGetFile;
-import pwnbrew.shell.Bash;
-import pwnbrew.shell.CommandPrompt;
-import pwnbrew.shell.Powershell;
-import pwnbrew.shell.Shell;
-import pwnbrew.shell.ShellListener;
+import pwnbrew.network.shell.Bash;
+import pwnbrew.network.shell.CommandPrompt;
+import pwnbrew.network.shell.Powershell;
+import pwnbrew.network.shell.Shell;
+import pwnbrew.network.shell.ShellListener;
 import pwnbrew.tasks.RemoteTask;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.Utilities;
@@ -1259,7 +1258,7 @@ public final class HostController extends LibraryItemController implements Actio
      * @return 
      */
     @Override
-    public PortManager getCommManager() {
+    public PortManager getPortManager() {
         return theMainGuiController.getServer().getServerManager();
     }
 

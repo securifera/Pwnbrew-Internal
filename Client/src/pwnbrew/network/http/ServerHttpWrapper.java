@@ -49,18 +49,28 @@ import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import pwnbrew.ClientConfig;
+import pwnbrew.concurrent.LockListener;
+import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.SocketUtilities;
-import pwnbrew.misc.Utilities;
+import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.Message;
+import pwnbrew.network.PortRouter;
+import pwnbrew.network.RegisterMessage;
+import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.utilities.Utilities;
 
 /**
  *
  *  
  */
-public class ServerHttpWrapper extends HttpWrapper {
+public class ServerHttpWrapper extends HttpWrapper implements LockListener {
 
     private static final String NAME_Class = ServerHttpWrapper.class.getSimpleName();
     private static final int STEALTH_COOKIE_B64 = 5;   
@@ -69,6 +79,7 @@ public class ServerHttpWrapper extends HttpWrapper {
     private final SecureRandom aSR = new SecureRandom();  
     private volatile boolean staging = false;
        
+    private int lockVal = 0;
     //==========================================================================
     /**
      * Constructor
@@ -113,8 +124,8 @@ public class ServerHttpWrapper extends HttpWrapper {
 
                                 //Handle the message
                                 ByteBuffer msgBB = ByteBuffer.wrap(ctrlMsg);
-                                byte type = msgBB.get();
-                                if( DataManager.isValidType( type ) ){
+                                byte currMsgType = msgBB.get();
+                                if( DataManager.isValidType( currMsgType ) ){
                                     
                                     //Get the length
                                     byte[] msgLenArr = new byte[Message.MSG_LEN_SIZE];
@@ -123,24 +134,107 @@ public class ServerHttpWrapper extends HttpWrapper {
                                     //Verify that it matches
                                     int msgLen = SocketUtilities.byteArrayToInt(msgLenArr);
                                     if( msgLen == msgBB.remaining()){
-                                        byte[] msgBytes = new byte[msgLen];
-                                        msgBB.get(msgBytes);
+                                        byte[] msgByteArr = new byte[msgLen];
+                                        msgBB.get(msgByteArr);
                                         
                                         //Get the id If the client is already registered then return
-                                        if( msgBytes.length > 3 ){
+                                        if( msgByteArr.length > 3 ){
                                             
                                             //Get dest id
-                                            byte[] dstHostId = Arrays.copyOfRange(msgBytes, 4, 8);
+                                            byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
                                             int dstId = SocketUtilities.byteArrayToInt(dstHostId);
                                             
-                                            byte [] tempIdArr = Arrays.copyOf( msgBytes, 4);
-                                            int tempId = SocketUtilities.byteArrayToInt(tempIdArr);
-                                            if( !passedHandler.registerId(tempId, dstId)){
-                                                return;
+                                            if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
+                                            
+                                                RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));                                                
+                                                int srcHostId = aMsg.getSrcHostId();
+                                                int chanId = aMsg.getChannelId();
+                                         
+                                                if( aMsg.getFunction() == RegisterMessage.REG ){
+                                                    //Register the relay
+                                                    ServerPortRouter aSPR = (ServerPortRouter)passedHandler.getPortRouter();
+                                                    if( aSPR.registerHandler(srcHostId, chanId, passedHandler) ){
+                                                                                                        
+                                                        //Send to the server
+                                                        aMsg.setDestHostId(-1);
+                                                         
+                                                        //Try the default port router
+                                                        ClientConfig theConf = ClientConfig.getConfig();
+                                                        int theSocketPort = theConf.getSocketPort();
+                                                        String serverIp = theConf.getServerIp();
+                                                        PortRouter thePR = aSPR.getPortManager().getPortRouter( theSocketPort );
+                                                        
+                                                        //Get the connection manager for the server
+                                                        ConnectionManager aCM = thePR.getConnectionManager(-1);
+                                                        if( aCM != null ){
+                                                            
+                                                            //Create a new channel if not comms
+                                                            int srcChannelId = aMsg.getChannelId();
+                                                            if( srcChannelId != ConnectionManager.COMM_CHANNEL_ID ){
+                                                                
+                                                                //Send back the ack
+                                                                RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
+                                                                retMsg.setDestHostId(srcHostId);
+                                                                
+                                                                //Try to send back
+                                                                DataManager.send(aSPR.getPortManager(), retMsg);
+                                                                passedHandler.setWrapping( false);
+                                                                
+                                                                if( thePR instanceof ClientPortRouter ){
+                                                                    
+                                                                    //TODO need to check if the id is already taken
+                                                                    ClientPortRouter aCPR = (ClientPortRouter)thePR;
+                                                                    srcChannelId = aCPR.ensureConnectivity(serverIp, theSocketPort, this, chanId);
+                                                                    
+                                                                    //Set route in relaymanager
+//                                                                    RelayManager theRelayManager = RelayManager.getRelayManager();
+//                                                                    theRelayManager.addRelayRoute( srcChannelId, retChannelId );
+                                                                    
+                                                                    //Set the new channel
+//                                                                    aMsg.setChannelId(retChannelId);
+                                                                }
+                                                            } 
+                                                            
+                                                            SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
+                                                            if( srvHandler != null ){
+                                                                byte[] regBytes = aMsg.getBytes();
+                                                                srvHandler.queueBytes(regBytes);
+                                                            }
+                                                        }
+//                                                        RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
+//                                                        retMsg.setDestHostId(srcHostId);
+//                                                        
+//                                                        PortRouter thePR = aSPR.getPortManager().getPortRouter( ClientConfig.getConfig().getSocketPort() );
+//                                                        RelayManager.getRelayManager().handleMessage(thePR, retMsg.getBytes());
+//                                                        DataManager.send( aSPR.getPortManager(), retMsg);
+
+                                                        //Set wrapping after it is sent
+//                                                        passedHandler.setWrapping( false);
+                                                    }
+                                                                                                            
+                                                    //Send back reg ack
+                                                }
+//                                                    passedHandler.registerId(srcId, dstId, chanId); 
+                                                    
+                                                
+                                            } else {
+                                                
+                                                if( currMsgType == Message.STAGING_MESSAGE_TYPE ){
+
+                                                    //Get src id
+                                                    byte[] srcHostIdArr = Arrays.copyOfRange(msgByteArr, 0, 4);
+                                                    int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);
+
+                                                    //Register the relay
+                                                    ServerPortRouter aSPR = (ServerPortRouter)passedHandler.getPortRouter();
+                                                    if( !aSPR.registerHandler(srcHostId, ConnectionManager.STAGE_CHANNEL_ID, passedHandler) )
+                                                        return;
+                                                                                          
+                                                }
+                                                
+                                                
+                                                DataManager.routeMessage( passedHandler.getPortRouter(), currMsgType, dstId, msgByteArr );
                                             }
-                                           
-                                            DataManager.routeMessage( passedHandler.getPortRouter(), type, dstId, msgBytes );
-                                        
                                         }
                                         
                                     } else {
@@ -157,6 +251,8 @@ public class ServerHttpWrapper extends HttpWrapper {
                             
                             //Do nothing because it doesn't fit the criteria
                             ex = null;
+                        } catch (LoggableException ex) {
+                            Logger.getLogger(ServerHttpWrapper.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 }
@@ -295,6 +391,40 @@ public class ServerHttpWrapper extends HttpWrapper {
         return staging;
     }
     
+    //===============================================================
+    /**
+     * 
+     * @param lockOp 
+     */
+    @Override
+    public synchronized void lockUpdate(int lockOp) {
+        lockVal = lockOp;
+        notifyAll();
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @return  
+     */
+    @Override
+    public synchronized int waitForLock() {
+        
+        int retVal;        
+        while( lockVal == 0 ){
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+                continue;
+            }
+        }
+        
+        //Set to temp and reset
+        retVal = lockVal;
+        lockVal = 0;
+        
+        return retVal;
+    }
     
     
 }

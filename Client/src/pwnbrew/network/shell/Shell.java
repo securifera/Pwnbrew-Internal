@@ -54,9 +54,10 @@ import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.Constants;
-import pwnbrew.misc.ManagedRunnable;
+import pwnbrew.utilities.Constants;
+import pwnbrew.utilities.ManagedRunnable;
 import pwnbrew.output.StreamReader;
 import pwnbrew.output.StreamReaderListener;
 import pwnbrew.output.StreamRecorder;
@@ -93,6 +94,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
     private final boolean redirect_stderr;
     
     private final int parentId;
+    private final int channelId;
     private final PortManager theCommManager;
     private static final String NAME_Class = Shell.class.getSimpleName();
       
@@ -103,17 +105,19 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
      * @param passedExecutor 
      * @param passedManager 
      * @param passedSrcId 
+     * @param passedChannelId 
      * @param passedArr 
      * @param passedEncoding 
      * @param passedStartupCmd 
      * @param passedBool 
      */
     public Shell( Executor passedExecutor, PortManager passedManager, 
-            int passedSrcId, String passedEncoding, String[] passedArr, 
+            int passedSrcId, int passedChannelId, String passedEncoding, String[] passedArr, 
             String passedStartupCmd,boolean passedBool ) {
         super(passedExecutor);
         
         parentId = passedSrcId;
+        channelId = passedChannelId;
         theCommManager = passedManager;
         encoding = passedEncoding;
         cmdStringArr = passedArr;
@@ -145,27 +149,28 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
             ProcessMessage aMsg;
             switch( passedId ){
                 case Constants.STD_OUT_ID:
-                    aMsg = new StdOutMessage( parentId, ByteBuffer.wrap(buffer));
+                    aMsg = new StdOutMessage( parentId, channelId, ByteBuffer.wrap(buffer));
                     break;
                 case Constants.STD_ERR_ID:
-                    aMsg = new StdErrMessage( parentId, ByteBuffer.wrap(buffer));
+                    aMsg = new StdErrMessage( parentId, channelId, ByteBuffer.wrap(buffer));
                     break;
                 default:
                     RemoteLog.log(Level.SEVERE, NAME_Class, "handleBytesRead()", "Unrecognized stream id.", null );        
                     return;
             }
 
-            try {
+//            try {
 
-                ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
-                if( aSMM == null){
-                    aSMM = ShellMessageManager.initialize( theCommManager );
-                }
-                aSMM.send(aMsg);
+//                ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
+//                if( aSMM == null){
+//                    aSMM = ShellMessageManager.initialize( theCommManager );
+//                }
+                DataManager.send(theCommManager, aMsg);
+//                aSMM.send(aMsg);
 
-            } catch (IOException | LoggableException ex) {
-                RemoteLog.log( Level.SEVERE, NAME_Class, "handleBytesRead()", ex.getMessage(), null);
-            }
+//            } catch (IOException | LoggableException ex) {
+//                RemoteLog.log( Level.SEVERE, NAME_Class, "handleBytesRead()", ex.getMessage(), null);
+//            }
             
         } else {
             

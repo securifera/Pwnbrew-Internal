@@ -52,7 +52,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.List;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.SubnetMaskTable_IPv4;
 import pwnbrew.utilities.NetworkInterfaceUtilities;
 import pwnbrew.network.Nic;

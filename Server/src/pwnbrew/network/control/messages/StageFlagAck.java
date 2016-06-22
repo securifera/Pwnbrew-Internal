@@ -47,12 +47,11 @@ package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
-import static pwnbrew.network.control.messages.SendStage.NAME_Class;
 import pwnbrew.utilities.Utilities;
 
 /**
@@ -123,8 +122,7 @@ public final class StageFlagAck extends ControlMessage{
             DataManager.send(passedManager,aPayload);
         else
             Log.log(Level.SEVERE, NAME_Class, "evaluate()", "Unable to retrieve payload, ensure one has been loaded into the library", null );
-                 
-       
+     
     }
 
 }

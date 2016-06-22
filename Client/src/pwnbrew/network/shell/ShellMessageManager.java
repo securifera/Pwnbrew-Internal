@@ -67,7 +67,7 @@ public class ShellMessageManager extends DataManager {
     private static final String NAME_Class = ShellMessageManager.class.getSimpleName();
     
     //The map for relating shells to their ids
-    private final Map<Integer, Shell> theShellMap = new HashMap<>();
+//    private final Map<Integer, Shell> theShellMap = new HashMap<>();
     
     //===========================================================================
     /*
@@ -124,37 +124,37 @@ public class ShellMessageManager extends DataManager {
         theShellMsgManager.getDataHandler().processData(srcPortRouter, msgBytes);        
     }
     
-    //===============================================================
-    /**
-     *   Send the message out the given channel.
-     *
-     * @param passedMessage
-     * @throws java.io.IOException
-     * @throws pwnbrew.log.LoggableException
-    */
-    @SuppressWarnings("ucd")
-    public void send( ProcessMessage passedMessage ) throws IOException, LoggableException {
-
-        //Allows for more specific handles to encode the message however necessary
-//        PortWrapper aWrapper = DataManager.getPortWrapper( operatingPort );
-        
-        ByteBuffer aByteBuffer;
-//        if( aWrapper != null ){
-//            aByteBuffer = aWrapper.wrapBytes( passedMessage.getBytes() );        
-//        } else {
-            int msgLen = passedMessage.getLength() + 3;
-            aByteBuffer = ByteBuffer.allocate( msgLen );
-            passedMessage.append(aByteBuffer);
-//        }
-        
-        //Get the port router
-        PortRouter thePR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
-        
-        //Queue the message to be sent
-        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
-//        DebugPrinter.printMessage(this, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-          
-    }
+//    //===============================================================
+//    /**
+//     *   Send the message out the given channel.
+//     *
+//     * @param passedMessage
+//     * @throws java.io.IOException
+//     * @throws pwnbrew.log.LoggableException
+//    */
+//    @SuppressWarnings("ucd")
+//    public void send( ProcessMessage passedMessage ) throws IOException, LoggableException {
+//
+//        //Allows for more specific handles to encode the message however necessary
+////        PortWrapper aWrapper = DataManager.getPortWrapper( operatingPort );
+//        
+//        ByteBuffer aByteBuffer;
+////        if( aWrapper != null ){
+////            aByteBuffer = aWrapper.wrapBytes( passedMessage.getBytes() );        
+////        } else {
+//            int msgLen = passedMessage.getLength() + 3;
+//            aByteBuffer = ByteBuffer.allocate( msgLen );
+//            passedMessage.append(aByteBuffer);
+////        }
+//        
+//        //Get the port router
+//        PortRouter thePR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+//        
+//        //Queue the message to be sent
+//        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getChannelId() );
+////        DebugPrinter.printMessage(this, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+//          
+//    }
     
     //===========================================================================
     /*
@@ -165,60 +165,60 @@ public class ShellMessageManager extends DataManager {
         return (ShellMessageHandler)theDataHandler;
     }   
 
-    //===========================================================================
-    /*
-     *  Return the shell
-     */
-    public Shell getShell( int passedId ) {
-        Shell aShell;
-        synchronized( theShellMap ){
-            aShell = theShellMap.get(passedId);
-        }
-        return aShell;
-    }    
+//    //===========================================================================
+//    /*
+//     *  Return the shell
+//     */
+//    public Shell getShell( int passedId ) {
+//        Shell aShell;
+//        synchronized( theShellMap ){
+//            aShell = theShellMap.get(passedId);
+//        }
+//        return aShell;
+//    }    
     
-    //===========================================================================
-    /*
-     *  Set the shell
-     */
-    public void setShell( int passedId, Shell passedShell ) {
-       
-        synchronized( theShellMap ){
-            Shell aShell = theShellMap.get(passedId);
-            if( aShell != null )
-                aShell.shutdown();
-            
-            theShellMap.put(passedId, passedShell);
-        }
-    }
+//    //===========================================================================
+//    /*
+//     *  Set the shell
+//     */
+//    public void setShell( int passedId, int channelId, Shell passedShell ) {
+//       
+//        synchronized( theShellMap ){
+//            Shell aShell = theShellMap.get(passedId);
+//            if( aShell != null )
+//                aShell.shutdown();
+//            
+//            theShellMap.put(passedId, passedShell);
+//        }
+//    }
     
-    //===========================================================================
-    /**
-     *  Shutdown the handler 
-     */
-    @Override
-    public void shutdown() {
-        super.shutdown();
-        synchronized( theShellMap ){
-            for( Shell aShell : theShellMap.values()){
-                aShell.shutdown();
-            }
-        }
-    }
+//    //===========================================================================
+//    /**
+//     *  Shutdown the handler 
+//     */
+//    @Override
+//    public void shutdown() {
+//        super.shutdown();
+//        synchronized( theShellMap ){
+//            for( Shell aShell : theShellMap.values()){
+//                aShell.shutdown();
+//            }
+//        }
+//    }
 
-    //===========================================================================
-    /**
-     * 
-     * @param passedId
-     * @return 
-     */
-    public Shell removeShell( int passedId ) {
-        Shell aShell;
-        synchronized( theShellMap ){
-            aShell = theShellMap.remove(passedId);
-        }
-        return aShell;
-    }
+//    //===========================================================================
+//    /**
+//     * 
+//     * @param passedId
+//     * @return 
+//     */
+//    public Shell removeShell( int passedId ) {
+//        Shell aShell;
+//        synchronized( theShellMap ){
+//            aShell = theShellMap.remove(passedId);
+//        }
+//        return aShell;
+//    }
     
     
     

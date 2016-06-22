@@ -48,7 +48,7 @@ package pwnbrew.network.control.messages;
 
 import java.io.IOException;
 import java.util.logging.Level;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.file.FileMessageManager;
 
@@ -65,11 +65,13 @@ public final class PushFileAbort extends FileMessage {
     /**
      * Constructor
      *
-     * @param passedId
+     * @param taskId
      * @param dstHostId
+     * @param passedChannelId
+     * @param passedFileId
     */
-    public PushFileAbort( int passedId, int dstHostId ) {
-        super( passedId, dstHostId );
+    public PushFileAbort( int taskId, int dstHostId, int passedChannelId, int passedFileId ) {
+        super( dstHostId, passedChannelId, taskId, passedFileId );
     }
     
     // ==========================================================================
@@ -94,7 +96,7 @@ public final class PushFileAbort extends FileMessage {
         //Get the control manager for sending messages
         try {
             
-            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+            FileMessageManager theFileMM = FileMessageManager.getMessageManager();
             if( theFileMM == null ){
                 theFileMM = FileMessageManager.initialize( passedManager );
             }

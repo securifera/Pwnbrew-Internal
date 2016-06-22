@@ -53,7 +53,7 @@ import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.DebugPrinter;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.Message;
 
 /**
@@ -122,26 +122,26 @@ public class ControlMessageManager extends DataManager {
         theControlManager.getDataHandler().processData( srcPortRouter, msgBytes);        
     }
     
-    //===============================================================
-    /**
-     *   Send the message out the given channel.
-     *
-     * @param passedMessage
-    */
-    public void send( Message passedMessage ) {
-
-        int msgLen = passedMessage.getLength();
-        ByteBuffer aByteBuffer = ByteBuffer.allocate( msgLen );
-        passedMessage.append(aByteBuffer);
-        
-        //Get the port router
-        PortRouter thePR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
-        
-        //Queue the message to be sent
-        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
-        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-        
-    }
+//    //===============================================================
+//    /**
+//     *   Send the message out the given channel.
+//     *
+//     * @param passedMessage
+//    */
+//    public void send( Message passedMessage ) {
+//
+//        int msgLen = passedMessage.getLength();
+//        ByteBuffer aByteBuffer = ByteBuffer.allocate( msgLen );
+//        passedMessage.append(aByteBuffer);
+//        
+//        //Get the port router
+//        PortRouter thePR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+//        
+//        //Queue the message to be sent
+//        if( thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getChannelId() ))
+//            DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+//        
+//    }
     
      //===========================================================================
     /*

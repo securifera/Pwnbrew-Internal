@@ -49,7 +49,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Stack;
-import pwnbrew.misc.DynamicClassLoader;
+import pwnbrew.utilities.DynamicClassLoader;
 import pwnbrew.network.PortRouter;
 
 /**
@@ -110,9 +110,9 @@ public abstract class PortManager {
         
         //Shutdown each port router
         synchronized( thePortRouterMap ){
-            for( Iterator<PortRouter> anIter = thePortRouterMap.values().iterator(); anIter.hasNext();  ){
-                anIter.next().closeConnection();
-            }
+            for( Iterator<PortRouter> anIter = thePortRouterMap.values().iterator(); anIter.hasNext();  )
+                anIter.next().getConnectionManager().shutdown();
+            
         }
     }
 

@@ -47,7 +47,7 @@ package pwnbrew.network;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *

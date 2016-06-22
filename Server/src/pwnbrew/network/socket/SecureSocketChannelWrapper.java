@@ -40,8 +40,8 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.socket;
 
 import pwnbrew.selector.SocketChannelHandler;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -55,7 +55,6 @@ import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import static javax.net.ssl.SSLEngineResult.HandshakeStatus.NEED_TASK;
 import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLException;
-import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.utilities.SocketUtilities;
@@ -179,7 +178,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
             //If finished
             case FINISHED:
                 initialHSComplete = true;
-                theParentHandler.setState(Constants.CONNECTED);
+//                theParentHandler.setState(Constants.CONNECTED);
                 theParentHandler.getPortRouter().getSelRouter().changeOps(theSocketChannel, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
         
                 setRead = true;
@@ -534,7 +533,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
             }
 
             //Set the state and change to read
-            theParentHandler.setState( Constants.CONNECTED);
+//            theParentHandler.setState( Constants.CONNECTED);
             theParentHandler.getPortRouter().getSelRouter().changeOps(theSocketChannel, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
             
             return;
@@ -603,7 +602,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
                         DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
 
                         //Set the state and change to read
-                        theParentHandler.setState( Constants.CONNECTED);
+//                        theParentHandler.setState( Constants.CONNECTED);
                         theParentHandler.getPortRouter().getSelRouter().changeOps(theSocketChannel, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
                                    
                         break;
@@ -670,7 +669,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
                     DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
 
                     //Set the state and change to read
-                    theParentHandler.setState( Constants.CONNECTED);
+//                    theParentHandler.setState( Constants.CONNECTED);
                     theParentHandler.getPortRouter().getSelRouter().changeOps(theSocketChannel, SelectionKey.OP_READ | SelectionKey.OP_WRITE );
                                                
                     break;

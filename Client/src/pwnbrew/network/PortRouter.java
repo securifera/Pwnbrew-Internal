@@ -51,9 +51,11 @@ import java.util.Arrays;
 import java.util.concurrent.Executor;
 import javax.net.ssl.SSLContext;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.PortManager;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.SSLUtilities;
+import pwnbrew.manager.IncomingConnectionManager;
+import pwnbrew.manager.PortManager;
+import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.selector.SelectionRouter;
 import pwnbrew.selector.SocketChannelHandler;
@@ -66,13 +68,14 @@ abstract public class PortRouter {
     
     protected final SelectionRouter theSelectionRouter;
     private final boolean encrypted;
-    protected final PortManager theCommManager;
+    protected final PortManager thePortManager;
     
     private volatile boolean notified = false;
     private volatile boolean waiting = false;
     
     private SSLContext theSSLContext = null;
     
+    public static final int CONTROL_CHANNEL_ID = 1;
     private static final String NAME_Class = PortRouter.class.getSimpleName();
   
     //===============================================================
@@ -86,7 +89,7 @@ abstract public class PortRouter {
      */
     public PortRouter(PortManager passedManager, boolean passedBool, Executor passedExecutor ) throws IOException { // NO_UCD (use default)
 
-        theCommManager = passedManager;       
+        thePortManager = passedManager;       
         encrypted = passedBool;
         
         //Create the selection router and start it
@@ -111,26 +114,8 @@ abstract public class PortRouter {
      * @return
      */
     public PortManager getPortManager() {
-        return theCommManager;
+        return thePortManager;
     }
-    
-     //===============================================================
-     /**
-     *  Registers the provided SocketChannelHandler with the server under the
-     * given InetAddress.
-     *
-     * @param passedClientId
-     * @param theHandler
-     */
-    abstract public void registerHandler(int passedClientId, SocketChannelHandler theHandler);
-
-    //===============================================================
-    /**
-     *  Removes the client id
-     * 
-     * @param clientId 
-    */
-    abstract public void removeHandler(int clientId);
     
     //===============================================================
     /**
@@ -140,27 +125,6 @@ abstract public class PortRouter {
     */
     abstract public void socketClosed( SocketChannelHandler thePortRouter );
  
-    //===============================================================
-    /**
-     *  Returns the SocketChannelHandler for the passed id.
-     * 
-     * @param passedInt
-     * @return 
-    */  
-    abstract public SocketChannelHandler getSocketChannelHandler( Integer... passedInt );
-
-    //===============================================================
-    /**
-    * Closes and removes any connections provided by passed Inetaddress
-    *
-     * @param passedId
-    */
-    public synchronized void closeConnection( int passedId ) { // NO_UCD (use default)
-    
-        SocketChannelHandler theHandler = getSocketChannelHandler(passedId);
-        if( theHandler != null)              
-            theHandler.shutdown();       
-    }
     
     //===============================================================
     /**
@@ -171,38 +135,41 @@ abstract public class PortRouter {
         return encrypted;
     }
 
-    //===============================================================
-    /**
-     *  Queues the byte array to be sent
-     * @param byteArr
-     * @param clientId
-     */
-    public void queueSend( byte[] byteArr, int clientId ) {
-        
-        SocketChannelHandler theHandler = getSocketChannelHandler( clientId );
-        if( theHandler != null ){
-            
-            //If wrapping is necessary then wrap it
-            if( theHandler.isWrapping() ){
-                PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
-                if( aWrapper != null ){
-                    
-                     //Set the staged wrapper if necessary
-                    if( aWrapper instanceof ServerHttpWrapper ){
-                        ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
-                        aSrvWrapper.setStaging( theHandler.isStaged());
-                    }
-                    
-                    ByteBuffer aByteBuffer = aWrapper.wrapBytes( byteArr );  
-                    byteArr = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
-                } 
-            }
-
-            theHandler.queueBytes(byteArr);
-            
-        }
-        
-    }
+//    //===============================================================
+//    /**
+//     *  Queues the byte array to be sent
+//     * @param byteArr
+//     * @param channelId
+//     * @return 
+//     */
+//    public boolean queueSend( byte[] byteArr, int channelId ) {
+//        
+//        boolean retVal = false;
+//        SocketChannelHandler theHandler = getConnectionManager().getSocketChannelHandler( channelId );
+//        if( theHandler != null ){
+//            
+//            //If wrapping is necessary then wrap it
+//            if( theHandler.isWrapping() ){
+//                PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
+//                if( aWrapper != null ){
+//                    
+//                     //Set the staged wrapper if necessary
+//                    if( aWrapper instanceof ServerHttpWrapper ){
+//                        ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+//                        aSrvWrapper.setStaging( theHandler.isStaged());
+//                    }
+//                    
+//                    ByteBuffer aByteBuffer = aWrapper.wrapBytes( byteArr );  
+//                    byteArr = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
+//                } 
+//            }
+//
+//            theHandler.queueBytes(byteArr);
+//            retVal = true;
+//            
+//        }
+//        return retVal;
+//    }
     
      // ==========================================================================
     /**
@@ -276,14 +243,18 @@ abstract public class PortRouter {
     /**
     * Closes and removes any connections provided by passed InetAddress
     *
+     * @param passedId
+     * @return 
     */
-    public synchronized void closeConnection() { // NO_UCD (use default)
+    abstract public ConnectionManager getConnectionManager( Integer... passedId );
     
-        SocketChannelHandler theHandler = getSocketChannelHandler();
-        if( theHandler != null)            
-            theHandler.shutdown();
-        
-    }
+    //==========================================================================
+    /**
+     * 
+     * @param srcId
+     * @param anICM 
+     */
+    abstract public void setConnectionManager( ConnectionManager anICM, Integer... srcId );
      
 
     //===============================================================

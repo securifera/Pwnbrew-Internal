@@ -64,11 +64,13 @@ import pwnbrew.network.socket.SecureSocketChannelWrapper;
 public class ConnectHandler implements Selectable {
 
     private final ClientPortRouter theClientPortRouter;
-
+    private final int channelId;
+    
     private static final String NAME_Class = ConnectHandler.class.getSimpleName();
   
-    public ConnectHandler( ClientPortRouter passedParent ) {
+    public ConnectHandler( ClientPortRouter passedParent, int passedChannelId ) {
 	theClientPortRouter = passedParent;
+        channelId = passedChannelId;
     }
 
     //===============================================================
@@ -121,10 +123,11 @@ public class ConnectHandler implements Selectable {
         try {
             
             //Get or create the access handler
-            SocketChannelHandler theSCH = theClientPortRouter.getSocketChannelHandler();
+            SocketChannelHandler theSCH = theClientPortRouter.getConnectionManager().getSocketChannelHandler(channelId);
             if( theSCH == null ){
                 theSCH = new SocketChannelHandler(theClientPortRouter, SocketChannelHandler.CLIENT_TYPE );
-                theClientPortRouter.registerHandler( 0, theSCH );
+                theSCH.setChannelId(channelId);
+                theClientPortRouter.getConnectionManager().setHandler( channelId, theSCH );
             }
 
             //Attach the accesshandler

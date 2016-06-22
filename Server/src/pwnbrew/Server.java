@@ -64,8 +64,8 @@ import javax.swing.JDialog;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import pwnbrew.gui.MainGui;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import pwnbrew.look.CustomLookAndFeel;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
@@ -78,7 +78,8 @@ import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.network.http.Http;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
-import pwnbrew.shell.ShellMessageManager;
+import pwnbrew.network.shell.ShellMessageManager;
+import pwnbrew.network.stage.StagingMessageManager;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.SSLUtilities;
 
@@ -96,7 +97,7 @@ public final class Server {
     private static final String lckFileName = "srv.lck";
     private FileLock theLock = null;
     private FileChannel theLockFileChannel = null;    
-    private static final boolean debug = false;
+    private static final boolean debug = true;
     
     private static final String SHOW_GUI_ARG = "-gui";
     private static final String REMOTE_MANAGEMENT_ARG = "-rmp";
@@ -118,7 +119,7 @@ public final class Server {
                                  
         try {
 
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            ControlMessageManager aCMManager = ControlMessageManager.getMessageManager();
             if( aCMManager == null ){
                 aCMManager = ControlMessageManager.initialize( theServerManager );
             }
@@ -174,7 +175,7 @@ public final class Server {
             boolean loop = true;
             while(loop){
                 System.out.print("\n>");
-                String line=buffer.readLine().toLowerCase();
+                String line = buffer.readLine().toLowerCase();
                 switch(line){
                     case "i":
                         System.out.print("Please enter the path to the certificate:");
@@ -216,17 +217,17 @@ public final class Server {
         theServerManager.shutdown();
 
         //Shutdown the control and file message managers
-        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
+        ControlMessageManager aCMM = ControlMessageManager.getMessageManager();
         if( aCMM != null ){
             aCMM.shutdown();
         }
         
-        FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
+        FileMessageManager aFMM = FileMessageManager.getMessageManager();
         if( aFMM != null ){
             aFMM.shutdown();
         }
         
-        ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
+        ShellMessageManager aSMM = ShellMessageManager.getMessageManager();
         if( aSMM != null ){
             aSMM.shutdown();
         }
@@ -234,6 +235,11 @@ public final class Server {
         RelayManager aRMM = RelayManager.getRelayManager();
         if( aRMM != null ){
             aRMM.shutdown();
+        }
+        
+        StagingMessageManager aStMM = StagingMessageManager.getMessageManager();
+        if( aStMM != null ){
+            aStMM.shutdown();
         }
 
         //Debug

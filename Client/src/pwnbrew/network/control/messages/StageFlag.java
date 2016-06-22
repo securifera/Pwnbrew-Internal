@@ -46,11 +46,13 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
+import pwnbrew.manager.ConnectionManager;
+import pwnbrew.manager.DataManager;
+import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.ServerPortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.selector.SocketChannelHandler;
 
@@ -131,17 +133,21 @@ public final class StageFlag extends ControlMessage{
             ServerPortRouter theSPR = theRelayManager.getServerPorterRouter();
             
             //Set the flag on the handler
-            SocketChannelHandler aHandler = theSPR.getSocketChannelHandler(theRelayClientId);
-            if( aHandler != null )
-                aHandler.setStaging(true);                     
-                            
-            //Send the ack
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
+            IncomingConnectionManager theICM = theSPR.getConnectionManager(theRelayClientId);
+            if( theICM != null ){
+                
+                SocketChannelHandler aHandler = theICM.getSocketChannelHandler(ConnectionManager.STAGE_CHANNEL_ID );
+                if( aHandler != null )
+                    aHandler.setStaging(true);                     
+
+                //Send the ack
+//                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//                if( aCMManager != null ){
                 StageFlagAck ackFlag = new StageFlagAck( theRelayClientId, theJvmVersion );
-                aCMManager.send(ackFlag);
-            }            
-            
+                DataManager.send(passedManager, ackFlag);
+//                    aCMManager.send(ackFlag);
+//                }            
+            }
         }    
     }
 

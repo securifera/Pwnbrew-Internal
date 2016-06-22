@@ -46,7 +46,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.look.ui;
 
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

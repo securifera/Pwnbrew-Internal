@@ -51,7 +51,7 @@ import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
@@ -139,13 +139,14 @@ public final class RelayStart extends ControlMessage{
         }
         
         //Get the control message manager send an ack        
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
+//        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//        if( aCMManager != null ){
             //Send the message
             RelayStatus aMsg = new RelayStatus( retVal );
             aMsg.setDestHostId( getSrcHostId() );
-            aCMManager.send(aMsg);
-        }
+            DataManager.send(passedManager, aMsg);
+//            aCMManager.send(aMsg);
+//        }
         
     }
 

@@ -73,7 +73,7 @@ import javax.swing.tree.TreePath;
 import pwnbrew.gui.MainGui;
 import pwnbrew.host.HostController;
 import pwnbrew.library.Ancestor;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.misc.FileFilterImp;
 import pwnbrew.utilities.Utilities;
 

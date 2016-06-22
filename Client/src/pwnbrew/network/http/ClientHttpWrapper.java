@@ -48,12 +48,15 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.SocketUtilities;
-import pwnbrew.misc.Utilities;
 import pwnbrew.network.Message;
+import pwnbrew.network.RegisterMessage;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.utilities.Utilities;
 
 /**
  *
@@ -115,15 +118,23 @@ public class ClientHttpWrapper extends HttpWrapper {
                                 byte[] msgBytes = new byte[msgLen];
                                 msgBB.get(msgBytes);
                                 
-                                //Get dest id
-                                byte[] dstHostId = Arrays.copyOfRange(msgBytes, 4, 8);
-                                int dstId = SocketUtilities.byteArrayToInt(dstHostId);
-                                
-                                try{
-                                    DataManager.routeMessage(  passedHandler.getPortRouter(), type, dstId, msgBytes );
-                                } catch(Exception ex ){
-                                    RemoteLog.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
-                                }   
+                                if( type == Message.REGISTER_MESSAGE_TYPE ){
+
+                                    RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgBytes ));                                                
+                                    aMsg.evaluate(passedHandler.getPortRouter().getPortManager());
+
+                                } else {
+
+                                    //Get dest id
+                                    byte[] dstHostId = Arrays.copyOfRange(msgBytes, 4, 8);
+                                    int dstId = SocketUtilities.byteArrayToInt(dstHostId);
+
+                                    try{
+                                        DataManager.routeMessage(  passedHandler.getPortRouter(), type, dstId, msgBytes );
+                                    } catch(Exception ex ){
+                                        RemoteLog.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
+                                    }   
+                                }
                             } else {
                                 RemoteLog.log( Level.WARNING, NAME_Class, "processHeader()", "Message size doesn't match remaing size.", null);
                             }
@@ -140,6 +151,9 @@ public class ClientHttpWrapper extends HttpWrapper {
                     //Do nothing because it doesn't fit the criteria
                     ex = null;
                     
+                } catch (LoggableException ex) {
+                    //Do nothing because it doesn't fit the criteria
+                    ex = null;
                 }               
             }
         }

@@ -137,6 +137,16 @@ public class FileMessageManager extends DataManager {
         return (FileHandler)theDataHandler;
     }  
     
+//    //===============================================================
+//    /**
+//    * Sets up for a file transfer
+//    *
+//    * @param fileToTransfer
+//    * @return
+//    */
+//    private void initFileTransfer( int clientId, int passedTaskId, int passedFileId, 
+//            File parentDir, String hashFilenameStr, long passedFileSize) 
+//            throws LoggableException, NoSuchAlgorithmException, IOException {
     //===============================================================
     /**
     * Sets up for a file transfer
@@ -144,19 +154,23 @@ public class FileMessageManager extends DataManager {
     * @param fileToTransfer
     * @return
     */
-    private void initFileTransfer( int clientId, int passedTaskId, int passedFileId, 
-            File parentDir, String hashFilenameStr, long passedFileSize) 
-            throws LoggableException, NoSuchAlgorithmException, IOException {
+    private void initFileTransfer( PushFile passedMsg, File parentDir ) throws LoggableException {
             
         //Initialize the file transfer
+        int fileId = passedMsg.getFileId();
         synchronized( theFileReceiverMap ){
 
-            FileReceiver theReceiver = theFileReceiverMap.get(passedFileId);
+            FileReceiver theReceiver = theFileReceiverMap.get(fileId);
             //If the receive flag is not set
             if( theReceiver == null ){
 
-                theReceiver = new FileReceiver( this, clientId, passedTaskId, passedFileId, passedFileSize, parentDir, hashFilenameStr );
-                theFileReceiverMap.put(passedFileId, theReceiver);
+//                theReceiver = new FileReceiver( this, clientId, passedTaskId, passedFileId, passedFileSize, parentDir, hashFilenameStr );
+                try {
+                    theReceiver = new FileReceiver( this, passedMsg, parentDir );
+                    theFileReceiverMap.put(fileId, theReceiver);
+                } catch (NoSuchAlgorithmException | IOException ex) {
+                    throw new LoggableException("Unable to create a new file receiver.");
+                }
 
             } else
                 throw new LoggableException("A file receive is already in progress.");
@@ -207,7 +221,8 @@ public class FileMessageManager extends DataManager {
         boolean retVal = false;
         int taskId = passedMessage.getTaskId();
         int fileId = passedMessage.getFileId();        
-        int clientId = passedMessage.getSrcHostId();        
+        int srcId = passedMessage.getSrcHostId();
+        int fileChannelId = passedMessage.getFileChannelId();
         
         File libDir = null;
         int fileType = passedMessage.getFileType();
@@ -225,31 +240,25 @@ public class FileMessageManager extends DataManager {
                 break;
         }
 
-        //Get the control manager for sending messages
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager == null ){
-            aCMManager = ControlMessageManager.initialize( getCommManager() );
+        if( libDir != null ){
+            //Get the control manager for sending messages
+            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            if( aCMManager != null ){
+
+                //Get the hash/filename
+                String hashFileNameStr = passedMessage.getHashFilenameString();
+
+                //Try to begin the file transfer
+        //            initFileTransfer( passedMessage.getSrcHostId(), taskId, fileId, libDir, hashFileNameStr, passedMessage.getFileSize() );
+                initFileTransfer( passedMessage, libDir );
+                //Send an ack to the sender to begin transfer
+        //                DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);
+                PushFileAck aSFMA = new PushFileAck(taskId, fileId, fileChannelId, hashFileNameStr, srcId );
+        //            PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr, clientId );
+                aCMManager.send( aSFMA );
+                retVal = true;
+            }
         }
-
-        try {
-
-            //Get the hash/filename
-            String hashFileNameStr = passedMessage.getHashFilenameString();
-
-            //Try to begin the file transfer
-            initFileTransfer( passedMessage.getSrcHostId(), taskId, fileId, libDir, hashFileNameStr, passedMessage.getFileSize() );
-
-            //Send an ack to the sender to begin transfer
-//                DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);
-            PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr, clientId );
-            aCMManager.send( aSFMA );
-
-        } catch (IOException | NoSuchAlgorithmException ex){
-            throw new LoggableException(ex);
-        }
-
-        retVal = true;
-        
 
         return retVal;
 

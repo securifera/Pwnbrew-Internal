@@ -54,10 +54,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.DebugPrinter;
-import pwnbrew.misc.DynamicClassLoader;
-import pwnbrew.misc.SocketUtilities;
+import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.DynamicClassLoader;
+import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Message;
 import pwnbrew.network.control.ControlMessageManager;
@@ -78,6 +79,7 @@ public abstract class ControlMessage extends Message {
     public ControlMessage() { // NO_UCD (use default)
         //Set id
         super( CONTROL_MESSAGE_TYPE );
+        setChannelId( ConnectionManager.COMM_CHANNEL_ID );
     }
 
     //=========================================================================
@@ -175,7 +177,7 @@ public abstract class ControlMessage extends Message {
 
             //Set client id
             int theClientId = SocketUtilities.byteArrayToInt(srcHostId);
-            aMessage.setClientId( theClientId );
+            aMessage.setSrcHostId( theClientId );
 
             //Set dest host id
             int theDestHostId= SocketUtilities.byteArrayToInt(tempHostId);

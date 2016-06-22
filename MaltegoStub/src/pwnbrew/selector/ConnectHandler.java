@@ -107,6 +107,7 @@ public class ConnectHandler implements Selectable {
             srcAddr = InetAddress.getByName(theAddy);
         } catch (UnknownHostException ex) {
             DebugPrinter.printMessage( NAME_Class, "handle", ex.getMessage(), ex);
+            return;
         }
         
         try {
@@ -114,6 +115,7 @@ public class ConnectHandler implements Selectable {
             socketChannel.socket().setKeepAlive(true);
         } catch (SocketException ex) {
             DebugPrinter.printMessage( NAME_Class, "handle", ex.getMessage(), ex);
+            return;
         }
 
         try {

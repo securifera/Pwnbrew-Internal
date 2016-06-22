@@ -50,7 +50,7 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import static pwnbrew.Environment.addClassToMap;
 import pwnbrew.generic.gui.GenericProgressDialog;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.misc.FileFilterImp;

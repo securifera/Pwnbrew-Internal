@@ -45,7 +45,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.selector;
 
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import java.io.IOException;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectableChannel;

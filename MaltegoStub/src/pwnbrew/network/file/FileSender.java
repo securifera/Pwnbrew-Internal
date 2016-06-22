@@ -76,7 +76,8 @@ public class FileSender extends ManagedRunnable {
     
     
 //    private static int maxMsgLen = (256 * 256) - 8; 
-    private static final int maxMsgLen = 12582 - 7;    
+    private static final int maxMsgLen = 12582 - 7; 
+    private int channelId = 0;
     
     //Class name
     private static final String NAME_Class = FileSender.class.getSimpleName();
@@ -98,6 +99,9 @@ public class FileSender extends ManagedRunnable {
     protected void go() {
         
             int fileId = theFileAck.getFileId();
+            int taskId = theFileAck.getTaskId();
+            channelId = theFileAck.getChannelId();
+            
             try {
 
                 File fileToSend = new File( theFileAck.getFilename());
@@ -121,8 +125,8 @@ public class FileSender extends ManagedRunnable {
                     }
 
                     //Send message to cleanup the file transfer on the client side
-                    int clientId = theFileAck.getSrcHostId();
-                    PushFileAbort fileAbortMsg = new PushFileAbort( fileId, clientId );
+                    int srcHostId = theFileAck.getSrcHostId();
+                    PushFileAbort fileAbortMsg = new PushFileAbort( taskId, srcHostId, channelId, fileId );
                     aCMManager.send(fileAbortMsg ); 
                     
                 } catch( IOException ex1 ){
@@ -158,7 +162,8 @@ public class FileSender extends ManagedRunnable {
             if( fileToBeSent.length() == 0 ){
                 
                 //Send the file data
-                FileData fileDataMsg = new FileData(fileId, new byte[0]);   
+                FileData fileDataMsg = new FileData(fileId, new byte[0]);  
+                fileDataMsg.setChannelId(channelId);
                 fileDataMsg.setSrcHostId(SocketUtilities.byteArrayToInt(clientIdArr));
                 fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) );   
                 
@@ -190,6 +195,7 @@ public class FileSender extends ManagedRunnable {
                         
                         byte[] fileBytes = Arrays.copyOf(fileChannelBB.array(), fileChannelBB.limit());
                         FileData fileDataMsg = new FileData(fileId, fileBytes);
+                        fileDataMsg.setChannelId(channelId);
                         fileDataMsg.setSrcHostId(SocketUtilities.byteArrayToInt(clientIdArr));
                         fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) ); 
                         thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
@@ -213,6 +219,15 @@ public class FileSender extends ManagedRunnable {
         } else {
             throw new IOException("Not connected to the client.");
         }
+    }
+    
+    //=====================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getChannelId() {
+        return channelId;
     }
 
 }

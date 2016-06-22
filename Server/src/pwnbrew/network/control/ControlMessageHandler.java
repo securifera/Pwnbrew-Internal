@@ -51,8 +51,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.logging.Level;
 import pwnbrew.exception.RemoteExceptionWrapper;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
@@ -150,7 +150,7 @@ public class ControlMessageHandler extends DataHandler {
             ControlMessage aMessage = ControlMessage.getMessage( ByteBuffer.wrap( passedByteArray ) );        
             if( aMessage instanceof MaltegoMessage ){
                 RelayManager theRelayManager = RelayManager.getRelayManager();
-                if( theRelayManager == null || !theRelayManager.getServerPorterRouter().equals(srcPortRouter) ){
+                if( theRelayManager != null && !theRelayManager.getServerPorterRouter().equals(srcPortRouter) ){
                     Log.log(Level.SEVERE, NAME_Class, "processData()", "*******Attempt to process maltego message from client.******", null );
                     return;
                 }

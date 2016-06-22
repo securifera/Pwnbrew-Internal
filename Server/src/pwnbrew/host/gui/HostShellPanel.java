@@ -57,15 +57,12 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 import pwnbrew.gui.panels.RunnerPane;
-import pwnbrew.shell.Shell;
+import pwnbrew.network.shell.Shell;
 
 /**
  *
@@ -93,7 +90,7 @@ public class HostShellPanel extends javax.swing.JPanel {
     /*
      *  Check if the document should be altered
      */
-    private boolean updateCaret( RunnerPane theTextPane, int offset ){
+    public boolean updateCaret( RunnerPane theTextPane, int offset ){
 
         boolean retVal = true;
         if( !theTextPane.isEnabled())
@@ -231,10 +228,11 @@ public class HostShellPanel extends javax.swing.JPanel {
     //===============================================================
     /**
      * 
-     * @param theOffset
+     * @param passedOffset
      * @return 
+     * @throws javax.swing.text.BadLocationException 
      */
-    private boolean canRemove( int passedOffset ) throws BadLocationException {
+    public boolean canRemove( int passedOffset ) throws BadLocationException {
         
         boolean retVal = true;
         RunnerPane theTextPane = getShellTextPane();
@@ -256,11 +254,13 @@ public class HostShellPanel extends javax.swing.JPanel {
             } 
         }       
         
-        if(! theTextPane.isUpdating() )
+        if( !theTextPane.isEnabled() || theTextPane.isUpdating())
             return true;
         
         if( passedOffset < theTextPane.getEndOffset() )
             retVal = false;
+        
+        
         
         return retVal;
     }
@@ -291,19 +291,28 @@ public class HostShellPanel extends javax.swing.JPanel {
                     updateCaret( theTextPane, theTextPane.getCaretPosition());     
                     if( e.getKeyChar() == KeyEvent.VK_ENTER ){
 
-                        StyledDocument aSD = theTextPane.getStyledDocument();
+                        ShellStyledDocument aSD = (ShellStyledDocument) theTextPane.getStyledDocument();
                         int lastOutputOffset = theTextPane.getEndOffset();
                         
                         String theStr = "";
                         int len = aSD.getLength() - lastOutputOffset;
                         if( len > 0 )
-                            theStr = aSD.getText(lastOutputOffset, len - 1);                  
+                            theStr = aSD.getText(lastOutputOffset, len);                  
 
                         //Add the input terminator
                         String inputTerm = theListener.getShell().getInputTerminator();
                         String outputStr = theStr;
-                        if( !inputTerm.isEmpty() )
+                        if( !inputTerm.isEmpty() ){
                             outputStr = theStr.concat( inputTerm );
+                            //Insert the string
+                            synchronized( aSD ){
+                                //Set the type back
+                                aSD.setInputSource(ShellStyledDocument.SHELL_OUTPUT);
+                                aSD.insertString(aSD.getLength(), inputTerm, aSet);
+                                //Set the type back
+                                aSD.setInputSource(ShellStyledDocument.USER_INPUT);
+                            }
+                        }
                         
                         //Reset the offset
                         theListener.getShell().setHistoryOffset(-1);
@@ -347,29 +356,7 @@ public class HostShellPanel extends javax.swing.JPanel {
             } 
         };
         theTextPane.addMouseListener(mouseAdapter);        
-        theTextPane.setStyledDocument( new DefaultStyledDocument(){
-        
-            //============================================================
-            /*
-             *  Insert the string if it is at the end of the textpane
-             */
-            @Override
-            public void insertString( int offset, String str, AttributeSet a) throws BadLocationException{
-                if( updateCaret( theTextPane, offset ) )
-                    super.insertString(offset, str, a);                
-            }
-            
-            //============================================================
-            /*
-             *  Remove the string if it is at the end of the textpane
-             */
-            @Override
-            public void remove( int theOffset, int len) throws BadLocationException{
-                if( canRemove( theOffset ) )
-                    super.remove(theOffset, len);
-            }
-            
-        });
+        theTextPane.setStyledDocument( new ShellStyledDocument(this) );
         
         theTextPane.setEnabled( false );
         setShellTextPane( theTextPane );

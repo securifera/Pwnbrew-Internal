@@ -57,7 +57,7 @@ import java.util.*;
 import java.util.logging.Level;
 import pwnbrew.execution.ExecutableItem;
 import pwnbrew.host.Host;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.FileUtilities;

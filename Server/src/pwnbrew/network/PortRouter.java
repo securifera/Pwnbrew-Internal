@@ -46,10 +46,10 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network;
 
 import java.io.IOException;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.selector.SelectionRouter;
-import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
@@ -59,7 +59,7 @@ abstract public class PortRouter {
     
     protected final SelectionRouter theSelectionRouter;
     private final boolean encrypted;
-    protected final PortManager theCommManager;
+    protected final PortManager thePortManager;
     
     //===============================================================
     /**
@@ -71,7 +71,7 @@ abstract public class PortRouter {
      */
     public PortRouter(PortManager passedManager, boolean passedBool ) throws IOException { // NO_UCD (use default)
 
-        theCommManager = passedManager;       
+        thePortManager = passedManager;       
         encrypted = passedBool;
         
         //Create the selection router and start it
@@ -79,7 +79,7 @@ abstract public class PortRouter {
         theSelectionRouter.start();
     }
     
-    abstract public SocketChannelHandler getSocketChannelHandler(Integer passedInt );
+//    abstract public SocketChannelHandler getSocketChannelHandler(Integer passedInt, Integer passedType );
 
     //===============================================================
     /**
@@ -97,46 +97,18 @@ abstract public class PortRouter {
      *
      * @return
      */
-    public PortManager getCommManager() {
-        return theCommManager;
+    public PortManager getPortManager() {
+        return thePortManager;
     }
     
     //===============================================================
-     /**
-     *  Registers the provided SocketChannelHandler with the server under the
-     * given InetAddress.
-     *
-     * @param passedClientId
-     * @param parentId
-     * @param theHandler
-     */
-    abstract public void registerHandler(int passedClientId, int parentId, SocketChannelHandler theHandler);
-
-    //===============================================================
     /**
-     *  Removes the client id
-     * 
-     * @param clientId 
-    */
-    abstract public void removeHandler(int clientId);
-    
-    //===============================================================
-    /**
-    * Checks if the host is connected to the specified address
+    * Closes and removes any connections provided by passed InetAddress
     *
-    * @param passedClientId 
-    * @return
+     * @param passedId
+     * @return 
     */
-//    @Override
-    public int getState( Integer passedClientId ){
-
-        int retVal = 0;
-        SocketChannelHandler theHandler = getSocketChannelHandler( passedClientId  );
-        if(theHandler != null){
-            retVal = theHandler.getState();
-        }
-        return retVal;
-    }
+    abstract public ConnectionManager getConnectionManager( Integer... passedId );
     
     //===============================================================
     /**

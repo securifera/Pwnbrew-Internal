@@ -41,7 +41,7 @@ package pwnbrew.network.control.messages;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Directories;

@@ -45,11 +45,12 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.logging.LoggableException;
 import java.io.UnsupportedEncodingException;
+import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
+import pwnbrew.network.file.FileMessageManager;
 
 /**
  *
@@ -66,10 +67,11 @@ public final class PushFileFin extends FileMessage {
      * @param taskId
      * @param dstHostId
      * @param hashFileNameStr
+     * @param passedChannelId
      * @throws java.io.UnsupportedEncodingException
     */
-    public PushFileFin( int taskId, String hashFileNameStr, int dstHostId ) throws UnsupportedEncodingException  {
-       super(taskId, dstHostId  );       
+    public PushFileFin( int taskId, String hashFileNameStr, int dstHostId, int passedChannelId ) throws UnsupportedEncodingException  {
+       super( dstHostId, passedChannelId, taskId  );       
          
        byte[] strBytes = hashFileNameStr.getBytes("US-ASCII");
        ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);
@@ -82,7 +84,7 @@ public final class PushFileFin extends FileMessage {
      * Constructor
      *
      * @param msgId
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public PushFileFin( byte[] msgId ) throws LoggableException  {
        super( msgId );
@@ -125,7 +127,10 @@ public final class PushFileFin extends FileMessage {
     @Override
     public void evaluate( PortManager passedManager ) {       
 
-        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received Fin message. Id: " + Integer.toString( getMsgId()));
+        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received Fin message. Id: " + Integer.toString( getChannelId()));
+        FileMessageManager aFMM = FileMessageManager.getMessageManager();
+        if( aFMM != null )
+            aFMM.cleanupFileSender(this);        
        
     }
 

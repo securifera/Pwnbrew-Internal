@@ -59,10 +59,11 @@ public class StdErrMessage extends ProcessMessage {
      * Constructor
      *
      * @param dstId
+     * @param channeldId
      * @param passedBB
     */
-    public StdErrMessage( int dstId, ByteBuffer passedBB ) {
-        super( STD_ERR, passedBB );
+    public StdErrMessage( int dstId, int channeldId, ByteBuffer passedBB ) {
+        super( STD_ERR, channeldId, passedBB );
         setDestHostId(dstId);
     }
     

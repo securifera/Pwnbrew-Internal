@@ -58,7 +58,7 @@ import pwnbrew.controllers.Controller;
 import pwnbrew.gui.Iconable;
 import pwnbrew.host.HostController;
 import pwnbrew.host.HostFactory;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.generic.gui.SavablePanel;

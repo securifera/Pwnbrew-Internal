@@ -50,7 +50,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.logging.Level;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.ControlOption;
 import pwnbrew.xmlBase.JarItem;

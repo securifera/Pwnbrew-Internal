@@ -45,8 +45,8 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -97,7 +97,7 @@ public class PushFile extends FileMessage {
      * @throws java.io.IOException
     */
     public PushFile(int taskId, String fileHashNameStr, long passedLength, int passedType, int dstHostId ) throws IOException {
-        super(taskId ,dstHostId );
+        super( dstHostId, 0, taskId );
 
         byte[] tempArr = fileHashNameStr.getBytes("US-ASCII");
         ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, tempArr);
@@ -119,10 +119,11 @@ public class PushFile extends FileMessage {
      *
      * @param taskId
      * @param dstHostId
-     * @throws pwnbrew.logging.LoggableException
+     * @param passedChannelId
+     * @throws pwnbrew.log.LoggableException
     */
-    public PushFile( int taskId , int dstHostId ) throws LoggableException { // NO_UCD (use default)
-        super( taskId, dstHostId );
+    public PushFile( int taskId , int dstHostId, int passedChannelId ) throws LoggableException { // NO_UCD (use default)
+        super( dstHostId, passedChannelId, taskId );
     }
     // ==========================================================================
     /**
@@ -248,7 +249,7 @@ public class PushFile extends FileMessage {
             String hashFileStr = getHashFilenameString();
             String otherHFStr = passedMessage.getHashFilenameString();
 
-            if(Arrays.equals(msgId, passedMessage.msgId ) &&
+            if(Arrays.equals(channelId, passedMessage.channelId ) &&
                     hashFileStr.equals(otherHFStr) ){
                 return true;
             }       
@@ -287,7 +288,7 @@ public class PushFile extends FileMessage {
             
              
             //Get the file manager
-            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+            FileMessageManager theFileMM = FileMessageManager.getMessageManager();
             if( theFileMM == null ){
                 theFileMM = FileMessageManager.initialize( passedManager );
             }

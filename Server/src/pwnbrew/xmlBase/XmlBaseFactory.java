@@ -46,7 +46,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.xmlBase;
 
 import pwnbrew.exception.XmlBaseCreationException;
-import pwnbrew.logging.Log;
+import pwnbrew.log.Log;
 import java.io.*;
 import java.util.logging.Level;
 import org.xml.sax.InputSource;

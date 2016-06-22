@@ -40,10 +40,11 @@ package pwnbrew.network.relay;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.logging.Level;
-import pwnbrew.logging.Log;
-import pwnbrew.logging.LoggableException;
-import pwnbrew.manager.PortManager;
+import pwnbrew.log.Log;
+import pwnbrew.log.LoggableException;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
@@ -126,11 +127,19 @@ public class RelayManager extends DataManager {
             if( thePR.equals( srcPortRouter))
                  thePR = theServerPortRouter;
 
-            SocketChannelHandler theHandler = thePR.getSocketChannelHandler(tempId);
-            if( theHandler != null ){
-                theHandler.queueBytes(msgBytes);
-            } else {
-                Log.log( Level.SEVERE, NAME_Class, "handleMessage()", "No socket handler found for the given id.", null);    
+            //Get the channel id
+            byte[] channelIdArr = Arrays.copyOfRange(msgBytes, Message.CHANNEL_ID_OFFSET, Message.CHANNEL_ID_OFFSET + 4);
+            int channelId = SocketUtilities.byteArrayToInt(channelIdArr);
+            
+            //Get the socketchannel handler
+            ConnectionManager aCM = thePR.getConnectionManager(tempId);
+            if( aCM != null ){
+                SocketChannelHandler theHandler = aCM.getSocketChannelHandler( channelId );
+                if( theHandler != null ){
+                    theHandler.queueBytes(msgBytes);
+                } else {
+                    Log.log( Level.SEVERE, NAME_Class, "handleMessage()", "No socket handler found for the given id.", null);    
+                }
             }
             
         } catch (LoggableException ex) {
