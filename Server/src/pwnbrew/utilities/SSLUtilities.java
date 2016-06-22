@@ -69,8 +69,13 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+<<<<<<< HEAD
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
+=======
+import pwnbrew.logging.Log;
+import pwnbrew.logging.LoggableException;
+>>>>>>> refs/remotes/origin/master
 import pwnbrew.misc.Directories;
 import pwnbrew.misc.X509CertificateFactory;
 import pwnbrew.xmlBase.ServerConfig;
@@ -440,6 +445,8 @@ final public class SSLUtilities {
 
                             //Store the cert
                             theConf.setAlias(anAlias);
+                            //Save
+                            theConf.writeSelfToDisk();
                             localKeystore.setKeyEntry(anAlias, thePrivKey, keyStorePassArr, theCertChain);
                             break;
                         }                    
@@ -503,8 +510,31 @@ final public class SSLUtilities {
 
         if( args.length > 0 ){
             
-            String anArg = args[0];
-            if( args.length == 1 && anArg.equals("-gui") ){            
+            boolean headless = true;
+            boolean serverFlag = false;
+            String certPath = null;
+            String certPw = "";
+            
+            //Assign the service name
+            for( String aString : args ){
+                if(aString.equals( "-gui" )){
+                    headless = false;
+                } else if( aString.contains("-certpw")){
+                    String[] argStrArr = aString.split("=");
+                    //Set the set path if it is defined
+                    if(argStrArr.length > 1 )
+                        certPw = argStrArr[1];
+                }  else if( aString.contains("-cert")){
+                    String[] argStrArr = aString.split("=");
+                    //Set the set path if it is defined
+                    if(argStrArr.length > 1 )
+                        certPath = argStrArr[1];                    
+                }  else if( aString.contains("-srv")){
+                    serverFlag = true;
+                }    
+            }     
+            
+            if( args.length == 1 && !headless ){ 
 
                 String lookAndFeelClassStr = "javax.swing.plaf.metal.MetalLookAndFeel";
                 if( Utilities.isWindows( Utilities.getOsName()) )
@@ -525,53 +555,64 @@ final public class SSLUtilities {
                 
                 return;
                 
-            } else {
-                
+            } else if( certPath != null ){
                 //import the cert
-                File cert = new File( anArg );
-                String filename = cert.getAbsolutePath();
-                if( cert.exists() && filename.endsWith(".der")){
-                    
-                    int index = filename.lastIndexOf('.');
-                    String certAlias = filename.substring(0, index);
-                    if( !certAlias.isEmpty() ){
+                File cert = new File( certPath );
 
-                        KeyStore aKeyStore = SSLUtilities.getKeystore();
-                        if( SSLUtilities.checkAlias(aKeyStore, certAlias)){
-                            
-                            byte[] aByteArr = new byte[1024];
-                            String theMessage = "A certificate already exists with the given alias. Would you like to overwrite it? (yes/no) ";
-                            System.out.print(theMessage);
-                            System.in.read( aByteArr );
-                            
-                            //Return if no is chosen
-                            String aStr = new String(aByteArr).toLowerCase();
-                            if( !aStr.equals("yes")){
-                                return;
+                //Load the cert into the keystore
+                if(cert.exists()){
+                    
+                    //Import self signed cert
+                    if( serverFlag ){
+                        SSLUtilities.importPKCS12Keystore(cert, certPw.toCharArray()); 
+                        return;
+                    } else {       
+                        String filename = cert.getAbsolutePath();
+                        if( cert.exists() && filename.endsWith(".der")){
+
+                            int index = filename.lastIndexOf('.');
+                            String certAlias = filename.substring(0, index);
+                            if( !certAlias.isEmpty() ){
+
+                                KeyStore aKeyStore = SSLUtilities.getKeystore();
+                                if( SSLUtilities.checkAlias(aKeyStore, certAlias)){
+
+                                    byte[] aByteArr = new byte[1024];
+                                    String theMessage = "A certificate already exists with the given alias. Would you like to overwrite it? (yes/no) ";
+                                    System.out.print(theMessage);
+                                    System.in.read( aByteArr );
+
+                                    //Return if no is chosen
+                                    String aStr = new String(aByteArr).toLowerCase();
+                                    if( !aStr.equals("yes")){
+                                        return;
+                                    }
+                                }
                             }
+
+                            //If a cert is returned then send it to the client                            
+                            byte[] certBytes = new byte[(int)cert.length()];
+                            try (FileInputStream aFOS = new FileInputStream(cert)) {
+                                aFOS.read(certBytes);                              
+                            }
+
+                            //Create a cert from the bytes
+                            Certificate aCert = new sun.security.x509.X509CertImpl( certBytes );
+                            SSLUtilities.importCertificate( certAlias, aCert);
+                            System.out.println("Certificate import complete.");
+                            return;
                         }
                     }
-
-                    //If a cert is returned then send it to the client                            
-                    byte[] certBytes = new byte[(int)cert.length()];
-                    try (FileInputStream aFOS = new FileInputStream(cert)) {
-                        aFOS.read(certBytes);                              
-                    }
-
-                    //Create a cert from the bytes
-                    Certificate aCert = new sun.security.x509.X509CertImpl( certBytes );
-                    SSLUtilities.importCertificate( certAlias, aCert);
-                    System.out.println("Certificate import complete.");
-                    return;
-                    
                 }
                 
             }
             
         } 
         
-        System.out.println("Usage:  -gui  <Display SSL import GUI>\n"
-                          +"   or:  <(Host Certificate).der>\n");
+        System.out.println("Usage:  -gui    <Display SSL import GUI>\n"
+                          +"        -cert   <Certificate Path>\n"
+                          +"        -certpw <Certificate Password>\n"
+                          +"        -srv    <Server Certificate Flag>\n");
         
         
     }

@@ -255,13 +255,13 @@ public final class Server {
 
         try {
             
-            boolean showGui = true;
+            boolean headless = true;
             int remManagePort = -1;
             
             //Assign the service name
             for( String aString : args ){
                 if(aString.equals( SHOW_GUI_ARG )){
-                    showGui = false;
+                    headless = false;
                 } else if( aString.contains(REMOTE_MANAGEMENT_ARG)){
                     String[] argStrArr = aString.split("=");
                     if(argStrArr.length > 1 ){
@@ -270,17 +270,17 @@ public final class Server {
                         } catch( NumberFormatException ex ){
                             remManagePort = -1;
                         }
-                    }                    
-                }
+                    }   
+                }    
             }     
-            
+                        
             //Assign the service name
             if( remManagePort == -1 ){
                 System.out.println("Usage:\tjava -jar Server.jar -rmp=<Maltego Listening Port>");
                 return;
             }
             
-            staticSelf = new Server( showGui );
+            staticSelf = new Server( headless );
             staticSelf.start( remManagePort );
 
         } catch ( Throwable ex) {

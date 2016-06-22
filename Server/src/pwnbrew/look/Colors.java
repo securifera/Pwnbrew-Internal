@@ -59,17 +59,24 @@ public class Colors {
     public static final Color COLOR_InputDeviceBackground_Invalid = Color.RED;
     public static final Color COLOR_InputDeviceBackground_DisabledAndInvalid =
             COLOR_InputDeviceBackground_Invalid.darker();
-    
-    public static final Color PANEL_BASE_COLOR = new Color(0xBC9F6F);
+   
+    public static final Color PANEL_BASE_COLOR = new Color(0xCEDAFF);
+   // public static final Color PANEL_BASE_COLOR = new Color(0xBC9F6F);
 //    public static final Color PANEL_BASE_COLOR = new Color(0x6F6F5F);
-    public static final Color THEME_PRIMARY_COLOR = new Color(0xA58A66);
+    public static final Color THEME_PRIMARY_COLOR = new Color(0xCEDAFF);
+//    public static final Color THEME_PRIMARY_COLOR = new Color(0xA58A66);
 //    public static final Color THEME_PRIMARY_COLOR = new Color(0x3F3F3F);
-    public static final Color THEME_SECONDARY_COLOR = new Color(0x967C5E);
-//    public static final Color THEME_SECONDARY_COLOR = new Color(0x767676);
-    public static final Color THEME_HIGHLIGHT_COLOR = new Color(0x8E7657);
+//    public static final Color THEME_SECONDARY_COLOR = new Color(0x967C5E);
+//    public static final Color THEME_SECONDARY_COLOR = new Color(0x967C5E);
+    public static final Color THEME_SECONDARY_COLOR = new Color(0x767676);
+    
+//    public static final Color THEME_HIGHLIGHT_COLOR = new Color(0x8E7657);
+    public static final Color THEME_HIGHLIGHT_COLOR = new Color(0x6F6F6F);
 //    public static final Color THEME_HIGHLIGHT_COLOR = new Color(0x5F5F5F);
-    public static final Color THEME_GRADIENT_COLOR = new Color(0xE5B380);
+//    public static final Color THEME_GRADIENT_COLOR = new Color(0xE5B380);
 //    public static final Color THEME_GRADIENT_COLOR = new Color(0xCEAD7B);
+    public static final Color THEME_GRADIENT_COLOR = new Color(0xAAC8FF);
+    
     
     public static final Color JUST_IMPORTED =  new Color( 228,255,228 );
     
