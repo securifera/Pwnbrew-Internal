@@ -73,7 +73,7 @@ public class HostFactory {
      *  Return a Host representing the local host.
      * 
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
      */
     public static Host getLocalHost() throws LoggableException {
        
