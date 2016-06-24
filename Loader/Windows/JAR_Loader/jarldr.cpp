@@ -64,7 +64,7 @@ int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,i
 	std::string jarPath(tmp_env);
 	free(tmp_env);
 	
-    jarPath.assign("C:\\Pwnbrew\\Loader\\Windows\\Stager.jar");
+    //jarPath.assign("C:\\Pwnbrew\\Loader\\Windows\\Stager.jar");
 	InvokeMain( nullptr, jarPath);
 }
 

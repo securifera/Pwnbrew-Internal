@@ -649,7 +649,7 @@ public class Utilities {
     * @param filePath
     * @param passedRelativePathInJar
     * @param passedJarElementName
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public static void writeJarElementToDisk( File filePath, String passedRelativePathInJar, String passedJarElementName ) throws LoggableException {
 
@@ -767,7 +767,7 @@ public class Utilities {
      * @param clearText
      * @param preSharedKey
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
     */
     public static String simpleEncrypt( String clearText, String preSharedKey) throws LoggableException {
         
@@ -789,7 +789,7 @@ public class Utilities {
      * @param dataToEncrypt
      * @param preSharedKey
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
     */
     public static byte[] simpleEncrypt( byte[] dataToEncrypt, String preSharedKey ) throws LoggableException {
 
@@ -839,7 +839,7 @@ public class Utilities {
      * @param encryptedText
      * @param preSharedKey
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
     */
     public static String simpleDecrypt ( String encryptedText, String preSharedKey ) throws LoggableException {
 
@@ -889,7 +889,7 @@ public class Utilities {
      * @param encryptedText
      * @param preSharedKey
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
     */
     public static byte[] simpleDecrypt ( byte[] encryptedText, String preSharedKey ) throws LoggableException {
 
@@ -1403,7 +1403,7 @@ public class Utilities {
     * Returns a list of {@link Object}s reconstructed from the xml files in the library.
     *
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
      * @throws java.net.SocketException 
     * @returna list of {@link Object}s reconstructed from the xml files in the library
     */

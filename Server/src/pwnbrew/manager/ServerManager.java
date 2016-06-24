@@ -93,7 +93,7 @@ public class ServerManager extends PortManager {
      *
      * @param passedServer
      * @param passedBool
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
      * @throws java.io.IOException
     */
     public ServerManager( Server passedServer, boolean passedBool ) throws LoggableException, IOException {
@@ -134,7 +134,7 @@ public class ServerManager extends PortManager {
      /**
      *  Starts the server manager and its associated components.
      *
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
      */
     public void start() throws LoggableException {
 
@@ -159,7 +159,7 @@ public class ServerManager extends PortManager {
      *  Builds the server sockets.
      *
      * @return 
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
      */
     public boolean rebuildServerSockets() throws LoggableException {
         

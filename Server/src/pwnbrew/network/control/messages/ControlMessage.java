@@ -138,7 +138,7 @@ public abstract class ControlMessage extends Message {
      *
      * @param passedBuffer
      * @return msgAddress
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
      * @throws java.io.IOException
      * @throws pwnbrew.exception.RemoteExceptionWrapper
     */
@@ -195,7 +195,7 @@ public abstract class ControlMessage extends Message {
      * @param msgId
      * @param passedBuffer
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
      * @throws java.lang.ClassNotFoundException 
      */
     public static ControlMessage instatiateMessage( byte[] msgId, ByteBuffer passedBuffer ) throws LoggableException, ClassNotFoundException{

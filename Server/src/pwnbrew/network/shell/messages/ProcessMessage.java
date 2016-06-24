@@ -154,7 +154,7 @@ abstract public class ProcessMessage extends Message {
      *
      * @param passedBuffer
      * @return msgAddress
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public static ProcessMessage getMessage( ByteBuffer passedBuffer ) throws LoggableException {
 

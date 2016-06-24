@@ -4,4 +4,5 @@ UID: 10002
 Version: 1.0.6.0
 Type: slib
 Private: aHR0cHM6Ly8xMjcuMC4wLjE6NDQzICAg
+Main-Class: stager.Stager
 

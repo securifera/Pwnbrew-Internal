@@ -190,7 +190,7 @@ public class StandardValidation {
      *
      * @throws NoSuchValidationException if the given keyword is not a recognized
      * validation keyword
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
      */
     public static boolean validate( String keyword, String value ) throws NoSuchValidationException, LoggableException {
 

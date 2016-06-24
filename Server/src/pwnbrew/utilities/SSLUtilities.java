@@ -140,7 +140,7 @@ final public class SSLUtilities {
      * Loads the keystore from the configuration in the ACT conf file
      * @param theConf
      * @return 
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public static KeyStore loadKeystore( ServerConfig theConf ) throws LoggableException {
 
@@ -248,7 +248,7 @@ final public class SSLUtilities {
      * Returns a file representing a java keystore
      * @param keystorePass
      * @return 
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public static KeyStore createKeystore( String keystorePass ) throws LoggableException {
 
@@ -330,7 +330,7 @@ final public class SSLUtilities {
      * Returns the certificate for the localhost
      * @return 
      * @throws java.security.KeyStoreException 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
     */
     public static Certificate getCertificate() throws KeyStoreException, LoggableException {
 
@@ -364,7 +364,7 @@ final public class SSLUtilities {
     /**
      *  Reloads the SSL context
      *
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public static synchronized void reloadSSLContext() throws LoggableException {
         theSSLContext = createSSLContext();
@@ -375,7 +375,7 @@ final public class SSLUtilities {
      * Returns the SSL context for the comm
      *
      * @return
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
      */
     public static synchronized SSLContext getSSLContext() throws LoggableException {
 
@@ -392,7 +392,7 @@ final public class SSLUtilities {
      * @param passedFile
      * @param passedPW
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
     */
     public static synchronized boolean importPKCS12Keystore( File passedFile, char[] passedPW ) throws LoggableException {
 
@@ -481,7 +481,7 @@ final public class SSLUtilities {
      * @param issueeDN
      * @param issuerDN
      * @param days 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
      */
     public static void createSelfSignedCertificate(String issueeDN, String issuerDN, int days) throws LoggableException {
         
@@ -498,7 +498,7 @@ final public class SSLUtilities {
      * @param args the command line arguments
      * @throws java.io.IOException
      * @throws java.security.KeyStoreException
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
      * @throws java.security.cert.CertificateException
      */
     public static void main(String[] args) throws IOException, KeyStoreException, LoggableException, CertificateException {
@@ -618,7 +618,7 @@ final public class SSLUtilities {
      * @param passedAlias
      * @param certificate
      * @return 
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public static synchronized boolean importCertificate(String passedAlias, Certificate certificate) throws LoggableException {
 

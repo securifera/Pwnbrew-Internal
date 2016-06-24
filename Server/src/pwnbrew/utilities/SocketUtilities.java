@@ -68,7 +68,7 @@ final public class SocketUtilities {
     * Returns the hostname of the current host.
     *
     * @return
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
      * @throws java.io.IOException
     */
     public static String getHostname() throws LoggableException, IOException {

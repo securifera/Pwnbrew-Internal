@@ -78,7 +78,7 @@ public class InterfaceOptionsPanel extends OptionsJPanel implements ProgressDriv
     //===================================================================
     /** Creates new form AdvancedlOptionsPanel
      * @param parent
-     * @throws pwnbrew.logging.LoggableException */
+     * @throws pwnbrew.log.LoggableException */
     public InterfaceOptionsPanel( PanelListener parent ) throws LoggableException {
         super( "JAR Library", parent );
         initComponents();
