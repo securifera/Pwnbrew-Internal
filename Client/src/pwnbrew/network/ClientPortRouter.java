@@ -433,13 +433,13 @@ public class ClientPortRouter extends PortRouter {
      */    
     @Override
     public OutgoingConnectionManager getConnectionManager( Integer... passedIdArr ) {
-        ClientConfig theClientConfig = ClientConfig.getConfig();
-        int servId = theClientConfig.getServerId();
-        if( passedIdArr.length != 0){
-            int passedId = passedIdArr[0];
-            if( passedId != -1 && passedId != servId )
-                return null;            
-        }
+//        ClientConfig theClientConfig = ClientConfig.getConfig();
+//        int servId = theClientConfig.getServerId();
+//        if( passedIdArr.length != 0){
+//            int passedId = passedIdArr[0];
+//            if( passedId != -1 && passedId != servId )
+//                return null;            
+//        }
         return theOCM;
     }
     

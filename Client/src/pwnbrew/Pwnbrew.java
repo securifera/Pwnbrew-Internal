@@ -39,9 +39,13 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
@@ -61,6 +65,8 @@ import pwnbrew.network.http.Http;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.shell.ShellMessageManager;
 import pwnbrew.task.TaskListener;
+import pwnbrew.utilities.Utilities.ManifestProperties;
+import sun.misc.CompoundEnumeration;
 
 
 /**
@@ -191,12 +197,21 @@ public final class Pwnbrew extends PortManager implements TaskListener {
             String[] inputArr = new String[0];
             if( args.length == 0 ){
                 
-                Utilities.ManifestProperties localProperties = new Utilities.ManifestProperties();
+                ManifestProperties localProperties = new ManifestProperties();
                 Class localClass = Pwnbrew.class;
-                InputStream localInputStream = localClass.getResourceAsStream("/" + Constants.PROP_FILE);
+
+                URL ourUrl = localClass.getProtectionDomain().getCodeSource().getLocation();
+                String aStr = ourUrl.toExternalForm();
+
+                final URL manifest =  new URL("jar:" + aStr + "!/" + Constants.PROP_FILE);
+                URLConnection theConnection = manifest.openConnection();
+                InputStream localInputStream = theConnection.getInputStream();
+                
                 if (localInputStream != null) {
                     localProperties.load(localInputStream);
                     localInputStream.close();
+                } else {
+                    return;
                 }
 
                 //Get ip

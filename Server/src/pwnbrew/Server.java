@@ -417,6 +417,8 @@ public final class Server {
    
     private void initialize() throws LoggableException {
 
+        
+        Environment.initialize();
         if( !Directories.directoryStructureInitialized() ) {
             System.out.println( "Could not initialize the directory structure.\nTerminating run..." );
             System.exit( 1 );
