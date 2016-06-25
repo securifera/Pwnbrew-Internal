@@ -57,6 +57,7 @@ import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
@@ -84,7 +85,23 @@ final public class SSLUtilities {
     private static KeyStore theKeystore;
     private static SSLContext theSSLContext = null;
     
-    private static final String KEYSTORE_NAME =  "keystore.jks";    
+    private static final String KEYSTORE_NAME =  "keystore.jks";   
+    private static final String SUBJECT = "SUBJECT";
+    private static final String ISSUER = "ISSUER";
+    private static final String hashAlg = "SHA256withRSA";
+    
+    private static final String[][] STATIC_CA_LIST = {
+        new String[] {"Baltimore CyberTrust Root","CyberTrust","Baltimore", "","","IE"},
+        new String[] {"DigiCert CA","www.digicert.com","DigiCert Inc", "","","US"},
+        new String[] {"Microsoft CA","Microsoft IT", "Microsoft Corporation", "Redmond","Washington", "US"},
+        new String[] {"GeoTrust Global CA","GeoTrust Inc.","", "","","US"},
+        new String[] {"Google Internet Authority","", "Google Inc.","","","US"},
+        new String[] {"GeoTrust SSL CA","", "GeoTrust Inc.", "","","US"},
+        new String[] {"Symantec Class 3 Secure Server CA","Symantec Trust Network","Symantec Corporation", "","","US"},
+        new String[] {"Verisign CA","Verisign Trust Network","Verisign Inc", "","","US"},
+        new String[] {"thawte Primary Root CA","thawte Certification Services","thawte Inc", "","","US"},
+        new String[] {"Go Daddy Secure Certificate Authority","","GoDaddy.com Inc", "Scottsdale","Arizona","US"}
+    };
     
     //===============================================================
     /**
@@ -303,6 +320,58 @@ final public class SSLUtilities {
         }
         
     }
+    
+    //===============================================================
+    /**
+     * 
+     * @param dnArray
+     * @return 
+     */
+    public static String constructDN( String[] dnArray ) {
+    
+        
+        StringBuilder aSB = new StringBuilder();    
+        if( dnArray.length == 6 ){
+                 
+            //Get the name first
+            String issueeName = dnArray[0];
+            if( !issueeName.isEmpty()){
+                aSB.append("CN=").append(issueeName).append(",");
+            }
+
+            //Get the ou
+            String issueeOU = dnArray[1];
+            if( !issueeOU.isEmpty()){
+                aSB.append("OU=").append(issueeOU).append(",");
+            }
+
+            //Get the org
+            String issueeOrg = dnArray[2];
+            if( !issueeOrg.isEmpty()){
+                aSB.append("O=").append(issueeOrg).append(",");
+            }
+
+            //Get the city
+            String issueeCity = dnArray[3];
+            if( !issueeCity.isEmpty()){
+                aSB.append("L=").append(issueeCity).append(",");
+            }
+
+            //Get the state
+            String issueeState = dnArray[4];
+            if( !issueeState.isEmpty()){
+                aSB.append("S=").append(issueeState).append(",");
+            }
+
+            //Get the country
+            String issueeCountry = dnArray[5];
+            if( !issueeCountry.isEmpty()){
+                aSB.append("C=").append(issueeCountry);
+            }
+        }
+        
+        return aSB.toString();
+    }
       
     //===========================================================================
     /**
@@ -311,11 +380,35 @@ final public class SSLUtilities {
     private static void createSelfSignedCertificate(String subjectDN, String issuerDN, int days, KeyStore passedKeyStore, String keystorePass, String hostAlias ) throws LoggableException {
      
         try {
-            Object[] theObjArr = X509CertificateFactory.generateCertificate( subjectDN, issuerDN, days, "RSA", 2048 );
+            
+            //Generate root CA
+            int ca_int = Math.abs(Utilities.SecureRandomGen.nextInt() % STATIC_CA_LIST.length);
+            String[] ca = STATIC_CA_LIST[ca_int];
+            String ca_subject = SSLUtilities.constructDN(ca);
+            
+            Object[] theObjArr = X509CertificateFactory.generateCertificate( ca_subject, ca_subject, 3600, "RSA", 2048, true );
+            PrivateKey caKey = (PrivateKey) theObjArr[0];
+            sun.security.x509.X509CertImpl caCert = (sun.security.x509.X509CertImpl) theObjArr[1];
+            
+            //Generate intermediate CA
+            int inter_int = Math.abs(Utilities.SecureRandomGen.nextInt() % STATIC_CA_LIST.length);
+            String[] inter = STATIC_CA_LIST[inter_int];
+            String inter_subject = SSLUtilities.constructDN(inter);
+            
+            theObjArr = X509CertificateFactory.generateCertificate( inter_subject, ca_subject, 3600, "RSA", 2048, false );
+            PrivateKey interKey = (PrivateKey) theObjArr[0];
+            sun.security.x509.X509CertImpl interCert = (sun.security.x509.X509CertImpl) theObjArr[1];
+            
+            //Sign with ca
+            interCert.sign( caKey, hashAlg );           
+            
+            theObjArr = X509CertificateFactory.generateCertificate( subjectDN, inter_subject, 1080, "RSA", 2048, false );
             Key theKey = (Key) theObjArr[0];
-            Certificate newCert = (Certificate) theObjArr[1];
-
-            passedKeyStore.setKeyEntry(hostAlias, theKey, keystorePass.toCharArray(), new Certificate[]{newCert});
+            sun.security.x509.X509CertImpl newCert = (sun.security.x509.X509CertImpl) theObjArr[1];
+            
+            //Sign it with inter
+            newCert.sign( interKey, hashAlg );
+            passedKeyStore.setKeyEntry(hostAlias, theKey, keystorePass.toCharArray(), new Certificate[]{newCert, interCert, caCert});
 
             //Save it
             saveKeyStore( passedKeyStore, keystorePass ); 

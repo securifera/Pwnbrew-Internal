@@ -82,6 +82,7 @@ public class X509CertificateFactory {
      * @param algorithm
      * @param days how many days from now the Certificate is valid for
      * @param KeySize
+     * @param selfSign
      * 
      * @return
      * @throws java.security.cert.CertificateException
@@ -91,7 +92,7 @@ public class X509CertificateFactory {
      * @throws java.io.IOException
      * @throws java.security.NoSuchAlgorithmException
      */
-    public static Object[] generateCertificate( String name, String issuer, int days, String algorithm, int KeySize )
+    public static Object[] generateCertificate( String name, String issuer, int days, String algorithm, int KeySize, boolean selfSign )
             throws CertificateException, InvalidKeyException, IOException, NoSuchAlgorithmException,
             NoSuchProviderException, SignatureException {
 
@@ -129,16 +130,20 @@ public class X509CertificateFactory {
             sun.security.x509.AlgorithmId algorithmId = new sun.security.x509.AlgorithmId( sun.security.x509.AlgorithmId.sha256WithRSAEncryption_oid );
             certInfo.set( sun.security.x509.X509CertInfo.ALGORITHM_ID, new sun.security.x509.CertificateAlgorithmId( algorithmId ) );
 
-            //Sign the certificate to identify the Algorithm_RSA that's used...
             privKey = keyPair.getPrivate();
             cert = new sun.security.x509.X509CertImpl( certInfo );
-            cert.sign( privKey, hashAlg );
+            
+            //Sign it if it's self signed
+            if( selfSign ){
+                //Sign the certificate to identify the Algorithm_RSA that's used...
+                cert.sign( privKey, hashAlg );
 
-            //Update the algorith, and resign...
-            algorithmId = (sun.security.x509.AlgorithmId)cert.get( sun.security.x509.X509CertImpl.SIG_ALG );
-            certInfo.set( sun.security.x509.CertificateAlgorithmId.NAME + "." + sun.security.x509.CertificateAlgorithmId.ALGORITHM, algorithmId );
-            cert = new sun.security.x509.X509CertImpl( certInfo );
-            cert.sign( privKey, hashAlg );
+                //Update the algorith, and resign...
+                algorithmId = (sun.security.x509.AlgorithmId)cert.get( sun.security.x509.X509CertImpl.SIG_ALG );
+                certInfo.set( sun.security.x509.CertificateAlgorithmId.NAME + "." + sun.security.x509.CertificateAlgorithmId.ALGORITHM, algorithmId );
+                cert = new sun.security.x509.X509CertImpl( certInfo );
+                cert.sign( privKey, hashAlg );
+            }
         }
         
         return new Object[]{ privKey, cert };
