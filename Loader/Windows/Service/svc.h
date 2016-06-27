@@ -13,11 +13,12 @@
 	#define ADDRESS_HOLDER -1
     #define COLON ":1"
 
-    bool InstallService( const char*,  char* );
+    bool InstallService( const char*,  const char* );
 	void UnInstall();
 
 	void ExtractStager( char* );
 	void ReadServiceName( std::string* );
+	void ReadServiceDescription( std::string* );
 	void ReadJavaPath( char* );
 	
 	DWORD WINAPI InvokeMainWrapper(LPVOID lpParam);

