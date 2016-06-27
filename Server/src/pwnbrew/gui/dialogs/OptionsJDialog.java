@@ -77,7 +77,7 @@ public class OptionsJDialog extends JDialog implements PanelListener {
     /** Creates new form OptionsJDialog
      * @param parent
      * @param modal
-     * @throws pwnbrew.logging.LoggableException */
+     * @throws pwnbrew.log.LoggableException */
     public OptionsJDialog( OptionsJDialogListener parent, boolean modal ) throws LoggableException {
        super( parent.getParentJFrame() , modal);
        

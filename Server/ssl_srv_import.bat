@@ -1,0 +1,1 @@
+java -cp Server.jar pwnbrew.utilities.SSLUtilities -cert=%1 -certpw=%2 -srv

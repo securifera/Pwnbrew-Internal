@@ -153,7 +153,7 @@ public class Png {
     /**
      * Writes the picture to disk
      *
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public void writeToDisk() throws LoggableException {
 

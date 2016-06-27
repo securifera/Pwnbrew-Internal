@@ -97,13 +97,6 @@ final public class Environment {
     private static final String MALTEGO_MODULE = "10001";
     private static final String[] DEFAULT_MODULE_LIST = new String[]{ CLIENT_MODULE, MALTEGO_MODULE, STAGER_MODULE };
 
-    static {
-        determineRunLocation();
-        populateNameToClassMap();
-        loadSavedModules();
-        loadDefaultModules();
-    }
-
     // ==========================================================================
     /**
     * Prevents instantiation of {@link Environment} outside of itself.
@@ -111,6 +104,14 @@ final public class Environment {
     private Environment() {
     }
 
+    public static void initialize(){
+        determineRunLocation();
+        populateNameToClassMap();
+        loadSavedModules();
+        loadDefaultModules();
+        return;
+    }
+    
     // ==========================================================================
     /**
      * Load any extension JARs

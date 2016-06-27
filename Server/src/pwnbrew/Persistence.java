@@ -97,7 +97,7 @@ final public class Persistence {
     *   Gets the bytes for the label that was passed from the data store. (PNG, etc.)
      * @param passedLabel
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
     */
     public static List<byte[]> getLabelBytes( String passedLabel ) throws LoggableException{
         
@@ -126,7 +126,7 @@ final public class Persistence {
     *   Gets the bytes for the label that was passed from the data store. (PNG, etc.)
      * @param passedLabel
      * @param passedBytes
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public static void writeLabel( String passedLabel, byte[] passedBytes ) throws LoggableException{
         

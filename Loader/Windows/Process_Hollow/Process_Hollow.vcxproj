@@ -25,7 +25,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v110</PlatformToolset>
@@ -79,6 +79,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -99,6 +101,12 @@
     <ResourceCompile>
       <PreprocessorDefinitions>_DBG;_X86</PreprocessorDefinitions>
     </ResourceCompile>
+    <PostBuildEvent>
+      <Command>del  ..\Stager_xor.jar</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>python.exe ..\rolling_xor.py  ..\Stager.jar  ..\Stager_xor.jar</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -116,6 +124,12 @@
     <ResourceCompile>
       <PreprocessorDefinitions>_DBG;_X64</PreprocessorDefinitions>
     </ResourceCompile>
+    <PostBuildEvent>
+      <Command>del  ..\Stager_xor.jar</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>python.exe ..\rolling_xor.py  ..\Stager.jar  ..\Stager_xor.jar</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -140,6 +154,16 @@
     <ResourceCompile>
       <PreprocessorDefinitions>_REL;_X86</PreprocessorDefinitions>
     </ResourceCompile>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <PreBuildEvent>
+      <Command>python.exe ..\rolling_xor.py  ..\Stager.jar  ..\Stager_xor.jar</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>del  ..\Stager_xor.jar</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -161,6 +185,12 @@
     <ResourceCompile>
       <PreprocessorDefinitions>_REL;_X64</PreprocessorDefinitions>
     </ResourceCompile>
+    <PostBuildEvent>
+      <Command>del  ..\Stager_xor.jar</Command>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>python.exe ..\rolling_xor.py  ..\Stager.jar  ..\Stager_xor.jar</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ph.h" />

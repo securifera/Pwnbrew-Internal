@@ -154,7 +154,7 @@ public class ServerConfig extends XmlBase {
     /**
      * Sets the password to the java keystore in the configuration file
      * @param passedKey
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public void setKeyStorePass( String passedKey ) throws LoggableException {
 
@@ -177,7 +177,7 @@ public class ServerConfig extends XmlBase {
      //==========================================================================
     /**
      * Writes the configuration file to the appropriate place
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public void writeSelfToDisk() throws LoggableException {
         
@@ -199,7 +199,7 @@ public class ServerConfig extends XmlBase {
     /**
      * Returns the configuration object
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
     */
     public static ServerConfig getServerConfig() throws LoggableException{
         

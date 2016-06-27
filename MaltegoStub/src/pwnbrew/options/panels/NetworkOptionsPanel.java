@@ -40,7 +40,6 @@ package pwnbrew.options.panels;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
@@ -550,6 +549,11 @@ public class NetworkOptionsPanel extends OptionsJPanel {
         });
 
         editCheckbox.setText("Edit Certificate");
+        editCheckbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editCheckboxActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -620,6 +624,10 @@ public class NetworkOptionsPanel extends OptionsJPanel {
                 getListener().sendCertFile( theCertFile, new String(passArr));
         }
     }//GEN-LAST:event_importButtonActionPerformed
+
+    private void editCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editCheckboxActionPerformed
+        setSaveButton(true);
+    }//GEN-LAST:event_editCheckboxActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

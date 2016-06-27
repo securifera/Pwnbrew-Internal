@@ -544,7 +544,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
             //Add the properties that need to be updated
             Map<String, String> propMap = new HashMap<>();
             String propLabel = Constants.STAGER_URL;  
-            propMap.put(propLabel, encodedStr);
+            propMap.put(propLabel, encodedStr.trim());
             
             //Update the jar
             Utilities.updateJarProperties(fileLoc, Constants.MANIFEST_FILE, propMap); 

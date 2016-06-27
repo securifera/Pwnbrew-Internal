@@ -63,8 +63,8 @@ public class ReflectionUtilities {
      * @param passedInstance
      * @param passedField
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
      * @throws java.lang.IllegalAccessException 
+     * @throws pwnbrew.log.LoggableException 
     */
     public static Object getValue( Object passedInstance, String passedField ) throws IllegalArgumentException, IllegalAccessException, LoggableException {
 
@@ -105,8 +105,8 @@ public class ReflectionUtilities {
      * @param passedInstance
      * @param passedValue
      * @param passedField
-     * @throws pwnbrew.logging.LoggableException
      * @throws java.lang.IllegalAccessException
+     * @throws pwnbrew.log.LoggableException
     */
     public static void setValue(Object passedInstance, String passedField, Object passedValue) throws IllegalArgumentException, IllegalAccessException, LoggableException {
 
@@ -146,7 +146,7 @@ public class ReflectionUtilities {
      * @param methodParams
      * @param passedMethod
      * @param passedClassArr
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
      * @throws java.lang.reflect.InvocationTargetException
      * @throws java.lang.IllegalAccessException
     */

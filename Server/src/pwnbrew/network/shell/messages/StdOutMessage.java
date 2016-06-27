@@ -45,7 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.shell.messages;
 
-import java.nio.ByteBuffer;
 import pwnbrew.manager.PortManager;
 
 /**

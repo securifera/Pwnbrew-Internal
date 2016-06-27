@@ -135,7 +135,7 @@ public class StageMessage extends Message {
      *
      * @param passedBuffer
      * @return msgAddress
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
      * @throws java.io.IOException
      * @throws pwnbrew.exception.RemoteExceptionWrapper
     */
@@ -191,7 +191,6 @@ public class StageMessage extends Message {
      * 
      * @param msgId
      * @return 
-     * @throws java.lang.ClassNotFoundException 
      */
     public static StageMessage instatiateMessage( byte[] msgId ) {
         

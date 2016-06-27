@@ -66,7 +66,7 @@ final public class Directories {
     private static String PATH_Root;
 
     // <root>/...
-    private static final String DEFAULT_NAME_Home = "pwnbrew";
+    private static final String DEFAULT_NAME_Home = "Pwnbrew";
     private static final String NAME_Home = DEFAULT_NAME_Home;
     private static String PATH_Home; // <root>/<home>
     

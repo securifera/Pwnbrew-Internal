@@ -138,7 +138,7 @@ public class FileContentRef extends XmlBase{
     *
     * @return the {@code FileContent} referenced by the {@code FileContentRef}, null
     * if the {@code FileContent} could not be created
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public FileContent getFileContent() throws LoggableException {
 

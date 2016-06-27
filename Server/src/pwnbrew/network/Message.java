@@ -217,7 +217,7 @@ public abstract class Message {
     *   Performs the logic specific to the message.
     *
      * @param theManager
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public void evaluate( PortManager theManager ) throws LoggableException {
     

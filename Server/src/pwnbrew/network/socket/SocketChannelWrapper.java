@@ -120,7 +120,7 @@ public class SocketChannelWrapper {
     * @param sk
     * @return
     * @throws IOException 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
     */
     public boolean doHandshake(SelectionKey sk) throws IOException, LoggableException {
         return true;

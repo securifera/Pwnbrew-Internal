@@ -1355,7 +1355,7 @@ final public class MainGuiController extends Controller implements ActionListene
      *  Recreate the sockets since the ports changed.
      * 
      * @return 
-     * @throws pwnbrew.logging.LoggableException 
+     * @throws pwnbrew.log.LoggableException 
     */
     @Override
     public boolean recreateSockets() throws LoggableException {        
@@ -1548,7 +1548,7 @@ final public class MainGuiController extends Controller implements ActionListene
     *
     * @param aTask    the passed task
     * @param newTask  is this a new task
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public void addTask(final RemoteTask aTask, boolean newTask) throws LoggableException {
 

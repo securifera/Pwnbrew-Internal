@@ -72,7 +72,6 @@ import pwnbrew.network.PortWrapper;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.messages.ResetId;
-import pwnbrew.network.control.messages.SetRelayWrap;
 import pwnbrew.network.control.messages.StageFlag;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.socket.SocketChannelWrapper;
@@ -146,8 +145,11 @@ public class SocketChannelHandler implements Selectable {
             shutdown();
             
             //Print the message if it exists
-            if( ex != null && !ex.getMessage().contains("closed"))
-                DebugPrinter.printException(ex);
+            if( ex != null ){
+                String msg = ex.getMessage();
+                if( msg != null && !msg.contains("closed"))
+                    DebugPrinter.printException(ex);
+            }
                         
             
             thePortRouter.getPortManager().socketClosed( this );

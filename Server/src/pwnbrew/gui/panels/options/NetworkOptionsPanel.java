@@ -92,7 +92,7 @@ public class NetworkOptionsPanel extends OptionsJPanel {
     /**
      *  Constructor
      * @param parent
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     public NetworkOptionsPanel( PanelListener parent ) throws LoggableException {
         super( "Network", parent );
