@@ -193,6 +193,7 @@ public final class Server {
                         break;
                      case "l":
                          
+                        System.out.println();
                         System.out.println("[+] Current Host List:\n");
                         //Get all current hosts and print out their names and ids
                         List<LibraryItemController> theHostControllers = theServerManager.getHostControllers();
@@ -200,9 +201,10 @@ public final class Server {
                             if( aCont instanceof HostController ){
                                 HostController aHC = (HostController)aCont;
                                 //Construct output string
-                                String outStr = aHC.getItemName() + " ( Host ID: " + aHC.getId()+ " )";
+                                String outStr = String.format("%-30s", aHC.getItemName());
+                                outStr += String.format("%25s", "( Host ID: " + aHC.getId()+ " )");
                                 if( aHC.isConnected() )
-                                    outStr += " * ";
+                                    outStr += String.format("%6s", "*");
                                 
                                 System.out.println( outStr ); 
                             }
@@ -279,7 +281,7 @@ public final class Server {
     public static void main( String[] args ) {
 
         try {
-            
+                                    
             boolean headless = true;
             int remManagePort = -1;
             
