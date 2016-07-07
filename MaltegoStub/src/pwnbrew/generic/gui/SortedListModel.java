@@ -5,8 +5,11 @@
  */
 package pwnbrew.generic.gui;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -32,6 +35,11 @@ public class SortedListModel extends DefaultListModel {
   public Object getElementAt(int index) {
     // Return the appropriate element
     return model.toArray()[index];
+  }
+  
+  @Override
+  public Enumeration elements(){
+    return Collections.enumeration( Arrays.asList( model.toArray()) );
   }
 
   // Other methods
