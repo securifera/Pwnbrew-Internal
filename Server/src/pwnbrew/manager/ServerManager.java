@@ -474,6 +474,7 @@ public class ServerManager extends PortManager {
             //Get the auto sleep flag and if it is set then tell the client to goto sleep
             if( theController.getAutoSleepFlag() ){
 
+                final ServerManager thiscpy = this;
                 Constants.Executor.execute( new Runnable(){
                     @Override
                     public void run() {
@@ -483,7 +484,7 @@ public class ServerManager extends PortManager {
                                 theParent = theGuiController.getParentJFrame();
                             
                             Thread.sleep( 30000 );
-                            theController.sleep( theParent, true );
+                            theController.sleep( theParent, thiscpy, true );
                             
                         } catch (InterruptedException ex) {
                             ex = null;
@@ -543,6 +544,30 @@ public class ServerManager extends PortManager {
                         
         }
                 
+    }
+    
+    //===========================================================================
+    /**
+     * 
+     * @param clientIdStr 
+     * @return  
+     */
+    public boolean removeHost( String clientIdStr ){
+        
+        boolean retVal = false;
+        HostController theController = getHostController( clientIdStr );
+        if(theController != null ){  
+            //Remove from the map and delete from disk
+            synchronized(theHostControllerMap){
+                theHostControllerMap.remove( clientIdStr);
+            }
+            //Delete
+            theController.deleteFromLibrary();
+            
+            retVal = true;
+        }  
+        
+        return retVal;
     }
 
     // ==========================================================================

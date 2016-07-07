@@ -56,12 +56,12 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
-public final class GetSessions extends MaltegoMessage{ 
+public final class RemoveHost extends MaltegoMessage{ 
     
     private static final byte OPTION_HOST_ID = 124;
     private int hostId;
     
-    private static final String NAME_Class = GetSessions.class.getSimpleName();
+    private static final String NAME_Class = RemoveHost.class.getSimpleName();
 
     // ==========================================================================
     /**
@@ -69,7 +69,7 @@ public final class GetSessions extends MaltegoMessage{
      *
      * @param passedId
     */
-    public GetSessions(byte[] passedId ) {
+    public RemoveHost(byte[] passedId ) {
         super( passedId );
     }
     
@@ -112,22 +112,8 @@ public final class GetSessions extends MaltegoMessage{
 
         //Get the host controller 
         ServerManager aSM = (ServerManager) passedManager;
-        HostController theHostController = aSM.getHostController( hostIdStr );
-        if( theHostController != null ){
-            Host theHost = theHostController.getObject();
-            List<Session> sessionList = theHost.getSessionList();
-            for( Session aSession : sessionList ){
-
-                try {
-                    SessionMsg aMsg = new SessionMsg( getSrcHostId(), hostId, aSession.getCheckInTime(), aSession.getDisconnectedTime());
-                    DataManager.send( passedManager, aMsg);
-                } catch ( UnsupportedEncodingException ex) {
-                    Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                }
-            }
-        }
-
-    }        
-    
+        aSM.removeHost(hostIdStr);
+        
+    } 
 
 }

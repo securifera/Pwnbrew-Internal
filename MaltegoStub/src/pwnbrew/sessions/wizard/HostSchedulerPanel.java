@@ -457,7 +457,8 @@ public final class HostSchedulerPanel extends HostCheckInWizardPanel implements 
             } // end MouseReleased
         }; // end MouseAdapter class
         checkInTimeList.addMouseListener(ml);
-
+        
+        
         KeyListener keyListener = new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {

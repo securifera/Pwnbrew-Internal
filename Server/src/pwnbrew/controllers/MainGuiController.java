@@ -307,40 +307,6 @@ final public class MainGuiController extends Controller implements ActionListene
         theMainGui.setCursor( Cursor.getPredefinedCursor( Cursor.WAIT_CURSOR ) );
 
         try{
-            
-//             if( theController instanceof JobController ) { 
-//
-//                JobController aJobController = (JobController) theController;
-//                //Make sure the job isnt' running
-//                if( aJobController.isRunning() ) {
-//                    JOptionPane.showMessageDialog( theMainGui, "Unable to delete job.  The Job is currently running.","Error", JOptionPane.ERROR_MESSAGE );
-//                    return null;
-//                } 
-//                
-//                Job jobToDelete = (Job)aJobController.getObject();
-//
-//                //Delete the file
-//                File rtnFile = new File( Directories.getLocalTasksDirectory(), jobToDelete.getId() );
-//                if(rtnFile.exists()){
-//                    FileUtilities.deleteFile( rtnFile ); //Delete any existing incarnation of the directory
-//                }
-//                    
-//                //Remove the object from all job sets
-//                HostController theHostController = aJobController.getHostController();
-//                List<LibraryItemController> theObjSet = theMainGui.getJTree().getLibraryItemControllers( theHostController, JobSetController.class );
-//                for(LibraryItemController aController : theObjSet){
-//
-//                    JobSetController aJobSetController = (JobSetController)aController;
-//                    
-//                    //Remove the controller and add the parent to the list
-//                    if( aJobSetController.contains( aJobController )){
-//                        aJobSetController.removeChild( aJobController );
-//                        aJobSetController.saveToDisk();
-//                        theParentList.add(aJobSetController);
-//                    }                    
-//                }
-//
-//            }
              
             theController.deleteFromLibrary(); //Delete the underlying object from disk
 
@@ -1006,7 +972,7 @@ final public class MainGuiController extends Controller implements ActionListene
                     theControllerList = theMainGui.getJTree().getSelectedObjectControllers();
                     for( LibraryItemController aController : theControllerList){
                         if( aController instanceof HostController){
-                            ((HostController)aController).sleep( theMainGui, false );
+                            ((HostController)aController).sleep( theMainGui, getServerManager(), false );
                         }
                     }
                     break;

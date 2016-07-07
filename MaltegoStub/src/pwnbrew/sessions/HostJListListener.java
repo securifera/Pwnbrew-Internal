@@ -35,73 +35,16 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-
-
-/*
-* HostCheckInListModel.java
-*
-* Created on June 24, 2013, 7:23:42 PM
-*/
-
 package pwnbrew.sessions;
 
-import java.text.ParseException;
-import pwnbrew.generic.gui.MutableListModel;
-import pwnbrew.generic.gui.SortedListModel;
-import pwnbrew.misc.Constants;
+import pwnbrew.xml.maltego.custom.Host;
 
 /**
  *
- *  
+ * @author Securifera
  */
-@SuppressWarnings("ucd")
-public class HostCheckInListModel extends SortedListModel implements MutableListModel {
+public interface HostJListListener {
 
-    private final HostCheckInListListener theListener;
+    public void removeHost(Host passedHost);
 
-    //===============================================================
-    /**
-     * Constructor
-     * 
-     * @param passedListener 
-    */
-    HostCheckInListModel(HostCheckInListListener passedListener ) {
-        theListener = passedListener;
-    }   
-    
-    //===============================================================
-    /**
-     * Determines if the cell is editable
-     *
-     * @param index
-     * @return
-     */
-    @Override
-    public boolean isCellEditable(int index) {
-        return true;
-    }
-
-    //===============================================================
-    /**
-     *  Sets the value for the Date
-     * 
-     * @param value
-     * @param index 
-     */
-    @Override
-    public void setValueAt(Object value, int index) {
-        
-        String newDateStr = (String)value;
-        try {
-            Constants.DEFAULT_DATE_FORMAT.parse((String)value);
-        } catch (ParseException ex) {
-            return;
-        }
-        
-        String aDate = (String)super.getElementAt(index);  
-        super.setElementAt(newDateStr, index);
-        theListener.replaceDate( aDate, newDateStr );                
-        
-    }
-
-}/* END CLASS HostCheckInListModel */
+}

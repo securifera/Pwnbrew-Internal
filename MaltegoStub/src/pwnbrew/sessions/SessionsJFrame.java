@@ -42,6 +42,10 @@ import java.awt.Image;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -51,6 +55,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.ListModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -111,7 +117,7 @@ public class SessionsJFrame extends javax.swing.JFrame {
 
         mainPanel = new javax.swing.JPanel();
         hostScrollPane = new javax.swing.JScrollPane();
-        hostJList = new javax.swing.JList();
+        hostJList = new HostJList( (SessionJFrameListener)theListener );
         checkInPanel = new javax.swing.JPanel();
         sessionPane = new javax.swing.JScrollPane();
         sessionTable = new javax.swing.JTable();
@@ -124,12 +130,12 @@ public class SessionsJFrame extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
-        hostScrollPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Hosts", 0, 0, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+        hostScrollPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Hosts", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
         hostJList.setBorder(javax.swing.BorderFactory.createEmptyBorder(4, 4, 4, 4));
         hostScrollPane.setViewportView(hostJList);
 
-        checkInPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Sessions", 0, 0, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+        checkInPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Sessions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
         sessionTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -171,7 +177,7 @@ public class SessionsJFrame extends javax.swing.JFrame {
             .addGroup(checkInPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(checkInPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sessionPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 221, Short.MAX_VALUE)
+                    .addComponent(sessionPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 268, Short.MAX_VALUE)
                     .addComponent(clearButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -185,7 +191,7 @@ public class SessionsJFrame extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        checkInPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Next Check-In Times", 0, 0, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+        checkInPane.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Next Check-In Times", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
         checkInPane.setViewportView(checkInTimeList);
 
         scheduleButton.setText("jButton1");
@@ -212,17 +218,16 @@ public class SessionsJFrame extends javax.swing.JFrame {
                 .addComponent(hostScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(checkInPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addComponent(checkInPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                        .addContainerGap())
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addGap(10, 10, 10)
                         .addComponent(scheduleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(autoSleepCheckbox)
-                        .addContainerGap(41, Short.MAX_VALUE))))
+                        .addComponent(autoSleepCheckbox))
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(checkInPane, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -290,6 +295,8 @@ public class SessionsJFrame extends javax.swing.JFrame {
                 };
 
             sessionTable.setModel(aModel);
+            //Set row sorter
+            sessionTable.setAutoCreateRowSorter(true);
 
             //Clear the times
             Object anObj = hostJList.getSelectedValue();
@@ -417,8 +424,16 @@ public class SessionsJFrame extends javax.swing.JFrame {
                     
                     //Clear the model
                     sessionTable.setModel(aModel);
-                    checkInTimeList.setModel( new HostCheckInListModel( theListener ));
                     
+                    //Set row sorter
+                    //Comparator<String> theComparator = SessionsJFrame.CHECK_IN_SORT;
+                    //TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(aModel);
+                    //sorter.setComparator(0, theComparator);
+                    sessionTable.setAutoCreateRowSorter(true);
+                    
+                    
+                    checkInTimeList.setModel( new HostCheckInListModel( theListener ));
+                     
                     //Get the selected Host
                     Object anObj = hostJList.getSelectedValue();
                     if( anObj != null && anObj instanceof Host ){
@@ -431,6 +446,37 @@ public class SessionsJFrame extends javax.swing.JFrame {
             }
         });
         
+        //Add mouse listener
+        MouseListener ml = new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                int index = hostJList.locationToIndex(e.getPoint());
+                if(e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1){
+                    if(hostJList.isSelectedIndex(index) && hostJList instanceof HostJList )
+                        ((HostJList)hostJList).doPopupMenuLogic(e);                
+                }
+
+            } // end MouseReleased
+        }; // end MouseAdapter class
+        hostJList.addMouseListener(ml);
+        
+        //Add tool tip for each item
+        hostJList.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                JList l = (JList)e.getSource();
+                ListModel m = l.getModel();
+                int index = l.locationToIndex(e.getPoint());
+                if( index > -1 ) {
+                    Object anObj = m.getElementAt(index);
+                    if( anObj instanceof Host ){
+                        Host aHost = (Host)anObj;
+                        l.setToolTipText( "Host ID: " + aHost.getField(Constants.HOST_ID).getXmlObjectContent() );
+                    }
+                }
+            }
+        });
+        
         KeyListener keyListener = new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -438,11 +484,11 @@ public class SessionsJFrame extends javax.swing.JFrame {
                     theListener.removeCheckInDates();
             
             }
-        }; // end MouseAdapter class
+        }; // end KeyAdapter class
         checkInTimeList.addKeyListener(keyListener);
-               
+                       
     }
-
+    
     //=================================================================
     /**
      * Get the Host list
@@ -500,10 +546,18 @@ public class SessionsJFrame extends javax.swing.JFrame {
      * @param checkInDatStr
      * @param checkOutDatStr 
      */
-    public synchronized void addSession( int hostId, String checkInDatStr, String checkOutDatStr) {     
+    public synchronized void addSession( int hostId, final String checkInDatStr, final String checkOutDatStr) {     
         if( isSelectedHost(hostId)){
-            DefaultTableModel aModel = (DefaultTableModel) sessionTable.getModel();
-            aModel.addRow( new Object[]{checkInDatStr, checkOutDatStr});
+            SwingUtilities.invokeLater(new Runnable(){
+                @Override
+                public void run() {  
+                    DefaultTableModel aModel = (DefaultTableModel) sessionTable.getModel();
+                    aModel.addRow( new Object[]{checkInDatStr, checkOutDatStr});
+                    
+                    sessionTable.getRowSorter().toggleSortOrder(0);
+                    
+                }           
+            });                
         }
     }
 
@@ -513,10 +567,16 @@ public class SessionsJFrame extends javax.swing.JFrame {
      * @param hostId
      * @param checkInDatStr 
      */
-    public synchronized void addCheckInDate( int hostId, String checkInDatStr) {
+    public synchronized void addCheckInDate( int hostId, final String checkInDatStr) {
         if( isSelectedHost(hostId)){
-            HostCheckInListModel theModel = (HostCheckInListModel) checkInTimeList.getModel();        
-            theModel.addElement( checkInDatStr );
+            SwingUtilities.invokeLater(new Runnable(){
+                @Override
+                public void run() {                
+                    HostCheckInListModel theModel = (HostCheckInListModel) checkInTimeList.getModel();        
+                    theModel.addElement( checkInDatStr );
+                }           
+            });
+            
         }
     }
 

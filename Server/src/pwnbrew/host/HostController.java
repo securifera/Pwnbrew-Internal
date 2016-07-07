@@ -91,6 +91,7 @@ import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
+import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.ControlOption;
@@ -501,7 +502,8 @@ public final class HostController extends LibraryItemController implements Actio
         List<String> dateList = theHost.getCheckInList();
         theHost.addCheckInTime(passedDate);
         
-        theMainGuiController.valuesChanged(this);
+        if( theMainGuiController != null )
+            theMainGuiController.valuesChanged(this);
         
         //Set the next check in time
         if( dateList == null || dateList.isEmpty() ){
@@ -539,7 +541,8 @@ public final class HostController extends LibraryItemController implements Actio
         refreshOverviewPanel(); 
         
         //Notify the controller
-        theMainGuiController.valuesChanged(this);
+        if( theMainGuiController != null )
+            theMainGuiController.valuesChanged(this);
         
     }
       
@@ -586,7 +589,8 @@ public final class HostController extends LibraryItemController implements Actio
         }
         
         //Set the dirty flag
-        theMainGuiController.valuesChanged(this);
+        if( theMainGuiController != null )
+            theMainGuiController.valuesChanged(this);
         
         refreshOverviewPanel();  
         
@@ -632,7 +636,8 @@ public final class HostController extends LibraryItemController implements Actio
     public void setAutoSleepFlag(boolean selected) {
         
         theHost.setAutoSleepFlag( selected );
-        theMainGuiController.valuesChanged( this );
+        if( theMainGuiController != null )
+            theMainGuiController.valuesChanged( this );
         
     }
     
@@ -673,9 +678,10 @@ public final class HostController extends LibraryItemController implements Actio
      *  Gets the first sleep date and sends a message to the client to goto sleep.
      * 
      * @param parent
+     * @param passedManager
      * @param autoFlag
     */
-    public void sleep( JFrame parent, boolean autoFlag ) {
+    public void sleep( JFrame parent, ServerManager passedManager, boolean autoFlag ) {
         
         //Purge stale dates
         removeStaleDates();
@@ -705,7 +711,7 @@ public final class HostController extends LibraryItemController implements Actio
                     //Send sleep message
                     int dstHostId = Integer.parseInt( theHost.getId());
                     Sleep sleepMsg = new Sleep( dstHostId, theCheckInTime ); //Convert mins to seconds
-                    DataManager.send( theMainGuiController.getServer().getServerManager(), sleepMsg );
+                    DataManager.send( passedManager, sleepMsg );
 
                 }
 
@@ -946,7 +952,8 @@ public final class HostController extends LibraryItemController implements Actio
                             aRemoteTask.setTarget(theHost);
 
                             //Add support files and add to the task list
-                            theMainGuiController.addTask(aRemoteTask, true);
+                            if( theMainGuiController != null )
+                                theMainGuiController.addTask(aRemoteTask, true);
 
                             TasksJDialog theTasksDialog = TasksJDialog.getTasksJDialog();
                             theTasksDialog.setVisible(true);
@@ -961,7 +968,7 @@ public final class HostController extends LibraryItemController implements Actio
                             thePFM.addOption(aTlv);
 
                             //Send the message
-                            DataManager.send( theMainGuiController.getServer().getServerManager(), thePFM );  
+                            DataManager.send( theMainGuiController.getServerManager(), thePFM );  
 
 
                         } catch ( LoggableException | IOException ex) {
@@ -1151,7 +1158,8 @@ public final class HostController extends LibraryItemController implements Actio
                 aRemoteTask.setTarget(theHost);
 
                 //Add support files and add to the task list
-                theMainGuiController.addTask(aRemoteTask, true);
+                if( theMainGuiController != null )
+                    theMainGuiController.addTask(aRemoteTask, true);
 
                 TasksJDialog theTasksDialog = TasksJDialog.getTasksJDialog();
                 theTasksDialog.setVisible(true);
@@ -1214,7 +1222,7 @@ public final class HostController extends LibraryItemController implements Actio
         try {
             
             FileOperation aFileOp = new FileOperation( hostId, passedOp, filePath, addParam );
-            DataManager.send( theMainGuiController.getServer().getServerManager(), aFileOp);
+            DataManager.send( theMainGuiController.getServerManager(), aFileOp);
             
         } catch (UnsupportedEncodingException ex) {
             Log.log(Level.WARNING, NAME_Class, "performFileOperation()", ex.getMessage(), ex );        

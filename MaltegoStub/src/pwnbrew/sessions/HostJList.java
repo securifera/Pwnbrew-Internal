@@ -39,85 +39,33 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.sessions;
 
-import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.*;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import javax.swing.*;
-import pwnbrew.generic.gui.MutableJList;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Utilities;
 import static pwnbrew.misc.Utilities.loadImageFromJar;
+import pwnbrew.xml.maltego.custom.Host;
 
 /**
  *
  *  
  */
 @SuppressWarnings("ucd")
-public class HostCheckInList extends MutableJList implements ActionListener {
+public class HostJList extends JList implements ActionListener {
 
-    private final HostCheckInListListener theListener;
-    private final boolean validFlag = true;
-
+    private final SessionJFrameListener theListener;
+   
     //===============================================================
     /**
      *  Constructor
      * @param passedListener
     */
-    public HostCheckInList(HostCheckInListListener passedListener) {
+    public HostJList(SessionJFrameListener passedListener) {
         
-        super( new HostCheckInListModel( passedListener ) );
-        theListener = passedListener;
-
-        final JTextField theTxtField = new JTextField();
-        theTxtField.addKeyListener( new KeyAdapter(){
-            /**
-            * Invoked when a key has been released.
-            */
-            @Override
-            public void keyReleased(KeyEvent e) {
-                validateDate(theTxtField);
-            }
-        });
-
-        setListCellEditor( new HostCheckInListCellEditor(theTxtField) );
-      
+        theListener = passedListener;      
     }
-    
-    //===============================================================
-    /**
-     *  Sets the value at the index
-     * 
-     * @param value
-     * @param index 
-     */
-    @Override
-    public void setValueAt(Object value, int index){
-
-        HostCheckInListModel theModel = (HostCheckInListModel) getModel();
-        String theDateStr = (String)theModel.getElementAt(index);
-        if(!theDateStr.equals(value)){
-            theModel.setValueAt(value, index);
-            
-            //Get a list of the task and the appropriate comparator
-            Object[] theDateArray = theModel.toArray();
-            List<String> theDates = new ArrayList(Arrays.asList(theDateArray));
-
-            //Sort the dates and add them back
-            Collections.sort( theDates );
-            theModel.clear();
-
-            //Add the sorted list back to the model
-            for(String aDate : theDates){
-                theModel.addElement(aDate);
-            }
-        }
-    }
-
+  
     //****************************************************************************
     /**
     *  Determines what menu options to show on the popup menu based on the
@@ -125,7 +73,6 @@ public class HostCheckInList extends MutableJList implements ActionListener {
     *
     *  @param  e   the {@code MouseEvent} that triggered the popup
     */
-    @Override
     public void doPopupMenuLogic( MouseEvent e ) {
 
         JPopupMenu popup = new JPopupMenu();
@@ -158,61 +105,16 @@ public class HostCheckInList extends MutableJList implements ActionListener {
 
         String actionCommand = evt.getActionCommand();            
         if( actionCommand.equals(Constants.DELETE) ) {
-            theListener.removeCheckInDates();
+            Object anObj = getSelectedValue();
+            if( anObj instanceof Host ){
+                Host aHost = (Host)anObj;
+                theListener.removeHost(aHost);
+            }
+            //Remove the element
+            DefaultListModel theModel = (DefaultListModel) getModel();
+            theModel.removeElement(anObj);
         }   
 
    }
-
-    //===============================================================
-    /**
-    * Returns whether the value is valid
-    *
-     * @param theObj
-     * @return 
-    */
-    @Override
-    public boolean isValueValid(Object theObj){
-       return validFlag;
-    }
-
-    //===============================================================
-    /**
-     * 
-     * @param index
-     * @return 
-     */
-    
-    @Override
-    public boolean isCellEditable(int index){
-
-        HostCheckInListModel theModel = (HostCheckInListModel)getModel();
-        return theModel.isCellEditable(index);
-    }
-
-    // ===============================================================
-    /**
-     * Validates the date.
-     * @param theTxtField 
-    */
-    private void validateDate( JTextField theTxtField ){
-
-        String fieldVal = theTxtField.getText();
-        setRequestFocusEnabled(true);
-        
-        try {
-            
-            //try and parse the field
-            Constants.DEFAULT_DATE_FORMAT.parse((String)fieldVal);
-            theTxtField.setBackground(Color.WHITE);
-            
-        } catch (ParseException ex) {
-            
-            theTxtField.setBackground(Color.RED);
-            setRequestFocusEnabled(false);
-        
-        }       
-       
-    }
-
 
 }

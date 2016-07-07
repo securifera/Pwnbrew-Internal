@@ -63,6 +63,7 @@ import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.network.control.messages.GetCheckInSchedule;
 import pwnbrew.network.control.messages.GetCount;
 import pwnbrew.network.control.messages.GetSessions;
+import pwnbrew.network.control.messages.RemoveHost;
 import pwnbrew.sessions.SessionJFrameListener;
 import pwnbrew.sessions.SessionsJFrame;
 import pwnbrew.xml.maltego.Field;
@@ -478,6 +479,25 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
     public void addSession(int hostId, String checkInDatStr, String checkOutDatStr) {
         if( theSessionsJFrame != null )
             theSessionsJFrame.addSession( hostId, checkInDatStr, checkOutDatStr);  
+    }
+
+    //===============================================================
+    /**
+     * Remove the passed host 
+     * 
+     * @param passedHost
+     */
+    @Override
+    public void removeHost(Host passedHost) {
+        
+        //Get the client count
+        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();    
+        
+        //Send a msg to remove the host
+        int hostId = Integer.parseInt( passedHost.getField(Constants.HOST_ID).getXmlObjectContent() );
+        ControlMessage aMsg = new RemoveHost( Constants.SERVER_ID, hostId);
+        aCMM.send(aMsg);
+        
     }
 
 }

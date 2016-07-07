@@ -37,6 +37,8 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.sessions;
 
+import pwnbrew.xml.maltego.custom.Host;
+
 /**
  *
  * @author Securifera
@@ -52,5 +54,7 @@ public interface SessionJFrameListener extends HostCheckInListListener {
     public void refreshSelection();
 
     public void beNotified();
+    
+    public void removeHost(Host passedHost);
 
 }

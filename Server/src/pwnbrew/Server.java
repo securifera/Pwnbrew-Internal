@@ -59,11 +59,14 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.List;
 import java.util.logging.Level;
 import javax.swing.JDialog;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import pwnbrew.gui.MainGui;
+import pwnbrew.host.HostController;
+import pwnbrew.library.LibraryItemController;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.look.CustomLookAndFeel;
@@ -168,6 +171,7 @@ public final class Server {
             StringBuilder aStr = new StringBuilder();
             aStr.append("\nCommands:\n\n")
                 .append("   i\tImport SSL Certificate\n")
+                .append("   l\tList Hosts\n")
                 .append("   d\tToggle Debug Messages\n")
                 .append("   q\tShutdown");
             
@@ -185,6 +189,27 @@ public final class Server {
                             importCertificate(aFile);
                         } else 
                             System.out.println("***Error: File does not exist.");
+                        
+                        break;
+                     case "l":
+                         
+                        System.out.println("[+] Current Host List:\n");
+                        //Get all current hosts and print out their names and ids
+                        List<LibraryItemController> theHostControllers = theServerManager.getHostControllers();
+                        for( LibraryItemController aCont : theHostControllers ){
+                            if( aCont instanceof HostController ){
+                                HostController aHC = (HostController)aCont;
+                                //Construct output string
+                                String outStr = aHC.getItemName() + " ( Host ID: " + aHC.getId()+ " )";
+                                if( aHC.isConnected() )
+                                    outStr += " * ";
+                                
+                                System.out.println( outStr ); 
+                            }
+                        }
+                        System.out.println();
+                        System.out.println("* Host is connected.");
+                        System.out.println();
                         
                         break;
                     case "d":
