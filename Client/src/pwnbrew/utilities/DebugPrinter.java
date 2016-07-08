@@ -117,31 +117,52 @@ public class DebugPrinter implements Runnable {
     @Override
     public void run() {
 
-       String currentMsg = null;
+        String currentMsg = null;
+//        FileOutputStream aFOS = null;
+//        File aFile = new File("C:\\pn.txt");
+//        try {
+            
+           //aFOS = new FileOutputStream(aFile);
+            while(!shutdownRequested) {
+                
+                // Wait for next message to become available
+                synchronized(queue) {
+                    while(queue.isEmpty()) {
+                        try {
+                            queue.wait();
+                        } catch (InterruptedException e) {
+                            //Shutdown the handler if interrupted and the shutdown flag was triggered
+                            if(shutdownRequested) 
+                                return;
+                        }
 
-       while(!shutdownRequested) {
-           // Wait for next message to become available
-           synchronized(queue) {
-              while(queue.isEmpty()) {
-                 try {
-                    queue.wait();
-                 } catch (InterruptedException e) {
-                    //Shutdown the handler if interrupted and the shutdown flag was triggered
-                    if(shutdownRequested) return;
-                 }
+                        //If shutdown is requested, exit
+                        if(shutdownRequested) 
+                            return;
 
-                 //If shutdown is requested, exit
-                 if(shutdownRequested) return;
-
-              }
-              currentMsg = (String)queue.poll();
-              if(currentMsg != null){
-                 System.out.println( new StringBuilder()
-                    .append( new SimpleDateFormat( FORMAT_SessionDateTime).format(new Date()))
-                    .append("- ").append(currentMsg).toString());
-              }
-           }
-       }
+                    }
+                    
+                    currentMsg = (String)queue.poll();
+                    if(currentMsg != null){
+                        String retStr = new StringBuilder()
+                        .append( new SimpleDateFormat( FORMAT_SessionDateTime).format(new Date()))
+                        .append("- ").append(currentMsg).toString();
+                        System.out.println( retStr );
+                        
+//                        //Write to file
+//                        aFOS.write(retStr.getBytes());
+//                        //Write newline
+//                        aFOS.write((byte)0xa);
+                    }
+                }
+            }
+            
+//        } catch (FileNotFoundException e) {
+//        } catch (IOException ex) {
+//        } finally {
+//            if(aFOS != null )
+//                try { aFOS.close(); } catch (IOException ex) {}
+//        } 
     }
 
     //===============================================================

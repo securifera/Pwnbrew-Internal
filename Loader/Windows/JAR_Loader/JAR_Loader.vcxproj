@@ -85,6 +85,12 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PreBuildEvent>
+      <Command>python.exe ..\rolling_xor.py  ..\Stager.jar  ..\Stager_xor.jar</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>del  ..\Stager_xor.jar</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -96,6 +102,12 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PreBuildEvent>
+      <Command>python.exe ..\rolling_xor.py  ..\Stager.jar  ..\Stager_xor.jar</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>del  ..\Stager_xor.jar</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -112,6 +124,12 @@
       <EnableUAC>false</EnableUAC>
       <ProgramDatabaseFile />
     </Link>
+    <PreBuildEvent>
+      <Command>python.exe ..\rolling_xor.py  ..\Stager.jar  ..\Stager_xor.jar</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>del  ..\Stager_xor.jar</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -128,16 +146,26 @@
       <EnableUAC>false</EnableUAC>
       <ProgramDatabaseFile />
     </Link>
+    <PreBuildEvent>
+      <Command>python.exe ..\rolling_xor.py  ..\Stager.jar  ..\Stager_xor.jar</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>del  ..\Stager_xor.jar</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\log.h" />
     <ClInclude Include="..\utilities.h" />
     <ClInclude Include="jarldr.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\log.cpp" />
     <ClCompile Include="..\utilities.cpp" />
     <ClCompile Include="jarldr.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="jarldr.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -382,7 +382,7 @@ public class SessionsJFrame extends javax.swing.JFrame {
                     Host aHost = (Host)value;
                     String theType = aHost.getType();
                     BufferedImage iconImage;
-                    if( theType.equals(Host.PWNBREW_HOST_CONNECTED))
+                    if( theType.equals(Host.PWNBREW_HOST_CONNECTED) || theType.equals( Host.PWNBREW_HOST_SLEEPABLE))
                         iconImage = Utilities.loadImageFromJar( Constants.HOST_IMG_STR );	
                     else
                         iconImage = Utilities.loadImageFromJar( Constants.DIS_HOST_IMG_STR );	

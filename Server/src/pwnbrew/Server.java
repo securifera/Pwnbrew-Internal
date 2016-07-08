@@ -202,7 +202,7 @@ public final class Server {
                                 HostController aHC = (HostController)aCont;
                                 //Construct output string
                                 String outStr = String.format("%-30s", aHC.getItemName());
-                                outStr += String.format("%25s", "( Host ID: " + aHC.getId()+ " )");
+                                outStr += String.format("( Host ID: %15s )", aHC.getId());
                                 if( aHC.isConnected() )
                                     outStr += String.format("%6s", "*");
                                 
