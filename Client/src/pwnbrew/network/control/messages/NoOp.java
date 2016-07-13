@@ -45,12 +45,17 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import pwnbrew.network.ControlOption;
+import pwnbrew.utilities.SocketUtilities;
+
 /**
  *
  *  
  */
 public final class NoOp extends ControlMessage{
 
+    private static final byte OPTION_GARBAGE = 13;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -58,6 +63,11 @@ public final class NoOp extends ControlMessage{
     */
     public NoOp() {
         super();
+        
+        int garbageSize = (int)(SocketUtilities.SecureRandomGen.nextFloat() * 1000);
+        byte[] garbage = new byte[garbageSize];
+        ControlOption aTlv = new ControlOption( OPTION_GARBAGE, garbage);
+        addOption(aTlv);
     }
     // ==========================================================================
     /**

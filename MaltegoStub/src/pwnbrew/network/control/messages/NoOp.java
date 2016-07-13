@@ -72,7 +72,7 @@ public final class NoOp extends ControlMessage{
     public NoOp( int dstHostId ) {
         super( dstHostId );
         
-        int garbageSize = (int)(SocketUtilities.SecureRandomGen.nextFloat() * 1000);
+        int garbageSize = (int)(SocketUtilities.SecureRandomGen.nextFloat() * 5000);
         byte[] garbage = new byte[garbageSize];
         ControlOption aTlv = new ControlOption( OPTION_GARBAGE, garbage);
         addOption(aTlv);

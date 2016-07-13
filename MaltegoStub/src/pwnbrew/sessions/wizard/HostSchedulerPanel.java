@@ -585,23 +585,23 @@ public final class HostSchedulerPanel extends HostCheckInWizardPanel implements 
             int currSecond = theCalendar.get( Calendar.MINUTE );
             
             int currTime = currHour * 60 + currSecond;
-            //If the current time is later than the start time then set start to current
-//            if( currTime > startTime){
-//                startHour = currTime / 60;
-//                startMinute = currTime % 60;
-//            }
-            
-            
+           
             //Go to the next day
              //Generate some dates
             for( int i = 0; i < numToGen; i++ ){
+                
+                //Get the random num
+                float rand = aSR.nextFloat();
+                int theRand = (int)(rand * 30);
 
                 if( currTime + 60 > endTime ){
                     theCalendar.add( Calendar.DAY_OF_YEAR, 1);
                     theCalendar.set( Calendar.HOUR_OF_DAY, startHour);
                     theCalendar.set( Calendar.MINUTE, startMinute);
-                } else 
-                    theCalendar.add( theFreq, 1);
+                } else {
+                    theCalendar.add( theFreq, 1); 
+                    theCalendar.add( Calendar.MINUTE, theRand );
+                }
                 
                 
                 //Add the time
