@@ -8,11 +8,9 @@
 #include <time.h>
 #include <direct.h>
 #include <stdarg.h>
+#include <string>
 
-#define LOG_FILE			"C:\\jldr.log"
-#define LOG_PATH			"C:\\"
-
-	
+void SetLogPath(std::string log_path_param ) ;
 void Log(char* format, ...);
 
 #endif

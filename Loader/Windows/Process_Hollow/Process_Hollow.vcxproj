@@ -193,6 +193,9 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\log.h" />
+    <ClInclude Include="..\persist.h" />
+    <ClInclude Include="..\utilities.h" />
     <ClInclude Include="ph.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
@@ -200,6 +203,9 @@
     <ResourceCompile Include="ph.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\log.cpp" />
+    <ClCompile Include="..\persist.cpp" />
+    <ClCompile Include="..\utilities.cpp" />
     <ClCompile Include="ph.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

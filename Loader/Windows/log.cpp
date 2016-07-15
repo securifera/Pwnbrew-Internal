@@ -3,7 +3,15 @@
 
 #include "log.h"
 
+std::string log_path;
 
+//=========================================================================
+/**
+	Log the string
+*/
+void SetLogPath(std::string log_path_param ) {
+	log_path.assign(log_path_param);
+}
 
 //=========================================================================
 /**
@@ -14,19 +22,18 @@ void Log(char* format, ...) {
 	char dateStr[9],timeStr[9];
 	errno_t err;
 
+	//Check if log path is set
+	if( log_path.empty() )
+		return;
+
 	_strdate_s(dateStr, sizeof(dateStr));
     _strtime_s( timeStr, sizeof(timeStr));
 
 	// write error or other information into log file
 	FILE* pFile = 0;
 	va_list ap;
-	if( (err = fopen_s(&pFile, LOG_FILE,"a")) != 0){
-		//Directory doesn't exist, create it
-		if( err == 2){
-		   _mkdir(LOG_PATH);
-		   fopen_s(&pFile, LOG_FILE,"a");
-		}
-
+	if( (err = fopen_s(&pFile, log_path.c_str(),"a")) != 0){
+		return;
 	}
 
 	if(pFile != 0) {

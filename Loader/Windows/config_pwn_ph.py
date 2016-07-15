@@ -9,12 +9,12 @@ import sys
 import binascii
 
 #jvm path marker
-cert_off = 200 * 2
-cert_name = '\x00\x00\x22\x00\x26\x00\x29\x00\x2c'
+jvm_off = 400 * 2
+jvm_path = '\x00\x00\x22\x00\x26\x00\x29\x00\x2c'
 
 #reg key path
-reg_off = 200 * 2
-reg_str = '\x00\x00\x26\x00\x23\x00\x17\x00\x21'
+reg_off = 400 * 2
+reg_str =  '\x00\x00\x16\x00\x23\x00\x17\x00\x21'
 
 #watch dog host path
 watch_dog_off = 400 * 2
@@ -57,7 +57,7 @@ def setAdsPath( filepath ):
 
   #Find port marker
   idx = data.find(ads_path_str)
-  #print "Index: ", idx
+  print "Index: ", idx
   cert_str_off = idx - ads_off
   #print binascii.hexlify(data[port_str_off: port_str_off + port_off ])
   #print "Current certificate name: " + data[cert_str_off: cert_str_off + cert_off ]
@@ -87,7 +87,7 @@ def setWatchdogHostPath( filepath ):
 
   #Find port marker
   idx = data.find(watch_dog_str)
-  #print "Index: ", idx
+  print "Index: ", idx
   cert_str_off = idx - watch_dog_off
   #print binascii.hexlify(data[port_str_off: port_str_off + port_off ])
   #print "Current certificate name: " + data[cert_str_off: cert_str_off + cert_off ]
@@ -117,7 +117,7 @@ def setPayloadHostPath( filepath ):
 
   #Find port marker
   idx = data.find(payload_host_str)
-  #print "Index: ", idx
+  print "Index: ", idx
   cert_str_off = idx - payload_off
   #print binascii.hexlify(data[port_str_off: port_str_off + port_off ])
   #print "Current certificate name: " + data[cert_str_off: cert_str_off + cert_off ]
@@ -132,8 +132,8 @@ def setRegKeyPath( filepath ):
   print "\nEnter the print monitor registry key name"
   sys.stdout.write('> ')
   reg_in = raw_input()
-  if len(reg_in) > 200 / 2:
-    print "Error: Length of registry name too long. Max Length = 100"
+  if len(reg_in) > 400 / 2:
+    print "Error: Length of registry name too long. Max Length = 200"
     return
   
   #convert to unicode
@@ -147,7 +147,7 @@ def setRegKeyPath( filepath ):
 
   #Find port marker
   idx = data.find(reg_str)
-  #print "Index: ", idx
+  print "Index: ", idx
   reg_str_off = idx - reg_off
   #print binascii.hexlify(data[port_str_off: port_str_off + port_off ])
   #print "Current certificate name: " + data[cert_str_off: cert_str_off + cert_off ]
@@ -176,9 +176,9 @@ def setJvmPath( filepath ):
   f.close()  
 
   #Find port marker
-  idx = data.find(cert_name)
+  idx = data.find(jvm_path)
   #print "Index: ", idx
-  cert_str_off = idx - cert_off
+  cert_str_off = idx - jvm_off
   #print binascii.hexlify(data[port_str_off: port_str_off + port_off ])
   #print "Current certificate name: " + data[cert_str_off: cert_str_off + cert_off ]
   
