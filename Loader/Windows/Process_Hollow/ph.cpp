@@ -9,9 +9,14 @@
 #include "..\log.h"
 #include "..\utilities.h"
 #include "..\persist.h"
+#include <ShlObj.h>
 
 #pragma comment(lib, "Advapi32.lib")
 #pragma comment(lib, "User32.lib")
+
+#ifdef _DBG
+#pragma comment(lib, "Shell32.lib")		
+#endif
 
 //FILE * debug_file_handle = stdout;
 
@@ -527,16 +532,26 @@ int main(int argc, char* argv[]){
 	//Check the global else load the watchdog
 	if( watch_target ){
 
-#ifdef _DBG					
-		SetLogPath("C:\\payld.log");
+#ifdef _DBG	
+	CHAR path[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROFILE, NULL, 0, path))) {
+		std::string str_path(path);
+		str_path.append("\\payld.log");
+		SetLogPath(str_path.c_str());
+	}
 #endif
 		LoadPayload();
 		exit(1);
 
 	} else {	
 
-#ifdef _DBG					
-		SetLogPath("C:\\wdg.log");
+#ifdef _DBG	
+	CHAR path[MAX_PATH];
+	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROFILE, NULL, 0, path))) {
+		std::string str_path(path);
+		str_path.append("\\wdg.log");
+		SetLogPath(str_path.c_str());
+	}
 #endif
 		LoadWatchDog();
 	}

