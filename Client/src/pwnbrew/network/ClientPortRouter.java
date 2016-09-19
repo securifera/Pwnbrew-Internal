@@ -49,7 +49,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.EmptyStackException;
 import java.util.logging.Level;
-import pwnbrew.ClientConfig;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.concurrent.LockingThread;
 import pwnbrew.log.LoggableException;
@@ -374,7 +373,7 @@ public class ClientPortRouter extends PortRouter {
     */
     public synchronized int ensureConnectivity( String serverIp, int passedPort, LockListener passedListener, Integer... passedIdArr ) {
 
-        int channelId = 0;
+        int channelId;
         try {
             
             //Get the channelId

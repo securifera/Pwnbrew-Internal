@@ -73,8 +73,7 @@ import pwnbrew.selector.SocketChannelHandler;
 abstract public class DataManager {    
 
     protected DataHandler theDataHandler;
-    protected final PortManager thePortManager;
-    
+    protected final PortManager thePortManager;    
     
     private static final Map<Integer, PortWrapper> thePortWrapperMap = new HashMap<>();
     private transient static final String NAME_Class = DataManager.class.getSimpleName();
@@ -309,13 +308,6 @@ abstract public class DataManager {
             SocketChannelHandler theHandler = aCM.getSocketChannelHandler( channelId );
             if( theHandler != null ){
                 
-//                ByteBuffer aByteBuffer;
-//                int msgLen = passedMessage.getLength();
-//                aByteBuffer = ByteBuffer.allocate( msgLen );
-//                passedMessage.append(aByteBuffer);
-//
-//                //Create a byte array from the messagen byte buffer
-//                byte[] msgBytes = Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position());
                 byte[] msgBytes = passedMessage.getBytes();
 
                 //If wrapping is necessary then wrap it
@@ -335,10 +327,8 @@ abstract public class DataManager {
                 }
 
                 theHandler.queueBytes(msgBytes);
-//                retVal = true;
 
             }
         }
-//        return;
     }
 }

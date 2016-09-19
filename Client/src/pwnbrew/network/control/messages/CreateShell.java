@@ -200,13 +200,9 @@ public final class CreateShell extends ControlMessage implements LockListener {
         if(retChannelId != 0 ){
             
             //Send ack back to set channel id
-//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//            if( aCMManager != null ){
-                CreateShellAck retMsg = new CreateShellAck( retChannelId );
-                retMsg.setDestHostId( theClientId );
-                DataManager.send(passedManager, retMsg);
-//                aCMManager.send(retMsg); 
-//            }
+            CreateShellAck retMsg = new CreateShellAck( retChannelId );
+            retMsg.setDestHostId( theClientId );
+            DataManager.send(passedManager, retMsg);
 
             //Create the shell and set it
             Shell aShell = new Shell( Constants.Executor, passedManager, 

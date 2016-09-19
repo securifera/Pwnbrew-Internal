@@ -51,11 +51,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.logging.Level;
-import pwnbrew.ClientConfig;
-import pwnbrew.concurrent.LockListener;
 import pwnbrew.manager.PortManager;
-import pwnbrew.network.ClientPortRouter;
-import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.file.FileMessageManager;
@@ -65,7 +61,7 @@ import pwnbrew.network.file.FileMessageManager;
  *
  *  
  */
-public class PushFile extends FileMessage implements LockListener {
+public class PushFile extends FileMessage {
 
     private String hashFilenameStr;
     protected long fileSize = 0;
@@ -80,8 +76,6 @@ public class PushFile extends FileMessage implements LockListener {
     private static final byte OPTION_DATASIZE = 4;
     private static final byte OPTION_FILE_TYPE = 10;
     public static final byte OPTION_REMOTE_DIR = 12;
-    
-    private int lockVal = 0;
    
   
      //Class name
@@ -266,41 +260,6 @@ public class PushFile extends FileMessage implements LockListener {
         return hash;
     }
     
-     //===============================================================
-    /**
-     * 
-     * @param lockOp 
-     */
-    @Override
-    public synchronized void lockUpdate(int lockOp) {
-        lockVal = lockOp;
-        notifyAll();
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @return  
-     */
-    @Override
-    public synchronized int waitForLock() {
-        
-        int retVal;        
-        while( lockVal == 0 ){
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                continue;
-            }
-        }
-        
-        //Set to temp and reset
-        retVal = lockVal;
-        lockVal = 0;
-        
-        return retVal;
-    }
-  
   //===============================================================
     /**
     *   Performs the logic specific to the message.
@@ -313,23 +272,23 @@ public class PushFile extends FileMessage implements LockListener {
         //Get the file manager
         try {
             FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
-            if( theFileMM == null ){
+            if( theFileMM == null )
                 theFileMM = FileMessageManager.initialize( passedManager );
-            }
-                   
-            ClientConfig theConf = ClientConfig.getConfig();
-            int socketPort = theConf.getSocketPort();
-            String serverIp = theConf.getServerIp();
-
-            //Get the port router
-            ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
-            DebugPrinter.printMessage(  this.getClass().getSimpleName(), "Received push file.");
             
-            int retChannelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
-            if(retChannelId != 0 ){
-                setFileChannelId(retChannelId);
-                theFileMM.prepFilePush( this );
-            }
+            theFileMM.fileUpload(this);      
+//            ClientConfig theConf = ClientConfig.getConfig();
+//            int socketPort = theConf.getSocketPort();
+//            String serverIp = theConf.getServerIp();
+//
+//            //Get the port router
+//            ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
+//            DebugPrinter.printMessage(  this.getClass().getSimpleName(), "Received push file.");
+//            
+//            int retChannelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
+//            if(retChannelId != 0 ){
+//                setFileChannelId(retChannelId);
+//                theFileMM.prepFilePush( this );
+//            }
 
         } catch ( LoggableException | IOException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
