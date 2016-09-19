@@ -73,7 +73,7 @@ import pwnbrew.utilities.Utilities.ManifestProperties;
 public final class Pwnbrew extends PortManager implements TaskListener {
 
     private static final String NAME_Class = Pwnbrew.class.getSimpleName();
-    private static final boolean debug = true;
+    private static final boolean debug = false;
   
      
     //===============================================================

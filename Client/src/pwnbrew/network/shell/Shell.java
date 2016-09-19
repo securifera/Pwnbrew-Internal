@@ -53,7 +53,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.Constants;

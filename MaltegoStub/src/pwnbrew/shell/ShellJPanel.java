@@ -50,13 +50,10 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 
 /**
  *
@@ -66,9 +63,6 @@ import javax.swing.text.StyledDocument;
 public class ShellJPanel extends javax.swing.JPanel {
 
     private final ShellJPanelListener theListener;   
-//    private final ArrayList<String> history = new ArrayList<>();
-//    private ListIterator<String> historyIterator = null;
-//    private String lastCommand = "";
     private JFileChooser theFileChooser = null;
         
     //===============================================================
@@ -83,48 +77,7 @@ public class ShellJPanel extends javax.swing.JPanel {
         initializeComponents();
                  
     }
-//    
-//    //==============================================================
-//    /*
-//     *  Check if the document should be altered
-//     */
-//    private int getPromptEndOffset( ShellJTextPane theTextPane ){
-//        
-//        int retVal = -1;
-//        
-//         //Get the prompt
-//        String thePrompt = theListener.getShell().getShellPrompt();
-//        StyledDocument theDoc = theTextPane.getStyledDocument();
-//        Element rootElement = theDoc.getDefaultRootElement();
-//        if( rootElement != null ){
-//
-//            //find the prompt working backwords
-//            int docElements = rootElement.getElementCount();
-//            for( int i = 1; i <= docElements; i++){
-//                
-//                //Get the element
-//                Element anElement = rootElement.getElement( rootElement.getElementCount() - i );
-//                int startPos = anElement.getStartOffset();
-//                int endPos = anElement.getEndOffset();
-//                
-//                //Get the string for that element
-//                try {
-//                    String theStr = theDoc.getText(startPos, (endPos - startPos) - 1);
-//                    int promptIndex = theStr.indexOf(thePrompt);
-//                    if( promptIndex != -1){
-//                        
-//                        retVal = startPos + promptIndex + thePrompt.length();
-//                        break;
-//                    }
-//                } catch (BadLocationException ex ){
-//                        
-//                }
-//            }
-//
-//        } 
-//        
-//        return retVal;
-//    }
+
     
     //==============================================================
     /*
@@ -267,8 +220,9 @@ public class ShellJPanel extends javax.swing.JPanel {
     //===============================================================
     /**
      * 
-     * @param theOffset
+     * @param passedOffset
      * @return 
+     * @throws javax.swing.text.BadLocationException 
      */
     public boolean canRemove( int passedOffset ) throws BadLocationException {
         
@@ -305,7 +259,7 @@ public class ShellJPanel extends javax.swing.JPanel {
      */
     private void initializeComponents() {
         
-         theFileChooser = new JFileChooser();
+        theFileChooser = new JFileChooser();
         theFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         theFileChooser.setMultiSelectionEnabled( true ); //Let the user select multiple files
        

@@ -259,7 +259,7 @@ def setJvmPath( filepath ):
 def print_menu():
   print "\nConfiguration Menu:"
   print "-------------------"
-  print "1. Set JVM library directory (ex. C:\Program Files\Java\jre7\\bin\client)"
+  print "1. Set JVM library directory (ex. C:\Program Files\Java\jre7\bin\client)"
   print "2. Set Print Monitor Key Name"
   print "3. Set Watchdog Host Path"
   print "4. Set Payload Host Path"

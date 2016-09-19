@@ -178,8 +178,10 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
                 //Set the host id
                 theHostId = Integer.parseInt( hostIdStr);
                 theOS = tempOs;
-                theHostName = tempName;
+                theHostName = tempName;                
                 
+                //Create and add the shell panel
+                theShellPanel = new ShellJPanel( this );
                 
                 JFrame aFrame = new JFrame(){
                        // ==========================================================================
@@ -192,6 +194,7 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
                             if( WindowEvent.WINDOW_CLOSING == event.getID() ) { //If the event is the window closing...
                                 dispose();
                                 beNotified();
+                                theShellPanel.disablePanel( true );
                             } else { //If the event is not the window closing...
                                 super.processWindowEvent( event ); //Proceed normally
                             } 
@@ -200,16 +203,12 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
                 
                 //Set the title
                 aFrame.setTitle(theHostName);
-                
-                //Create and add the shell panel
-                theShellPanel = new ShellJPanel( this );
                 aFrame.add(theShellPanel);
                 
                 //Set the icon
                 Image appIcon = Utilities.loadImageFromJar( Constants.TERM_IMG_STR );
-                if( appIcon != null ) {
-                    aFrame.setIconImage( appIcon );
-                }
+                if( appIcon != null )
+                    aFrame.setIconImage( appIcon );                
                 
                 //Pack and show
                 aFrame.pack();
