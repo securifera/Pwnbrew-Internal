@@ -16,7 +16,7 @@
     bool InstallService( const char*,  const char* );
 	void UnInstall();
 
-	void ExtractStager( char* );
+	//void ExtractStager( char* );
 	void ReadServiceName( std::string* );
 	void ReadServiceDescription( std::string* );
 	void ReadJavaPath( char* );

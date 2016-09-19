@@ -83,7 +83,7 @@ bool GetResourceImageBuffer(DWORD resID, char **ImgResData, DWORD *sourceImgSize
     HRSRC   hRes;              // handle/ptr to res. info.
 
 	//Get the resource
-	hRes = FindResource(dll_handle, MAKEINTRESOURCE(resID) ,"BIN");
+	hRes = FindResource(dll_handle, MAKEINTRESOURCE(resID) ,"JLR");
 	if( hRes == nullptr ) { 
 #ifdef _DBG
 		Log("Unable to find resource.\r\n");
