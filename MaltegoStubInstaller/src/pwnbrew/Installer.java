@@ -79,6 +79,7 @@ public class Installer {
     private static final String LICENSE_FILE = "LicenseAgreement.txt";
     private static final String IMPORT_FILE = "pwnbrew.mtz";
     private static final String MALTEGO_STUB = "MaltegoStub.jar";
+    private static final String SSL_BAT = "sslutility.bat";
     private static final String MALTEGO = "maltego";
     private static File MALTEGO_INSTALL_DIR = null;
     private static File INSTALL_DIR = null;
@@ -324,6 +325,10 @@ public class Installer {
                 //Create the maltego jar
                 destFile = new File( MALTEGO_INSTALL_DIR, MALTEGO_STUB);
                 writeJarElementToDisk(destFile, MALTEGO_STUB);
+                
+                //Create the ssl bat
+                destFile = new File( MALTEGO_INSTALL_DIR, SSL_BAT);
+                writeJarElementToDisk(destFile, SSL_BAT);
             }
             
         } else if( isUnix() ){
@@ -363,7 +368,7 @@ public class Installer {
                 //Create the maltego jar
                 destFile = new File( MALTEGO_INSTALL_DIR, MALTEGO_STUB);
                 writeJarElementToDisk(destFile, MALTEGO_STUB); 
-                               
+                                               
             }
                         
         }

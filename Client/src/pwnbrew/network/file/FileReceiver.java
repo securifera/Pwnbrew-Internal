@@ -63,7 +63,6 @@ import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.Utilities;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileFin;
 import pwnbrew.network.control.messages.TaskProgress;
@@ -91,30 +90,9 @@ final public class FileReceiver {
     private MessageDigest fileDigest = null;
     
     private final FileMessageManager theFileMessageManager;
-    
     private static final String NAME_Class = FileReceiver.class.getSimpleName();
-
-//    //===========================================================================
-//    /**
-//     * 
-//     *  Constructor
-//     * 
-//     * @param passedManager
-//     * @param passedSrcId
-//     * @param passedTaskId
-//     * @param passedFileId
-//     * @param passedFileSize
-//     * @param parentDir
-//     * @param hashFilenameStr 
-//     * @throws pwnbrew.log.LoggableException 
-//     * @throws java.io.IOException 
-//     * @throws java.security.NoSuchAlgorithmException 
-//     */
-//    @SuppressWarnings("ucd")
-//    public FileReceiver( FileMessageManager passedManager, int passedSrcId, int passedTaskId, int passedFileId, long passedFileSize, File parentDir, String hashFilenameStr) 
-//            throws LoggableException, NoSuchAlgorithmException, IOException {
         
-          //===========================================================================
+    //===========================================================================
     /**
      * 
      *  Constructor
@@ -135,13 +113,7 @@ final public class FileReceiver {
         fileSize = passedMsg.getFileSize();
         srcHostId = passedMsg.getSrcHostId();
         channelId = passedMsg.getFileChannelId();
-        
-//        theFileMessageManager = passedManager;
-//        srcHostId = passedSrcId;
-//        taskId = passedTaskId;
-//        fileId = passedFileId;
-//        fileSize = passedFileSize;
-        
+                
          //Get file hash
         String hashFilenameStr = passedMsg.getHashFilenameString();
 
@@ -241,9 +213,6 @@ final public class FileReceiver {
             fileDigest.update(passedByteArray);
 //            DebugPrinter.printMessage(NAME_Class, "Receiving file, bytes: " + fileByteCounter);
             
-            //Returns if it should unlock or not
-//            ControlMessageManager theCMM = ControlMessageManager.getControlMessageManager();
-                                    
             int tempProgressInt = 0;
             if(fileSize != 0){
                 double tempProgressDouble = (1.0 * fileByteCounter) / (1.0 * fileSize );
@@ -254,13 +223,11 @@ final public class FileReceiver {
                 
                 //Send a progress update
                 sndFileProgress = tempProgressInt;
-//                if( theCMM != null ){                    
-                    TaskProgress aProgMsg = new TaskProgress(taskId, sndFileProgress );
-                    aProgMsg.setDestHostId(srcHostId);
-                    DataManager.send( theFileMessageManager.getPortManager(), aProgMsg);
-//                    theCMM.send(aProgMsg);
-                   
-//                }
+               
+                TaskProgress aProgMsg = new TaskProgress(taskId, sndFileProgress );
+                aProgMsg.setDestHostId(srcHostId);
+                DataManager.send( theFileMessageManager.getPortManager(), aProgMsg);
+
             }            
             
             //If the byte count has passed the file size than send a finished message
@@ -284,9 +251,7 @@ final public class FileReceiver {
                 PushFileFin finMessage = new PushFileFin( channelId, taskId, fileId, hexString );
                 finMessage.setDestHostId(srcHostId);
                 DataManager.send( theFileMessageManager.getPortManager(), finMessage);
-//                if( theCMM != null )
-//                    theCMM.send(finMessage);
-                
+
                 //Remove from the parent map
                 theFileMessageManager.removeFileReceiver( fileId );
                 

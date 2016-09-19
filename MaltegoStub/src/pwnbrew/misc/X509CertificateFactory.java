@@ -95,7 +95,7 @@ public class X509CertificateFactory {
         PrivateKey privKey = null;
         sun.security.x509.X509CertImpl cert = null;
         String hashAlg = Hash_SHA256withRSA;
-            
+        
         KeyPairGenerator kpGenerator = KeyPairGenerator.getInstance( algorithm );
         if( kpGenerator != null ){
 
@@ -117,8 +117,16 @@ public class X509CertificateFactory {
             sun.security.x509.X509CertInfo certInfo = new sun.security.x509.X509CertInfo();
             certInfo.set( sun.security.x509.X509CertInfo.VALIDITY, certValidity );
             certInfo.set( sun.security.x509.X509CertInfo.SERIAL_NUMBER, new sun.security.x509.CertificateSerialNumber( certSerialNumber ) );
-            certInfo.set( sun.security.x509.X509CertInfo.SUBJECT, new sun.security.x509.CertificateSubjectName( ownerName ) );
-            certInfo.set( sun.security.x509.X509CertInfo.ISSUER, new sun.security.x509.CertificateIssuerName( issuerName ) );
+      
+            String version = System.getProperty( "java.version" );
+            if( version.startsWith("1.8")){
+                certInfo.set( sun.security.x509.X509CertInfo.SUBJECT, ownerName );
+                certInfo.set( sun.security.x509.X509CertInfo.ISSUER, issuerName );
+            } else {
+                certInfo.set( sun.security.x509.X509CertInfo.SUBJECT, new sun.security.x509.CertificateSubjectName( ownerName ) );
+                certInfo.set( sun.security.x509.X509CertInfo.ISSUER, new sun.security.x509.CertificateIssuerName( issuerName ) );
+            }
+            
             certInfo.set( sun.security.x509.X509CertInfo.KEY, new sun.security.x509.CertificateX509Key( keyPair.getPublic() ) );
             certInfo.set( sun.security.x509.X509CertInfo.VERSION, new sun.security.x509.CertificateVersion( sun.security.x509.CertificateVersion.V3 ) );
                

