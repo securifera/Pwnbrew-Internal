@@ -51,6 +51,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
@@ -849,7 +851,16 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
      */
     @Override
     public File getDownloadDirectory() {
-        return new File(theHostName, "download");
+        
+        File dataDir = MaltegoStub.getDataDir();
+        File hostDir = new File(dataDir, theHostName );
+        File retDir = new File(hostDir, "download");
+        
+        try {
+            Utilities.ensureDirectoryExists(retDir);
+        } catch (IOException ex) {}
+        
+        return retDir;
     }
 
     //=================================================================

@@ -159,21 +159,26 @@ public class ShellJPanel extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(shellCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(openButton)
-                    .addComponent(fontLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(fontSizeSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(fontSizeSpinner)
+                    .addComponent(fontLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(24, 24, 24))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void openButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openButtonActionPerformed
         
-         if(openButton.getText().equals("Open Shell")){
-            
+        if(openButton.getText().equals("Open Shell")){            
+             
+            SpinnerModel aSP = fontSizeSpinner.getModel();
+            Integer strVal  = (Integer) aSP.getValue();
             
             ShellJTextPane thePane = getShellTextPane();
             thePane.setEnabled( true );
-            thePane.requestFocus();
-        
+            thePane.requestFocus();        
+            
+            Font font = new Font("Courier New", Font.PLAIN, strVal);
+            thePane.setFont(font);  
+                   
             //Spawn the shell
             ClassWrapper aClassWrapper = (ClassWrapper)shellCombo.getSelectedItem();
             theListener.spawnShell( aClassWrapper.theClass );
@@ -191,7 +196,7 @@ public class ShellJPanel extends javax.swing.JPanel {
         ShellJTextPane thePane = getShellTextPane();
         if( thePane != null ){
             Integer strVal = (Integer) fontSizeSpinner.getModel().getValue();
-            Font font = new Font("Serif", Font.PLAIN, strVal);
+            Font font = new Font("Courier New", Font.PLAIN, strVal);
             thePane.setFont(font);
         }
     }//GEN-LAST:event_fontSizeSpinnerStateChanged
@@ -295,7 +300,7 @@ public class ShellJPanel extends javax.swing.JPanel {
         theFileChooser.setMultiSelectionEnabled( true ); //Let the user select multiple files
         
         SpinnerModel aSP = fontSizeSpinner.getModel();
-        aSP.setValue(12);
+        aSP.setValue(14);
        
         final ShellJTextPane theTextPane = new ShellJTextPane();
         theTextPane.setEditable(true);

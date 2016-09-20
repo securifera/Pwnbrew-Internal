@@ -137,16 +137,6 @@ public class FileMessageManager extends DataManager {
         return (FileHandler)theDataHandler;
     }  
     
-//    //===============================================================
-//    /**
-//    * Sets up for a file transfer
-//    *
-//    * @param fileToTransfer
-//    * @return
-//    */
-//    private void initFileTransfer( int clientId, int passedTaskId, int passedFileId, 
-//            File parentDir, String hashFilenameStr, long passedFileSize) 
-//            throws LoggableException, NoSuchAlgorithmException, IOException {
     //===============================================================
     /**
     * Sets up for a file transfer
@@ -249,12 +239,10 @@ public class FileMessageManager extends DataManager {
                 String hashFileNameStr = passedMessage.getHashFilenameString();
 
                 //Try to begin the file transfer
-        //            initFileTransfer( passedMessage.getSrcHostId(), taskId, fileId, libDir, hashFileNameStr, passedMessage.getFileSize() );
                 initFileTransfer( passedMessage, libDir );
                 //Send an ack to the sender to begin transfer
         //                DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);
                 PushFileAck aSFMA = new PushFileAck(taskId, fileId, fileChannelId, hashFileNameStr, srcId );
-        //            PushFileAck aSFMA = new PushFileAck(taskId, fileId, hashFileNameStr, clientId );
                 aCMManager.send( aSFMA );
                 retVal = true;
             }

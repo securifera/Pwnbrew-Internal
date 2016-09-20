@@ -46,8 +46,8 @@
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="shellCombo" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="openButton" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="fontLabel" alignment="1" max="32767" attributes="0"/>
-                  <Component id="fontSizeSpinner" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="fontSizeSpinner" alignment="1" max="32767" attributes="0"/>
+                  <Component id="fontLabel" alignment="1" min="-2" pref="23" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
           </Group>

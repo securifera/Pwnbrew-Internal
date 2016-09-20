@@ -295,19 +295,7 @@ public class Stager extends ClassLoader {
                     //Skip the msg id
                     localDataInputStream.skipBytes(4);
                     
-                    //Get the classpath length
-//                    byte[] clsLen = new byte[2];
-//                    localDataInputStream.read(clsLen);
-//                    
-//                    //Convert to int
-//                    int tempInt = 0;
-//                    tempInt += (clsLen[0] & 0xff) << (8 * 1);
-//                    tempInt += (clsLen[1] & 0xff);
-//                    
-//                    //Skip the classpath
-//                    localDataInputStream.skipBytes(tempInt);
-                    
-                    //Get the type
+                   //Get the type
                     msgType = (byte)(localDataInputStream.read() & 0xff );
                     if( msgType == 32 ){
                         

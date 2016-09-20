@@ -37,9 +37,13 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import pwnbrew.concurrent.LockListener;
@@ -70,6 +74,29 @@ public class MaltegoStub extends PortManager  implements LockListener {
     private static final String BASE_FUNCTION_CLASSPATH = "pwnbrew.functions.";
     private static final String NAME_Class = MaltegoStub.class.getSimpleName();   
     private static MaltegoStub theMaltegoStub;
+    
+    //OS properties...
+    private static final String PROPERTY_OsName    = "os.name";  
+    private static final String PROPERTY_OsArch    = "os.arch";
+
+    //OS name values...
+    private static final String OS_NAME_Windows    = "windows";
+    private static final String OS_NAME_SunSolaris   = "sunos";
+    private static final String OS_NAME_Linux        = "linux";
+    private static final String OS_NAME_Unix         = "unix";
+    
+    //UNIX OS family...
+    private static final List<String> OS_FAMILY_Unix;
+    static {
+        ArrayList<String> temp = new ArrayList<>();
+        temp.add( OS_NAME_SunSolaris );
+        temp.add( OS_NAME_Linux );
+        temp.add( OS_NAME_Unix );
+        OS_FAMILY_Unix = Collections.unmodifiableList( temp );
+    }
+    
+    //Local OS values...
+    public static final String OS_NAME    = System.getProperty( PROPERTY_OsName ).toLowerCase();
     
     
     //========================================================================
@@ -175,6 +202,44 @@ public class MaltegoStub extends PortManager  implements LockListener {
         
     }
     
+    // ==========================================================================
+    /**
+    * Determines if the local host is running an OS that is in the Windows family.
+    *
+    * @return {@code true} if the local OS is a flavor of Windows, {@code false}
+    * otherwise
+    */
+    static public boolean isWindows() {
+        return OS_NAME.contains( OS_NAME_Windows );
+    }
+    
+     // ==========================================================================
+    /**
+    * Determines if the local host is running an OS that is in the UNIX family.
+    *
+    * @return {@code true} if the local OS is a flavor of UNIX, {@code false}
+    * otherwise
+    */
+    @SuppressWarnings("ucd")
+    static public boolean isUnix() {
+        return OS_FAMILY_Unix.contains( OS_NAME );
+    }/* END isUnix() */
+    
+    public static File getDataDir(){
+  
+        File parentDir;
+        if(isWindows()){
+            parentDir = new File( System.getenv("APPDATA"));   
+        } else if( isUnix()){
+            parentDir = new File( System.getenv("user.dir")); 
+        } else {
+            parentDir = new File("");
+        }
+        
+        File dataDir = new File(parentDir, ".pwnbrew");
+        return dataDir;
+    }
+    
     //========================================================================
     /**
      * 
@@ -183,6 +248,7 @@ public class MaltegoStub extends PortManager  implements LockListener {
     public static MaltegoStub getMaltegoStub(){
         return theMaltegoStub;
     }
+    
     // ========================================================================
     /**
      *  Handles any functions that need to be executed before the program starts.

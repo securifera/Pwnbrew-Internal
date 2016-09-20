@@ -359,14 +359,18 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
     @Override
     public File getShellLogDir() {
         
-        //Create a directory in the local dir
-        File parentDir = new File( theHostName );
-                
-        //Add the shell dir
-        File shellDir = new File( parentDir, "shell");
-        shellDir.mkdirs(); 
+        File dataDir = MaltegoStub.getDataDir();
+        File hostDir = new File(dataDir, theHostName );
+        File retDir = new File(hostDir, "shell");
         
-        return shellDir;
+        try {
+            Utilities.ensureDirectoryExists(retDir);
+        } catch (IOException ex) {
+            DebugPrinter.printMessage( NAME_Class, "getShellLogDir", ex.getMessage(), ex );            
+        }
+        
+        
+        return retDir;
     }
 
     //========================================================================
