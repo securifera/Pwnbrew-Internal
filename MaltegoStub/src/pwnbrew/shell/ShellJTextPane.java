@@ -80,7 +80,6 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
     private void initComponent() {
         setBackground(Color.BLACK);
         setForeground(Color.WHITE);
-
     }
     
      //=======================================================================
@@ -172,7 +171,6 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
                             }      
 
                             //Insert the string
-    //                        theSD.insertString(theSD.getLength(), newStr, aSet);
                             synchronized( aSSD ){
                                 aSSD.setInputSource(ShellStyledDocument.SHELL_OUTPUT);
                                 aSSD.insertString(aSSD.getLength(), newStr, aSet);

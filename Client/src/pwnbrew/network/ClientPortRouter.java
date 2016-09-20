@@ -73,7 +73,7 @@ public class ClientPortRouter extends PortRouter {
     private static final int SLEEP_TIME = 1000;
     private static final int CONNECT_RETRY = 3;
     
-    private final LockingThread theConnectionLock;
+//    private final LockingThread theConnectionLock;
        
     private static final String NAME_Class = ClientPortRouter.class.getSimpleName();
     private OutgoingConnectionManager theOCM;
@@ -95,8 +95,8 @@ public class ClientPortRouter extends PortRouter {
         //Create server connection manager
         theOCM = new OutgoingConnectionManager();
         
-        theConnectionLock = new LockingThread( Constants.Executor );
-        theConnectionLock.start();
+//        theConnectionLock = new LockingThread( Constants.Executor );
+//        theConnectionLock.start();
         
     }
 
@@ -143,7 +143,12 @@ public class ClientPortRouter extends PortRouter {
                 SelectionKey theSelKey = theSelectionRouter.register(theSocketChannel, SelectionKey.OP_CONNECT, connectHandler);
 
                 //Wait until the thread is notified or times out
-                waitForConnection();
+                boolean timedOut = waitForConnection();
+                if( timedOut )
+                    DebugPrinter.printMessage( NAME_Class, "Connection timed out.");
+                else
+                    DebugPrinter.printMessage( NAME_Class, "Connection made.");
+    
 
                 //Return if the key was cancelled
                 if(!theSelKey.isValid()){
@@ -155,6 +160,7 @@ public class ClientPortRouter extends PortRouter {
                 theSCH = theOCM.getSocketChannelHandler( channelId );
                 if( theSCH == null || theSCH.getState() == Constants.DISCONNECTED){
 
+                    DebugPrinter.printMessage( NAME_Class, "Invalid connection.");
                     //Shutdown the first connect handler and set it to null
                     theSelKey.cancel();
                     return false;
@@ -185,17 +191,17 @@ public class ClientPortRouter extends PortRouter {
     * @return
     * @throws IOException
     */
-    private boolean initiateConnection( int channedId, LockListener passedListener, InetAddress hostAddress, int passedPort, int retry ) throws LoggableException {
+    private boolean initiateConnection( int channedId, /**LockListener passedListener,**/ InetAddress hostAddress, int passedPort, int retry ) throws LoggableException {
 
         int sleepTime = SLEEP_TIME;
         boolean connected = false;
            
-        //Block until we get the lock
-        int retVal = -1;
-        while( retVal != LockingThread.LOCK ){
-            theConnectionLock.lock( passedListener );
-            retVal = passedListener.waitForLock();
-        }
+//        //Block until we get the lock
+//        int retVal = -1;
+//        while( retVal != LockingThread.LOCK ){
+//            theConnectionLock.lock( passedListener );
+//            retVal = passedListener.waitForLock();
+//        }
 
         DebugPrinter.printMessage( NAME_Class, "Obtained connection lock");
             
@@ -210,6 +216,8 @@ public class ClientPortRouter extends PortRouter {
                     try {                    
                         //Intentially sleeping with lock held so there are no other attempts to
                         //connect to the server during this loop.
+                        DebugPrinter.printMessage( NAME_Class, "Sleeping because of no connection.");
+    
                         Thread.sleep(sleepTime);
                     } catch (InterruptedException ex) {
                         ex = null;
@@ -224,26 +232,13 @@ public class ClientPortRouter extends PortRouter {
 
                     SocketChannelHandler aSC = theOCM.getSocketChannelHandler( channedId );   
                     if( aSC != null ){
+                            
+                        //Send register message
+                        RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, channedId);
+                        DataManager.send( thePortManager, aMsg );
 
-                        //Get the message sender
-//                        try {
-                            
-//                            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//                            if( aCMManager == null ){
-//                                aCMManager = ControlMessageManager.initialize(thePortManager);
-//                            }
-                            
-                            //Send register message
-                            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, channedId);
-                            DataManager.send( thePortManager, aMsg );
-                            
-                            //Wait for the registration to complete
-                            waitForConnection();
-                            
-//                        } catch(IOException ex){
-//                            throw new LoggableException(ex);
-//                        }
-
+                        //Wait for the registration to complete
+                        waitForConnection();
 
                     } else {
                         connected = false;
@@ -255,7 +250,7 @@ public class ClientPortRouter extends PortRouter {
             
         } finally {
         
-            theConnectionLock.unlock();
+//            theConnectionLock.unlock();
             DebugPrinter.printMessage(this.getClass().getSimpleName(), "Released connection lock");
         }
 
@@ -353,7 +348,7 @@ public class ClientPortRouter extends PortRouter {
 
            
         theSelectionRouter.shutdown();
-        theConnectionLock.shutdown();
+//        theConnectionLock.shutdown();
         
         //Shut down the handler 
         theOCM.shutdown();
@@ -367,11 +362,10 @@ public class ClientPortRouter extends PortRouter {
      *
      * @param serverIp
      * @param passedPort
-     * @param passedListener
      * @param passedIdArr
      * @return 
     */
-    public synchronized int ensureConnectivity( String serverIp, int passedPort, LockListener passedListener, Integer... passedIdArr ) {
+    public synchronized int ensureConnectivity( String serverIp, int passedPort, /**LockListener passedListener,**/ Integer... passedIdArr ) {
 
         int channelId;
         try {
@@ -391,7 +385,7 @@ public class ClientPortRouter extends PortRouter {
                 InetAddress srvInet = InetAddress.getByName(serverIp);
                 DebugPrinter.printMessage( NAME_Class, "Attempting to connect to " + srvInet.getHostAddress() + ":" + passedPort);
      
-                if( !initiateConnection( channelId, passedListener, srvInet, passedPort, CONNECT_RETRY )){
+                if( !initiateConnection( channelId, srvInet, passedPort, CONNECT_RETRY )){
                     RemoteLog.log(Level.INFO, NAME_Class, "isConnected()", "Unable to connect to port " + passedPort, null );
                     channelId = 0x0;
                 } else {
@@ -432,13 +426,6 @@ public class ClientPortRouter extends PortRouter {
      */    
     @Override
     public OutgoingConnectionManager getConnectionManager( Integer... passedIdArr ) {
-//        ClientConfig theClientConfig = ClientConfig.getConfig();
-//        int servId = theClientConfig.getServerId();
-//        if( passedIdArr.length != 0){
-//            int passedId = passedIdArr[0];
-//            if( passedId != -1 && passedId != servId )
-//                return null;            
-//        }
         return theOCM;
     }
     

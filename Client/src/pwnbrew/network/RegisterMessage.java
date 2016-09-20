@@ -192,37 +192,35 @@ public class RegisterMessage extends Message {
         
         if( function == RegisterMessage.REG_ACK ){
             
-//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//            if( aCMManager != null ){
-              DebugPrinter.printMessage(NAME_Class, "Received REG ACK, Sending Hello");
-                try {
+            DebugPrinter.printMessage(NAME_Class, "Received REG ACK, Sending Hello");
+            try {
 
-                    ClientConfig theClientConfig = ClientConfig.getConfig();
-                    PortRouter aPR = passedManager.getPortRouter( theClientConfig.getSocketPort() );
-                    if( aPR != null ){
-                        SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( getChannelId() );
+                ClientConfig theClientConfig = ClientConfig.getConfig();
+                PortRouter aPR = passedManager.getPortRouter( theClientConfig.getSocketPort() );
+                if( aPR != null ){
+                    SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( getChannelId() );
 
-                        //Set the wrapping flag
-                        if( aSCH != null )
-                            aSCH.setWrapping(false);
-                        
-                        //Notify the port router to continue
-                        aPR.beNotified(); 
+                    //Set the wrapping flag
+                    if( aSCH != null )
+                        aSCH.setWrapping(false);
 
-                        //Create a hello message and send it
-                        if( getChannelId() == ConnectionManager.COMM_CHANNEL_ID ){
-                            //Get the port router
-                            String hostname = SocketUtilities.getHostname();
-                            Hello helloMessage = new Hello( hostname, ConnectionManager.COMM_CHANNEL_ID );
-                            DataManager.send(passedManager, helloMessage);
-//                            aCMManager.send(helloMessage); 
-                        }
+                    //Notify the port router to continue
+                    aPR.beNotified(); 
+
+                    //Create a hello message and send it
+                    if( getChannelId() == ConnectionManager.COMM_CHANNEL_ID ){
+                        //Get the port router
+                        String hostname = SocketUtilities.getHostname();
+                        Hello helloMessage = new Hello( hostname, ConnectionManager.COMM_CHANNEL_ID );
+                        DataManager.send(passedManager, helloMessage);
+
                     }
-
-                } catch ( IOException | LoggableException ex) {
-                    RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
                 }
-//            }  
+
+            } catch ( IOException | LoggableException ex) {
+                RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
+            }
+
         } else if( function == RegisterMessage.REG_RST ){
         
             //Get new id

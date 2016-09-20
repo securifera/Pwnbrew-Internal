@@ -47,15 +47,10 @@ package pwnbrew.network.shell;
 
 import pwnbrew.network.PortRouter;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.network.shell.messages.ProcessMessage;
 
 /**
  *
@@ -124,38 +119,6 @@ public class ShellMessageManager extends DataManager {
         theShellMsgManager.getDataHandler().processData(srcPortRouter, msgBytes);        
     }
     
-//    //===============================================================
-//    /**
-//     *   Send the message out the given channel.
-//     *
-//     * @param passedMessage
-//     * @throws java.io.IOException
-//     * @throws pwnbrew.log.LoggableException
-//    */
-//    @SuppressWarnings("ucd")
-//    public void send( ProcessMessage passedMessage ) throws IOException, LoggableException {
-//
-//        //Allows for more specific handles to encode the message however necessary
-////        PortWrapper aWrapper = DataManager.getPortWrapper( operatingPort );
-//        
-//        ByteBuffer aByteBuffer;
-////        if( aWrapper != null ){
-////            aByteBuffer = aWrapper.wrapBytes( passedMessage.getBytes() );        
-////        } else {
-//            int msgLen = passedMessage.getLength() + 3;
-//            aByteBuffer = ByteBuffer.allocate( msgLen );
-//            passedMessage.append(aByteBuffer);
-////        }
-//        
-//        //Get the port router
-//        PortRouter thePR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
-//        
-//        //Queue the message to be sent
-//        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getChannelId() );
-////        DebugPrinter.printMessage(this, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-//          
-//    }
-    
     //===========================================================================
     /*
      *  Returns the data handler
@@ -164,62 +127,5 @@ public class ShellMessageManager extends DataManager {
     public ShellMessageHandler getDataHandler() {
         return (ShellMessageHandler)theDataHandler;
     }   
-
-//    //===========================================================================
-//    /*
-//     *  Return the shell
-//     */
-//    public Shell getShell( int passedId ) {
-//        Shell aShell;
-//        synchronized( theShellMap ){
-//            aShell = theShellMap.get(passedId);
-//        }
-//        return aShell;
-//    }    
-    
-//    //===========================================================================
-//    /*
-//     *  Set the shell
-//     */
-//    public void setShell( int passedId, int channelId, Shell passedShell ) {
-//       
-//        synchronized( theShellMap ){
-//            Shell aShell = theShellMap.get(passedId);
-//            if( aShell != null )
-//                aShell.shutdown();
-//            
-//            theShellMap.put(passedId, passedShell);
-//        }
-//    }
-    
-//    //===========================================================================
-//    /**
-//     *  Shutdown the handler 
-//     */
-//    @Override
-//    public void shutdown() {
-//        super.shutdown();
-//        synchronized( theShellMap ){
-//            for( Shell aShell : theShellMap.values()){
-//                aShell.shutdown();
-//            }
-//        }
-//    }
-
-//    //===========================================================================
-//    /**
-//     * 
-//     * @param passedId
-//     * @return 
-//     */
-//    public Shell removeShell( int passedId ) {
-//        Shell aShell;
-//        synchronized( theShellMap ){
-//            aShell = theShellMap.remove(passedId);
-//        }
-//        return aShell;
-//    }
-    
-    
-    
+  
 }

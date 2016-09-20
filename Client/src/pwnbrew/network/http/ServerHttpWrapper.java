@@ -51,7 +51,6 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import pwnbrew.ClientConfig;
-import pwnbrew.concurrent.LockListener;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
@@ -61,7 +60,6 @@ import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.ServerPortRouter;
-import pwnbrew.network.relay.RelayManager;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
@@ -70,7 +68,7 @@ import pwnbrew.utilities.Utilities;
  *
  *  
  */
-public class ServerHttpWrapper extends HttpWrapper implements LockListener {
+public class ServerHttpWrapper extends HttpWrapper {
 
     private static final String NAME_Class = ServerHttpWrapper.class.getSimpleName();
     private static final int STEALTH_COOKIE_B64 = 5;   
@@ -184,15 +182,9 @@ public class ServerHttpWrapper extends HttpWrapper implements LockListener {
                                                                     
                                                                     //TODO need to check if the id is already taken
                                                                     ClientPortRouter aCPR = (ClientPortRouter)thePR;
-                                                                    srcChannelId = aCPR.ensureConnectivity(serverIp, theSocketPort, this, chanId);
+                                                                    srcChannelId = aCPR.ensureConnectivity(serverIp, theSocketPort, chanId);
                                                                     
-                                                                    //Set route in relaymanager
-//                                                                    RelayManager theRelayManager = RelayManager.getRelayManager();
-//                                                                    theRelayManager.addRelayRoute( srcChannelId, retChannelId );
-                                                                    
-                                                                    //Set the new channel
-//                                                                    aMsg.setChannelId(retChannelId);
-                                                                }
+                                                                 }
                                                             } 
                                                             
                                                             SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
@@ -201,21 +193,11 @@ public class ServerHttpWrapper extends HttpWrapper implements LockListener {
                                                                 srvHandler.queueBytes(regBytes);
                                                             }
                                                         }
-//                                                        RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
-//                                                        retMsg.setDestHostId(srcHostId);
-//                                                        
-//                                                        PortRouter thePR = aSPR.getPortManager().getPortRouter( ClientConfig.getConfig().getSocketPort() );
-//                                                        RelayManager.getRelayManager().handleMessage(thePR, retMsg.getBytes());
-//                                                        DataManager.send( aSPR.getPortManager(), retMsg);
-
-                                                        //Set wrapping after it is sent
-//                                                        passedHandler.setWrapping( false);
                                                     }
                                                                                                             
                                                     //Send back reg ack
                                                 }
-//                                                    passedHandler.registerId(srcId, dstId, chanId); 
-                                                    
+                                  
                                                 
                                             } else {
                                                 
@@ -391,40 +373,40 @@ public class ServerHttpWrapper extends HttpWrapper implements LockListener {
         return staging;
     }
     
-    //===============================================================
-    /**
-     * 
-     * @param lockOp 
-     */
-    @Override
-    public synchronized void lockUpdate(int lockOp) {
-        lockVal = lockOp;
-        notifyAll();
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @return  
-     */
-    @Override
-    public synchronized int waitForLock() {
-        
-        int retVal;        
-        while( lockVal == 0 ){
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                continue;
-            }
-        }
-        
-        //Set to temp and reset
-        retVal = lockVal;
-        lockVal = 0;
-        
-        return retVal;
-    }
+//    //===============================================================
+//    /**
+//     * 
+//     * @param lockOp 
+//     */
+//    @Override
+//    public synchronized void lockUpdate(int lockOp) {
+//        lockVal = lockOp;
+//        notifyAll();
+//    }
+//    
+//    //===============================================================
+//    /**
+//     * 
+//     * @return  
+//     */
+//    @Override
+//    public synchronized int waitForLock() {
+//        
+//        int retVal;        
+//        while( lockVal == 0 ){
+//            try {
+//                wait();
+//            } catch (InterruptedException ex) {
+//                continue;
+//            }
+//        }
+//        
+//        //Set to temp and reset
+//        retVal = lockVal;
+//        lockVal = 0;
+//        
+//        return retVal;
+//    }
     
     
 }

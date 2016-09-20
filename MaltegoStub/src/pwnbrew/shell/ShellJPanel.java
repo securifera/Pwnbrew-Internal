@@ -39,6 +39,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.shell;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -49,6 +50,7 @@ import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JTextPane;
+import javax.swing.SpinnerModel;
 import javax.swing.SwingConstants;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.MutableAttributeSet;
@@ -110,6 +112,8 @@ public class ShellJPanel extends javax.swing.JPanel {
         shellScrollPane = new javax.swing.JScrollPane();
         openButton = new javax.swing.JButton();
         shellCombo = new javax.swing.JComboBox();
+        fontSizeSpinner = new javax.swing.JSpinner();
+        fontLabel = new javax.swing.JLabel();
 
         openButton.setText("Open Shell");
         openButton.addActionListener(new java.awt.event.ActionListener() {
@@ -118,16 +122,29 @@ public class ShellJPanel extends javax.swing.JPanel {
             }
         });
 
+        fontSizeSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                fontSizeSpinnerStateChanged(evt);
+            }
+        });
+
+        fontLabel.setText("Font Size:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(shellScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 602, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(shellScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 602, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(24, 24, 24)
+                        .addComponent(fontLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(fontSizeSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(shellCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(openButton)))
@@ -141,7 +158,9 @@ public class ShellJPanel extends javax.swing.JPanel {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(shellCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(openButton))
+                    .addComponent(openButton)
+                    .addComponent(fontLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(fontSizeSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(24, 24, 24))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -167,8 +186,20 @@ public class ShellJPanel extends javax.swing.JPanel {
 
     }//GEN-LAST:event_openButtonActionPerformed
 
+    private void fontSizeSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_fontSizeSpinnerStateChanged
+    
+        ShellJTextPane thePane = getShellTextPane();
+        if( thePane != null ){
+            Integer strVal = (Integer) fontSizeSpinner.getModel().getValue();
+            Font font = new Font("Serif", Font.PLAIN, strVal);
+            thePane.setFont(font);
+        }
+    }//GEN-LAST:event_fontSizeSpinnerStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel fontLabel;
+    private javax.swing.JSpinner fontSizeSpinner;
     private javax.swing.JButton openButton;
     private javax.swing.JComboBox shellCombo;
     private javax.swing.JScrollPane shellScrollPane;
@@ -262,6 +293,9 @@ public class ShellJPanel extends javax.swing.JPanel {
         theFileChooser = new JFileChooser();
         theFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         theFileChooser.setMultiSelectionEnabled( true ); //Let the user select multiple files
+        
+        SpinnerModel aSP = fontSizeSpinner.getModel();
+        aSP.setValue(12);
        
         final ShellJTextPane theTextPane = new ShellJTextPane();
         theTextPane.setEditable(true);

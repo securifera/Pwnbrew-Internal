@@ -121,10 +121,6 @@ final public class FileReceiver {
             throws LoggableException, NoSuchAlgorithmException, IOException {
         
         theFileMessageManager = passedManager;
-//        taskId = passedTaskId;
-//        fileId = passedFileId;
-//        fileSize = passedFileSize;
-//        srcHostId = passedClientId;
         taskId = passedMsg.getTaskId();
         fileId = passedMsg.getFileId();
         fileSize = passedMsg.getFileSize();

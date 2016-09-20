@@ -253,7 +253,7 @@ final public class FileReceiver {
                 DataManager.send( theFileMessageManager.getPortManager(), finMessage);
 
                 //Remove from the parent map
-                theFileMessageManager.removeFileReceiver( fileId );
+                theFileMessageManager.removeFileReceiver( fileId, channelId );
                 
             }            
      

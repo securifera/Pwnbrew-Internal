@@ -56,7 +56,6 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.Persistence;
-import pwnbrew.concurrent.LockListener;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
@@ -67,7 +66,7 @@ import pwnbrew.network.control.ControlMessageManager;
  *
  *  
  */
-public class ReconnectTimer extends ManagedRunnable implements LockListener {
+public class ReconnectTimer extends ManagedRunnable {
     
     private PortManager theCommManager = null;
     
@@ -202,7 +201,7 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
                 if( theDate != null ){
                     
                     waitUntil(theDate);  
-                    connected = aPR.ensureConnectivity( serverIp, thePort, this, theChannelId );
+                    connected = aPR.ensureConnectivity( serverIp, thePort, theChannelId );
                     theDate = null;
                    
                 } else  {
@@ -219,7 +218,7 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
         if( connected == 0 ){
             
             if( backupServerIp != null && backupServerPort != -1 ){
-                connected = aPR.ensureConnectivity(backupServerIp, backupServerPort, this, theChannelId);
+                connected = aPR.ensureConnectivity(backupServerIp, backupServerPort, theChannelId);
                 if( connected != 0 ){
                     
                     theConf.setServerIp(backupServerIp);
@@ -296,39 +295,39 @@ public class ReconnectTimer extends ManagedRunnable implements LockListener {
     }
     
      
-     //===============================================================
-    /**
-     * 
-     * @param lockOp 
-     */
-    @Override
-    public synchronized void lockUpdate(int lockOp) {
-        lockVal = lockOp;
-        notifyAll();
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @return  
-     */
-    @Override
-    public synchronized int waitForLock() {
-        
-        int retVal;        
-        while( lockVal == 0 && !shutdownRequested){
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-            }
-        }
-        
-        //Set to temp and reset
-        retVal = lockVal;
-        lockVal = 0;
-        
-        return retVal;
-    }
+//     //===============================================================
+//    /**
+//     * 
+//     * @param lockOp 
+//     */
+//    @Override
+//    public synchronized void lockUpdate(int lockOp) {
+//        lockVal = lockOp;
+//        notifyAll();
+//    }
+//    
+//    //===============================================================
+//    /**
+//     * 
+//     * @return  
+//     */
+//    @Override
+//    public synchronized int waitForLock() {
+//        
+//        int retVal;        
+//        while( lockVal == 0 && !shutdownRequested){
+//            try {
+//                wait();
+//            } catch (InterruptedException ex) {
+//            }
+//        }
+//        
+//        //Set to temp and reset
+//        retVal = lockVal;
+//        lockVal = 0;
+//        
+//        return retVal;
+//    }
 
     //===============================================================
     /**

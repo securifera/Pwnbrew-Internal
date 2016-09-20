@@ -220,7 +220,7 @@ public class FileSender extends ManagedRunnable implements LockListener {
         
         //Remove from the parent map
         FileMessageManager theFMM = FileMessageManager.getFileMessageManager();
-        theFMM.removeFileSender( theFileAck.getTaskId() );
+        theFMM.removeFileSender( theFileAck.getTaskId(), channelId );
 
     }
 

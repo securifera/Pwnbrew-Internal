@@ -58,11 +58,6 @@ public class OutgoingConnectionManager extends ConnectionManager {
     private final Map<Integer, ReconnectTimer> theReconnectTimerMap = new HashMap<>();
     private final Map<Integer, Shell> theShellMap = new HashMap<>();
     
-    //Channel Id generator
-//    private static int messageCounter = 2;
-//    private Shell theShell = null;
- 
-
     //==========================================================================
     /**
      * 

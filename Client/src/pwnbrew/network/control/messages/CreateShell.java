@@ -49,7 +49,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import pwnbrew.ClientConfig;
-import pwnbrew.concurrent.LockListener;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
@@ -62,7 +61,7 @@ import pwnbrew.network.shell.Shell;
  *
  *  
  */
-public final class CreateShell extends ControlMessage implements LockListener {
+public final class CreateShell extends ControlMessage {
 
     private String[] cmdString;
     private String encoding;
@@ -89,40 +88,40 @@ public final class CreateShell extends ControlMessage implements LockListener {
         super( passedId );
     }
     
-    //===============================================================
-    /**
-     * 
-     * @param lockOp 
-     */
-    @Override
-    public synchronized void lockUpdate(int lockOp) {
-        lockVal = lockOp;
-        notifyAll();
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @return  
-     */
-    @Override
-    public synchronized int waitForLock() {
-        
-        int retVal;        
-        while( lockVal == 0 ){
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                continue;
-            }
-        }
-        
-        //Set to temp and reset
-        retVal = lockVal;
-        lockVal = 0;
-        
-        return retVal;
-    }
+//    //===============================================================
+//    /**
+//     * 
+//     * @param lockOp 
+//     */
+//    @Override
+//    public synchronized void lockUpdate(int lockOp) {
+//        lockVal = lockOp;
+//        notifyAll();
+//    }
+//    
+//    //===============================================================
+//    /**
+//     * 
+//     * @return  
+//     */
+//    @Override
+//    public synchronized int waitForLock() {
+//        
+//        int retVal;        
+//        while( lockVal == 0 ){
+//            try {
+//                wait();
+//            } catch (InterruptedException ex) {
+//                continue;
+//            }
+//        }
+//        
+//        //Set to temp and reset
+//        retVal = lockVal;
+//        lockVal = 0;
+//        
+//        return retVal;
+//    }
     
     //=========================================================================
     /**
@@ -196,7 +195,7 @@ public final class CreateShell extends ControlMessage implements LockListener {
         ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
         int theClientId = getSrcHostId();
 
-        int retChannelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
+        int retChannelId = aPR.ensureConnectivity( serverIp, socketPort );   
         if(retChannelId != 0 ){
             
             //Send ack back to set channel id

@@ -46,19 +46,15 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.concurrent.Executor;
 import javax.net.ssl.SSLContext;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.ConnectionManager;
-import pwnbrew.manager.DataManager;
-import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.SSLUtilities;
-import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.selector.SelectionRouter;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.DebugPrinter;
 
 /**
  *
@@ -135,43 +131,7 @@ abstract public class PortRouter {
         return encrypted;
     }
 
-//    //===============================================================
-//    /**
-//     *  Queues the byte array to be sent
-//     * @param byteArr
-//     * @param channelId
-//     * @return 
-//     */
-//    public boolean queueSend( byte[] byteArr, int channelId ) {
-//        
-//        boolean retVal = false;
-//        SocketChannelHandler theHandler = getConnectionManager().getSocketChannelHandler( channelId );
-//        if( theHandler != null ){
-//            
-//            //If wrapping is necessary then wrap it
-//            if( theHandler.isWrapping() ){
-//                PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
-//                if( aWrapper != null ){
-//                    
-//                     //Set the staged wrapper if necessary
-//                    if( aWrapper instanceof ServerHttpWrapper ){
-//                        ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
-//                        aSrvWrapper.setStaging( theHandler.isStaged());
-//                    }
-//                    
-//                    ByteBuffer aByteBuffer = aWrapper.wrapBytes( byteArr );  
-//                    byteArr = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
-//                } 
-//            }
-//
-//            theHandler.queueBytes(byteArr);
-//            retVal = true;
-//            
-//        }
-//        return retVal;
-//    }
-    
-     // ==========================================================================
+    // ==========================================================================
     /**
     * Causes the calling {@link Thread} to <tt>wait()</tt> until notified by
     * another.
@@ -212,7 +172,10 @@ abstract public class PortRouter {
     */
     public synchronized void beNotified() {
 
+        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Notified.");
         if(waiting){
+            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Was waiting.");
+
             notified = true;
             notifyAll(); //Notify the thread
         }

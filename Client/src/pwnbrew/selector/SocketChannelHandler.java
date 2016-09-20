@@ -78,7 +78,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
-public class SocketChannelHandler implements Selectable, LockListener{
+public class SocketChannelHandler implements Selectable {
 
     public static final int SERVER_TYPE = 124;
     public static final int CLIENT_TYPE = 125;
@@ -404,14 +404,8 @@ public class SocketChannelHandler implements Selectable, LockListener{
                                                         
                                                         //TODO need to check if the id is taken
                                                         ClientPortRouter aCPR = (ClientPortRouter)thePR;
-                                                        srcChannelId = aCPR.ensureConnectivity(serverIp, theSocketPort, this);
+                                                        srcChannelId = aCPR.ensureConnectivity(serverIp, theSocketPort );
 
-//                                                        //Set route in relaymanager
-//                                                        RelayManager theRelayManager = RelayManager.getRelayManager();
-//                                                        theRelayManager.addRelayRoute( srcChannelId, retChannelId );
-//
-//                                                        //Set the new channel
-//                                                        aMsg.setChannelId(retChannelId);
                                                     }
                                                 }
                                                 SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
@@ -420,32 +414,8 @@ public class SocketChannelHandler implements Selectable, LockListener{
                                                     srvHandler.queueBytes(regBytes);
                                                 }
                                             }
-//                                                        RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
-//                                                        retMsg.setDestHostId(srcHostId);
-//                                                        
-//                                                        PortRouter thePR = aSPR.getPortManager().getPortRouter( ClientConfig.getConfig().getSocketPort() );
-//                                                        RelayManager.getRelayManager().handleMessage(thePR, retMsg.getBytes());
-//                                                        DataManager.send( aSPR.getPortManager(), retMsg);
 
-                                            //Set wrapping after it is sent
-//                                            setWrapping( false);
                                         }
-//                                        //Register the relay
-//                                        ServerPortRouter aSPR = (ServerPortRouter)getPortRouter();
-//                                        if( aSPR.registerHandler(srcHostId, chanId, this) ){
-//                                            setRegisteredFlag(true);                                           
-//
-//                                            RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
-//                                            retMsg.setDestHostId(srcHostId);
-//                                            
-//                                            PortRouter thePR = aSPR.getPortManager().getPortRouter( ClientConfig.getConfig().getSocketPort() );
-//                                            RelayManager.getRelayManager().handleMessage(thePR, retMsg.getBytes());
-////                                                    
-////                                            DataManager.send( aSPR.getPortManager(), retMsg);
-//
-//                                            //Set wrapping after it is sent
-//                                            setWrapping( false);
-//                                        }
                                     
                                     } else if( aMsg.getFunction() == RegisterMessage.REG_ACK ) {
                                         
@@ -530,56 +500,7 @@ public class SocketChannelHandler implements Selectable, LockListener{
         }
 
     }
-    
-//     //===============================================================
-//    /**
-//     *  Register the client
-//     * 
-//     * @param srcId
-//     * @param dstId
-//     * @param passedChannelId
-//     * @return 
-//     */
-//    public boolean registerId( int srcId, int dstId, int passedChannelId ){
-//        
-//        try {
-//                
-//            ClientConfig aConf = ClientConfig.getConfig();
-//            int localId = Integer.parseInt( aConf.getHostId() );            
-//            if( localId != dstId && ( dstId == aConf.getServerId() || dstId == -1) ){ 
-//
-//                RelayManager aManager = RelayManager.getRelayManager();
-//                if( aManager == null){
-//                    aManager = RelayManager.initialize( thePortRouter.getPortManager() );
-//                }
-//
-//                //Get the port router and register the host
-//                SocketChannelHandler aSCH = null;
-//                ServerPortRouter aSPR = aManager.getServerPorterRouter();
-////                IncomingConnectionManager anICM = aSPR.getConnectionManager(srcId);
-////                if( anICM == null ){
-////                    anICM = new IncomingConnectionManager(srcId);
-////                    aSPR.setConnectionManager( anICM, srcId );
-////                } else {
-////                    aSCH = anICM.getSocketChannelHandler(srcId);
-////                }
-////                
-////                //If the Handler doesn't exist then register it
-////                if( aSCH == null ){
-////                    anICM.setHandler(srcId, this);
-////                    hostId = srcId;
-////                }    
-//               
-//            } 
-//            
-//        } catch (IOException ex) {
-//            RemoteLog.log( Level.SEVERE, NAME_Class, "registerId()", ex.getMessage(), null);
-//        }
-//        
-//        return true;
-//        
-//    }
-
+ 
     //===============================================================
     /**
      * This method is responsible for sending the next control message
@@ -675,11 +596,7 @@ public class SocketChannelHandler implements Selectable, LockListener{
                 }
                 
                 queueBytes(byteArr);
-//                //Get the dest id
-//                byte[] dstHostId = Arrays.copyOfRange(byteArr, Message.DEST_HOST_ID_OFFSET, Message.DEST_HOST_ID_OFFSET + 4);
-//                int tempId = SocketUtilities.byteArrayToInt(dstHostId);
-//                thePortRouter.queueSend( byteArr, tempId );
-                
+                                
             }
 
         }); 
@@ -859,39 +776,39 @@ public class SocketChannelHandler implements Selectable, LockListener{
         return wrappingFlag;
     }
     
-     //===============================================================
-    /**
-     * 
-     * @param lockOp 
-     */
-    @Override
-    public synchronized void lockUpdate(int lockOp) {
-        lockVal = lockOp;
-        notifyAll();
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @return  
-     */
-    @Override
-    public synchronized int waitForLock() {
-        
-        int retVal;        
-        while( lockVal == 0 ){
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                continue;
-            }
-        }
-        
-        //Set to temp and reset
-        retVal = lockVal;
-        lockVal = 0;
-        
-        return retVal;
-    }
+//     //===============================================================
+//    /**
+//     * 
+//     * @param lockOp 
+//     */
+//    @Override
+//    public synchronized void lockUpdate(int lockOp) {
+//        lockVal = lockOp;
+//        notifyAll();
+//    }
+//    
+//    //===============================================================
+//    /**
+//     * 
+//     * @return  
+//     */
+//    @Override
+//    public synchronized int waitForLock() {
+//        
+//        int retVal;        
+//        while( lockVal == 0 ){
+//            try {
+//                wait();
+//            } catch (InterruptedException ex) {
+//                continue;
+//            }
+//        }
+//        
+//        //Set to temp and reset
+//        retVal = lockVal;
+//        lockVal = 0;
+//        
+//        return retVal;
+//    }
 
-}/* END CLASS AccessHandler */
+}/* END CLASS SocketChannelHandler */

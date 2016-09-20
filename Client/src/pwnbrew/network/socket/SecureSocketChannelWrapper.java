@@ -516,7 +516,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
         if(currStatus == HandshakeStatus.FINISHED){
 
             initialHSComplete = true;
-            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
+            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 1.");
 
             //Flush the buffer so that the client will get a finished flag too
             if (outNetBB.hasRemaining()){
@@ -585,12 +585,15 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
 
                     case FINISHED:
                         initialHSComplete = true;
-                        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
+                        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 2.");
 
                         
                         //Notify the comm
                         theSocketHandler.setState( Constants.CONNECTED);
+                        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Set state.");
+
                         theSocketHandler.getPortRouter().beNotified(); 
+                        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Notified.");
 //                        thePortRouter.connectionCompleted(theSocketChannel, true, true);
                         
                         break;
@@ -653,7 +656,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
                     
                 case FINISHED:
                     initialHSComplete = true;
-                    DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
+                    DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 3.");
 
                     //Notify the comm
                     theSocketHandler.setState( Constants.CONNECTED);

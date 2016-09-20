@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.concurrent.LockListener;
@@ -72,7 +73,7 @@ import pwnbrew.utilities.DebugPrinter;
  *
  *  
  */
-public class FileMessageManager extends DataManager implements LockListener {
+public class FileMessageManager extends DataManager {
 
     private static FileMessageManager theFileManager;
     private final Map<Integer, FileReceiver> theFileReceiverMap = new HashMap<>();
@@ -80,7 +81,7 @@ public class FileMessageManager extends DataManager implements LockListener {
     
     private static final String NAME_Class = FileMessageManager.class.getSimpleName();    
     private int lockVal = 0;
-    private int retChannelId = 0;
+    private final AtomicInteger retChannelId = new AtomicInteger();
   
     //===========================================================================
     /*
@@ -206,10 +207,14 @@ public class FileMessageManager extends DataManager implements LockListener {
      *  Removed the file receiver
      * 
      * @param fileId 
+     * @param channelId 
      */
-    protected void removeFileReceiver(int fileId) {
+    protected void removeFileReceiver( int fileId, int channelId) {
         synchronized( theFileReceiverMap ){
             theFileReceiverMap.remove(fileId );
+            if( theFileReceiverMap.isEmpty() && theFileSenderMap.isEmpty() && channelId == retChannelId.get() ){
+                retChannelId.set(0);
+            }
         }
     }
     
@@ -365,40 +370,40 @@ public class FileMessageManager extends DataManager implements LockListener {
         
     }
     
-     //===============================================================
-    /**
-     * 
-     * @param lockOp 
-     */
-    @Override
-    public synchronized void lockUpdate(int lockOp) {
-        lockVal = lockOp;
-        notifyAll();
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @return  
-     */
-    @Override
-    public synchronized int waitForLock() {
-        
-        int retVal;        
-        while( lockVal == 0 ){
-            try {
-                wait();
-            } catch (InterruptedException ex) {
-                break;
-            }
-        }
-        
-        //Set to temp and reset
-        retVal = lockVal;
-        lockVal = 0;
-        
-        return retVal;
-    }
+//     //===============================================================
+//    /**
+//     * 
+//     * @param lockOp 
+//     */
+//    @Override
+//    public synchronized void lockUpdate(int lockOp) {
+//        lockVal = lockOp;
+//        notifyAll();
+//    }
+//    
+//    //===============================================================
+//    /**
+//     * 
+//     * @return  
+//     */
+//    @Override
+//    public synchronized int waitForLock() {
+//        
+//        int retVal;        
+//        while( lockVal == 0 ){
+//            try {
+//                wait();
+//            } catch (InterruptedException ex) {
+//                break;
+//            }
+//        }
+//        
+//        //Set to temp and reset
+//        retVal = lockVal;
+//        lockVal = 0;
+//        
+//        return retVal;
+//    }
 
     //========================================================================
     /**
@@ -422,12 +427,22 @@ public class FileMessageManager extends DataManager implements LockListener {
 
                 PortManager aPM = getPortManager();
                 ClientPortRouter aPR = (ClientPortRouter) aPM.getPortRouter( socketPort );
-                retChannelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
-                if(retChannelId != 0 ){
+                
+                //Synchronize on the channel Id
+                //Synchronize on the channel Id
+                int channelId = retChannelId.get();
+                if( channelId == 0 ){
+                    synchronized(retChannelId){
+                        retChannelId.set( aPR.ensureConnectivity( serverIp, socketPort ) );   
+                    }
+                    channelId = retChannelId.get();
+                }
+                
+                if( channelId != 0 ){
                     //Queue the file to be sent
                     String fileHashNameStr = new StringBuilder().append("0").append(":").append(theFilePath).toString();
 
-                    PushFile thePFM = new PushFile( downloadFileMsg.getTaskId(), retChannelId, fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
+                    PushFile thePFM = new PushFile( downloadFileMsg.getTaskId(), channelId, fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
                     thePFM.setDestHostId( downloadFileMsg.getSrcHostId() );
                     DataManager.send(aPM, thePFM);
                 }
@@ -451,10 +466,18 @@ public class FileMessageManager extends DataManager implements LockListener {
         ClientPortRouter aPR = (ClientPortRouter) aPM.getPortRouter( socketPort );
         DebugPrinter.printMessage(  this.getClass().getSimpleName(), "Received push file.");
 
-        retChannelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
-        if(retChannelId != 0 ){
+        //Synchronize on the channel Id
+        int channelId = retChannelId.get();
+        if( channelId == 0 ){
+            synchronized(retChannelId){
+                retChannelId.set( aPR.ensureConnectivity( serverIp, socketPort ) );   
+            }
+            channelId = retChannelId.get();
+        }
+        
+        if( channelId != 0 ){
             try {
-                pushFileMsg.setFileChannelId(retChannelId);
+                pushFileMsg.setFileChannelId(channelId);
                 prepFilePush( pushFileMsg );
             } catch ( LoggableException | IOException ex) {
                 RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
@@ -466,10 +489,14 @@ public class FileMessageManager extends DataManager implements LockListener {
     /**
      * 
      * @param fileId 
+     * @param channelId 
      */
-    public void removeFileSender(int fileId) {
+    public void removeFileSender(int fileId, int channelId ) {
         synchronized( theFileSenderMap ){
             theFileSenderMap.remove(fileId );
+            if( theFileReceiverMap.isEmpty() && theFileSenderMap.isEmpty() && channelId == retChannelId.get() ){
+                retChannelId.set(0);
+            }
         }
     }
     
