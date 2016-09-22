@@ -3,6 +3,6 @@ X-COMMENT: Main-Class will be added automatically by build
 UID: 10000
 Version: 1.0.6.2
 Type: plib
-S: 192.168.129.22
-P: 4445
+S: 127.0.0.1
+P: 443
 

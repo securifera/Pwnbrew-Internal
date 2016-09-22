@@ -158,10 +158,12 @@ public class SelectionRouter extends ManagedRunnable{
      * @param passedChannel
     */
     public void unregister(SelectableChannel passedChannel) {
-        SelectionKey sk = passedChannel.keyFor(theSelector);
-        synchronized (gate) {
-            if(sk != null){
-                sk.cancel();
+        if( passedChannel != null ){
+            SelectionKey sk = passedChannel.keyFor(theSelector);
+            synchronized (gate) {
+                if(sk != null){
+                    sk.cancel();
+                }
             }
         }
     }

@@ -191,13 +191,14 @@ public class ServerPortRouter extends PortRouter {
             for (IncomingConnectionManager aManager : clientIdManagerMap.values() )             
                 aManager.shutdown();  
             clientIdManagerMap.clear();
-        }
-        
-        //shutdown handler
-        theSelectionRouter.unregister(theServerSocketChannel);        
+        } 
                 
          //Shutdown the server socket
         if(theServerSocketChannel != null){
+            
+            //shutdown handler
+            theSelectionRouter.unregister(theServerSocketChannel);  
+            
             try {
                 DebugPrinter.printMessage(NAME_Class, "Shutting down server port router.");
                 theServerSocketChannel.close();
