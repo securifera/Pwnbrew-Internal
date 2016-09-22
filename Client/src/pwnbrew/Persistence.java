@@ -173,9 +173,9 @@ final public class Persistence {
 
                             }
                         });        
-
-                        //Shutdown the client
-                        passedManager.shutdown();      
+//
+//                        //Shutdown the client
+//                        passedManager.shutdown();      
                     
                     }              
                     
@@ -185,6 +185,9 @@ final public class Persistence {
             }
             
         }      
+        
+        //Shutdown the client
+        passedManager.shutdown(); 
 
     }
 

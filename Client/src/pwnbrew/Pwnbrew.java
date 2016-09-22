@@ -111,7 +111,11 @@ public final class Pwnbrew extends PortManager implements TaskListener {
      *
     */
     private void start() throws UnknownHostException, LoggableException {
-
+        
+        //Try and connect to the server
+        int thePort = ClientConfig.getConfig().getSocketPort();
+        ClientPortRouter aPR = (ClientPortRouter) getPortRouter( thePort );
+        
         //Create the Timer
         ReconnectTimer aReconnectTimer = new ReconnectTimer(OutgoingConnectionManager.COMM_CHANNEL_ID); 
         
@@ -119,9 +123,6 @@ public final class Pwnbrew extends PortManager implements TaskListener {
         aReconnectTimer.setCommManager( this );
         aReconnectTimer.start();
             
-        //Try and connect to the server
-        int thePort = ClientConfig.getConfig().getSocketPort();
-        ClientPortRouter aPR = (ClientPortRouter) getPortRouter( thePort );
         
     }
      
