@@ -60,6 +60,7 @@ import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.relay.RelayManager;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
@@ -147,52 +148,67 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                 RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));                                                
                                                 int srcHostId = aMsg.getSrcHostId();
                                                 int chanId = aMsg.getChannelId();
+//                                                int destId = aMsg.getDestHostId();
                                          
                                                 if( aMsg.getFunction() == RegisterMessage.REG ){
                                                     //Register the relay
                                                     ServerPortRouter aSPR = (ServerPortRouter)passedHandler.getPortRouter();
                                                     if( aSPR.registerHandler(srcHostId, chanId, passedHandler) ){
-                                                                                                        
-                                                        //Send to the server
-                                                        aMsg.setDestHostId(-1);
-                                                         
-                                                        //Try the default port router
-                                                        ClientConfig theConf = ClientConfig.getConfig();
-                                                        int theSocketPort = theConf.getSocketPort();
-                                                        String serverIp = theConf.getServerIp();
-                                                        PortRouter thePR = aSPR.getPortManager().getPortRouter( theSocketPort );
+                                                        RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
+                                                        retMsg.setDestHostId(srcHostId);
                                                         
-                                                        //Get the connection manager for the server
-                                                        ConnectionManager aCM = thePR.getConnectionManager(-1);
-                                                        if( aCM != null ){
-                                                            
-                                                            //Create a new channel if not comms
-                                                            int srcChannelId = aMsg.getChannelId();
-                                                            if( srcChannelId != ConnectionManager.COMM_CHANNEL_ID ){
-                                                                
-                                                                //Send back the ack
-                                                                RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
-                                                                retMsg.setDestHostId(srcHostId);
-                                                                
-                                                                //Try to send back
-                                                                DataManager.send(aSPR.getPortManager(), retMsg);
+                                                        DataManager.send( aSPR.getPortManager(), retMsg);
+                                                        passedHandler.setWrapping( false);
+                                                
+                                                                                                        
+//                                                        //Send to the server
+//                                                        aMsg.setDestHostId(destId);
+//                                                         
+//                                                        //Try the default port router
+//                                                        ClientConfig theConf = ClientConfig.getConfig();
+//                                                        int theSocketPort = theConf.getSocketPort();
+//                                                        String serverIp = theConf.getServerIp();
+//                                                        PortRouter thePR = aSPR.getPortManager().getPortRouter( theSocketPort );
+//                                                        
+//                                                        //Get the connection manager for the server
+//                                                        ConnectionManager aCM = thePR.getConnectionManager(destId);
+//                                                        if( aCM != null ){
+//                                                            
+//                                                            //Create a new channel if not comms
+//                                                            int srcChannelId = aMsg.getChannelId();
+//                                                            if( srcChannelId != ConnectionManager.COMM_CHANNEL_ID ){
+//                                                                
+//                                                                //Send back the ack
+//                                                                RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
+//                                                                retMsg.setDestHostId(srcHostId);
+//                                                                
+////                                                                RelayManager aRelayManager = RelayManager.getRelayManager();
+////                                                                if( aRelayManager != null ){
+////                                                                    ServerPortRouter thePR = aRelayManager.getServerPorterRouter();
+////                                                                    //Try to send back
+////                                                                    DataManager.send(aSPR.getPortManager(), retMsg);
+////                                                                }
+//                                                                
+//                                                                
+//                                                                //Try to send back
+//                                                                DataManager.send(aSPR.getPortManager(), retMsg);
                                                                 passedHandler.setWrapping( false);
-                                                                
-                                                                if( thePR instanceof ClientPortRouter ){
-                                                                    
-                                                                    //TODO need to check if the id is already taken
-                                                                    ClientPortRouter aCPR = (ClientPortRouter)thePR;
-                                                                    srcChannelId = aCPR.ensureConnectivity(serverIp, theSocketPort, chanId);
-                                                                    
-                                                                 }
-                                                            } 
-                                                            
-                                                            SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
-                                                            if( srvHandler != null ){
-                                                                byte[] regBytes = aMsg.getBytes();
-                                                                srvHandler.queueBytes(regBytes);
-                                                            }
-                                                        }
+////                                                                
+////                                                                if( thePR instanceof ClientPortRouter ){
+////                                                                    
+////                                                                    //TODO need to check if the id is already taken
+////                                                                    ClientPortRouter aCPR = (ClientPortRouter)thePR;
+////                                                                    srcChannelId = aCPR.ensureConnectivity(serverIp, theSocketPort, chanId);
+////                                                                    
+////                                                                 }
+//                                                            } 
+//                                                            
+//                                                            SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
+//                                                            if( srvHandler != null ){
+//                                                                byte[] regBytes = aMsg.getBytes();
+//                                                                srvHandler.queueBytes(regBytes);
+//                                                            }
+//                                                        }
                                                     }
                                                                                                             
                                                     //Send back reg ack
@@ -372,41 +388,5 @@ public class ServerHttpWrapper extends HttpWrapper {
     public synchronized boolean isStaged() {
         return staging;
     }
-    
-//    //===============================================================
-//    /**
-//     * 
-//     * @param lockOp 
-//     */
-//    @Override
-//    public synchronized void lockUpdate(int lockOp) {
-//        lockVal = lockOp;
-//        notifyAll();
-//    }
-//    
-//    //===============================================================
-//    /**
-//     * 
-//     * @return  
-//     */
-//    @Override
-//    public synchronized int waitForLock() {
-//        
-//        int retVal;        
-//        while( lockVal == 0 ){
-//            try {
-//                wait();
-//            } catch (InterruptedException ex) {
-//                continue;
-//            }
-//        }
-//        
-//        //Set to temp and reset
-//        retVal = lockVal;
-//        lockVal = 0;
-//        
-//        return retVal;
-//    }
-    
     
 }

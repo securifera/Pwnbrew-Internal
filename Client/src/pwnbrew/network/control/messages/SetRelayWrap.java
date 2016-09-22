@@ -120,7 +120,7 @@ public final class SetRelayWrap extends ControlMessage{
                 
                 //Get the relay
                 RelayManager theRelayManager = RelayManager.getRelayManager();
-                ServerPortRouter theSPR = theRelayManager.getServerPorterRouter();
+                ServerPortRouter theSPR = theRelayManager.getServerPortRouter();
 
                 //Set the flag on the handler
                  //Set the flag on the handler

@@ -56,8 +56,6 @@ import pwnbrew.network.ControlOption;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.relay.RelayManager;
-import pwnbrew.selector.SocketChannelHandler;
-import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
@@ -124,7 +122,7 @@ public final class HelloAck extends ControlMessage {
             //Ensure any internal hosts resend their hello message
             RelayManager theManager = RelayManager.getRelayManager();
             if( theManager != null ){
-                ServerPortRouter aSPR = theManager.getServerPorterRouter();
+                ServerPortRouter aSPR = theManager.getServerPortRouter();
                 Map<Integer, IncomingConnectionManager> connectionManagerMap = aSPR.getConnectionManagerMap();
                 if( !connectionManagerMap.isEmpty() ){
                     

@@ -130,7 +130,7 @@ public final class StageFlag extends ControlMessage{
             
             //Get the relay
             RelayManager theRelayManager = RelayManager.getRelayManager();
-            ServerPortRouter theSPR = theRelayManager.getServerPorterRouter();
+            ServerPortRouter theSPR = theRelayManager.getServerPortRouter();
             
             //Set the flag on the handler
             IncomingConnectionManager theICM = theSPR.getConnectionManager(theRelayClientId);

@@ -48,11 +48,6 @@ package pwnbrew.network.relay;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -159,23 +154,7 @@ public class RelayManager extends DataManager {
             //If it is a staging message just send on the comm channel
             if( destHostId == -1 && channelId == ConnectionManager.STAGE_CHANNEL_ID )
                 channelId = ConnectionManager.COMM_CHANNEL_ID;
-            
-//            //Set the route for any relayed channels
-//            if( channelId != ConnectionManager.COMM_CHANNEL_ID && channelId != ConnectionManager.STAGE_CHANNEL_ID ){
-//                Integer retInt;
-//                if( srcPortRouter instanceof ServerPortRouter)
-//                    retInt = getRouteToParent( channelId);
-//                else
-//                    retInt = getRouteToChild( channelId);
-//                
-//                //Set the return value
-//                if( retInt != null ){
-//                    channelId = retInt;
-//                    channelIdArr = SocketUtilities.intToByteArray(channelId);
-//                    System.arraycopy(channelIdArr, 0, msgBytes, Message.CHANNEL_ID_OFFSET, channelIdArr.length);
-//                }
-//                
-//            }
+
             
             SocketChannelHandler theHandler = aCM.getSocketChannelHandler( channelId );
             if( theHandler != null ){
@@ -235,111 +214,10 @@ public class RelayManager extends DataManager {
      *  Return the Port Router
      * @return 
     */
-    public ServerPortRouter getServerPorterRouter() {
+    public ServerPortRouter getServerPortRouter() {
         return theServerPortRouter;
     }
     
-//    //===============================================================
-//    /**
-//     *   Send the message out the given channel.
-//     *
-//     * @param passedMessage
-//    */
-//    public void send( Message passedMessage ) {
-//
-//        int msgLen = passedMessage.getLength();
-//        ByteBuffer aByteBuffer = ByteBuffer.allocate( msgLen );
-//        passedMessage.append(aByteBuffer);
-//        
-//        //Queue the message to be sent
-//        theServerPortRouter.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
-//        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-//              
-//    }
 
-//    //========================================================================
-//    /**
-//     * 
-//     * @param srcChannelId
-//     * @param retChannelId 
-//     */
-//    public void addRelayRoute( int srcChannelId, int retChannelId ) {
-//        
-//        synchronized(childToParentChannelRouteMap){
-//            childToParentChannelRouteMap.put(srcChannelId, retChannelId);
-//        }
-//        
-//        synchronized(parentToChildChannelRouteMap){
-//            parentToChildChannelRouteMap.put(retChannelId, srcChannelId);
-//        }
-//    }
-//    
-//    //========================================================================
-//    /**
-//     * 
-//     * @param srcChannelId 
-//     */
-//    public void removeRouteFromChild( int srcChannelId ) {
-//        
-//        Integer parentId;
-//        synchronized(childToParentChannelRouteMap){
-//            parentId = childToParentChannelRouteMap.remove(srcChannelId);
-//        }
-//        
-//        if( parentId != null){
-//            synchronized(parentToChildChannelRouteMap){
-//                parentToChildChannelRouteMap.remove(parentId);
-//            }
-//        }
-//    }
-//    
-//    //========================================================================
-//    /**
-//     * 
-//     * @param srcChannelId 
-//     */
-//    public void removeRouteFromParent( int srcChannelId ) {
-//        
-//        Integer childId;
-//        synchronized(parentToChildChannelRouteMap){
-//            childId = parentToChildChannelRouteMap.remove(srcChannelId);
-//        }
-//        
-//        if( childId != null){
-//            synchronized(childToParentChannelRouteMap){
-//                childToParentChannelRouteMap.remove(childId);
-//            }
-//        }
-//    }
-//    
-//    //========================================================================
-//    /**
-//     * 
-//     * @param srcChannelId
-//     * @return 
-//     */
-//    public Integer getRouteToParent( int srcChannelId ) {
-//        
-//        Integer retId;
-//        synchronized(childToParentChannelRouteMap){
-//            retId = childToParentChannelRouteMap.get(srcChannelId);
-//        }
-//        return retId;  
-//    }
-//    
-//    //========================================================================
-//    /**
-//     * 
-//     * @param srcChannelId
-//     * @return 
-//     */
-//    public Integer getRouteToChild( int srcChannelId ) {
-//        
-//        Integer retId;
-//        synchronized(parentToChildChannelRouteMap){
-//            retId = parentToChildChannelRouteMap.get(srcChannelId);
-//        }
-//        return retId;  
-//    }
     
 }

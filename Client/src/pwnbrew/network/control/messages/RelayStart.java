@@ -54,7 +54,6 @@ import pwnbrew.manager.DataManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.ServerPortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
 
@@ -122,7 +121,7 @@ public final class RelayStart extends ControlMessage{
                 aManager = RelayManager.initialize( passedManager );
             }
             
-            ServerPortRouter aSPR = aManager.getServerPorterRouter();
+            ServerPortRouter aSPR = aManager.getServerPortRouter();
             if( aSPR.getServerSocketChannel() == null ){
                 aSPR.startServer(null, port );
                 
@@ -138,15 +137,9 @@ public final class RelayStart extends ControlMessage{
             retVal = false;
         }
         
-        //Get the control message manager send an ack        
-//        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//        if( aCMManager != null ){
-            //Send the message
-            RelayStatus aMsg = new RelayStatus( retVal );
-            aMsg.setDestHostId( getSrcHostId() );
-            DataManager.send(passedManager, aMsg);
-//            aCMManager.send(aMsg);
-//        }
+        RelayStatus aMsg = new RelayStatus( retVal );
+        aMsg.setDestHostId( getSrcHostId() );
+        DataManager.send(passedManager, aMsg);
         
     }
 

@@ -57,7 +57,6 @@ import java.util.Queue;
 import java.util.logging.Level;
 import javax.net.ssl.SSLException;
 import pwnbrew.ClientConfig;
-import pwnbrew.concurrent.LockListener;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
@@ -429,7 +428,7 @@ public class SocketChannelHandler implements Selectable {
                                             DataManager.send( getPortRouter().getPortManager(), aMsg);
                                             RelayManager aRelayManager = RelayManager.getRelayManager();
                                             if( aRelayManager != null ){
-                                                ServerPortRouter thePR = aRelayManager.getServerPorterRouter();
+                                                ServerPortRouter thePR = aRelayManager.getServerPortRouter();
                                                 ConnectionManager aCM = thePR.getConnectionManager(dstId);    
                                                 
                                                 //Get the socket handler

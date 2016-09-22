@@ -292,15 +292,27 @@ abstract public class DataManager {
         //Try the default port router
         ClientConfig aConf = ClientConfig.getConfig();
         int thePort = aConf.getSocketPort();
-        PortRouter thePR = passedCommManager.getPortRouter( thePort );
-        ConnectionManager aCM = thePR.getConnectionManager(destClientId);
-        if( aCM == null ){
-            RelayManager aRelayManager = RelayManager.getRelayManager();
-            if( aRelayManager != null ){
-                thePR = aRelayManager.getServerPorterRouter();
-                aCM = thePR.getConnectionManager(destClientId);                
-            }
+        PortRouter clientPR = passedCommManager.getPortRouter( thePort );
+        
+        ConnectionManager aCM = null;
+        RelayManager aRelayManager = RelayManager.getRelayManager();
+        if( aRelayManager != null ){
+            PortRouter aPR = aRelayManager.getServerPortRouter();
+            aCM = aPR.getConnectionManager(destClientId);                
         }
+        
+        if( aCM == null)
+            aCM = clientPR.getConnectionManager(destClientId);
+        
+        
+//        ConnectionManager aCM = thePR.getConnectionManager(destClientId);
+//        if( aCM == null ){
+//            RelayManager aRelayManager = RelayManager.getRelayManager();
+//            if( aRelayManager != null ){
+//                thePR = aRelayManager.getServerPortRouter();
+//                aCM = thePR.getConnectionManager(destClientId);                
+//            }
+//        }
 
         //Get the socket handler
         if( aCM != null ){

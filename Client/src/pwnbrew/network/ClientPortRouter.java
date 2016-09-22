@@ -49,8 +49,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.EmptyStackException;
 import java.util.logging.Level;
-import pwnbrew.concurrent.LockListener;
-import pwnbrew.concurrent.LockingThread;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
@@ -72,9 +70,7 @@ public class ClientPortRouter extends PortRouter {
 
     private static final int SLEEP_TIME = 1000;
     private static final int CONNECT_RETRY = 3;
-    
-//    private final LockingThread theConnectionLock;
-       
+           
     private static final String NAME_Class = ClientPortRouter.class.getSimpleName();
     private OutgoingConnectionManager theOCM;
     
@@ -94,9 +90,7 @@ public class ClientPortRouter extends PortRouter {
         
         //Create server connection manager
         theOCM = new OutgoingConnectionManager();
-        
-//        theConnectionLock = new LockingThread( Constants.Executor );
-//        theConnectionLock.start();
+
         
     }
 
@@ -348,7 +342,6 @@ public class ClientPortRouter extends PortRouter {
 
            
         theSelectionRouter.shutdown();
-//        theConnectionLock.shutdown();
         
         //Shut down the handler 
         theOCM.shutdown();
@@ -365,7 +358,7 @@ public class ClientPortRouter extends PortRouter {
      * @param passedIdArr
      * @return 
     */
-    public synchronized int ensureConnectivity( String serverIp, int passedPort, /**LockListener passedListener,**/ Integer... passedIdArr ) {
+    public synchronized int ensureConnectivity( String serverIp, int passedPort, Integer... passedIdArr ) {
 
         int channelId;
         try {

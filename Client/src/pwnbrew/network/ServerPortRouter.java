@@ -56,21 +56,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
-import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.log.LoggableException;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.DebugPrinter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.RelayDisconnect;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.selector.AcceptHandler;
 import pwnbrew.selector.SocketChannelHandler;
-import pwnbrew.utilities.SocketUtilities;
 
 
 /**
@@ -81,10 +76,7 @@ public class ServerPortRouter extends PortRouter {
 
     private ServerSocketChannel theServerSocketChannel = null;
     private final Map<Integer, IncomingConnectionManager> clientIdManagerMap= new HashMap<>();
-     
-    
-//    private final Map<Integer, SocketChannelHandler> hostHandlerMap = new HashMap<>();
-    
+         
     private AcceptHandler currentHandler = null;    
     private static final String NAME_Class = ServerPortRouter.class.getSimpleName();
   
