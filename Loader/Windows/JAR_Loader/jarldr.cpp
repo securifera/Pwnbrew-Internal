@@ -158,6 +158,10 @@ void MessageLoop() {
         DispatchMessage(&msg);
     }
 
+#ifdef _DBG
+		Log("[-] Stop Event signaled.");
+#endif
+
 }
 
 
@@ -228,9 +232,9 @@ unsigned int __stdcall StartWatchDog(void* a) {
 		Log( "[+] LoadLibrary addr %p: %s.\n", ret, dll_path.c_str());
 #endif
 				
-		exit(1);
 	}
-	
+
+	exit(1);
 	return 0;
 }
 

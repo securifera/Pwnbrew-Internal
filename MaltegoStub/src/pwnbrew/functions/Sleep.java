@@ -3,6 +3,7 @@ package pwnbrew.functions;
 
 import java.io.IOException;
 import java.util.Map;
+import javax.swing.JOptionPane;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
@@ -40,7 +41,7 @@ public class Sleep extends Function {
     public void run(String passedObjectStr) {
         
         String retStr = "";
-        Map<String, String> objectMap = getKeyValueMap(passedObjectStr); 
+        Map<String, String> objectMap = getKeyValueMap(passedObjectStr);         
          
         //Get server IP
         String serverIp = objectMap.get( Constants.SERVER_IP);
@@ -60,6 +61,12 @@ public class Sleep extends Function {
         String hostIdStr = objectMap.get( Constants.HOST_ID);
         if( hostIdStr == null ){
             DebugPrinter.printMessage( NAME_Class, "run", "No host id provided", null);
+            return;
+        }
+        
+        String theMessage = "Are you sure you want to put host to sleep?";
+        int dialogValue = JOptionPane.showConfirmDialog(null, theMessage, "Sleep?", JOptionPane.YES_NO_OPTION);
+        if ( dialogValue != JOptionPane.YES_OPTION ){
             return;
         }
         

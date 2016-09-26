@@ -227,14 +227,17 @@ public class MaltegoStub extends PortManager  implements LockListener {
     
     public static File getDataDir(){
   
-        File parentDir;
+        File parentDir = new File("");
         if(isWindows()){
-            parentDir = new File( System.getenv("APPDATA"));   
-        } else if( isUnix()){
-            parentDir = new File( System.getenv("user.dir")); 
-        } else {
-            parentDir = new File("");
-        }
+            String aStr = System.getenv("APPDATA");
+            if( aStr != null )
+                parentDir = new File( aStr);   
+            
+        } else if( isUnix()){      
+            String userHome = System.getProperty( "user.home" );
+            if( userHome != null )
+                parentDir = new File(userHome); 
+        } 
         
         File dataDir = new File(parentDir, ".pwnbrew");
         return dataDir;
