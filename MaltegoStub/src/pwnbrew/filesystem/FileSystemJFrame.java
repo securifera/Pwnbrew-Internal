@@ -489,6 +489,8 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
         DefaultTableModel theTableModel = (DefaultTableModel) theFileJTable.getModel();
         for( int anInt : selRowIndexes ){
             
+            //Converts the view index for the row to the underlying model
+            anInt = theFileJTable.convertRowIndexToModel(anInt);
             FileNode aFileNode = (FileNode)theTableModel.getValueAt(anInt, 0);
             RemoteFile filePath = aFileNode.getFile();
             theFileList.add(filePath);
@@ -521,6 +523,8 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
         int[] selRowIndexes = theFileJTable.getSelectedRows();
         DefaultTableModel theTableModel = (DefaultTableModel) theFileJTable.getModel();
         for( int anInt : selRowIndexes ){
+            //Converts the view index for the row to the underlying model
+            anInt = theFileJTable.convertRowIndexToModel(anInt);
             String tempStr = (String)theTableModel.getValueAt(anInt, 2);
             if( theTypeStr == null )
                 theTypeStr = tempStr;

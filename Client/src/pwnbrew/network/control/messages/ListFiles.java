@@ -49,7 +49,6 @@ import java.io.UnsupportedEncodingException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 
 /**
  *
@@ -113,8 +112,6 @@ public final class ListFiles extends Tasking {
     @Override
     public void evaluate( PortManager passedManager ) {   
     
-//        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//        if( aCMManager != null ){
             
             File theRemoteFile = new File(theFilePath);
             File[] fileList = theRemoteFile.listFiles();
@@ -124,23 +121,19 @@ public final class ListFiles extends Tasking {
                 ControlMessage aMsg = new DirCount(getTaskId(), fileList.length);
                 aMsg.setDestHostId( getSrcHostId() );
                 DataManager.send(passedManager, aMsg);
-//                aCMManager.send(aMsg);
                 
                 //Send a message per file
                 for (File aFile : fileList) {
                     aMsg = new FileSystemMsg( getTaskId(), aFile, false );
                     aMsg.setDestHostId( getSrcHostId() );
                     DataManager.send(passedManager, aMsg);
-//                    aCMManager.send(aMsg);
                 }
                 
             } else {
                 FileSystemMsg aMsg = new FileSystemMsg( getTaskId(), null, false );
                 aMsg.setDestHostId( getSrcHostId() );
                 DataManager.send(passedManager, aMsg);
-//                aCMManager.send(aMsg);
             }
-//        }
     
     }
 

@@ -123,7 +123,6 @@ public class FileJTable extends JTable {
         
         });
         
-        
         setShowGrid(false);
         setAutoCreateRowSorter(true);
         TableRowSorter theRowSorter = (TableRowSorter) getRowSorter();
@@ -215,7 +214,9 @@ public class FileJTable extends JTable {
                 int[] selRowIndexes = theJTable.getSelectedRows();
                 DefaultTableModel theTableModel = (DefaultTableModel) theJTable.getModel();
                 for( int anInt : selRowIndexes ){
-                    
+                     
+                    //Converts the view index for the row to the underlying model
+                    anInt = theJTable.convertRowIndexToModel(anInt);            
                     FileNode aFileNode = (FileNode)theTableModel.getValueAt(anInt, 0);
                     RemoteFile theFile = aFileNode.getFile();
                     String filePath = theFile.getAbsolutePath();
@@ -231,21 +232,24 @@ public class FileJTable extends JTable {
             @Override
             public void actionPerformed(ActionEvent e){
                 
-                 int[] selRowIndexes = theJTable.getSelectedRows();
-                 DefaultTableModel theTableModel = (DefaultTableModel) theJTable.getModel();
-                 for( int anInt : selRowIndexes ){
+                int[] selRowIndexes = theJTable.getSelectedRows();
+                DefaultTableModel theTableModel = (DefaultTableModel) theJTable.getModel();
+                for( int anInt : selRowIndexes ){
                     
-                     FileNode aFileNode = (FileNode)theTableModel.getValueAt(anInt, 0);
-                     RemoteFile theFile = aFileNode.getFile();
-                     String filePath = theFile.getAbsolutePath();
-                     File aFile = new File(filePath);
+                      //Converts the view index for the row to the underlying model
+                    anInt = theJTable.convertRowIndexToModel(anInt);
+            
+                    FileNode aFileNode = (FileNode)theTableModel.getValueAt(anInt, 0);
+                    RemoteFile theFile = aFileNode.getFile();
+                    String filePath = theFile.getAbsolutePath();
+                    File aFile = new File(filePath);
 
-                     Object userInputStr = JOptionPane.showInputDialog(null, null, "Rename File", JOptionPane.PLAIN_MESSAGE, null, null, aFile.getName() );
-                     if( userInputStr != null && userInputStr instanceof String ) { //If the new name String is null...
+                    Object userInputStr = JOptionPane.showInputDialog(null, null, "Rename File", JOptionPane.PLAIN_MESSAGE, null, null, aFile.getName() );
+                    if( userInputStr != null && userInputStr instanceof String ) { //If the new name String is null...
                          //Get the file
-                         theListener.performFileOperation( FileOperation.RENAME, filePath, (String) userInputStr);
-                     }
-                 }    
+                        theListener.performFileOperation( FileOperation.RENAME, filePath, (String) userInputStr);
+                    }
+                }    
             
             }
         };
@@ -260,16 +264,19 @@ public class FileJTable extends JTable {
                  DefaultTableModel theTableModel = (DefaultTableModel) theJTable.getModel();
                  for( int anInt : selRowIndexes ){
                     
-                     FileNode aFileNode = (FileNode)theTableModel.getValueAt(anInt, 0);
-                     RemoteFile theFile = aFileNode.getFile();
-                     String filePath = theFile.getAbsolutePath();
-                     String lastModified = aFileNode.getLastModified();
+                    //Converts the view index for the row to the underlying model
+                    anInt = theJTable.convertRowIndexToModel(anInt);
+            
+                    FileNode aFileNode = (FileNode)theTableModel.getValueAt(anInt, 0);
+                    RemoteFile theFile = aFileNode.getFile();
+                    String filePath = theFile.getAbsolutePath();
+                    String lastModified = aFileNode.getLastModified();
 
-                     Object userInputStr = JOptionPane.showInputDialog(null, null, "Change Modified Date", JOptionPane.PLAIN_MESSAGE, null, null, lastModified );
-                     if( userInputStr != null && userInputStr instanceof String ) { //If the new name String is null...
+                    Object userInputStr = JOptionPane.showInputDialog(null, null, "Change Modified Date", JOptionPane.PLAIN_MESSAGE, null, null, lastModified );
+                    if( userInputStr != null && userInputStr instanceof String ) { //If the new name String is null...
                          //Get the file
-                         theListener.performFileOperation( FileOperation.DATE, filePath, (String) userInputStr);
-                     }                        
+                        theListener.performFileOperation( FileOperation.DATE, filePath, (String) userInputStr);
+                    }                        
                 }
             }
         };

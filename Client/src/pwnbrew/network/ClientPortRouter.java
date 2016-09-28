@@ -263,6 +263,10 @@ public class ClientPortRouter extends PortRouter {
         int channelId = theHandler.getChannelId();
         theOCM.removeHandler( channelId );
         
+        OutgoingConnectionManager aOCM = getConnectionManager();
+        if( aOCM != null )
+            aOCM.removeShell( channelId );        
+        
         //Stop the keepalive
         KeepAliveTimer aKAT = theOCM.getKeepAliveTimer( channelId );
         if( aKAT != null )

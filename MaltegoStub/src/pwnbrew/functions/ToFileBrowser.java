@@ -51,8 +51,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
@@ -470,6 +468,10 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                 });
             }
 
+        } else {
+            
+            theFsFrame.setCursor(null);
+            
         }
         
     }
@@ -632,6 +634,8 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                 DefaultTableModel theTableModel = (DefaultTableModel) theFileJTable.getModel();            
 
                 //Get the directory
+                //Converts the view index for the row to the underlying model
+                selRow = theFileJTable.convertRowIndexToModel(selRow);
                 FileNode aFileNode = (FileNode)theTableModel.getValueAt(selRow, 0);
                 filePath = aFileNode.getFile().getAbsolutePath();
 

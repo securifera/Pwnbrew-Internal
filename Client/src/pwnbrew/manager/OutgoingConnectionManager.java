@@ -80,6 +80,20 @@ public class OutgoingConnectionManager extends ConnectionManager {
         }
     }
     
+     //===========================================================================
+    /*
+     *  Set the shell
+     */
+    public void removeShell( int channelId ) {
+        //Kill the previous shell
+        Shell theShell;
+        synchronized( theShellMap ){
+            theShell = theShellMap.remove(channelId);
+            if( theShell != null )
+                theShell.shutdown();
+        }
+    }
+    
     //===========================================================================
     /*
      *  Return the shell
