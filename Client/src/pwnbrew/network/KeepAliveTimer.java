@@ -48,19 +48,14 @@ package pwnbrew.network;
 import pwnbrew.utilities.ManagedRunnable;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.Constants;
-import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.log.RemoteLog;
-import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.NoOp;
 import pwnbrew.selector.SocketChannelHandler;
 
@@ -166,7 +161,7 @@ public class KeepAliveTimer extends ManagedRunnable {
             }
         };
         
-        DebugPrinter.printMessage(NAME_Class, "Sending a keep alive at " + date.toString());
+        //DebugPrinter.printMessage(NAME_Class, "Sending a keep alive at " + date.toString());
         //Create a timer
         Timer aTimer = new Timer();
         aTimer.schedule(aTimerTask, date);

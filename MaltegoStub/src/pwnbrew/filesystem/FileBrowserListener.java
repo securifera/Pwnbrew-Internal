@@ -78,4 +78,6 @@ public interface FileBrowserListener extends TaskManager {
 
     public void cancelSearch();
 
+    public void cancelOperation();
+
 }

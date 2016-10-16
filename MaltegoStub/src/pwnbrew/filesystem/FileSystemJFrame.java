@@ -39,9 +39,12 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.filesystem;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
@@ -50,11 +53,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
@@ -299,7 +305,7 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
         downloadButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
         downloadButton.setToolTipText("Download File");
         Utilities.setComponentIcon(downloadButton, 27, 27, Constants.DOWNLOAD_IMG_STR);
-    
+            
         uploadButton.addActionListener( new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -336,6 +342,33 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
         theFileJTable = new FileJTable( theListener );
         fileTableScrollPane.setViewportView(theFileJTable);
         fileTableScrollPane.getViewport().setBackground(Color.WHITE);
+        
+        
+        // NEW
+        final JPopupMenu theJPopup = new JPopupMenu();        
+        final Action cancelAction = new AbstractAction("Cancel"){ 
+            @Override
+            public void actionPerformed(ActionEvent e){
+                
+                //Get the file
+                theListener.cancelOperation();
+                            
+            }
+        };    
+        theJPopup.add(cancelAction);
+                
+        //Add mouse listener        
+        fileTableScrollPane.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e){
+                
+                Cursor theCursor = getCursor();
+                if( theCursor.equals( Cursor.getPredefinedCursor( Cursor.WAIT_CURSOR ))){
+                    //Add cancel
+                    theJPopup.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
         
         
         //Setup the file list

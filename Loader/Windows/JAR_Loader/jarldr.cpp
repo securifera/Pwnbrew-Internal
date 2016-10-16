@@ -704,6 +704,13 @@ BOOL WINAPI InvokeMain( std::string *serviceName, std::string adsPath, const cha
 		//Free memory
 		free(jvmPath);
 		return FALSE;	
+	} else {
+	
+#ifdef _DBG
+		//Print status
+		Log("Loaded JVM Library.");					
+#endif
+	
 	}
 		
 	//Free memory
@@ -743,8 +750,7 @@ BOOL WINAPI InvokeMain( std::string *serviceName, std::string adsPath, const cha
 	
 #ifdef _DBG
 		Log( "JVM created.\n");
-#endif
-	
+#endif	
 	}
 
 	//Find the java class

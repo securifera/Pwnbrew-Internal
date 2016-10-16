@@ -39,6 +39,7 @@ package pwnbrew.filesystem;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -207,7 +208,7 @@ public class FileJTable extends JTable {
 
         //Add the action listeners
         final FileJTable theJTable = this;
-        Action deleteAction = new AbstractAction("Delete"){ 
+        final Action deleteAction = new AbstractAction("Delete"){ 
             @Override
             public void actionPerformed(ActionEvent e){
 
@@ -226,9 +227,9 @@ public class FileJTable extends JTable {
                
             }
         };
-        theJPopup.add(deleteAction);
+//        theJPopup.add(deleteAction);
 
-        Action renameAction = new AbstractAction("Rename"){ 
+        final Action renameAction = new AbstractAction("Rename"){ 
             @Override
             public void actionPerformed(ActionEvent e){
                 
@@ -252,11 +253,10 @@ public class FileJTable extends JTable {
                 }    
             
             }
-        };
-        theJPopup.add(renameAction);
+        };        
         
         //Add the date change option
-        Action dateAction = new AbstractAction("Change Modified Date"){ 
+        final Action dateAction = new AbstractAction("Change Modified Date"){ 
             @Override
             public void actionPerformed(ActionEvent e){
 
@@ -280,18 +280,33 @@ public class FileJTable extends JTable {
                 }
             }
         };
-        theJPopup.add(dateAction);        
+        //theJPopup.add(dateAction);        
         add(theJPopup);
         
         addMouseListener( new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e){
-                int r = theJTable.rowAtPoint(e.getPoint());
-                if (r >= 0 && r < theJTable.getRowCount()) {
-                    theJTable.setRowSelectionInterval(r, r);
-                } else {
-                    theJTable.clearSelection();
+                
+                //Remove all the menus
+                theJPopup.removeAll();
+                                
+                //Select the row if it's not already
+                if( theJTable.getSelectedRowCount() < 2 ){
+                    int r = theJTable.rowAtPoint(e.getPoint());
+                    if (r >= 0 && r < theJTable.getRowCount()) {
+                        theJTable.setRowSelectionInterval(r, r);
+                        
+                        //Add rename
+                        theJPopup.add(renameAction);
+                    } else {
+                        theJTable.clearSelection();
+                    }
                 }
+                
+                
+                //Add modified date & delete
+                theJPopup.add(dateAction);
+                theJPopup.add(deleteAction);                                
 
                 int rowindex = theJTable.getSelectedRow();
                 if (rowindex < 0)

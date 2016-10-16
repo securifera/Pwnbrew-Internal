@@ -173,7 +173,8 @@ public abstract class ControlMessage extends Message {
             //Create a message
             aMessage = instatiateMessage( theId, thePath );
             
-            DebugPrinter.printMessage(ControlMessage.class.getSimpleName(), "Received " + aMessage.getClass().getSimpleName() + " message.");
+            if( !(aMessage instanceof NoOp) )
+                DebugPrinter.printMessage(ControlMessage.class.getSimpleName(), "Received " + aMessage.getClass().getSimpleName() + " message.");
 
             //Set client id
             int theClientId = SocketUtilities.byteArrayToInt(srcHostId);
