@@ -245,7 +245,7 @@ public class PushFile extends FileMessage {
             String hashFileStr = getHashFilenameString();
             String otherHFStr = passedMessage.getHashFilenameString();
 
-            if(Arrays.equals(channelId, passedMessage.channelId ) &&
+            if(Arrays.equals(msgChannelId, passedMessage.msgChannelId ) &&
                     hashFileStr.equals(otherHFStr) ){
                 return true;
             }       
@@ -276,19 +276,6 @@ public class PushFile extends FileMessage {
                 theFileMM = FileMessageManager.initialize( passedManager );
             
             theFileMM.fileUpload(this);      
-//            ClientConfig theConf = ClientConfig.getConfig();
-//            int socketPort = theConf.getSocketPort();
-//            String serverIp = theConf.getServerIp();
-//
-//            //Get the port router
-//            ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
-//            DebugPrinter.printMessage(  this.getClass().getSimpleName(), "Received push file.");
-//            
-//            int retChannelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
-//            if(retChannelId != 0 ){
-//                setFileChannelId(retChannelId);
-//                theFileMM.prepFilePush( this );
-//            }
 
         } catch ( LoggableException | IOException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );

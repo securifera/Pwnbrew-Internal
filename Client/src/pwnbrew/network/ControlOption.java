@@ -52,7 +52,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
-public class ControlOption extends TlvOption {
+public final class ControlOption extends TlvOption {
 
     //======================================================================
     /**
@@ -67,6 +67,17 @@ public class ControlOption extends TlvOption {
         //Convert the length to a byte array
         length = new byte[4];
     
+        //Set the value
+        setValue(passedValue);
+    }
+
+    //===========================================================================
+    /**
+     * 
+     * @param passedValue 
+     */
+    public void setValue(byte[] passedValue) {
+        
         if(passedValue != null){
             SocketUtilities.intToByteArray(length, passedValue.length);
             value = Arrays.copyOf(passedValue, passedValue.length);

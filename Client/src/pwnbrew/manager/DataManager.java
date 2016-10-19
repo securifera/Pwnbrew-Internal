@@ -66,6 +66,7 @@ import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.shell.ShellMessageManager;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.DebugPrinter;
 /**
  *
  *  
@@ -285,7 +286,6 @@ abstract public class DataManager {
      */
     public static void send( PortManager passedCommManager, Message passedMessage ) {
         
-//        boolean retVal = false;
         int destClientId = passedMessage.getDestHostId();
         int channelId = passedMessage.getChannelId();
         
@@ -304,16 +304,6 @@ abstract public class DataManager {
         if( aCM == null)
             aCM = clientPR.getConnectionManager(destClientId);
         
-        
-//        ConnectionManager aCM = thePR.getConnectionManager(destClientId);
-//        if( aCM == null ){
-//            RelayManager aRelayManager = RelayManager.getRelayManager();
-//            if( aRelayManager != null ){
-//                thePR = aRelayManager.getServerPortRouter();
-//                aCM = thePR.getConnectionManager(destClientId);                
-//            }
-//        }
-
         //Get the socket handler
         if( aCM != null ){
         
@@ -324,6 +314,9 @@ abstract public class DataManager {
 
                 //If wrapping is necessary then wrap it
                 if( theHandler.isWrapping() ){
+                    
+                    DebugPrinter.printMessage( NAME_Class, "Wrapping message.");
+                        
                     PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
                     if( aWrapper != null ){
 
@@ -338,6 +331,7 @@ abstract public class DataManager {
                     } 
                 }
 
+                //DebugPrinter.printMessage( NAME_Class, "Queued bytes");
                 theHandler.queueBytes(msgBytes);
 
             }

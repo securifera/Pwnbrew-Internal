@@ -50,14 +50,16 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.concurrent.LockListener;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.utilities.FileUtilities;
@@ -80,8 +82,11 @@ public class FileMessageManager extends DataManager {
     private final Map<Integer, Map<Integer, FileSender>> theFileSenderMap = new HashMap<>();
     
     private static final String NAME_Class = FileMessageManager.class.getSimpleName();    
-    private int lockVal = 0;
-    private final AtomicInteger retChannelId = new AtomicInteger();
+    private final AtomicInteger retChannelId = new AtomicInteger(ConnectionManager.CHANNEL_DISCONNECTED);
+    
+    //Queues for tasks while trying to connect
+    private final Queue< PushFile > pendingDownloads = new LinkedList<>();
+    private final Queue< PushFile > pendingUploads = new LinkedList<>();
   
     //===========================================================================
     /*
@@ -213,7 +218,7 @@ public class FileMessageManager extends DataManager {
         synchronized( theFileReceiverMap ){
             theFileReceiverMap.remove(fileId );
             if( theFileReceiverMap.isEmpty() && theFileSenderMap.isEmpty() && channelId == retChannelId.get() ){
-                retChannelId.set(0);
+                retChannelId.set(ConnectionManager.CHANNEL_DISCONNECTED);
             }
         }
     }
@@ -233,6 +238,9 @@ public class FileMessageManager extends DataManager {
         int taskId = passedMessage.getTaskId();
         int fileId = passedMessage.getFileId();
         int fileChannelId = passedMessage.getFileChannelId();
+        
+        DebugPrinter.printMessage(  this.getClass().getSimpleName(), "Prepping file push.");
+      
      
         File libDir = null;
         int fileType = passedMessage.getFileType();
@@ -369,41 +377,6 @@ public class FileMessageManager extends DataManager {
         
         
     }
-    
-//     //===============================================================
-//    /**
-//     * 
-//     * @param lockOp 
-//     */
-//    @Override
-//    public synchronized void lockUpdate(int lockOp) {
-//        lockVal = lockOp;
-//        notifyAll();
-//    }
-//    
-//    //===============================================================
-//    /**
-//     * 
-//     * @return  
-//     */
-//    @Override
-//    public synchronized int waitForLock() {
-//        
-//        int retVal;        
-//        while( lockVal == 0 ){
-//            try {
-//                wait();
-//            } catch (InterruptedException ex) {
-//                break;
-//            }
-//        }
-//        
-//        //Set to temp and reset
-//        retVal = lockVal;
-//        lockVal = 0;
-//        
-//        return retVal;
-//    }
 
     //========================================================================
     /**
@@ -428,24 +401,33 @@ public class FileMessageManager extends DataManager {
                 PortManager aPM = getPortManager();
                 ClientPortRouter aPR = (ClientPortRouter) aPM.getPortRouter( socketPort );
                 
-                //Synchronize on the channel Id
-                //Synchronize on the channel Id
-                int channelId = retChannelId.get();
-                if( channelId == 0 ){
-                    synchronized(retChannelId){
-                        retChannelId.set( aPR.ensureConnectivity( serverIp, socketPort ) );   
+                //Queue the file to be sent
+                String fileHashNameStr = new StringBuilder().append("0").append(":").append(theFilePath).toString();
+                PushFile thePFM = new PushFile( downloadFileMsg.getTaskId(), 0, fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
+                thePFM.setDestHostId( downloadFileMsg.getSrcHostId() );
+                               
+                //Get the channel id and determine what to do
+                synchronized(retChannelId){
+                    int channelId = retChannelId.get();
+                    switch (channelId) {
+                        case -1:
+                            //Make sure to set channel Id before sending
+                            queueFileDownload(thePFM);
+                            //Start connection
+                            FileConnectionCallback aFCC = new FileConnectionCallback(serverIp, socketPort);
+                            aPR.ensureConnectivity( aFCC );
+                            retChannelId.set(0);
+                            break;
+                        case 0:
+                            //Queue file download
+                            queueFileDownload(thePFM);
+                            break;
+                        default:
+                            thePFM.setChannelId(channelId);
+                            DataManager.send(aPM, thePFM);
+                            break;
                     }
-                    channelId = retChannelId.get();
-                }
-                
-                if( channelId != 0 ){
-                    //Queue the file to be sent
-                    String fileHashNameStr = new StringBuilder().append("0").append(":").append(theFilePath).toString();
-
-                    PushFile thePFM = new PushFile( downloadFileMsg.getTaskId(), channelId, fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
-                    thePFM.setDestHostId( downloadFileMsg.getSrcHostId() );
-                    DataManager.send(aPM, thePFM);
-                }
+                }                
             }
         }
     }
@@ -465,24 +447,34 @@ public class FileMessageManager extends DataManager {
         PortManager aPM = getPortManager();
         ClientPortRouter aPR = (ClientPortRouter) aPM.getPortRouter( socketPort );
         DebugPrinter.printMessage(  this.getClass().getSimpleName(), "Received push file.");
-
-        //Synchronize on the channel Id
-        int channelId = retChannelId.get();
-        if( channelId == 0 ){
-            synchronized(retChannelId){
-                retChannelId.set( aPR.ensureConnectivity( serverIp, socketPort ) );   
+        
+        //Get the channel id and determine what to do
+        synchronized(retChannelId){
+            int channelId = retChannelId.get();
+            switch (channelId) {
+                case ConnectionManager.CHANNEL_DISCONNECTED:
+                    //Make sure to set channel Id before sending
+                    queueFileUpload(pushFileMsg);
+                    //Start connection
+                    FileConnectionCallback aFCC = new FileConnectionCallback(serverIp, socketPort);
+                    aPR.ensureConnectivity( aFCC );
+                    retChannelId.set(0);
+                    break;
+                case 0:
+                    //Queue file download
+                    queueFileUpload(pushFileMsg);
+                    break;
+                default:
+                    try {
+                        pushFileMsg.setFileChannelId(channelId);
+                        prepFilePush( pushFileMsg );
+                    } catch ( LoggableException | IOException ex) {
+                        RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
+                    }  
+                    break;
             }
-            channelId = retChannelId.get();
         }
         
-        if( channelId != 0 ){
-            try {
-                pushFileMsg.setFileChannelId(channelId);
-                prepFilePush( pushFileMsg );
-            } catch ( LoggableException | IOException ex) {
-                RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-            }  
-        }
     }
 
     //=================================================================
@@ -495,9 +487,75 @@ public class FileMessageManager extends DataManager {
         synchronized( theFileSenderMap ){
             theFileSenderMap.remove(fileId );
             if( theFileReceiverMap.isEmpty() && theFileSenderMap.isEmpty() && channelId == retChannelId.get() ){
-                retChannelId.set(0);
+                retChannelId.set(ConnectionManager.CHANNEL_DISCONNECTED);
             }
         }
+    }
+
+    //==========================================================================
+    /**
+     * 
+     * @param thePFM 
+     */
+    private void queueFileDownload(PushFile thePFM) {
+        synchronized( pendingDownloads ){
+            pendingDownloads.add(thePFM);
+        }
+    }
+    
+     //==========================================================================
+    /**
+     * 
+     * @param thePFM 
+     */
+    private void queueFileUpload(PushFile thePFM) {
+        synchronized( pendingUploads ){
+            pendingUploads.add(thePFM);
+        }
+    }
+
+    //==========================================================================
+    /**
+     * 
+     * @param theChannelId 
+     */
+    public void connectionCallback(int theChannelId) {
+        
+        //Set the channelId
+        synchronized(retChannelId){
+            retChannelId.set(theChannelId);
+        }
+        
+        //Get the port manager
+        PortManager aPM = getPortManager();
+        //Start the downloads
+        synchronized( pendingDownloads ){
+            while( !pendingDownloads.isEmpty() ){
+                //Send while there are messages
+                PushFile aPF = pendingDownloads.poll();
+                if( aPF != null ){
+                    aPF.setFileChannelId(theChannelId);
+                    DataManager.send(aPM, aPF);    
+                }          
+            }
+        }
+        
+        //Start the uploads
+        synchronized( pendingUploads ){
+            try {
+                while( !pendingUploads.isEmpty() ){
+                    //Send while there are messages
+                    PushFile aPF = pendingUploads.poll();
+                    if( aPF != null ){
+                        aPF.setFileChannelId(theChannelId);
+                        prepFilePush( aPF );
+                    }
+                }
+            } catch ( LoggableException | IOException ex) {
+                RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
+            }  
+        }
+        
     }
     
 }

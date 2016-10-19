@@ -46,6 +46,7 @@ import pwnbrew.selector.SocketChannelHandler;
  */
 public abstract class ConnectionManager {
     
+    public final static int CHANNEL_DISCONNECTED = -1;
     public final static int STAGE_CHANNEL_ID = Message.STAGING_MESSAGE_TYPE;
     public final static int COMM_CHANNEL_ID = 1;
    
@@ -67,6 +68,7 @@ public abstract class ConnectionManager {
      *
      * @param passedchannelId
      * @param theHandler
+     * @return 
      */
     abstract public boolean setHandler(int passedchannelId, SocketChannelHandler theHandler);
 
@@ -75,6 +77,7 @@ public abstract class ConnectionManager {
      *  Removes the channel id
      * 
      * @param channelId 
+     * @return  
     */
     abstract public SocketChannelHandler removeHandler(int channelId);
 

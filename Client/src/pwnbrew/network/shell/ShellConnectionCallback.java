@@ -35,73 +35,63 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
+package pwnbrew.network.shell;
 
-
-/*
-* HostCheckInListModel.java
-*
-* Created on June 24, 2013, 7:23:42 PM
-*/
-
-package pwnbrew.sessions;
-
-import java.text.ParseException;
-import pwnbrew.generic.gui.MutableListModel;
-import pwnbrew.generic.gui.SortedListModel;
-import pwnbrew.misc.Constants;
+import pwnbrew.manager.DataManager;
+import pwnbrew.manager.OutgoingConnectionManager;
+import pwnbrew.manager.PortManager;
+import pwnbrew.network.ClientPortRouter;
+import pwnbrew.network.ConnectionCallback;
+import pwnbrew.network.control.messages.CreateShellAck;
 
 /**
  *
- *  
+ * @author Securifera
  */
-@SuppressWarnings("ucd")
-public class HostCheckInListModel extends SortedListModel implements MutableListModel {
-
-    private final HostCheckInListListener theListener;
-
-    //===============================================================
-    /**
-     * Constructor
-     * 
-     * @param passedListener 
-    */
-    HostCheckInListModel(HostCheckInListListener passedListener ) {
-        theListener = passedListener;
-    }   
+public class ShellConnectionCallback extends ConnectionCallback{
     
-    //===============================================================
-    /**
-     * Determines if the cell is editable
-     *
-     * @param index
-     * @return
-     */
-    @Override
-    public boolean isCellEditable(int index) {
-        return true;
-    }
+    private final PortManager theManager;
+    private final Shell theShell;
 
-    //===============================================================
+    //=====================================================================
     /**
-     *  Sets the value for the Date
      * 
-     * @param value
-     * @param index 
+     * @param serverIp
+     * @param passedPort
+     * @param passedManager 
+     * @param passedShell 
+     */
+    public ShellConnectionCallback( String serverIp, int passedPort, PortManager passedManager, Shell passedShell ) {
+        super(serverIp, passedPort);
+        theManager = passedManager;
+        theShell = passedShell;
+    }   
+
+    //=====================================================================
+    /**
+     * 
+     * @param theChannelId
      */
     @Override
-    public void setValueAt(Object value, int index) {
+    public void handleConnection( int theChannelId ) {
         
-        String newDateStr = (String)value;
-        try {
-            Constants.CHECKIN_DATE_FORMAT.parse((String)value);
-        } catch (ParseException ex) {
-            return;
-        }
-        
-        //String aDate = (String)super.getElementAt(index);  
-        super.setElementAt(newDateStr, index);
-        //theListener.replaceDate( aDate, newDateStr );                
-        
-    }
+        ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( socketPort );
+        if(theChannelId != 0 ){
+            
+            //Send ack back to set channel id
+            CreateShellAck retMsg = new CreateShellAck( theChannelId );
+            retMsg.setDestHostId( theShell.getHostId() );
+            DataManager.send(theManager, retMsg);
 
-}/* END CLASS HostCheckInListModel */
+            //Set the channelId and start it
+            theShell.setChannelId(theChannelId);
+            theShell.start();                
+
+            //Register the shell
+            OutgoingConnectionManager aOCM = aPR.getConnectionManager();
+            aOCM.setShell( theChannelId, theShell );
+
+        }
+    }
+    
+}

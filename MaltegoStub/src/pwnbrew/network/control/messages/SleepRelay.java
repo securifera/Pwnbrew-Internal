@@ -39,6 +39,8 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
+import pwnbrew.misc.Constants;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
@@ -49,7 +51,7 @@ import pwnbrew.network.ControlOption;
 public class SleepRelay extends MaltegoMessage {
     
     private static final byte OPTION_TARGET_HOST_ID = 22;
-       
+    private static final byte OPTION_SENDER_TIME = 19;
     //Class name
     private static final String NAME_Class = SleepRelay.class.getSimpleName();
  
@@ -63,9 +65,15 @@ public class SleepRelay extends MaltegoMessage {
     */
     public SleepRelay( int dstHostId, int targedId ) throws UnsupportedEncodingException  {
         super( dstHostId);
+        
+        String senderTime = Constants.CHECKIN_DATE_FORMAT.format( new Date() );        
+        byte[] strBytes = senderTime.getBytes("US-ASCII");
+        
+        ControlOption aTlv = new ControlOption(OPTION_SENDER_TIME, strBytes);
+        addOption(aTlv);
 
         byte[] targetIdBytes =SocketUtilities.intToByteArray(targedId);        
-        ControlOption aTlv = new ControlOption(OPTION_TARGET_HOST_ID, targetIdBytes);
+        aTlv = new ControlOption(OPTION_TARGET_HOST_ID, targetIdBytes);
         addOption(aTlv);
     }
 

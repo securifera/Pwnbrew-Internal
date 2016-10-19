@@ -79,7 +79,7 @@ abstract public class ProcessMessage extends Message {
     public ProcessMessage( byte passedFunction, int passedChannelId, ByteBuffer passedBB ) {
         super( PROCESS_MESSAGE_TYPE );
         function = passedFunction;
-        channelId = SocketUtilities.intToByteArray( passedChannelId );
+        msgChannelId = SocketUtilities.intToByteArray( passedChannelId );
           
         setBytes(passedBB);
     }

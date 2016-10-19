@@ -35,73 +35,37 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
+package pwnbrew.network.file;
 
-
-/*
-* HostCheckInListModel.java
-*
-* Created on June 24, 2013, 7:23:42 PM
-*/
-
-package pwnbrew.sessions;
-
-import java.text.ParseException;
-import pwnbrew.generic.gui.MutableListModel;
-import pwnbrew.generic.gui.SortedListModel;
-import pwnbrew.misc.Constants;
+import pwnbrew.network.ConnectionCallback;
 
 /**
  *
- *  
+ * @author Securifera
  */
-@SuppressWarnings("ucd")
-public class HostCheckInListModel extends SortedListModel implements MutableListModel {
-
-    private final HostCheckInListListener theListener;
-
-    //===============================================================
-    /**
-     * Constructor
-     * 
-     * @param passedListener 
-    */
-    HostCheckInListModel(HostCheckInListListener passedListener ) {
-        theListener = passedListener;
-    }   
+public class FileConnectionCallback extends ConnectionCallback{
     
-    //===============================================================
+    //=====================================================================
     /**
-     * Determines if the cell is editable
-     *
-     * @param index
-     * @return
-     */
-    @Override
-    public boolean isCellEditable(int index) {
-        return true;
-    }
-
-    //===============================================================
-    /**
-     *  Sets the value for the Date
      * 
-     * @param value
-     * @param index 
+     * @param passedIp
+     * @param passedPort 
+     */
+    public FileConnectionCallback(String passedIp, int passedPort) {
+        super(passedIp, passedPort);
+    }
+    
+     //=====================================================================
+    /**
+     * 
+     * @param theChannelId
      */
     @Override
-    public void setValueAt(Object value, int index) {
-        
-        String newDateStr = (String)value;
-        try {
-            Constants.CHECKIN_DATE_FORMAT.parse((String)value);
-        } catch (ParseException ex) {
-            return;
-        }
-        
-        //String aDate = (String)super.getElementAt(index);  
-        super.setElementAt(newDateStr, index);
-        //theListener.replaceDate( aDate, newDateStr );                
-        
+    public void handleConnection( int theChannelId ) {
+    
+        //Call the file manager callback
+        FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
+        aFMM.connectionCallback(theChannelId);
     }
-
-}/* END CLASS HostCheckInListModel */
+    
+}

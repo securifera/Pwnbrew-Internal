@@ -57,8 +57,10 @@ import pwnbrew.utilities.SocketUtilities;
 public class SleepRelay extends MaltegoMessage {
     
     private static final byte OPTION_TARGET_HOST_ID = 22;
+    private static final byte OPTION_SENDER_TIME = 19; //IN SECONDS
     private int hostId;
     
+    private String senderTime = "";
     //Class name
     private static final String NAME_Class = SleepRelay.class.getSimpleName();
  
@@ -85,13 +87,20 @@ public class SleepRelay extends MaltegoMessage {
         boolean retVal = true;
         
         byte[] theValue = tempTlv.getValue();
-        switch( tempTlv.getType()){
-            case OPTION_TARGET_HOST_ID:
-                hostId = SocketUtilities.byteArrayToInt(theValue);
-                break;
-            default:
-                retVal = false;
-                break;
+        try {
+            switch( tempTlv.getType()){
+                case OPTION_TARGET_HOST_ID:
+                    hostId = SocketUtilities.byteArrayToInt(theValue);
+                    break;
+                case OPTION_SENDER_TIME:
+                    senderTime = new String( theValue, "US-ASCII");
+                    break; 
+                default:
+                    retVal = false;
+                    break;
+            }
+        } catch (UnsupportedEncodingException ex) {
+            ex = null;
         }
         
         return retVal;
@@ -121,7 +130,7 @@ public class SleepRelay extends MaltegoMessage {
                     //Get the first time
                     String theCheckInTime = theCheckInList.get(0);
                     //Send sleep message
-                    Sleep sleepMsg = new Sleep( hostId, theCheckInTime ); //Convert mins to seconds
+                    Sleep sleepMsg = new Sleep( hostId, theCheckInTime, senderTime ); //Convert mins to seconds
                     DataManager.send( passedManager, sleepMsg );
                 }
 

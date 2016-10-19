@@ -35,73 +35,49 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
+package pwnbrew.selector;
 
-
-/*
-* HostCheckInListModel.java
-*
-* Created on June 24, 2013, 7:23:42 PM
-*/
-
-package pwnbrew.sessions;
-
-import java.text.ParseException;
-import pwnbrew.generic.gui.MutableListModel;
-import pwnbrew.generic.gui.SortedListModel;
-import pwnbrew.misc.Constants;
+import pwnbrew.manager.ConnectionManager;
+import pwnbrew.network.ConnectionCallback;
+import pwnbrew.network.RegisterMessage;
 
 /**
  *
- *  
+ * @author Securifera
  */
-@SuppressWarnings("ucd")
-public class HostCheckInListModel extends SortedListModel implements MutableListModel {
-
-    private final HostCheckInListListener theListener;
-
-    //===============================================================
-    /**
-     * Constructor
-     * 
-     * @param passedListener 
-    */
-    HostCheckInListModel(HostCheckInListListener passedListener ) {
-        theListener = passedListener;
-    }   
+public class SocketChannelCallback extends ConnectionCallback{
     
-    //===============================================================
+    private final RegisterMessage theRegMsg;
+    private final ConnectionManager theCM;
+    
+    //===========================================================================
     /**
-     * Determines if the cell is editable
-     *
-     * @param index
-     * @return
-     */
-    @Override
-    public boolean isCellEditable(int index) {
-        return true;
-    }
-
-    //===============================================================
-    /**
-     *  Sets the value for the Date
      * 
-     * @param value
-     * @param index 
+     * @param passedIp
+     * @param passedPort 
+     * @param aMsg 
+     * @param passedCM 
+     */
+    public SocketChannelCallback(String passedIp, int passedPort, RegisterMessage aMsg, ConnectionManager passedCM) {
+        super(passedIp, passedPort);
+        theRegMsg = aMsg;
+        theCM = passedCM;
+    }
+    
+     //=====================================================================
+    /**
+     * 
+     * @param theChannelId
      */
     @Override
-    public void setValueAt(Object value, int index) {
+    public void handleConnection( int theChannelId ) {
         
-        String newDateStr = (String)value;
-        try {
-            Constants.CHECKIN_DATE_FORMAT.parse((String)value);
-        } catch (ParseException ex) {
-            return;
+        SocketChannelHandler srvHandler = theCM.getSocketChannelHandler( theChannelId );
+        if( srvHandler != null ){
+            byte[] regBytes = theRegMsg.getBytes();
+            srvHandler.queueBytes(regBytes);
         }
-        
-        //String aDate = (String)super.getElementAt(index);  
-        super.setElementAt(newDateStr, index);
-        //theListener.replaceDate( aDate, newDateStr );                
-        
+    
     }
-
-}/* END CLASS HostCheckInListModel */
+    
+}

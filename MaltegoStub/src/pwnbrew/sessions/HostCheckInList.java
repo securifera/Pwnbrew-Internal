@@ -52,6 +52,7 @@ import pwnbrew.generic.gui.MutableJList;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Utilities;
 import static pwnbrew.misc.Utilities.loadImageFromJar;
+import static pwnbrew.misc.Utilities.loadImageFromJar;
 
 /**
  *
@@ -202,7 +203,7 @@ public class HostCheckInList extends MutableJList implements ActionListener {
         try {
             
             //try and parse the field
-            Constants.DEFAULT_DATE_FORMAT.parse((String)fieldVal);
+            Constants.CHECKIN_DATE_FORMAT.parse((String)fieldVal);
             theTxtField.setBackground(Color.WHITE);
             
         } catch (ParseException ex) {

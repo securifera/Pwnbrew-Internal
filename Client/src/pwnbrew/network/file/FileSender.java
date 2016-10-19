@@ -176,7 +176,7 @@ public class FileSender extends ManagedRunnable implements LockListener {
                 int readCount;            
 
                 int fileRead = 0;
-                DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sending " + theFileAck.getHashFilenameString());
+                DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sending " + theFileAck.getHashFilenameString() + " Channel: " + Integer.toString(channelId));
                 while(fileRead != -1 && !finished() ){
 
                     //Add the file message type

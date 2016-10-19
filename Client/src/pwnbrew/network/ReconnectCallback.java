@@ -35,73 +35,36 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
+package pwnbrew.network;
 
-
-/*
-* HostCheckInListModel.java
-*
-* Created on June 24, 2013, 7:23:42 PM
-*/
-
-package pwnbrew.sessions;
-
-import java.text.ParseException;
-import pwnbrew.generic.gui.MutableListModel;
-import pwnbrew.generic.gui.SortedListModel;
-import pwnbrew.misc.Constants;
+import pwnbrew.utilities.ReconnectTimer;
 
 /**
  *
- *  
+ * @author Securifera
  */
-@SuppressWarnings("ucd")
-public class HostCheckInListModel extends SortedListModel implements MutableListModel {
-
-    private final HostCheckInListListener theListener;
-
-    //===============================================================
-    /**
-     * Constructor
-     * 
-     * @param passedListener 
-    */
-    HostCheckInListModel(HostCheckInListListener passedListener ) {
-        theListener = passedListener;
-    }   
+public class ReconnectCallback extends ConnectionCallback{
     
-    //===============================================================
-    /**
-     * Determines if the cell is editable
-     *
-     * @param index
-     * @return
-     */
-    @Override
-    public boolean isCellEditable(int index) {
-        return true;
-    }
+    
+    private final ReconnectTimer theReconnectThread;
 
-    //===============================================================
+    //=========================================================================
     /**
-     *  Sets the value for the Date
      * 
-     * @param value
-     * @param index 
+     * @param passedIp
+     * @param passedPort 
+     * @param passedThread 
      */
-    @Override
-    public void setValueAt(Object value, int index) {
-        
-        String newDateStr = (String)value;
-        try {
-            Constants.CHECKIN_DATE_FORMAT.parse((String)value);
-        } catch (ParseException ex) {
-            return;
-        }
-        
-        //String aDate = (String)super.getElementAt(index);  
-        super.setElementAt(newDateStr, index);
-        //theListener.replaceDate( aDate, newDateStr );                
-        
+    public ReconnectCallback(String passedIp, int passedPort, ReconnectTimer passedThread ) {
+        super(passedIp, passedPort);
+        theReconnectThread = passedThread;
     }
 
-}/* END CLASS HostCheckInListModel */
+    @Override
+    public void handleConnection(int theChannelId) {
+        channelId = theChannelId;
+        theReconnectThread.beNotified();
+    }
+    
+    
+}

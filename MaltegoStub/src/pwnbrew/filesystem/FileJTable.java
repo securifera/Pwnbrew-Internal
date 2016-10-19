@@ -159,8 +159,8 @@ public class FileJTable extends JTable {
                     //Compare the dates
                     try {
                         
-                        Date firstDate = Constants.DEFAULT_DATE_FORMAT.parse(firstDateStr);
-                        Date secondDate = Constants.DEFAULT_DATE_FORMAT.parse(secondDateStr);
+                        Date firstDate = Constants.CHECKIN_DATE_FORMAT.parse(firstDateStr);
+                        Date secondDate = Constants.CHECKIN_DATE_FORMAT.parse(secondDateStr);
                         return firstDate.compareTo(secondDate);
                         
                     } catch (ParseException ex) {                    

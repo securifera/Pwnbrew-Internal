@@ -126,7 +126,8 @@ public class MutableJList extends JList<Object> implements CellEditorListener, L
             editingIndex = -1;
             editorComp = null;
 
-            repaint(cellRect);
+            if( cellRect != null )
+                repaint(cellRect);
         }
     }
 

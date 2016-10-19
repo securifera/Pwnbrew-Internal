@@ -773,7 +773,7 @@ public class NetworkOptionsPanel extends OptionsJPanel {
 
                     //Get the date and calculate how many days between
                     String dateStr = expDateField.getText();
-                    Date futureDate = Constants.DEFAULT_DATE_FORMAT.parse(dateStr);
+                    Date futureDate = Constants.CHECKIN_DATE_FORMAT.parse(dateStr);
                     long difference = futureDate.getTime() - (new Date()).getTime();
                     int days = (int) (difference / 86400000); //milliseconds in one day
 

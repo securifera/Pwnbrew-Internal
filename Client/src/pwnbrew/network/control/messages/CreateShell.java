@@ -56,6 +56,7 @@ import pwnbrew.utilities.Constants;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.shell.Shell;
+import pwnbrew.network.shell.ShellConnectionCallback;
 
 /**
  *
@@ -194,25 +195,31 @@ public final class CreateShell extends ControlMessage {
         //Get the port router
         ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
         int theClientId = getSrcHostId();
-
-        int retChannelId = aPR.ensureConnectivity( serverIp, socketPort );   
-        if(retChannelId != 0 ){
-            
-            //Send ack back to set channel id
-            CreateShellAck retMsg = new CreateShellAck( retChannelId );
-            retMsg.setDestHostId( theClientId );
-            DataManager.send(passedManager, retMsg);
-
-            //Create the shell and set it
-            Shell aShell = new Shell( Constants.Executor, passedManager, 
-                    theClientId, retChannelId, encoding, cmdString, startupCmd, redirectStderr );
-            aShell.start();                
-
-            //Register the shell
-            OutgoingConnectionManager aOCM = aPR.getConnectionManager();
-            aOCM.setShell( retChannelId, aShell );
-
-        }
+        
+        //Create the shell
+        Shell aShell = new Shell( Constants.Executor, passedManager, 
+                    theClientId, encoding, cmdString, startupCmd, redirectStderr );
+        
+        //Create the shell callback
+        ShellConnectionCallback aSCC = new ShellConnectionCallback(serverIp, socketPort, passedManager, aShell);
+        aPR.ensureConnectivity( aSCC );   
+//        if(retChannelId != 0 ){
+//            
+//            //Send ack back to set channel id
+//            CreateShellAck retMsg = new CreateShellAck( retChannelId );
+//            retMsg.setDestHostId( theClientId );
+//            DataManager.send(passedManager, retMsg);
+//
+//            //Create the shell and set it
+//            Shell aShell = new Shell( Constants.Executor, passedManager, 
+//                    theClientId, retChannelId, encoding, cmdString, startupCmd, redirectStderr );
+//            aShell.start();                
+//
+//            //Register the shell
+//            OutgoingConnectionManager aOCM = aPR.getConnectionManager();
+//            aOCM.setShell( retChannelId, aShell );
+//
+//        }
         
     }
 

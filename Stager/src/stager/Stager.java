@@ -116,10 +116,10 @@ public class Stager extends ClassLoader {
 
                     //Get sleep time if it exists
                     String sleepTime = localProperties.getProperty(SLEEP_LABEL, null);
-                    if (sleepTime != null){
+                    if (sleepTime != null && !sleepTime.trim().isEmpty()){
 
                         //Start the timer
-                        Long aLong = Long.parseLong(sleepTime );
+                        Long aLong = Long.parseLong(sleepTime.trim() );
                         Date tmpDate = new Date( aLong ); 
 
                         aTimer.setIntialSleepDate(tmpDate);
