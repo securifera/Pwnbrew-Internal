@@ -615,7 +615,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
 
                 //Queue the file to be sent
                 String fileHashNameStr = new StringBuilder().append("0").append(":").append(aFile.getAbsolutePath()).toString();
-                TaskGetFile theTaskMsg = new TaskGetFile( taskId, fileHashNameStr, theHostId );
+                TaskGetFile theTaskMsg = new TaskGetFile( taskId, fileHashNameStr, theHostId, useCompression() );
 
                 //Send the message
                 aCMManager.send( theTaskMsg );  
@@ -626,6 +626,15 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
 
         }
 
+    }
+    
+    //===========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int useCompression(){
+        return theFsFrame.useCompression();
     }
 
     //===============================================================

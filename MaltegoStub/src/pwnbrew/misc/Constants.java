@@ -81,6 +81,8 @@ abstract public class Constants {
     public static final String EDITOR_IMG_STR = "brew.png";  
     public static final String UPLOAD_IMG_STR = "upload.png";
     public static final String DOWNLOAD_IMG_STR = "download.png";
+    public static final String ZIP_IMG_STR = "zip.png";    
+    public static final String ZIP_PRESSED_IMG_STR = "zip_pressed.png";
     public static final String TERM_IMG_STR = "terminal.png";
     public static final String SCHEDULE_IMG_STR = "schedule.png";
     public static final String HOST_IMG_STR = "computer_small.png";

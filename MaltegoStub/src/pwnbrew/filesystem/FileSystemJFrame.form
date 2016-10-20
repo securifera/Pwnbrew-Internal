@@ -91,7 +91,9 @@
                       <Component id="downloadButton" min="-2" pref="25" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="downloadFolderButton" min="-2" pref="25" max="-2" attributes="0"/>
-                      <EmptySpace pref="138" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="compressButton" min="-2" pref="25" max="-2" attributes="0"/>
+                      <EmptySpace pref="107" max="32767" attributes="0"/>
                       <Component id="searchTextField" min="-2" pref="180" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="8" max="-2" attributes="0"/>
                       <Component id="searchButton" min="-2" pref="25" max="-2" attributes="0"/>
@@ -110,6 +112,7 @@
                           <Component id="searchTextField" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
                           <Component id="searchButton" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
                           <Component id="downloadFolderButton" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
+                          <Component id="compressButton" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
                       <Component id="fileTableScrollPane" pref="389" max="32767" attributes="0"/>
@@ -146,6 +149,14 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="jButton1"/>
               </Properties>
+            </Component>
+            <Component class="javax.swing.JToggleButton" name="compressButton">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="jToggleButton1"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="compressButtonActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>

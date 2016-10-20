@@ -178,6 +178,7 @@ public class ShellMessageHandler extends DataHandler {
             DebugPrinter.printMessage( NAME_Class, "receiveByteArray", ex.getMessage(), ex);   
         }
         
+        currByteArray = null;
     }
     
     //===============================================================

@@ -28,7 +28,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="fontSizeSpinner" min="-2" pref="48" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
-                      <Component id="shellCombo" min="-2" pref="130" max="-2" attributes="0"/>
+                      <Component id="shellCombo" min="-2" pref="180" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="openButton" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -41,21 +41,28 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="shellScrollPane" pref="418" max="32767" attributes="0"/>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="shellCombo" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="openButton" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="fontSizeSpinner" alignment="1" max="32767" attributes="0"/>
-                  <Component id="fontLabel" alignment="1" min="-2" pref="23" max="-2" attributes="0"/>
+              <Component id="shellScrollPane" pref="424" max="32767" attributes="0"/>
+              <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="fontSizeSpinner" alignment="1" pref="28" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="shellCombo" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="openButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Component id="fontLabel" alignment="1" max="32767" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
   </Layout>
   <SubComponents>
     <Container class="javax.swing.JScrollPane" name="shellScrollPane">
+      <Properties>
+        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+          <Border info="null"/>
+        </Property>
+      </Properties>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
     </Container>
@@ -75,6 +82,12 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JSpinner" name="fontSizeSpinner">
+      <Properties>
+        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+          <Border info="null"/>
+        </Property>
+        <Property name="inheritsPopupMenu" type="boolean" value="true"/>
+      </Properties>
       <Events>
         <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="fontSizeSpinnerStateChanged"/>
       </Events>

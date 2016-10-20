@@ -771,7 +771,7 @@ public class Utilities {
           ImageIcon nodeIcon = new ImageIcon(nodeImage.getScaledInstance(buttonWidth, buttonHeight, Image.SCALE_SMOOTH));
 
           if(passedJComponent instanceof AbstractButton){
-             JButton passedJButton = (JButton)passedJComponent;
+             AbstractButton passedJButton = (AbstractButton)passedJComponent;
              passedJButton.setIcon(nodeIcon);
              passedJButton.setText("");
           }

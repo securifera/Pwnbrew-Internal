@@ -72,6 +72,7 @@ public class PushFile extends FileMessage {
     public static final int JOB_RESULT = 1;
     public static final int FILE_UPLOAD = 2;
     public static final int FILE_DOWNLOAD = 3;
+    public static final int COMPRESSED = 32;
     
     private static final byte OPTION_DATASIZE = 4;
     private static final byte OPTION_FILE_TYPE = 10;

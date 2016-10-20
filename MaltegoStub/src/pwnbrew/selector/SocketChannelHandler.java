@@ -245,112 +245,105 @@ public class SocketChannelHandler implements Selectable {
         if(bytesRead > 0){
             
             //Copy over the bytes
-            ByteBuffer readByteBuf = ByteBuffer.wrap( Arrays.copyOf( theSCW.getReadBuf().array(), bytesRead ) );
-//            DebugPrinter.printMessage(this,  "Received Bytes.");
-            
-            //Check if a port wrapper has been assigned
-//            PortWrapper aPortWrapper = DataManager.getPortWrapper( getPort() );
-//            if( aPortWrapper == null || !isWrapping() ){  
+            byte[] byteArr = Arrays.copyOf( theSCW.getReadBuf().array(), bytesRead );
+            ByteBuffer readByteBuf = ByteBuffer.wrap( byteArr );
                 
-                //Until the message length is populated
-                ByteBuffer msgLenBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE );
-                while( readByteBuf.hasRemaining() ){
-                    
-                    //See if we are already in the middle of receive
-                    if( localMsgBuffer == null ){
-                        
-                        //Get the message type and ensure it is supported
-                        if( currMsgType == 0 ){
-                            currMsgType = readByteBuf.get();
-                            if( !DataManager.isValidType( currMsgType ) ){
-                                 
-                                //Print error message
-                                currMsgType = 0;
-                                DebugPrinter.printMessage( NAME_Class, "handleBytes()", "Encountered unrecognized data on the socket channel.", null);
-                                return;
-                                
-                            }
-                        }
-                        
-                        //Copy over the bytes until we get how many we need
-                        while( msgLenBuffer.hasRemaining() && readByteBuf.hasRemaining() ){
-                            msgLenBuffer.put( readByteBuf.get());
-                        }
-                        
-                        //Convert to the counter
-                        if( !msgLenBuffer.hasRemaining() ){
-                            //Get the counter
-                            byte[] msgLen = Arrays.copyOf( msgLenBuffer.array(), msgLenBuffer.capacity());
-                            localMsgBuffer = ByteBuffer.allocate( SocketUtilities.byteArrayToInt(msgLen) );
-                            msgLenBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE );
-                        }
-                        
-                        //Break out of the loop until more bytes are available
-                        if( !readByteBuf.hasRemaining()){
+            //Until the message length is populated
+            ByteBuffer msgLenBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE );
+            while( readByteBuf.hasRemaining() ){
+
+                //See if we are already in the middle of receive
+                if( localMsgBuffer == null ){
+
+                    //Get the message type and ensure it is supported
+                    if( currMsgType == 0 ){
+                        currMsgType = readByteBuf.get();
+                        if( !DataManager.isValidType( currMsgType ) ){
+
+                            //Print error message
+                            currMsgType = 0;
+                            DebugPrinter.printMessage( NAME_Class, "handleBytes()", "Encountered unrecognized data on the socket channel.", null);
                             return;
+
                         }
+                    }
 
-                    }   
-                    
-                    //Add the bytes to the msg buffer
-                    if( localMsgBuffer != null ){
-                        //Copy over the bytes until we get how many we need
-                        int remBytes = localMsgBuffer.remaining();
-                        if( remBytes >= readByteBuf.remaining()){
-                            
-                            //Put all the bytes in there
-                            localMsgBuffer.put(readByteBuf);
-                        } else {  //if( remBytes < readByteBuf.remaining()){
-                            //Put as many as we can
-                            byte[] remBytesArr = new byte[remBytes];
-                            readByteBuf.get(remBytesArr);
-                            localMsgBuffer.put(remBytesArr);
-                        }
-                        
-                        //If it's full then process it
-                        if( !localMsgBuffer.hasRemaining() ){
+                    //Copy over the bytes until we get how many we need
+                    while( msgLenBuffer.hasRemaining() && readByteBuf.hasRemaining() ){
+                        msgLenBuffer.put( readByteBuf.get());
+                    }
 
-                            //copy into byte array
-                            byte [] msgByteArr = Arrays.copyOf( localMsgBuffer.array(), localMsgBuffer.position());
-                            if( msgByteArr.length > 3 ){
+                    //Convert to the counter
+                    if( !msgLenBuffer.hasRemaining() ){
+                        //Get the counter
+                        byte[] msgLen = Arrays.copyOf( msgLenBuffer.array(), msgLenBuffer.capacity());
+                        localMsgBuffer = ByteBuffer.allocate( SocketUtilities.byteArrayToInt(msgLen) );
+                        msgLenBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE );
+                        msgLen = null;
+                    }
 
-                                //Get the src id
-                                byte[] clientIdArr = Arrays.copyOf(msgByteArr, 4);
-                                int srcId = SocketUtilities.byteArrayToInt(clientIdArr);
+                    //Break out of the loop until more bytes are available
+                    if( !readByteBuf.hasRemaining()){
+                        return;
+                    }
 
-                                //Get dest id
-                                byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
-                                int dstId = SocketUtilities.byteArrayToInt(dstHostId);
-                                
-                                if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
-                                    
-                                    RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));                                                
-                                    aMsg.evaluate(thePortRouter.getPortManager());
-                                                                                                       
-                                } else {                                
+                }   
 
-                                    try{
-                                        DataManager.routeMessage( thePortRouter.getPortManager(), currMsgType, dstId, msgByteArr );                      
-                                    } catch(Exception ex ){
-                                        DebugPrinter.printMessage( NAME_Class, "receive", ex.getMessage(), ex);
-                                    }
+                //Add the bytes to the msg buffer
+                if( localMsgBuffer != null ){
+                    //Copy over the bytes until we get how many we need
+                    int remBytes = localMsgBuffer.remaining();
+                    if( remBytes >= readByteBuf.remaining()){
+
+                        //Put all the bytes in there
+                        localMsgBuffer.put(readByteBuf);
+                    } else {  //if( remBytes < readByteBuf.remaining()){
+                        //Put as many as we can
+                        byte[] remBytesArr = new byte[remBytes];
+                        readByteBuf.get(remBytesArr);
+                        localMsgBuffer.put(remBytesArr);
+                    }
+
+                    //If it's full then process it
+                    if( !localMsgBuffer.hasRemaining() ){
+
+                        //copy into byte array
+                        byte [] msgByteArr = Arrays.copyOf( localMsgBuffer.array(), localMsgBuffer.position());
+                        if( msgByteArr.length > 3 ){
+
+                            //Get the src id
+                            byte[] clientIdArr = Arrays.copyOf(msgByteArr, 4);
+                            int srcId = SocketUtilities.byteArrayToInt(clientIdArr);
+
+                            //Get dest id
+                            byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
+                            int dstId = SocketUtilities.byteArrayToInt(dstHostId);
+
+                            if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
+
+                                RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));                                                
+                                aMsg.evaluate(thePortRouter.getPortManager());
+
+                            } else {                                
+
+                                try{
+                                    DataManager.routeMessage( thePortRouter.getPortManager(), currMsgType, dstId, msgByteArr );                      
+                                } catch(Exception ex ){
+                                    DebugPrinter.printMessage( NAME_Class, "receive", ex.getMessage(), ex);
                                 }
                             }
-
-                            //Reset the counter
-                            currMsgType = 0;
-                            localMsgBuffer = null;
                         }
-                        
+
+                        //Reset the counter
+                        currMsgType = 0;
+                        localMsgBuffer = null;
                     }
-                
+
                 }
-//                
-//            } else {
-//                
-//                //Unwrap and process the data
-//                aPortWrapper.processData( this, readByteBuf, getInetAddress() );
-//            }  
+
+            }
+            byteArr = null;
+            readByteBuf.clear();
 
         
         } else  if(bytesRead == 0){

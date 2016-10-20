@@ -37,6 +37,7 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.functions;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.event.WindowEvent;
@@ -49,6 +50,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import javax.swing.JFrame;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.ColorUIResource;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
@@ -101,7 +106,7 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
      */
     @Override
     public void run(String passedObjectStr) {
-        
+                        
         String retStr = "";
         Map<String, String> objectMap = getKeyValueMap(passedObjectStr); 
          
@@ -167,8 +172,13 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
                 return;     
             }           
             
-            //Set up the port wrapper
-            theManager.initialize();
+            //Set look and feel            
+            String lookAndFeelClassStr = "javax.swing.plaf.nimbus.NimbusLookAndFeel";        
+            try{
+                UIManager.setLookAndFeel( lookAndFeelClassStr );
+            } catch ( ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+            }
+//            theManager.initialize();
             
             //Connect to server
             try {

@@ -401,9 +401,14 @@ public class FileMessageManager extends DataManager {
                 PortManager aPM = getPortManager();
                 ClientPortRouter aPR = (ClientPortRouter) aPM.getPortRouter( socketPort );
                 
+                //Set type
+                int type = PushFile.FILE_DOWNLOAD;
+                if( downloadFileMsg.useCompression() )
+                    type |= PushFile.COMPRESSED;
+                
                 //Queue the file to be sent
                 String fileHashNameStr = new StringBuilder().append("0").append(":").append(theFilePath).toString();
-                PushFile thePFM = new PushFile( downloadFileMsg.getTaskId(), 0, fileHashNameStr, fileToSend.length(), PushFile.FILE_DOWNLOAD );
+                PushFile thePFM = new PushFile( downloadFileMsg.getTaskId(), 0, fileHashNameStr, fileToSend.length(), type );
                 thePFM.setDestHostId( downloadFileMsg.getSrcHostId() );
                                
                 //Get the channel id and determine what to do

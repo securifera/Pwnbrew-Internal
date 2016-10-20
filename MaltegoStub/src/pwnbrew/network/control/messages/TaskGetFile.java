@@ -47,6 +47,7 @@ package pwnbrew.network.control.messages;
 
 import java.io.IOException;
 import pwnbrew.network.ControlOption;
+import pwnbrew.utilities.SocketUtilities;
 
 
 /**
@@ -55,13 +56,12 @@ import pwnbrew.network.ControlOption;
  */
 @SuppressWarnings("ucd")
 public final class TaskGetFile extends TaskStatus{
-
-//    private String fileName = null;
-//    private String fileHash = null;    
+ 
+    public static final byte OPTION_COMPRESSED = (byte)181;
     
     static final String TASK_XFER_FILES = "Transferring Files";
-     //Class name
-//    private static final String NAME_Class = TaskGetFile.class.getSimpleName();
+    //Class name
+    private static final String NAME_Class = TaskGetFile.class.getSimpleName();
      
     // ==========================================================================
     /**
@@ -70,122 +70,20 @@ public final class TaskGetFile extends TaskStatus{
      * @param taskId
      * @param fileNameHashStr
      * @param dstId
+     * @param compressed
      * @throws java.io.IOException
     */
-    public TaskGetFile(int taskId, String fileNameHashStr, int dstId ) throws IOException  {
+    public TaskGetFile(int taskId, String fileNameHashStr, int dstId, int compressed ) throws IOException  {
         super(taskId , TASK_XFER_FILES, dstId );
    
-        byte[] strBytes = fileNameHashStr.getBytes("US-ASCII");
-        ControlOption aTlv = new ControlOption(OPTION_HASH_FILENAME, strBytes);
+        byte[] tempArr = fileNameHashStr.getBytes("US-ASCII");
+        ControlOption aTlv = new ControlOption(OPTION_HASH_FILENAME, tempArr);
         addOption(aTlv);
+        
+        tempArr = SocketUtilities.intToByteArray(compressed);
+        aTlv = new ControlOption( OPTION_COMPRESSED, tempArr);
+        addOption(aTlv);
+        
     }
-    
-//     // ==========================================================================
-//    /**
-//     * Constructor
-//     *
-//     * @param passedId
-//     * @throws java.io.IOException
-//    */
-//    public TaskGetFile(byte[] passedId) {
-//        super( passedId );
-//    }
-// 
-//    //=========================================================================
-//    /**
-//     *  Sets the variable in the message related to this TLV
-//     * 
-//     * @param tempTlv 
-//     * @return  
-//     */
-//    @Override
-//    public boolean setOption( ControlOption tempTlv ){        
-//       
-//        boolean retVal = true;
-//        if( !super.setOption(tempTlv)){
-//            try {
-//                byte[] theValue = tempTlv.getValue();
-//                switch( tempTlv.getType()){
-//                    case OPTION_HASH_FILENAME:
-//
-//                        String hashFileNameStr = new String( theValue, "US-ASCII");
-//                        String[] hashFileNameArr = hashFileNameStr.split(":");
-//                        fileHash = hashFileNameArr[0];
-//                        fileName = hashFileNameArr[1]; 
-//                        break;
-//
-//                    case TASK_STATUS:
-//                        taskStatus = new String( theValue, "US-ASCII");
-//                        break;
-//                    default:
-//                        retVal = false;
-//                }
-//
-//            } catch (UnsupportedEncodingException ex) {
-//                ex = null;
-//            }
-//        }
-//        return retVal;
-//    }    
-//
-//    //===============================================================
-//    /**
-//     * Returns a string specifying the local file name.
-//     *
-//     * @return
-//     */
-//    public String getFileNameToRetrieve() {       
-//        return fileName;
-//    }
-//
-//     //===============================================================
-//    /**
-//     * Returns a string specifying the file hash.
-//     *
-//     * @return
-//     */
-//    public String getHashToRetrieve() {
-//        return fileHash;
-//    }
-    
-//    //===============================================================
-//    /**
-//    *   Performs the logic specific to the message.
-//    *
-//     * @param passedManager
-//    */
-//    @Override
-//    public void evaluate( CommManager passedManager ) {
-//        
-//        try {
-//            
-//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//            if( aCMManager != null ){
-//                
-//                //Alert the manager of the change in the task
-//                passedManager.getTaskManager().taskChanged(this);
-//
-//                File libDir = Directories.getFileLibraryDirectory();
-//                String theHash = getHashToRetrieve();
-//
-//                //Debug
-////                DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received TaskGetFile for " + theHash);
-//
-//                File fileToSend = new File(libDir, theHash);
-//                if(fileToSend.exists()){
-//
-//                    //Queue the file to be sent
-//                    String fileHashNameStr = new StringBuilder().append(fileToSend.getName()).append(":").append(fileToSend.getName()).toString();
-//
-//                    int clientId =  getSrcHostId();
-//                    PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.JOB_SUPPORT, clientId );
-//                    aCMManager.send(thePFM);
-//                }
-//            }           
-//
-//        } catch (IOException ex) {
-//            Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-//        }
-//    }
 
 }
