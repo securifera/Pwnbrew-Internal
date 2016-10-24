@@ -335,7 +335,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     public void updateFileSystem(int taskId, long size, String filePath, byte fileType, String dateModified ) {
         
         //Get the task for the id        
-        RemoteFileSystemTask theTask;
+        final RemoteFileSystemTask theTask;
         synchronized(theRemoteFileSystemTaskMap){
             theTask = theRemoteFileSystemTaskMap.get(taskId);
         }
@@ -349,61 +349,119 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             
             if( theTask.getListLength() == theTask.getFileCount() ){
 
-                //Get the parent
-                FileNode parentFileNode = null;
-                DefaultMutableTreeNode parent = theTask.getParentNode();
-                try {
-                    parent.removeAllChildren();  // Remove Flag
-                } catch( ArrayIndexOutOfBoundsException ex ){                    
-                }
-
-                Object theParentObj = parent.getUserObject();
-                if( theParentObj instanceof IconData ){
-                    IconData theIconData = (IconData)theParentObj;
-                    Object innerObj = theIconData.getObject();
-                    if( innerObj instanceof FileNode ){
-                        parentFileNode = (FileNode)innerObj;
-                    }
-                }
-
-                List nodeList = theTask.getFileList();
-                Collections.sort(nodeList);
-
-                for (Iterator it = nodeList.iterator(); it.hasNext();) {
-                    
-                    Object nodeList1 = it.next();
-                    FileNode currentNode = (FileNode) nodeList1;
-                    if( parentFileNode != null ){
-                        parentFileNode.addChildNode(currentNode);
-                    }
-                    if ( currentNode.isDirectory() || currentNode.isDrive() ){
-
-                        IconData theIconData = new IconData( currentNode.getIcon(), currentNode.getExpandedIcon(), currentNode);
-                        DefaultMutableTreeNode node = new DefaultMutableTreeNode(theIconData);
-                        parent.add(node);
-
-                        if( currentNode.getSize() > 0)
-                            node.add(new DefaultMutableTreeNode( true));
-                        
-                    }
-                }
-
-                //Get the treepath
-                DefaultMutableTreeNode aNode = parent;
-                try {
-                    parent.getFirstChild();       
-                } catch(NoSuchElementException ex ){
-                    aNode = (DefaultMutableTreeNode) parent.getParent();
-                }
+//                //Get the parent
+//                FileNode parentFileNode = null;
+//                DefaultMutableTreeNode parent = theTask.getParentNode();
+//                try {
+//                    parent.removeAllChildren();  // Remove Flag
+//                } catch( ArrayIndexOutOfBoundsException ex ){                    
+//                }
+//
+//                Object theParentObj = parent.getUserObject();
+//                if( theParentObj instanceof IconData ){
+//                    IconData theIconData = (IconData)theParentObj;
+//                    Object innerObj = theIconData.getObject();
+//                    if( innerObj instanceof FileNode ){
+//                        parentFileNode = (FileNode)innerObj;
+//                    }
+//                }
+//                
+//                //Clear node children
+//                if( parentFileNode != null )
+//                    parentFileNode.clearChildNodes();
+//
+//                List nodeList = theTask.getFileList();
+//                Collections.sort(nodeList);
+//
+//                for (Iterator it = nodeList.iterator(); it.hasNext();) {
+//                    
+//                    Object nodeList1 = it.next();
+//                    FileNode currentNode = (FileNode) nodeList1;
+//                    if( parentFileNode != null ){
+//                        parentFileNode.addChildNode(currentNode);
+//                    }
+//                    if ( currentNode.isDirectory() || currentNode.isDrive() ){
+//
+//                        IconData theIconData = new IconData( currentNode.getIcon(), currentNode.getExpandedIcon(), currentNode);
+//                        DefaultMutableTreeNode node = new DefaultMutableTreeNode(theIconData);
+//                        parent.add(node);
+//
+//                        if( currentNode.getSize() > 0)
+//                            node.add(new DefaultMutableTreeNode( true));
+//                        
+//                    }
+//                }
+//
+//                //Get the treepath
+//                DefaultMutableTreeNode aNode = parent;
+//                try {
+//                    parent.getFirstChild();       
+//                } catch(NoSuchElementException ex ){
+//                    aNode = (DefaultMutableTreeNode) parent.getParent();
+//                }
 
                 //Run in swing thread
-                final FileNode theParentNode = parentFileNode;                                
+                //final FileNode theParentNode = parentFileNode;                                
                 final FileTreePanel theFileTreePanel = theFsFrame.getFileTreePanel();                
-                final TreePath aTreePath = new TreePath( aNode.getPath() );
+                //final TreePath aTreePath = new TreePath( aNode.getPath() );
                 SwingUtilities.invokeLater( new Runnable(){
 
                     @Override
                     public void run() {
+                        
+                        //Get the parent
+                        FileNode parentFileNode = null;
+                        DefaultMutableTreeNode parent = theTask.getParentNode();
+                        try {
+                            parent.removeAllChildren();  // Remove Flag
+                        } catch( ArrayIndexOutOfBoundsException ex ){                    
+                        }
+
+                        Object theParentObj = parent.getUserObject();
+                        if( theParentObj instanceof IconData ){
+                            IconData theIconData = (IconData)theParentObj;
+                            Object innerObj = theIconData.getObject();
+                            if( innerObj instanceof FileNode ){
+                                parentFileNode = (FileNode)innerObj;
+                            }
+                        }
+
+                        //Clear node children
+                        if( parentFileNode != null )
+                            parentFileNode.clearChildNodes();
+
+                        List nodeList = theTask.getFileList();
+                        Collections.sort(nodeList);
+
+                        for (Iterator it = nodeList.iterator(); it.hasNext();) {
+
+                            Object nodeList1 = it.next();
+                            FileNode currentNode = (FileNode) nodeList1;
+                            if( parentFileNode != null ){
+                                parentFileNode.addChildNode(currentNode);
+                            }
+                            if ( currentNode.isDirectory() || currentNode.isDrive() ){
+
+                                IconData theIconData = new IconData( currentNode.getIcon(), currentNode.getExpandedIcon(), currentNode);
+                                DefaultMutableTreeNode node = new DefaultMutableTreeNode(theIconData);
+                                parent.add(node);
+
+                                if( currentNode.getSize() > 0)
+                                    node.add(new DefaultMutableTreeNode( true));
+
+                            }
+                        }
+
+                        //Get the treepath
+                        DefaultMutableTreeNode aNode = parent;
+                        try {
+                            parent.getFirstChild();       
+                        } catch(NoSuchElementException ex ){
+                            aNode = (DefaultMutableTreeNode) parent.getParent();
+                        }
+                        
+                        //Create treepath
+                        TreePath aTreePath = new TreePath( aNode.getPath() );
 
                         //Reload the model
                         JTree theJTree = theFileTreePanel.getJTree();
@@ -414,7 +472,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                         TreeSelectionListener theTSListener = theTreeListenerArr[0];
                         theJTree.removeTreeSelectionListener( theTSListener);
 
-                        //Remote any listeners
+                        //Remove any listeners
                         TreeExpansionListener[] theTreeExpansionArr = theJTree.getTreeExpansionListeners();
                         TreeExpansionListener theTEListener = theTreeExpansionArr[0];
                         theJTree.removeTreeExpansionListener( theTEListener );
@@ -426,13 +484,19 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                         theJTree.setSelectionPath(theSelPath);
 
                         //Add to the table
-                        addToFileTable( theParentNode, theParentNode.getChildNodes(), theFileTreePanel );
+                        if( parentFileNode != null )
+                            addToFileTable( parentFileNode, parentFileNode.getChildNodes(), theFileTreePanel );
 
                         //Add the listeners back
                         theJTree.addTreeExpansionListener( theTEListener );
                         theJTree.addTreeSelectionListener(theTSListener);
 
                         theFsFrame.setCursor(null);
+                                                 
+                        //Set flag
+                        synchronized(dirListingFlag){
+                            dirListingFlag.set(false);
+                        }
                     }               
                 });
 
@@ -440,12 +504,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                 synchronized(theRemoteFileSystemTaskMap){
                     theRemoteFileSystemTaskMap.remove(taskId);
                 }
-                
-                //Set flag
-                synchronized(dirListingFlag){
-                    dirListingFlag.set(false);
-                }
-
+               
             //Is a file search under way
             } else if( theTask.isFileSearch()){
                 
@@ -702,6 +761,11 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                                 String fileHashNameStr = new StringBuilder().append("0").append(":").append(aFile.getAbsolutePath()).toString();
                                 PushFile thePFM = new PushFile( taskId, fileHashNameStr, aFile.length(), PushFile.FILE_UPLOAD, theHostId );
 
+                                //Set compression flag if enabled
+                                if( useCompression() == 1){
+                                    thePFM.enableCompression();
+                                }
+                                
                                 //Add the directory
                                 byte[] tempArr = filePath.getBytes("US-ASCII");
                                 ControlOption aTlv = new ControlOption( PushFile.OPTION_REMOTE_DIR, tempArr);
@@ -758,25 +822,26 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         theFsFrame.setCursor( Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) );
         
         //Clear the table
-        DefaultTableModel theModel = (DefaultTableModel) theFsFrame.getFileJTable().getModel();
-        theModel.setRowCount(0);
-        
         Object anObj = passedNode.getUserObject();
         if( anObj instanceof IconData) 
             anObj = ((IconData)anObj).getObject();
         
         //Set flag
-        boolean dirListBool = false;
+        boolean dirListBool;
         Tasking aTaskMessage = null;
         synchronized(dirListingFlag){
-            dirListBool = dirListingFlag.get();
-               
+            
+            //Get flag
+            dirListBool = dirListingFlag.get();               
             if( anObj instanceof FileNode && !dirListBool ){
+                
+                DefaultTableModel theModel = (DefaultTableModel) theFsFrame.getFileJTable().getModel();
+                theModel.setRowCount(0);
 
                 //Set the flag
                 dirListingFlag.set(true);
                 FileNode aFN = (FileNode)anObj;
-                aFN.clearChildNodes();
+//                aFN.clearChildNodes();
 
                 switch( aFN.getType() ) {
                     case FileSystemMsg.FOLDER:                    

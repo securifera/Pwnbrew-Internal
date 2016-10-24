@@ -501,17 +501,6 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
             
             //Create a list out of the array
             List<File> theObjList = Arrays.asList(userSelectedFiles);
-//            int selRow = theFileJTable.getSelectedRow();
-//            if( selRow != -1){
-//                DefaultTableModel theTableModel = (DefaultTableModel) theFileJTable.getModel();            
-//
-//                //Get the directory
-//                FileNode aFileNode = (FileNode)theTableModel.getValueAt(selRow, 0);
-//                String filePath = aFileNode.getFile().getAbsolutePath();
-//
-//            } else {
-//                
-//            }
             theListener.uploadFiles(theObjList );  
                     
         }       

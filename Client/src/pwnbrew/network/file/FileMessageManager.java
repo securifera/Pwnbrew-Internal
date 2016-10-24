@@ -260,6 +260,9 @@ public class FileMessageManager extends DataManager {
 
             //DebugPrinter.printMessage(PortManager.class.getSimpleName(), "Sending ACK for " + hashFileNameStr);
             PushFileAck aSFMA = new PushFileAck(fileChannelId, taskId, fileId, hashFileNameStr);
+            if( passedMessage.useCompression() )
+                aSFMA.enableCompression();
+            
             aSFMA.setDestHostId( passedMessage.getSrcHostId() );
 
             //Send the message
@@ -403,13 +406,15 @@ public class FileMessageManager extends DataManager {
                 
                 //Set type
                 int type = PushFile.FILE_DOWNLOAD;
-                if( downloadFileMsg.useCompression() )
-                    type |= PushFile.COMPRESSED;
-                
+                                
                 //Queue the file to be sent
                 String fileHashNameStr = new StringBuilder().append("0").append(":").append(theFilePath).toString();
                 PushFile thePFM = new PushFile( downloadFileMsg.getTaskId(), 0, fileHashNameStr, fileToSend.length(), type );
                 thePFM.setDestHostId( downloadFileMsg.getSrcHostId() );
+                
+                //Set compression
+                if( downloadFileMsg.useCompression() )
+                    thePFM.enableCompression();
                                
                 //Get the channel id and determine what to do
                 synchronized(retChannelId){

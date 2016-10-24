@@ -46,6 +46,7 @@ package pwnbrew.network.control.messages;
 
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
+import static pwnbrew.network.control.messages.PushFile.OPTION_COMPRESSION;
 
 /**
  *
@@ -57,48 +58,11 @@ public class FileMessage extends Tasking {
     protected static final byte OPTION_HASH_FILENAME = 3;
     private static final byte OPTION_FILE_ID = 23;
     private static final byte OPTION_CHANNEL_ID = 102; 
+    public static final byte OPTION_COMPRESSION = 78;
    
     protected int fileChannelId = 0;    
-    private int fileId = 0;
-    
-//    // ==========================================================================
-//    /**
-//     * Constructor
-//     *
-//     * @param taskId
-//     * @param dstHostId
-//    */
-//    public FileMessage( int taskId, int dstHostId ) { // NO_UCD (use default)
-//        super( taskId, dstHostId );
-//        
-//        //Copy the task Id
-//        fileId = SocketUtilities.getNextId();
-//        byte[] fileIdArr = SocketUtilities.intToByteArray(fileId);
-//        
-//        //Add the option
-//        ControlOption aTlv = new ControlOption(OPTION_FILE_ID, fileIdArr);
-//        addOption(aTlv);
-//    }
-    
-//    // ==========================================================================
-//    /**
-//     * Constructor
-//     *
-//     * @param taskId
-//     * @param dstHostId
-//     * @param passedFileId
-//    */
-//    public FileMessage( int taskId, int passedFileId, int dstHostId ) { // NO_UCD (use default)
-//        super( taskId, dstHostId );
-//        
-//        //Copy the task Id
-//        fileId = passedFileId;
-//        byte[] fileIdArr = SocketUtilities.intToByteArray(fileId);
-//        
-//        //Add the option
-//        ControlOption aTlv = new ControlOption(OPTION_FILE_ID, fileIdArr);
-//        addOption(aTlv);
-//    }
+    protected int fileId = 0;
+    protected boolean compressionFlag = false;
     
     // ==========================================================================
     /**
@@ -159,6 +123,9 @@ public class FileMessage extends Tasking {
                 case OPTION_CHANNEL_ID:
                     fileChannelId = SocketUtilities.byteArrayToInt(theValue);
                     break;
+                case OPTION_COMPRESSION:
+                        compressionFlag = true;
+                        break;
                 default:
                     retVal = false;
                     break;              
@@ -187,4 +154,24 @@ public class FileMessage extends Tasking {
        return fileChannelId;
     }
 
+     
+    //===============================================================
+    /**
+     * 
+     */
+    public void enableCompression() {
+        byte[] tempArr = SocketUtilities.intToByteArray(1);
+        ControlOption aTlv = new ControlOption( OPTION_COMPRESSION, tempArr);
+        addOption(aTlv);
+    }
+    
+     //===============================================================
+    /**
+     * Returns a file reference specifying the local file name.
+     *
+     * @return
+     */
+    public boolean useCompression() {
+       return compressionFlag;
+    }
 }

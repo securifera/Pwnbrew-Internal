@@ -88,8 +88,9 @@ public class FileOperationJListMouseListener extends MouseAdapter {
 
                JButton theCancelButton = theProgressPanel.getCancelButton();
 
+               Rectangle aRect = theJList.getCellBounds(index, index);
                int relEventX = e.getX();
-               int relEventY = e.getY() - (index  * 60);
+               int relEventY = e.getY() - (index  * aRect.height);
 
                //Pass on the mouse click events
                if(passedMouseEvent == MouseEvent.MOUSE_RELEASED){

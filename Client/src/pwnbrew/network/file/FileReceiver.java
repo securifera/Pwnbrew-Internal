@@ -61,8 +61,6 @@ import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
-import pwnbrew.utilities.FileUtilities;
-import pwnbrew.utilities.Utilities;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileFin;
 import pwnbrew.network.control.messages.TaskProgress;
@@ -84,7 +82,8 @@ final public class FileReceiver {
     private int taskId = 0;
     private int fileId = 0;
     private int channelId = 0;
-    private String fileHash = null;
+//    private String fileHash = null;
+    private final boolean compressed;
     
     private FileOutputStream aFileStream = null;
     private MessageDigest fileDigest = null;
@@ -113,6 +112,7 @@ final public class FileReceiver {
         fileSize = passedMsg.getFileSize();
         srcHostId = passedMsg.getSrcHostId();
         channelId = passedMsg.getFileChannelId();
+        compressed = passedMsg.useCompression();
                 
          //Get file hash
         String hashFilenameStr = passedMsg.getHashFilenameString();
@@ -122,7 +122,7 @@ final public class FileReceiver {
         if( fileHashFileNameArr.length != 2 )
             throw new LoggableException("Passed hash filename string is not correct.");
       
-        fileHash = fileHashFileNameArr[0];
+//        fileHash = fileHashFileNameArr[0];
       
         //Create the file digest
         fileDigest = MessageDigest.getInstance(Constants.HASH_FUNCTION);
@@ -133,16 +133,16 @@ final public class FileReceiver {
         String filePath = fileHashFileNameArr[1];
         String fileName = filePath.substring( filePath.lastIndexOf("\\") + 1 );
         fileLoc = new File( parentDir, fileName );
-        if(fileLoc.exists()){
-
-            //If file already exists and the hash is the same
-            String localFileHash = FileUtilities.getFileHash(fileLoc);
-            if( !localFileHash.equals(fileHash) && !fileLoc.delete()){
-                cleanupFileTransfer();
-                throw new LoggableException("File already exists, the hash does not match, and was unable to remove it.");
-            }
-
-        }
+//        if(fileLoc.exists()){
+//
+//            //If file already exists and the hash is the same
+//            String localFileHash = FileUtilities.getFileHash(fileLoc);
+//            if( !localFileHash.equals(fileHash) && !fileLoc.delete()){
+//                cleanupFileTransfer();
+//                throw new LoggableException("File already exists, the hash does not match, and was unable to remove it.");
+//            }
+//
+//        }
 
         //Open the file stream
         aFileStream = new FileOutputStream(fileLoc, true);
@@ -190,6 +190,16 @@ final public class FileReceiver {
         }
     }
     
+    //===========================================================================
+    /**
+     * 
+     * @param passedSize 
+     */
+    public void updateFileSize( long passedSize ){
+        fileSize = passedSize;
+        receiveFile(new byte[0]);
+    }
+    
     //===============================================================
     /**
      * Receives the bytes from the socket channel and puts them into a file
@@ -235,12 +245,12 @@ final public class FileReceiver {
             if(fileByteCounter >= fileSize){
 
                 //Get the hash and reset it
-                byte[] byteHash = fileDigest.digest();
-                String hexString = Utilities.byteToHexString(byteHash);
-
-                if( !fileHash.equals("0") && !hexString.equals(fileHash)){
-                    RemoteLog.log(Level.WARNING, NAME_Class, "receiveFile()", "Calculated file hash does not match the hash provided.", null);
-                }
+//                byte[] byteHash = fileDigest.digest();
+//                String hexString = Utilities.byteToHexString(byteHash);
+//
+//                if( !fileHash.equals("0") && !hexString.equals(fileHash)){
+//                    RemoteLog.log(Level.WARNING, NAME_Class, "receiveFile()", "Calculated file hash does not match the hash provided.", null);
+//                }
 
                 DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received File.");
 
@@ -248,7 +258,7 @@ final public class FileReceiver {
                 cleanupFileTransfer();
 
                   
-                PushFileFin finMessage = new PushFileFin( channelId, taskId, fileId, hexString );
+                PushFileFin finMessage = new PushFileFin( channelId, taskId, fileId, "" );
                 finMessage.setDestHostId(srcHostId);
                 DataManager.send( theFileMessageManager.getPortManager(), finMessage);
 

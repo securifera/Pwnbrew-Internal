@@ -39,11 +39,9 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import pwnbrew.log.LoggableException;
-import pwnbrew.log.RemoteLog;
+import pwnbrew.MaltegoStub;
 import pwnbrew.manager.PortManager;
+import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.utilities.SocketUtilities;
@@ -53,27 +51,25 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
-public final class TaskGetFile extends TaskStatus {
+public final class PushFileUpdate extends FileMessage {
 
-    private String hashFilenameStr;    
-    private int compress_flag = 0;
-    public static final byte OPTION_COMPRESSED = 78;
-    
+    private static final byte OPTION_DATASIZE = 4;
+    private long fileSize;
     
     //Class name
-    private static final String NAME_Class = TaskGetFile.class.getSimpleName();
-     
+    private static final String NAME_Class = PushFileUpdate.class.getSimpleName();
+    
     // ==========================================================================
     /**
      * Constructor
      *
-     * @param msgId
+     * @param passedId
     */
-    public TaskGetFile(byte[] msgId ) { // NO_UCD (use default)
-        super(msgId);
+    public PushFileUpdate( byte[] passedId ) { // NO_UCD (use default)
+        super( passedId );
     }
-     
-    //=========================================================================
+    
+     //=========================================================================
     /**
      *  Sets the variable in the message related to this TLV
      * 
@@ -81,52 +77,34 @@ public final class TaskGetFile extends TaskStatus {
      * @return  
      */
     @Override
-    public boolean setOption( ControlOption tempTlv ){        
-       
+    public boolean setOption( ControlOption tempTlv ){      
+        
         boolean retVal = true;
         if( !super.setOption(tempTlv)){
-            try {
-                byte[] theValue = tempTlv.getValue();
-                switch( tempTlv.getType()){
-                    case OPTION_HASH_FILENAME:
-                        hashFilenameStr = new String( theValue, "US-ASCII");
-                        break;
-                    case OPTION_COMPRESSED:
-                        compress_flag = SocketUtilities.byteArrayToInt( theValue );
-                        break;
-                    case TASK_STATUS:
-                        taskStatus = new String( theValue, "US-ASCII");
-                        break;
-                    default:
-                        retVal = false;
-                }
-
-            } catch (UnsupportedEncodingException ex) {
-                ex = null;
+            
+            byte[] theValue = tempTlv.getValue();
+            switch( tempTlv.getType()){
+                case OPTION_DATASIZE:
+                    fileSize = SocketUtilities.byteArrayToLong( theValue );
+                    break; 
+                default:
+                    retVal = false;
+                    break;              
             }
+            
         }
         return retVal;
-    }    
+    }  
 
     //===============================================================
     /**
-     * Returns a file reference specifying the local file name.
      *
      * @return
      */
-    public String getHashFilenameString() {
-       return hashFilenameStr;
+    public long getFileSize() {
+        return fileSize;
     }
     
-     //===============================================================
-    /**
-     * Returns a file reference specifying the local file name.
-     *
-     * @return
-     */
-    public boolean useCompression() {
-       return (compress_flag == 1);
-    }
     
     //===============================================================
     /**
@@ -135,21 +113,26 @@ public final class TaskGetFile extends TaskStatus {
      * @param passedManager
     */
     @Override
-    public void evaluate( PortManager passedManager ) {       
-
+    public void evaluate( PortManager passedManager ) {
+                
         try {
-            //Get the port router
-            FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
-            if( aFMM == null )
-                aFMM = FileMessageManager.initialize( passedManager );
+              
+            //If the return value is true
+            if( passedManager instanceof MaltegoStub ){
 
-            aFMM.fileDownload( this );
+                //Get the file manager
+                FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+                if( theFileMM == null ){
+                    theFileMM = FileMessageManager.initialize( passedManager );
+                }
 
-        } catch ( LoggableException | IOException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        }    
-
+                //Update the file receiver size
+                theFileMM.updateFileSize( fileId, fileSize );
+            }
+            
+        } catch (IOException ex) {
+            DebugPrinter.printMessage( NAME_Class, "evaluate", ex.getMessage(), ex); 
+        }
+        
     }
-    
-
-}/* END CLASS TaskGetFile */
+}

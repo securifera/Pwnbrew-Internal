@@ -57,7 +57,7 @@ import pwnbrew.utilities.SocketUtilities;
 @SuppressWarnings("ucd")
 public final class TaskGetFile extends TaskStatus{
  
-    public static final byte OPTION_COMPRESSED = (byte)181;
+    public static final byte OPTION_COMPRESSED = 78;
     
     static final String TASK_XFER_FILES = "Transferring Files";
     //Class name

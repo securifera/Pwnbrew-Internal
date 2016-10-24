@@ -67,17 +67,16 @@ public class PushFile extends FileMessage {
     protected long fileSize = 0;
     protected int fileType;
     private String remoteDir;
-    
+       
     public static final int JOB_SUPPORT = 0;
     public static final int JOB_RESULT = 1;
     public static final int FILE_UPLOAD = 2;
     public static final int FILE_DOWNLOAD = 3;
-    public static final int COMPRESSED = 32;
     
     private static final byte OPTION_DATASIZE = 4;
     private static final byte OPTION_FILE_TYPE = 10;
     public static final byte OPTION_REMOTE_DIR = 12;
-   
+       
   
      //Class name
     private static final String NAME_Class = PushFile.class.getSimpleName();
@@ -146,6 +145,9 @@ public class PushFile extends FileMessage {
                         break;  
                     case OPTION_FILE_TYPE:
                         fileType = SocketUtilities.byteArrayToInt( theValue );
+                        break; 
+                    case OPTION_COMPRESSION:
+                        compressionFlag = true;
                         break; 
                     default:
                         retVal = false;
@@ -261,7 +263,7 @@ public class PushFile extends FileMessage {
         return hash;
     }
     
-  //===============================================================
+    //===============================================================
     /**
     *   Performs the logic specific to the message.
     *
@@ -282,6 +284,27 @@ public class PushFile extends FileMessage {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
         }
         
+    }
+
+    //===============================================================
+    /**
+     * 
+     */
+    @Override
+    public void enableCompression() {
+        byte[] tempArr = SocketUtilities.intToByteArray(1);
+        ControlOption aTlv = new ControlOption( OPTION_COMPRESSION, tempArr);
+        addOption(aTlv);
+    }
+    
+     //===============================================================
+    /**
+     * Returns a file reference specifying the local file name.
+     *
+     * @return
+     */
+    public boolean useCompression() {
+       return compressionFlag;
     }
 
 }/* END CLASS PushFile */

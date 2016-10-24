@@ -70,8 +70,8 @@ import pwnbrew.selector.SocketChannelHandler;
 public class FileMessageManager extends DataManager {
 
     private static FileMessageManager theFileManager;
-    private final Map<Integer, FileReceiver> theFileReceiverMap = new HashMap<>();
-    private final Map<Integer, Map<Integer, FileSender>> theFileSenderMap = new HashMap<>();
+    private final Map<Integer, FileReceiver> fileId_FileReceiverMap = new HashMap<>();
+    private final Map<Integer, Map<Integer, FileSender>> taskId_fileId_FileSenderMap = new HashMap<>();
        
     private static final String NAME_Class = FileMessageManager.class.getSimpleName();
   
@@ -148,16 +148,16 @@ public class FileMessageManager extends DataManager {
             
         //Initialize the file transfer
         int fileId = passedMsg.getFileId();
-        synchronized( theFileReceiverMap ){
+        synchronized( fileId_FileReceiverMap ){
 
-            FileReceiver theReceiver = theFileReceiverMap.get(fileId);
+            FileReceiver theReceiver = fileId_FileReceiverMap.get(fileId);
             //If the receive flag is not set
             if( theReceiver == null ){
 
 //                theReceiver = new FileReceiver( this, clientId, passedTaskId, passedFileId, passedFileSize, parentDir, hashFilenameStr );
                 try {
                     theReceiver = new FileReceiver( this, passedMsg, parentDir );
-                    theFileReceiverMap.put(fileId, theReceiver);
+                    fileId_FileReceiverMap.put(fileId, theReceiver);
                 } catch (NoSuchAlgorithmException | IOException ex) {
                     throw new LoggableException("Unable to create a new file receiver.");
                 }
@@ -179,8 +179,8 @@ public class FileMessageManager extends DataManager {
     protected FileReceiver getFileReceiver( int passedId ){
         
         FileReceiver theReceiver;
-        synchronized( theFileReceiverMap ){
-            theReceiver = theFileReceiverMap.get( passedId );
+        synchronized( fileId_FileReceiverMap ){
+            theReceiver = fileId_FileReceiverMap.get( passedId );
         }
         return theReceiver;
     }
@@ -192,8 +192,8 @@ public class FileMessageManager extends DataManager {
      * @param fileId 
      */
     protected void removeFileReceiver(int fileId) {
-        synchronized( theFileReceiverMap ){
-            theFileReceiverMap.remove(fileId );
+        synchronized( fileId_FileReceiverMap ){
+            fileId_FileReceiverMap.remove(fileId );
         }
     }
     
@@ -243,6 +243,10 @@ public class FileMessageManager extends DataManager {
                 //Send an ack to the sender to begin transfer
         //                DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);
                 PushFileAck aSFMA = new PushFileAck(taskId, fileId, fileChannelId, hashFileNameStr, srcId );
+                //Set compression flag
+                if( passedMessage.useCompression() )
+                    aSFMA.enableCompression();
+                
                 aCMManager.send( aSFMA );
                 retVal = true;
             }
@@ -261,8 +265,8 @@ public class FileMessageManager extends DataManager {
     public void abortFileReceive( int passedFileId ) {
         
         FileReceiver theReceiver;
-        synchronized( theFileReceiverMap ){
-            theReceiver = theFileReceiverMap.remove(passedFileId );  
+        synchronized( fileId_FileReceiverMap ){
+            theReceiver = fileId_FileReceiverMap.remove(passedFileId );  
         }
         
         //Clean up
@@ -285,11 +289,11 @@ public class FileMessageManager extends DataManager {
         int taskId = aMessage.getTaskId();
         int fileId = aMessage.getFileId();
                 
-        synchronized( theFileSenderMap ){
-            Map<Integer, FileSender> senderMap = theFileSenderMap.get(taskId);
+        synchronized( taskId_fileId_FileSenderMap ){
+            Map<Integer, FileSender> senderMap = taskId_fileId_FileSenderMap.get(taskId);
             if( senderMap == null){
                 senderMap = new HashMap<>();
-                theFileSenderMap.put(taskId, senderMap);
+                taskId_fileId_FileSenderMap.put(taskId, senderMap);
             }
             senderMap.put(fileId, aSender);
         }
@@ -307,29 +311,29 @@ public class FileMessageManager extends DataManager {
      */
     public void cancelFileTransfer( int clientId, int taskId ) {
         
-        synchronized( theFileReceiverMap ){
+        synchronized( fileId_FileReceiverMap ){
             
-            List<Integer> fileIds = new ArrayList<>(theFileReceiverMap.keySet());
+            List<Integer> fileIds = new ArrayList<>(fileId_FileReceiverMap.keySet());
             for( Integer anId : fileIds ){
                 
-                FileReceiver aReceiver = theFileReceiverMap.get(anId);
+                FileReceiver aReceiver = fileId_FileReceiverMap.get(anId);
                 if( aReceiver != null ){
                     int receiverId = aReceiver.getTaskId();
                     if( receiverId == taskId ){
                         aReceiver.cleanupFileTransfer();
-                        theFileReceiverMap.remove( anId );
+                        fileId_FileReceiverMap.remove( anId );
                     }
                 }
             }
         }
         
          //Cancel file sends
-        synchronized( theFileSenderMap ){
+        synchronized( taskId_fileId_FileSenderMap ){
             
-            List<Integer> taskIds = new ArrayList<>(theFileSenderMap.keySet());
+            List<Integer> taskIds = new ArrayList<>(taskId_fileId_FileSenderMap.keySet());
             for( Integer aTaskId : taskIds ){
                 
-                Map<Integer, FileSender> aSenderMap = theFileSenderMap.get(aTaskId);
+                Map<Integer, FileSender> aSenderMap = taskId_fileId_FileSenderMap.get(aTaskId);
                 List<Integer> aFileId = new ArrayList<>(aSenderMap.keySet());
                 for( Integer anId : aFileId ){
                     FileSender aSender = aSenderMap.get(anId);
@@ -338,7 +342,7 @@ public class FileMessageManager extends DataManager {
                 }
                 
                 //Remove from the map
-                theFileSenderMap.remove(aTaskId);
+                taskId_fileId_FileSenderMap.remove(aTaskId);
             }
         }
         
@@ -363,6 +367,25 @@ public class FileMessageManager extends DataManager {
         MaltegoStub theStub = MaltegoStub.getMaltegoStub();
         Function aFunc = theStub.getFunction();
         aFunc.fileReceived( taskId, fileLoc );
+    }
+
+    //===============================================================
+    /**
+     * 
+     * @param fileId
+     * @param fileSize 
+     */
+    public void updateFileSize(int fileId, long fileSize) {
+    
+        FileReceiver aFR;
+        synchronized( fileId_FileReceiverMap ){
+            aFR = fileId_FileReceiverMap.get(fileId);
+        }
+        
+        //Update size
+        if( aFR != null )
+            aFR.updateFileSize(fileSize);
+        
     }
     
 }

@@ -67,10 +67,11 @@ public final class PushFileAbort extends FileMessage {
      * Constructor
      *
      * @param passedChannelId
-     * @param passedId
+     * @param passedTaskId,
+     * @param passedFileId
     */
-    public PushFileAbort( int passedChannelId, int passedId ) {
-        super( passedChannelId, passedId );
+    public PushFileAbort( int passedChannelId, int passedTaskId, int passedFileId ) {
+        super( passedChannelId, passedTaskId, passedFileId );
     }
     
     // ==========================================================================
