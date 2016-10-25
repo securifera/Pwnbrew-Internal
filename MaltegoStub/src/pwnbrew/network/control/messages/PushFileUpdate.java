@@ -59,6 +59,26 @@ public final class PushFileUpdate extends FileMessage {
     //Class name
     private static final String NAME_Class = PushFileUpdate.class.getSimpleName();
     
+    
+   // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param destHostId
+     * @param passedChannelId
+     * @param passedTaskId
+     * @param passedFileId
+     * @param passedFileSize
+    */
+    public PushFileUpdate( int destHostId, int passedChannelId, int passedTaskId, int passedFileId, long passedFileSize ) {
+        super(destHostId, passedChannelId, passedTaskId, passedFileId );     
+
+        byte[] tempArr = SocketUtilities.longToByteArray(passedFileSize);
+        ControlOption aTlv = new ControlOption( OPTION_DATASIZE, tempArr);
+        addOption(aTlv);
+       
+    }
+    
     // ==========================================================================
     /**
      * Constructor
@@ -116,19 +136,15 @@ public final class PushFileUpdate extends FileMessage {
     public void evaluate( PortManager passedManager ) {
                 
         try {
-              
-            //If the return value is true
-            if( passedManager instanceof MaltegoStub ){
-
-                //Get the file manager
-                FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
-                if( theFileMM == null ){
-                    theFileMM = FileMessageManager.initialize( passedManager );
-                }
-
-                //Update the file receiver size
-                theFileMM.updateFileSize( fileId, fileSize );
+            
+            //Get the file manager
+            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+            if( theFileMM == null ){
+                theFileMM = FileMessageManager.initialize( passedManager );
             }
+
+            //Update the file receiver size
+            theFileMM.updateFileSize( fileId, fileSize );            
             
         } catch (IOException ex) {
             DebugPrinter.printMessage( NAME_Class, "evaluate", ex.getMessage(), ex); 

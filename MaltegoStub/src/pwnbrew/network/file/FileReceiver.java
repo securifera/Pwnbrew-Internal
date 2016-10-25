@@ -239,7 +239,7 @@ final public class FileReceiver {
             //Check for divide by zero
             if(theListener != null){
                 
-                int tempProgressInt = 0;
+                int tempProgressInt;
                 if(fileSize != 0){
                     double tempProgressDouble = (1.0 * fileByteCounter) / (1.0 * fileSize );
                     tempProgressInt = (int)Math.round(tempProgressDouble * 100.0);
@@ -274,12 +274,15 @@ final public class FileReceiver {
                     
                     //Make the array into a stream                   
                     ByteArrayInputStream bais = new ByteArrayInputStream( compFileByteArr );
-                    Inflater inflater = new Inflater(true);
+                    Inflater inflater = new Inflater();
                     
-                    //Unzip and write to file
-                    InflaterInputStream iis = new InflaterInputStream(bais, inflater, 2048);
-                    for (int c = iis.read(); c != -1; c = iis.read()) {
-                        aFileStream.write(c);
+                    try ( //Unzip and write to file
+                        InflaterInputStream iis = new InflaterInputStream(bais, inflater)) {
+                        byte[] buffer = new byte[32768];
+                        int len;
+                        while((len = iis.read(buffer)) > 0){
+                            aFileStream.write(buffer, 0, len);
+                        }
                     }
                     aFileStream.close();
                     

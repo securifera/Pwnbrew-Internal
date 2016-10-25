@@ -129,12 +129,9 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
 
             RemoteLog.log(Level.INFO, NAME_Class, "go()", ex.getMessage(), ex );
 
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager != null ){
-                //Send message to cleanup the file transfer on the client side
-                PushFileAbort fileAbortMsg = new PushFileAbort( channelId, taskId, fileId );
-                DataManager.send(thePortManager, fileAbortMsg);
-            }
+            //Send message to cleanup the file transfer on the client side
+            PushFileAbort fileAbortMsg = new PushFileAbort( channelId, taskId, fileId );
+            DataManager.send(thePortManager, fileAbortMsg);            
 
         }
         
@@ -239,41 +236,6 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
 
     }
 
-//    //===============================================================
-//    /**
-//     * 
-//     * @param lockOp 
-//     */
-//    @Override
-//    public synchronized void lockUpdate(int lockOp) {
-//        lockVal = lockOp;
-//        notifyAll();
-//    }
-    
-//    //===============================================================
-//    /**
-//     * 
-//     * @return  
-//     */
-//    @Override
-//    public synchronized int waitForLock() {
-//        
-//        int retVal;        
-//        while( lockVal == 0 && !shutdownRequested ){
-//            try {
-//                wait();
-//            } catch (InterruptedException ex) {
-//                continue;
-//            }
-//        }
-//        
-//        //Set to temp and reset
-//        retVal = lockVal;
-//        lockVal = 0;
-//        
-//        return retVal;
-//    }
-
     //=====================================================================
     /**
      * 
@@ -292,12 +254,12 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
         ByteArrayOutputStream baos = new ByteArrayOutputStream( (int) fileToBeSent.length());
         Deflater aDef = new Deflater();
         aDef.setLevel(Deflater.BEST_COMPRESSION);
-        DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(baos, aDef, 2048);
+        DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(baos, aDef );
 
         //Normal file send
         try {
             
-            byte[] readBuf = new byte[4096];
+            byte[] readBuf = new byte[32768];
             FileInputStream aFIS = new FileInputStream( fileToBeSent);
             try {                
                 int read;
@@ -316,6 +278,7 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
             }
 
             deflaterOutputStream.finish();
+            deflaterOutputStream.close();
                         
         } catch (IOException ex) {
             Logger.getLogger(FileSender.class.getName()).log(Level.SEVERE, null, ex);
@@ -327,13 +290,11 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
         int dstHostId = theFileAck.getSrcHostId();
         
         byte[] compressedBytes = baos.toByteArray();
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
-            //Send message to cleanup the file transfer on the client side
-            PushFileUpdate fileSizeUpdateMsg = new PushFileUpdate( ConnectionManager.COMM_CHANNEL_ID, taskId, fileId, compressedBytes.length );
-            fileSizeUpdateMsg.setDestHostId(dstHostId);
-            DataManager.send(thePortManager, fileSizeUpdateMsg);
-        }
+
+        //Send message update the file size to the compressed one
+        PushFileUpdate fileSizeUpdateMsg = new PushFileUpdate( ConnectionManager.COMM_CHANNEL_ID, taskId, fileId, compressedBytes.length );
+        fileSizeUpdateMsg.setDestHostId(dstHostId);
+        DataManager.send(thePortManager, fileSizeUpdateMsg);
     
         byte[] byteChunk = new byte[maxMsgLen];
         ByteBuffer fileChannelBB = ByteBuffer.wrap(compressedBytes);

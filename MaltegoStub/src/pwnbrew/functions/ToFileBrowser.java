@@ -349,57 +349,6 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             
             if( theTask.getListLength() == theTask.getFileCount() ){
 
-//                //Get the parent
-//                FileNode parentFileNode = null;
-//                DefaultMutableTreeNode parent = theTask.getParentNode();
-//                try {
-//                    parent.removeAllChildren();  // Remove Flag
-//                } catch( ArrayIndexOutOfBoundsException ex ){                    
-//                }
-//
-//                Object theParentObj = parent.getUserObject();
-//                if( theParentObj instanceof IconData ){
-//                    IconData theIconData = (IconData)theParentObj;
-//                    Object innerObj = theIconData.getObject();
-//                    if( innerObj instanceof FileNode ){
-//                        parentFileNode = (FileNode)innerObj;
-//                    }
-//                }
-//                
-//                //Clear node children
-//                if( parentFileNode != null )
-//                    parentFileNode.clearChildNodes();
-//
-//                List nodeList = theTask.getFileList();
-//                Collections.sort(nodeList);
-//
-//                for (Iterator it = nodeList.iterator(); it.hasNext();) {
-//                    
-//                    Object nodeList1 = it.next();
-//                    FileNode currentNode = (FileNode) nodeList1;
-//                    if( parentFileNode != null ){
-//                        parentFileNode.addChildNode(currentNode);
-//                    }
-//                    if ( currentNode.isDirectory() || currentNode.isDrive() ){
-//
-//                        IconData theIconData = new IconData( currentNode.getIcon(), currentNode.getExpandedIcon(), currentNode);
-//                        DefaultMutableTreeNode node = new DefaultMutableTreeNode(theIconData);
-//                        parent.add(node);
-//
-//                        if( currentNode.getSize() > 0)
-//                            node.add(new DefaultMutableTreeNode( true));
-//                        
-//                    }
-//                }
-//
-//                //Get the treepath
-//                DefaultMutableTreeNode aNode = parent;
-//                try {
-//                    parent.getFirstChild();       
-//                } catch(NoSuchElementException ex ){
-//                    aNode = (DefaultMutableTreeNode) parent.getParent();
-//                }
-
                 //Run in swing thread
                 //final FileNode theParentNode = parentFileNode;                                
                 final FileTreePanel theFileTreePanel = theFsFrame.getFileTreePanel();                

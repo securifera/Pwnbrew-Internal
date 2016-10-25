@@ -76,8 +76,6 @@ public class FileTreePanel extends JPanel {
     
     private final FileBrowserListener theFileBrowserListener; 
     private final JScrollPane theScrollPane = new JScrollPane();       
-
-//    protected JPopupMenu theJPopup;
     
     //Class name
     private static final String NAME_Class = FileTreePanel.class.getSimpleName();

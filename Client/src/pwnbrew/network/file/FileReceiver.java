@@ -45,13 +45,17 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.file;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.logging.Level;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 import pwnbrew.ClientConfig;
 import pwnbrew.Persistence;
 import pwnbrew.log.RemoteLog;
@@ -84,9 +88,10 @@ final public class FileReceiver {
     private int channelId = 0;
 //    private String fileHash = null;
     private final boolean compressed;
+    private ByteBuffer compBB;
     
     private FileOutputStream aFileStream = null;
-    private MessageDigest fileDigest = null;
+//    private MessageDigest fileDigest = null;
     
     private final FileMessageManager theFileMessageManager;
     private static final String NAME_Class = FileReceiver.class.getSimpleName();
@@ -125,10 +130,14 @@ final public class FileReceiver {
 //        fileHash = fileHashFileNameArr[0];
       
         //Create the file digest
-        fileDigest = MessageDigest.getInstance(Constants.HASH_FUNCTION);
+//        fileDigest = MessageDigest.getInstance(Constants.HASH_FUNCTION);
         
         //Ensure the parent directory exists
         Persistence.ensureDirectoryExists(parentDir);
+        
+        //create byte buffer
+        if( compressed )
+            compBB = ByteBuffer.allocate((int)fileSize);
 
         String filePath = fileHashFileNameArr[1];
         String fileName = filePath.substring( filePath.lastIndexOf("\\") + 1 );
@@ -218,9 +227,14 @@ final public class FileReceiver {
             }
 
             //Copy over the bytes
-            aFileStream.write(passedByteArray);
+            //Copy over the bytes
+            if( compressed ){
+                compBB.put(passedByteArray);
+            } else {
+                aFileStream.write(passedByteArray);
+            }
             fileByteCounter += passedByteArray.length;
-            fileDigest.update(passedByteArray);
+//            fileDigest.update(passedByteArray);
 //            DebugPrinter.printMessage(NAME_Class, "Receiving file, bytes: " + fileByteCounter);
             
             int tempProgressInt = 0;
@@ -243,6 +257,39 @@ final public class FileReceiver {
             //If the byte count has passed the file size than send a finished message
             //so the socket can be closed
             if(fileByteCounter >= fileSize){
+                
+                //Make sure to set the progress to 100
+                if(sndFileProgress != 100 ){
+                    sndFileProgress = 100;
+                    TaskProgress aProgMsg = new TaskProgress(taskId, sndFileProgress );
+                    aProgMsg.setDestHostId(srcHostId);
+                    DataManager.send( theFileMessageManager.getPortManager(), aProgMsg);
+                }
+                
+                //If compressed
+                if( compressed ){
+                    
+                    //Convert bytebuffer to array
+                    byte[] compFileByteArr = new byte[ compBB.position() ];
+                    compBB.flip();
+                    compBB.get( compFileByteArr, 0, compFileByteArr.length ); 
+                    compBB.clear();
+                    
+                    //Make the array into a stream                   
+                    ByteArrayInputStream bais = new ByteArrayInputStream( compFileByteArr );
+                    Inflater inflater = new Inflater();
+                    
+                    try ( //Unzip and write to file
+                        InflaterInputStream iis = new InflaterInputStream(bais, inflater)) {
+                        byte[] buffer = new byte[32768];
+                        int len;
+                        while((len = iis.read(buffer)) > 0){
+                            aFileStream.write(buffer, 0, len);
+                        }
+                    }
+                    aFileStream.close();
+                    
+                }
 
                 //Get the hash and reset it
 //                byte[] byteHash = fileDigest.digest();
