@@ -36,64 +36,77 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
+
+/*
+ *  Custom.java
+ *
+ */
+
 package pwnbrew.shell;
 
-import java.util.List;
-import javax.swing.JFrame;
+import java.util.Arrays;
+import java.util.concurrent.Executor;
 
 /**
  *
  *  
  */
-public interface ShellJPanelListener {
+public class Custom extends Shell {
     
+    public static String[] CMD_EXE_STR = new String[]{ "cmd", "/k"};
+    private static final String ENCODING = "UTF-8";
+    private static final String PROMPT_REGEX = "^[a-zA-Z]:(\\\\|(\\\\[^\\\\/:*\"<>|]+)+)>";
+     
+    // ==========================================================================
+    /**
+     *  Constructor
+     * 
+     * @param passedExecutor
+     * @param passedListener 
+     */
+    public Custom(Executor passedExecutor, ShellListener passedListener) {
+        super(passedExecutor, passedListener);
+    }
     
     // ==========================================================================
     /**
-     *  Spawns a shell given the cmd line string.
+     *  Get the command string
      * 
-     * @param passedShellClass 
+     * @return 
      */
-    public void spawnShell( Class passedShellClass );
+    @Override
+    public String[] getCommandStringArray(){                
+        return CMD_EXE_STR;
+    }
+    
+     // ==========================================================================
+    /**
+     *  Set the command string
+     * 
+     * @param passedArr 
+     */
+    public static void setCommandStringArray( String[] passedArr){                
+        CMD_EXE_STR = Arrays.copyOf(passedArr, passedArr.length);
+    }
 
     // ==========================================================================
     /**
-     *  Sends the input string to the shell
-     * 
-     * @param theStr 
-     */
-    public void sendInput(String theStr);
-
-    
-    //==========================================================================
-    /**
-     *  Get the list of available shell classes
+     *  Get character encoding.
      * 
      * @return 
      */
-    public List<Class> getShellList();
-
-     //==========================================================================
-    /**
-     *  Kill the shell
-     */
-    public void killShell();
+    @Override
+    public String getEncoding() {
+        return ENCODING;
+    }
     
-     //==========================================================================
+    // ==========================================================================
     /**
-     *  Get the Shell
+     * 
      * @return 
      */
-    public Shell getShell();
-    
-    
-      //==========================================================================
-    /**
-     *  Get the Jframe
-     * @return 
-     */
-    public JFrame getParentJFrame();
-    
-
-
+    @Override
+    public String toString(){
+        return "Custom";
+    }  
 }
