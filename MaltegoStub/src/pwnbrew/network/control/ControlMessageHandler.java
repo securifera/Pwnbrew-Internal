@@ -98,7 +98,7 @@ public class ControlMessageHandler extends DataHandler {
             @Override
             public void run() {
                 try { 
-                    aMessage.evaluate( theDataManager.getCommManager() );
+                    aMessage.evaluate( theDataManager.getPortManager() );
                 } catch (LoggableException ex) {
                     DebugPrinter.printMessage( NAME_Class, "run", ex.getMessage(), ex);         
                 }

@@ -131,13 +131,10 @@ abstract public class DataManager {
         switch(type){
             
             case Message.REGISTER_MESSAGE_TYPE:
-                break;
             case Message.STAGING_MESSAGE_TYPE:
-                break;
             case Message.CONTROL_MESSAGE_TYPE:
-                break;
             case Message.PROCESS_MESSAGE_TYPE:
-                break;
+            case Message.SOCKS_MESSAGE_TYPE:
             case Message.FILE_MESSAGE_TYPE:
                 break;            
             default:

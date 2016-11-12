@@ -218,7 +218,7 @@ public class FileMessageManager extends DataManager {
         int fileType = passedMessage.getFileType();
         switch(fileType){
             case PushFile.FILE_DOWNLOAD:
-                File aClientDir = theCommManager.getTaskManager().getDownloadDirectory();
+                File aClientDir = thePortManager.getTaskManager().getDownloadDirectory();
                 if( aClientDir != null )
                     libDir = new File(aClientDir, Integer.toString(taskId));
                 else
@@ -284,7 +284,7 @@ public class FileMessageManager extends DataManager {
      */
     public void sendFile(PushFileAck aMessage) {
         
-        FileSender aSender = new FileSender( getCommManager(), aMessage, StubConfig.getConfig().getSocketPort() );
+        FileSender aSender = new FileSender( getPortManager(), aMessage, StubConfig.getConfig().getSocketPort() );
         
         int taskId = aMessage.getTaskId();
         int fileId = aMessage.getFileId();
@@ -347,7 +347,7 @@ public class FileMessageManager extends DataManager {
         }
         
          //Clear the send buffer
-        PortRouter aPR = theCommManager.getPortRouter( StubConfig.getConfig().getSocketPort() );
+        PortRouter aPR = thePortManager.getPortRouter( StubConfig.getConfig().getSocketPort() );
         SocketChannelHandler aSCH = aPR.getSocketChannelHandler(clientId);
 
         //Set the wrapper

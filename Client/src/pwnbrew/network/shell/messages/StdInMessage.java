@@ -45,16 +45,11 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.shell.messages;
 
-import java.io.IOException;
-import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.log.LoggableException;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.shell.Shell;
-import pwnbrew.network.shell.ShellMessageManager;
 
 
 

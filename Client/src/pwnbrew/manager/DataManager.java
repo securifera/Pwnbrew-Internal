@@ -66,6 +66,7 @@ import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.shell.ShellMessageManager;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.socks.SocksMessageManager;
 import pwnbrew.utilities.DebugPrinter;
 /**
  *
@@ -127,14 +128,11 @@ abstract public class DataManager {
         boolean retVal = true;
         switch(type){
             
-            case Message.REGISTER_MESSAGE_TYPE:
-                break;
-            case Message.STAGING_MESSAGE_TYPE:
-                break;
-            case Message.CONTROL_MESSAGE_TYPE:
-                break;
-            case Message.PROCESS_MESSAGE_TYPE:
-                break;
+            case Message.REGISTER_MESSAGE_TYPE:                
+            case Message.STAGING_MESSAGE_TYPE:                
+            case Message.CONTROL_MESSAGE_TYPE:                
+            case Message.PROCESS_MESSAGE_TYPE:                
+            case Message.SOCKS_MESSAGE_TYPE:                
             case Message.FILE_MESSAGE_TYPE:
                 break;            
             default:
@@ -229,6 +227,12 @@ abstract public class DataManager {
                         aManager = ShellMessageManager.getShellMessageManager();
                         if( aManager == null){
                             aManager = ShellMessageManager.initialize(theCommManager);
+                        }
+                        break;
+                    case Message.SOCKS_MESSAGE_TYPE:
+                        aManager = SocksMessageManager.getSocksMessageManager();
+                        if( aManager == null){
+                            aManager = SocksMessageManager.initialize(theCommManager);
                         }
                         break;
                     case Message.FILE_MESSAGE_TYPE:

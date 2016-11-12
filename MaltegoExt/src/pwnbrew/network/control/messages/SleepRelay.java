@@ -39,6 +39,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.host.Host;
@@ -126,7 +127,10 @@ public class SleepRelay extends MaltegoMessage {
                 //Get the sleep time
                 List<String> theCheckInList = theHost.getCheckInList();
                 if( !theCheckInList.isEmpty() ){
-
+                    
+                    //TODO purge all times before now 
+                    //Sort first - Hopefully fixes wrong sleep getting pulled first
+                    Collections.sort(theCheckInList);
                     //Get the first time
                     String theCheckInTime = theCheckInList.get(0);
                     //Send sleep message

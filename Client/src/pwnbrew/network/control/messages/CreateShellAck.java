@@ -38,7 +38,7 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
-* KillShell.java
+* CreateShellAck.java
 *
 * Created on Oct 18, 2013, 10:12:33 PM
 */
@@ -70,4 +70,4 @@ public final class CreateShellAck extends ControlMessage{ // NO_UCD (use default
         addOption(aTlv);
     }
 
-}/* END CLASS KillShell */
+}/* END CLASS CreateShellAck */

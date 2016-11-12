@@ -67,7 +67,6 @@ import pwnbrew.network.socket.SecureSocketChannelWrapper;
 final public class AcceptHandler implements Selectable {
 
     private final ServerPortRouter theSPR;
-
     private static final String NAME_Class = AcceptHandler.class.getSimpleName();
   
     //===========================================================================
@@ -100,7 +99,8 @@ final public class AcceptHandler implements Selectable {
         }
 
         //Return if the socket is null
-        if (theSocketChannel == null) return;
+        if (theSocketChannel == null) 
+            return;
 
         //Get the source address - This is necessary - DO NOT REMOVE
         InetAddress srcAddr = theSocketChannel.socket().getInetAddress();

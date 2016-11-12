@@ -92,13 +92,6 @@ public class FileData extends Message {
         //Add the file byte value
         rtnBuffer.put( fileBytes );
         
-        //Add padding to put the data on a word boundary
-        int remainder = rtnBuffer.position() % (Integer.SIZE/Byte.SIZE);
-        if(remainder > 0){
-            byte[] paddArr = new byte[(Integer.SIZE/Byte.SIZE) - remainder];
-            rtnBuffer.put(paddArr, 0, paddArr.length );
-        }
-        
     }
     
     //===============================================================
@@ -140,11 +133,11 @@ public class FileData extends Message {
         //Add the options
         count += fileBytes.length;
 
-        //Add padding to put the data on a word boundary
-        int remainder = count % (Integer.SIZE/Byte.SIZE);
-        if(remainder > 0){
-            count += (Integer.SIZE/Byte.SIZE) - remainder;
-        }
+//        //Add padding to put the data on a word boundary
+//        int remainder = count % (Integer.SIZE/Byte.SIZE);
+//        if(remainder > 0){
+//            count += (Integer.SIZE/Byte.SIZE) - remainder;
+//        }
         
         //Set the length
         SocketUtilities.intToByteArray(length, count );
@@ -176,7 +169,7 @@ public class FileData extends Message {
        passedBuffer.get(theId, 0, theId.length);
        int fileId = SocketUtilities.byteArrayToInt(theId);
 
-       //Copy over the id
+       //Copy over the bytes
        byte[] theFileBytes = new byte[ passedBuffer.remaining() ];
        passedBuffer.get(theFileBytes, 0, theFileBytes.length);
 

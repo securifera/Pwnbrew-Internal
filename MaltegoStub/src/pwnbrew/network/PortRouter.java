@@ -177,18 +177,7 @@ abstract public class PortRouter {
         
         SocketChannelHandler theHandler = getSocketChannelHandler( clientId );
         if( theHandler != null ){
-            
-//            //If wrapping is necessary then wrap it
-//            if( theHandler.isWrapping() ){
-//                PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
-//                if( aWrapper != null ){                    
-//                    ByteBuffer aByteBuffer = aWrapper.wrapBytes( byteArr );  
-//                    byteArr = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
-//                } 
-//            }
-
-            theHandler.queueBytes(byteArr);
-            
+            theHandler.queueBytes(byteArr);            
         }
         
     }

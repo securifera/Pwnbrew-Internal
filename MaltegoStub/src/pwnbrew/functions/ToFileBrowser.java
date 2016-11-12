@@ -228,7 +228,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                 return;     
             }           
             
-            //Set up the port wrapper
+            //Setup skin
             theManager.initialize();
             
             //Connect to server

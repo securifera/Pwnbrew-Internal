@@ -155,7 +155,7 @@ public class ShellMessageHandler extends DataHandler {
             byte[] msgBytes = aMessage.getMsgBytes();  
             
             ShellMessageManager theManager = getDataManager();
-            PortManager theCommManager = theManager.getCommManager();
+            PortManager theCommManager = theManager.getPortManager();
             if( theCommManager instanceof MaltegoStub ){
            
                 MaltegoStub maltegoManager = (MaltegoStub)theCommManager;

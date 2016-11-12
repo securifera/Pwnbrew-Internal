@@ -38,6 +38,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.relay;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.log.Log;
@@ -49,6 +50,7 @@ import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.control.messages.RemoteException;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
@@ -138,11 +140,30 @@ public class RelayManager extends DataManager {
                 if( theHandler != null ){
                     theHandler.queueBytes(msgBytes);
                 } else {
+                    
+                    //Get the src id
+                    byte[] srcHostIdArr = Arrays.copyOfRange(msgBytes, Message.SRC_HOST_ID_OFFSET, Message.SRC_HOST_ID_OFFSET + 4);
+                    int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);
+                    
+                    //Send back error msg
+                    RemoteException exceptionMsg = new RemoteException(srcHostId, "");
+                    exceptionMsg.setChannelId(channelId);
+                                        
+                    aCM = srcPortRouter.getConnectionManager(srcHostId);
+                    if( aCM != null ){
+                        theHandler = aCM.getSocketChannelHandler( channelId );
+                        if( theHandler != null ){
+                            byte[] retBytes = exceptionMsg.getBytes();
+                            theHandler.queueBytes(retBytes);
+                        }                    
+                    }
+                    
                     Log.log( Level.SEVERE, NAME_Class, "handleMessage()", "No socket handler found for the given id.", null);    
+                    
                 }
             }
             
-        } catch (LoggableException ex) {
+        } catch (LoggableException | UnsupportedEncodingException ex) {
             Log.log( Level.SEVERE, NAME_Class, "handleMessage()", ex.getMessage(), ex);        
         }
         

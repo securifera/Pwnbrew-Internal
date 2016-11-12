@@ -113,27 +113,27 @@ public final class ListFiles extends Tasking {
     public void evaluate( PortManager passedManager ) {   
     
             
-            File theRemoteFile = new File(theFilePath);
-            File[] fileList = theRemoteFile.listFiles();
-            if( fileList != null && fileList.length != 0 ){
-                
-                //Send the count
-                ControlMessage aMsg = new DirCount(getTaskId(), fileList.length);
-                aMsg.setDestHostId( getSrcHostId() );
-                DataManager.send(passedManager, aMsg);
-                
-                //Send a message per file
-                for (File aFile : fileList) {
-                    aMsg = new FileSystemMsg( getTaskId(), aFile, false );
-                    aMsg.setDestHostId( getSrcHostId() );
-                    DataManager.send(passedManager, aMsg);
-                }
-                
-            } else {
-                FileSystemMsg aMsg = new FileSystemMsg( getTaskId(), null, false );
+        File theRemoteFile = new File(theFilePath);
+        File[] fileList = theRemoteFile.listFiles();
+        if( fileList != null && fileList.length != 0 ){
+
+            //Send the count
+            ControlMessage aMsg = new DirCount(getTaskId(), fileList.length);
+            aMsg.setDestHostId( getSrcHostId() );
+            DataManager.send(passedManager, aMsg);
+
+            //Send a message per file
+            for (File aFile : fileList) {
+                aMsg = new FileSystemMsg( getTaskId(), aFile, false );
                 aMsg.setDestHostId( getSrcHostId() );
                 DataManager.send(passedManager, aMsg);
             }
+
+        } else {
+            FileSystemMsg aMsg = new FileSystemMsg( getTaskId(), null, false );
+            aMsg.setDestHostId( getSrcHostId() );
+            DataManager.send(passedManager, aMsg);
+        }
     
     }
 
