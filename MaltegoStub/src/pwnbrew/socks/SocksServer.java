@@ -129,9 +129,9 @@ public class SocksServer extends ManagedRunnable {
         }
 
         //Main accept loop
-        while( theServerSocket != null && !finished()  ) {
+        while( theServerSocket != null && !finished()  )
             checkClientConnection();
-        }
+        
     }
 
     //=========================================================================

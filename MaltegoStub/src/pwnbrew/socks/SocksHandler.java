@@ -33,9 +33,7 @@ public class SocksHandler extends ManagedRunnable {
     
     private final int theDstId;
     private final int theChannelId;
-    
-//    private final Queue<byte[]> serverReceivedPackets = new LinkedList<>();
-    
+        
     public static final int DEFAULT_PROXY_TIMEOUT = 10;
     public static final int DEFAULT_BUF_SIZE = 4096;
 
@@ -172,14 +170,17 @@ public class SocksHandler extends ManagedRunnable {
                     relay();
                     break;
 
-                case Constants.SC_BIND:
-//                    comm.bind();
-//                    relay();
-                    DebugPrinter.printMessage( NAME_Class, "processRelay", "BIND not supported.", null );
-                    break;
+//                case Constants.SC_BIND:
+////                    comm.bind();
+////                    relay();
+//                    DebugPrinter.printMessage( NAME_Class, "processRelay", "SOCKS command not supported.", null );
+//                    break;
 
                 case Constants.SC_UDP:
                     comm.udp();
+                    break;
+                default:
+                    DebugPrinter.printMessage( NAME_Class, "processRelay", "SOCKS command not supported.", null );
                     break;
             }
         } catch( Exception ex )	{
@@ -239,7 +240,7 @@ public class SocksHandler extends ManagedRunnable {
         } catch( IOException ex ){
             DebugPrinter.printMessage( NAME_Class, "sendToClient()", ex.getMessage(), ex );  
 //            DebugLog.getInstance().error( "Sending data to client" );
-        }
+        } 
     }
 
     //=========================================================================
@@ -308,43 +309,6 @@ public class SocksHandler extends ManagedRunnable {
         return	dlen;
            
     }
-
-//    public synchronized	int checkServerData()	{
-//           
-//        // The client side is not opened.
-////        if( m_ServerInput == null )
-////            return -1;
-//
-//        int dlen=0;
-////        try {
-////            dlen = m_ServerInput.read(socketBuffer, 0, DEFAULT_BUF_SIZE );
-////        } catch( InterruptedIOException e ){
-////            return 0;
-////        } catch( IOException e )		{
-//////                DebugLog.getInstance().println( "Server connection Closed!" );
-////            close();	//	Close the server on this exception
-////            return -1;
-////        }
-////
-////        if( dlen < 0 )
-////            close();
-//
-//        return	dlen;
-//            
-//    }
-    
-    
-//    //=========================================================================
-//    /**
-//     * 
-//     * @param bytes 
-//     */
-//    public void queueSocksMsg(byte[] bytes) {
-//        synchronized(serverReceivedPackets){
-//            serverReceivedPackets.add(bytes);
-//        }
-//        beNotified();
-//    }
       
     //==========================================================================
     /**

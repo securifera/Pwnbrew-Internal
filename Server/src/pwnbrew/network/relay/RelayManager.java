@@ -141,12 +141,15 @@ public class RelayManager extends DataManager {
                     theHandler.queueBytes(msgBytes);
                 } else {
                     
+                    //Set error msg
+                    String errMsg = "No socket handler found for the given id.";
+                    
                     //Get the src id
                     byte[] srcHostIdArr = Arrays.copyOfRange(msgBytes, Message.SRC_HOST_ID_OFFSET, Message.SRC_HOST_ID_OFFSET + 4);
                     int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);
                     
                     //Send back error msg
-                    RemoteException exceptionMsg = new RemoteException(srcHostId, "");
+                    RemoteException exceptionMsg = new RemoteException(srcHostId, errMsg);
                     exceptionMsg.setChannelId(channelId);
                                         
                     aCM = srcPortRouter.getConnectionManager(srcHostId);
@@ -158,7 +161,7 @@ public class RelayManager extends DataManager {
                         }                    
                     }
                     
-                    Log.log( Level.SEVERE, NAME_Class, "handleMessage()", "No socket handler found for the given id.", null);    
+                    Log.log( Level.SEVERE, NAME_Class, "handleMessage()", errMsg, null);    
                     
                 }
             }

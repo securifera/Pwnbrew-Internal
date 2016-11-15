@@ -8,7 +8,7 @@ import java.net.Socket;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 
-public class Socks4Impl implements SocksCommonInterface {
+public class Socks4Impl {
     
     private static final String NAME_Class = Socks4Impl.class.getSimpleName();
     
@@ -102,10 +102,6 @@ public class Socks4Impl implements SocksCommonInterface {
     }
 
 
-    
-
-    //--- Reply Codes ---
-    @Override
     //========================================================================
     /**
      * 
@@ -113,7 +109,6 @@ public class Socks4Impl implements SocksCommonInterface {
     public byte getSuccessCode() {
         return 90;
     }
-    @Override
     
     //========================================================================
     /**
@@ -123,15 +118,6 @@ public class Socks4Impl implements SocksCommonInterface {
         return 91;
     }
     
-//    //========================================================================
-//    /**
-//     * 
-//     * @return 
-//     */
-//    public InetAddress getClientAddress(){
-//        return m_ClientIP;
-//    }
-    
     //========================================================================
     /**
      * 
@@ -140,16 +126,7 @@ public class Socks4Impl implements SocksCommonInterface {
     public InetAddress getServerAddress(){
         return m_ServerIP;
     }
-    
-//    //========================================================================
-//    /**
-//     * 
-//     * @return 
-//     */
-//    public int getClientPort(){ 
-//        return m_nClientPort;
-//    }
-    
+
     //========================================================================
     /**
      * 
@@ -195,7 +172,6 @@ public class Socks4Impl implements SocksCommonInterface {
      * @param SOCKS_Ver
      * @throws Exception 
      */
-    @Override
     public void authenticate( byte SOCKS_Ver ) throws Exception {
         SOCKS_Version = SOCKS_Ver;
     }
@@ -205,7 +181,6 @@ public class Socks4Impl implements SocksCommonInterface {
      * 
      * @throws Exception 
      */
-    @Override
     public void	getClientCommand() throws Exception {
        
         // Version was get in method Authenticate()
@@ -242,7 +217,6 @@ public class Socks4Impl implements SocksCommonInterface {
      * 
      * @param ReplyCode 
      */
-    @Override
     public void replyCommand( byte ReplyCode ){
         
         DebugPrinter.printMessage( NAME_Class , "getClientCommand", "Socks 4 reply: \""+replyName( ReplyCode)+"\"", null );
@@ -276,7 +250,6 @@ public class Socks4Impl implements SocksCommonInterface {
      * 
      * @throws Exception 
      */
-    @Override
     public void	connect() throws Exception {
 
 //        DebugPrinter.printMessage( NAME_Class , "connect","Connecting...", null );
@@ -292,153 +265,10 @@ public class Socks4Impl implements SocksCommonInterface {
         replyCommand( getSuccessCode() );
     }	
 
-//    //==========================================================================
-//    /**
-//     * 
-//     * @param ReplyCode
-//     * @param IA
-//     * @param PT
-//     * @throws IOException 
-//     */
-//    @Override
-//    public void bindReply( byte ReplyCode, InetAddress IA, int PT ) throws IOException {
-//        byte	IP[] = {0,0,0,0};
-//
-//        DebugPrinter.printMessage( NAME_Class, "Reply to Client : \""+replyName( ReplyCode )+"\"" );
-//
-//        byte[] REPLY = new byte[8];
-//        if( IA != null )
-//            IP = IA.getAddress();
-//
-//        REPLY[0]= 0;
-//        REPLY[1]= ReplyCode;
-//        REPLY[2]= (byte)((PT & 0xFF00) >> 8);
-//        REPLY[3]= (byte) (PT & 0x00FF);
-//        REPLY[4]= IP[0];
-//        REPLY[5]= IP[1];
-//        REPLY[6]= IP[2];
-//        REPLY[7]= IP[3];
-//
-////        if( m_Parent.isActive() ){
-//            m_Parent.sendToClient( REPLY );
-////        } else {
-////            DebugPrinter.printMessage( NAME_Class, "Closed BIND Client Connection" );
-////        }
-//        
-//    } 
-
-    //==========================================================================
+    //========================================================================
     /**
      * 
-     * @return 
      */
-    public InetAddress resolveExternalLocalIP() {
-
-        InetAddress IP = null;
-//        if( m_ExtLocalIP != null ){
-//            Socket	sct = null;
-//            try	{
-//                sct = new Socket( m_ExtLocalIP, m_Parent.getSocksServer().getPort() );
-//                IP = sct.getLocalAddress();
-//                sct.close();
-//                return m_ExtLocalIP;
-//            } catch( IOException e )	{
-//                DebugPrinter.printMessage( NAME_Class, "WARNING !!! THE LOCAL IP ADDRESS WAS CHANGED !" );
-//            }
-//        }
-
-        String[] hosts = {"www.microsoft.com","www.google.com","www.bing.com","www.yahoo.com"};
-        for( int i=0;i<hosts.length;i++ ){
-            try	{
-                Socket sct = new Socket( InetAddress.getByName(hosts[i]),80 );
-                IP = sct.getLocalAddress();
-                sct.close();
-                break;
-            } catch( Exception e )	{  // IP == null
-                DebugPrinter.printMessage( NAME_Class, "resolveExternalLocalIP", "Error in BIND() - BIND reip Failed at "+i, null );
-            }
-        }
-
-        m_ExtLocalIP = IP;
-        return	IP;
-    }
-
-    
-//    //==========================================================================
-//    /**
-//     * 
-//     * @throws IOException 
-//     */
-//    @Override
-//    public void	bind() throws IOException {
-//        
-//        ServerSocket ssock = null;
-//        InetAddress MyIP = null;
-//        int MyPort = 0;
-//
-//        DebugPrinter.printMessage( NAME_Class, "Binding..." );
-//        // Resolve External IP
-//        MyIP = resolveExternalLocalIP();
-//
-//        DebugPrinter.printMessage( NAME_Class, "Local IP : " + MyIP.toString() );
-//
-//        try {	
-//            ssock = new ServerSocket( 0 );
-//            ssock.setSoTimeout( Constants.DEFAULT_PROXY_TIMEOUT );
-//            MyPort = ssock.getLocalPort();
-//        } catch( IOException e )	{  // MyIP == null
-//            DebugPrinter.printMessage( NAME_Class, "Error in BIND() - Can't BIND at any Port" );
-//            bindReply( (byte)92, MyIP,MyPort );
-//            ssock.close();
-//            return;
-//        }
-//
-//        DebugPrinter.printMessage( NAME_Class, "BIND at : <"+MyIP.toString()+":"+MyPort+">" );
-//        bindReply( (byte)90, MyIP, MyPort );
-//
-//        Socket	socket = null;
-//
-//        while( socket == null )
-//        {
-//            if( m_Parent.checkClientData() >= 0 ) {
-//                DebugPrinter.printMessage( NAME_Class, "BIND - Client connection closed" );
-//                ssock.close();
-//                return;
-//            }
-//
-//            try {
-//                socket = ssock.accept();
-//                socket.setSoTimeout( Constants.DEFAULT_PROXY_TIMEOUT );
-//            } catch( InterruptedIOException e ) {
-//                socket.close();
-//            }
-//            Thread.yield();
-//        }
-//
-//
-///*		if( socket.getInetAddress() != m_m_ServerIP )	{
-//                BIND_Reply( (byte)91,	socket.getInetAddress(), 
-//                                                                socket.getPort() );
-//                Log.Warning( m_Server, "BIND Accepts different IP/P" );
-//                m_Server.Close();
-//                return;
-//        }
-//*/		
-//
-//        m_ServerIP = socket.getInetAddress();
-//        m_nServerPort = socket.getPort();
-//
-//        bindReply( (byte)90, socket.getInetAddress(), socket.getPort() );
-//
-//        m_Parent.m_ServerSocket = socket;
-//        m_Parent.prepareServer();
-//
-//        DebugPrinter.printMessage( NAME_Class, "BIND Connection from "+ m_ServerIP.getHostAddress() + ":" + m_nServerPort );
-//        ssock.close();
-//
-//    }
-    
-
     public void udp() throws IOException {
         DebugPrinter.printMessage(UID, "udp","Error - Socks 4 don't support UDP Association!", null );
         DebugPrinter.printMessage(UID, "udp","Check your Software please...", null );

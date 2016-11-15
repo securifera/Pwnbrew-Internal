@@ -41,6 +41,7 @@ package pwnbrew.network.control.messages;
 import java.util.Arrays;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.Utilities;
 
@@ -107,6 +108,8 @@ public final class ClassRequest extends ControlMessage{
     */
     @Override
     public void evaluate( PortManager passedManager ) {
+        
+        DebugPrinter.printMessage(NAME_Class, "Received request for class: " + theClassPath);
         
         //Get the address and connect                   
         byte[] retBytes = Utilities.getClassBytes(theClassPath);

@@ -158,9 +158,11 @@ public final class SocksOperation extends ControlMessage{
             SocksServer aSS = theSMM.getSocksServer();
             
             //Get the socks handler
-            SocksHandler aSH = aSS.removeSocksHandler(theHandlerId);   
-            if( aSH != null )
-                aSH.close();
+            if( aSS != null){
+                SocksHandler aSH = aSS.removeSocksHandler(theHandlerId);   
+                if( aSH != null )
+                    aSH.close();
+            }
             
         }
         

@@ -164,7 +164,7 @@ public class SocksMessageManager extends DataManager {
     public void stopSocksServer() {
         //Close server
         if( theSocksServer != null ){
-            theSocksServer.close();
+            theSocksServer.shutdown();
             theSocksServer = null;
         }
     }

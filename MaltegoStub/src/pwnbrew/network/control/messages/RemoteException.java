@@ -43,8 +43,6 @@ import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.xml.maltego.MaltegoMessage;
-import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
  *
@@ -89,6 +87,15 @@ public final class RemoteException extends ControlMessage{ // NO_UCD (use defaul
         
         return retVal;
     }  
+    
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public String getMessage(){
+        return theExceptionMsg;
+    }
     
     //===============================================================
     /**

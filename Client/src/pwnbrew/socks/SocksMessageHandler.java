@@ -158,7 +158,7 @@ public class SocksMessageHandler extends DataHandler {
             if( theSocksHandler != null ){
                 theSocksHandler.sendToServer(aMessage.getSocksBytes());
             } else {
-                RemoteLog.log(Level.INFO, NAME_Class, "receiveByteArray()", "No file receiver for the specified id.", null); 
+                RemoteLog.log(Level.INFO, NAME_Class, "receiveByteArray()", "No socks handler for the specified id.", null); 
             }
             
         } catch (LoggableException ex) {

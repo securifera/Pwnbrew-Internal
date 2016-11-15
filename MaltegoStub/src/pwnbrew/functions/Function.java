@@ -231,19 +231,17 @@ abstract public class Function {
     //===============================================================
     /**
      * 
-     * @param aThis 
+     * @param passedMsg 
      */
-    public void handleException(RemoteException aThis ) {
+    public void handleException(RemoteException passedMsg ) {
         
-        MaltegoMessage aMsg = getMaltegoMsg();
-            
         //Create a relay object
-        pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( theExceptionMsg );
-        MaltegoTransformExceptionMessage malMsg = aMsg.getExceptionMessage();
+        pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( passedMsg.getMessage() );
+        MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
 
         //Create the message list
         malMsg.getExceptionMessages().addExceptionMessage(exMsg); 
-        System.out.println( aMsg.getXml() );
+        System.out.println( theReturnMsg.getXml() );
         
     }
 }
