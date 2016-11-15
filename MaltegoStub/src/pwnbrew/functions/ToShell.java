@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import pwnbrew.MaltegoStub;
@@ -61,6 +62,7 @@ import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.RemoteException;
 import pwnbrew.output.StreamReceiver;
 import pwnbrew.shell.Bash;
 import pwnbrew.shell.CommandPrompt;
@@ -383,6 +385,24 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
         
         
         return retDir;
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @param aMsg 
+     */
+    @Override
+    public void handleException(RemoteException aMsg ) {
+        super.handleException(aMsg); 
+        
+        //Set the component back
+        ShellJPanel aPanel = (ShellJPanel) getParentComponent();
+        aPanel.disablePanel(true);
+        
+        //Show popup
+        JOptionPane.showMessageDialog( aPanel, "Server is not connected to the Host.","Error", JOptionPane.ERROR_MESSAGE );
+                
     }
 
     //========================================================================

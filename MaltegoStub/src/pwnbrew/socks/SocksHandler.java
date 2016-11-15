@@ -159,7 +159,8 @@ public class SocksHandler extends ManagedRunnable {
                     DebugPrinter.printMessage( NAME_Class, "processRelay","Invalid SOKCS version : "+SOCKS_Version, null );
                     return;
             }
-            DebugPrinter.printMessage( NAME_Class, "processRelay","Accepted SOCKS "+SOCKS_Version+" Request.", null );
+            
+            //DebugPrinter.printMessage( NAME_Class, "processRelay","Accepted SOCKS "+SOCKS_Version+" Request.", null );
 
             comm.authenticate( SOCKS_Version );
             comm.getClientCommand();

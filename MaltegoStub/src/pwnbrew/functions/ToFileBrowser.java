@@ -93,10 +93,12 @@ import pwnbrew.network.control.messages.FileSystemMsg;
 import pwnbrew.network.control.messages.GetDrives;
 import pwnbrew.network.control.messages.ListFiles;
 import pwnbrew.network.control.messages.PushFile;
+import pwnbrew.network.control.messages.RemoteException;
 import pwnbrew.network.control.messages.TaskGetFile;
 import pwnbrew.network.control.messages.TaskStatus;
 import pwnbrew.network.control.messages.Tasking;
 import pwnbrew.network.file.FileMessageManager;
+import pwnbrew.shell.ShellJPanel;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
@@ -1151,5 +1153,23 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             theRemoteFileSystemTaskMap.clear();
         }
     }
+    
+     //===============================================================
+    /**
+     * 
+     * @param aMsg 
+     */
+    @Override
+    public void handleException(RemoteException aMsg ) {
+        super.handleException(aMsg); 
+        
+        //Cancel
+        cancelOperation();
+                
+        //Show popup
+        JOptionPane.showMessageDialog( theFsFrame, "Server is not connected to the Host.","Error", JOptionPane.ERROR_MESSAGE );
+                
+    }
+
 
 }

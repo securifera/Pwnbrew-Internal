@@ -4,7 +4,6 @@ package	pwnbrew.socks;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 
@@ -23,9 +22,6 @@ public class Socks4Impl {
     //-------------------
     protected InetAddress m_ServerIP = null;
     protected int m_nServerPort = 0;
-
-//    protected InetAddress m_ClientIP = null;
-//    protected int m_nClientPort = 0;
 
     public InetAddress m_ExtLocalIP	= null;
     	
@@ -105,6 +101,7 @@ public class Socks4Impl {
     //========================================================================
     /**
      * 
+     * @return 
      */
     public byte getSuccessCode() {
         return 90;
@@ -113,6 +110,7 @@ public class Socks4Impl {
     //========================================================================
     /**
      * 
+     * @return 
      */
     public byte getFailCode(){
         return 91;
@@ -209,7 +207,7 @@ public class Socks4Impl {
             throw new Exception( "Socks 4 - Unknown Host/IP address '"+m_ServerIP.toString() );
         }
 
-        DebugPrinter.printMessage( NAME_Class , "getClientCommand", "Accepted SOCKS 4 Command: \""+ commName( socksCommand )+"\"", null );
+        //DebugPrinter.printMessage( NAME_Class , "getClientCommand", "Accepted SOCKS 4 Command: \""+ commName( socksCommand )+"\"", null );
     } 
     
     //=========================================================================
@@ -268,6 +266,7 @@ public class Socks4Impl {
     //========================================================================
     /**
      * 
+     * @throws java.io.IOException
      */
     public void udp() throws IOException {
         DebugPrinter.printMessage(UID, "udp","Error - Socks 4 don't support UDP Association!", null );

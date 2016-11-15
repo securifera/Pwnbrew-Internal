@@ -46,6 +46,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.manager;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,6 +62,7 @@ import pwnbrew.network.PortRouter;
 import pwnbrew.network.PortWrapper;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.RemoteException;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
@@ -276,26 +278,49 @@ abstract public class DataManager {
             
             ServerConfig aConf = ServerConfig.getServerConfig();
             int serverPort = aConf.getSocketPort();
+            int srcHostId = passedMessage.getSrcHostId();
             int destClientId = passedMessage.getDestHostId();
             int channelId = passedMessage.getChannelId();
             
             //Try the default port router
-            PortRouter thePR = passedCommManager.getPortRouter( serverPort );
-            ConnectionManager aCM = thePR.getConnectionManager(destClientId);
+            PortRouter defaultPortRouter = passedCommManager.getPortRouter( serverPort );
+            ConnectionManager aCM = defaultPortRouter.getConnectionManager(destClientId);
             if( aCM == null ){
                 RelayManager aRelayManager = RelayManager.getRelayManager();
                 if( aRelayManager != null ){
-                    thePR = aRelayManager.getServerPorterRouter();
-                    aCM = thePR.getConnectionManager(destClientId);                
+                    PortRouter relayPortRouter = aRelayManager.getServerPorterRouter();
+                    aCM = relayPortRouter.getConnectionManager(destClientId);                
                 }
             }
             
             //Get the socket handler
             if( aCM != null ){
                 SocketChannelHandler theHandler = aCM.getSocketChannelHandler(channelId);
-                if( theHandler == null ){
-                    Log.log( Level.SEVERE, NAME_Class, "send()", "Not connected to the specified client.", null);      
-                    return;
+                if( theHandler == null ){  
+                    
+                    try {
+                        //Set error msg
+                        String errMsg = "No socket handler found for the given channel id.";
+
+                        //Send back error msg
+                        RemoteException exceptionMsg = new RemoteException(srcHostId, errMsg);
+                        exceptionMsg.setChannelId(channelId);
+
+                        aCM = defaultPortRouter.getConnectionManager(srcHostId);
+                        if( aCM != null ){
+                            theHandler = aCM.getSocketChannelHandler( channelId );
+                            if( theHandler != null ){
+                                byte[] retBytes = exceptionMsg.getBytes();
+                                theHandler.queueBytes(retBytes);
+                            }                    
+                        }                    
+
+                        Log.log( Level.SEVERE, NAME_Class, "send()", errMsg, null);      
+                        return;
+                        
+                    } catch ( UnsupportedEncodingException ex) {
+                        Log.log( Level.SEVERE, NAME_Class, "handleMessage()", ex.getMessage(), ex);        
+                    }
                 } 
 
                 ByteBuffer aByteBuffer;
