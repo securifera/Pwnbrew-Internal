@@ -32,8 +32,8 @@ public class Utils {
 			if( i<3 )	sIA += ".";
 		}
 		
-		try	{
-			IA = InetAddress.getByName( sIA );
+		try {
+                    IA = InetAddress.getByName( sIA );
 		}
 		catch( UnknownHostException e )	{
 			return null;

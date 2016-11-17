@@ -49,7 +49,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.DataManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.control.ControlMessageManager;
@@ -153,19 +152,31 @@ public class SocksMessageHandler extends DataHandler {
             int theHandlerId = aMessage.getHandlerId();
             SocksServer theSS = theSocksManager.getSocksServer();
             if( theSS != null ){
+                
                 SocksHandler theSocksHandler = theSS.getSocksHandler(theHandlerId);
                 if( theSocksHandler != null ){
-                    theSocksHandler.sendToClient(aMessage.getSocksBytes());
-                } else {
+                    byte[] retBytes = aMessage.getSocksBytes();
+                    if( retBytes.length != 0 ){
+                        if( theSocksHandler.sendToClient(retBytes, retBytes.length ))
+                            return;
+                    }                    
+                    
+                    DebugPrinter.printMessage( NAME_Class, "close", "Socket closed or received notifcation to close.", null );
+                    
+                    //Close the handler
+                    SocksHandler aSH = theSS.removeSocksHandler(theHandlerId);  
+                    aSH.close();
+                    
+                } 
 
-                    //Get the control message manager
-                    ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                    //Send message close that handler
-                    SocksOperation aSocksMsg = new SocksOperation( aMessage.getSrcHostId(), SocksOperation.HANDLER_STOP, theHandlerId );
-                    aCMManager.send(aSocksMsg );
+                //Get the control message manager
+                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+                //Send message close that handler
+                SocksOperation aSocksMsg = new SocksOperation( aMessage.getSrcHostId(), SocksOperation.HANDLER_STOP, theHandlerId );
+                aCMManager.send(aSocksMsg );
 
-                    DebugPrinter.printMessage( NAME_Class, "receiveByteArray()", "No file receiver for the specified id.", null); 
-                }
+                    //DebugPrinter.printMessage( NAME_Class, "receiveByteArray()", "No file receiver for the specified id.", null); 
+                
             }
             
         } catch (LoggableException ex) {

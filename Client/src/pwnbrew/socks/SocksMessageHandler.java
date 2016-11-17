@@ -156,7 +156,8 @@ public class SocksMessageHandler extends DataHandler {
             int theHandlerId = aMessage.getHandlerId();
             SocksHandler theSocksHandler = theSocksManager.getSocksHandler(aMessage.getSrcHostId(), theHandlerId);
             if( theSocksHandler != null ){
-                theSocksHandler.sendToServer(aMessage.getSocksBytes());
+                byte[] recvBytes = aMessage.getSocksBytes();
+                theSocksHandler.sendToServer(recvBytes, recvBytes.length);
             } else {
                 RemoteLog.log(Level.INFO, NAME_Class, "receiveByteArray()", "No socks handler for the specified id.", null); 
             }

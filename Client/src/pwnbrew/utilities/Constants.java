@@ -94,7 +94,7 @@ abstract public class Constants {
     public static final byte SOCKS4_Version = 0x04;
          
     public static final int DEFAULT_PROXY_TIMEOUT = 10;
-    public static final int DEFAULT_BUF_SIZE = 4096;
+    public static final int DEFAULT_SOCKS_BUFFER_SIZE = 65500;
     public static final int MAX_ADDR_LEN = 255;
     
     public static byte SRE_Refuse[] = { (byte)0x05, (byte)0xFF };

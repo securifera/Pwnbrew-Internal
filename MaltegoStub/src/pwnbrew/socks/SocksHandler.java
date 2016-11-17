@@ -28,14 +28,14 @@ public class SocksHandler extends ManagedRunnable {
     private final Socket theClientSocket;
     
     public byte[] socketBuffer		= null;
-    public InputStream m_ClientInput	= null;
-    public OutputStream m_ClientOutput	= null;
+    public InputStream theClientInputStream	= null;
+    public OutputStream theClientOutputStream	= null;
     
     private final int theDstId;
     private final int theChannelId;
         
     public static final int DEFAULT_PROXY_TIMEOUT = 10;
-    public static final int DEFAULT_BUF_SIZE = 4096;
+    public static final int DEFAULT_SOCKS_BUFFER_SIZE = 65500;;
 
     //========================================================================
     /**
@@ -63,7 +63,7 @@ public class SocksHandler extends ManagedRunnable {
             }
         }
 
-        socketBuffer = new byte[ DEFAULT_BUF_SIZE ];
+        socketBuffer = new byte[ DEFAULT_SOCKS_BUFFER_SIZE ];
 //        DebugLog.getInstance().println( "Proxy Created." );
     }
     
@@ -102,6 +102,8 @@ public class SocksHandler extends ManagedRunnable {
 
         processRelay();
 
+        //DebugPrinter.printMessage( NAME_Class, "close", "Shutting down Sockshandler thread.", null );
+        
         //Close
         close();
     }
@@ -110,7 +112,7 @@ public class SocksHandler extends ManagedRunnable {
     /**
      * 
      */
-    public void relay(){
+    public void readLoop(){
         
         waitToBeNotified();
         while( !theClientSocket.isClosed() && !finished() ){
@@ -152,9 +154,9 @@ public class SocksHandler extends ManagedRunnable {
                 case Constants.SOCKS4_Version:
                     comm = new Socks4Impl( this );
                     break;
-//                case Constants.SOCKS5_Version:	
-//                    comm = new Socks5Impl( this );	
-//                    break;
+                case Constants.SOCKS5_Version:	
+                    comm = new Socks5Impl( this );	
+                    break;
                 default:	
                     DebugPrinter.printMessage( NAME_Class, "processRelay","Invalid SOKCS version : "+SOCKS_Version, null );
                     return;
@@ -168,7 +170,7 @@ public class SocksHandler extends ManagedRunnable {
             switch ( comm.socksCommand ){
                 case Constants.SC_CONNECT:
                     comm.connect();
-                    relay();
+                    readLoop();
                     break;
 
 //                case Constants.SC_BIND:
@@ -195,11 +197,14 @@ public class SocksHandler extends ManagedRunnable {
      */
     public void close()	{
         
+        
+        //DebugPrinter.printMessage( NAME_Class, "close", "Closing socket.", null );
+        
         //Close all of the streams
         try {
-            if( m_ClientOutput != null ){
-                m_ClientOutput.flush();
-                m_ClientOutput.close();
+            if( theClientOutputStream != null ){
+                theClientOutputStream.flush();
+                theClientOutputStream.close();
             }
         } catch( IOException e ){
         }
@@ -214,34 +219,45 @@ public class SocksHandler extends ManagedRunnable {
 //            DebugLog.getInstance().println( "Proxy Closed." );
     }
 
-    //=========================================================================
-    /**
-     * 
-     * @param buffer 
-     */
-    public void sendToClient( byte[] buffer )	{
-        sendToClient( buffer, buffer.length );
-    }
+//    //=========================================================================
+//    /**
+//     * 
+//     * @param buffer 
+//     */
+//    public void sendToClient( byte[] buffer )	{
+//        sendToClient( buffer, buffer.length );
+//    }
 
     //=========================================================================
     /**
      * 
      * @param buffer
      * @param len 
+     * @return  
      */
-    public void sendToClient( byte[] buffer, int len )	{
-        if( m_ClientOutput == null )	
-            return;
+    public boolean sendToClient( byte[] buffer, int len )	{
+        
+        if( theClientSocket.isClosed() ){
+            DebugPrinter.printMessage( NAME_Class, "sendToClient()", "Unable to send, socket closed.", null );  
+            return false;
+        }
+            
+        if( theClientOutputStream == null )	
+            return false;
         if( len <= 0 || len > buffer.length )
-            return;
+            return false;
 
         try {
-            m_ClientOutput.write( buffer, 0, len );
-            m_ClientOutput.flush();
+            theClientOutputStream.write( buffer, 0, len );
+            theClientOutputStream.flush();
         } catch( IOException ex ){
             DebugPrinter.printMessage( NAME_Class, "sendToClient()", ex.getMessage(), ex );  
 //            DebugLog.getInstance().error( "Sending data to client" );
-        } 
+            return false;
+        }
+        
+        return true;
+       
     }
 
     //=========================================================================
@@ -276,8 +292,8 @@ public class SocksHandler extends ManagedRunnable {
             return false;
 
         try {
-            m_ClientInput = theClientSocket.getInputStream();
-            m_ClientOutput= theClientSocket.getOutputStream();
+            theClientInputStream = theClientSocket.getInputStream();
+            theClientOutputStream= theClientSocket.getOutputStream();
         } catch( IOException ex )	{
             DebugPrinter.printMessage( NAME_Class, "prepareClient()", ex.getMessage(), ex ); 
             return false;
@@ -293,12 +309,12 @@ public class SocksHandler extends ManagedRunnable {
     public synchronized	int checkClientData()	{
             
         //The client side is not opened.
-        if( m_ClientInput == null )
+        if( theClientInputStream == null )
             return -1;
 
         int dlen;
         try {
-            dlen = m_ClientInput.read(socketBuffer, 0, DEFAULT_BUF_SIZE );
+            dlen = theClientInputStream.read(socketBuffer, 0, DEFAULT_SOCKS_BUFFER_SIZE );
         } catch( InterruptedIOException e ){
             return 0;
         } catch( IOException e )		{
@@ -322,7 +338,7 @@ public class SocksHandler extends ManagedRunnable {
         while( theClientSocket != null ) {
 
             try	{
-                b = m_ClientInput.read();
+                b = theClientInputStream.read();
             } catch( InterruptedIOException e )		{
                 Thread.yield();
                 continue;

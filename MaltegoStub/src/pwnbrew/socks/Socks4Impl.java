@@ -20,7 +20,7 @@ public class Socks4Impl {
     public String UID = "";
 
     //-------------------
-    protected InetAddress m_ServerIP = null;
+    protected String m_ServerAddr = null;
     protected int m_nServerPort = 0;
 
     public InetAddress m_ExtLocalIP	= null;
@@ -121,8 +121,8 @@ public class Socks4Impl {
      * 
      * @return 
      */
-    public InetAddress getServerAddress(){
-        return m_ServerIP;
+    public String getServerAddress(){
+        return m_ServerAddr;
     }
 
     //========================================================================
@@ -142,10 +142,11 @@ public class Socks4Impl {
     public boolean calculateAddress() {
 
         // IP v4 Address Type
-        m_ServerIP = Utils.getInstance().calcInetAddress( DST_Addr );
+        InetAddress serverInet = Utils.getInstance().calcInetAddress( DST_Addr );
+        m_ServerAddr = serverInet.getHostAddress();
         m_nServerPort = Utils.getInstance().calcPort( DST_Port[0], DST_Port[1] );
 
-        return ( (m_ServerIP != null) && (m_nServerPort >= 0) );
+        return ( (m_ServerAddr != null) && (m_nServerPort >= 0) );
     }							
     
     //=========================================================================
@@ -204,7 +205,7 @@ public class Socks4Impl {
 
         if( !calculateAddress() ){  // Gets the IP Address 
             refuseCommand( (byte)92 );	// Host Not Exists...
-            throw new Exception( "Socks 4 - Unknown Host/IP address '"+m_ServerIP.toString() );
+            throw new Exception( "Socks 4 - Unknown Host/IP address '"+m_ServerAddr.toString() );
         }
 
         //DebugPrinter.printMessage( NAME_Class , "getClientCommand", "Accepted SOCKS 4 Command: \""+ commName( socksCommand )+"\"", null );
@@ -217,19 +218,19 @@ public class Socks4Impl {
      */
     public void replyCommand( byte ReplyCode ){
         
-        DebugPrinter.printMessage( NAME_Class , "getClientCommand", "Socks 4 reply: \""+replyName( ReplyCode)+"\"", null );
+//        DebugPrinter.printMessage( NAME_Class , "getClientCommand", "Socks 4 reply: \""+replyName( ReplyCode)+"\"", null );
 
-        byte[] REPLY = new byte[8];
-        REPLY[0]= 0;
-        REPLY[1]= ReplyCode;
-        REPLY[2]= DST_Port[0];
-        REPLY[3]= DST_Port[1];
-        REPLY[4]= DST_Addr[0];
-        REPLY[5]= DST_Addr[1];
-        REPLY[6]= DST_Addr[2];
-        REPLY[7]= DST_Addr[3];
+        byte[] retBytes = new byte[8];
+        retBytes[0]= 0;
+        retBytes[1]= ReplyCode;
+        retBytes[2]= DST_Port[0];
+        retBytes[3]= DST_Port[1];
+        retBytes[4]= DST_Addr[0];
+        retBytes[5]= DST_Addr[1];
+        retBytes[6]= DST_Addr[2];
+        retBytes[7]= DST_Addr[3];
 
-        m_Parent.sendToClient( REPLY );
+        m_Parent.sendToClient( retBytes, retBytes.length );
     } 
 
     //=========================================================================
@@ -253,10 +254,10 @@ public class Socks4Impl {
 //        DebugPrinter.printMessage( NAME_Class , "connect","Connecting...", null );
 //        //Connect to the Remote Host
         try{
-            m_Parent.connectToServer( m_ServerIP.getHostAddress(), m_nServerPort );
+            m_Parent.connectToServer(m_ServerAddr, m_nServerPort );
         } catch( IOException e )	{
             refuseCommand( getFailCode() ); // Connection Refused
-            throw new Exception("Socks 4 - Can't connect to " + m_ServerIP.getHostAddress() + ":" + m_nServerPort );
+            throw new Exception("Socks 4 - Can't connect to " + m_ServerAddr + ":" + m_nServerPort );
         }
 //
 //        DebugPrinter.printMessage( NAME_Class, "Connected to "+ m_ServerIP.getHostAddress() + ":" + m_nServerPort );
