@@ -53,6 +53,7 @@ import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.shell.ShellMessageManager;
+import pwnbrew.socks.SocksMessageManager;
 /**
  *
  *  
@@ -60,7 +61,7 @@ import pwnbrew.shell.ShellMessageManager;
 abstract public class DataManager {    
 
     protected DataHandler theDataHandler;
-    protected final PortManager theCommManager;
+    protected final PortManager thePortManager;
     
     private transient static final String NAME_Class = DataManager.class.getSimpleName();
     
@@ -71,15 +72,15 @@ abstract public class DataManager {
      * @param passedProvider
      */
     public DataManager( PortManager passedProvider ) {
-        theCommManager = passedProvider ;
+        thePortManager = passedProvider ;
     }  
     
     //===========================================================================
     /*
      *  Returns the comm manager
      */
-    public PortManager getCommManager(){
-        return theCommManager;
+    public PortManager getPortManager(){
+        return thePortManager;
     }
     //===========================================================================
     /*
@@ -90,12 +91,10 @@ abstract public class DataManager {
         boolean retVal = true;
         switch(type){
             
-            case Message.REGISTER_MESSAGE_TYPE:
-                break;
-            case Message.CONTROL_MESSAGE_TYPE:
-                break;
-            case Message.PROCESS_MESSAGE_TYPE:
-                break;
+            case Message.REGISTER_MESSAGE_TYPE:                
+            case Message.CONTROL_MESSAGE_TYPE:                
+            case Message.PROCESS_MESSAGE_TYPE:                
+            case Message.SOCKS_MESSAGE_TYPE:                
             case Message.FILE_MESSAGE_TYPE:
                 break;            
             default:
@@ -161,6 +160,13 @@ abstract public class DataManager {
                     aManager = ShellMessageManager.getShellMessageManager();
                     if( aManager == null){
                         aManager = ShellMessageManager.initialize(theCommManager);
+                    }
+                    break;
+                case Message.SOCKS_MESSAGE_TYPE:
+
+                    aManager = SocksMessageManager.getSocksMessageManager();
+                    if( aManager == null){
+                        aManager = SocksMessageManager.initialize(theCommManager);
                     }
                     break;
                 case Message.FILE_MESSAGE_TYPE:

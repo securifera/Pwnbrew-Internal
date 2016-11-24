@@ -174,11 +174,11 @@ public class FileData extends Message {
         passedBuffer.get(theMsgId, 0, theMsgId.length);
         int msgId = SocketUtilities.byteArrayToInt(theFileId);
 
-        //Copy over the id
+        //Copy over the file id
         passedBuffer.get(theFileId, 0, theFileId.length);
         int fileId = SocketUtilities.byteArrayToInt(theFileId);
 
-        //Copy over the id
+        //Copy over the file bytes
         byte[] theFileBytes = new byte[ passedBuffer.remaining() ];
         passedBuffer.get(theFileBytes, 0, theFileBytes.length);
 
@@ -191,4 +191,4 @@ public class FileData extends Message {
        
     }
     
-}/* END CLASS ControlMessage */
+}/* END CLASS FileData */

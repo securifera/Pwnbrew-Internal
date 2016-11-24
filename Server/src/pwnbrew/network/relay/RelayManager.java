@@ -38,6 +38,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.relay;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.log.Log;
@@ -49,6 +50,7 @@ import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.control.messages.RemoteException;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
@@ -131,18 +133,38 @@ public class RelayManager extends DataManager {
             byte[] channelIdArr = Arrays.copyOfRange(msgBytes, Message.CHANNEL_ID_OFFSET, Message.CHANNEL_ID_OFFSET + 4);
             int channelId = SocketUtilities.byteArrayToInt(channelIdArr);
             
+            //Get the src id
+            byte[] srcHostIdArr = Arrays.copyOfRange(msgBytes, Message.SRC_HOST_ID_OFFSET, Message.SRC_HOST_ID_OFFSET + 4);
+            int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);                    
+            
             //Get the socketchannel handler
             ConnectionManager aCM = thePR.getConnectionManager(tempId);
             if( aCM != null ){
                 SocketChannelHandler theHandler = aCM.getSocketChannelHandler( channelId );
                 if( theHandler != null ){
                     theHandler.queueBytes(msgBytes);
-                } else {
-                    Log.log( Level.SEVERE, NAME_Class, "handleMessage()", "No socket handler found for the given id.", null);    
+                    return;
                 }
-            }
+            } 
             
-        } catch (LoggableException ex) {
+             //Set error msg
+            String errMsg = "No socket handler found for the given host/channel id.";                    
+
+            //Send back error msg
+            RemoteException exceptionMsg = new RemoteException(srcHostId, errMsg);
+            exceptionMsg.setChannelId(channelId);
+
+            aCM = srcPortRouter.getConnectionManager(srcHostId);
+            if( aCM != null ){
+                SocketChannelHandler theHandler = aCM.getSocketChannelHandler( channelId );
+                if( theHandler != null ){
+                    byte[] retBytes = exceptionMsg.getBytes();
+                    theHandler.queueBytes(retBytes);
+                }                    
+            }
+
+            Log.log( Level.SEVERE, NAME_Class, "handleMessage()", errMsg, null);  
+        } catch (LoggableException | UnsupportedEncodingException ex) {
             Log.log( Level.SEVERE, NAME_Class, "handleMessage()", ex.getMessage(), ex);        
         }
         

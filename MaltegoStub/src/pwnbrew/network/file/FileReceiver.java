@@ -157,7 +157,7 @@ final public class FileReceiver {
         aFileStream = new FileOutputStream(fileLoc, true);
         
         //Set the progress listener
-        TaskManager theTaskManager = passedManager.getCommManager().getTaskManager();
+        TaskManager theTaskManager = passedManager.getPortManager().getTaskManager();
         theListener = ( theTaskManager != null ? theTaskManager.getProgressListener() : null );
         
     }

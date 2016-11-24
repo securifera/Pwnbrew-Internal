@@ -226,7 +226,7 @@ public class SleepTimer implements Runnable {
             }
         };
         
-        System.out.println( "Trying to connect again at " + date.toString());
+        //System.out.println( "Trying to connect again at " + date.toString());
         
         //Create a timer
         Timer aTimer = new Timer();

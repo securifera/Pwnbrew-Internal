@@ -43,8 +43,6 @@ import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.xml.maltego.MaltegoMessage;
-import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
  *
@@ -90,6 +88,15 @@ public final class RemoteException extends ControlMessage{ // NO_UCD (use defaul
         return retVal;
     }  
     
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public String getMessage(){
+        return theExceptionMsg;
+    }
+    
     //===============================================================
     /**
     *   Performs the logic specific to the message.
@@ -102,16 +109,18 @@ public final class RemoteException extends ControlMessage{ // NO_UCD (use defaul
         if( passedManager instanceof MaltegoStub ){            
             MaltegoStub theStub = (MaltegoStub)passedManager;
             Function aFunction = theStub.getFunction(); 
-            MaltegoMessage aMsg = aFunction.getMaltegoMsg();
+            aFunction.handleException( this );
             
-             //Create a relay object
-            pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( theExceptionMsg );
-            MaltegoTransformExceptionMessage malMsg = aMsg.getExceptionMessage();
-
-            //Create the message list
-            malMsg.getExceptionMessages().addExceptionMessage(exMsg); 
-            System.out.println( aMsg.getXml() );
-            System.exit(0);
+//            MaltegoMessage aMsg = aFunction.getMaltegoMsg();
+//            
+//             //Create a relay object
+//            pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( theExceptionMsg );
+//            MaltegoTransformExceptionMessage malMsg = aMsg.getExceptionMessage();
+//
+//            //Create the message list
+//            malMsg.getExceptionMessages().addExceptionMessage(exMsg); 
+//            System.out.println( aMsg.getXml() );
+//            System.exit(0);
             
         }
     }

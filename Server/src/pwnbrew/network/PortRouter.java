@@ -103,12 +103,12 @@ abstract public class PortRouter {
     
     //===============================================================
     /**
-    * Closes and removes any connections provided by passed InetAddress
+    * Retrives the ConnectionManager for the passed Host Id
     *
-     * @param passedId
+     * @param passedHostId
      * @return 
     */
-    abstract public ConnectionManager getConnectionManager( Integer... passedId );
+    abstract public ConnectionManager getConnectionManager( Integer... passedHostId );
     
     //===============================================================
     /**

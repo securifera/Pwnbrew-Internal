@@ -60,10 +60,7 @@ public class ShellMessageManager extends DataManager {
 
     private static ShellMessageManager theShellMsgManager;
     private static final String NAME_Class = ShellMessageManager.class.getSimpleName();
-    
-    //The map for relating shells to their ids
-//    private final Map<Integer, Shell> theShellMap = new HashMap<>();
-    
+        
     //===========================================================================
     /*
      *  Constructor
