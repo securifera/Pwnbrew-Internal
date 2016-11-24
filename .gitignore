@@ -255,3 +255,4 @@ build/
 *.properties
 Client/nbproject/private/private.xml
 *.xml
+*.jks
