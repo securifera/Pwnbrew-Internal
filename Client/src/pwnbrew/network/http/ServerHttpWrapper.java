@@ -61,6 +61,7 @@ import pwnbrew.network.PortRouter;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.relay.RelayManager;
+import pwnbrew.selector.SocketChannelCallback;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
@@ -78,7 +79,7 @@ public class ServerHttpWrapper extends HttpWrapper {
     private final SecureRandom aSR = new SecureRandom();  
     private volatile boolean staging = false;
        
-    private int lockVal = 0;
+//    private int lockVal = 0;
     //==========================================================================
     /**
      * Constructor
@@ -196,17 +197,22 @@ public class ServerHttpWrapper extends HttpWrapper {
 ////                                                                
                                                                 if( thePR instanceof ClientPortRouter ){
                                                                     
+                                                                    //Create callback
+                                                                    SocketChannelCallback aSCC = new SocketChannelCallback(serverIp, theSocketPort, aMsg, aCM);
+                                                      
                                                                     //TODO need to check if the id is already taken
                                                                     ClientPortRouter aCPR = (ClientPortRouter)thePR;
-                                                                    srcChannelId = aCPR.ensureConnectivity(serverIp, theSocketPort, chanId);
+                                                                    aCPR.ensureConnectivity(aSCC, chanId);
                                                                     
                                                                  }
-                                                            } 
+                                                            } else {
                                                             
-                                                            SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
-                                                            if( srvHandler != null ){
-                                                                byte[] regBytes = aMsg.getBytes();
-                                                                srvHandler.queueBytes(regBytes);
+                                                                SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
+                                                                if( srvHandler != null ){
+                                                                    byte[] regBytes = aMsg.getBytes();
+                                                                    srvHandler.queueBytes(regBytes);
+                                                                }
+                                                                
                                                             }
                                                         }
                                                     }

@@ -45,13 +45,17 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.file;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.logging.Level;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 import pwnbrew.ClientConfig;
 import pwnbrew.Persistence;
 import pwnbrew.log.RemoteLog;
@@ -61,8 +65,6 @@ import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
-import pwnbrew.utilities.FileUtilities;
-import pwnbrew.utilities.Utilities;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileFin;
 import pwnbrew.network.control.messages.TaskProgress;
@@ -84,10 +86,12 @@ final public class FileReceiver {
     private int taskId = 0;
     private int fileId = 0;
     private int channelId = 0;
-    private String fileHash = null;
+//    private String fileHash = null;
+    private final boolean compressed;
+    private ByteBuffer compBB;
     
     private FileOutputStream aFileStream = null;
-    private MessageDigest fileDigest = null;
+//    private MessageDigest fileDigest = null;
     
     private final FileMessageManager theFileMessageManager;
     private static final String NAME_Class = FileReceiver.class.getSimpleName();
@@ -113,6 +117,7 @@ final public class FileReceiver {
         fileSize = passedMsg.getFileSize();
         srcHostId = passedMsg.getSrcHostId();
         channelId = passedMsg.getFileChannelId();
+        compressed = passedMsg.useCompression();
                 
          //Get file hash
         String hashFilenameStr = passedMsg.getHashFilenameString();
@@ -122,27 +127,31 @@ final public class FileReceiver {
         if( fileHashFileNameArr.length != 2 )
             throw new LoggableException("Passed hash filename string is not correct.");
       
-        fileHash = fileHashFileNameArr[0];
+//        fileHash = fileHashFileNameArr[0];
       
         //Create the file digest
-        fileDigest = MessageDigest.getInstance(Constants.HASH_FUNCTION);
+//        fileDigest = MessageDigest.getInstance(Constants.HASH_FUNCTION);
         
         //Ensure the parent directory exists
         Persistence.ensureDirectoryExists(parentDir);
+        
+        //create byte buffer
+        if( compressed )
+            compBB = ByteBuffer.allocate((int)fileSize);
 
         String filePath = fileHashFileNameArr[1];
         String fileName = filePath.substring( filePath.lastIndexOf("\\") + 1 );
         fileLoc = new File( parentDir, fileName );
-        if(fileLoc.exists()){
-
-            //If file already exists and the hash is the same
-            String localFileHash = FileUtilities.getFileHash(fileLoc);
-            if( !localFileHash.equals(fileHash) && !fileLoc.delete()){
-                cleanupFileTransfer();
-                throw new LoggableException("File already exists, the hash does not match, and was unable to remove it.");
-            }
-
-        }
+//        if(fileLoc.exists()){
+//
+//            //If file already exists and the hash is the same
+//            String localFileHash = FileUtilities.getFileHash(fileLoc);
+//            if( !localFileHash.equals(fileHash) && !fileLoc.delete()){
+//                cleanupFileTransfer();
+//                throw new LoggableException("File already exists, the hash does not match, and was unable to remove it.");
+//            }
+//
+//        }
 
         //Open the file stream
         aFileStream = new FileOutputStream(fileLoc, true);
@@ -190,6 +199,16 @@ final public class FileReceiver {
         }
     }
     
+    //===========================================================================
+    /**
+     * 
+     * @param passedSize 
+     */
+    public void updateFileSize( long passedSize ){
+        fileSize = passedSize;
+        receiveFile(new byte[0]);
+    }
+    
     //===============================================================
     /**
      * Receives the bytes from the socket channel and puts them into a file
@@ -208,9 +227,14 @@ final public class FileReceiver {
             }
 
             //Copy over the bytes
-            aFileStream.write(passedByteArray);
+            //Copy over the bytes
+            if( compressed ){
+                compBB.put(passedByteArray);
+            } else {
+                aFileStream.write(passedByteArray);
+            }
             fileByteCounter += passedByteArray.length;
-            fileDigest.update(passedByteArray);
+//            fileDigest.update(passedByteArray);
 //            DebugPrinter.printMessage(NAME_Class, "Receiving file, bytes: " + fileByteCounter);
             
             int tempProgressInt = 0;
@@ -233,14 +257,47 @@ final public class FileReceiver {
             //If the byte count has passed the file size than send a finished message
             //so the socket can be closed
             if(fileByteCounter >= fileSize){
+                
+                //Make sure to set the progress to 100
+                if(sndFileProgress != 100 ){
+                    sndFileProgress = 100;
+                    TaskProgress aProgMsg = new TaskProgress(taskId, sndFileProgress );
+                    aProgMsg.setDestHostId(srcHostId);
+                    DataManager.send( theFileMessageManager.getPortManager(), aProgMsg);
+                }
+                
+                //If compressed
+                if( compressed ){
+                    
+                    //Convert bytebuffer to array
+                    byte[] compFileByteArr = new byte[ compBB.position() ];
+                    compBB.flip();
+                    compBB.get( compFileByteArr, 0, compFileByteArr.length ); 
+                    compBB.clear();
+                    
+                    //Make the array into a stream                   
+                    ByteArrayInputStream bais = new ByteArrayInputStream( compFileByteArr );
+                    Inflater inflater = new Inflater();
+                    
+                    try ( //Unzip and write to file
+                        InflaterInputStream iis = new InflaterInputStream(bais, inflater)) {
+                        byte[] buffer = new byte[32768];
+                        int len;
+                        while((len = iis.read(buffer)) > 0){
+                            aFileStream.write(buffer, 0, len);
+                        }
+                    }
+                    aFileStream.close();
+                    
+                }
 
                 //Get the hash and reset it
-                byte[] byteHash = fileDigest.digest();
-                String hexString = Utilities.byteToHexString(byteHash);
-
-                if( !fileHash.equals("0") && !hexString.equals(fileHash)){
-                    RemoteLog.log(Level.WARNING, NAME_Class, "receiveFile()", "Calculated file hash does not match the hash provided.", null);
-                }
+//                byte[] byteHash = fileDigest.digest();
+//                String hexString = Utilities.byteToHexString(byteHash);
+//
+//                if( !fileHash.equals("0") && !hexString.equals(fileHash)){
+//                    RemoteLog.log(Level.WARNING, NAME_Class, "receiveFile()", "Calculated file hash does not match the hash provided.", null);
+//                }
 
                 DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received File.");
 
@@ -248,7 +305,7 @@ final public class FileReceiver {
                 cleanupFileTransfer();
 
                   
-                PushFileFin finMessage = new PushFileFin( channelId, taskId, fileId, hexString );
+                PushFileFin finMessage = new PushFileFin( channelId, taskId, fileId, "" );
                 finMessage.setDestHostId(srcHostId);
                 DataManager.send( theFileMessageManager.getPortManager(), finMessage);
 

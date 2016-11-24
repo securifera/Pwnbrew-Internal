@@ -93,7 +93,7 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
     private final boolean redirect_stderr;
     
     private final int parentId;
-    private final int channelId;
+    private int channelId = 0;
     private final PortManager theCommManager;
     private static final String NAME_Class = Shell.class.getSimpleName();
       
@@ -104,25 +104,41 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
      * @param passedExecutor 
      * @param passedManager 
      * @param passedSrcId 
-     * @param passedChannelId 
      * @param passedArr 
      * @param passedEncoding 
      * @param passedStartupCmd 
      * @param passedBool 
      */
     public Shell( Executor passedExecutor, PortManager passedManager, 
-            int passedSrcId, int passedChannelId, String passedEncoding, String[] passedArr, 
+            int passedSrcId, String passedEncoding, String[] passedArr, 
             String passedStartupCmd,boolean passedBool ) {
         super(passedExecutor);
         
         parentId = passedSrcId;
-        channelId = passedChannelId;
         theCommManager = passedManager;
         encoding = passedEncoding;
         cmdStringArr = passedArr;
         startupCmd = passedStartupCmd;
         redirect_stderr = passedBool;
-    }    
+    }  
+    
+    //==========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getHostId(){
+        return parentId;
+    }
+    
+    //==========================================================================
+    /**
+     * 
+     * @param passedId 
+     */
+    public void setChannelId(int passedId ){
+        channelId = passedId;            
+    }
            
     // ==========================================================================
     /**
@@ -158,18 +174,8 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
                     return;
             }
 
-//            try {
-
-//                ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
-//                if( aSMM == null){
-//                    aSMM = ShellMessageManager.initialize( theCommManager );
-//                }
-                DataManager.send(theCommManager, aMsg);
-//                aSMM.send(aMsg);
-
-//            } catch (IOException | LoggableException ex) {
-//                RemoteLog.log( Level.SEVERE, NAME_Class, "handleBytesRead()", ex.getMessage(), null);
-//            }
+            
+            DataManager.send(theCommManager, aMsg);
             
         } else {
             

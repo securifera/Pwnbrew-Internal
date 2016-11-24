@@ -898,7 +898,7 @@ public class SSLJFrame extends javax.swing.JFrame {
 
             //Set the date
             Date expirationDate = theCustomCert.getNotAfter();
-            String expDateStr = Constants.DEFAULT_DATE_FORMAT.format(expirationDate);
+            String expDateStr = Constants.CHECKIN_DATE_FORMAT.format(expirationDate);
             expDateField.setText(expDateStr);
 
         }   

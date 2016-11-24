@@ -128,12 +128,14 @@ public final class PushFileUpdate extends FileMessage {
             
             //Call for update
             final TaskManager aManager = passedManager.getTaskManager();
-            final RemoteTask rmTask = aManager.getRemoteTask( getTaskId() );
-            if( rmTask != null ){
-                rmTask.resultFileReceived();
-                TaskManager aMgr = passedManager.getTaskManager();
-                if( aMgr != null )
-                    aMgr.taskChanged(new TaskStatus( getTaskId(), RemoteTask.TASK_COMPLETED, -1 ));
+            if( aManager != null ){
+                final RemoteTask rmTask = aManager.getRemoteTask( getTaskId() );
+                if( rmTask != null ){
+                    rmTask.resultFileReceived();
+                    TaskManager aMgr = passedManager.getTaskManager();
+                    if( aMgr != null )
+                        aMgr.taskChanged(new TaskStatus( getTaskId(), RemoteTask.TASK_COMPLETED, -1 ));
+                }
             }
 
         } catch (IOException ex) {

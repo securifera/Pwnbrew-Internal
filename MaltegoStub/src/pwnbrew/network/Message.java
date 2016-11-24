@@ -60,6 +60,7 @@ public abstract class Message {
     public static final byte CONTROL_MESSAGE_TYPE = 88;
     public static final byte PROCESS_MESSAGE_TYPE = 89;
     public static final byte FILE_MESSAGE_TYPE = 90;
+    public static final byte SOCKS_MESSAGE_TYPE = 91;
 
     public static final int MSG_LEN_SIZE = 4;
     

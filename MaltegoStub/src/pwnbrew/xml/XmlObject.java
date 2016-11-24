@@ -175,7 +175,7 @@ abstract public class XmlObject {
         }
 
         List<XmlObject> componentList = getXmlComponents(); //Get the XMLable components
-        if(  (componentList == null || componentList.isEmpty()) && theXmlObjectContent.isEmpty() ) {
+        if(  (componentList == null || componentList.isEmpty()) && (theXmlObjectContent == null || theXmlObjectContent.isEmpty()) ) {
 
             appendXml_OneLine( stringBuilder ); //Append the XML data for this XmlBase in the one-line format
 

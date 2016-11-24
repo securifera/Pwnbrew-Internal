@@ -38,8 +38,14 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import pwnbrew.log.LoggableException;
+import pwnbrew.log.RemoteLog;
+import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
+import pwnbrew.network.file.FileMessageManager;
 
 /**
  *
@@ -48,6 +54,11 @@ import pwnbrew.network.ControlOption;
 public final class PushFileUpdate extends FileMessage {
 
     private static final byte OPTION_DATASIZE = 4;
+    private long fileSize;
+    
+    //Class name
+    private static final String NAME_Class = PushFileUpdate.class.getSimpleName();
+   
     
     // ==========================================================================
     /**
@@ -65,5 +76,78 @@ public final class PushFileUpdate extends FileMessage {
         ControlOption aTlv = new ControlOption( OPTION_DATASIZE, tempArr);
         addOption(aTlv);
        
+    }
+    
+    // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param passedId
+    */
+    public PushFileUpdate( byte[] passedId ) { // NO_UCD (use default)
+        super( passedId );
+    }
+    
+     //=========================================================================
+    /**
+     *  Sets the variable in the message related to this TLV
+     * 
+     * @param tempTlv 
+     * @return  
+     */
+    @Override
+    public boolean setOption( ControlOption tempTlv ){      
+        
+        boolean retVal = true;
+        if( !super.setOption(tempTlv)){
+            
+            byte[] theValue = tempTlv.getValue();
+            switch( tempTlv.getType()){
+                case OPTION_DATASIZE:
+                    fileSize = SocketUtilities.byteArrayToLong( theValue );
+                    break; 
+                default:
+                    retVal = false;
+                    break;              
+            }
+            
+        }
+        return retVal;
+    }  
+    
+     //===============================================================
+    /**
+     *
+     * @return
+     */
+    public long getFileSize() {
+        return fileSize;
+    }
+    
+    
+    //===============================================================
+    /**
+    *   Performs the logic specific to the message.
+    *
+     * @param passedManager
+    */
+    @Override
+    public void evaluate( PortManager passedManager ) {
+                
+        try {
+            
+            //Get the file manager
+            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+            if( theFileMM == null ){
+                theFileMM = FileMessageManager.initialize( passedManager );
+            }
+
+            //Update the file receiver size
+            theFileMM.updateFileSize( fileId, fileSize );
+            
+        } catch (LoggableException | IOException ex) {
+            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
+        }
+        
     }
 }

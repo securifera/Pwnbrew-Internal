@@ -79,7 +79,7 @@ public class RegisterMessage extends Message {
     @SuppressWarnings("ucd")
     public RegisterMessage( byte passedFunction, int passedChannelId ) {
         super( REGISTER_MESSAGE_TYPE );
-        channelId = SocketUtilities.intToByteArray( passedChannelId );
+        msgChannelId = SocketUtilities.intToByteArray( passedChannelId );
         function = passedFunction;
     }
     
@@ -192,23 +192,34 @@ public class RegisterMessage extends Message {
         
         if( function == RegisterMessage.REG_ACK ){
             
-            DebugPrinter.printMessage(NAME_Class, "Received REG ACK, Sending Hello");
             try {
 
                 ClientConfig theClientConfig = ClientConfig.getConfig();
                 PortRouter aPR = passedManager.getPortRouter( theClientConfig.getSocketPort() );
                 if( aPR != null ){
-                    SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( getChannelId() );
-
+                    
+                    int tempId = getChannelId();
+                    SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( tempId );
+                    
+                    DebugPrinter.printMessage( NAME_Class, "Id Registered: " + Integer.toString(tempId));
+                        
+                    
                     //Set the wrapping flag
                     if( aSCH != null )
                         aSCH.setWrapping(false);
 
-                    //Notify the port router to continue
-                    aPR.beNotified(); 
+                    //Call the callback function
+                    ConnectionCallback theCC = aPR.removeConnectionCallback(tempId);
+                    if( theCC != null ){
+                        DebugPrinter.printMessage(NAME_Class, "Calling callback function.");
+                        theCC.handleConnection(tempId);
+                    }
 
                     //Create a hello message and send it
-                    if( getChannelId() == ConnectionManager.COMM_CHANNEL_ID ){
+                    if( tempId == ConnectionManager.COMM_CHANNEL_ID ){
+                        
+                        DebugPrinter.printMessage(NAME_Class, "Received REG ACK, Sending Hello");
+            
                         //Get the port router
                         String hostname = SocketUtilities.getHostname();
                         Hello helloMessage = new Hello( hostname, ConnectionManager.COMM_CHANNEL_ID );

@@ -76,12 +76,15 @@ abstract public class Constants {
     public static final int STD_ERR_ID = 42;
     
     public static final SimpleDateFormat THE_DATE_FORMAT = new SimpleDateFormat("MM-dd-yyyy--HHmm");  
-    public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");      
+    public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");      
     
     public static final String EDITOR_IMG_STR = "brew.png";  
     public static final String UPLOAD_IMG_STR = "upload.png";
     public static final String DOWNLOAD_IMG_STR = "download.png";
+    public static final String ZIP_IMG_STR = "zip.png";    
+    public static final String ZIP_PRESSED_IMG_STR = "zip_pressed.png";
     public static final String TERM_IMG_STR = "terminal.png";
+    public static final String RELAY_IMG_STR = "relay.png";
     public static final String SCHEDULE_IMG_STR = "schedule.png";
     public static final String HOST_IMG_STR = "computer_small.png";
     public static final String DIS_HOST_IMG_STR = "dis_computer_small.png";
@@ -129,6 +132,22 @@ abstract public class Constants {
     public static final String REMOTE_EXTENSION_TYPE = "REMOTE EXTENSION";
     
     public final static int COMM_CHANNEL_ID = 1;
+    
+    
+    //SOCKS
+    public static final	byte SC_CONNECT	= 0x01;
+    public static final	byte SC_BIND = 0x02;
+    public static final	byte SC_UDP = 0x03;
+    
+    public static final byte SOCKS5_Version = 0x05;
+    public static final byte SOCKS4_Version = 0x04;
+         
+    public static final int DEFAULT_PROXY_TIMEOUT = 10;
+    public static final int DEFAULT_BUF_SIZE = 4096;
+    public static final int MAX_ADDR_LEN = 255;
+    
+    public static byte SRE_Refuse[] = { (byte)0x05, (byte)0xFF };
+    public static byte SRE_Accept[] = { (byte)0x05, (byte)0x00 };
     
     
 }/* END CLASS Constants */

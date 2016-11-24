@@ -59,7 +59,7 @@ public class DebugPrinter implements Runnable {
     private static volatile boolean shutdownRequested = false;
     private static final Queue<String> queue = new LinkedList<>();
     private static DebugPrinter staticSelf = null;
-    private static volatile boolean enabled = false;
+    private static volatile boolean enabled = true;
     
      //Session's start date/time...
     private static final String FORMAT_SessionDateTime

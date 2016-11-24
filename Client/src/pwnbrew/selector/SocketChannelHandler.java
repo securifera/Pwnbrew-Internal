@@ -104,7 +104,7 @@ public class SocketChannelHandler implements Selectable {
     
     private boolean isRegistered = false;
     
-    private int lockVal = 0;
+//    private int lockVal = 0;
     
     // ==========================================================================
     /**
@@ -357,6 +357,7 @@ public class SocketChannelHandler implements Selectable {
                                     int srcHostId = aMsg.getSrcHostId();
                                     int chanId = aMsg.getChannelId();
                                     
+                                    //If register from pivot client
                                     if( aMsg.getFunction() == RegisterMessage.REG ){
                                         //Register the relay
                                         ServerPortRouter aSPR = (ServerPortRouter)getPortRouter();
@@ -378,20 +379,7 @@ public class SocketChannelHandler implements Selectable {
                                                 //Create a new channel if not comms
                                                 int srcChannelId = aMsg.getChannelId();
                                                 if( srcChannelId != ConnectionManager.COMM_CHANNEL_ID ){
-                                                    
-//                                                    //Check if it already exists
-//                                                    boolean sendReset = false;
-//                                                    while( aCM.getSocketChannelHandler( srcChannelId ) != null ){
-//                                                        //Try to send back
-//                                                        srcChannelId = SocketUtilities.SecureRandomGen.nextInt();
-//                                                        sendReset = true;
-//                                                    }
-//                                                    
-//                                                    //Send reset flag if we had to change the channel id
-//                                                    if( sendReset ){
-//                                                        
-//                                                    }
-                                                    
+                                                                                                        
                                                     //Send back the ack
                                                     RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
                                                     retMsg.setDestHostId(srcHostId);
@@ -401,16 +389,21 @@ public class SocketChannelHandler implements Selectable {
                                                          
                                                     if( thePR instanceof ClientPortRouter ){
                                                         
+                                                        //Create callback
+                                                        SocketChannelCallback aSCC = new SocketChannelCallback(serverIp, theSocketPort, aMsg, aCM);
+                                                                                                             
                                                         //TODO need to check if the id is taken
                                                         ClientPortRouter aCPR = (ClientPortRouter)thePR;
-                                                        srcChannelId = aCPR.ensureConnectivity(serverIp, theSocketPort );
+                                                        aCPR.ensureConnectivity(aSCC );
 
                                                     }
-                                                }
-                                                SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
-                                                if( srvHandler != null ){
-                                                    byte[] regBytes = aMsg.getBytes();
-                                                    srvHandler.queueBytes(regBytes);
+                                                } else {
+                                                    
+                                                    SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
+                                                    if( srvHandler != null ){
+                                                        byte[] regBytes = aMsg.getBytes();
+                                                        srvHandler.queueBytes(regBytes);
+                                                    }
                                                 }
                                             }
 
@@ -518,25 +511,25 @@ public class SocketChannelHandler implements Selectable {
                 if( !pendingByteArrs.isEmpty() ){
 
                     //Send while there are messages
-                        byte[] nextArr = pendingByteArrs.poll();
-                        if( nextArr != null){
+                    byte[] nextArr = pendingByteArrs.poll();
+                    if( nextArr != null){
 
-                            try {
+                        try {
 
-                                send(nextArr);
+                            send(nextArr);
 
-                            } catch( IOException ex ){
+                        } catch( IOException ex ){
 
-                                if (ex.getMessage().startsWith("Resource temporarily")) {
-                                    RemoteLog.log(Level.INFO, NAME_Class, "send()", ex.getMessage(), ex );
-                                    return;
-                                }                                   
+                            if (ex.getMessage().startsWith("Resource temporarily")) {
+                                RemoteLog.log(Level.INFO, NAME_Class, "send()", ex.getMessage(), ex );
+                                return;
+                            }                                   
 
-                            } catch( IllegalStateException ex1 ){
-                                //Resend it
-                                retrySend(nextArr);    
-                            }                            
-                        }
+                        } catch( IllegalStateException ex1 ){
+                            //Resend it
+                            retrySend(nextArr);    
+                        }                            
+                    }
                         
                 }  else {
                     
@@ -774,40 +767,5 @@ public class SocketChannelHandler implements Selectable {
     public synchronized boolean isWrapping() {
         return wrappingFlag;
     }
-    
-//     //===============================================================
-//    /**
-//     * 
-//     * @param lockOp 
-//     */
-//    @Override
-//    public synchronized void lockUpdate(int lockOp) {
-//        lockVal = lockOp;
-//        notifyAll();
-//    }
-//    
-//    //===============================================================
-//    /**
-//     * 
-//     * @return  
-//     */
-//    @Override
-//    public synchronized int waitForLock() {
-//        
-//        int retVal;        
-//        while( lockVal == 0 ){
-//            try {
-//                wait();
-//            } catch (InterruptedException ex) {
-//                continue;
-//            }
-//        }
-//        
-//        //Set to temp and reset
-//        retVal = lockVal;
-//        lockVal = 0;
-//        
-//        return retVal;
-//    }
 
 }/* END CLASS SocketChannelHandler */

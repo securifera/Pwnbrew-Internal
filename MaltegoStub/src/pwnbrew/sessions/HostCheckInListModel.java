@@ -93,14 +93,14 @@ public class HostCheckInListModel extends SortedListModel implements MutableList
         
         String newDateStr = (String)value;
         try {
-            Constants.DEFAULT_DATE_FORMAT.parse((String)value);
+            Constants.CHECKIN_DATE_FORMAT.parse((String)value);
         } catch (ParseException ex) {
             return;
         }
         
-        String aDate = (String)super.getElementAt(index);  
+        //String aDate = (String)super.getElementAt(index);  
         super.setElementAt(newDateStr, index);
-        theListener.replaceDate( aDate, newDateStr );                
+        //theListener.replaceDate( aDate, newDateStr );                
         
     }
 

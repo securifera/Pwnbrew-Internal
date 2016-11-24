@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import pwnbrew.MaltegoStub;
+import pwnbrew.network.control.messages.RemoteException;
 import pwnbrew.xml.maltego.MaltegoMessage;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
@@ -226,4 +227,21 @@ abstract public class Function {
      * @param fileLoc 
      */
     public void fileReceived(int taskId, File fileLoc) { }
+
+    //===============================================================
+    /**
+     * 
+     * @param passedMsg 
+     */
+    public void handleException(RemoteException passedMsg ) {
+        
+        //Create a relay object
+        pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( passedMsg.getMessage() );
+        MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+
+        //Create the message list
+        malMsg.getExceptionMessages().addExceptionMessage(exMsg); 
+        System.out.println( theReturnMsg.getXml() );
+        
+    }
 }

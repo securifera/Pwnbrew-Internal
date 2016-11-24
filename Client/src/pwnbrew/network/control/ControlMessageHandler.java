@@ -174,8 +174,6 @@ public class ControlMessageHandler extends DataHandler {
                     //If the returned message is a class request then return to sender
                     if( aMessage instanceof ClassRequest){
                         DataManager.send( srcPortRouter.getPortManager(), aMessage);
-//                        byte[] byteArr = aMessage.getBytes();
-//                        srcPortRouter.queueSend( byteArr, aMessage.getDestHostId());
                     } else
                         processIncoming(srcPortRouter, aMessage);
                     

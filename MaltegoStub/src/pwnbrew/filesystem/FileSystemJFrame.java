@@ -39,9 +39,12 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.filesystem;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
@@ -50,11 +53,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
@@ -135,6 +141,7 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
         searchButton = new javax.swing.JButton();
         fileTableScrollPane = new javax.swing.JScrollPane();
         downloadFolderButton = new javax.swing.JButton();
+        compressButton = new javax.swing.JToggleButton();
         fileOperationScrollPane = new javax.swing.JScrollPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -167,6 +174,13 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
 
         downloadFolderButton.setText("jButton1");
 
+        compressButton.setText("jToggleButton1");
+        compressButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                compressButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout rightSplitPaneLayout = new javax.swing.GroupLayout(rightSplitPane);
         rightSplitPane.setLayout(rightSplitPaneLayout);
         rightSplitPaneLayout.setHorizontalGroup(
@@ -178,7 +192,9 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
                 .addComponent(downloadButton, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(downloadFolderButton, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 138, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(compressButton, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 107, Short.MAX_VALUE)
                 .addComponent(searchTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(8, 8, 8)
                 .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -194,7 +210,8 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
                     .addComponent(downloadButton, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(searchTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(downloadFolderButton, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(downloadFolderButton, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(compressButton, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(5, 5, 5)
                 .addComponent(fileTableScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 389, Short.MAX_VALUE))
         );
@@ -259,7 +276,12 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
         
     }//GEN-LAST:event_searchButtonActionPerformed
 
+    private void compressButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_compressButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_compressButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JToggleButton compressButton;
     private javax.swing.JButton downloadButton;
     private javax.swing.JButton downloadFolderButton;
     private javax.swing.JScrollPane fileOperationScrollPane;
@@ -299,7 +321,28 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
         downloadButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
         downloadButton.setToolTipText("Download File");
         Utilities.setComponentIcon(downloadButton, 27, 27, Constants.DOWNLOAD_IMG_STR);
-    
+        
+        compressButton.setOpaque(false);
+        compressButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        compressButton.setToolTipText("Compress");
+        Utilities.setComponentIcon(compressButton, 34, 34, Constants.ZIP_IMG_STR);
+        compressButton.setFocusable(false);
+        
+        compressButton.addActionListener( new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ae) {               
+                
+                if( !compressButton.getModel().isSelected() ){
+                    compressButton.setToolTipText("Compress");
+                    Utilities.setComponentIcon(compressButton, 36, 36, Constants.ZIP_IMG_STR);
+                } else {
+                    compressButton.setToolTipText("Don't Compress");
+                    Utilities.setComponentIcon(compressButton, 36, 36, Constants.ZIP_PRESSED_IMG_STR);                
+                }
+                
+            }
+        });
+            
         uploadButton.addActionListener( new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -336,6 +379,33 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
         theFileJTable = new FileJTable( theListener );
         fileTableScrollPane.setViewportView(theFileJTable);
         fileTableScrollPane.getViewport().setBackground(Color.WHITE);
+        
+        
+        // NEW
+        final JPopupMenu theJPopup = new JPopupMenu();        
+        final Action cancelAction = new AbstractAction("Cancel"){ 
+            @Override
+            public void actionPerformed(ActionEvent e){
+                
+                //Get the file
+                theListener.cancelOperation();
+                            
+            }
+        };    
+        theJPopup.add(cancelAction);
+                
+        //Add mouse listener        
+        fileTableScrollPane.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e){
+                
+                Cursor theCursor = getCursor();
+                if( theCursor.equals( Cursor.getPredefinedCursor( Cursor.WAIT_CURSOR ))){
+                    //Add cancel
+                    theJPopup.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
         
         
         //Setup the file list
@@ -431,17 +501,6 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
             
             //Create a list out of the array
             List<File> theObjList = Arrays.asList(userSelectedFiles);
-//            int selRow = theFileJTable.getSelectedRow();
-//            if( selRow != -1){
-//                DefaultTableModel theTableModel = (DefaultTableModel) theFileJTable.getModel();            
-//
-//                //Get the directory
-//                FileNode aFileNode = (FileNode)theTableModel.getValueAt(selRow, 0);
-//                String filePath = aFileNode.getFile().getAbsolutePath();
-//
-//            } else {
-//                
-//            }
             theListener.uploadFiles(theObjList );  
                     
         }       
@@ -576,6 +635,15 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
         searchButton.setToolTipText("Search");
         Utilities.setComponentIcon(searchButton, 25, 25, Constants.SEARCH_IMG_STR);
         
+    }
+
+    //===========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int useCompression() {
+        return ( compressButton.getModel().isSelected() ? 1 : 0 );
     }
 
 }

@@ -51,6 +51,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
@@ -92,10 +93,12 @@ import pwnbrew.network.control.messages.FileSystemMsg;
 import pwnbrew.network.control.messages.GetDrives;
 import pwnbrew.network.control.messages.ListFiles;
 import pwnbrew.network.control.messages.PushFile;
+import pwnbrew.network.control.messages.RemoteException;
 import pwnbrew.network.control.messages.TaskGetFile;
 import pwnbrew.network.control.messages.TaskStatus;
 import pwnbrew.network.control.messages.Tasking;
 import pwnbrew.network.file.FileMessageManager;
+import pwnbrew.shell.ShellJPanel;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
@@ -120,6 +123,8 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     
     //Map relating the msgid to the task
     private final Map<Integer, RemoteFileIO> theRemoteFileIOMap = new HashMap<>();
+    
+    private final AtomicBoolean dirListingFlag = new AtomicBoolean();
   
     //==================================================================
     /**
@@ -225,14 +230,12 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                 return;     
             }           
             
-            //Set up the port wrapper
+            //Setup skin
             theManager.initialize();
             
             //Connect to server
             try {
-//            boolean connected =
                 aPR.ensureConnectivity( serverPort, theManager );
-//            if( connected ){
              
                 //Set the host id
                 theHostId = Integer.parseInt( hostIdStr);
@@ -288,6 +291,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     * <strong>This method most certainly "blocks".</strong>
      * @param anInt
     */
+    @Override
     protected synchronized void waitToBeNotified( Integer... anInt ) {
 
         while( !notified ) {
@@ -330,10 +334,10 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
      * @param fileType
      * @param dateModified
      */
-    public synchronized void updateFileSystem(int taskId, long size, String filePath, byte fileType, String dateModified ) {
+    public void updateFileSystem(int taskId, long size, String filePath, byte fileType, String dateModified ) {
         
         //Get the task for the id        
-        RemoteFileSystemTask theTask;
+        final RemoteFileSystemTask theTask;
         synchronized(theRemoteFileSystemTaskMap){
             theTask = theRemoteFileSystemTaskMap.get(taskId);
         }
@@ -347,58 +351,68 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             
             if( theTask.getListLength() == theTask.getFileCount() ){
 
-                //Get the parent
-                FileNode parentFileNode = null;
-                DefaultMutableTreeNode parent = theTask.getParentNode();
-                parent.removeAllChildren();  // Remove Flag
-
-                Object theParentObj = parent.getUserObject();
-                if( theParentObj instanceof IconData ){
-                    IconData theIconData = (IconData)theParentObj;
-                    Object innerObj = theIconData.getObject();
-                    if( innerObj instanceof FileNode ){
-                        parentFileNode = (FileNode)innerObj;
-                    }
-                }
-
-                List nodeList = theTask.getFileList();
-                Collections.sort(nodeList);
-
-                for (Iterator it = nodeList.iterator(); it.hasNext();) {
-                    
-                    Object nodeList1 = it.next();
-                    FileNode currentNode = (FileNode) nodeList1;
-                    if( parentFileNode != null ){
-                        parentFileNode.addChildNode(currentNode);
-                    }
-                    if ( currentNode.isDirectory() || currentNode.isDrive() ){
-
-                        IconData theIconData = new IconData( currentNode.getIcon(), currentNode.getExpandedIcon(), currentNode);
-                        DefaultMutableTreeNode node = new DefaultMutableTreeNode(theIconData);
-                        parent.add(node);
-
-                        if( currentNode.getSize() > 0)
-                            node.add(new DefaultMutableTreeNode( true));
-                        
-                    }
-                }
-
-                //Get the treepath
-                DefaultMutableTreeNode aNode = parent;
-                try {
-                    parent.getFirstChild();       
-                } catch(NoSuchElementException ex ){
-                    aNode = (DefaultMutableTreeNode) parent.getParent();
-                }
-
                 //Run in swing thread
-                final FileNode theParentNode = parentFileNode;                                
+                //final FileNode theParentNode = parentFileNode;                                
                 final FileTreePanel theFileTreePanel = theFsFrame.getFileTreePanel();                
-                final TreePath aTreePath = new TreePath( aNode.getPath() );
+                //final TreePath aTreePath = new TreePath( aNode.getPath() );
                 SwingUtilities.invokeLater( new Runnable(){
 
                     @Override
                     public void run() {
+                        
+                        //Get the parent
+                        FileNode parentFileNode = null;
+                        DefaultMutableTreeNode parent = theTask.getParentNode();
+                        try {
+                            parent.removeAllChildren();  // Remove Flag
+                        } catch( ArrayIndexOutOfBoundsException ex ){                    
+                        }
+
+                        Object theParentObj = parent.getUserObject();
+                        if( theParentObj instanceof IconData ){
+                            IconData theIconData = (IconData)theParentObj;
+                            Object innerObj = theIconData.getObject();
+                            if( innerObj instanceof FileNode ){
+                                parentFileNode = (FileNode)innerObj;
+                            }
+                        }
+
+                        //Clear node children
+                        if( parentFileNode != null )
+                            parentFileNode.clearChildNodes();
+
+                        List nodeList = theTask.getFileList();
+                        Collections.sort(nodeList);
+
+                        for (Iterator it = nodeList.iterator(); it.hasNext();) {
+
+                            Object nodeList1 = it.next();
+                            FileNode currentNode = (FileNode) nodeList1;
+                            if( parentFileNode != null ){
+                                parentFileNode.addChildNode(currentNode);
+                            }
+                            if ( currentNode.isDirectory() || currentNode.isDrive() ){
+
+                                IconData theIconData = new IconData( currentNode.getIcon(), currentNode.getExpandedIcon(), currentNode);
+                                DefaultMutableTreeNode node = new DefaultMutableTreeNode(theIconData);
+                                parent.add(node);
+
+                                if( currentNode.getSize() > 0)
+                                    node.add(new DefaultMutableTreeNode( true));
+
+                            }
+                        }
+
+                        //Get the treepath
+                        DefaultMutableTreeNode aNode = parent;
+                        try {
+                            parent.getFirstChild();       
+                        } catch(NoSuchElementException ex ){
+                            aNode = (DefaultMutableTreeNode) parent.getParent();
+                        }
+                        
+                        //Create treepath
+                        TreePath aTreePath = new TreePath( aNode.getPath() );
 
                         //Reload the model
                         JTree theJTree = theFileTreePanel.getJTree();
@@ -409,7 +423,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                         TreeSelectionListener theTSListener = theTreeListenerArr[0];
                         theJTree.removeTreeSelectionListener( theTSListener);
 
-                        //Remote any listeners
+                        //Remove any listeners
                         TreeExpansionListener[] theTreeExpansionArr = theJTree.getTreeExpansionListeners();
                         TreeExpansionListener theTEListener = theTreeExpansionArr[0];
                         theJTree.removeTreeExpansionListener( theTEListener );
@@ -421,21 +435,27 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                         theJTree.setSelectionPath(theSelPath);
 
                         //Add to the table
-                        addToFileTable( theParentNode, theParentNode.getChildNodes(), theFileTreePanel );
+                        if( parentFileNode != null )
+                            addToFileTable( parentFileNode, parentFileNode.getChildNodes(), theFileTreePanel );
 
                         //Add the listeners back
                         theJTree.addTreeExpansionListener( theTEListener );
                         theJTree.addTreeSelectionListener(theTSListener);
 
                         theFsFrame.setCursor(null);
+                                                 
+                        //Set flag
+                        synchronized(dirListingFlag){
+                            dirListingFlag.set(false);
+                        }
                     }               
                 });
 
-                //Remote the task from the map
+                //Remove the task from the map
                 synchronized(theRemoteFileSystemTaskMap){
                     theRemoteFileSystemTaskMap.remove(taskId);
                 }
-
+               
             //Is a file search under way
             } else if( theTask.isFileSearch()){
                 
@@ -471,6 +491,11 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         } else {
             
             theFsFrame.setCursor(null);
+            
+            //Set flag
+            synchronized(dirListingFlag){
+                dirListingFlag.set(false);
+            }
             
         }
         
@@ -600,7 +625,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
 
                 //Queue the file to be sent
                 String fileHashNameStr = new StringBuilder().append("0").append(":").append(aFile.getAbsolutePath()).toString();
-                TaskGetFile theTaskMsg = new TaskGetFile( taskId, fileHashNameStr, theHostId );
+                TaskGetFile theTaskMsg = new TaskGetFile( taskId, fileHashNameStr, theHostId, useCompression() );
 
                 //Send the message
                 aCMManager.send( theTaskMsg );  
@@ -611,6 +636,15 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
 
         }
 
+    }
+    
+    //===========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int useCompression(){
+        return theFsFrame.useCompression();
     }
 
     //===============================================================
@@ -678,6 +712,11 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                                 String fileHashNameStr = new StringBuilder().append("0").append(":").append(aFile.getAbsolutePath()).toString();
                                 PushFile thePFM = new PushFile( taskId, fileHashNameStr, aFile.length(), PushFile.FILE_UPLOAD, theHostId );
 
+                                //Set compression flag if enabled
+                                if( useCompression() == 1){
+                                    thePFM.enableCompression();
+                                }
+                                
                                 //Add the directory
                                 byte[] tempArr = filePath.getBytes("US-ASCII");
                                 ControlOption aTlv = new ControlOption( PushFile.OPTION_REMOTE_DIR, tempArr);
@@ -734,29 +773,37 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         theFsFrame.setCursor( Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) );
         
         //Clear the table
-        DefaultTableModel theModel = (DefaultTableModel) theFsFrame.getFileJTable().getModel();
-        theModel.setRowCount(0);
-        
         Object anObj = passedNode.getUserObject();
         if( anObj instanceof IconData) 
             anObj = ((IconData)anObj).getObject();
         
-        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
+        //Set flag
+        boolean dirListBool;
         Tasking aTaskMessage = null;
-        if( anObj instanceof FileNode ){
+        synchronized(dirListingFlag){
             
-            FileNode aFN = (FileNode)anObj;
-            aFN.clearChildNodes();
-            
-            switch( aFN.getType() ) {
-                case FileSystemMsg.FOLDER:                    
-                case FileSystemMsg.DRIVE:
-                    RemoteFile aFile = aFN.getFile();
-                    aTaskMessage = new ListFiles( theHostId, aFile.getAbsolutePath());
-                    break;
-                default:
-                    aTaskMessage = new GetDrives( theHostId );                        
-                    break;
+            //Get flag
+            dirListBool = dirListingFlag.get();               
+            if( anObj instanceof FileNode && !dirListBool ){
+                
+                DefaultTableModel theModel = (DefaultTableModel) theFsFrame.getFileJTable().getModel();
+                theModel.setRowCount(0);
+
+                //Set the flag
+                dirListingFlag.set(true);
+                FileNode aFN = (FileNode)anObj;
+//                aFN.clearChildNodes();
+
+                switch( aFN.getType() ) {
+                    case FileSystemMsg.FOLDER:                    
+                    case FileSystemMsg.DRIVE:
+                        RemoteFile aFile = aFN.getFile();
+                        aTaskMessage = new ListFiles( theHostId, aFile.getAbsolutePath());
+                        break;
+                    default:
+                        aTaskMessage = new GetDrives( theHostId );                        
+                        break;
+                }
             }
         }
 
@@ -765,6 +812,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             RemoteFileSystemTask aRFST = new RemoteFileSystemTask(taskId, passedNode );
 
             //Send a message
+            ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
             addRemoteFileSystemTask(aRFST);
             aCMM.send(aTaskMessage);
         }
@@ -1089,5 +1137,39 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         }
         
     }
+
+    @Override
+    public void cancelOperation() {
+        //cancelSearch();
+        theFsFrame.setCursor(null);
+            
+        //Set flag
+        synchronized(dirListingFlag){
+            dirListingFlag.set(false);
+        }
+        
+        //Remove all tasks
+        synchronized(theRemoteFileSystemTaskMap){
+            theRemoteFileSystemTaskMap.clear();
+        }
+    }
+    
+     //===============================================================
+    /**
+     * 
+     * @param aMsg 
+     */
+    @Override
+    public void handleException(RemoteException aMsg ) {
+        super.handleException(aMsg); 
+        
+        //Cancel
+        cancelOperation();
+                
+        //Show popup
+        JOptionPane.showMessageDialog( theFsFrame, "Server is not connected to the Host.","Error", JOptionPane.ERROR_MESSAGE );
+                
+    }
+
 
 }

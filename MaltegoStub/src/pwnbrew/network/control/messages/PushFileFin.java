@@ -52,7 +52,6 @@ import pwnbrew.functions.ToServerConfiguration;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
-import static pwnbrew.network.control.messages.FileMessage.OPTION_HASH_FILENAME;
 
 /**
  *

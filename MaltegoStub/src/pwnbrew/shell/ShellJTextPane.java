@@ -39,9 +39,13 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.shell;
 
 import java.awt.Color;
-import java.awt.Font;
+import java.awt.Insets;
+import javax.swing.BorderFactory;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.*;
 import pwnbrew.misc.Constants;
@@ -58,20 +62,22 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
    private volatile int outputOffset = -1;
    private boolean updating = false;
       
-   /**
-   * This constructor sets the default mode used for displaying this object as
-   * well as the mode to be used for any of its child objects.
-   *
-   */
-   public ShellJTextPane( ) {
+    /**
+    * This constructor sets the default mode used for displaying this object as
+    * well as the mode to be used for any of its child objects.
+    *
+    */
+    public ShellJTextPane( ) {
 
-      initComponent();
-      setEditable(false);      
+        initComponent();
+        setEditable(false);      
 
-      TitledBorder theBorder = new TitledBorder("Console Output");
-      theBorder.setTitleColor(Color.WHITE);
-      setBorder(theBorder);
-      
+        //      TitledBorder theBorder = new TitledBorder("Console Output");
+//        LineBorder theBorder = new LineBorder(Color.WHITE);
+//        Border newBorder = BorderFactory.createCompoundBorder( theBorder, 
+//                BorderFactory.createEmptyBorder( 4, 4, 4, 4 ) );
+//        setBorder(newBorder);
+
     }
 
     // ==========================================================================
@@ -79,8 +85,23 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
      *  Initialize the components
      */
     private void initComponent() {
-        setBackground(Color.BLACK);
-        setForeground(Color.WHITE);
+//        setBackground(Color.BLACK);
+//        setForeground(Color.WHITE);
+        
+        Color bgColor = Color.BLACK;
+        UIDefaults defaults = new UIDefaults();
+        defaults.put("TextPane[Enabled].backgroundPainter", bgColor);
+        putClientProperty("Nimbus.Overrides", defaults);
+        putClientProperty("Nimbus.Overrides.InheritDefaults", true);
+        setBackground(bgColor);
+        
+        LineBorder theBorder = new LineBorder(Color.BLACK);
+        Border newBorder = BorderFactory.createCompoundBorder( theBorder, 
+                BorderFactory.createEmptyBorder( 8, 8, 8, 8 ) );
+        setBorder(newBorder);
+        
+        //Double buffer
+        setDoubleBuffered(true);
     }
     
      //=======================================================================

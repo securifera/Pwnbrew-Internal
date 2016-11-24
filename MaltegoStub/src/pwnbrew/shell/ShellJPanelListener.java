@@ -39,6 +39,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.shell;
 
 import java.util.List;
+import javax.swing.JFrame;
 
 /**
  *
@@ -84,6 +85,14 @@ public interface ShellJPanelListener {
      * @return 
      */
     public Shell getShell();
+    
+    
+      //==========================================================================
+    /**
+     *  Get the Jframe
+     * @return 
+     */
+    public JFrame getParentJFrame();
     
 
 

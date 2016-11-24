@@ -162,7 +162,7 @@ public abstract class ControlMessage extends Message {
              
             //Ignore NoOps
             if( !aMessage.getClass().equals( NoOp.class ))
-                DebugPrinter.printMessage(ControlMessage.class.getSimpleName(), "Received " + aMessage.getClass().getSimpleName() + " message.");
+                DebugPrinter.printMessage(NAME_Class, "Received " + aMessage.getClass().getSimpleName() + " message.");
 
             //Set client id
             int theClientId = SocketUtilities.byteArrayToInt(clientId);

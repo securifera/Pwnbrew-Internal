@@ -505,7 +505,7 @@ public final class HostSchedulerPanel extends HostCheckInWizardPanel implements 
     private void generateCheckInTimes() throws ParseException {
         
         int numToGen = (Integer)occurSpinner.getValue();
-        SimpleDateFormat aSdf = Constants.DEFAULT_DATE_FORMAT;
+        SimpleDateFormat aSdf = Constants.CHECKIN_DATE_FORMAT;
         DefaultListModel theModel = (DefaultListModel)checkInTimeList.getModel();
                 
         //Get the white listed times
@@ -528,7 +528,7 @@ public final class HostSchedulerPanel extends HostCheckInWizardPanel implements 
             currentDate = new Date();
         } else {
             String currentDateStr = (String)theModel.get( theModel.size() - 1 );  
-            currentDate = Constants.DEFAULT_DATE_FORMAT.parse(currentDateStr);
+            currentDate = Constants.CHECKIN_DATE_FORMAT.parse(currentDateStr);
         }
         
         //Set the time

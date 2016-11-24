@@ -67,7 +67,7 @@ public class PushFile extends FileMessage {
     protected long fileSize = 0;
     protected int fileType;
     private String remoteDir;
-    
+       
     public static final int JOB_SUPPORT = 0;
     public static final int JOB_RESULT = 1;
     public static final int FILE_UPLOAD = 2;
@@ -76,7 +76,7 @@ public class PushFile extends FileMessage {
     private static final byte OPTION_DATASIZE = 4;
     private static final byte OPTION_FILE_TYPE = 10;
     public static final byte OPTION_REMOTE_DIR = 12;
-   
+       
   
      //Class name
     private static final String NAME_Class = PushFile.class.getSimpleName();
@@ -145,6 +145,9 @@ public class PushFile extends FileMessage {
                         break;  
                     case OPTION_FILE_TYPE:
                         fileType = SocketUtilities.byteArrayToInt( theValue );
+                        break; 
+                    case OPTION_COMPRESSION:
+                        compressionFlag = true;
                         break; 
                     default:
                         retVal = false;
@@ -245,7 +248,7 @@ public class PushFile extends FileMessage {
             String hashFileStr = getHashFilenameString();
             String otherHFStr = passedMessage.getHashFilenameString();
 
-            if(Arrays.equals(channelId, passedMessage.channelId ) &&
+            if(Arrays.equals(msgChannelId, passedMessage.msgChannelId ) &&
                     hashFileStr.equals(otherHFStr) ){
                 return true;
             }       
@@ -260,7 +263,7 @@ public class PushFile extends FileMessage {
         return hash;
     }
     
-  //===============================================================
+    //===============================================================
     /**
     *   Performs the logic specific to the message.
     *
@@ -276,24 +279,32 @@ public class PushFile extends FileMessage {
                 theFileMM = FileMessageManager.initialize( passedManager );
             
             theFileMM.fileUpload(this);      
-//            ClientConfig theConf = ClientConfig.getConfig();
-//            int socketPort = theConf.getSocketPort();
-//            String serverIp = theConf.getServerIp();
-//
-//            //Get the port router
-//            ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
-//            DebugPrinter.printMessage(  this.getClass().getSimpleName(), "Received push file.");
-//            
-//            int retChannelId = aPR.ensureConnectivity( serverIp, socketPort, this );   
-//            if(retChannelId != 0 ){
-//                setFileChannelId(retChannelId);
-//                theFileMM.prepFilePush( this );
-//            }
 
         } catch ( LoggableException | IOException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
         }
         
+    }
+
+    //===============================================================
+    /**
+     * 
+     */
+    @Override
+    public void enableCompression() {
+        byte[] tempArr = SocketUtilities.intToByteArray(1);
+        ControlOption aTlv = new ControlOption( OPTION_COMPRESSION, tempArr);
+        addOption(aTlv);
+    }
+    
+     //===============================================================
+    /**
+     * Returns a file reference specifying the local file name.
+     *
+     * @return
+     */
+    public boolean useCompression() {
+       return compressionFlag;
     }
 
 }/* END CLASS PushFile */

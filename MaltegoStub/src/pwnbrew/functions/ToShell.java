@@ -49,6 +49,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
@@ -59,9 +62,11 @@ import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.RemoteException;
 import pwnbrew.output.StreamReceiver;
 import pwnbrew.shell.Bash;
 import pwnbrew.shell.CommandPrompt;
+import pwnbrew.shell.Custom;
 import pwnbrew.shell.Powershell;
 import pwnbrew.shell.Shell;
 import pwnbrew.shell.ShellJPanel;
@@ -82,6 +87,7 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
     private String theOS;
     private String theHostName;
     
+    private JFrame parentFrame;
     private ShellJPanel theShellPanel;
     private Shell theShell = null;
   
@@ -101,7 +107,7 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
      */
     @Override
     public void run(String passedObjectStr) {
-        
+                        
         String retStr = "";
         Map<String, String> objectMap = getKeyValueMap(passedObjectStr); 
          
@@ -167,8 +173,13 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
                 return;     
             }           
             
-            //Set up the port wrapper
-            theManager.initialize();
+            //Set look and feel            
+            String lookAndFeelClassStr = "javax.swing.plaf.nimbus.NimbusLookAndFeel";        
+            try{
+                UIManager.setLookAndFeel( lookAndFeelClassStr );
+            } catch ( ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+            }
+            
             
             //Connect to server
             try {
@@ -183,7 +194,7 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
                 //Create and add the shell panel
                 theShellPanel = new ShellJPanel( this );
                 
-                JFrame aFrame = new JFrame(){
+                parentFrame = new JFrame(){
                        // ==========================================================================
                        /**
                        * Processes {@link WindowEvent}s occurring on this component.
@@ -202,17 +213,17 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
                 };
                 
                 //Set the title
-                aFrame.setTitle(theHostName);
-                aFrame.add(theShellPanel);
+                parentFrame.setTitle(theHostName);
+                parentFrame.add(theShellPanel);
                 
                 //Set the icon
                 Image appIcon = Utilities.loadImageFromJar( Constants.TERM_IMG_STR );
                 if( appIcon != null )
-                    aFrame.setIconImage( appIcon );                
+                    parentFrame.setIconImage( appIcon );                
                 
                 //Pack and show
-                aFrame.pack();
-                aFrame.setVisible(true);
+                parentFrame.pack();
+                parentFrame.setVisible(true);
                 
                 //Wait to be notified
                 waitToBeNotified();
@@ -307,6 +318,9 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
             //Add powershell
             theShellList.add(Powershell.class);
             
+            //Add custom
+            theShellList.add(Custom.class );
+            
         } else if( Utilities.isUnix(theOS)){
             
             //Add bash
@@ -372,6 +386,24 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
         
         return retDir;
     }
+    
+    //===============================================================
+    /**
+     * 
+     * @param aMsg 
+     */
+    @Override
+    public void handleException(RemoteException aMsg ) {
+        super.handleException(aMsg); 
+        
+        //Set the component back
+        ShellJPanel aPanel = (ShellJPanel) getParentComponent();
+        aPanel.disablePanel(true);
+        
+        //Show popup
+        JOptionPane.showMessageDialog( aPanel, "Server is not connected to the Host.","Error", JOptionPane.ERROR_MESSAGE );
+                
+    }
 
     //========================================================================
     /**
@@ -411,6 +443,16 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
     @Override
     public ShellJTextPane getShellTextPane() {
         return theShellPanel.getShellTextPane();
+    }
+
+    //=======================================================================
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public JFrame getParentJFrame() {
+        return parentFrame;
     }
 
 

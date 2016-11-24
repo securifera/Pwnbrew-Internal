@@ -52,6 +52,8 @@ public class StandardValidation {
 
     //IPv4 address regular expressions...
     private static final String REGEX_Ipv4Octet = "25[0-5]|2[0-4]\\d|[01]?\\d?\\d";
+    private static final String REGEX_CommandArray = "^\\[.*\\]$";
+    
     private static final String REGEX_Ipv4Address = "((" + REGEX_Ipv4Octet + ")\\.){3}(" + REGEX_Ipv4Octet + ")";
 
     //IPv6 address regular expression...
@@ -69,6 +71,7 @@ public class StandardValidation {
     private static final String KEYWORD_Ipv6Address = "ipv6address";
     public static final String KEYWORD_Port = "port";
     public static final String KEYWORD_ClientConnect = "clientconnect"; 
+    public static final String KEYWORD_CommandArray = "commandArray";
     //
     private static final List<String> KEYWORD_LIST;
     static {
@@ -78,6 +81,7 @@ public class StandardValidation {
         tempList.add( KEYWORD_Ipv4Address );
         tempList.add( KEYWORD_ClientConnect );
         tempList.add( KEYWORD_Ipv6Address );
+        tempList.add( KEYWORD_CommandArray );
         KEYWORD_LIST = Collections.unmodifiableList( tempList );
     }
 
@@ -89,6 +93,7 @@ public class StandardValidation {
         theKeywordToMethodNameMap.put( KEYWORD_Ipv4Address, "validateIpv4Address" );
         theKeywordToMethodNameMap.put( KEYWORD_ClientConnect, "validateClientConnect" );
         theKeywordToMethodNameMap.put( KEYWORD_Ipv6Address, "validateIpv6Address" );
+        theKeywordToMethodNameMap.put( KEYWORD_CommandArray, "validateCommandArray" );
     }
 
 
@@ -287,6 +292,21 @@ public class StandardValidation {
             return false; 
 
         return address.matches( REGEX_Client_Connection ); 
+
+    }
+    
+     // ==========================================================================
+    /**
+     * Determines if the provided string represents an array
+     * @param address
+     * @return 
+     */
+    public static boolean validateCommandArray( String address ) {
+
+        if( address == null ) 
+            return false; 
+
+        return address.matches( REGEX_CommandArray ); 
 
     }
 

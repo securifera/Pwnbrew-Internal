@@ -61,8 +61,6 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-import static stager.Stager.DEATH_LABEL;
-import static stager.Stager.STAG_PROP_FILE;
 import sun.net.www.protocol.jar.JarURLConnection;
 
 /**
@@ -564,7 +562,38 @@ public class LoaderUtilities {
             File theClassPath = new File( ourUrl.toURI() );  
 
             LoaderUtilities.unloadLibs( aClassLoader );
-            LoaderUtilities.updateJarProperties( theClassPath, STAG_PROP_FILE, DEATH_LABEL, dateStr ); 
+            LoaderUtilities.updateJarProperties( theClassPath, Stager.STAG_PROP_FILE, Stager.DEATH_LABEL, dateStr ); 
+            LoaderUtilities.loadLib(theClassPath);            
+
+        } catch (IllegalArgumentException | IOException | URISyntaxException ex) {
+        }
+
+    }
+    
+     //===============================================================
+    /**
+    *   Updates the sleep time
+    *
+    */
+    public static void resetTimes() {
+        
+        //Pass it to the manager
+        try {
+            
+            //Get the current date
+            String dateStr = "";               
+            Class stagerClass = LoaderUtilities.class;
+            ClassLoader aClassLoader = stagerClass.getClassLoader();  
+            
+            //Check if we are staging first
+            URL ourUrl = stagerClass.getProtectionDomain().getCodeSource().getLocation();
+                        
+            //Check for null
+            File theClassPath = new File( ourUrl.toURI() );  
+
+            LoaderUtilities.unloadLibs( aClassLoader );
+            LoaderUtilities.updateJarProperties( theClassPath, Stager.STAG_PROP_FILE, Stager.DEATH_LABEL, dateStr ); 
+            LoaderUtilities.updateJarProperties( theClassPath, Stager.STAG_PROP_FILE, Stager.SLEEP_LABEL, dateStr ); 
             LoaderUtilities.loadLib(theClassPath);            
 
         } catch (IllegalArgumentException | IOException | URISyntaxException ex) {

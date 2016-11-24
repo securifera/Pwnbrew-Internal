@@ -46,6 +46,8 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import javax.net.ssl.SSLContext;
 import pwnbrew.log.LoggableException;
@@ -73,6 +75,8 @@ abstract public class PortRouter {
     
     public static final int CONTROL_CHANNEL_ID = 1;
     private static final String NAME_Class = PortRouter.class.getSimpleName();
+    
+    private final Map<Integer, ConnectionCallback> connectionCallbackMap = new HashMap();
   
     //===============================================================
     /**
@@ -225,4 +229,30 @@ abstract public class PortRouter {
      *  Shuts down the handler and selector
      */
     abstract public void shutdown();
+
+    //===============================================================
+    /**
+     * 
+     * @param channelId
+     * @return 
+     */
+    public ConnectionCallback removeConnectionCallback(int channelId) {
+        ConnectionCallback aCC;
+        synchronized(connectionCallbackMap){
+            aCC = connectionCallbackMap.get(channelId);
+        }        
+        return aCC;
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @param channelId 
+     * @param aCC 
+     */
+    public void setConnectionCallback( int channelId, ConnectionCallback aCC ) {
+        synchronized(connectionCallbackMap){
+            connectionCallbackMap.put(channelId, aCC);
+        }        
+    }
 }

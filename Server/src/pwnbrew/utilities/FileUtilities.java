@@ -880,7 +880,7 @@ abstract public class FileUtilities {
             //Rename the file flush the stream and close it
             File finFile = new File(parentDir, theHash);
             if(!finFile.exists() && !outFile.renameTo(finFile))
-                    moveFile(outFile, finFile);                
+                moveFile(outFile, finFile);                
 
 
         } else { //If the file doesn't exist or is not actually a file...

@@ -173,13 +173,18 @@ public final class Server {
                 .append("   i\tImport SSL Certificate\n")
                 .append("   l\tList Hosts\n")
                 .append("   d\tToggle Debug Messages\n")
+                .append("   v\tPrint Version\n")
                 .append("   q\tShutdown");
             
             BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
             boolean loop = true;
             while(loop){
                 System.out.print("\n>");
-                String line = buffer.readLine().toLowerCase();
+                String line = buffer.readLine();
+                if( line == null )
+                    break;
+                
+                line = line.toLowerCase();
                 switch(line){
                     case "i":
                         System.out.print("Please enter the path to the certificate:");
@@ -219,6 +224,9 @@ public final class Server {
                         DebugPrinter.enable(isEnabled);
                         String toggleStr = ( isEnabled ? "Enabled" : "Disabled ");
                         System.out.println("\n***Debug Messages " + toggleStr);
+                        break;
+                    case "v":
+                        System.out.println("\nVersion: " + Constants.CURRENT_VERSION);
                         break;
                     case "q":
                     case "quit":

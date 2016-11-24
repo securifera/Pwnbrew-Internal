@@ -85,4 +85,19 @@ abstract public class Constants {
     public static final String PROP_FILE ="META-INF/MANIFEST.MF";
     public static final String PAYLOAD_VERSION_LABEL = "Version";
     
+    //SOCKS
+    public static final	byte SC_CONNECT	= 0x01;
+    public static final	byte SC_BIND = 0x02;
+    public static final	byte SC_UDP = 0x03;
+    
+    public static final byte SOCKS5_Version = 0x05;
+    public static final byte SOCKS4_Version = 0x04;
+         
+    public static final int DEFAULT_PROXY_TIMEOUT = 10;
+    public static final int DEFAULT_SOCKS_BUFFER_SIZE = 65500;
+    public static final int MAX_ADDR_LEN = 255;
+    
+    public static byte SRE_Refuse[] = { (byte)0x05, (byte)0xFF };
+    public static byte SRE_Accept[] = { (byte)0x05, (byte)0x00 };
+    
 }/* END CLASS Constants */

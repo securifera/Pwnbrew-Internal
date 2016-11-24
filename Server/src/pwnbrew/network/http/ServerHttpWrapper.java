@@ -54,9 +54,11 @@ import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.Message;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.selector.SocketChannelHandler;
@@ -142,6 +144,8 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                 int chanId = aMsg.getChannelId();
       
                                                 if( passedHandler.registerId(srcId, chanId) ){
+                                                    
+                                                    DebugPrinter.printMessage(ControlMessage.class.getSimpleName(), "Registered host: " + Integer.toString(srcId) + " channel: " + Integer.toString(chanId));
                                                     passedHandler.setRegisteredFlag(true);                                                    
                                                      
                                                     RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, srcId, chanId);

@@ -46,6 +46,7 @@ import pwnbrew.misc.Constants;
 import pwnbrew.misc.Utilities;
 import static pwnbrew.misc.Utilities.loadImageFromJar;
 import pwnbrew.xml.maltego.custom.Host;
+import static pwnbrew.misc.Utilities.loadImageFromJar;
 
 /**
  *

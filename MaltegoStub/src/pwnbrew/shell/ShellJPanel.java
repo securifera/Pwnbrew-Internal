@@ -46,8 +46,11 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextPane;
 import javax.swing.SpinnerModel;
@@ -56,6 +59,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import pwnbrew.generic.gui.ValidTextField;
+import pwnbrew.misc.StandardValidation;
 
 /**
  *
@@ -114,6 +119,10 @@ public class ShellJPanel extends javax.swing.JPanel {
         shellCombo = new javax.swing.JComboBox();
         fontSizeSpinner = new javax.swing.JSpinner();
         fontLabel = new javax.swing.JLabel();
+        cmdLabel = new javax.swing.JLabel();
+        cmdTextField = new ValidTextField();
+
+        shellScrollPane.setBorder(null);
 
         openButton.setText("Open Shell");
         openButton.addActionListener(new java.awt.event.ActionListener() {
@@ -122,6 +131,14 @@ public class ShellJPanel extends javax.swing.JPanel {
             }
         });
 
+        shellCombo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                shellComboActionPerformed(evt);
+            }
+        });
+
+        fontSizeSpinner.setBorder(null);
+        fontSizeSpinner.setInheritsPopupMenu(true);
         fontSizeSpinner.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 fontSizeSpinnerStateChanged(evt);
@@ -130,6 +147,14 @@ public class ShellJPanel extends javax.swing.JPanel {
 
         fontLabel.setText("Font Size:");
 
+        cmdLabel.setText("Command:");
+
+        cmdTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                cmdTextFieldKeyReleased(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -137,31 +162,42 @@ public class ShellJPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(shellScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 602, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
+                        .addGap(8, 8, 8)
+                        .addComponent(shellScrollPane))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGap(24, 24, 24)
-                        .addComponent(fontLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(fontSizeSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(shellCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(openButton)))
-                .addContainerGap())
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(fontLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(fontSizeSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(187, 187, 187)
+                                .addComponent(shellCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(openButton))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(cmdLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(cmdTextField)))))
+                .addGap(8, 8, 8))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(shellScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 418, Short.MAX_VALUE)
+                .addComponent(shellScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 433, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(fontSizeSpinner, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(shellCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(openButton))
+                    .addComponent(fontLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(shellCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(openButton)
-                    .addComponent(fontSizeSpinner)
-                    .addComponent(fontLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(24, 24, 24))
+                    .addComponent(cmdLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmdTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -201,8 +237,51 @@ public class ShellJPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_fontSizeSpinnerStateChanged
 
+    private void shellComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_shellComboActionPerformed
+        
+        boolean showCustom = false;
+        ClassWrapper aCW = (ClassWrapper) shellCombo.getSelectedItem();
+        if( aCW.theClass.equals( Custom.class )){
+            showCustom = true;   
+            
+            String[] cmdArr = Custom.CMD_EXE_STR;
+            String cmd = Arrays.toString( cmdArr );
+            cmdTextField.setText( cmd );
+        }
+                
+        cmdLabel.setVisible(showCustom);
+        cmdTextField.setVisible(showCustom);
+        JFrame parentFrame = theListener.getParentJFrame();
+        if( parentFrame != null )
+            parentFrame.pack();
+    }//GEN-LAST:event_shellComboActionPerformed
+
+    private void cmdTextFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_cmdTextFieldKeyReleased
+        if( ((ValidTextField)cmdTextField).isDataValid() ){
+            
+            String[] retArr = null;
+            String retStr = cmdTextField.getText();
+            retStr = retStr.substring(1, retStr.length()-1);
+            
+            //Create an array from the string
+            int pos = retStr.indexOf("\"");
+            if( pos == -1 ){
+                retArr = retStr.split(",");
+            } else {
+                StringBuilder aSB = new StringBuilder(retStr);                
+                ArrayList<String> aList = new ArrayList<>();
+                retArr = aList.toArray( new String[aList.size()]);
+            }
+            
+            
+            Custom.setCommandStringArray( retArr );
+        }
+    }//GEN-LAST:event_cmdTextFieldKeyReleased
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel cmdLabel;
+    private javax.swing.JTextField cmdTextField;
     private javax.swing.JLabel fontLabel;
     private javax.swing.JSpinner fontSizeSpinner;
     private javax.swing.JButton openButton;
@@ -294,6 +373,8 @@ public class ShellJPanel extends javax.swing.JPanel {
      *  Initialize the panel components
      */
     private void initializeComponents() {
+        
+        setBackground(new Color(235,235,230));
         
         theFileChooser = new JFileChooser();
         theFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -394,6 +475,10 @@ public class ShellJPanel extends javax.swing.JPanel {
         
         //Center the items
         ((JLabel)shellCombo.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
+       
+        //Set validation
+        ((ValidTextField)cmdTextField).setValidation( StandardValidation.KEYWORD_CommandArray );
+               
      
     } 
     

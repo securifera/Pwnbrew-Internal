@@ -203,7 +203,7 @@ public final class Hello extends ControlMessage {
            
                 //Register the host
                 Integer theClientId = getSrcHostId();
-                DebugPrinter.printMessage(NAME_Class, "Accepted connection from host id: " + theClientId);
+                DebugPrinter.printMessage(NAME_Class, "Accepted connection from host id: " + theClientId + " channel: " + Integer.toString(theChannelId));
                 PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort() );
                 
                 //Get connection manager
@@ -216,9 +216,6 @@ public final class Hello extends ControlMessage {
                         //Send HostAck
                         HelloAck aHostAck = new HelloAck( theClientId );
                         DataManager.send( passedManager, aHostAck );
-
-                        //Turn off wrapping
-//                        aSCH.setWrapping( theClientId, false);
 
                         //Create a host
                         Host aHost = new Host(theClientId);   

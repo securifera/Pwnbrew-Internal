@@ -151,7 +151,7 @@ public class Sleep extends ControlMessage {
             
             //Get the sleep time and spin up a thread to connect after the time.
             String theSleepTime = getSleepTime();
-            String theSenderTime = this.getSenderTime();
+            String theSenderTime = getSenderTime();
 
             //Set the time to the sender time and get the difference
             Date senderDate = Constants.CHECKIN_DATE_FORMAT.parse( theSenderTime );

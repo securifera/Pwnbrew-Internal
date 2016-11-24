@@ -71,12 +71,16 @@ public class Sleep extends ControlMessage {
      *
      * @param dstHostId
      * @param passedTime
+     * @param passedSenderTime
      * @throws java.io.UnsupportedEncodingException
     */
-    public Sleep( int dstHostId, String passedTime ) throws UnsupportedEncodingException  {
+    public Sleep( int dstHostId, String passedTime, String... passedSenderTime ) throws UnsupportedEncodingException  {
         super( dstHostId);
 
         senderTime = Constants.CHECKIN_DATE_FORMAT.format( new Date() );
+        if( passedSenderTime != null && passedSenderTime.length > 0 )
+            senderTime = passedSenderTime[0];
+        
         byte[] strBytes = senderTime.getBytes("US-ASCII");
         
         ControlOption aTlv = new ControlOption(OPTION_SENDER_TIME, strBytes);

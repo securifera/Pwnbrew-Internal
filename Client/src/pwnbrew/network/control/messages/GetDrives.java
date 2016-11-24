@@ -81,26 +81,21 @@ public final class GetDrives extends Tasking {
     @Override
     public void evaluate( PortManager passedManager ) {   
     
-//        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//        if( aCMManager != null ){
-            //Get the roots
-            File[] theRoots = File.listRoots();
-            int taskId = getTaskId();
-            
-            //Create a dircount message and send it back
-            ControlMessage aMsg = new DirCount(taskId, theRoots.length);
+        //Get the roots
+        File[] theRoots = File.listRoots();
+        int taskId = getTaskId();
+
+        //Create a dircount message and send it back
+        ControlMessage aMsg = new DirCount(taskId, theRoots.length);
+        aMsg.setDestHostId( getSrcHostId() );
+        DataManager.send(passedManager, aMsg);
+
+        for (File aFile : theRoots) {
+            aMsg = new FileSystemMsg( taskId, aFile, true );
             aMsg.setDestHostId( getSrcHostId() );
             DataManager.send(passedManager, aMsg);
-//            aCMManager.send(aMsg);
-            
-            for (File aFile : theRoots) {
-                aMsg = new FileSystemMsg( taskId, aFile, true );
-                aMsg.setDestHostId( getSrcHostId() );
-                DataManager.send(passedManager, aMsg);
-//                aCMManager.send(aMsg);
-            }
-//        }
-        
+        }
+
     }
    
 }

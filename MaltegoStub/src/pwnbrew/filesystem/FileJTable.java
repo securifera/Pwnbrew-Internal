@@ -158,8 +158,8 @@ public class FileJTable extends JTable {
                     //Compare the dates
                     try {
                         
-                        Date firstDate = Constants.DEFAULT_DATE_FORMAT.parse(firstDateStr);
-                        Date secondDate = Constants.DEFAULT_DATE_FORMAT.parse(secondDateStr);
+                        Date firstDate = Constants.CHECKIN_DATE_FORMAT.parse(firstDateStr);
+                        Date secondDate = Constants.CHECKIN_DATE_FORMAT.parse(secondDateStr);
                         return firstDate.compareTo(secondDate);
                         
                     } catch (ParseException ex) {                    
@@ -207,7 +207,7 @@ public class FileJTable extends JTable {
 
         //Add the action listeners
         final FileJTable theJTable = this;
-        Action deleteAction = new AbstractAction("Delete"){ 
+        final Action deleteAction = new AbstractAction("Delete"){ 
             @Override
             public void actionPerformed(ActionEvent e){
 
@@ -226,9 +226,9 @@ public class FileJTable extends JTable {
                
             }
         };
-        theJPopup.add(deleteAction);
+//        theJPopup.add(deleteAction);
 
-        Action renameAction = new AbstractAction("Rename"){ 
+        final Action renameAction = new AbstractAction("Rename"){ 
             @Override
             public void actionPerformed(ActionEvent e){
                 
@@ -252,11 +252,10 @@ public class FileJTable extends JTable {
                 }    
             
             }
-        };
-        theJPopup.add(renameAction);
+        };        
         
         //Add the date change option
-        Action dateAction = new AbstractAction("Change Modified Date"){ 
+        final Action dateAction = new AbstractAction("Change Modified Date"){ 
             @Override
             public void actionPerformed(ActionEvent e){
 
@@ -280,18 +279,33 @@ public class FileJTable extends JTable {
                 }
             }
         };
-        theJPopup.add(dateAction);        
+        //theJPopup.add(dateAction);        
         add(theJPopup);
         
         addMouseListener( new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e){
-                int r = theJTable.rowAtPoint(e.getPoint());
-                if (r >= 0 && r < theJTable.getRowCount()) {
-                    theJTable.setRowSelectionInterval(r, r);
-                } else {
-                    theJTable.clearSelection();
+                
+                //Remove all the menus
+                theJPopup.removeAll();
+                                
+                //Select the row if it's not already
+                if( theJTable.getSelectedRowCount() < 2 ){
+                    int r = theJTable.rowAtPoint(e.getPoint());
+                    if (r >= 0 && r < theJTable.getRowCount()) {
+                        theJTable.setRowSelectionInterval(r, r);
+                        
+                        //Add rename
+                        theJPopup.add(renameAction);
+                    } else {
+                        theJTable.clearSelection();
+                    }
                 }
+                
+                
+                //Add modified date & delete
+                theJPopup.add(dateAction);
+                theJPopup.add(deleteAction);                                
 
                 int rowindex = theJTable.getSelectedRow();
                 if (rowindex < 0)

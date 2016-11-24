@@ -145,7 +145,7 @@ abstract public class ManagedRunnable implements Runnable {
     /**
      * Notifies the thread
     */
-    protected synchronized void beNotified() {
+    public synchronized void beNotified() {
         notified = true;
         notifyAll();
     }

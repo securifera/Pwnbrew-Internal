@@ -62,6 +62,7 @@ public abstract class Message {
     public static final byte CONTROL_MESSAGE_TYPE = 88;
     public static final byte PROCESS_MESSAGE_TYPE = 89;
     public static final byte FILE_MESSAGE_TYPE = 90;
+    public static final byte SOCKS_MESSAGE_TYPE = 91;
 
     public static final int SRC_HOST_ID_OFFSET = 5;
     public static final int DEST_HOST_ID_OFFSET = 9;
@@ -74,7 +75,7 @@ public abstract class Message {
     protected final byte[] length = new byte[MSG_LEN_SIZE];
     private final byte[] srcHostId = new byte[4];
     private final byte[] destHostId = new byte[4];
-    protected byte[] channelId = new byte[4];
+    protected byte[] msgChannelId = new byte[4];
 
     //Class name
     private static final String NAME_Class = Message.class.getSimpleName();
@@ -95,10 +96,10 @@ public abstract class Message {
             SocketUtilities.intToByteArray(destHostId,  theConf.getServerId());
         }
         
-        SocketUtilities.intToByteArray(channelId, 0);        
+        SocketUtilities.intToByteArray(msgChannelId, 0);        
         
         //Set the base length
-        length[3] = (byte)(1 + srcHostId.length + destHostId.length + channelId.length);
+        length[3] = (byte)(1 + srcHostId.length + destHostId.length + msgChannelId.length);
     }
     
     //===========================================================================
@@ -112,13 +113,13 @@ public abstract class Message {
         type = passedType;
 
         if(passedId != null){
-           System.arraycopy( passedId, 0, channelId, 0, channelId.length );          
+           System.arraycopy(passedId, 0, msgChannelId, 0, msgChannelId.length );          
         } else {
-           SocketUtilities.intToByteArray(channelId, 0);
+           SocketUtilities.intToByteArray(msgChannelId, 0);
         }
         
         //Set the base length
-        length[3] = (byte)(1 + srcHostId.length + destHostId.length + channelId.length);;
+        length[3] = (byte)(1 + srcHostId.length + destHostId.length + msgChannelId.length);;
     }
     
     //===============================================================
@@ -158,7 +159,7 @@ public abstract class Message {
         count += length.length;
         
         //Add the ID
-        count += channelId.length;
+        count += msgChannelId.length;
 
         //Add Client ID
         count += srcHostId.length;
@@ -176,7 +177,7 @@ public abstract class Message {
      * @return
     */
     public int getChannelId(){
-        return SocketUtilities.byteArrayToInt(channelId);
+        return SocketUtilities.byteArrayToInt(msgChannelId);
     }
     
      //===============================================================
@@ -186,7 +187,7 @@ public abstract class Message {
      * @param passedId
     */
     public void setChannelId( int passedId ){
-       channelId = SocketUtilities.intToByteArray(passedId);
+       msgChannelId = SocketUtilities.intToByteArray(passedId);
     }
     
     //===============================================================
@@ -245,7 +246,7 @@ public abstract class Message {
         rtnBuffer.put(destHostId, 0, destHostId.length );
         
         //Add the ID
-        rtnBuffer.put(channelId, 0, channelId.length );
+        rtnBuffer.put(msgChannelId, 0, msgChannelId.length );
 
     }
     

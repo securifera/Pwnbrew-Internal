@@ -49,7 +49,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -57,7 +56,6 @@ import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
-import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Directories;
 import pwnbrew.misc.ProgressListener;
@@ -66,7 +64,6 @@ import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileFin;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.FileUtilities;
-import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.ServerConfig;
 
 /**
@@ -93,70 +90,11 @@ final public class FileReceiver {
     private final String fileHash;
     
     private FileOutputStream aFileStream = null;
-    private MessageDigest fileDigest = null;
+//    private MessageDigest fileDigest = null;
         
     private final FileMessageManager theFileMessageManager;
     
     private static final String NAME_Class = FileReceiver.class.getSimpleName();
-
-//    //===========================================================================
-//    /**
-//     * 
-//     *  Constructor
-//     * 
-//     * @param passedManager
-//     * @param passedClientId
-//     * @param passedTaskId
-//     * @param passedFileId
-//     * @param passedFileSize
-//     * @param parentDir
-//     * @param hashFilenameStr 
-//     * @throws pwnbrew.logging.LoggableException 
-//     * @throws java.security.NoSuchAlgorithmException 
-//     * @throws java.io.IOException 
-//     */
-//    public FileReceiver( FileMessageManager passedManager, int passedClientId, int passedTaskId, int passedFileId, 
-//            long passedFileSize, File parentDir, String hashFilenameStr) 
-//            throws LoggableException, NoSuchAlgorithmException, IOException {
-//        
-//        theFileMessageManager = passedManager;
-//        taskId = passedTaskId;
-//        fileId = passedFileId;
-//        fileSize = passedFileSize;
-//        clientId = passedClientId;
-//
-//        //Set the hash
-//        String[] fileHashFileNameArr = hashFilenameStr.split(":", 2);
-//        if( fileHashFileNameArr.length != 2 )
-//            throw new LoggableException("Passed hash filename string is not correct.");
-//            
-//        fileHash = fileHashFileNameArr[0];
-//      
-//        //Create the file digest
-//        fileDigest = MessageDigest.getInstance(Constants.HASH_FUNCTION);
-//        
-//        //Ensure the parent directory exists
-//        Directories.ensureDirectoryExists(parentDir);
-//
-//        String filePath = new File( fileHashFileNameArr[1] ).getName();        
-//        fileLoc = new File( parentDir,  filePath);
-//        if(fileLoc.exists()){
-//
-//            //If file already exists and the hash is the same
-//            String localFileHash = FileUtilities.getFileHash(fileLoc);
-//            if( !localFileHash.equals(fileHash) && !fileLoc.delete()){
-//                cleanupFileTransfer();
-//                throw new LoggableException("File already exists, the hash does not match, and was unable to remove it.");
-//            }
-//
-//        }
-//
-//        //Open the file stream
-//        aFileStream = new FileOutputStream(fileLoc, true);
-//        
-//        //Set the progress listener
-//        theListener = passedManager.getPortManager().getProgressListener();
-//    }
     
       //===========================================================================
     /**
@@ -191,7 +129,7 @@ final public class FileReceiver {
         fileHash = fileHashFileNameArr[0];
       
         //Create the file digest
-        fileDigest = MessageDigest.getInstance(Constants.HASH_FUNCTION);
+//        fileDigest = MessageDigest.getInstance(Constants.HASH_FUNCTION);
         
         //Ensure the parent directory exists
         Directories.ensureDirectoryExists(parentDir);
@@ -285,7 +223,7 @@ final public class FileReceiver {
             //Copy over the bytes
             aFileStream.write(passedByteArray);
             fileByteCounter += passedByteArray.length;
-            fileDigest.update(passedByteArray);
+//            fileDigest.update(passedByteArray);
 //            DebugPrinter.printMessage(this, "Receiving file, bytes: " + fileByteCounter);
             
             //Calculate the progress
@@ -327,11 +265,11 @@ final public class FileReceiver {
     private void finishFileTransfer(){
         
         //Get the hash and reset it
-        byte[] byteHash = fileDigest.digest();
-        String hexString = Utilities.byteToHexString(byteHash);
-
-        if( !fileHash.equals("0") && !hexString.equals(fileHash))
-            Log.log(Level.WARNING, NAME_Class, "receiveFile()", "Calculated file hash does not match the hash provided.", null);
+//        byte[] byteHash = fileDigest.digest();
+//        String hexString = Utilities.byteToHexString(byteHash);
+//
+//        if( !fileHash.equals("0") && !hexString.equals(fileHash))
+//            Log.log(Level.WARNING, NAME_Class, "receiveFile()", "Calculated file hash does not match the hash provided.", null);
   
         DebugPrinter.printMessage( getClass().getSimpleName(), "Received File.");
 
@@ -341,7 +279,7 @@ final public class FileReceiver {
         //Send fin message to host
         try {
 
-            PushFileFin finMessage = new PushFileFin( taskId, hexString+":"+fileLoc.getName(), srcId, channelId );
+            PushFileFin finMessage = new PushFileFin( taskId, "0:"+fileLoc.getName(), srcId, channelId );
             DataManager.send(theFileMessageManager.getPortManager(), finMessage);
             
 

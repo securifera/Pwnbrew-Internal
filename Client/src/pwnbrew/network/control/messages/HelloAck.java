@@ -131,8 +131,7 @@ public final class HelloAck extends ControlMessage {
                         Set<Integer> keySet = connectionManagerMap.keySet();
                         for( Integer aInt : keySet){
                             HelloRepeat aRepeatMsg = new HelloRepeat( aInt );
-                            DataManager.send(passedManager, aRepeatMsg);
-//                            theManager.send(aRepeatMsg);                    
+                            DataManager.send(passedManager, aRepeatMsg);     
                         } 
                     }
                     
