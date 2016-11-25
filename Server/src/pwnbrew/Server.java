@@ -187,8 +187,8 @@ public final class Server {
                 line = line.toLowerCase();
                 switch(line){
                     case "i":
-                        System.out.print("Please enter the path to the certificate:");
-                        String filePath = buffer.readLine().toLowerCase();
+                        System.out.print("Please enter the path to the certificate: ");
+                        String filePath = buffer.readLine().toLowerCase().trim();
                         File aFile = new File(filePath);
                         if(aFile.exists()){
                             importCertificate(aFile);
