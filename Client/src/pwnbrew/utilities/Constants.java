@@ -93,7 +93,7 @@ abstract public class Constants {
     public static final byte SOCKS5_Version = 0x05;
     public static final byte SOCKS4_Version = 0x04;
          
-    public static final int DEFAULT_PROXY_TIMEOUT = 10;
+    public static final int DEFAULT_PROXY_TIMEOUT = 100;
     public static final int DEFAULT_SOCKS_BUFFER_SIZE = 65500;
     public static final int MAX_ADDR_LEN = 255;
     

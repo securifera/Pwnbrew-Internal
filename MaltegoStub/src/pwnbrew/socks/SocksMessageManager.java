@@ -234,6 +234,7 @@ public class SocksMessageManager extends DataManager {
         //Star the handler
         if( theSocksServer != null ){
             SocksHandler theSH = theSocksServer.getSocksHandler(theHandlerId);
+            theSH.setConnected(creationFlag);
             theSH.beNotified();
         }
     }

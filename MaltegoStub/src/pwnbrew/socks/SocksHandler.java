@@ -36,6 +36,8 @@ public class SocksHandler extends ManagedRunnable {
         
     public static final int DEFAULT_PROXY_TIMEOUT = 10;
     public static final int DEFAULT_SOCKS_BUFFER_SIZE = 65500;;
+    
+    private boolean connected = false;
 
     //========================================================================
     /**
@@ -114,7 +116,6 @@ public class SocksHandler extends ManagedRunnable {
      */
     public void readLoop(){
         
-        waitToBeNotified();
         while( !theClientSocket.isClosed() && !finished() ){
         
             //Receive data
@@ -349,14 +350,24 @@ public class SocksHandler extends ManagedRunnable {
         throw new Exception( "Interrupted Reading GetByteFromClient()");
     } 
     
+    //=========================================================================
+    /**
+     * 
+     * @param passedBool 
+     */
+    public void setConnected( boolean passedBool ){
+        connected = passedBool;
+    }
+    
      //=========================================================================
     /**
      * 
      * @param server
      * @param port
+     * @return 
      * @throws IOException 
      */
-    public void connectToServer( String server, int port ) throws IOException {
+    public boolean connectToServer( String server, int port ) throws IOException {
         
         //Send message to create new sockshandler on the client
         ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
@@ -367,6 +378,11 @@ public class SocksHandler extends ManagedRunnable {
         //Send the socks start msg
         SocksCreateHandlerMsg aMsg = new SocksCreateHandlerMsg( theDstId, theSocksHandlerId, connectStr);
         aCMM.send(aMsg);
+        
+        //For for connection
+        waitToBeNotified();
+        
+        return connected;
         
     }
 }

@@ -253,15 +253,21 @@ public class Socks4Impl {
 
 //        DebugPrinter.printMessage( NAME_Class , "connect","Connecting...", null );
 //        //Connect to the Remote Host
+        boolean retVal;
         try{
-            m_Parent.connectToServer(m_ServerAddr, m_nServerPort );
+            retVal = m_Parent.connectToServer(m_ServerAddr, m_nServerPort );
         } catch( IOException e )	{
             refuseCommand( getFailCode() ); // Connection Refused
             throw new Exception("Socks 4 - Can't connect to " + m_ServerAddr + ":" + m_nServerPort );
         }
-//
+        //
 //        DebugPrinter.printMessage( NAME_Class, "Connected to "+ m_ServerIP.getHostAddress() + ":" + m_nServerPort );
-        replyCommand( getSuccessCode() );
+        
+        byte retCode = getSuccessCode();
+        if( !retVal )
+            retCode = getFailCode();
+        
+        replyCommand( retCode );
     }	
 
     //========================================================================

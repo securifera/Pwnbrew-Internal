@@ -8,10 +8,12 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import pwnbrew.manager.DataManager;
+import pwnbrew.network.control.messages.SocksCreateHandlerAckMsg;
 import pwnbrew.network.control.messages.SocksOperation;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
@@ -64,18 +66,30 @@ public class SocksHandler extends ManagedRunnable {
     @Override
     public void	go(){
         
+        boolean connected = true;
         try {
             //Connect to the server
             connectToServer();
         } catch (IOException ex) {
             DebugPrinter.printMessage( NAME_Class, ex.getMessage() );             
                             
-            //Send message to create channel for socks proxy
-            SocksOperation aSocksMsg = new SocksOperation( theSrcHostId, SocksOperation.HANDLER_STOP, theSocksHandlerId );
-            DataManager.send(theSMM.getPortManager(), aSocksMsg );
-            
-            return;
+//            //Send message to create channel for socks proxy
+//            SocksOperation aSocksMsg = new SocksOperation( theSrcHostId, SocksOperation.HANDLER_STOP, theSocksHandlerId );
+//            DataManager.send(theSMM.getPortManager(), aSocksMsg );
+            connected = false;
+//            return;
         }
+        
+        //Create message
+        SocksCreateHandlerAckMsg anAck = new SocksCreateHandlerAckMsg(theSocksHandlerId, connected);
+        anAck.setDestHostId(theSrcHostId);
+     
+        //Send back message
+        DataManager.send(theSMM.getPortManager(), anAck);
+        
+        //If no connection, return
+        if( !connected )
+            return;
         
         //Main loop
         recvLoop();
@@ -174,8 +188,11 @@ public class SocksHandler extends ManagedRunnable {
         }
 
         String[] connectArr = theConnectStr.split(":");
-        theExternalSocket = new Socket( connectArr[0], Integer.parseInt(connectArr[1]) );
-//        theExternalSocket.setSoTimeout( Constants.DEFAULT_PROXY_TIMEOUT );
+        //theExternalSocket = new Socket( connectArr[0], Integer.parseInt(connectArr[1]) );
+        theExternalSocket = new Socket();
+        theExternalSocket.connect(new InetSocketAddress(connectArr[0], Integer.parseInt(connectArr[1])), Constants.DEFAULT_PROXY_TIMEOUT);
+        // This stops the request from dragging on after connection succeeds.
+        //theExternalSocket.setSoTimeout(Constants.DEFAULT_PROXY_TIMEOUT);
 
         DebugPrinter.printMessage(NAME_Class, "Connected to "+ theConnectStr );
         prepareServer();
