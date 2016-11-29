@@ -119,11 +119,11 @@ public class SocksCreateHandlerMsg extends ControlMessage {
             
             //Create a handler for this id
             boolean retVal = aSMM.createHandler( getSrcHostId(), theHandlerId, theConnectStr);
-//            SocksCreateHandlerAckMsg anAck = new SocksCreateHandlerAckMsg(theHandlerId, retVal);
-//            anAck.setDestHostId(getSrcHostId());
-//            
-//            //Send back message
-//            DataManager.send(passedManager, anAck);
+            if( !retVal ){
+                //Send message to create channel for socks proxy
+                SocksOperation aSocksMsg = new SocksOperation( getSrcHostId(), SocksOperation.HANDLER_STOP, theHandlerId );
+                DataManager.send(passedManager, aSocksMsg );
+            }
             
         } catch( IOException ex){
             RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null); 

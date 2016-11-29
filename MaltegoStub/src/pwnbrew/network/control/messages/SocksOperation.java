@@ -160,8 +160,10 @@ public final class SocksOperation extends ControlMessage{
             //Get the socks handler
             if( aSS != null){
                 SocksHandler aSH = aSS.removeSocksHandler(theHandlerId);   
-                if( aSH != null )
+                if( aSH != null ){
+                    aSH.beNotified();
                     aSH.close();
+                }
             }
             
         }

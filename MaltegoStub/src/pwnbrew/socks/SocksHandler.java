@@ -220,15 +220,6 @@ public class SocksHandler extends ManagedRunnable {
 //            DebugLog.getInstance().println( "Proxy Closed." );
     }
 
-//    //=========================================================================
-//    /**
-//     * 
-//     * @param buffer 
-//     */
-//    public void sendToClient( byte[] buffer )	{
-//        sendToClient( buffer, buffer.length );
-//    }
-
     //=========================================================================
     /**
      * 

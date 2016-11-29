@@ -14,7 +14,6 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import pwnbrew.manager.DataManager;
 import pwnbrew.network.control.messages.SocksCreateHandlerAckMsg;
-import pwnbrew.network.control.messages.SocksOperation;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.ManagedRunnable;
@@ -71,13 +70,8 @@ public class SocksHandler extends ManagedRunnable {
             //Connect to the server
             connectToServer();
         } catch (IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, ex.getMessage() );             
-                            
-//            //Send message to create channel for socks proxy
-//            SocksOperation aSocksMsg = new SocksOperation( theSrcHostId, SocksOperation.HANDLER_STOP, theSocksHandlerId );
-//            DataManager.send(theSMM.getPortManager(), aSocksMsg );
+            DebugPrinter.printMessage( NAME_Class, ex.getMessage() );
             connected = false;
-//            return;
         }
         
         //Create message
@@ -123,35 +117,6 @@ public class SocksHandler extends ManagedRunnable {
 //            DebugLog.getInstance().println( "Proxy Closed." );
     }
 
-//    //=========================================================================
-//    /**
-//     * 
-//     * @param buffer
-//     * @param len 
-//     */
-//    public void sendToClient( byte[] buffer, int len )	{
-//        
-//        //Copy of bytes read
-//        byte[] tempArr = Arrays.copyOf(buffer, len);
-//        
-//        //Send the file data
-//        SocksMessage socksMsg = new SocksMessage(theSocksHandlerId, tempArr);  
-//        socksMsg.setChannelId(theChannelId);
-//        socksMsg.setDestHostId(theSrcHostId );   
-//
-//        //Send the message
-//        DataManager.send( theSMM.getPortManager(), socksMsg);
-//    }
-
-//    //=========================================================================
-//    /**
-//     * 
-//     * @param buffer 
-//     */
-//    public void sendToServer( byte[] buffer )	{
-//        sendToServer( buffer, buffer.length );
-//    }
-
     //=========================================================================
     /**
      * 
@@ -188,12 +153,9 @@ public class SocksHandler extends ManagedRunnable {
         }
 
         String[] connectArr = theConnectStr.split(":");
-        //theExternalSocket = new Socket( connectArr[0], Integer.parseInt(connectArr[1]) );
         theExternalSocket = new Socket();
         theExternalSocket.connect(new InetSocketAddress(connectArr[0], Integer.parseInt(connectArr[1])), Constants.DEFAULT_PROXY_TIMEOUT);
-        // This stops the request from dragging on after connection succeeds.
-        //theExternalSocket.setSoTimeout(Constants.DEFAULT_PROXY_TIMEOUT);
-
+    
         DebugPrinter.printMessage(NAME_Class, "Connected to "+ theConnectStr );
         prepareServer();
     }
@@ -247,9 +209,6 @@ public class SocksHandler extends ManagedRunnable {
         //Send the message
         DataManager.send( theSMM.getPortManager(), socksMsg);
                 
-//        //Send message to create channel for socks proxy
-//        SocksOperation aSocksMsg = new SocksOperation( theSrcHostId, SocksOperation.HANDLER_STOP, theSocksHandlerId );
-//        DataManager.send(theSMM.getPortManager(), aSocksMsg );
     }
 
     //=========================================================================
@@ -271,27 +230,11 @@ public class SocksHandler extends ManagedRunnable {
             return 0;
         } catch( IOException e )		{
             DebugPrinter.printMessage(NAME_Class, "Server connection Closed!" );
-//            close();	//	Close the server on this exception
             return -1;
         }
-
-//        if( dlen < 0 )
-//            close();
 
         return	dlen;
             
     }    
- 
-//    //=========================================================================
-//    /**
-//     * 
-//     * @param traffic 
-//     */
-//    public void logServerData( int traffic ) {
-//        DebugPrinter.printMessage(NAME_Class, "Srv data : "+
-//                                    comm.m_ServerIP.getHostName()+"/"+
-//                                    comm.m_ServerIP.getHostAddress()+":"+
-//                                    comm.m_nServerPort+"> : " + 
-//                                    traffic +" bytes." );
-//    }   	
+  	
 }
