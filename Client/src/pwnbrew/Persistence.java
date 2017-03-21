@@ -43,6 +43,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.LoaderUtilities;
 import pwnbrew.utilities.RuntimeRunnable;
@@ -55,6 +57,10 @@ import pwnbrew.utilities.Utilities;
 final public class Persistence {
 
     private static final String NAME_Class = Persistence.class.getSimpleName();
+
+    private static void Sleep(int i) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     
     // ==========================================================================
@@ -97,6 +103,7 @@ final public class Persistence {
      */
     public static void uninstall( PortManager passedManager ) {    
 
+        RemoteLog.log(Level.INFO, NAME_Class, "uninstall()", "Uninstalling persistence.", null );   
         if( Utilities.isStaged() ){
             
             try {
@@ -109,6 +116,8 @@ final public class Persistence {
                     //Cast to string
                     String svcStr = (String)anObj;
                     if( !svcStr.isEmpty() ){
+                        
+                        RemoteLog.log(Level.INFO, NAME_Class, "uninstall()", "Removing service: " + svcStr + ".", null ); 
                         
                         //Tell the service to stop and restart
                         final List<String> strList = new ArrayList<>();
@@ -130,26 +139,39 @@ final public class Persistence {
                             }
                         }  
                        
+                        if( theSvcPath != null ){
+                            
+                            RemoteLog.log(Level.INFO, NAME_Class, "uninstall()", "Service Path: " + theSvcPath + ".", null ); 
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException ex) {}
+                            
+                            //Stop the svc, Remove the reg entry, delete files
+                            final List<String> cleanupList = new ArrayList<>();
+                            cleanupList.add("cmd.exe");
+                            cleanupList.add("/c");
 
-                        //Stop the svc, Remove the reg entry, delete files
-                        final List<String> cleanupList = new ArrayList<>();
-                        cleanupList.add("cmd.exe");
-                        cleanupList.add("/c");
+                            StringBuilder aSB = new StringBuilder();
+                            aSB.append("net stop \"").append(svcStr).append("\"");
+                            aSB.append(" && sc delete \"").append(svcStr).append("\"");
+                            
+                            //If this starts becoming unreliable, possibly move to
+                            //ManagementFactory.getRuntimeMXBean().getName();
+                            // to get pid, and then get the binary path using
+                            //wmic process get ProcessID,ExecutablePath | findstr <pid>
+                            aSB.append(" && del /q \"").append(theSvcPath).append("\"");                           
+
+                            cleanupList.add(aSB.toString());
+                            try{
+                                Runtime.getRuntime().exec(cleanupList.toArray( new String[cleanupList.size()]) );
+                            } catch(IOException ex){            
+                            }    
+                            
+                        } else {
                         
-                        StringBuilder aSB = new StringBuilder();
-                        aSB.append("net stop \"").append(svcStr).append("\"");
-                        
-                        if(theSvcPath != null ){
-                            aSB.append(" && ").append(theSvcPath).append(" -u");
-                            aSB.append(" && del ").append(theSvcPath);
-                            aSB.append(" && del ").append( Utilities.getClassPath() );
+                            RemoteLog.log(Level.INFO, NAME_Class, "uninstall()", "Unable to retrieve service path.", null ); 
+
                         }
-                        
-                        cleanupList.add(aSB.toString());
-                        try{
-                            Runtime.getRuntime().exec(cleanupList.toArray( new String[cleanupList.size()]) );
-                        } catch(IOException ex){            
-                        }                        
                         
                     } else {
                     
@@ -172,10 +194,10 @@ final public class Persistence {
                                 }
 
                             }
-                        });        
-//
-//                        //Shutdown the client
-//                        passedManager.shutdown();      
+                        });  
+                        
+                        //Shutdown the client
+                        passedManager.shutdown(); 
                     
                     }              
                     
@@ -186,8 +208,6 @@ final public class Persistence {
             
         }      
         
-        //Shutdown the client
-        passedManager.shutdown(); 
 
     }
 

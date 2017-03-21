@@ -584,6 +584,40 @@ char *GetJvmPath(){
 }
 
 //Load JVM and if it fails load microsoft runtime first
+bool LoadJvmCRuntime(std::string jvm_path){
+
+
+	//Check if default path exists - msvcr100.dll
+	if( FileExists(jvm_path)){ 
+
+		hDllInstance = LoadLibrary(jvm_path.c_str());
+			
+		//Try and load the jvm dll again
+		if(hDllInstance == NULL){
+#ifdef _DBG
+			//Write error log
+			std::string sFailed = std::string("Failed to load C++ Runtime, Path: ");
+			sFailed.append(jvm_path).append("\n");
+			Log((char *)sFailed.c_str());
+#endif
+
+			return FALSE;
+		}
+	} else {
+#ifdef _DBG
+		//Write error log
+		std::string sFailed = std::string("C++ Runtime, Path: ");
+		sFailed.append(jvm_path);
+		sFailed.append(" does not exist.\n");
+		Log((char *)sFailed.c_str());
+#endif
+	}	
+			
+	return (hDllInstance != NULL);
+
+}
+
+//Load JVM and if it fails load microsoft runtime first
 bool LoadJvmLibrary(char *jvm_path){
 
 	std::string sJavaDll;
@@ -606,8 +640,8 @@ bool LoadJvmLibrary(char *jvm_path){
 		_dupenv_s (&pSystemRoot, &len, root );
 		free(root);
 			
-		//Check if default path exists
-		char *mscrt = decode_split("\x5\xc\x5\xc\x6\xd\x7\x3\x7\x6\x6\x3\x7\x2\x3\x1\x3\x0\x2\xe\x6\x4\x6\xc\x6\xc",26);
+		//Check if default path exists - \\msvcr100.dll
+		char *mscrt = decode_split("\x5\xc\x5\xc\x6\xd\x7\x3\x7\x6\x6\x3\x7\x2\x3\x1\x3\x0\x3\x0\x2\xe\x6\x4\x6\xc\x6\xc",28);
 		sLibPath.assign(pSystemRoot).append(mscrt);
 		free(mscrt);
 	    if( FileExists(sLibPath)){ 
@@ -628,7 +662,15 @@ bool LoadJvmLibrary(char *jvm_path){
 
 				return FALSE;
 			}
-		} 
+		} else {
+#ifdef _DBG
+			//Write error log
+			std::string sFailed = std::string("C++ Runtime, Path: ");
+			sFailed.append(sLibPath);
+			sFailed.append(" does not exist.\n");
+			Log((char *)sFailed.c_str());
+#endif
+		}
 	}
 			
 	return (hDllInstance != NULL);
@@ -650,14 +692,14 @@ BOOL WINAPI InvokeMain( std::string *serviceName, std::string adsPath, const cha
     jobjectArray args;
 	jstring jstr;
 	
-	std::string sJavaVersion, sJavaRoot;
+	std::string sJavaVersion, sJavaRoot, jvmPathStr;
 	
 	//Set the jvm path
 	char* jvmPath;
 	if( jvm_path_param && strlen(jvm_path_param) > 0 ){
 
 		//Append the jvm dll
-		std::string jvmPathStr(jvm_path_param);
+		jvmPathStr.assign(jvm_path_param);
 		//\jvm.dll
 		char *dec_jvm = decode_split("\x5\xc\x6\xa\x7\x6\x6\xd\x2\xe\x6\x4\x6\xc\x6\xc",16);
 		jvmPathStr.append(dec_jvm);
@@ -688,6 +730,42 @@ BOOL WINAPI InvokeMain( std::string *serviceName, std::string adsPath, const cha
 #endif
 
 	}
+
+	//Load the C runtime to ensure jvm loads
+	jvmPathStr.assign(jvmPath);
+	std::size_t found = jvmPathStr.find_last_of("\\");
+	jvmPathStr.assign( jvmPathStr.substr(0, found) );
+	found = jvmPathStr.find_last_of("\\");
+	jvmPathStr.assign( jvmPathStr.substr(0, found + 1) );
+
+	//msvcr100.dll
+	char *mscrt = decode_split("\x6\xd\x7\x3\x7\x6\x6\x3\x7\x2\x3\x1\x3\x0\x3\x0\x2\xe\x6\x4\x6\xc\x6\xc",24);
+	jvmPathStr.append(mscrt);
+	free(mscrt);
+
+	//If the file couldn't be found or loaded
+	if( !LoadJvmCRuntime( jvmPathStr ) ) {
+
+#ifdef _DBG
+		std::string sFailed("Failed to Load JVM DLL, Path: ");
+		sFailed.append(jvmPathStr).append("\n");
+		//Log
+		Log((char *)sFailed.c_str());
+		Log("Error code = %d\n", GetLastError());					
+#endif
+				
+		//Free memory
+		free(jvmPath);
+		return FALSE;	
+
+	} else {
+	
+#ifdef _DBG
+		//Print status
+		Log("Loaded C Runtime Library.\n");					
+#endif
+	
+	}
 			  
 	
 	//If the file couldn't be found or loaded
@@ -708,7 +786,7 @@ BOOL WINAPI InvokeMain( std::string *serviceName, std::string adsPath, const cha
 	
 #ifdef _DBG
 		//Print status
-		Log("Loaded JVM Library.");					
+		Log("Loaded JVM Library.\n");					
 #endif
 	
 	}
