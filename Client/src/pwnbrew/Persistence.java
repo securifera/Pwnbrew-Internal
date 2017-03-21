@@ -40,6 +40,7 @@ package pwnbrew;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -152,7 +153,10 @@ final public class Persistence {
                             cleanupList.add("/c");
 
                             StringBuilder aSB = new StringBuilder();
-                            aSB.append("net stop \"").append(svcStr).append("\"");
+                            //aSB.append("net stop \"").append(svcStr).append("\"");
+                            String pidHostname = ManagementFactory.getRuntimeMXBean().getName();
+                            String pid = pidHostname.split("@")[0];
+                            aSB.append("taskkill /pid ").append(pid).append(" /f ");
                             aSB.append(" && sc delete \"").append(svcStr).append("\"");
                             
                             //If this starts becoming unreliable, possibly move to
