@@ -601,4 +601,11 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         channelId = passedId;
     }
 
+    // ==========================================================================
+    /**
+     * 
+     * @param keyCode 
+     */
+    public void handleCtrlChar(int keyCode) {}
+
 }

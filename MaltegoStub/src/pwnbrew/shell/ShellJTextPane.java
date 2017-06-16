@@ -72,12 +72,6 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
         initComponent();
         setEditable(false);      
 
-        //      TitledBorder theBorder = new TitledBorder("Console Output");
-//        LineBorder theBorder = new LineBorder(Color.WHITE);
-//        Border newBorder = BorderFactory.createCompoundBorder( theBorder, 
-//                BorderFactory.createEmptyBorder( 4, 4, 4, 4 ) );
-//        setBorder(newBorder);
-
     }
 
     // ==========================================================================
@@ -85,8 +79,6 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
      *  Initialize the components
      */
     private void initComponent() {
-//        setBackground(Color.BLACK);
-//        setForeground(Color.WHITE);
         
         Color bgColor = Color.BLACK;
         UIDefaults defaults = new UIDefaults();

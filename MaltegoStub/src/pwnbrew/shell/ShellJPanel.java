@@ -71,6 +71,7 @@ public class ShellJPanel extends javax.swing.JPanel {
 
     private final ShellJPanelListener theListener;   
     private JFileChooser theFileChooser = null;
+    private boolean ctrl_char = false;
         
     //===============================================================
     /**
@@ -440,6 +441,20 @@ public class ShellJPanel extends javax.swing.JPanel {
                     } else if( e.getKeyCode() == KeyEvent.VK_DOWN ){
 
                         theListener.getShell().printNextCommand();
+                    } else{
+                        
+                        //If ctrl flag is set, pass to shell
+                        if( ctrl_char ){
+                            theListener.getShell().handleCtrlChar( e.getKeyCode() );
+                        }
+                        
+                        //Set ctrl char flag
+                        if ( e.getKeyCode() == KeyEvent.VK_CONTROL ){
+                            ctrl_char = true; 
+                        } else {
+                            ctrl_char = false;
+                        }  
+                        
                     }
                     
                 } catch (BadLocationException ex) {
@@ -457,8 +472,7 @@ public class ShellJPanel extends javax.swing.JPanel {
                 if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1){
                     String selText = theTextPane.getSelectedText();
                     if( selText == null )
-                        updateCaret( theTextPane, theTextPane.getCaretPosition());
-                    
+                        updateCaret( theTextPane, theTextPane.getCaretPosition());                    
                 }
 
             } 
