@@ -157,11 +157,11 @@ public class Installer {
             return;
                             
         InstallerGui aIG = new InstallerGui();
-        aIG.setLocationRelativeTo(null);
-        Point parentLocation = aIG.getLocation();
-        aIG.setLocation(parentLocation.x - 300, parentLocation.y - 100);
+        //aIG.setLocationRelativeTo(null);
+        //Point parentLocation = aIG.getLocation();
+        aIG.setLocation(50, 50);
          
-        aIG.setAlwaysOnTop(true);
+        //aIG.setAlwaysOnTop(true);
         aIG.setVisible(true);
         
         aIG.setButtonText("Cancel");
@@ -191,15 +191,17 @@ public class Installer {
                 + "Close Maltego to conclude installation.\n\n";
         
         //Get the parent frame location
-        parentLocation = aIG.getLocation();
-        
-        JOptionPane aPane = new JOptionPane(msg , JOptionPane.INFORMATION_MESSAGE);
-        aPane.setOptions(new Object[]{"Finished Importing"});
-        JDialog aDialog = aPane.createDialog(aIG, "Import Pwnbrew Entities & Transforms");
-        aDialog.setLocation( parentLocation.x + 500, parentLocation.y);
-        aDialog.setModal(false);
-        aDialog.setAlwaysOnTop(true);
-        aDialog.setVisible(true); 
+        aIG.setInstructionsText(msg);
+        aIG.setButtonText("Done Importing");
+//        Point parentLocation = aIG.getLocation();
+//        
+//        JOptionPane aPane = new JOptionPane(msg , JOptionPane.INFORMATION_MESSAGE);
+//        aPane.setOptions(new Object[]{"Finished Importing"});
+//        JDialog aDialog = aPane.createDialog(aIG, "Import Pwnbrew Entities & Transforms");
+//        aDialog.setLocation( parentLocation.x + 500, parentLocation.y);
+//        aDialog.setModal(false);
+//        aDialog.setAlwaysOnTop(true);
+//        aDialog.setVisible(true); 
         
         
         File maltegoExe = null;
@@ -213,8 +215,8 @@ public class Installer {
             executeCmd(cmdArgs, maltegoExe.getParentFile(), false);
         }
         
-        aIG.addStatusString("Installation complete.\n");
-        aIG.installationComplete();
+        //aIG.addStatusString("Installation complete.\n");
+        //aIG.installationComplete();
         
     }
     

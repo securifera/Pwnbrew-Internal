@@ -18,7 +18,6 @@ You may not reverse engineer, decompile, translate, create derivative works, dec
 You will return or destroy all copies of the Software if and when Your right to use it ends.
 You may not use the Software for any purpose that is unlawful.
 ADDITIONAL SOFTWARE This license applies to updates, upgrades, plug-ins and any other additions to the original Software provided by Vendor, unless Vendor provides other terms along with the additional software.
-REGISTRATION. The software will electronically register itself during installation to confirm that You have entered a valid “License Key". The registration process only sends the license information that You've entered (License key) and information about the software installed (Program ID, Version, Checksum and selected Network Interface MAC address). No other information is sent.
 UPGRADES. If this copy of the software is an upgrade from an earlier version of the software, it is provided to You on a license exchange basis. Your use of the Software upgrade is subject to the terms of this license, and You agree by Your installation and use of this copy of the Software to voluntarily terminate Your earlier license and that You will not continue to use the earlier version of the Software or transfer it to another person or entity.
 TRANSFER. You cannot transfer the Software and Your rights under this license to another party.
 SUBLICENSING. You may not sublicense the Software and Your rights under this license to another party

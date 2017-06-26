@@ -61,17 +61,21 @@ public class InstallerGui extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        theTextArea = new javax.swing.JTextArea();
+        statusPane = new javax.swing.JScrollPane();
+        statusTextArea = new javax.swing.JTextArea();
         theProgressBar = new javax.swing.JProgressBar();
         aButton = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        instPane = new javax.swing.JScrollPane();
+        instTextArea = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Pwnbrew Maltego Plugin Installer");
 
-        theTextArea.setColumns(20);
-        theTextArea.setRows(5);
-        jScrollPane1.setViewportView(theTextArea);
+        statusTextArea.setColumns(20);
+        statusTextArea.setRows(5);
+        statusPane.setViewportView(statusTextArea);
 
         aButton.setText("OK");
         aButton.addActionListener(new java.awt.event.ActionListener() {
@@ -80,40 +84,65 @@ public class InstallerGui extends javax.swing.JFrame {
             }
         });
 
+        jLabel1.setText("Status:");
+
+        jLabel2.setText("Instructions:");
+
+        instTextArea.setColumns(20);
+        instTextArea.setRows(5);
+        instPane.setViewportView(instTextArea);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(instPane)
+                    .addComponent(statusPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 583, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(theProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(aButton, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(aButton, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(instPane, javax.swing.GroupLayout.DEFAULT_SIZE, 185, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(statusPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(5, 5, 5)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(aButton)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(4, 4, 4)
                         .addComponent(theProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(8, 9, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void aButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aButtonActionPerformed
-        dispose();
-        System.exit(0);
+        if( aButton.getText().equals("Close") ){
+           dispose();
+           System.exit(0);
+        } else if( aButton.getText().equals("Done Importing") ){
+            addStatusString("Installation complete.\n");
+            installationComplete();
+        }
     }//GEN-LAST:event_aButtonActionPerformed
     
     //=============================================================
@@ -122,7 +151,17 @@ public class InstallerGui extends javax.swing.JFrame {
      * @param aStr 
      */
     public void addStatusString( String aStr ){
-        theTextArea.append(aStr);
+        statusTextArea.append(aStr);
+        statusTextArea.setCaretPosition(statusTextArea.getDocument().getLength());
+    }
+    
+    //=============================================================
+    /**
+     * 
+     * @param aStr 
+     */
+    public void setInstructionsText( String aStr ){
+        instTextArea.setText(aStr);
     }
     
      //=============================================================
@@ -136,9 +175,13 @@ public class InstallerGui extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton aButton;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane instPane;
+    private javax.swing.JTextArea instTextArea;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JScrollPane statusPane;
+    private javax.swing.JTextArea statusTextArea;
     private javax.swing.JProgressBar theProgressBar;
-    private javax.swing.JTextArea theTextArea;
     // End of variables declaration//GEN-END:variables
 
     //=================================================================
