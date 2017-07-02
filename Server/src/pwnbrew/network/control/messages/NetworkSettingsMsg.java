@@ -57,6 +57,7 @@ import pwnbrew.xmlBase.ServerConfig;
  *
  * @author Securifera
  */
+@SuppressWarnings("ucd")
 public class NetworkSettingsMsg extends MaltegoMessage {
     
     private static final byte OPTION_SERVER_PORT = 54;  
@@ -84,6 +85,7 @@ public class NetworkSettingsMsg extends MaltegoMessage {
      * @param expDateStr
      * @throws java.io.UnsupportedEncodingException
     */
+    @SuppressWarnings("ucd")
     public NetworkSettingsMsg( int dstHostId, int passedPort, String issueeName, String issuerName, String theAlgorithm, String expDateStr ) throws UnsupportedEncodingException {
         super( dstHostId );
         

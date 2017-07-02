@@ -45,34 +45,19 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.controllers;
 
-import javax.swing.JPanel;
-
 /**
  *
  * 
  */
 public abstract class Controller {
-    
-    protected boolean headless = true;
-    
+        
     //========================================================================
     /**
      * 
-     * @param passedBool 
      */
-    public Controller( boolean passedBool ){
-        headless = passedBool;
+    public Controller(){
     }
-    
-     //=========================================================================
-    /**
-     * 
-     * @return 
-     */
-    public boolean isHeadless(){
-        return headless;
-    }
-
+ 
     //=========================================================================
     /**
     * 
@@ -86,18 +71,5 @@ public abstract class Controller {
     * @param passedObj 
     */
     abstract public void setObject( Object passedObj);
-
-    //=========================================================================
-    /**
-    * 
-    * @return 
-    */
-    abstract public JPanel getRootPanel();
-
-    //=========================================================================
-    /**
-    * 
-    */
-    abstract public void updateComponents();
 
 }

@@ -40,16 +40,12 @@ package pwnbrew.network.control.messages;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import pwnbrew.host.Host;
-import pwnbrew.host.HostController;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
-import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.PortRouter;
-import pwnbrew.network.shell.Shell;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xmlBase.ServerConfig;
@@ -132,7 +128,7 @@ public final class KillShellRelay extends MaltegoMessage{
             DataManager.send( passedManager, aShellMsg );
 
         } catch (LoggableException ex) {
-            Logger.getLogger(Shell.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(KillShellRelay.class.getName()).log(Level.SEVERE, null, ex);
         }              
           
     }

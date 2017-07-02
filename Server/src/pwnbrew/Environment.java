@@ -58,7 +58,6 @@ import java.util.TreeMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
-import pwnbrew.gui.panels.options.OptionsJPanel;
 import pwnbrew.log.Log;
 import pwnbrew.log.LogLevel;
 import pwnbrew.misc.Directories;
@@ -104,6 +103,7 @@ final public class Environment {
     private Environment() {
     }
 
+    @SuppressWarnings("ucd")
     public static void initialize(){
         determineRunLocation();
         populateNameToClassMap();
@@ -121,26 +121,28 @@ final public class Environment {
         //For local 
         File jarLibDir = new File( Directories.getJarLibPath());
         File[] fileArr = jarLibDir.listFiles();
-        for( File aFile : fileArr ){
-            XmlBase anObj = XmlBaseFactory.createFromXmlFile(aFile);
-            if( anObj instanceof JarItem ){
-                
-                //Add the jar to the map
-                JarItem aRef = (JarItem)anObj;
-                Utilities.addJarItem(aRef);
-                
-                //If it is a local extension then load it
-                if( aRef.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
-                    
-                    //Load the jar
-                    File libraryFile = new File( Directories.getFileLibraryDirectory(), aRef.getFileHash() ); 
-                    List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
-                    for( Class aClass : theClasses ){
-                        addClassToMap(aClass);
+        if( fileArr != null ){
+            for( File aFile : fileArr ){
+                XmlBase anObj = XmlBaseFactory.createFromXmlFile(aFile);
+                if( anObj instanceof JarItem ){
+
+                    //Add the jar to the map
+                    JarItem aRef = (JarItem)anObj;
+                    Utilities.addJarItem(aRef);
+
+                    //If it is a local extension then load it
+                    if( aRef.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
+
+                        //Load the jar
+                        File libraryFile = new File( Directories.getFileLibraryDirectory(), aRef.getFileHash() ); 
+                        List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
+                        for( Class aClass : theClasses ){
+                            addClassToMap(aClass);
+                        }
                     }
-                }
-            }                    
-        }        
+                }                    
+            }   
+        }     
         
     }
     
@@ -225,45 +227,7 @@ final public class Environment {
                             aFile.delete();
                         }
                     }
-                    
-//                    //Create a FileContentRef
-//                    JarItem aJarItem = null;
-//                    try {
-//                        aJarItem = Utilities.getJavaItem( aFile );
-//                    } catch (JarItemException ex) {
-//                        Log.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex);         
-//                        return;
-//                    }
-                    
-//                     //Add the jar
-//                    if( aJarItem != null ){
-//                        Utilities.addJarItem( aJarItem );
-//
-//                        //Write the file to disk
-//                        String fileHash = FileUtilities.createHashedFile( aFile, null );
-//                        if( fileHash != null ) {
-//
-//                            //Create a FileContentRef
-//                            aJarItem.setFileHash( fileHash ); //Set the file's hash
-//
-//                            //Write to disk
-//                            aJarItem.writeSelfToDisk();
-//
-//                            //If it is a local extension then load it
-//                            if( aJarItem.getType().equals(JarItem.LOCAL_EXTENSION_TYPE)){
-//
-//                                //Load the jar
-//                                File libraryFile = new File( Directories.getFileLibraryDirectory(), aJarItem.getFileHash() ); //Create a File to represent the library file to be copied
-//                                List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
-//                                for( Class aClass : theClasses )
-//                                    addClassToMap(aClass);                            
-//                            }
-//
-//                        } 
-//                    }
-//                    
-//                    //Delete the temp file
-//                    aFile.delete();
+               
                 } catch (IOException | NoSuchAlgorithmException ex) {
                     Log.log( LogLevel.SEVERE, NAME_Class, "loadDefaultModules()", ex.getMessage(), ex );
                 }
@@ -309,15 +273,6 @@ final public class Environment {
         }
 
     }/* END determineRunLocation() */
-
-    // ==========================================================================
-    /**
-    *
-     * @return 
-    */
-    public static URL getCodeSourceLocation() {
-        return theCodeSourceLocationUrl;
-    }
 
     // ==========================================================================
     /**
@@ -486,9 +441,9 @@ final public class Environment {
 //                    } else if( parentClass == RunnableItemController.class ){
 //                        Utilities.addRunnableController( aClass.getCanonicalName() );
 //                        break;
-                    } else if( parentClass == OptionsJPanel.class ){
-                        Utilities.addOptionsJPanel( aClass.getCanonicalName() );
-                        break;
+//                    } else if( parentClass == OptionsJPanel.class ){
+//                        Utilities.addOptionsJPanel( aClass.getCanonicalName() );
+//                        break;
                     }else {
                         parentClass = parentClass.getSuperclass();
                     }

@@ -68,7 +68,7 @@ public class StageMessage extends Message {
     
         
     //Data members
-    protected List<ControlOption> optionList = new ArrayList<>();
+    private List<ControlOption> optionList = new ArrayList<>();
 
     //=========================================================================
     /*
@@ -139,6 +139,7 @@ public class StageMessage extends Message {
      * @throws java.io.IOException
      * @throws pwnbrew.exception.RemoteExceptionWrapper
     */
+    @SuppressWarnings("ucd")
     public static StageMessage getMessage( ByteBuffer passedBuffer ) throws LoggableException, IOException, RemoteExceptionWrapper {
 
         byte[] channelId = new byte[4],  clientId = new byte[4], destHostId = new byte[4], stageId = new byte[4];

@@ -99,40 +99,33 @@ public class FileSender extends ManagedRunnable {
     @Override
     protected void go() {
         
-//         //Get the socket router
-//        ServerPortRouter aPR = (ServerPortRouter) theCommManager.getPortRouter( thePort );
-//                       
-//        //Initiate the file transfer
-//        if(aPR != null){
-            
-            int fileId = theFileAck.getFileId();
-            channelId = theFileAck.getChannelId();
-            int taskId = theFileAck.getTaskId();
-            try {
+        int fileId = theFileAck.getFileId();
+        channelId = theFileAck.getChannelId();
+        int taskId = theFileAck.getTaskId();
+        try {
 
-                File fileToSend = new File( theFileAck.getFilename());
-                if( !fileToSend.exists()){
-                    fileToSend = new File( Directories.getFileLibraryPath(), theFileAck.getFilehash());
-                }
-                
-                //Send the file
-                if( fileToSend.exists() ){
-                    sendFile( fileToSend, fileId );
-                } else {
-                    Log.log(Level.WARNING, NAME_Class, "go()", fileToSend.getAbsolutePath() + " doesn't exist.", null);
-                }             
-
-            } catch (IOException | LoggableException ex) {
-
-                Log.log(Level.INFO, NAME_Class, "go()", ex.getMessage(), ex );
-
-                //Send message to cleanup the file transfer on the client side
-                int clientId = theFileAck.getSrcHostId();
-                PushFileAbort fileAbortMsg = new PushFileAbort( taskId, clientId, channelId, fileId );
-                DataManager.send(theCommManager, fileAbortMsg);
-
+            File fileToSend = new File( theFileAck.getFilename());
+            if( !fileToSend.exists()){
+                fileToSend = new File( Directories.getFileLibraryPath(), theFileAck.getFilehash());
             }
-//        }
+
+            //Send the file
+            if( fileToSend.exists() ){
+                sendFile( fileToSend, fileId );
+            } else {
+                Log.log(Level.WARNING, NAME_Class, "go()", fileToSend.getAbsolutePath() + " doesn't exist.", null);
+            }             
+
+        } catch (IOException | LoggableException ex) {
+
+            Log.log(Level.INFO, NAME_Class, "go()", ex.getMessage(), ex );
+
+            //Send message to cleanup the file transfer on the client side
+            int clientId = theFileAck.getSrcHostId();
+            PushFileAbort fileAbortMsg = new PushFileAbort( taskId, clientId, channelId, fileId );
+            DataManager.send(theCommManager, fileAbortMsg);
+
+        }
         
     } 
     
@@ -146,9 +139,6 @@ public class FileSender extends ManagedRunnable {
         
         //Get the port router
         int dstHostId = theFileAck.getSrcHostId();
-//        DebugPrinter.printMessage(NAME_Class, "Port: " + thePort);
-//        PortRouter thePR = theCommManager.getPortRouter( thePort );
-//        SocketChannelHandler aHandler = thePR.getSocketChannelHandler( dstHostId );
         DebugPrinter.printMessage(NAME_Class, "Sending file to: " + dstHostId);
         
         //Get the client id and dest id
@@ -156,69 +146,63 @@ public class FileSender extends ManagedRunnable {
         byte[] clientIdArr = SocketUtilities.intToByteArray(clientId);
         byte[] destIdArr = SocketUtilities.intToByteArray(dstHostId);
     
-        //Get the id and port router
-//        if( aHandler != null ){
+        if( fileToBeSent.length() == 0 ){
 
-            if( fileToBeSent.length() == 0 ){
+            FileData fileDataMsg = new FileData(fileId, new byte[0]);
+            fileDataMsg.setChannelId(channelId);
+            fileDataMsg.setSrcHostId(SocketUtilities.byteArrayToInt(clientIdArr));
+            fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) );           
 
-                FileData fileDataMsg = new FileData(fileId, new byte[0]);
-                fileDataMsg.setChannelId(channelId);
-                fileDataMsg.setSrcHostId(SocketUtilities.byteArrayToInt(clientIdArr));
-                fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) );           
+            //Send the message
+            DataManager.send(theCommManager, fileDataMsg);
 
-                //Send the message
-                DataManager.send(theCommManager, fileDataMsg);
+        } else {  
 
-            } else {  
+            FileInputStream aFIS = new FileInputStream( fileToBeSent);
+            try {
 
-                FileInputStream aFIS = new FileInputStream( fileToBeSent);
+                //Get the file channel
+                FileChannel theFC = aFIS.getChannel();
+                ByteBuffer fileChannelBB = ByteBuffer.allocate(maxMsgLen);
+
+                int fileRead = 0;
+                DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sending " + theFileAck.getHashFilenameString());
+                while(fileRead != -1 && !finished() ){
+
+                    //Add the file message type
+                    fileChannelBB.clear();
+                    fileRead = theFC.read(fileChannelBB);                
+
+                    //Set file length
+                    if( fileRead == -1 )
+                        continue;
+
+                    fileChannelBB.flip();
+
+                    byte[] fileBytes = Arrays.copyOf(fileChannelBB.array(), fileChannelBB.limit());
+                    FileData fileDataMsg = new FileData(fileId, fileBytes);
+                    fileDataMsg.setChannelId(channelId);
+                    fileDataMsg.setSrcHostId(SocketUtilities.byteArrayToInt(clientIdArr));
+                    fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) ); 
+
+                    DataManager.send(theCommManager, fileDataMsg);
+
+                }
+
+                //Close the file channel
+                theFC.force(true);
+
+            }  finally {
+
+                //Close file input stream
                 try {
-
-                    //Get the file channel
-                    FileChannel theFC = aFIS.getChannel();
-                    ByteBuffer fileChannelBB = ByteBuffer.allocate(maxMsgLen);
-
-                    int fileRead = 0;
-                    DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sending " + theFileAck.getHashFilenameString());
-                    while(fileRead != -1 && !finished() ){
-
-                        //Add the file message type
-                        fileChannelBB.clear();
-                        fileRead = theFC.read(fileChannelBB);                
-
-                        //Set file length
-                        if( fileRead == -1 )
-                            continue;
-
-                        fileChannelBB.flip();
-
-                        byte[] fileBytes = Arrays.copyOf(fileChannelBB.array(), fileChannelBB.limit());
-                        FileData fileDataMsg = new FileData(fileId, fileBytes);
-                        fileDataMsg.setChannelId(channelId);
-                        fileDataMsg.setSrcHostId(SocketUtilities.byteArrayToInt(clientIdArr));
-                        fileDataMsg.setDestHostId(SocketUtilities.byteArrayToInt(destIdArr) ); 
-                        
-                        DataManager.send(theCommManager, fileDataMsg);
-
-                    }
-
-                    //Close the file channel
-                    theFC.force(true);
-
-                }  finally {
-
-                    //Close file input stream
-                    try {
-                        aFIS.close();
-                    } catch (IOException ex) {
-                        ex = null;
-                    }
+                    aFIS.close();
+                } catch (IOException ex) {
+                    ex = null;
                 }
             }
+        }
             
-//        } else {
-//            throw new IOException("Not connected to the client.");
-//        }
     }
 
     //=====================================================================

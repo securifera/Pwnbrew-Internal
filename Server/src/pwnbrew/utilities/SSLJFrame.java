@@ -61,6 +61,7 @@ import pwnbrew.misc.Constants;
  *
  * @author Securifera
  */
+@SuppressWarnings("ucd")
 public class SSLJFrame extends javax.swing.JFrame {
 
     private JFileChooser theCertificateChooser = null;

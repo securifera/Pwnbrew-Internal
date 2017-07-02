@@ -50,6 +50,7 @@ import java.util.regex.Pattern;
 /**
  * 
  */
+@SuppressWarnings("ucd")
 public class XmlUtilities {
   
     /** XML encoding of the "ampersand" character. */
@@ -143,6 +144,7 @@ public class XmlUtilities {
     * 
     * @return the encoded data
     */
+    @SuppressWarnings("ucd")
     public static String encode( Object content ) {
 
         if( content == null ) return null;

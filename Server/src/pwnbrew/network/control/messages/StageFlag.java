@@ -53,7 +53,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
-@SuppressWarnings("ucd")
+
 public final class StageFlag extends ControlMessage{
     
     private static final byte OPTION_STAGE_FLAG = 42;

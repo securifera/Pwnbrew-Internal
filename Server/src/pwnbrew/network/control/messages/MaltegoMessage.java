@@ -66,6 +66,7 @@ public class MaltegoMessage extends ControlMessage{
      *
      * @param passedBytes
     */
+    @SuppressWarnings("ucd")
     public MaltegoMessage( byte[] passedBytes ) {
         super( passedBytes );
     }

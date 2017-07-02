@@ -59,7 +59,7 @@ import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.SocketDisconnectTimer;
-import pwnbrew.network.socket.SecureSocketChannelWrapper;
+import pwnbrew.network.socket.EncryptedSocketChannelWrapper;
 
 /**
  *
@@ -135,7 +135,7 @@ final public class AcceptHandler implements Selectable {
             }
 
             //Assign an unencyrpted socketwrapper to the handler temporarily
-            SecureSocketChannelWrapper theSCW = new SecureSocketChannelWrapper( theSocketChannel, theSCH, requireAuthentication );
+            EncryptedSocketChannelWrapper theSCW = new EncryptedSocketChannelWrapper( theSocketChannel, theSCH, requireAuthentication );
             theSCH.setSocketChannelWrapper(theSCW);
             
             theSCW.beginHandshake();

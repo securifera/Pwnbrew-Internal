@@ -54,7 +54,7 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
-@SuppressWarnings("ucd")
+
 public final class NoOp extends ControlMessage{
     
     private static final byte OPTION_GARBAGE = 13;
@@ -69,6 +69,7 @@ public final class NoOp extends ControlMessage{
      *
      * @param dstHostId
     */
+    @SuppressWarnings("ucd")
     public NoOp( int dstHostId ) {
         super( dstHostId );
         

@@ -45,6 +45,7 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
+@SuppressWarnings("ucd")
 public class JarItemMsg extends MaltegoMessage { 
     
     private static final byte OPTION_JAR_NAME = 32;
@@ -68,6 +69,7 @@ public class JarItemMsg extends MaltegoMessage {
      * @param passedJarVersion
      * @throws java.io.UnsupportedEncodingException
     */
+    @SuppressWarnings("ucd")
     public JarItemMsg( int dstHostId, String passedName, String passedType, String passedJvmVersion, String passedJarVersion ) throws UnsupportedEncodingException {
         super( dstHostId );
         
@@ -95,6 +97,7 @@ public class JarItemMsg extends MaltegoMessage {
      *
      * @param passedId
     */
+    @SuppressWarnings("ucd")
     public JarItemMsg(byte[] passedId ) {
         super( passedId );
     }

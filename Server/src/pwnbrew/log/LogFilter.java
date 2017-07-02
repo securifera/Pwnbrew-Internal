@@ -56,6 +56,7 @@ import java.util.logging.LogRecord;
 /**
  * 
  */
+
 @SuppressWarnings("ucd")
 final public class LogFilter implements Filter {
 
@@ -95,6 +96,7 @@ final public class LogFilter implements Filter {
      * 
      * @param level the {@code Level} to allow
      */
+    @SuppressWarnings("ucd")
     public synchronized void allow( Level level ) {
         
         if( level == null ) return;

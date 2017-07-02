@@ -50,16 +50,16 @@ public class ShellStyledDocument extends DefaultStyledDocument {
     public static final int USER_INPUT = 0;
     public static final int SHELL_OUTPUT = 1;
     
-    private final ShellJPanel theHostShellPanel;
+    private final ShellJTextPane theParentPane;
     private volatile int theInputSrc = USER_INPUT;
     
     //============================================================
     /**
      * 
-     * @param passedPanel
+     * @param passedPane
      */
-    public ShellStyledDocument( ShellJPanel passedPanel ) {
-        theHostShellPanel = passedPanel;
+    public ShellStyledDocument( ShellJTextPane passedPane ) {
+        theParentPane = passedPane;
     }   
     
     //============================================================
@@ -82,7 +82,7 @@ public class ShellStyledDocument extends DefaultStyledDocument {
             return;
         
         synchronized( this ){
-            if( theHostShellPanel.updateCaret( theHostShellPanel.getShellTextPane(), offset ) )
+            if( theParentPane.updateCaret( offset ) )
                 super.insertString(offset, str, a);  
         }
     }
@@ -93,7 +93,7 @@ public class ShellStyledDocument extends DefaultStyledDocument {
      */
     @Override
     public void remove( int theOffset, int len) throws BadLocationException{
-        if( theHostShellPanel.canRemove( theOffset ) )
+        if( theParentPane.canRemove( theOffset ) )
             super.remove(theOffset, len);
     }
 

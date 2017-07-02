@@ -76,7 +76,7 @@ abstract public class XmlBase implements Identifiable{
     protected final Map<String, AttributeCollection> theAttributeCollectionMap = new LinkedHashMap<>();
 
     /** The XmlBase's instance ID. */
-    public static final String ATT_Id = "Id";
+    private static final String ATT_Id = "Id";
     public static final String ATTRIBUTE_Name = "Name";
  
     // ==========================================================================

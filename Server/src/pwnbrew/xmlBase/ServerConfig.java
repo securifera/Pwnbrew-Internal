@@ -45,16 +45,22 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.xmlBase;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
-import pwnbrew.Persistence;
+import java.util.logging.Logger;
 import pwnbrew.misc.Constants;
+import pwnbrew.misc.Directories;
 import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.utilities.Utilities;
 
 /**
  *
@@ -70,7 +76,9 @@ public class ServerConfig extends XmlBase {
     
     //Configurable Ports
     private static final String ATTRIBUTE_CommPort = "ctrlPort";    
+    private static final String theConfigFileName = "config.xml";
     private static ServerConfig theConf = null;
+    
     
     private transient static final String aString = "The quick brown fox jumps over the lazy dog.";
     private static final String NAME_Class = ServerConfig.class.getSimpleName();
@@ -184,11 +192,20 @@ public class ServerConfig extends XmlBase {
         try {
             
             byte[] theConfBytes = getXml().getBytes("US-ASCII");
+            String rootPathStr = Directories.getRoot();
+            File configFile = new File(rootPathStr, theConfigFileName );
             
-            //Encrypt and write to the file
-            theConfBytes = Utilities.simpleEncrypt( theConfBytes, aString);
-            Persistence.writeLabel( Persistence.CONF_CHUNK, theConfBytes);
-        
+            FileOutputStream theOutStream = new FileOutputStream(configFile);
+            BufferedOutputStream theBOS = new BufferedOutputStream(theOutStream);
+            try {
+                theBOS.write(theConfBytes, 0, theConfBytes.length);
+                theBOS.flush();
+
+            } finally {
+                //Close output stream
+                theBOS.close();
+            }
+                    
         } catch (IOException ex) {
             throw new LoggableException(ex);
         }
@@ -219,28 +236,56 @@ public class ServerConfig extends XmlBase {
         ServerConfig localConf = null;
         try {
 
-            List<byte[]> theConfEntries = Persistence.getLabelBytes( Persistence.CONF_CHUNK );
-            if( !theConfEntries.isEmpty() ){
-
-                //Decode the bytes
-                for( Iterator<byte[]> theIter = theConfEntries.iterator(); theIter.hasNext(); ){
-
+            String rootPathStr = Directories.getRoot();
+            File configFile = new File(rootPathStr, theConfigFileName );
+            if( configFile.exists() ){
+         
+                try {
+                    FileInputStream theFileStream = new FileInputStream(configFile);
+                    BufferedInputStream theBufferedIS = new BufferedInputStream(theFileStream);
                     try {
 
-                        byte[] theConfBytes = theIter.next();
-                        theConfBytes = Utilities.simpleDecrypt( theConfBytes, aString);
+                        int bytesRead = 0;
+                        ByteArrayOutputStream theBOS = new ByteArrayOutputStream();
+                        try {
+
+                            //Read to the end
+                            byte[] byteArr = new byte[1024];
+                            while( bytesRead != -1){
+                                bytesRead = theBufferedIS.read(byteArr);
+                                if(bytesRead != -1){
+                                    theBOS.write(byteArr, 0, bytesRead);
+                                }
+                            }
+
+                            theBOS.flush();
+
+                        } catch (IOException ex) {
+                        } finally {
+                            try {
+                                //Close output stream
+                                theBOS.close();
+                            } catch (IOException ex) {
+                            }
+                        }            
+
+                        //Queue up the classes to be sent
+                        byte[] theConfBytes = theBOS.toByteArray();
 
                         //Get the object
                         XmlBase anXB = XmlBaseFactory.createFromXml(new String(theConfBytes, "US-ASCII"));
                         if(anXB instanceof ServerConfig){
                             localConf = (ServerConfig)anXB;
+                        }                    
+
+                    } catch (UnsupportedEncodingException ex) {
+                    } finally {
+                        try {
+                            theBufferedIS.close();
+                        } catch (IOException ex) {
                         }
-                        break;
-
-                    } catch ( IOException ex) {
-                        throw new LoggableException(ex);
-                    }
-
+                    } 
+                } catch(FileNotFoundException ex){                    
                 }
 
             } else {

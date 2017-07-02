@@ -47,6 +47,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
+
 @SuppressWarnings("ucd")
 public final class HelloAck extends ControlMessage {
     
@@ -57,6 +58,7 @@ public final class HelloAck extends ControlMessage {
      * @param dstHostId
      * @throws java.io.IOException
     */
+    @SuppressWarnings("ucd")
     public HelloAck( int dstHostId ) throws IOException {
         super( dstHostId );
     }

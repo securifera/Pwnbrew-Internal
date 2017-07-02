@@ -46,6 +46,7 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
+@SuppressWarnings("ucd")
 public final class UpgradeStagerComplete extends ControlMessage {    
     
     private static final byte OPTION_JAR_VERSION = 19;    

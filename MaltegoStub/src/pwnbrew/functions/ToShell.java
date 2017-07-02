@@ -38,16 +38,14 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.functions;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -63,7 +61,6 @@ import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.RemoteException;
-import pwnbrew.output.StreamReceiver;
 import pwnbrew.shell.Bash;
 import pwnbrew.shell.CommandPrompt;
 import pwnbrew.shell.Custom;
@@ -71,7 +68,6 @@ import pwnbrew.shell.Powershell;
 import pwnbrew.shell.Shell;
 import pwnbrew.shell.ShellJPanel;
 import pwnbrew.shell.ShellJPanelListener;
-import pwnbrew.shell.ShellJTextPane;
 import pwnbrew.shell.ShellListener;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
@@ -90,7 +86,7 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
     private JFrame parentFrame;
     private ShellJPanel theShellPanel;
     private Shell theShell = null;
-  
+      
     //==================================================================
     /**
      * Constructor
@@ -212,9 +208,14 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
                        }
                 };
                 
+                       
                 //Set the title
                 parentFrame.setTitle(theHostName);
                 parentFrame.add(theShellPanel);
+                parentFrame.setMinimumSize( new Dimension(455,260));
+                
+                //Set the size
+                parentFrame.setPreferredSize( new Dimension(710,560) );
                 
                 //Set the icon
                 Image appIcon = Utilities.loadImageFromJar( Constants.TERM_IMG_STR );
@@ -260,32 +261,6 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
     @Override
     public Component getParentComponent(){
         return theShellPanel;
-    }
- 
-    // ==========================================================================
-    /**
-     *  Spawns a shell
-     * 
-     * @param passedClass 
-     */
-    @Override
-    public void spawnShell(Class passedClass) {
-        //Get the shell
-        if( passedClass != null ){
-            
-            try {
-                
-                Constructor aConstructor = passedClass.getConstructor( Executor.class, ShellListener.class );
-                theShell = (Shell)aConstructor.newInstance( Constants.Executor, this);
-                    
-                //Start the shell
-                theShell.start();
-
-            } catch (  NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                DebugPrinter.printMessage( NAME_Class, "spawnShell", ex.getMessage(), ex );
-            }
-            
-        }
     }
 
     // ==========================================================================
@@ -352,16 +327,6 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
     @Override
     public Shell getShell() {
         return theShell;
-    }
-
-    //========================================================================
-    /**
-     *  Get the text pane for the shell output
-     * @return 
-     */
-    @Override
-    public StreamReceiver getStreamReceiver() {
-        return theShellPanel.getShellTextPane();
     }
 
      //===============================================================
@@ -441,8 +406,8 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
      * @return 
      */
     @Override
-    public ShellJTextPane getShellTextPane() {
-        return theShellPanel.getShellTextPane();
+    public Component getShellView() {
+        return theShellPanel.getShellView();
     }
 
     //=======================================================================
@@ -455,5 +420,23 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
         return parentFrame;
     }
 
+    //=======================================================================
+    /**
+     * 
+     * @param passedShell
+     */
+    @Override
+    public void setShell(Shell passedShell) {
+        theShell = passedShell;
+    }
+
+    //=======================================================================
+    /**
+     * 
+     */
+    @Override
+    public void setFrameTitle(String title) {
+        parentFrame.setTitle(title);
+    }
 
 }

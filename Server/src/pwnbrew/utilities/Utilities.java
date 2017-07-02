@@ -41,7 +41,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.utilities;
 
 import pwnbrew.xmlBase.JarItemException;
-import java.awt.Component;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.beans.IntrospectionException;
@@ -69,10 +68,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.tree.DefaultMutableTreeNode;
 import pwnbrew.exception.NoSuchValidationException;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostFactory;
@@ -82,11 +77,9 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Base64Converter;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
-import pwnbrew.tasks.RemoteTask;
 import pwnbrew.xmlBase.XmlBase;
 import pwnbrew.exception.XmlBaseCreationException;
 import pwnbrew.xmlBase.XmlBaseFactory;
-import pwnbrew.misc.FileFilterImp;
 import pwnbrew.misc.IdGenerator;
 import pwnbrew.network.control.messages.Payload;
 import pwnbrew.network.control.messages.SendStage;
@@ -123,19 +116,14 @@ public class Utilities {
 
     private static final URL ourUrl= Utilities.class.getProtectionDomain().getCodeSource().getLocation();
     private static File classPath;
+              
+    private static final String WINDOWS_LINE_SEPARATOR = "\r\n";
+    private static final String UNIX_LINE_SEPARATOR = "\n";
     
-    private static final List<String> theControllerList = new ArrayList<>();
-    private static final List<String> theExtPanelClassList = new ArrayList<>();
-      
-    public static final String IMAGE_PATH_IN_JAR= "pwnbrew/images";
-    
-    public static final String WINDOWS_LINE_SEPARATOR = "\r\n";
-    public static final String UNIX_LINE_SEPARATOR = "\n";
-    
-    public static final Map<String, JarItem> theStagerRefMap = new HashMap<>();
-    public static final Map<String, JarItem> thePayloadRefMap = new HashMap<>();
-    public static final Map<String, JarItem> theLocalExtMap = new HashMap<>();
-    public static final Map<String, JarItem> theRemoteExtMap = new HashMap<>();
+    private static final Map<String, JarItem> theStagerRefMap = new HashMap<>();
+    private static final Map<String, JarItem> thePayloadRefMap = new HashMap<>();
+    private static final Map<String, JarItem> theLocalExtMap = new HashMap<>();
+    private static final Map<String, JarItem> theRemoteExtMap = new HashMap<>();
     
     private static final SecureRandom aSR = new SecureRandom();
     
@@ -165,36 +153,8 @@ public class Utilities {
 
     //Local OS values...
     public static final String OsName    = System.getProperty( PROPERTY_OsName ).toLowerCase();
-    public static final String JAVA_ARCH    = System.getProperty( PROPERTY_OsArch ).toLowerCase();
+    private static final String JAVA_ARCH    = System.getProperty( PROPERTY_OsArch ).toLowerCase();
 
-//    // ==========================================================================
-//    /**
-//     *  Add the Controller to the Runnable Controller list
-//     * @param passedClassPath
-//     */
-//    public static void addRunnableController( String passedClassPath ) {
-//        if( passedClassPath != null && !passedClassPath.isEmpty() )
-//            theControllerList.add(passedClassPath);
-//    }
-    
-     // ==========================================================================
-    /**
-     *  Adds the class
-     * @param passedClassPath
-     */
-    public static void addOptionsJPanel( String passedClassPath ) {
-        if( passedClassPath != null && !passedClassPath.isEmpty() )
-            theExtPanelClassList.add(passedClassPath);
-    }
-
-    // ==========================================================================
-    /**
-     *  Return a list of option panels from the loaded extensions
-     * @return 
-     */
-    public static List<String> getExtPanelClassList() {
-        return new ArrayList<>(theExtPanelClassList);
-    }
 
     //===========================================================================
     /**
@@ -540,55 +500,12 @@ public class Utilities {
      * 
      * @return 
      */
+    @SuppressWarnings("ucd")
     public static String[] nextCityState() {
         int index = aSR.nextInt(CITY_STATE_TUPLES.size() );
         return CITY_STATE_TUPLES.get(index);
     }
 
-    // ==========================================================================
-    /**
-     *
-     */
-    public static enum EditMenuOptions {
-
-        CUT("Cut"),
-        COPY("Copy"),
-        PASTE("Paste"),
-        SELECT_ALL("Select All");
-
-        //Return a dummy menu
-        public static void fillDummyMenu( JMenu menu ) {
-            menu.add( EditMenuOptions.CUT.getDummyMenuItem() ); //Cut
-            menu.add( EditMenuOptions.COPY.getDummyMenuItem() ); //Copy
-            menu.add( EditMenuOptions.PASTE.getDummyMenuItem() ); //Paste
-            menu.addSeparator();
-            menu.add( EditMenuOptions.SELECT_ALL.getDummyMenuItem() ); //Select All
-        }
-
-        private final String editMenuString;
-
-        private final JMenuItem DummyMenuItem;
-
-        EditMenuOptions(String theString){
-            
-            this.editMenuString = theString;
-
-            DummyMenuItem = new JMenuItem();
-            DummyMenuItem.setText( editMenuString );
-            DummyMenuItem.setEnabled( false );
-
-        }
-
-        public String getValue() {
-            return editMenuString;
-        }
-
-        public JMenuItem getDummyMenuItem() {
-            return DummyMenuItem;
-        }
-       
-    }
-    
     // ==========================================================================
     /**
     * Returns the OS_Name
@@ -749,6 +666,7 @@ public class Utilities {
     * @param byteHash
     * @return the hex string
     */
+    @SuppressWarnings("ucd")
     public static String byteToHexString(byte[] byteHash) {
         StringBuilder aSB = new StringBuilder();
         String tempString;
@@ -935,20 +853,12 @@ public class Utilities {
      *   Returns the class path for the application.
      * 
      * @return 
+    @SuppressWarnings("ucd")
     */   
     public static File getClassPath(){
         return classPath;
     }
-
-//    //****************************************************************************
-//    /**
-//    * Returns the four bytes that compose an file header
-//     * @return 
-//    */
-//    public static byte[] getFileHeader(){
-//        return new byte[]{ (byte)'P', (byte)'P',(byte)'F',(byte)0x00 };
-//    }
-//    
+ 
     // ==========================================================================
     /**
      *  Xor the data.
@@ -1024,17 +934,6 @@ public class Utilities {
         return theClasses;
     }
     
-     // ===============================================
-    /**
-     * Convenience method for loadImageFromJar
-     * @param passedImageName
-     * @return 
-    */
-    public static BufferedImage loadImageFromJar ( String passedImageName ) {
-
-       return loadImageFromJar ( passedImageName, classPath, IMAGE_PATH_IN_JAR);
-    }
-  
     // ===============================================
     /**
     * Returns the image in the jar, or jar supplement, that matches the {@code passedImageName).
@@ -1056,41 +955,6 @@ public class Utilities {
         }
 
         return rtnImage;
-    }
-
-     // ==========================================================================
-    /**
-    *   Returns a map with the creation string and class for each
-    * library item loaded into the application.
-     * @return 
-    */
-    public static Map<String, Class> getActionControllerClassMap() {
-        
-        Map<String, Class> theActionClassMap = new HashMap<>();
-        //Loop through the controller types and add their creation strings
-        //to the right click menu
-        for( String aString : theControllerList ){        
-            
-            Class aClass;
-            try {
-                
-                aClass = Class.forName(aString);
-                Object anObj = aClass.newInstance();
-                
-                //Add the menu item
-                if( anObj instanceof LibraryItemController ){  
-                    
-                    LibraryItemController theController = (LibraryItemController)anObj;
-                    String addString = theController.getCreationAction();
-                    theActionClassMap.put(addString, aClass);
-                }
-                
-            } catch (    InstantiationException | IllegalAccessException | ClassNotFoundException ex) {
-            }  
-        }
-        
-        return theActionClassMap;
-        
     }
     
     //=====================================================================
@@ -1226,52 +1090,6 @@ public class Utilities {
         return rtnImage;
     }
   
-    
-    // ==========================================================================
-    /**
-    * Prompts the user to confirm they want to delete the given {@link XmlBase}.
-    * <p>
-    * If the given {@code XmlBase} is null, this method does nothing and
-    * returns 1 (the value of JOptionPane.NO_OPTION).
-    *
-     * @param parent
-    * @param theObjectList the {@code XmlBase} in question
-    *
-    * @return an integer indicating the user's choice
-    *            <ul>
-    *            <li>JOptionPane.YES_OPTION  (0)
-    *            <li>JOptionPane.NO_OPTION   (1)
-    *            </ul>
-    */
-    public static int confirmDelete( Component parent, List<DefaultMutableTreeNode> theObjectList ) {
-
-        if( theObjectList == null || theObjectList.isEmpty() ) { //If the XmlBase is null...
-            return JOptionPane.NO_OPTION; //Do nothing, return 1
-        }
-
-        //Build the message for the user...
-        StringBuilder messageBuilder = new StringBuilder( "This will permanently remove '" );
-        for(int i = 0; i < theObjectList.size(); i++){        
-
-            DefaultMutableTreeNode aNode = theObjectList.get(i);
-            messageBuilder.append( aNode.toString() );
-            if( i != theObjectList.size() -1 ){
-                messageBuilder.append(" , ");      
-            }
-
-        }
-        messageBuilder.append( "' from the library.\nDo you want continue?" );
-
-        //Prompt user to confirm the delete
-        int rtnCode = JOptionPane.showConfirmDialog( parent,
-                    messageBuilder.toString(),
-                    "Delete " + theObjectList.toString(),
-                    JOptionPane.YES_NO_OPTION );
-        
-        return rtnCode;
-
-    }/* END confirmDelete( List<DefaultMutableTreeNode> ) */
-    
     // ========================================================================
     /**
      * Returns the {@link LibraryItemController} in the given list that's controlling
@@ -1308,51 +1126,7 @@ public class Utilities {
         return rtnT;
         
     }/* END findControllerByItemName( List<T extends LibraryItemController>, String ) */
-     
-    //****************************************************************************
-    /**
-     * Returns a list of the previously run tasks on disk
-     * @param parentDir
-     * @return 
-     * @throws java.io.IOException 
-    */
-    public static List<RemoteTask> getTasksFromDisk( File parentDir ) throws XmlBaseCreationException, IOException  {
 
-        List<RemoteTask> theTasks = new ArrayList<>();
-        File[] theTaskDirs = parentDir.listFiles();
-
-        if( theTaskDirs != null ){
-            for(File aDir : theTaskDirs){
-
-               //Make sure it is a directory
-               if(aDir.isDirectory()){
-
-                  String taskName = aDir.getName();
-                  File taskObjFile = new File(aDir, taskName + ".xml");
-
-                  //Create a task object
-                  if(taskObjFile.exists()){
-
-                      XmlBase anObj = XmlBaseFactory.createFromXmlFile(taskObjFile);
-                      if(anObj instanceof RemoteTask){
-                         theTasks.add((RemoteTask)anObj);
-                      } else {
-                         //Delete the directory because it is not a task dir
-                         FileUtilities.deleteDir(aDir);
-                      }
-
-                  } else {
-
-                      //Delete the directory because it is not a task dir
-                      theTasks.addAll( getTasksFromDisk(aDir) );
-                  }
-               }
-            }
-        }
-
-        return theTasks;
-    }
-    
     //****************************************************************************
     /**
     * Returns a string for the date depending on how distant from the current date
@@ -1517,67 +1291,7 @@ public class Utilities {
             return false;
         }
     }
-    
-//     // ==========================================================================
-//    /**
-//     * Kill the children spawned by the parent process provided.
-//     * @param theProcess
-//    */
-//    public static void killChildProcesses(Process theProcess) {
-//        
-//        StringBuilder killString = new StringBuilder();
-//        List<String> stringList = new ArrayList<>();
-//        int pid;
-//        try {
-//            
-//            if (theProcess.getClass().getName().equals("java.lang.Win32Process") ||
-//                theProcess.getClass().getName().equals("java.lang.ProcessImpl")) {
-//                
-//                //Get the process handle
-//                Field f = theProcess.getClass().getDeclaredField("handle");
-//                f.setAccessible(true);				
-//                long handl = f.getLong(theProcess);
-//
-//                //Get the pid
-//                Kernel32 kernel = Kernel32.INSTANCE;
-//                Kernel32.HANDLE handle = new Kernel32.HANDLE();
-//                handle.setPointer(Pointer.createConstant(handl));
-//                pid = kernel.GetProcessId(handle);
-//                
-//                //Create the kill string
-//                stringList.add("taskkill");
-//                stringList.add("/PID");
-//                stringList.add(Integer.toString(pid));
-//                stringList.add("/T");
-//            
-//            } else {
-//
-//                if(theProcess.getClass().getName().equals("java.lang.UNIXProcess")) {
-//
-//                    //Get the pid field
-//                    Field f = theProcess.getClass().getDeclaredField("pid");
-//                    f.setAccessible(true);
-//                    pid = f.getInt(theProcess);
-//                    stringList.add("/bin/bash");
-//                    stringList.add("-c");
-//                   
-//                    killString.append("pstree -p ").append(pid)
-//                            .append(" | sed 's/(/\\n(/g' | grep '(' | sed 's/(\\(.*\\)).*/\\1/' | tr '\\n' ' ' | xargs kill");
-//
-//                    stringList.add(killString.toString());
-//                }
-//            }
-//            
-//        } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException ex) {
-//            Log.log(Level.WARNING, NAME_Class, "killChildProcesses()", ex.getMessage(), ex );
-//        } 
-//
-//        String[] stringArr = stringList.toArray( new String[stringList.size()]);
-//        //Kill child process
-//        Constants.Executor.execute( new RuntimeRunnable( stringArr ));
-//             
-//    }
-    
+   
      //=====================================================================
     /*
      *  Adds a URL to the Class Loader
@@ -1593,16 +1307,7 @@ public class Utilities {
             throw new IntrospectionException("Error when adding url to system ClassLoader "); 
         } 
     }
-    
-    //=========================================================================
-    /**
-     * 
-     * @return 
-     */
-    public static FileFilterImp getFileFilter() {
-        return null;
-    }
-    
+      
      //=========================================================================
     /**
      *  Get the client payload
@@ -1768,6 +1473,7 @@ public class Utilities {
     /**
      * 
      * @return 
+     @SuppressWarnings("ucd")
      */
     public static String nextString() {
         

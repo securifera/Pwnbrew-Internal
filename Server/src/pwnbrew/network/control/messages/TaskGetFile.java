@@ -45,9 +45,15 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import pwnbrew.log.Log;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
+import pwnbrew.misc.DebugPrinter;
+import pwnbrew.misc.Directories;
 import pwnbrew.network.ControlOption;
 
 
@@ -55,6 +61,7 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
+
 @SuppressWarnings("ucd")
 public final class TaskGetFile extends TaskStatus{
 
@@ -158,33 +165,28 @@ public final class TaskGetFile extends TaskStatus{
     @Override
     public void evaluate( PortManager passedManager ) {
         
-//        try {
-//
-//            //Alert the manager of the change in the task
-//            TaskManager aMgr = passedManager.getTaskManager();
-//            if( aMgr != null )
-//                aMgr.taskChanged(this);
-//
-//            File libDir = Directories.getFileLibraryDirectory();
-//            String theHash = getHashToRetrieve();
-//
-//            //Debug
-//            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received TaskGetFile for " + theHash);
-//
-//            File fileToSend = new File(libDir, theHash);
-//            if(fileToSend.exists()){
-//
-//                //Queue the file to be sent
-//                String fileHashNameStr = new StringBuilder().append(fileToSend.getName()).append(":").append(fileToSend.getName()).toString();
-//
-//                int clientId =  getSrcHostId();
-//                PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.JOB_SUPPORT, clientId );
-//                DataManager.send(passedManager,thePFM);
-//            }
-//
-//        } catch (IOException ex) {
-//            Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-//        }
+        try {
+
+            File libDir = Directories.getFileLibraryDirectory();
+            String theHash = getHashToRetrieve();
+
+            //Debug
+            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received TaskGetFile for " + theHash);
+
+            File fileToSend = new File(libDir, theHash);
+            if(fileToSend.exists()){
+
+                //Queue the file to be sent
+                String fileHashNameStr = new StringBuilder().append(fileToSend.getName()).append(":").append(fileToSend.getName()).toString();
+
+                int clientId =  getSrcHostId();
+                PushFile thePFM = new PushFile( getTaskId(), fileHashNameStr, fileToSend.length(), PushFile.JOB_SUPPORT, clientId );
+                DataManager.send(passedManager,thePFM);
+            }
+
+        } catch (IOException ex) {
+            Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
+        }
     }
 
 }

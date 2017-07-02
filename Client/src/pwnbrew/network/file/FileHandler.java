@@ -64,8 +64,6 @@ import pwnbrew.network.PortRouter;
 public class FileHandler extends DataHandler {
 
     private final Queue<byte[]> recByteQueue = new LinkedList<>();
-    private volatile boolean sendFileFlag = false;
-
     private static final String NAME_Class = FileHandler.class.getSimpleName();
 
     //===============================================================
@@ -118,7 +116,7 @@ public class FileHandler extends DataHandler {
             // Wait for next message to become available
             synchronized(recByteQueue) {
                 
-                while(recByteQueue.isEmpty() && sendFileFlag == false) {
+                while( recByteQueue.isEmpty() ) {
                     try {
                         recByteQueue.wait();
                     } catch (InterruptedException ex) {

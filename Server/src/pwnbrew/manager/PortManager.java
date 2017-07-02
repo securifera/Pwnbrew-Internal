@@ -38,7 +38,7 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
-* CommManager.java
+* PortManager.java
 *
 * Created on June 7, 2013, 11:49:21 PM
 */
@@ -48,10 +48,8 @@ package pwnbrew.manager;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import pwnbrew.misc.ProgressListener;
 import pwnbrew.network.PortRouter;
 import pwnbrew.selector.SocketChannelHandler;
-import pwnbrew.tasks.TaskManager;
 
 /**
  *
@@ -94,14 +92,6 @@ public abstract class PortManager {
         }
     }   
 
-   //===============================================================
-    /**
-     *  Get the task manager
-     * 
-     * @return 
-     */
-    abstract public TaskManager getTaskManager();
-
     //===========================================================================
     /**
      *  Sets the port router for the given port.
@@ -113,13 +103,6 @@ public abstract class PortManager {
             thePortRouterMap.put( passedPort, aPR );
         }
     }
-
-    //===========================================================================
-    /**
-     * 
-     * @return 
-     */
-    abstract public ProgressListener getProgressListener();
 
     //===========================================================================
     /**
@@ -145,5 +128,4 @@ public abstract class PortManager {
         }
     }
 
-
-}/*END CLASS CommManager */
+}

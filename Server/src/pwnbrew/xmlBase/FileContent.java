@@ -45,7 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.xmlBase;
 
-import pwnbrew.exception.FileContentException;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,7 +53,6 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import pwnbrew.generic.gui.GenericProgressDialog;
 import pwnbrew.misc.Base64Converter;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.FileUtilities;
@@ -166,17 +164,6 @@ public class FileContent extends XmlBase implements ProgressDriver {
                 List progressList = new ArrayList();
                 progressList.add(passedFile);
 
-                //Import the files with progress
-                GenericProgressDialog pDialog = new GenericProgressDialog(null,
-                "Exporting files...", this, false, progressList);
-                pDialog.setVisible(true);
-
-                //See if an error occurred
-                String retStr = pDialog.getReturn();
-                if(retStr != null){
-                    throw new FileContentException(retStr);
-                }
-
                 stringBuilder = new StringBuilder();
                 stringBuilder.append( "\"" ); //Add the close quote
 
@@ -281,11 +268,6 @@ public class FileContent extends XmlBase implements ProgressDriver {
 
                     //Check the header
                     int bytesRead = 0;
-//                            = theBufferedIS.read(headerBytes, 0, headerBytes.length);
-//                    if(!Arrays.equals(headerBytes, theHeader)){
-//                        retStr = "This file does not contain the required header.";
-//                        return retStr;
-//                    }
 
                     //Read in the file bytes
                     while( bytesRead != -1){

@@ -69,6 +69,7 @@ public final class ClassResponse extends ControlMessage{
      * @param classBytes
      * @param msgBytes
     */
+    @SuppressWarnings("ucd")
     public ClassResponse( int destId, byte[] classBytes, byte[] msgBytes ) {
         super(destId);
         

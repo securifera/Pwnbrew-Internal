@@ -44,8 +44,6 @@ import pwnbrew.log.Log;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.file.FileMessageManager;
-import pwnbrew.tasks.RemoteTask;
-import pwnbrew.tasks.TaskManager;
 import pwnbrew.utilities.SocketUtilities;
 
 
@@ -53,6 +51,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
+@SuppressWarnings("ucd")
 public final class PushFileUpdate extends FileMessage {
 
     private static final byte OPTION_DATASIZE = 4;
@@ -125,18 +124,6 @@ public final class PushFileUpdate extends FileMessage {
                 theFileMM = FileMessageManager.initialize( passedManager );            
             
             theFileMM.updateFileSize( getFileId(), getFileSize() );
-            
-            //Call for update
-            final TaskManager aManager = passedManager.getTaskManager();
-            if( aManager != null ){
-                final RemoteTask rmTask = aManager.getRemoteTask( getTaskId() );
-                if( rmTask != null ){
-                    rmTask.resultFileReceived();
-                    TaskManager aMgr = passedManager.getTaskManager();
-                    if( aMgr != null )
-                        aMgr.taskChanged(new TaskStatus( getTaskId(), RemoteTask.TASK_COMPLETED, -1 ));
-                }
-            }
 
         } catch (IOException ex) {
             Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );

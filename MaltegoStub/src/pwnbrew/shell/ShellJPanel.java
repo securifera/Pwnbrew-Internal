@@ -39,27 +39,25 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.shell;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JTextPane;
+import javax.swing.JPanel;
 import javax.swing.SpinnerModel;
 import javax.swing.SwingConstants;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.MutableAttributeSet;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
 import pwnbrew.generic.gui.ValidTextField;
+import pwnbrew.misc.Constants;
 import pwnbrew.misc.StandardValidation;
 
 /**
@@ -71,7 +69,7 @@ public class ShellJPanel extends javax.swing.JPanel {
 
     private final ShellJPanelListener theListener;   
     private JFileChooser theFileChooser = null;
-    private boolean ctrl_char = false;
+    private Dimension prevDim = null;
         
     //===============================================================
     /**
@@ -84,26 +82,6 @@ public class ShellJPanel extends javax.swing.JPanel {
         initComponents();
         initializeComponents();
                  
-    }
-
-    
-    //==============================================================
-    /*
-     *  Check if the document should be altered
-     */
-    public boolean updateCaret( ShellJTextPane theTextPane, int offset ){
-
-        boolean retVal = true;
-        if( !theTextPane.isEnabled())
-            return retVal;     
-                    
-        int thePromptOffset = theTextPane.getEndOffset();
-        if( thePromptOffset != -1 && offset < thePromptOffset ) {
-            theTextPane.setCaretPosition( thePromptOffset );
-            retVal = false;
-        }
-        
-        return retVal;
     }
        
     /** This method is called from within the constructor to
@@ -124,6 +102,7 @@ public class ShellJPanel extends javax.swing.JPanel {
         cmdTextField = new ValidTextField();
 
         shellScrollPane.setBorder(null);
+        shellScrollPane.setPreferredSize(new java.awt.Dimension(472, 472));
 
         openButton.setText("Open Shell");
         openButton.addActionListener(new java.awt.event.ActionListener() {
@@ -164,9 +143,9 @@ public class ShellJPanel extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(8, 8, 8)
-                        .addComponent(shellScrollPane))
+                        .addComponent(shellScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGap(24, 24, 24)
+                        .addGap(11, 11, 11)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(cmdLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(fontLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -175,9 +154,9 @@ public class ShellJPanel extends javax.swing.JPanel {
                             .addComponent(cmdTextField)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(fontSizeSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(195, 195, 195)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 212, Short.MAX_VALUE)
                                 .addComponent(shellCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(openButton)))))
                 .addGap(8, 8, 8))
         );
@@ -185,14 +164,14 @@ public class ShellJPanel extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(shellScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 433, Short.MAX_VALUE)
+                .addComponent(shellScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(shellCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(openButton))
+                        .addComponent(shellCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(openButton, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(fontLabel)
+                        .addComponent(fontLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(fontSizeSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -209,17 +188,34 @@ public class ShellJPanel extends javax.swing.JPanel {
             SpinnerModel aSP = fontSizeSpinner.getModel();
             Integer strVal  = (Integer) aSP.getValue();
             
-            ShellJTextPane thePane = getShellTextPane();
-            thePane.setEnabled( true );
-            thePane.requestFocus();        
-            
-            Font font = new Font("Courier New", Font.PLAIN, strVal);
-            thePane.setFont(font);  
-                   
             //Spawn the shell
-            ClassWrapper aClassWrapper = (ClassWrapper)shellCombo.getSelectedItem();
-            theListener.spawnShell( aClassWrapper.theClass );
-            
+            ClassWrapper aClassWrapper = (ClassWrapper)shellCombo.getSelectedItem();            
+            try {
+                
+                Constructor aConstructor = aClassWrapper.theClass.getConstructor( Executor.class, ShellListener.class );
+                Shell theShell = (Shell)aConstructor.newInstance( Constants.Executor, (ShellListener)theListener);
+                Component shellView = theShell.getView();
+                
+                //Enabled, set font, and request focus
+                shellView.setEnabled( true );
+                shellView.requestFocus();        
+
+                Font font = new Font("Courier New", Font.PLAIN, strVal);
+                shellView.setFont(font);  
+                
+                //Set the view for the current shell
+                setShellView(shellView);
+                theShell.windowResized( shellScrollPane.getViewport().getWidth(), shellScrollPane.getViewport().getHeight(), 0, 0 );
+                
+                theListener.setShell( theShell);
+                
+                //Start the shell
+                theShell.start(); 
+                
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+                ex.printStackTrace();
+            }
+                                    
             //Set to stop shell
             openButton.setText("Kill Shell");
             
@@ -230,7 +226,7 @@ public class ShellJPanel extends javax.swing.JPanel {
 
     private void fontSizeSpinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_fontSizeSpinnerStateChanged
     
-        ShellJTextPane thePane = getShellTextPane();
+        Component thePane = getShellView();
         if( thePane != null ){
             Integer strVal = (Integer) fontSizeSpinner.getModel().getValue();
             Font font = new Font("Courier New", Font.PLAIN, strVal);
@@ -292,10 +288,10 @@ public class ShellJPanel extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
 
     /**
-     * Sets the runner text pane to the passed runner text pane
+     * Sets gui component for the shell
      * @param shellPane
     */
-    public void setShellTextPane( JTextPane shellPane ) {
+    public void setShellView( Component shellPane ) {
         if(shellPane != null)
            shellScrollPane.setViewportView( shellPane );
         
@@ -309,12 +305,9 @@ public class ShellJPanel extends javax.swing.JPanel {
     public void disablePanel( boolean passedBool ){
         
         //Disable it
-        ShellJTextPane theTextPane = getShellTextPane();
-        theTextPane.setEnabled( false );
-
-        //Clear the panel
-        theTextPane.setText("");
-        theTextPane.setEndOffset(-1);
+        JPanel newPanel = new JPanel();        
+        newPanel.setEnabled( false );
+        setShellView( newPanel);
 
         //Kill the shell
         if( passedBool )
@@ -330,44 +323,8 @@ public class ShellJPanel extends javax.swing.JPanel {
      *
      * @return 
     */
-    public ShellJTextPane getShellTextPane() {
-        return (ShellJTextPane) shellScrollPane.getViewport().getView();
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @param passedOffset
-     * @return 
-     * @throws javax.swing.text.BadLocationException 
-     */
-    public boolean canRemove( int passedOffset ) throws BadLocationException {
-        
-         
-        boolean retVal = true;
-        ShellJTextPane theTextPane = getShellTextPane();
-        
-        if( !theTextPane.isEnabled() )
-            return true;
-        
-        //Check if the offset has been set, if it has reset it
-        int historyOffset = theListener.getShell().getHistoryOffset();
-        if( historyOffset != -1 ){ 
-            if( passedOffset >= historyOffset ){
-                theTextPane.setEndOffset(passedOffset);
-                return true;
-            } else {
-                return false;
-            }
-        }  
-        
-        if( !theTextPane.isEnabled() || theTextPane.isUpdating())
-            return true;
-                
-        if( passedOffset < theTextPane.getEndOffset() )
-            retVal = false;
-        
-        return retVal;
+    public Component getShellView() {
+        return shellScrollPane.getViewport().getView();
     }
 
     //===============================================================
@@ -385,103 +342,27 @@ public class ShellJPanel extends javax.swing.JPanel {
         SpinnerModel aSP = fontSizeSpinner.getModel();
         aSP.setValue(14);
        
-        final ShellJTextPane theTextPane = new ShellJTextPane();
-        theTextPane.setEditable(true);
-        theTextPane.setCaretColor(Color.WHITE);
-        final MutableAttributeSet aSet = new SimpleAttributeSet();
-        StyleConstants.setForeground(aSet, Color.WHITE);           
-         
-        KeyListener keyAdapter = new KeyAdapter() {
-
+        JPanel blankPanel = new JPanel();
+        blankPanel.setEnabled( false );
+        setShellView( blankPanel );
+        
+        //Add listener for resize event
+        shellScrollPane.addComponentListener( new ComponentAdapter(){
             @Override
-            public void keyReleased(KeyEvent e) {
-                
-                try {
-                    
-                    updateCaret( theTextPane, theTextPane.getCaretPosition());     
-                    if( e.getKeyChar() == KeyEvent.VK_ENTER ){
-
-                        ShellStyledDocument aSD = (ShellStyledDocument) theTextPane.getStyledDocument();
-                        int lastOutputOffset = theTextPane.getEndOffset();
-                        
-                        String theStr = "";
-                        int len = aSD.getLength() - lastOutputOffset;
-                        if( len > 0 )
-                            theStr = aSD.getText(lastOutputOffset, len);                  
-
-                        //Add the input terminator
-                        String inputTerm = theListener.getShell().getInputTerminator();
-                        String outputStr = theStr;
-                        if( !inputTerm.isEmpty() ){
-                            outputStr = theStr.concat( inputTerm );
-                            //Insert the string
-                            synchronized( aSD ){
-                                //Set the type back
-                                aSD.setInputSource(ShellStyledDocument.SHELL_OUTPUT);
-                                aSD.insertString(aSD.getLength(), inputTerm, aSet);
-                                //Set the type back
-                                aSD.setInputSource(ShellStyledDocument.USER_INPUT);
-                            }
-                        }                       
-                                                
-                        //Reset the offset
-                        theListener.getShell().setHistoryOffset(-1);
-
-                        theListener.sendInput( outputStr );
-
-                        //Add the command to the history
-                        theListener.getShell().addCommandToHistory(theStr);
-
-                    } else if( e.getKeyCode() == KeyEvent.VK_TAB ){
-
-                    } else if( e.getKeyCode() == KeyEvent.VK_UP ){
-
-                        theListener.getShell().printPreviousCommand();
-
-                    } else if( e.getKeyCode() == KeyEvent.VK_DOWN ){
-
-                        theListener.getShell().printNextCommand();
-                    } else{
-                        
-                        //If ctrl flag is set, pass to shell
-                        if( ctrl_char ){
-                            theListener.getShell().handleCtrlChar( e.getKeyCode() );
-                        }
-                        
-                        //Set ctrl char flag
-                        if ( e.getKeyCode() == KeyEvent.VK_CONTROL ){
-                            ctrl_char = true; 
-                        } else {
-                            ctrl_char = false;
-                        }  
-                        
+            public void componentResized(ComponentEvent e){
+                Shell theShell = theListener.getShell();
+                if( theShell != null ){                                            
+                    Dimension nextDim = e.getComponent().getSize();
+                    if( prevDim != null){
+                        if( prevDim.height != nextDim.height || prevDim.width != nextDim.width )
+                            theShell.windowResized(nextDim.width,nextDim.height, prevDim.width, prevDim.height );
+                    } else {
+                        theShell.windowResized(nextDim.width,nextDim.height, 0, 0 );
                     }
-                    
-                } catch (BadLocationException ex) {
-                    ex = null;
+                    prevDim = nextDim;                            
                 }
-            }
-        }; // end MouseAdapter class
-        theTextPane.addKeyListener(keyAdapter);  
-        
-        MouseListener mouseAdapter = new MouseAdapter() {
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                
-                if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1){
-                    String selText = theTextPane.getSelectedText();
-                    if( selText == null )
-                        updateCaret( theTextPane, theTextPane.getCaretPosition());                    
-                }
-
-            } 
-        };
-        theTextPane.addMouseListener(mouseAdapter);        
-        theTextPane.setStyledDocument( new ShellStyledDocument(this) );
-        
-        theTextPane.setEnabled( false );
-        setShellTextPane( theTextPane );
+            }        
+        });
         
         //Add the command prompt
         List<Class> shellList = theListener.getShellList();
@@ -493,8 +374,7 @@ public class ShellJPanel extends javax.swing.JPanel {
        
         //Set validation
         ((ValidTextField)cmdTextField).setValidation( StandardValidation.KEYWORD_CommandArray );
-               
-     
+           
     } 
     
     //=======================================================================

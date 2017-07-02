@@ -44,9 +44,9 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.shell;
 
+import java.awt.Component;
 import java.io.File;
 import pwnbrew.manager.PortManager;
-import pwnbrew.output.StreamReceiver;
 
 /**
  *
@@ -60,16 +60,8 @@ public interface ShellListener {
      *
      * @return 
     */
-    public ShellJTextPane getShellTextPane();
+    public Component getShellView();
     
-     //===============================================================
-    /**
-     * Returns the runner text pane
-     *
-     * @return 
-    */
-    public StreamReceiver getStreamReceiver();
-
      //===============================================================
     /**
      * Returns the shell log dir.
@@ -100,5 +92,12 @@ public interface ShellListener {
      * @return 
      */
     public int getHostId();
+    
+    //===============================================================
+    /**
+     * Set the title of the frame
+     * @param title 
+     */
+    public void setFrameTitle(String title);
 
 }

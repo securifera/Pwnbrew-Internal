@@ -49,7 +49,6 @@ import java.util.logging.Level;
 import javax.swing.SwingUtilities;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
-import pwnbrew.host.gui.HostTabPanel;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.ConnectionManager;
@@ -64,6 +63,7 @@ import pwnbrew.xmlBase.ServerConfig;
  *
  *  
  */
+@SuppressWarnings("ucd")
 public final class RelayDisconnect extends ControlMessage{
     
     private static final String NAME_Class = RelayDisconnect.class.getSimpleName();
@@ -143,17 +143,10 @@ public final class RelayDisconnect extends ControlMessage{
             if( theController != null ){
 
                 SwingUtilities.invokeLater( new Runnable() {
-
                     @Override
-                    public void run() {                    
-
+                    public void run() { 
                         aSM.hostDisconnected( (Host) theController.getObject() );
-                        HostTabPanel thePanel = theController.getRootPanel();
-                        if( thePanel != null )
-                            thePanel.getShellPanel().disablePanel( false );
-                        theController.updateComponents();
                         theController.saveToDisk();
-
                     }
                 });
             }

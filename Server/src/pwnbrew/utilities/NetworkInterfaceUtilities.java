@@ -45,16 +45,13 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.utilities;
 
-import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
-import pwnbrew.misc.SubnetMaskTable_IPv4;
 
 
 /**
@@ -289,39 +286,5 @@ public class NetworkInterfaceUtilities {
     return rtnList;
     
   }/* END getAllUpInterfaces() */
-  
-  
-    // ==========================================================================
-    /**
-    * Returns the subnet mask for the given {@link NetworkInterface}.
-    *
-    * @param theNI the <tt>NetworkInterface</tt> in question
-    *
-    * @return the subnet mask for the given {@link NetworkInterface}
-    */
-    static public String getSubnetMask( NetworkInterface theNI ) {
-
-        if( theNI == null ) { //If the NetworkInterface is NULL...
-        return null; //Do nothing
-        }
-
-        String rtnStr = null;
-
-        List<InterfaceAddress> iaList = theNI.getInterfaceAddresses(); //Get a list of the InterfaceAddresses
-        if( iaList.size() > 0 ) { //If at least one InterfaceAddress was obtained...
-
-            InterfaceAddress anIN = iaList.get( 0 ); //Get the first InterfaceAddress
-            rtnStr = SubnetMaskTable_IPv4.get( anIN.getNetworkPrefixLength() ); //Get the subnet mask for the InterfaceAddress's prefix
-
-            anIN = null; //Free memory
-
-        }
-
-        iaList = null; //Free memory
-
-        return rtnStr;
-
-    }/* END getSubnetMask() */ 
-
   
 }/* END CLASS NetworkInterfaceUtilities */

@@ -50,14 +50,6 @@ public interface ShellJPanelListener {
     
     // ==========================================================================
     /**
-     *  Spawns a shell given the cmd line string.
-     * 
-     * @param passedShellClass 
-     */
-    public void spawnShell( Class passedShellClass );
-
-    // ==========================================================================
-    /**
      *  Sends the input string to the shell
      * 
      * @param theStr 
@@ -93,6 +85,13 @@ public interface ShellJPanelListener {
      * @return 
      */
     public JFrame getParentJFrame();
+
+    //==========================================================================
+    /**
+     * 
+     * @param theShell 
+     */
+    public void setShell(Shell theShell);
     
 
 

@@ -80,39 +80,21 @@ public class StandardValidation {
     static final String KEYWORD_Hostname = "hostname";
     public static final String KEYWORD_Port = "port";
     public static final String KEYWORD_ClientConnect = "clientconnect";
-    private static final String KEYWORD_TTL = "ttl";
     private static final String KEYWORD_IpHostname = "iphostname";
     static final String KEYWORD_IpAddress = "ipaddress";
     public static final String KEYWORD_Ipv4Address = "ipv4address";    
     private static final String KEYWORD_Ipv6Address = "ipv6address";
-    public static final String KEYWORD_SubnetMask = "subnetmask";
-    private static final String KEYWORD_Ipv4SubnetMask = "ipv4subnetmask";
-    private static final String KEYWORD_Ipv6SubnetMask = "ipv6subnetmask";
-    static final String KEYWORD_MacAddress = "macaddress";
-    private static final String KEYWORD_MacAddress_Colon = "macaddress:";
-    private static final String KEYWORD_MacAddress_Hyphen = "macaddress-";
-    private static final String KEYWORD_MacAddress_Period = "macaddress.";
-    private static final String KEYWORD_MacAddress_Undelimited = "macaddress_";
     //
     private static final List<String> KEYWORD_LIST;
     static {
         List<String> tempList = new ArrayList<>();
         tempList.add( KEYWORD_Hostname );
         tempList.add( KEYWORD_Port );
-        tempList.add( KEYWORD_TTL );
         tempList.add( KEYWORD_IpHostname );
         tempList.add( KEYWORD_IpAddress );
         tempList.add( KEYWORD_Ipv4Address );
         tempList.add( KEYWORD_ClientConnect );
         tempList.add( KEYWORD_Ipv6Address );
-        tempList.add( KEYWORD_SubnetMask );
-        tempList.add( KEYWORD_Ipv4SubnetMask );
-        tempList.add( KEYWORD_Ipv6SubnetMask );
-        tempList.add( KEYWORD_MacAddress );
-        tempList.add( KEYWORD_MacAddress_Colon );
-        tempList.add( KEYWORD_MacAddress_Hyphen );
-        tempList.add( KEYWORD_MacAddress_Period );
-        tempList.add( KEYWORD_MacAddress_Undelimited );
         KEYWORD_LIST = Collections.unmodifiableList( tempList );
     }
 
@@ -121,20 +103,11 @@ public class StandardValidation {
     static {
         theKeywordToMethodNameMap.put( KEYWORD_Hostname, "validateHostname" );
         theKeywordToMethodNameMap.put( KEYWORD_Port, "validatePort" );
-        theKeywordToMethodNameMap.put( KEYWORD_TTL, "validateTTL" );
         theKeywordToMethodNameMap.put( KEYWORD_IpHostname, "validateIpHostname" );
         theKeywordToMethodNameMap.put( KEYWORD_IpAddress, "validateIpAddress" );
         theKeywordToMethodNameMap.put( KEYWORD_Ipv4Address, "validateIpv4Address" );
         theKeywordToMethodNameMap.put( KEYWORD_ClientConnect, "validateClientConnect" );
         theKeywordToMethodNameMap.put( KEYWORD_Ipv6Address, "validateIpv6Address" );
-        theKeywordToMethodNameMap.put( KEYWORD_SubnetMask, "validateSubnetMask" );
-        theKeywordToMethodNameMap.put( KEYWORD_Ipv4SubnetMask, "validateIpv4SubnetMask" );
-        theKeywordToMethodNameMap.put( KEYWORD_Ipv6SubnetMask, "validateIpv6SubnetMask" );
-        theKeywordToMethodNameMap.put( KEYWORD_MacAddress, "validateMacAddress" );
-        theKeywordToMethodNameMap.put( KEYWORD_MacAddress_Colon, "validateMacAddress_ColonDelimited" );
-        theKeywordToMethodNameMap.put( KEYWORD_MacAddress_Hyphen, "validateMacAddress_HyphenDelimited" );
-        theKeywordToMethodNameMap.put( KEYWORD_MacAddress_Period, "validateMacAddress_PeriodDelimited" );
-        theKeywordToMethodNameMap.put( KEYWORD_MacAddress_Undelimited, "validateMacAddress_Undelimited" );
     }
 
 
@@ -358,36 +331,6 @@ public class StandardValidation {
 
     }/* END validatePort( String ) */
 
-
-    // ==========================================================================
-    /**
-     * Determines if the given String is a valid ttl packet value.
-     * <p>
-     * If the argument is null this method returns false.
-     *
-     * @param value the String to test
-     *
-     * @return {@code true} if the given String is a valid ttl
-     */
-    public static boolean validateTTL( String value ) {
-
-        if( value == null ) //If the String is null...
-            return false; //Do nothing
-
-        boolean rtnBool = false;
-
-        try {
-           int intVal = Integer.parseInt(value);
-           if(intVal >= 0 && intVal <= 255){
-              rtnBool = true;
-           }
-        } catch (NumberFormatException ex){
-           return false;
-        }
-        return rtnBool;
-
-    }/* END validateTTL( String ) */
-    
     // ==========================================================================
     /**
      * Determines if the given String is a valid IP v4 or v6 address.

@@ -38,37 +38,25 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.manager;
 
-import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.net.BindException;
 import java.security.GeneralSecurityException;
 import java.util.*;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import javax.swing.tree.DefaultMutableTreeNode;
 import pwnbrew.Server;
-import pwnbrew.controllers.MainGuiController;
-import pwnbrew.gui.MainGui;
-import pwnbrew.gui.tree.IconNode;
-import pwnbrew.gui.tree.LibraryItemJTree;
-import pwnbrew.gui.tree.MainGuiTreeModel;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.Session;
-import pwnbrew.host.gui.HostTabPanel;
 import pwnbrew.library.LibraryItemController;
 import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
-import pwnbrew.misc.ProgressListener;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.messages.RelayStart;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.selector.SocketChannelHandler;
-import pwnbrew.tasks.TaskManager;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.ServerConfig;
 import pwnbrew.xmlBase.XmlBase;
@@ -80,9 +68,7 @@ import pwnbrew.xmlBase.XmlBase;
 public class ServerManager extends PortManager {
 
     private final Server theServer;
-    private final boolean headless;
-    private MainGuiController theGuiController = null;
-
+    
     //Create the host map
     private final Map<String, HostController> theHostControllerMap = new HashMap<>();    
     private static final String NAME_Class = ServerManager.class.getSimpleName();
@@ -92,42 +78,24 @@ public class ServerManager extends PortManager {
      * Constructor
      *
      * @param passedServer
-     * @param passedBool
      * @throws pwnbrew.log.LoggableException
      * @throws java.io.IOException
     */
-    public ServerManager( Server passedServer, boolean passedBool ) throws LoggableException, IOException {
+    public ServerManager( Server passedServer ) throws LoggableException, IOException {
 
-        //The comm channels
-        headless = passedBool;
         theServer = passedServer;
-        
-        //Create the main controller and gui if flag is set            
-        if( !headless )
-            theGuiController = new MainGuiController( this, headless );   
-        else {
             
-            //Create list to hold of the separate controllers
-            Map<Host, List<XmlBase>> retMap = Utilities.rebuildLibrary(); //Get the Scripts in the library
-            Set<Host> hostSet = retMap.keySet();
-            synchronized(theHostControllerMap){
-                for( Host aHost : hostSet ){
-                    HostController aController = new HostController(aHost, theGuiController, headless);
-                    theHostControllerMap.put( aHost.getId(), aController);
-                }
+        //Create list to hold of the separate controllers
+        Map<Host, List<XmlBase>> retMap = Utilities.rebuildLibrary(); //Get the Scripts in the library
+        Set<Host> hostSet = retMap.keySet();
+        synchronized(theHostControllerMap){
+            for( Host aHost : hostSet ){
+                HostController aController = new HostController(aHost );
+                theHostControllerMap.put( aHost.getId(), aController);
             }
-            
         }
             
-    }
-    
-    //===============================================================
-     /**
-      * 
-      * @return 
-      */
-    public boolean isHeadless(){
-        return headless;
+            
     }
 
     //===============================================================
@@ -140,19 +108,8 @@ public class ServerManager extends PortManager {
 
         //Builds the sockets
         rebuildServerSockets();
-        if( !headless )
-            ((MainGui)theGuiController.getObject()).setVisible(true); 
     }
-    
-     //===============================================================
-    /**
-     * Returns the server controller
-     *
-     * @return 
-    */
-    public MainGuiController getGuiController(){
-       return theGuiController;
-    }
+
     
     //===============================================================
      /**
@@ -179,13 +136,7 @@ public class ServerManager extends PortManager {
             aSPR.startServer(null, controlPort );
             
         } catch (BindException ex) {
-            if( theGuiController != null ){
-                String aSB = "Unable to bind to port " + theControlPort + ".  Please select a new control port.  Tools->Options : \"Network\" Tab";
-                JOptionPane.showMessageDialog( null, aSB);
-            } else {
-                throw new LoggableException( ex, Integer.toString(theControlPort));
-            }
-            retVal = false;
+            throw new LoggableException( ex, Integer.toString(theControlPort));
         } catch (IOException | GeneralSecurityException ex) {
             throw new LoggableException( ex, Integer.toString(theControlPort));
         }
@@ -202,10 +153,6 @@ public class ServerManager extends PortManager {
             aSPR.startServer(null, filePort );
             
         } catch (BindException ex) {
-            if( theGuiController != null ){
-                String aSB = "Unable to bind to port " + theControlPort + ". Please select a new data port. Tools->Options : \"Network\" Tab";
-                JOptionPane.showMessageDialog( theGuiController.getParentJFrame(), aSB);
-            }
             retVal = false;
         } catch (IOException | GeneralSecurityException ex) {
             throw new LoggableException(ex, Integer.toString(theControlPort));
@@ -265,12 +212,6 @@ public class ServerManager extends PortManager {
 
                                 for( HostController nextController: theHostList ){
                                     hostDisconnected( (Host) nextController.getObject() );
-
-                                    HostTabPanel thePanel = nextController.getRootPanel();
-                                    if( thePanel != null )
-                                        thePanel.getShellPanel().disablePanel( false );
-
-                                    nextController.updateComponents();
                                     nextController.saveToDisk();
                                 }
                             }
@@ -292,31 +233,6 @@ public class ServerManager extends PortManager {
         return theServer;
     }
     
-    //===============================================================
-    /**
-     *  Get the task manager
-     * 
-     * @return 
-     */
-    @Override
-    public TaskManager getTaskManager() {
-        TaskManager aMgr = null;
-        if( theGuiController != null && theGuiController instanceof TaskManager)
-            aMgr = (TaskManager) theGuiController;
-        
-        return aMgr;
-    }
-
-    //===============================================================
-    /**
-     * 
-     * @return 
-     */
-    @Override
-    public ProgressListener getProgressListener() {
-        return theGuiController;
-    }
-    
     // ==========================================================================
     /**
      *  Get the host with the given id string
@@ -326,23 +242,11 @@ public class ServerManager extends PortManager {
      */
     public HostController getHostController( String clientIdStr ) {
         
-        HostController retController = null;
-        if( theGuiController != null ){
-            
-            MainGui theMainGui = (MainGui) theGuiController.getObject();
-            for( LibraryItemController aController : theMainGui.getJTree().getLibraryItemControllers( HostController.class ) ){
-                Host aHost = (Host)aController.getObject();
-                if( aHost.getId().equals( clientIdStr )){
-                    retController = (HostController) aController;
-                    break;
-                }           
-            }
-            
-        } else {
-            synchronized(theHostControllerMap){
-                retController = theHostControllerMap.get(clientIdStr);
-            }
+        HostController retController;
+        synchronized(theHostControllerMap){
+            retController = theHostControllerMap.get(clientIdStr);
         }
+
         return retController;
     }
     
@@ -355,13 +259,8 @@ public class ServerManager extends PortManager {
     public List<LibraryItemController> getHostControllers() {
         
         List<LibraryItemController> aList = new ArrayList<>();
-        if( theGuiController != null ){
-            MainGui theMainGui = (MainGui) theGuiController.getObject();
-            aList.addAll(theMainGui.getJTree().getLibraryItemControllers( HostController.class ));
-        } else {
-            synchronized(theHostControllerMap){
-                aList.addAll( theHostControllerMap.values() );
-            }
+        synchronized(theHostControllerMap){
+            aList.addAll( theHostControllerMap.values() );
         }
         return aList;  
     }
@@ -409,9 +308,6 @@ public class ServerManager extends PortManager {
         //Set the new version and save
         theHost.setJreVersion( passedVersion );
         theController.saveToDisk();
-        
-        if( theGuiController != null )
-            JOptionPane.showMessageDialog((Component) theGuiController.getObject(), "Stager upgrade complete for " + theController.getItemName());
     }
     
      // ==========================================================================
@@ -458,19 +354,6 @@ public class ServerManager extends PortManager {
             //Get the relayPort
             String thePortStr = theHost.getRelayPort();
 
-            //Call for repaint
-            SwingUtilities.invokeLater( new Runnable(){
-                @Override
-                public void run() {
-                    if( theGuiController != null ){
-                        LibraryItemJTree theJTree = theGuiController.getJTree();
-                        theJTree.repaint();
-                        theJTree.requestFocus();
-                        theController.updateComponents();
-                    }
-                }
-            });
-
             //Get the auto sleep flag and if it is set then tell the client to goto sleep
             if( theController.getAutoSleepFlag() ){
 
@@ -479,12 +362,9 @@ public class ServerManager extends PortManager {
                     @Override
                     public void run() {
                         try {
-                            JFrame theParent = null;
-                            if( theGuiController != null )
-                                theParent = theGuiController.getParentJFrame();
                             
                             Thread.sleep( 30000 );
-                            theController.sleep( theParent, thiscpy, true );
+                            theController.sleep( thiscpy, true );
                             
                         } catch (InterruptedException ex) {
                             ex = null;
@@ -511,32 +391,16 @@ public class ServerManager extends PortManager {
         } else {
 
             //Start in swing thread since it affects the gui
-            final HostController aHostController = new HostController( passedHost, theGuiController, headless );
+            final HostController aHostController = new HostController( passedHost );
             Session aSession = new Session();
             passedHost.addSession(aSession);
             
             SwingUtilities.invokeLater( new Runnable(){
                 @Override
                 public void run() {
-
-                    //Get the JTree and add the controller
-                    if( theGuiController != null ){
-                        LibraryItemJTree theJTree = theGuiController.getJTree();
-                        MainGuiTreeModel treeModel = theJTree.getModel();               
-                        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) treeModel.getRoot();
-
-                        //Add the host node
-                        IconNode newParentNode = new IconNode( aHostController, true );
-
-                        //Add the node at the end of the children of the parentNode
-                        int index = parentNode.getChildCount();
-                        treeModel.insertNodeInto( newParentNode, parentNode, index );  
-                    } else {
-                        synchronized(theHostControllerMap){
-                            theHostControllerMap.put( passedHost.getId(), aHostController);
-                        }
-                    }           
-
+                    synchronized(theHostControllerMap){
+                        theHostControllerMap.put( passedHost.getId(), aHostController);
+                    }
                 }
             });
             
@@ -583,10 +447,7 @@ public class ServerManager extends PortManager {
         aSession.setDisconnectedTime(Constants.CHECKIN_DATE_FORMAT.format( new Date() ));
        
         passedHost.setConnected( false );
-        if( theGuiController != null )
-            theGuiController.getJTree().repaint();
-
     }
     
 
-}/* END CLASS ServerManager */
+}

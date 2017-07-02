@@ -57,6 +57,7 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
+
 @SuppressWarnings("ucd")
 public class LogMsg extends ControlMessage {
         

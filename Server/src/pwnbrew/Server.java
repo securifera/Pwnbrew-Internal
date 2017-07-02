@@ -62,14 +62,10 @@ import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.logging.Level;
 import javax.swing.JDialog;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import pwnbrew.gui.MainGui;
 import pwnbrew.host.HostController;
 import pwnbrew.library.LibraryItemController;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
-import pwnbrew.look.CustomLookAndFeel;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.Constants;
@@ -81,7 +77,6 @@ import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.network.http.Http;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
-import pwnbrew.network.shell.ShellMessageManager;
 import pwnbrew.network.stage.StagingMessageManager;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.SSLUtilities;
@@ -102,7 +97,6 @@ public final class Server {
     private FileChannel theLockFileChannel = null;    
     private static final boolean debug = true;
     
-    private static final String SHOW_GUI_ARG = "-gui";
     private static final String REMOTE_MANAGEMENT_ARG = "-rmp";
     
     //=========================================================================
@@ -113,12 +107,12 @@ public final class Server {
      * @throws LoggableException
      * @throws IOException 
      */
-    private Server( boolean passedBool ) throws LoggableException, IOException  {
+    private Server() throws LoggableException, IOException  {
         
         initialize();
         
         //Create the server manager
-        theServerManager = new ServerManager( this, passedBool );
+        theServerManager = new ServerManager( this );
                                  
         try {
 
@@ -165,8 +159,6 @@ public final class Server {
             
         }
         
-        //Start input loop
-        if( theServerManager.isHeadless() ){
             
             StringBuilder aStr = new StringBuilder();
             aStr.append("\nCommands:\n\n")
@@ -238,7 +230,7 @@ public final class Server {
                         System.out.println(aStr.toString());
                 }                
             }     
-        }   
+//        }   
         
     }
 
@@ -247,7 +239,7 @@ public final class Server {
      * Handles the shutdown tasks for the thread
      *
     */
-    public void shutdown(){
+    private void shutdown(){
 
         theServerManager.shutdown();
 
@@ -260,11 +252,6 @@ public final class Server {
         FileMessageManager aFMM = FileMessageManager.getMessageManager();
         if( aFMM != null ){
             aFMM.shutdown();
-        }
-        
-        ShellMessageManager aSMM = ShellMessageManager.getMessageManager();
-        if( aSMM != null ){
-            aSMM.shutdown();
         }
         
         RelayManager aRMM = RelayManager.getRelayManager();
@@ -290,14 +277,11 @@ public final class Server {
 
         try {
                                     
-            boolean headless = true;
             int remManagePort = -1;
             
             //Assign the service name
             for( String aString : args ){
-                if(aString.equals( SHOW_GUI_ARG )){
-                    headless = false;
-                } else if( aString.contains(REMOTE_MANAGEMENT_ARG)){
+                if( aString.contains(REMOTE_MANAGEMENT_ARG)){
                     String[] argStrArr = aString.split("=");
                     if(argStrArr.length > 1 ){
                         try{ 
@@ -315,7 +299,7 @@ public final class Server {
                 return;
             }
             
-            staticSelf = new Server( headless );
+            staticSelf = new Server();
             staticSelf.start( remManagePort );
 
         } catch ( Throwable ex) {
@@ -478,19 +462,13 @@ public final class Server {
                     .append( ex.getMessage() ).append( "\"\n" )
                     + "Logging is unavailable." );
         }
-        
-        try {
-            UIManager.setLookAndFeel(new CustomLookAndFeel());
-        } catch (UnsupportedLookAndFeelException ex) {
-            Log.log(Level.SEVERE, NAME_Class, "main()", ex.getMessage(), ex );
-        }
-        
+         
         //Make sure the server can run
         if(!canRun()){
             throw new LoggableException("Unable to start the Server.  An entry point has already been executed.");
         }
         
-        MainGui.setDefaultLookAndFeelDecorated(true);
+//        MainGui.setDefaultLookAndFeelDecorated(true);
         JDialog.setDefaultLookAndFeelDecorated(true);
     }
 

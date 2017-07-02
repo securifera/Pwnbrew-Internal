@@ -56,8 +56,6 @@ import pwnbrew.misc.DebugPrinter;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.file.FileMessageManager;
-import pwnbrew.tasks.RemoteTask;
-import pwnbrew.tasks.TaskManager;
 
 
 /**
@@ -97,6 +95,7 @@ public class PushFile extends FileMessage {
      * @param passedLength
      * @throws java.io.IOException
     */
+    @SuppressWarnings("ucd")
     public PushFile(int taskId, String fileHashNameStr, long passedLength, int passedType, int dstHostId ) throws IOException {
         super( dstHostId, 0, taskId );
 
@@ -280,13 +279,6 @@ public class PushFile extends FileMessage {
     public void evaluate( PortManager passedManager ) {
                 
         try {
-            
-            if( fileType == PushFile.JOB_RESULT){  
-                TaskManager aMgr = passedManager.getTaskManager();
-                if( aMgr != null )
-                    aMgr.taskChanged(new TaskStatus( getTaskId(), RemoteTask.TASK_XFER_RESULTS, -1 ));
-            }
-            
              
             //Get the file manager
             FileMessageManager theFileMM = FileMessageManager.getMessageManager();

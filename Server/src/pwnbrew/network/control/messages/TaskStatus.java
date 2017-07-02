@@ -50,12 +50,12 @@ import java.io.UnsupportedEncodingException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.network.ControlOption;
-import pwnbrew.tasks.TaskManager;
 
 /**
  *
  *  
  */
+@SuppressWarnings("ucd")
 public class TaskStatus extends Tasking {    
     
     protected static final byte OPTION_HASH_FILENAME = 3;
@@ -75,6 +75,7 @@ public class TaskStatus extends Tasking {
      * @param passedStatus
      * @throws java.io.IOException
     */
+    @SuppressWarnings("ucd")
     public TaskStatus(int taskId, String passedStatus, int dstHostId ) throws IOException  {
         super( taskId, dstHostId );
 
@@ -91,6 +92,7 @@ public class TaskStatus extends Tasking {
     *
      * @param msgId
     */
+    @SuppressWarnings("ucd")
     public TaskStatus(byte[] msgId) {
        super(msgId);
     }
@@ -142,12 +144,7 @@ public class TaskStatus extends Tasking {
     */
     @Override
     public void evaluate( PortManager passedManager ) {
-        
-        //Pass it to the manager
-        TaskManager aMgr = passedManager.getTaskManager();
-        if( aMgr != null )
-            aMgr.taskChanged(this);       
-            
+           
         //Send a noop to look like a typical HTTP response
         int clientId = getSrcHostId();
         NoOp aNoOp = new NoOp(clientId);

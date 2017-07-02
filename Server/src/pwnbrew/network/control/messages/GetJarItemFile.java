@@ -54,6 +54,7 @@ import pwnbrew.xmlBase.JarItem;
  *
  *  
  */
+@SuppressWarnings("ucd")
 public final class GetJarItemFile extends JarItemMsg { 
         
     private static final byte OPTION_TASK_ID = 92;

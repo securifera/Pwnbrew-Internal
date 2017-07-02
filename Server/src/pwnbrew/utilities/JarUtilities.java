@@ -54,6 +54,7 @@ import pwnbrew.validation.StandardValidation;
  *
  * @author Securifera
  */
+@SuppressWarnings("ucd")
 public class JarUtilities {
     
     public static final String URL_LABEL ="Private";

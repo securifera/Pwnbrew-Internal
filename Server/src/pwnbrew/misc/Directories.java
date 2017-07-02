@@ -45,11 +45,9 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.misc;
 
-import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.Utilities;
 import java.io.File;
 import java.io.IOException;
-import pwnbrew.execution.ExecutableItem;
 import pwnbrew.host.HostFactory;
 
 
@@ -85,7 +83,7 @@ final public class Directories {
     
     
     // <root>/<home>/data/taskarc/...
-    private static String PATH_LocalTasks; // <root>/<home>/data/taskarc/local
+//    private static String PATH_LocalTasks; // <root>/<home>/data/taskarc/local
     private static String PATH_RemoteTasks; // <root>/<home>/data/taskarc/local
     
     private static boolean directoriesCreated = false;
@@ -149,14 +147,10 @@ final public class Directories {
         // <root>/<home>
         PATH_Home = strBldr.append( PATH_Root ).append( DELIM_Path ).append( NAME_Home ).toString();
         strBldr.setLength( 0 ); //Reset the StringBuilder
-        
-        // <root>/<home>/...
-//        PATH_Bin = strBldr.append( PATH_Home ).append( DELIM_Path ).append( "bin" ).toString();
-//        strBldr.setLength( 0 );
+
         PATH_Data = strBldr.append( PATH_Home ).append( DELIM_Path ).append( "data" ).toString();
         strBldr.setLength( 0 );
-//        PATH_Doc = strBldr.append( PATH_Home ).append( DELIM_Path ).append( "doc" ).toString();
-//        strBldr.setLength( 0 );
+
         PATH_Log = strBldr.append( PATH_Home ).append( DELIM_Path ).append( "log" ).toString();
         strBldr.setLength( 0 );
         
@@ -173,8 +167,8 @@ final public class Directories {
         
     
         // <root>/<home>/data/taskarc/...
-        PATH_LocalTasks = strBldr.append( PATH_Tasks ).append( DELIM_Path ).append( "local" ).toString();
-        strBldr.setLength( 0 );
+//        PATH_LocalTasks = strBldr.append( PATH_Tasks ).append( DELIM_Path ).append( "local" ).toString();
+//        strBldr.setLength( 0 );
         PATH_RemoteTasks = strBldr.append( PATH_Tasks ).append( DELIM_Path ).append( "remote" ).toString();
         strBldr.setLength( 0 );
 
@@ -193,9 +187,7 @@ final public class Directories {
         ensureDirectoryExists( PATH_Home );
 
         // <root>/<home>/...
-//        ensureDirectoryExists( PATH_Bin );
         ensureDirectoryExists( PATH_Data );
-//        ensureDirectoryExists( PATH_Doc );
         ensureDirectoryExists( PATH_Log );
         ensureDirectoryExists( PATH_JarLib );
         
@@ -206,42 +198,12 @@ final public class Directories {
         ensureDirectoryExists( PATH_Tasks );
 
         // <root>/<home>/data/taskarc/...
-        ensureDirectoryExists( PATH_LocalTasks );
+//        ensureDirectoryExists( PATH_LocalTasks );
         ensureDirectoryExists( PATH_RemoteTasks );
         
     }/* END createDirectories() */
     
-
-    // ==========================================================================
-    /**
-     * Creates the working directory for the {@link ExecutableItem}.
-     * <p>
-     * This method creates a directory in which to place the files necessary for
-     * executing the item and text files containing the data from stdout and stderr
-     * during the execution. The directory is given the {@code ExecutableItem}'s
-     * id as its name. If the directory already exists, this method will delete
-     * it and its contents then remake the directory.
-     *
-     * @param item
-     * @return a {@link File} representing the working directory, null if the
-     * directory could not be created
-     * @throws java.io.IOException
-    */
-    public static File createWorkingDirectory( ExecutableItem item ) throws IOException  {
-
-        File rtnFile = new File( Directories.getLocalTasksDirectory(), item.getId() );
-
-        //Delete the directory if it exists...
-        if( rtnFile.exists() )
-            FileUtilities.deleteDir( rtnFile );
-
-        Directories.ensureDirectoryExists( rtnFile );
-        
-        return rtnFile;
-
-    }/* END createWorkingDirectory( ExecutableItem ) */
-    
-    
+  
     // ==========================================================================
     /**
      * Ensures the directory at the given path exists.
@@ -317,16 +279,6 @@ final public class Directories {
     public static String getDataPath() {
         return PATH_Data;
     }/* END getDataPath() */
-    
-//    // ==========================================================================
-//    /**
-//     * Returns the path to the doc directory.
-//     * 
-//     * @return the path to the doc directory
-//     */
-//    public static String getDocPath() {
-//        return PATH_Doc;
-//    }/* END getDocPath() */
     
      // ==========================================================================
     /**
@@ -416,26 +368,26 @@ final public class Directories {
         return new File( getLocalObjectLibraryPath() );
     }/* END getObjectLibraryDirectory() */
     
-    // ==========================================================================
-    /**
-     * Returns the path to the local tasks directory.
-     * 
-     * @return the path to the local tasks directory
-     */
-    private static String getLocalTasksPath() {
-        return PATH_LocalTasks;
-    }/* END getLocalTasksPath() */
+//    // ==========================================================================
+//    /**
+//     * Returns the path to the local tasks directory.
+//     * 
+//     * @return the path to the local tasks directory
+//     */
+//    private static String getLocalTasksPath() {
+//        return PATH_LocalTasks;
+//    }/* END getLocalTasksPath() */
     
     
-    // ==========================================================================
-    /**
-     * Returns a {@link File} representing the local tasks directory.
-     * 
-     * @return a {@code File} representing the local tasks directory
-     */
-    public static File getLocalTasksDirectory() {
-        return new File( getLocalTasksPath() );
-    }/* END getLocalTasksDirectory() */
+//    // ==========================================================================
+//    /**
+//     * Returns a {@link File} representing the local tasks directory.
+//     * 
+//     * @return a {@code File} representing the local tasks directory
+//     */
+//    public static File getLocalTasksDirectory() {
+//        return new File( getLocalTasksPath() );
+//    }/* END getLocalTasksDirectory() */
     
     
     // ==========================================================================

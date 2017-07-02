@@ -39,14 +39,18 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.shell;
 
 import java.awt.Color;
-import java.awt.Insets;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import javax.swing.BorderFactory;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.text.*;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
@@ -60,17 +64,20 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
 
    private static final String NAME_Class = ShellJTextPane.class.getSimpleName();
    private volatile int outputOffset = -1;
-   private boolean updating = false;
+   private boolean updating = false;   
+   private boolean ctrl_char = false; 
+   private final Shell theShell;
       
     /**
     * This constructor sets the default mode used for displaying this object as
     * well as the mode to be used for any of its child objects.
     *
     */
-    public ShellJTextPane( ) {
+    public ShellJTextPane( Shell passedShell ) {
 
         initComponent();
         setEditable(false);      
+        theShell = passedShell;
 
     }
 
@@ -94,6 +101,103 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
         
         //Double buffer
         setDoubleBuffered(true);
+        
+        //Config
+        setEditable(true);
+        setCaretColor(Color.WHITE);
+        final MutableAttributeSet aSet = new SimpleAttributeSet();
+        StyleConstants.setForeground(aSet, Color.WHITE);           
+         
+        KeyListener keyAdapter = new KeyAdapter() {
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                
+                try {
+                    
+                    updateCaret( getCaretPosition());     
+                    if( e.getKeyChar() == KeyEvent.VK_ENTER ){
+
+                        ShellStyledDocument aSD = (ShellStyledDocument) getStyledDocument();
+                        int lastOutputOffset = getEndOffset();
+                        
+                        String theStr = "";
+                        int len = aSD.getLength() - lastOutputOffset;
+                        if( len > 0 )
+                            theStr = aSD.getText(lastOutputOffset, len);                  
+
+                        //Add the input terminator
+                        String inputTerm = theShell.getInputTerminator();
+                        String outputStr = theStr;
+                        if( !inputTerm.isEmpty() ){
+                            outputStr = theStr.concat( inputTerm );
+                            //Insert the string
+                            synchronized( aSD ){
+                                //Set the type back
+                                aSD.setInputSource(ShellStyledDocument.SHELL_OUTPUT);
+                                aSD.insertString(aSD.getLength(), inputTerm, aSet);
+                                //Set the type back
+                                aSD.setInputSource(ShellStyledDocument.USER_INPUT);
+                            }
+                        }                       
+                                                
+                        //Reset the offset
+                        theShell.setHistoryOffset(-1);
+
+                        theShell.sendInput( outputStr );
+
+                        //Add the command to the history
+                        theShell.addCommandToHistory(theStr);
+
+                    } else if( e.getKeyCode() == KeyEvent.VK_TAB ){
+
+                    } else if( e.getKeyCode() == KeyEvent.VK_UP ){
+
+                        theShell.printPreviousCommand();
+
+                    } else if( e.getKeyCode() == KeyEvent.VK_DOWN ){
+
+                        theShell.printNextCommand();
+                        
+                    } else{
+                        
+                        //If ctrl flag is set, pass to shell
+                        if( ctrl_char ){
+                            theShell.handleCtrlChar( e.getKeyCode() );
+                        }
+                        
+                        //Set ctrl char flag
+                        if ( e.getKeyCode() == KeyEvent.VK_CONTROL ){
+                            ctrl_char = true; 
+                        } else {
+                            ctrl_char = false;
+                        }  
+                        
+                    }
+                    
+                } catch (BadLocationException ex) {
+                    ex = null;
+                }
+            }
+        }; // end MouseAdapter class
+        addKeyListener(keyAdapter);  
+        
+        MouseListener mouseAdapter = new MouseAdapter() {
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                
+                if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1){
+                    String selText = getSelectedText();
+                    if( selText == null )
+                        updateCaret( getCaretPosition());                    
+                }
+
+            } 
+        };
+        addMouseListener(mouseAdapter);        
+        setStyledDocument( new ShellStyledDocument(this) );
+        
     }
     
      //=======================================================================
@@ -226,6 +330,60 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
      */
     public synchronized boolean isUpdating() {
         return updating;
+    }
+    
+     //==============================================================
+    /*
+     *  Check if the document should be altered
+     */
+    public boolean updateCaret( int offset ){
+
+        boolean retVal = true;
+        if( !isEnabled())
+                return retVal;     
+
+        int thePromptOffset = getEndOffset();
+        if( thePromptOffset != -1 && offset < thePromptOffset ) {
+            setCaretPosition( thePromptOffset );
+            retVal = false;
+        }
+        
+        return retVal;
+    }
+    
+      //===============================================================
+    /**
+     * 
+     * @param passedOffset
+     * @return 
+     * @throws javax.swing.text.BadLocationException 
+     */
+    public boolean canRemove( int passedOffset ) throws BadLocationException {        
+         
+        boolean retVal = true;
+
+        if( !isEnabled() )
+            return true;
+
+        //Check if the offset has been set, if it has reset it
+        int historyOffset = theShell.getHistoryOffset();
+        if( historyOffset != -1 ){ 
+            if( passedOffset >= historyOffset ){
+                setEndOffset(passedOffset);
+                return true;
+            } else {
+                return false;
+            }
+        }  
+
+        if( !isEnabled() || isUpdating())
+            return true;
+
+        if( passedOffset < getEndOffset() )
+            retVal = false;
+        
+        
+        return retVal;
     }
 
 

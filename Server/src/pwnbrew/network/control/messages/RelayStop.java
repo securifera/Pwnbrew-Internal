@@ -49,6 +49,7 @@ package pwnbrew.network.control.messages;
  *
  *  
  */
+@SuppressWarnings("ucd")
 public final class RelayStop extends ControlMessage{
    
     // ==========================================================================

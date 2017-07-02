@@ -23,7 +23,7 @@
                       <Component id="shellScrollPane" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="cmdLabel" max="32767" attributes="0"/>
                           <Component id="fontLabel" min="-2" pref="62" max="-2" attributes="0"/>
@@ -33,9 +33,9 @@
                           <Component id="cmdTextField" max="32767" attributes="0"/>
                           <Group type="102" attributes="0">
                               <Component id="fontSizeSpinner" min="-2" pref="58" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="195" max="-2" attributes="0"/>
+                              <EmptySpace pref="212" max="32767" attributes="0"/>
                               <Component id="shellCombo" min="-2" pref="180" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                               <Component id="openButton" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -49,15 +49,15 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="shellScrollPane" pref="433" max="32767" attributes="0"/>
+              <Component id="shellScrollPane" max="32767" attributes="0"/>
               <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="shellCombo" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="openButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="shellCombo" alignment="3" min="-2" pref="23" max="-2" attributes="0"/>
+                      <Component id="openButton" alignment="3" min="-2" pref="23" max="-2" attributes="0"/>
                   </Group>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="fontLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="fontLabel" alignment="3" min="-2" pref="23" max="-2" attributes="0"/>
                       <Component id="fontSizeSpinner" alignment="3" min="-2" pref="23" max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -76,6 +76,9 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="null"/>
+        </Property>
+        <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[472, 472]"/>
         </Property>
       </Properties>
 

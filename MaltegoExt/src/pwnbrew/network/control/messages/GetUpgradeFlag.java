@@ -99,7 +99,6 @@ public final class GetUpgradeFlag extends MaltegoMessage{ // NO_UCD (use default
     *   Performs the logic specific to the message.
     *
      * @param passedManager
-     * @throws pwnbrew.logging.LoggableException
     */
     @Override
     public void evaluate( PortManager passedManager ) throws LoggableException {     

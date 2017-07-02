@@ -45,6 +45,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.shell;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -112,6 +113,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
     private ListIterator<String> historyIterator = null;
     
     private int channelId = -1;
+    
 
     //===========================================================================
     /**
@@ -124,6 +126,15 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         super(passedExecutor);
         theListener = passedListener;   
     }  
+    
+    //==============================================================
+    /**
+     * 
+     * @return 
+     */
+    public ShellListener getListener(){
+        return theListener;
+    }
     
     //===============================================================
     /*
@@ -154,18 +165,22 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         if( nextIndex != -1){
 
             String nextCommand = historyIterator.previous();
-            ShellJTextPane thePane = theListener.getShellTextPane();
-            StyledDocument theDoc = thePane.getStyledDocument();
+            Component theView = theListener.getShellView();
+            if( theView instanceof ShellJTextPane ){
+                
+                ShellJTextPane thePane = (ShellJTextPane)theView;
+                StyledDocument theDoc = thePane.getStyledDocument();
 
 
-            //remove whatever is there and insert this
-            int promptLoc = thePane.getEndOffset();
-            try {
-                theDoc.remove(promptLoc, theDoc.getLength() - promptLoc);
-                theDoc.insertString( theDoc.getLength(), nextCommand, aSet); 
-                thePane.setCaretPosition( theDoc.getLength() );  
-            } catch (BadLocationException ex) {
-                DebugPrinter.printMessage( NAME_Class, "previousInput()", ex.getMessage(), ex );  
+                //remove whatever is there and insert this
+                int promptLoc = thePane.getEndOffset();
+                try {
+                    theDoc.remove(promptLoc, theDoc.getLength() - promptLoc);
+                    theDoc.insertString( theDoc.getLength(), nextCommand, aSet); 
+                    thePane.setCaretPosition( theDoc.getLength() );  
+                } catch (BadLocationException ex) {
+                    DebugPrinter.printMessage( NAME_Class, "previousInput()", ex.getMessage(), ex );  
+                }
             }
 
         }
@@ -185,16 +200,20 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
             if( nextIndex != history.size()){
                 
                 String nextCommand = historyIterator.next();
-                ShellJTextPane thePane = theListener.getShellTextPane();
-                StyledDocument theDoc = thePane.getStyledDocument();
+                Component theView = theListener.getShellView();
+                if( theView instanceof ShellJTextPane ){
                 
-                int promptLoc = thePane.getEndOffset();
-                try {
-                    theDoc.remove(promptLoc, theDoc.getLength() - promptLoc);
-                    theDoc.insertString( theDoc.getLength(), nextCommand, aSet); 
-                    thePane.setCaretPosition( theDoc.getLength() );  
-                } catch (BadLocationException ex) {
-                    DebugPrinter.printMessage( NAME_Class, "previousInput()", ex.getMessage(), ex );  
+                    ShellJTextPane thePane = (ShellJTextPane)theView;
+                    StyledDocument theDoc = thePane.getStyledDocument();
+
+                    int promptLoc = thePane.getEndOffset();
+                    try {
+                        theDoc.remove(promptLoc, theDoc.getLength() - promptLoc);
+                        theDoc.insertString( theDoc.getLength(), nextCommand, aSet); 
+                        thePane.setCaretPosition( theDoc.getLength() );  
+                    } catch (BadLocationException ex) {
+                        DebugPrinter.printMessage( NAME_Class, "previousInput()", ex.getMessage(), ex );  
+                    }
                 }
             }
         }
@@ -314,10 +333,13 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
         }
             
         //Get runner pane
-        ShellJTextPane thePane = theListener.getShellTextPane(); 
-        String aStr = new String( buffer );                    
-        if( !aStr.isEmpty() )
-            thePane.handleStreamBytes(theStreamId, aStr);
+        Component theView = theListener.getShellView();
+        if( theView instanceof ShellJTextPane ){                
+            ShellJTextPane thePane = (ShellJTextPane)theView;
+            String aStr = new String( buffer );                    
+            if( !aStr.isEmpty() )
+                thePane.handleStreamBytes(theStreamId, aStr);
+        }
     }
 
     // ==========================================================================
@@ -608,4 +630,27 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
      */
     public void handleCtrlChar(int keyCode) {}
 
+    // ==========================================================================
+    /**
+     * 
+     * @param w
+     * @param h
+     * @param oldw
+     * @param oldh
+     */
+    public void windowResized(int w, int h, int oldw, int oldh) {}
+
+    // ==========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public Component getView() {
+        
+        ShellJTextPane theTextPane = new ShellJTextPane( this );
+        theTextPane.setEnabled( false );
+        
+        return theTextPane;
+        
+    } 
 }

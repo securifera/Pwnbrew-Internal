@@ -58,6 +58,7 @@ import pwnbrew.misc.Constants;
 /**
 *
 */
+@SuppressWarnings("ucd")
 public class StreamReader extends ManagedRunnable {
 
     private static final String NAME_Class = StreamReader.class.getSimpleName();
@@ -72,6 +73,7 @@ public class StreamReader extends ManagedRunnable {
     * Constructor
      * @param passedId
     */
+    @SuppressWarnings("ucd")
     public StreamReader( int passedId ){
         super(Constants.Executor);
         theStreamId = passedId;

@@ -50,6 +50,7 @@ import java.io.IOException;
 
 /**
  */
+@SuppressWarnings("ucd")
 public interface StreamReaderListener {
 
     // ==========================================================================

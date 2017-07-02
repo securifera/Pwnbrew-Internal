@@ -43,8 +43,6 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;

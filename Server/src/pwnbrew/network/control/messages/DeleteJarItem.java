@@ -61,6 +61,7 @@ import pwnbrew.xmlBase.JarItem;
  *
  *  
  */
+@SuppressWarnings("ucd")
 public final class DeleteJarItem extends JarItemMsg { 
         
      private static final String NAME_Class = DeleteJarItem.class.getSimpleName();

@@ -45,13 +45,10 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.host;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.xmlBase.AttributeCollection;
 import pwnbrew.xmlBase.Node;
@@ -62,16 +59,7 @@ import pwnbrew.xmlBase.XmlBase;
  *  
  */
 public class Host extends Node {
-    
-    //Image and icon...
-    private static final String Host_Img_File_Name = "computer_small.png";
-    private static final String Host_DisConnect_Img_File_Name = "dis_computer_small.png";
-    private static final BufferedImage HostBuffImage = Utilities.loadImageFromJar( Host_Img_File_Name );	
-    public static final Icon HOST_ICON = new ImageIcon( HostBuffImage.getScaledInstance(
-            ICON_WIDTH, ICON_HEIGHT, Image.SCALE_SMOOTH ) );
-    
-    public static final Icon HOST_DISCONNECT_ICON = new ImageIcon( Utilities.loadImageFromJar( Host_DisConnect_Img_File_Name ).getScaledInstance(
-            ICON_WIDTH, ICON_HEIGHT, Image.SCALE_SMOOTH));
+
  
     private boolean virtual = false;
     
@@ -94,10 +82,7 @@ public class Host extends Node {
      * Creates a new instance of {@link Host}.
      */
     public Host() {
-        
-        theIcon = HOST_ICON;
-        theBufferedImage = HostBuffImage;
-        
+                
          //Add the attributes
         theAttributeMap.put( ATTRIBUTE_Os_Name,  ""  );
         
@@ -266,6 +251,7 @@ public class Host extends Node {
      * 
      * @param passedDateStr 
      */
+    @SuppressWarnings("ucd")
     public void addCheckInTime( String passedDateStr ){
         
         List<String> theCheckInList = getCheckInList();
@@ -279,6 +265,7 @@ public class Host extends Node {
     /**
      *  Removes a check in time.
      * 
+     @SuppressWarnings("ucd")
      * @param passedDateStr 
      */
     public void removeCheckInTime( String passedDateStr ){
@@ -356,16 +343,6 @@ public class Host extends Node {
         
         return theCollection.getStringAt( 0 );
     }
-    
-    //===============================================================
-    /**
-    *   Returns the icon
-    * @return
-    */
-    @Override
-    public Icon getIcon() {
-        return ( connected ? HOST_ICON : HOST_DISCONNECT_ICON);
-    }/* END getHostIcon() */
 
     // ========================================================================
     /**
@@ -596,4 +573,4 @@ public class Host extends Node {
     }
    
    
-}/* END CLASS Host */
+}

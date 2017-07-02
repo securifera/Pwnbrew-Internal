@@ -52,9 +52,10 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
+@SuppressWarnings("ucd")
 abstract public class Tasking extends ControlMessage {
     
-    static final byte OPTION_TASK_ID = 22;
+    private static final byte OPTION_TASK_ID = 22;
     private int taskId = 0;    
     
      // ==========================================================================
@@ -81,6 +82,7 @@ abstract public class Tasking extends ControlMessage {
     *
      * @param passedId
     */
+    @SuppressWarnings("ucd")
     public Tasking( byte[] passedId ) {
         super( passedId );
     }

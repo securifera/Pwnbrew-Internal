@@ -53,6 +53,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
+@SuppressWarnings("ucd")
 public final class FileOperation extends Tasking {
     
     public static final byte DELETE = 78;

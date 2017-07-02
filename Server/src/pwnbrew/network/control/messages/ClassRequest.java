@@ -49,6 +49,7 @@ import pwnbrew.utilities.Utilities;
  *
  *  
  */
+
 @SuppressWarnings("ucd")
 public final class ClassRequest extends ControlMessage{
     

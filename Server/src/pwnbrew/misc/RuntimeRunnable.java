@@ -55,7 +55,7 @@ import pwnbrew.output.StreamCollector;
  *
  *  
  */
-@SuppressWarnings("ucd")
+
 public class RuntimeRunnable implements Runnable {
 
     private final String[] theCommand;

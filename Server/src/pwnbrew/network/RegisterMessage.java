@@ -63,7 +63,7 @@ public class RegisterMessage extends Message {
      * @param passedChannelId
      * @param destId
     */
-    @SuppressWarnings("ucd")
+    
     public RegisterMessage( byte passedFunction, int destId, int passedChannelId ) {
         super( REGISTER_MESSAGE_TYPE, destId );
         channelId = SocketUtilities.intToByteArray( passedChannelId );
@@ -77,7 +77,7 @@ public class RegisterMessage extends Message {
      * @param passedFunction
      * @param passedId
     */
-    @SuppressWarnings("ucd")
+    
     public RegisterMessage( byte passedFunction, byte[] passedId) {
         super(REGISTER_MESSAGE_TYPE, passedId);
         function = passedFunction;

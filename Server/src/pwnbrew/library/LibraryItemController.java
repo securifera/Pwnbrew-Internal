@@ -45,82 +45,33 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.library;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import pwnbrew.xmlBase.XmlBase;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
-import javax.swing.Icon;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import pwnbrew.controllers.Controller;
-import pwnbrew.gui.Iconable;
 import pwnbrew.host.HostController;
 import pwnbrew.host.HostFactory;
 import pwnbrew.log.Log;
-import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
-import pwnbrew.generic.gui.SavablePanel;
-import pwnbrew.gui.panels.RunnerPane;
 
 
 /**
  * 
  */
-abstract public class LibraryItemController extends Controller implements Iconable, ActionListener {
-
-    protected Icon theIcon;
-      
-  
+abstract public class LibraryItemController extends Controller {
     //Dirty flag - used to determine if an object needs to be saved
     private boolean isDirtyFlag = false;
     
     //Just Imported flag - used to determine how to render object's that have just been imported into the app
-    private boolean justImported = false;
     protected static final String NAME_Class = LibraryItemController.class.getSimpleName();
     
     //====================================================================
     /**
      * 
-     * @param passedBool 
      */
-    public LibraryItemController( boolean passedBool ){
-        super(passedBool);
-    }
-    
-    // ==========================================================================
-    /**
-    *   Action Listener implementation.
-    *
-     * @param evt
-    */
-    @Override
-    public void actionPerformed(ActionEvent evt) {
-         
-        String actionCommand = evt.getActionCommand();
-        switch (actionCommand) {
-           
-            case Constants.SAVE_ALL:
-                
-                //Save to disk
-                saveToDisk();
-                
-                //Disable the save button and repaint
-                JPanel aPanel = getRootPanel();
-                if( aPanel != null && aPanel instanceof LibraryItemPanel){
-                    LibraryItemPanel thePanel = (LibraryItemPanel) aPanel;
-                    thePanel.setSaveButton( false );
-                    thePanel.repaint();
-                }
-                
-                //Call for a repaint
-                getLibraryItemControllerListener().getListenerComponent().repaint();
-                break;
-                
-            default:               
-                break;
-        }
+    public LibraryItemController(){
+        super();
     }
     
     // ==========================================================================
@@ -145,57 +96,9 @@ abstract public class LibraryItemController extends Controller implements Iconab
     public final void setIsDirty( boolean passedDirtyFlag ) {
         isDirtyFlag = passedDirtyFlag;
 
-        //Disable the save button and repaint
-        JPanel aPanel = getRootPanel();
-        if( aPanel != null && aPanel instanceof SavablePanel ){
-            SavablePanel thePanel = (SavablePanel)aPanel;
-            thePanel.setSaveButton(passedDirtyFlag);
-        }
-
     }/* END setIsDirty( boolean ) */
     
-    // ========================================================================
-    /**
-     *  Returns the library item listener
-     * 
-     * @return 
-    */
-    abstract public LibraryItemControllerListener getLibraryItemControllerListener();
-
-  
-    // ==========================================================================
-    /**
-    * Returns the value of the {@link XmlBase}'s "just imported" flag indicating if the data
-    * in this object has been changed.
-    *
-    * @return the value of the {@code XmlBase}'s "just imported" flag
-    */
-    public final boolean justImported() {
-        return justImported;
-    }/* END justImported() */
-    
-    // ==========================================================================
-    /**
-    * Sets the value of the {@link XmlBase}'s just imported flag to the given value.
-    * <p>
-    *
-    * @param passedBool the new just imported value.
-    */
-    public final void setJustImported( boolean passedBool ) {
-        justImported = passedBool;
-    }/* END setJustImported( boolean ) */
-    
-    
-    // ========================================================================
-    /**
-     *  Returns the icon for the library item.
-     * @return 
-     */
-    @Override
-    public Icon getIcon() {
-        return theIcon;
-    }
-    
+         
     // ========================================================================
     /**
      *  Returns the icon for the library item.
@@ -240,30 +143,7 @@ abstract public class LibraryItemController extends Controller implements Iconab
     public HostController getHostController(){
         return null;
     }
-    
-    // ========================================================================
-    /**
-     *  Returns the right click popup menu for the library item.
-     * @param multiSelect
-     * @return 
-     */
-    abstract public JPopupMenu getPopupJMenu( boolean multiSelect );
-    
-    // ========================================================================
-    /**
-     *  Returns the string displayed when 
-     * @return 
-     */
-    abstract public String getCreationAction();
-    
-    // ========================================================================
-    /**
-     *  Creates the underlying item that the controller is in charge of.
-     * @param passedListener
-     * @return 
-     */
-    abstract public Object createItem( LibraryItemControllerListener passedListener );
-
+            
     // ==========================================================================
     /**
      * Saves the given {@link XmlBase} to the Object Library directory.
@@ -370,15 +250,6 @@ abstract public class LibraryItemController extends Controller implements Iconab
         
     }/* END isValidNameForItem( String ) */
     
-    // ==========================================================================
-    /**
-    * Clones the controller and the underlying object.
-    * (Named it copy because FindBugs complains about the name clone())
-     * @return 
-    */
-    abstract public LibraryItemController copy();
-    
-    
     // ========================================================================
     /**
      * 
@@ -392,27 +263,9 @@ abstract public class LibraryItemController extends Controller implements Iconab
             //Change the name in the item...
             ( (XmlBase)object ).setAttribute( XmlBase.ATTRIBUTE_Name, name );
             saveToDisk();
-            
-            //Change the name in the interface...
-            JPanel jpanel = getRootPanel();
-            if( jpanel != null && jpanel instanceof LibraryItemPanel )
-                ( (LibraryItemPanel)jpanel ).setLibraryItemName( name );
-            
+                        
         }
         
     }/* END changeLibraryItemName( String ) */
-
-    // ========================================================================
-    /**
-     *  Gets the runner pane
-     * 
-     * @param b whether to show the runner pane
-     * @return 
-     */
-    public RunnerPane getRunnerPane(boolean b) {
-        return null;
-    }
-    
-
         
-}/* END CLASS LibraryItemController */
+}

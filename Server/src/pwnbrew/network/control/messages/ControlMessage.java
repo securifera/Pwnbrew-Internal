@@ -86,6 +86,7 @@ public abstract class ControlMessage extends Message {
     /*
      *  Contructor
      */
+    @SuppressWarnings("ucd")
     public ControlMessage( byte[] passedId ) {
         //Set id
         super( CONTROL_MESSAGE_TYPE, passedId);

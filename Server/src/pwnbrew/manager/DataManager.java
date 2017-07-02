@@ -66,7 +66,6 @@ import pwnbrew.network.control.messages.RemoteException;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.network.relay.RelayManager;
-import pwnbrew.network.shell.ShellMessageManager;
 import pwnbrew.network.stage.StagingMessageManager;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.SocketUtilities;
@@ -234,13 +233,7 @@ abstract public class DataManager {
                             aManager = ControlMessageManager.initialize(theCommManager);
                         }
                         break;
-                    case Message.PROCESS_MESSAGE_TYPE:
 
-                        aManager = ShellMessageManager.getMessageManager();
-                        if( aManager == null){
-                            aManager = ShellMessageManager.initialize(theCommManager);
-                        }
-                        break;
                     case Message.FILE_MESSAGE_TYPE:
                         aManager = FileMessageManager.getMessageManager();
                         if( aManager == null){

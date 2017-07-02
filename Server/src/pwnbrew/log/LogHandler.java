@@ -55,6 +55,7 @@ import java.util.logging.*;
 /**
  * 
  */
+
 @SuppressWarnings("ucd")
 public class LogHandler extends FileHandler {
 

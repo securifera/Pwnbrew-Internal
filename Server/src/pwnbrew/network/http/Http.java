@@ -66,15 +66,15 @@ public class Http {
     private final Map<String, String> optionList = new HashMap<>();
     private byte[] thePayLoadBytes = new byte[0];   
     
-    public static final String DEFAULT_VERSION = "HTTP/1.1";   
+    private static final String DEFAULT_VERSION = "HTTP/1.1";   
     
-    public static final String CONNECTION = "Connection";    
+    private static final String CONNECTION = "Connection";    
     public static final String ACCEPT_LANGUAGE = "Accept-Language";   
     public static final String COOKIE = "Cookie";     
     
     //RESPONSE
-    public static final String CONTENT_TYPE = "Content-Type";
-    public static final String LOCATION = "Location";    
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String LOCATION = "Location";    
     public static final String CONTENT_LENGTH = "Content-Length";    
     
     public static final String SET_COOKIE = "Set-Cookie";  
@@ -83,7 +83,7 @@ public class Http {
     
     public static final int _200 = 200;
     public static final int _302 = 302;
-    public static final int _404 = 404;
+    private static final int _404 = 404;
     
     public static final int DEFAULT_PORT = 80;
     public static final int SECURE_PORT = 443;
@@ -108,6 +108,7 @@ public class Http {
      * 
      * @param headerParts 
     */
+    @SuppressWarnings("ucd")
     public Http( String... headerParts ) {
         operation = new ExchangeDetails( headerParts );          
         setOption( Http.CONNECTION, "keep-alive");

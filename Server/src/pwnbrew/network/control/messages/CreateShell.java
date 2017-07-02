@@ -54,12 +54,13 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
+@SuppressWarnings("ucd")
 public final class CreateShell extends ControlMessage{
     
-    public static final byte OPTION_CMD_STRING = 5;
-    public static final byte OPTION_ENCODING = 20;
-    public static final byte OPTION_STARTUP_CMD = 22;
-    public static final byte OPTION_REDIRECT_STDERR = 24;
+    private static final byte OPTION_CMD_STRING = 5;
+    private static final byte OPTION_ENCODING = 20;
+    private static final byte OPTION_STARTUP_CMD = 22;
+    private static final byte OPTION_REDIRECT_STDERR = 24;
     
     // ==========================================================================
     /**

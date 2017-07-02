@@ -48,17 +48,14 @@ package pwnbrew.xmlBase;
 import pwnbrew.network.Nic;
 import java.awt.image.BufferedImage;
 import java.util.*;
-import javax.swing.Icon;
-import pwnbrew.gui.Iconable;
 import pwnbrew.utilities.Utilities;
 
 /**
  *
  *  
  */
-public class Node extends XmlBase implements Iconable, java.io.Serializable {
+public class Node extends XmlBase implements java.io.Serializable {
     
-    protected transient Icon theIcon;
     protected transient BufferedImage theBufferedImage;
     
     //A list of InetAddress,MAC pairs
@@ -250,19 +247,6 @@ public class Node extends XmlBase implements Iconable, java.io.Serializable {
     public String toString(){
        return getHostname();
     }
-
-    
-
-    //===============================================================
-    /**
-    *   Returns the icon
-    * @return
-    */
-    @Override
-    public Icon getIcon() {
-        return theIcon;
-    }
-    
     
     // ========================================================================
     /**

@@ -148,7 +148,13 @@ public class SocketChannelWrapper {
      * Write the src buffer into the socket channel.
      */
     public int write(ByteBuffer src) throws IOException {
-	return theSocketChannel.write(src);
+        int ret=0;
+        try{
+            ret = theSocketChannel.write(src);
+        } catch(IllegalArgumentException ex ){
+            throw new IOException(ex.getMessage());
+        }
+	return ret;
     }
 
     /*

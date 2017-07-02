@@ -49,7 +49,7 @@ import pwnbrew.selector.SocketChannelHandler;
 public class IncomingConnectionManager extends ConnectionManager {
           
     private final int theClientId;
-    protected final Map<Integer, SocketChannelHandler> channelIdHandlerMap = new HashMap<>();
+    private final Map<Integer, SocketChannelHandler> channelIdHandlerMap = new HashMap<>();
 
     //==========================================================================
     /**

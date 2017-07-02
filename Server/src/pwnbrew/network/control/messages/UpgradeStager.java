@@ -59,6 +59,7 @@ import pwnbrew.xmlBase.JarItem;
  *
  *  
  */
+
 @SuppressWarnings("ucd")
 public final class UpgradeStager extends ControlMessage{
     

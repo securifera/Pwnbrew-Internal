@@ -58,7 +58,6 @@ import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Directories;
-import pwnbrew.misc.ProgressListener;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileFin;
@@ -79,7 +78,7 @@ final public class FileReceiver {
     private long fileSize = 0;
     
     //Send update to the progress listener
-    private final ProgressListener theListener;
+//    private final ProgressListener theListener;
     
     //For progress
     private int sndFileProgress = 0;                
@@ -151,7 +150,7 @@ final public class FileReceiver {
         aFileStream = new FileOutputStream(fileLoc, true);
         
         //Set the progress listener
-        theListener = passedManager.getPortManager().getProgressListener();
+//        theListener = passedManager.getPortManager().getProgressListener();
     }
     
     //===============================================================
@@ -226,22 +225,6 @@ final public class FileReceiver {
 //            fileDigest.update(passedByteArray);
 //            DebugPrinter.printMessage(this, "Receiving file, bytes: " + fileByteCounter);
             
-            //Calculate the progress
-            if(theListener != null){
-                
-                int tempProgressInt = 0;
-                //Check for divide by zero
-                if(fileSize != 0){
-                    double tempProgressDouble = (1.0 * fileByteCounter) / (1.0 * fileSize );
-                    tempProgressInt = (int)Math.round(tempProgressDouble * 100.0);
-                }
-
-                if(tempProgressInt != sndFileProgress){
-                    theListener.progressChanged(taskId, tempProgressInt);
-                    sndFileProgress = tempProgressInt;
-                }
-            }
-
             //If the byte count has passed the file size than send a finished message
             //so the socket can be closed
             if( fileSize >= 0 && fileByteCounter >= fileSize )

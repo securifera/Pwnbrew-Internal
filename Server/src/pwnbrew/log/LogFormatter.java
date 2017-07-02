@@ -56,6 +56,7 @@ import java.util.logging.SimpleFormatter;
 /**
  * 
  */
+
 @SuppressWarnings("ucd")
 public class LogFormatter extends SimpleFormatter {
 

@@ -46,8 +46,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import pwnbrew.host.HostController;
-import pwnbrew.host.gui.HostDetailsPanel;
-import pwnbrew.host.gui.HostTabPanel;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
@@ -57,6 +55,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
+@SuppressWarnings("ucd")
 public final class RelayStatus extends ControlMessage{
     
     private static final byte OPTION_TASK_STATUS = 8;
@@ -127,18 +126,7 @@ public final class RelayStatus extends ControlMessage{
     */
     @Override
     public void evaluate( PortManager passedManager ) { 
-    
-        //Get the host and set the relay information
-        int clientId = getSrcHostId();
-        final ServerManager aSM = (ServerManager) passedManager;
-        HostController theController = aSM.getHostController( Integer.toString( clientId) );
-        if( theController != null ){
-            HostTabPanel thePanel = theController.getRootPanel();
-            if( thePanel != null ){
-                HostDetailsPanel aPanel = thePanel.getOverviewPanel();
-                aPanel.setRelayValue(connected);
-            }
-        }
+
     }
     
     

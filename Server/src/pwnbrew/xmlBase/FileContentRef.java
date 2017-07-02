@@ -55,6 +55,7 @@ import pwnbrew.utilities.FileUtilities;
  *
  *  
  */
+@SuppressWarnings("ucd")
 public class FileContentRef extends XmlBase{
 
 
