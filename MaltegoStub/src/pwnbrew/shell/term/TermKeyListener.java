@@ -279,13 +279,11 @@ class TermKeyListener {
 
     private ModifierKey mFnKey = new ModifierKey();
 
-    private boolean mHardwareControlKey;
 
     private TermSession mTermSession;
 
     private boolean mAltSendsEsc;
 
-    private int mCombiningAccent;
 
     // Map keycodes out of (above) the Unicode code point space.
     static public final int KEYCODE_OFFSET = 0xA00000;
@@ -304,17 +302,12 @@ class TermKeyListener {
         mAltSendsEsc = flag;
     }
 
-    public void handleHardwareControlKey(boolean down) {
-        mHardwareControlKey = down;
-    }
-
     public void handleControlKey(boolean down) {
         if (down) {
             mControlKey.onPress();
         } else {
             mControlKey.onRelease();
         }
-//        updateCursorMode();
     }
 
     public void handleAltKey(boolean down) {
@@ -393,10 +386,10 @@ class TermKeyListener {
     }
 
     public int mapControlChar(int ch) {
-        return mapControlChar(mHardwareControlKey || mControlKey.isActive(), ch);
+        return mapControlChar( mControlKey.isActive(), ch);
     }
 
-    public int mapControlChar(boolean control/**, boolean fn**/, int ch) {
+    public int mapControlChar(boolean control, int ch) {
         int result = ch;
         if (control) {
             // Search is the control key.
@@ -472,131 +465,74 @@ class TermKeyListener {
         return result;
     }
 
+    //=========================================================================
     /**
+     *  * 
      * Handle a keyDown event.
      *
      * @param keyCode the keycode of the keyDown event
-     *
+     * @param keyChar
+     * @param event
+     * @param appMode
+     * @throws IOException 
      */
-    public void keyDown(int keyCode, KeyEvent event, boolean appMode/*, boolean allowToggle*/) throws IOException {
+    public void keyDown( int keyCode, int keyChar, KeyEvent event, boolean appMode ) throws IOException {
 
-        if (handleKeyCode(keyCode, event, appMode)) {
-            return;
-        }
-        int result = -1;
-        boolean chordedCtrl = false;
-//        boolean setHighBit = false;
-        switch (keyCode) {
-            case KeyEvent.VK_ALT:
-//            case KeyEvent.KEYCODE_ALT_LEFT:
-//                if (allowToggle) {
-//                    mAltKey.onPress();
-//                    updateCursorMode();
-//                }
-                break;
-
-            case KeyEvent.VK_SHIFT:
-//            case KeyEvent.KEYCODE_SHIFT_RIGHT:
-//                if (allowToggle) {
-//                    mCapKey.onPress();
-//                    updateCursorMode();
-//                }
-                break;
-
-            case KeyEvent.VK_CONTROL:
-//            case KEYCODE_CTRL_RIGHT:
-                // Ignore the control key.
+        int result = keyChar;
+        if( keyCode != -1 ){
+            if (event != null && handleKeyCode(keyCode, event, appMode)) {
                 return;
-
-            case KeyEvent.VK_CAPS_LOCK:
-                // Ignore the capslock key.
-                return;
-
-//            case KEYCODE_FUNCTION:
-//                // Ignore the function key.
-//                return;
-
-//            case KeyEvent.VK_BACK_SPACE:
-//                result = mBackKeyCode;
-//                break;
-
-            default: {
-//                int metaState = event.getMetaState();
-//                chordedCtrl = ((META_CTRL_ON & metaState) != 0);
-//                boolean effectiveCaps = allowToggle &&
-//                        (mCapKey.isActive());
-//                boolean effectiveAlt = allowToggle && mAltKey.isActive();
-//                int effectiveMetaState = metaState & (~META_CTRL_MASK);
-//                if (effectiveCaps) {
-//                    effectiveMetaState |= KeyEvent.META_SHIFT_ON;
-//                }
-//                if (!allowToggle && (effectiveMetaState & META_ALT_ON) != 0) {
-//                    effectiveAlt = true;
-//                }
-//                if (effectiveAlt) {
-//                    if (mAltSendsEsc) {
-//                        mTermSession.write(new byte[]{0x1b},0,1);
-//                        effectiveMetaState &= ~KeyEvent.META_ALT_MASK;
-//                    } else if (SUPPORT_8_BIT_META) {
-//                        setHighBit = true;
-//                        effectiveMetaState &= ~KeyEvent.META_ALT_MASK;
-//                    } else {
-//                        // Legacy behavior: Pass Alt through to allow composing characters.
-//                        effectiveMetaState |= KeyEvent.META_ALT_ON;
-//                    }
-//                }
-
-                // Note: The Hacker keyboard IME key labeled Alt actually sends Meta.
-
-
-//                if ((metaState & KeyEvent.META_META_ON) != 0) {
-//                    if (mAltSendsEsc) {
-//                        mTermSession.write(new byte[]{0x1b},0,1);
-//                        effectiveMetaState &= ~KeyEvent.META_META_MASK;
-//                    } else {
-//                        if (SUPPORT_8_BIT_META) {
-//                            setHighBit = true;
-//                            effectiveMetaState &= ~KeyEvent.META_META_MASK;
-//                        }
-//                    }
-//                }
-                result = event.getKeyChar();
-                break;
             }
+
+            switch (keyCode) {
+                case KeyEvent.VK_ALT:
+                    break;
+
+                case KeyEvent.VK_SHIFT:
+                    break;
+
+                case KeyEvent.VK_CONTROL:
+                    return;
+
+                case KeyEvent.VK_CAPS_LOCK:
+                    // Ignore the capslock key.
+                    return;
+
+                default: {
+                    break;
+                }
+            }
+            
+            boolean effectiveControl = mControlKey.isActive();
+            result = mapControlChar(effectiveControl, result);
         }
 
-        boolean effectiveControl = chordedCtrl || /**mAltControlKey ||**/ mHardwareControlKey || (/**allowToggle && **/mControlKey.isActive());
-        //boolean effectiveFn = allowToggle && mFnKey.isActive();
-
-        result = mapControlChar(effectiveControl/**, effectiveFn**/, result);
-
-//        if (result >= KEYCODE_OFFSET) {
-//            handleKeyCode(result - KEYCODE_OFFSET, null, appMode);
-//        } else 
-        if (result >= 0) {
+        if (result >= 0)
             mTermSession.write(result);
-        }
+        
     }
 
+    //============================================================================================
+    /**
+     * 
+     * @param keyCode
+     * @param event
+     * @param appMode
+     * @return
+     * @throws IOException 
+     */
     public boolean handleKeyCode(int keyCode, KeyEvent event, boolean appMode) throws IOException {
-        if (keyCode == 95 || keyCode == 211 || keyCode == 212) {
-            // SWITCH_CHARSET, ZENKAKU_HANKAKU, EISU
-            return true;
-        }
-
+      
         String code = null;
         if (event != null) {
             int keyMod = 0;
-            // META_CTRL_ON was added only in API 11, so don't use it,
-            // use our own tracking of Ctrl key instead.
-            // (event.getMetaState() & META_CTRL_ON) != 0
-            if (/**mAltControlKey ||**/ event.isControlDown() || mHardwareControlKey || mControlKey.isActive()) {
+            if ( event.isControlDown() || mControlKey.isActive()) {
                 keyMod |= KEYMOD_CTRL;
             }
-            if ( /**(event.getMetaState() & META_ALT_ON) != 0**/ event.isAltDown() ) {
+            if ( event.isAltDown() ) {
                 keyMod |= KEYMOD_ALT;
             }
-            if (/**(event.getMetaState() & META_SHIFT_ON) != 0**/ event.isShiftDown() ) {
+            if ( event.isShiftDown() ) {
                 keyMod |= KEYMOD_SHIFT;
             }
             // First try to map scancode
@@ -614,12 +550,8 @@ class TermKeyListener {
                 code = mKeyCodes[keyCode];
             }
         }
-
-//        if (altString != "") code = altString;
+        
         if (code != null) {
-            byte[] bytes = code.getBytes();
-            //Logger.getLogger(TermKeyListener.class.getName()).log(Level.WARNING, "Out: '" + new String(bytes) + "'");
-            
             mTermSession.write(code);
             return true;
         }

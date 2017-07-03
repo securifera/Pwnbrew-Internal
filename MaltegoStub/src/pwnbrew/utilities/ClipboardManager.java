@@ -40,6 +40,7 @@ package pwnbrew.utilities;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 
@@ -55,6 +56,11 @@ public class ClipboardManager {
         } catch (UnsupportedFlavorException | IOException ex) {
         }
         return charStr;
+    }
+    
+    public static void setText(String passedStr) {
+        StringSelection selection = new StringSelection(passedStr);
+        STATIC_CLIPBOARD.setContents(selection, selection);
     }
 
     public static boolean hasText() {

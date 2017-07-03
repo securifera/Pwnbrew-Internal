@@ -409,7 +409,7 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
     public Component getShellView() {
         return theShellPanel.getShellView();
     }
-
+    
     //=======================================================================
     /**
      * 

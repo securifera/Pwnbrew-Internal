@@ -645,11 +645,9 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
      * 
      * @return 
      */
-    public Component getView() {
+    public Component createView() {
         
-        ShellJTextPane theTextPane = new ShellJTextPane( this );
-        theTextPane.setEnabled( false );
-        
+        ShellJTextPane theTextPane = new ShellJTextPane( this ); 
         return theTextPane;
         
     } 

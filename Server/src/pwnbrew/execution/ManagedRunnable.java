@@ -91,6 +91,9 @@ abstract public class ManagedRunnable implements Runnable {
         //Run the main function
         try {
             go();
+        } catch(OutOfMemoryError ex ){
+            DebugPrinter.printException(ex);
+            System.exit(1);
         } catch( Throwable ex ){
             DebugPrinter.printException(ex);
         }

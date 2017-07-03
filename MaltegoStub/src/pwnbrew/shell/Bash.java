@@ -42,6 +42,7 @@ import pwnbrew.shell.term.TermJTextPane;
 import pwnbrew.shell.term.TermSession;
 import java.awt.Component;
 import java.util.concurrent.Executor;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -88,9 +89,9 @@ public class Bash extends Shell {
      * @param buffer the buffer into which the bytes were read
      */
     @Override
-    public void handleBytesRead( int passedId, byte[] buffer ) {
+    public void handleBytesRead( final int passedId, final byte[] buffer ) {
         theTermSession.handleIncoming(passedId, buffer);
-        theTermJTextArea.updateScreen();
+        theTermJTextArea.updateScreen();     
     }
     
     // ==========================================================================
@@ -163,7 +164,6 @@ public class Bash extends Shell {
     @Override
     public synchronized void shutdown(){
         super.shutdown();
-        theTermSession.finish();
     }
     
     // ==========================================================================
@@ -172,7 +172,7 @@ public class Bash extends Shell {
      * @return 
      */
     @Override
-    public Component getView() {
+    public Component createView() {
         return theTermJTextArea;        
     }
 }

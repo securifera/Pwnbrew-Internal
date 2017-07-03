@@ -290,11 +290,11 @@ class TerminalEmulator {
      * at the edge of the screen are stored in the proper place.
      */
     private boolean mJustWrapped = false;
-
-    /**
-     * Used for debugging, counts how many chars have been processed.
-     */
-    private int mProcessedCharCount;
+//
+//    /**
+//     * Used for debugging, counts how many chars have been processed.
+//     */
+//    private int mProcessedCharCount;
 
     /**
      * Foreground color, 0..255
@@ -383,7 +383,7 @@ class TerminalEmulator {
     /**
      * Used for moving selection up along with the scrolling text
      */
-    private int mScrollCounter = 0;
+//    private int mScrollCounter = 0;
 
     /**
      * UTF-8 support
@@ -414,9 +414,9 @@ class TerminalEmulator {
      */
     public TerminalEmulator(TermSession session, int columns, int rows ) {
         mSession = session;
-        mMainBuffer = new TranscriptScreen(columns, 512, rows );
+        mMainBuffer = new TranscriptScreen(columns, session.getMaxRows(), rows );
         mScreen = mMainBuffer;
-        mAltBuffer = new TranscriptScreen(columns, 512, rows );
+        mAltBuffer = new TranscriptScreen(columns, session.getMaxRows(), rows );
         mRows = rows;
         mColumns = columns;
         mTabStop = new boolean[mColumns];
@@ -611,14 +611,14 @@ class TerminalEmulator {
 //        }
 //    }
 
-    /**
-     * Get the cursor's current row.
-     *
-     * @return the cursor's current row.
-     */
-    public final int getCursorRow() {
-        return mCursorRow;
-    }
+//    /**
+//     * Get the cursor's current row.
+//     *
+//     * @return the cursor's current row.
+//     */
+//    public final int getCursorRow() {
+//        return mCursorRow;
+//    }
     
      /**
      * Get the cursor's current row.
@@ -695,7 +695,7 @@ class TerminalEmulator {
         for (int i = 0; i < length; i++) {            
             byte b = buffer[base + i];
             process(b);
-            mProcessedCharCount++;
+//            mProcessedCharCount++;
         }
     }
 
@@ -714,7 +714,6 @@ class TerminalEmulator {
 
     public void setOSCMode(int esc) {
         mEscSeq.offer(esc);
-//        mUTF8ModeNotify.onUpdate();
     }
 
     public int getEscCtrlMode() {
@@ -1114,8 +1113,7 @@ class TerminalEmulator {
     private void doEscPound(byte b) {
         switch (b) {
             case '8': // Esc # 8 - DECALN alignment test
-                mScreen.blockSet(0, 0, mColumns, mRows, 'E',
-                        getStyle());
+                mScreen.blockSet(0, 0, mColumns, mRows, 'E', getStyle());
                 break;
 
             default:
@@ -1691,7 +1689,7 @@ class TerminalEmulator {
 
     private void scroll() {
         //System.out.println("Scroll(): mTopMargin " + mTopMargin + " mBottomMargin " + mBottomMargin);
-        mScrollCounter ++;
+//        mScrollCounter ++;
         mScreen.scroll(mTopMargin, mBottomMargin, getStyle());
     }
 
@@ -1934,25 +1932,6 @@ class TerminalEmulator {
         }
     }
 
-    /**
-     * Send an array of UTF-16 chars to the screen.
-     *
-     * @param c A char[] array whose contents are to be sent to the screen.
-     */
-    private void emit(char[] c, int offset, int length, int style) {
-        for (int i = offset; i < length; ++i) {
-            if (c[i] == 0) {
-                break;
-            }
-            if (Character.isHighSurrogate(c[i])) {
-                emit(Character.toCodePoint(c[i], c[i+1]), style);
-                ++i;
-            } else {
-                emit((int) c[i], style);
-            }
-        }
-    }
-
     private void setCursorRow(int row) {
         mCursorRow = row;
         mAboutToAutoWrap = false;
@@ -1967,14 +1946,6 @@ class TerminalEmulator {
         mCursorRow = Math.min(row, mRows-1);
         mCursorCol = Math.min(col, mColumns-1);
         mAboutToAutoWrap = false;
-    }
-
-    public int getScrollCounter() {
-        return mScrollCounter;
-    }
-
-    public void clearScrollCounter() {
-        mScrollCounter = 0;
     }
 
     /**
@@ -2032,30 +2003,11 @@ class TerminalEmulator {
             mInputCharBuffer.clear();
         }
         mUTF8Mode = utf8Mode;
-//        if (mUTF8ModeNotify != null) {
-//            mUTF8ModeNotify.onUpdate();
-//        }
     }
 
     public boolean getUTF8Mode() {
         return mUTF8Mode;
     }
 
-//    public void setUTF8ModeUpdateCallback(UpdateCallback utf8ModeNotify) {
-//        mUTF8ModeNotify = utf8ModeNotify;
-//    }
-
-//    public void setColorScheme(ColorScheme scheme) {
-//        mDefaultForeColor = TextStyle.ciForeground;
-//        mDefaultBackColor = TextStyle.ciBackground;
-//        mMainBuffer.setColorScheme(scheme);
-//        if (mAltBuffer != null) {
-//            mAltBuffer.setColorScheme(scheme);
-//        }
-//    }
-
-    public String getSelectedText(int x1, int y1, int x2, int y2) {
-        return mScreen.getSelectedText(x1, y1, x2, y2);
-    }
     
 }

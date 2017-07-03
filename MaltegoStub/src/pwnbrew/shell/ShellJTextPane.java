@@ -75,8 +75,7 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
     */
     public ShellJTextPane( Shell passedShell ) {
 
-        initComponent();
-        setEditable(false);      
+        initComponent();     
         theShell = passedShell;
 
     }
@@ -86,6 +85,9 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
      *  Initialize the components
      */
     private void initComponent() {
+        
+        setBackground(Color.BLACK);
+        setForeground(Color.WHITE);
         
         Color bgColor = Color.BLACK;
         UIDefaults defaults = new UIDefaults();
@@ -299,9 +301,10 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
 
                             //Set the new length
                             int newLength = theSD.getLength();
-                            setCaretPosition( newLength );
-
                             theRunnerPane.setEndOffset(newLength);
+                            //******** Not necessary ******
+                            //theRunnerPane.updateCaret( newLength );
+                           
                         }
 
                     } catch ( BadLocationException ex) {
@@ -340,7 +343,7 @@ public class ShellJTextPane extends JTextPane implements StreamReceiver {
 
         boolean retVal = true;
         if( !isEnabled())
-                return retVal;     
+            return retVal;     
 
         int thePromptOffset = getEndOffset();
         if( thePromptOffset != -1 && offset < thePromptOffset ) {

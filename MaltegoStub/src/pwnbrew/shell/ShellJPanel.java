@@ -194,11 +194,10 @@ public class ShellJPanel extends javax.swing.JPanel {
                 
                 Constructor aConstructor = aClassWrapper.theClass.getConstructor( Executor.class, ShellListener.class );
                 Shell theShell = (Shell)aConstructor.newInstance( Constants.Executor, (ShellListener)theListener);
-                Component shellView = theShell.getView();
+                Component shellView = theShell.createView();
                 
                 //Enabled, set font, and request focus
-                shellView.setEnabled( true );
-                shellView.requestFocus();        
+                shellView.setEnabled( true );       
 
                 Font font = new Font("Courier New", Font.PLAIN, strVal);
                 shellView.setFont(font);  
@@ -206,7 +205,7 @@ public class ShellJPanel extends javax.swing.JPanel {
                 //Set the view for the current shell
                 setShellView(shellView);
                 theShell.windowResized( shellScrollPane.getViewport().getWidth(), shellScrollPane.getViewport().getHeight(), 0, 0 );
-                
+                shellView.requestFocusInWindow();
                 theListener.setShell( theShell);
                 
                 //Start the shell

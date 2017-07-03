@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.util.Arrays;
+import java.util.concurrent.locks.ReentrantLock;
 import pwnbrew.shell.Shell;
 
 
@@ -56,9 +57,6 @@ import pwnbrew.shell.Shell;
 public class TermSession {
     
     private TermKeyListener mKeyListener;
-
-//    private ColorScheme mColorScheme = BaseTextRenderer.defaultColorScheme;
-//    private UpdateCallback mNotify;
     private String mTitle;
     private TerminalEmulator mEmulator;
 
@@ -73,8 +71,10 @@ public class TermSession {
     private static final int TRANSCRIPT_ROWS = 10000;
     
     private final Shell theShell;    
-    private boolean mIsRunning = false;
+//    private boolean mIsRunning = false;
     
+    //Necessary so model doesn't get updated in the middle of a paint event
+//    private static final ReentrantLock theTermLock = new ReentrantLock();    
 
     public TermSession( Shell passedShell, final boolean exitOnEOF) {
         theShell = passedShell;
@@ -87,14 +87,55 @@ public class TermSession {
         this.exitOnEOF = exitOnEOF;
     }
     
+    //========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getMaxRows(){
+        return TRANSCRIPT_ROWS;
+    }
+    
+//    //========================================================================
+//    /**
+//     * This is a blocking event
+//     */
+//    public void getLock(){
+//        theTermLock.lock();
+//    }
+//    
+//    //========================================================================
+//    /**
+//     * This is a blocking event
+//     */
+//    public void releaseLock(){
+//        theTermLock.unlock();
+//    }
+    
+    //=========================================================================
+    /**
+     * 
+     * @param l 
+     */
     public void setKeyListener(TermKeyListener l) {
         mKeyListener = l;
     }
     
+    //=========================================================================
+    /**
+     * 
+     * @param passedId
+     * @param buffer 
+     */
     public void handleIncoming( int passedId, byte[] buffer ){
-        //mReaderThread.addToQueue(buffer);
-        processInput(buffer, 0, buffer.length);
-//        notifyUpdate();
+        //getLock();
+        try {
+            processInput(buffer, 0, buffer.length);
+        } catch(IllegalArgumentException ex){
+            System.out.println(ex.toString());
+//        } finally {
+//            releaseLock();
+        }
     }
 
     /**
@@ -104,14 +145,12 @@ public class TermSession {
      * @param rows The number of rows in the terminal window.
      */
     public void initializeEmulator(int columns, int rows) {
-//        mTranscriptScreen = new TranscriptScreen(columns, TRANSCRIPT_ROWS, rows, mColorScheme);
+        
         mEmulator = new TerminalEmulator(this, columns, rows );
         mEmulator.setDefaultUTF8Mode(mDefaultUTF8Mode);
         mEmulator.setKeyListener(mKeyListener);
 
-        mIsRunning = true;
-//        mReaderThread.start();
-//        mWriterThread.start();
+//        mIsRunning = true;
     }
 
     /**
@@ -190,37 +229,16 @@ public class TermSession {
         write(byteBuf.array(), 0, byteBuf.position()-1);
     }
 
+    //========================================================================
     /**
-     * @return Whether the terminal emulation is currently running.
+     * 
+     * @return 
      */
-    public boolean isRunning() {
-        return mIsRunning;
-    }
-
     TerminalEmulator getEmulator() {
         return mEmulator;
     }
 
-//    /**
-//     * Set an {@link UpdateCallback} to be invoked when the terminal emulator's
-//     * screen is changed.
-//     *
-//     * @param notify The {@link UpdateCallback} to be invoked on changes.
-//     */
-//    public void setUpdateCallback(UpdateCallback notify) {
-//        mNotify = notify;
-//    }
-//
-//    /**
-//     * Notify the {@link UpdateCallback} registered by {@link
-//     * #setUpdateCallback setUpdateCallback} that the screen has changed.
-//     */
-//    protected void notifyUpdate() {
-//        if (mNotify != null) {
-//            mNotify.onUpdate();
-//        }
-//    }
-
+    //========================================================================
     /**
      * Get the terminal session's title (may be null).
      * @return 
@@ -229,6 +247,7 @@ public class TermSession {
         return mTitle;
     }
 
+    //========================================================================
     /**
      * Change the terminal session's title.
      * @param title
@@ -254,8 +273,6 @@ public class TermSession {
     public void updateSize(int columns, int rows) {
         if (mEmulator == null) {
             initializeEmulator(columns, rows);
-//        } else {
-//            mEmulator.updateSize(columns, rows);
         }
     }
 
@@ -289,36 +306,6 @@ public class TermSession {
     protected void processInput(byte[] data, int offset, int count) {
         mEmulator.append(data, offset, count);
     }
-  
-    /**
-     * Write something directly to the terminal emulator input, bypassing the
-     * emulation client, the session's {@link InputStream}, and any processing
-     * being done by {@link #processInput processInput}.
-     *
-     * @param data The data to be written to the terminal.
-     * @param offset The starting offset into the buffer of the data.
-     * @param count The length of the data to be written.
-     */
-    protected final void appendToEmulator(byte[] data, int offset, int count) {
-        mEmulator.append(data, offset, count);
-    }
-
-//    /**
-//     * Set the terminal emulator's color scheme (default colors).
-//     *
-//     * @param scheme The {@link ColorScheme} to be used (use null for the
-//     *               default scheme).
-//     */
-//    public void setColorScheme(ColorScheme scheme) {
-//        if (scheme == null) {
-//            scheme = BaseTextRenderer.defaultColorScheme;
-//        }
-//        mColorScheme = scheme;
-//        if (mEmulator == null) {
-//            return;
-//        }
-//        mEmulator.setColorScheme(scheme);
-//    }
 
     /**
      * Set whether the terminal emulator should be in UTF-8 mode by default.
@@ -351,33 +338,13 @@ public class TermSession {
             return mEmulator.getUTF8Mode();
         }
     }
-
-//    /**
-//     * Set an {@link UpdateCallback} to be invoked when the terminal emulator
-//     * goes into or out of UTF-8 mode.
-//     *
-//     * @param utf8ModeNotify The {@link UpdateCallback} to be invoked.
+  /**
+//     * Finish this terminal session.  Frees resources used by the terminal
+//     * emulator and closes the attached <code>InputStream</code> and
+//     * <code>OutputStream</code>.
 //     */
-//    public void setUTF8ModeUpdateCallback(UpdateCallback utf8ModeNotify) {
-//        if (mEmulator != null) {
-//            mEmulator.setUTF8ModeUpdateCallback(utf8ModeNotify);
-//        }
+//    public void finish() {
+//        mIsRunning = false;                        
 //    }
-
-//    /**
-//     * Reset the terminal emulator's state.
-//     */
-//    public void reset() {
-//        mEmulator.reset();
-//        notifyUpdate();
-//    }
-
-    /**
-     * Finish this terminal session.  Frees resources used by the terminal
-     * emulator and closes the attached <code>InputStream</code> and
-     * <code>OutputStream</code>.
-     */
-    public void finish() {
-        mIsRunning = false;                        
-    }
+//  
 }

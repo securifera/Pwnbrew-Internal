@@ -33,8 +33,9 @@
  */
 package pwnbrew.shell.term;
 
+import java.awt.AWTException;
 import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.Robot;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -44,7 +45,6 @@ import java.awt.event.MouseListener;
 import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.JTextPane;
-import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
@@ -53,6 +53,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import pwnbrew.utilities.ClipboardManager;
 
 /**
  *
@@ -96,6 +97,7 @@ public class TermJTextPane extends JTextPane {
         //Config
         setEditable(true);
         setCaretColor(Color.WHITE);
+        setForeground(Color.WHITE);
                 
         //Add key listener to the view
         KeyListener keyAdapter = new KeyAdapter(){
@@ -122,15 +124,15 @@ public class TermJTextPane extends JTextPane {
         MouseListener mouseAdapter = new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {            
-//                sendMouseEventCode(e);
+                sendMouseEventCode(e);
             } 
         };
         addMouseListener(mouseAdapter);  
-        requestFocus();
         
         //Set the key listener
         theTermKeyListener = new TermKeyListener(theTermSession);
-        theTermSession.setKeyListener(theTermKeyListener);   
+        theTermSession.setKeyListener(theTermKeyListener); 
+        requestFocus();
                 
     }
     
@@ -164,10 +166,16 @@ public class TermJTextPane extends JTextPane {
         if (handleControlKey(keyCode, true)) {
             return true;
         } 
+        
+        //Handle copy paste
+        if( handleCopyPaste( event ) ){
+            theTermKeyListener.mapControlChar(keyCode);
+            return true;
+        }
 
         // Translate the keyCode into an ASCII character.
         try {
-            theTermKeyListener.keyDown(keyCode, event, getKeypadApplicationMode() );            
+            theTermKeyListener.keyDown( event.getKeyCode(), event.getKeyChar(), event, getKeypadApplicationMode() );            
         } catch (IOException e) {
             // Ignore I/O exceptions
         }
@@ -200,30 +208,22 @@ public class TermJTextPane extends JTextPane {
      */
     private void sendMouseEventCode( MouseEvent e ) {
         
-//        int col = theTermSession.getEmulator().getColumnCount();
-//        int row = theTermSession.getEmulator().getRowCount();
-//        
-//        int button_code = e.getButton();
-//        int x = (int)(e.getX() / getColumnWidth()) + 1;
-//        int y = (int)( e.getY()/*/  -mTopOfScreenMargin)*/ / getRowHeight()) + 1;
-//        // Clip to screen, and clip to the limits of 8-bit data.
-//        boolean out_of_bounds =
-//                x < 1 || y < 1 ||
-//                x > col || y > row ||
-//                x > 255-32 || y > 255-32;
-//        
-//        //Log.d(TAG, "mouse button "+x+","+y+","+button_code+",oob="+out_of_bounds);
-//        if(button_code < 0 || button_code > 255-32) {
-//            return;
-//        }
-//        if(!out_of_bounds) {
-//            byte[] data = {
-//                    '\033', '[', 'M',
-//                    (byte)(32 + button_code),
-//                    (byte)(32 + x),
-//                    (byte)(32 + y) };
-//            theTermSession.write(data, 0, data.length);
-//        }
+        
+        if(e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 1){
+            String selection = getSelectedText();
+            if( selection != null && !selection.isEmpty() )
+                ClipboardManager.setText(selection);
+        } if(e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1){
+            Robot aRobot;
+            try {
+                aRobot = new Robot();
+                aRobot.keyPress(KeyEvent.VK_CONTROL);
+                aRobot.keyPress(KeyEvent.VK_V);
+                aRobot.keyRelease(KeyEvent.VK_V);
+                aRobot.keyRelease(KeyEvent.VK_CONTROL);
+            } catch (AWTException ex) {
+            }
+        }
     }
     
     //========================================================================
@@ -239,35 +239,62 @@ public class TermJTextPane extends JTextPane {
     /**
      * 
      */
-    public synchronized void updateScreen() {
-                                
-        final String aStr = theTermSession.getTranscriptText() + "\n";            
-        if( !aStr.isEmpty() ){            
-            SwingUtilities.invokeLater(new Runnable(){
-
-                @Override
-                public void run() {
-                    DefaultStyledDocument aDoc = new DefaultStyledDocument();
-                    final MutableAttributeSet aSet = new SimpleAttributeSet();
-                    StyleConstants.setForeground(aSet, Color.WHITE);
-                    try {
-                        aDoc.insertString(0, aStr, aSet);
-                    } catch (BadLocationException ex) {
-                    }
-                    setDocument(aDoc);  
-
-                    int col = theTermSession.getEmulator().getCursorCol();
-                    int row = theTermSession.getEmulator().getRealCursorRow();
-                    int pos = col + ( row  * (theTermSession.getEmulator().getColumnCount() + 1));
-                    
-                    if( pos < aStr.length())
-                        setCaretPosition( pos );
-                    requestFocus();
-                }
-                
-             });
-        }
+    public void updateScreen() {                                
+           
+        int col, row;
+        String aStr = theTermSession.getTranscriptText() + "\n";    
+        col = theTermSession.getEmulator().getCursorCol();
+        row = theTermSession.getEmulator().getRealCursorRow();
         
+        final int pos = col + ( row  * (theTermSession.getEmulator().getColumnCount() + 1));
+        final DefaultStyledDocument prevDoc = (DefaultStyledDocument)getDocument();
+        
+        final MutableAttributeSet aSet = new SimpleAttributeSet();
+        StyleConstants.setForeground(aSet, Color.WHITE);
+        try {
+            prevDoc.replace(0, prevDoc.getLength(), aStr, aSet);
+        } catch (BadLocationException ex) {
+        }       
+        
+        int strLen = prevDoc.getLength();
+        if( pos < strLen ) 
+            setCaretPosition( pos );
+        else
+            System.out.println("Overrun");
+
+        //requestFocus(); 
+
     }
+
+    //=====================================================================
+    /**
+     * 
+     * @param event
+     * @return 
+     */
+    private boolean handleCopyPaste(KeyEvent event) {
+        boolean retVal = false;
+        int keyChar = event.getKeyChar();
+        if( keyChar == KeyEvent.VK_CANCEL){
+            String selection = getSelectedText();
+            if( selection != null && !selection.isEmpty() ){
+                ClipboardManager.setText(selection);
+                retVal = true;
+            }
+        } else if(keyChar == 22){
+            String theStr = ClipboardManager.getText();
+            char[] charArr = theStr.toCharArray();
+            for( char aChar : charArr ){
+                try {            
+                    theTermKeyListener.keyDown( -1, aChar, null, getKeypadApplicationMode() );
+                } catch (IOException ex) {
+                }
+            }
+            retVal = true;
+        }
+        return retVal;
+    }
+ 
+    
 
 }
