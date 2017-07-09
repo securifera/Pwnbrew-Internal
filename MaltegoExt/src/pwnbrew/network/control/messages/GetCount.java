@@ -44,7 +44,6 @@ import java.util.logging.Level;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.HostFactory;
-import pwnbrew.library.LibraryItemController;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
@@ -113,7 +112,7 @@ public final class GetCount extends MaltegoMessage{ // NO_UCD (use default)
     *   Performs the logic specific to the message.
     *
      * @param passedManager
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     @Override
     public void evaluate( PortManager passedManager ) throws LoggableException {     
@@ -124,7 +123,7 @@ public final class GetCount extends MaltegoMessage{ // NO_UCD (use default)
         switch( countType ){
             case HOST_COUNT:
 
-                    List<LibraryItemController> theHostControllers = aSM.getHostControllers();
+                    List<HostController> theHostControllers = aSM.getHostControllers();
                     retCount = theHostControllers.size() - 1;
 
                     //If 

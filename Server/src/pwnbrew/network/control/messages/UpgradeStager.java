@@ -53,7 +53,7 @@ import java.util.logging.Level;
 import pwnbrew.log.Log;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.ControlOption;
-import pwnbrew.xmlBase.JarItem;
+import pwnbrew.xml.JarItem;
 
 /**
  *

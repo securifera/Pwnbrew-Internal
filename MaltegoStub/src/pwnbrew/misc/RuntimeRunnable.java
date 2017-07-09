@@ -40,25 +40,29 @@ The copyright on this package is held by Securifera, Inc
 /*
  * RuntimeRunnable.java
  *
+ * Created on July 20, 2013
  */
 
 package pwnbrew.misc;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import pwnbrew.output.StreamCollector;
+import java.util.logging.Level;
 
 /**
  *
  *  
  */
+
 public class RuntimeRunnable implements Runnable {
 
     private final String[] theCommand;
     private static final String NAME_Class = RuntimeRunnable.class.getSimpleName();
-    private final StreamCollector theOutputReader = new StreamCollector( Constants.STD_OUT_ID);
-    private final StreamCollector theErrReader = new StreamCollector( Constants.STD_ERR_ID );
     private int exitValue = 0;
+    private String theStdOut = "";
+    private String theStdErr = "";
     
     //===============================================================
     /**
@@ -69,6 +73,10 @@ public class RuntimeRunnable implements Runnable {
         theCommand = passedCommand;
     }
     
+    //===============================================================
+    /**
+     * 
+     */
     @Override
     public void run() {
         
@@ -81,19 +89,24 @@ public class RuntimeRunnable implements Runnable {
                 ioe = null;
             }
             
-            //Collect the data from stdout...
-            theOutputReader.setInputStream( aProc.getInputStream() );   
-            theOutputReader.start();
+            BufferedReader stdInput = new BufferedReader(new InputStreamReader(aProc.getInputStream()));
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(aProc.getErrorStream()));
+
+            // read the output from the command
+            String s = null;
+            while ((s = stdInput.readLine()) != null) {
+                theStdOut += s;
+            }
+
+            // read any errors from the attempted command
+            while ((s = stdError.readLine()) != null) {
+                theStdErr += s;
+            }            
             
-            //Collect the data from stderr...
-            theErrReader.setInputStream( aProc.getErrorStream() );
-            theErrReader.start();
-            
-            //Wait for the exit value
             exitValue = aProc.waitFor();           
             
         } catch (InterruptedException | IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "routeMessage", ex.getMessage(), ex);   
+            DebugPrinter.printMessage( NAME_Class, "run", ex.getMessage(), ex);   
         }
         
     }
@@ -104,7 +117,7 @@ public class RuntimeRunnable implements Runnable {
      * @return 
     */
     public String getStdOut() {
-        return theOutputReader.getString();
+        return theStdOut;
     }
     
      //===============================================================
@@ -113,7 +126,7 @@ public class RuntimeRunnable implements Runnable {
      * @return 
     */
     public String getStdErr() {
-        return theErrReader.getString();
+        return theStdErr;
     }
 
     //===============================================================

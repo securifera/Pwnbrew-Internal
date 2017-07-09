@@ -48,7 +48,7 @@ import pwnbrew.misc.Directories;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
-import pwnbrew.xmlBase.JarItem;
+import pwnbrew.xml.JarItem;
 
 /**
  *

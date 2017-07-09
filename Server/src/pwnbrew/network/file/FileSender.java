@@ -63,7 +63,7 @@ import pwnbrew.misc.Directories;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.control.messages.PushFileAbort;
 import pwnbrew.network.control.messages.PushFileAck;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xml.ServerConfig;
 
 /**
  *

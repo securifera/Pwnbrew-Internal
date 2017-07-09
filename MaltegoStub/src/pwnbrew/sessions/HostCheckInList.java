@@ -122,7 +122,7 @@ public class HostCheckInList extends MutableJList implements ActionListener {
     //****************************************************************************
     /**
     *  Determines what menu options to show on the popup menu based on the
-    *  {@link XmlBase} object contained in the currently selected node.
+    *  {@link XmlObject} object contained in the currently selected node.
     *
     *  @param  e   the {@code MouseEvent} that triggered the popup
     */

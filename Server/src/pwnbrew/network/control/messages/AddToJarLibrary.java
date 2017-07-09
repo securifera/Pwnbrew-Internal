@@ -44,15 +44,15 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.logging.Level;
-import static pwnbrew.Environment.addClassToMap;
 import pwnbrew.log.Log;
+import pwnbrew.manager.ClassManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.Utilities;
-import pwnbrew.xmlBase.JarItem;
-import pwnbrew.xmlBase.JarItemException;
+import pwnbrew.xml.JarItem;
+import pwnbrew.xml.JarItemException;
 
 /**
  *
@@ -157,7 +157,7 @@ public final class AddToJarLibrary extends JarItemMsg{ // NO_UCD (use default)
                         Utilities.addJarItem( aJarItem );
 
                         //Write the file to disk
-                        String fileHash = FileUtilities.createHashedFile( tempJarFile, null );
+                        String fileHash = FileUtilities.createHashedFile( tempJarFile );
                         if( fileHash != null ) {
 
                             //Create a FileContentRef
@@ -173,7 +173,7 @@ public final class AddToJarLibrary extends JarItemMsg{ // NO_UCD (use default)
                                 File libraryFile = new File( Directories.getFileLibraryDirectory(), aJarItem.getFileHash() ); //Create a File to represent the library file to be copied
                                 List<Class<?>> theClasses = Utilities.loadJar(libraryFile);
                                 for( Class aClass : theClasses )
-                                    addClassToMap(aClass);                            
+                                    ClassManager.addClassToMap(aClass);                            
                             }
 
                             try {

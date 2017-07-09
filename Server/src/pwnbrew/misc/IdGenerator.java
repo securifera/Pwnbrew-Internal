@@ -53,9 +53,7 @@ import java.util.Date;
 /**
  * 
  */
-final public class IdGenerator {
-
-    
+final public class IdGenerator {    
 
     //Session's start date/time...
     private static final String FORMAT_SessionDateTime

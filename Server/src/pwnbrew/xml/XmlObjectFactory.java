@@ -38,14 +38,14 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
- * XmlBaseFactory.java
+ * XmlObjectFactory.java
  *
  * Created on Nov 22, 2013, 7:41:32 PM
  */
 
-package pwnbrew.xmlBase;
+package pwnbrew.xml;
 
-import pwnbrew.exception.XmlBaseCreationException;
+import pwnbrew.exception.XmlObjectCreationException;
 import pwnbrew.log.Log;
 import java.io.*;
 import java.util.logging.Level;
@@ -53,7 +53,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
-import pwnbrew.Environment;
+import pwnbrew.manager.ClassManager;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.misc.IdGenerator;
 
@@ -61,43 +61,15 @@ import pwnbrew.misc.IdGenerator;
 /**
  * 
  */
-final public class XmlBaseFactory {
+final public class XmlObjectFactory {
 
-    private static final String NAME_Class = XmlBaseFactory.class.getSimpleName();
+    private static final String NAME_Class = XmlObjectFactory.class.getSimpleName();
 
     // ==========================================================================
     /**
     * Constructor
     */
-    private XmlBaseFactory() {
-    }
-
-
-    // ==========================================================================
-    /**
-    * Creates a deep copy of the given {@link XmlBase} descendent.
-    * <p>
-    * The clone will contain clones of the original's {@code XmlBase} components.
-    *
-    * @param <T>
-    * @param xmlBase the {@code XmlBase} to clone
-    * @return 
-    *
-    * @throws IllegalArgumentException if the argument is null
-    * @throws XmlBaseCreationException if an {@link XmlReader} cannot be created
-    *   or if the XML data from the {@code XmlBase} descendent could not be parsed
-    */
-    public static <T extends XmlBase> T clone( T xmlBase ) throws XmlBaseCreationException {
-
-        if( xmlBase == null )
-            throw new IllegalArgumentException( "The XmlBase descendent cannot be null." );
-        
-        T anXB = (T)createFromXml( xmlBase.getXml() );
-        anXB.setId( IdGenerator.next() );
-        anXB.doPostCreation();
-
-        return anXB; 
-
+    private XmlObjectFactory() {
     }
 
     // ==========================================================================
@@ -120,8 +92,7 @@ final public class XmlBaseFactory {
     *   class has no nullary constructor; or if the instantiation fails for some
     *   other reason.
     */
-    static Object instantiateClassByName( String className )
-    throws IllegalAccessException, InstantiationException {
+    static Object instantiateClassByName( String className ) throws IllegalAccessException, InstantiationException {
 
         if( className == null ) 
             throw new IllegalArgumentException( "The String cannot be null." );
@@ -134,7 +105,7 @@ final public class XmlBaseFactory {
             className = className.substring(lastDelim + 1, className.length());
         }
 
-        Class aClass = Environment.getClassByName( className ); 
+        Class aClass = ClassManager.getClassByName( className ); 
         return instantiateClass(aClass);
 
     }
@@ -159,15 +130,14 @@ final public class XmlBaseFactory {
     *   class has no nullary constructor; or if the instantiation fails for some
     *   other reason.
     */
-    public static Object instantiateClass( Class aClass )
-    throws IllegalAccessException, InstantiationException {
+    public static Object instantiateClass( Class aClass ) throws IllegalAccessException, InstantiationException {
 
         Object rtnObj = null;
         if( aClass != null ) { 
 
             //Create a new instance of the Class...
             rtnObj = aClass.newInstance();
-            ((XmlBase)rtnObj).setId(IdGenerator.next());
+            ((XmlObject)rtnObj).setId(IdGenerator.next());
         }
 
         return rtnObj;
@@ -176,21 +146,21 @@ final public class XmlBaseFactory {
 
     // ==========================================================================
     /**
-    * Creates an {@link XmlBase} from the XML data in the given {@code String}.
+    * Creates an {@link XmlObject} from the XML data in the given {@code String}.
     *
-    * @param headerOnly a flag indicating whether to build the entire {@code XmlBase}
+    * @param headerOnly a flag indicating whether to build the entire {@code XmlObject}
     * and its components or just its header
     * @param xml a {@code String} containing the XML data
     *
-    * @return an {@code XmlBase} created from the XML data in the given {@code String}
+    * @return an {@code XmlObject} created from the XML data in the given {@code String}
     *
     * @throws IllegalArgumentException if the given {@code String} is null or empty
-    * @throws XmlBaseCreationException if an {@link XmlReader} cannot be created
+    * @throws XmlObjectCreationException if an {@link XmlReader} cannot be created
     *   or if the XML data in the {@code String} could not be parsed
     *
     * @see #createFromXml( boolean, InputSource )
     */
-    static XmlBase createFromXml( String xml ) throws XmlBaseCreationException {
+    static XmlObject createFromXml( String xml ) throws XmlObjectCreationException {
 
         if( xml == null )
             throw new IllegalArgumentException( "The String cannot be null." );
@@ -204,26 +174,26 @@ final public class XmlBaseFactory {
 
     // ==========================================================================
     /**
-    * Creates an {@link XmlBase} from the XML data in the file represented by the
+    * Creates an {@link XmlObject} from the XML data in the file represented by the
     * given {@link File}.
     *
     * @param file a {@code File} representing the file containing the XML data
     *
-    * @return an {@code XmlBase} created from the XML data in the file represented
+    * @return an {@code XmlObject} created from the XML data in the file represented
     * by the given {@code File}
     *
     * @throws IllegalArgumentException if the given {@code File} is null
-    * @throws XmlBaseCreationException if the file represented by the given {@code File}
+    * @throws XmlObjectCreationException if the file represented by the given {@code File}
     * cannot be read
     */
-    public static XmlBase createFromXmlFile( File file ) throws XmlBaseCreationException {
+    public static XmlObject createFromXmlFile( File file ) throws XmlObjectCreationException {
 
         if( file == null )
             throw new IllegalArgumentException( "The File cannot be null." );
         else if( FileUtilities.verifyCanRead( file ) == false ) 
-            throw new XmlBaseCreationException( "Cannot read the file \"" + file.toString() + "\"." );
+            throw new XmlObjectCreationException( "Cannot read the file \"" + file.toString() + "\"." );
         
-        XmlBase rtnXB = null;
+        XmlObject rtnXB = null;
 
         //Create a FileInputStream for the File...
         FileInputStream aFileInputStream = null;
@@ -232,11 +202,11 @@ final public class XmlBaseFactory {
         } catch( FileNotFoundException ex ) {
             //The call to FileUtilities.verifyCanRead( file ) should obviate this scenario,
             //  but just in case...
-            throw new XmlBaseCreationException( "Could not find the file \"" + file.toString() + "\"." );
+            throw new XmlObjectCreationException( "Could not find the file \"" + file.toString() + "\"." );
         }
 
         try {
-            //Create the XmlBase
+            //Create the XmlObject
             rtnXB = createFromXml( new InputSource( aFileInputStream ) );
         } finally {
 
@@ -248,8 +218,8 @@ final public class XmlBaseFactory {
         }
 
         if( rtnXB == null )
-            throw new XmlBaseCreationException(
-        "Could not create the XmlBase from the file \"" + file.toString() + "\"." );
+            throw new XmlObjectCreationException(
+        "Could not create the XmlObject from the file \"" + file.toString() + "\"." );
         
 
         return rtnXB;
@@ -258,49 +228,45 @@ final public class XmlBaseFactory {
 
     // ==========================================================================
     /**
-    * Creates an {@link XmlBase} from the XML data obtained from the given {@link InputSource}.
+    * Creates an {@link XmlObject} from the XML data obtained from the given {@link InputSource}.
     *
     * @param inputSource the {@code InputSource}
     *
-    * @return an {@link XmlBase} created from the XML data obtained from the given
+    * @return an {@link XmlObject} created from the XML data obtained from the given
     * {@link InputSource}
     *
-    * @throws XmlBaseCreationException if an {@link XmlReader} cannot be created
+    * @throws XmlObjectCreationException if an {@link XmlReader} cannot be created
     * or if the data from the {@code InputSource} could not be parsed
     */
-    private static XmlBase createFromXml( InputSource inputSource )
-    throws XmlBaseCreationException {
+    private static XmlObject createFromXml( InputSource inputSource )
+    throws XmlObjectCreationException {
 
         XMLReader xmlReader = null;
         
         try {
             xmlReader = XMLReaderFactory.createXMLReader();
         } catch (SAXException ex) {
-            throw new XmlBaseCreationException( "Could not create an XMLReader." );
+            throw new XmlObjectCreationException( "Could not create an XMLReader." );
         }
 
         XmlHandler theHandler = new XmlHandler( false );
         xmlReader.setContentHandler( theHandler );
-
-        try { //Try to parse the XML file...
+        try {
             xmlReader.parse( inputSource );
-        } catch( IOException ex ) {
-            throw new XmlBaseCreationException(
-            "Could not parse the data from the InputSource \"" + inputSource.toString() + "\"." );
-        } catch( SAXException ex ) {
-            throw new XmlBaseCreationException(
+        } catch( IOException | SAXException ex ) {
+            throw new XmlObjectCreationException(
             "Could not parse the data from the InputSource \"" + inputSource.toString() + "\"." );
         } catch(Error er ){
 
             ///////////////////
             ///////////////////
-            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-            System.out.println(" Error.getClass()            >>" + er.getClass().getSimpleName() + "<<" );
-            System.out.println(" Error.toString()            >>" + er.toString() + "<<" );
-            System.out.println(" Error.getMessage()          >>" + er.getMessage() + "<<" );
-            System.out.println(" Error.getLocalizedMessage() >>" + er.getLocalizedMessage() + "<<" );
-            System.out.println(" Error.getCause              >>" + er.getCause() + "<<" );
-            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+//            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+//            System.out.println(" Error.getClass()            >>" + er.getClass().getSimpleName() + "<<" );
+//            System.out.println(" Error.toString()            >>" + er.toString() + "<<" );
+//            System.out.println(" Error.getMessage()          >>" + er.getMessage() + "<<" );
+//            System.out.println(" Error.getLocalizedMessage() >>" + er.getLocalizedMessage() + "<<" );
+//            System.out.println(" Error.getCause              >>" + er.getCause() + "<<" );
+//            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
             ///////////////////
             ///////////////////
 
@@ -316,10 +282,7 @@ final public class XmlBaseFactory {
 
         }
 
-        //NOTE: The XMLReader's parse method extracts the information stored in the
-        //  XML structures and the XmlHandler dictates what to do with that data.
-        XmlBase theObject = theHandler.getFinishedXmlBase();
-
+        XmlObject theObject = theHandler.getFinishedXmlObject();
         return theObject;
 
     }

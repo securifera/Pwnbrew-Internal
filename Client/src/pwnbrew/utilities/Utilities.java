@@ -44,10 +44,13 @@ import java.beans.IntrospectionException;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -92,6 +95,9 @@ public class Utilities {
         temp.add( OS_NAME_Unix );
         OS_FAMILY_Unix = Collections.unmodifiableList( temp );
     }
+        
+    private static final Map<String, Byte[]> MAC_MAP= new HashMap<>();
+    private static final ReentrantLock MAC_LOCK = new ReentrantLock();
 
     
     // ==========================================================================
@@ -674,4 +680,83 @@ public class Utilities {
         }
     }
 
+    // ==========================================================================
+    /**
+    * 
+    * @param passedBytes
+    * @return
+    */
+    public static String convertHexBytesToString( byte [] passedBytes ) {
+        
+        if ( passedBytes == null )
+            return null;
+        
+        StringBuilder strBuf = new StringBuilder();
+        int byteInt;
+        for ( int i = 0; i < passedBytes.length; i++ ) { //For each byte...
+
+            byteInt = passedBytes[ i ]; //NOTE: this assignment promotes to 32 bits
+
+            byteInt = byteInt << 24; //Shift off any sign bits
+            byteInt = byteInt >>> 24; //Shift back, filling with zeros
+
+            //Add the byte as hex to the String
+            strBuf.append( byteInt < 16 ? "0" + Integer.toHexString( byteInt ) : Integer.toHexString( byteInt ) );
+        }
+
+        return strBuf.toString().toUpperCase();
+    }
+    
+     // ==========================================================================
+    /**
+    * This wrapper method should returns the same results as would
+    * a call like: passedNI.getHardwareAddress() except that it attempts to
+    * minimize the actual number of times that the JVM actually calls the
+    * method 'getHardwareAddress()'.
+    *
+    * @param passedNI
+    * @return 
+    * @throws java.net.SocketException 
+    */
+    public static byte[] getCachedHardwareAddress( NetworkInterface passedNI ) throws SocketException {
+
+        if ( passedNI == null )
+            return null;
+        
+        byte [] rtnBytes= null;
+        MAC_LOCK .lock();
+        try {
+            
+            String tmpName= passedNI.getName();
+            Byte [] lookupResultBytes= MAC_MAP.get( tmpName );
+            if ( lookupResultBytes == null ) {
+            
+                rtnBytes= passedNI.getHardwareAddress();
+                if ( rtnBytes == null )
+                    MAC_MAP.put( tmpName, new Byte[ 0 ] );
+                else {
+                
+                    Byte [] theByteObjList= new Byte[ rtnBytes.length ];
+                    for ( int q= 0; q < rtnBytes.length; q++ )
+                        theByteObjList[ q ] = rtnBytes[ q ];
+                    
+                    MAC_MAP.put( tmpName, theByteObjList );                 
+                }
+
+            } else {
+         
+                if ( lookupResultBytes.length > 0 ) {
+                    int theQty= lookupResultBytes.length;
+                    rtnBytes= new byte[ theQty ];
+                    for ( int q= 0; q < theQty; q++ )
+                        rtnBytes[ q ]= lookupResultBytes[ q ];
+                }
+            }
+        
+        } finally {
+            MAC_LOCK .unlock();
+        }
+
+        return rtnBytes;
+    }
 }

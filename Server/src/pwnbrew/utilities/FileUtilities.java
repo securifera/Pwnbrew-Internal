@@ -50,7 +50,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
-import pwnbrew.misc.ProgressListener;
 
 /**
  */
@@ -308,7 +307,7 @@ abstract public class FileUtilities {
     public static void moveFile( File srcFile, File dstFile ) throws IOException {
         
         try( FileInputStream aFIS = new FileInputStream(srcFile); 
-             FileOutputStream aFOS = new FileOutputStream(dstFile)) {
+            FileOutputStream aFOS = new FileOutputStream(dstFile)) {
             FileChannel inputChannel = aFIS.getChannel();
             FileChannel outputChannel = aFOS.getChannel();
             inputChannel.transferTo(0, inputChannel.size(), outputChannel);         
@@ -324,7 +323,6 @@ abstract public class FileUtilities {
    * Convenience method for function below.
    *
      * @param aFile
-     * @param theListener
    *
    * @return a {@code String} representing the hash of the file written to disk
    *
@@ -334,8 +332,8 @@ abstract public class FileUtilities {
    * @throws NoSuchAlgorithmException if the hash algorithm cannot be found
    * @throws NullPointerException if the given {@code File} is null
    */
-   public static String createHashedFile( File aFile, ProgressListener theListener ) throws IOException, NoSuchAlgorithmException {
-       return createHashedFile(aFile, theListener, Directories.getFileLibraryDirectory());   
+   public static String createHashedFile( File aFile ) throws IOException, NoSuchAlgorithmException {
+       return createHashedFile(aFile, Directories.getFileLibraryDirectory());   
    }
    
   
@@ -354,20 +352,11 @@ abstract public class FileUtilities {
     * @throws NoSuchAlgorithmException if the hash algorithm cannot be found
     * @throws NullPointerException if the given {@code File} is null
     */
-    private static String createHashedFile( File aFile, ProgressListener theListener, File parentDir ) throws IOException, NoSuchAlgorithmException {
+    private static String createHashedFile( File aFile, File parentDir ) throws IOException, NoSuchAlgorithmException {
 
         int bytesRead = 0;
         byte[] byteBuffer = new byte[Constants.GENERIC_BUFFER_SIZE];
         String theHash = null;
-
-        //Variables for progress updates
-        int sndFileProgress = 0;
-        int tempProgressInt = 0;
-        double tempProgressDouble;
-        long writeByteCounter = 0;
-
-        //Get file size
-        long tempFileSize = aFile.length();
 
         if( FileUtilities.verifyCanRead( aFile ) ) { //If the file can be read...
 
@@ -382,26 +371,8 @@ abstract public class FileUtilities {
                 BufferedOutputStream theBOS = new BufferedOutputStream(theOutStream);
 
                 try {
-
-
+                    
                     while( bytesRead != -1){
-
-                        writeByteCounter += bytesRead;
-
-                        //Calculate the progress
-                        //Check for divide by zero
-                        if(theListener != null){
-                            if(tempFileSize != 0){
-                                tempProgressDouble = (1.0 * writeByteCounter) / (1.0 * tempFileSize );
-                                tempProgressInt = (int)Math.round(tempProgressDouble * 100.0);
-                            }
-
-                            if(tempProgressInt != sndFileProgress){
-                                theListener.progressChanged(0, tempProgressInt);
-                                sndFileProgress = tempProgressInt;
-                            }
-                        }
-
                         theBOS.write(byteBuffer, 0, bytesRead);
                         hash.update(byteBuffer, 0, bytesRead);
                         bytesRead = theBufferedIS.read(byteBuffer);
@@ -441,7 +412,6 @@ abstract public class FileUtilities {
 
         return theHash;
 
-    }/* END createFileContentFromFile( File ) */
+    }
      
-
-}/* END CLASS FileUtilities */
+}

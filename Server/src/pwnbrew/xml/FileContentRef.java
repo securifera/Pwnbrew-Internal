@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
  * Created on June 23, 2013, 8:47 PM
  */
 
-package pwnbrew.xmlBase;
+package pwnbrew.xml;
 
 import pwnbrew.log.LoggableException;
 import java.io.File;
@@ -56,7 +56,7 @@ import pwnbrew.utilities.FileUtilities;
  *  
  */
 @SuppressWarnings("ucd")
-public class FileContentRef extends XmlBase{
+public class FileContentRef extends XmlObject{
 
 
     //The hash of the file being referenced and the name
@@ -68,10 +68,10 @@ public class FileContentRef extends XmlBase{
      * Constructor
      */
     public FileContentRef() {
-       theAttributeMap.put( ATTRIBUTE_FileHash, "");
+       thePropertyMap.put( ATTRIBUTE_FileHash, "");
        
        //Add the attributes
-       theAttributeMap.put( ATTRIBUTE_ModifiedDate,  ""  );
+       thePropertyMap.put( ATTRIBUTE_ModifiedDate,  ""  );
     }    
     
     //===============================================================
@@ -81,7 +81,7 @@ public class FileContentRef extends XmlBase{
     * @return
     */
     public String getFileHash(){
-        return getAttribute(ATTRIBUTE_FileHash);
+        return getProperty(ATTRIBUTE_FileHash);
     }
     
      //===============================================================
@@ -91,7 +91,7 @@ public class FileContentRef extends XmlBase{
      * @param passedString 
      */
     public void setFileHash( String passedString) {
-        setAttribute( ATTRIBUTE_FileHash, passedString);
+        setProperty( ATTRIBUTE_FileHash, passedString);
     }
     
     //===============================================================
@@ -101,7 +101,7 @@ public class FileContentRef extends XmlBase{
      * @return 
      */
     public String getModifiedDate(){
-        return getAttribute( ATTRIBUTE_ModifiedDate );
+        return getProperty( ATTRIBUTE_ModifiedDate );
     }
     
     //===============================================================
@@ -111,7 +111,7 @@ public class FileContentRef extends XmlBase{
      * @param passedDate 
      */
     public void setModifiedDate( String passedDate) {
-        setAttribute( ATTRIBUTE_ModifiedDate, passedDate);
+        setProperty( ATTRIBUTE_ModifiedDate, passedDate);
     }
   
     // ========================================================================
@@ -120,8 +120,8 @@ public class FileContentRef extends XmlBase{
      * @return 
      */
     public String getFilename() {
-        return getAttribute( ATTRIBUTE_Name );
-    }/* END getFilename() */
+        return getProperty(OBJECT_NAME );
+    }
   
     //===============================================================
     /**
@@ -130,7 +130,7 @@ public class FileContentRef extends XmlBase{
      * @param passedName 
      */
     public void setFilename( String passedName) {
-        setAttribute( ATTRIBUTE_Name, passedName);
+        setProperty(OBJECT_NAME, passedName);
     }
 
     // ==========================================================================
@@ -146,7 +146,7 @@ public class FileContentRef extends XmlBase{
         FileContent rtnFileContent = null;
         try {
             
-            rtnFileContent = (FileContent) XmlBaseFactory.instantiateClass( FileContent.class );
+            rtnFileContent = (FileContent) XmlObjectFactory.instantiateClass( FileContent.class );
             rtnFileContent.setName(getName()); //Convert the file's contents to base-64
             rtnFileContent.setId(getId());
             rtnFileContent.setFileHash(getFileHash());

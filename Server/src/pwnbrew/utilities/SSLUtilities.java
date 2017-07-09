@@ -74,7 +74,7 @@ import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Directories;
 import pwnbrew.misc.X509CertificateFactory;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xml.ServerConfig;
 /**
  *
  *  
@@ -769,4 +769,4 @@ final public class SSLUtilities {
         return retStr;
     }
 
-}/* END CLASS SSLUtilities */
+}

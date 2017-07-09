@@ -57,7 +57,7 @@ import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.PortRouter;
 import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xml.ServerConfig;
 
 /**
  *

@@ -67,7 +67,7 @@ import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileAck;
 import pwnbrew.network.control.messages.PushFileFin;
 import pwnbrew.selector.SocketChannelHandler;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xml.ServerConfig;
 
 /**
  *
@@ -122,7 +122,7 @@ public class FileMessageManager extends DataManager {
         
         return theFileManager;
 
-    }/* END instantiate() */
+    }
     
     // ==========================================================================
     /**

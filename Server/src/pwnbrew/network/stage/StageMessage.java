@@ -100,18 +100,7 @@ public class StageMessage extends Message {
     
         //Add the parent
         super.append(rtnBuffer);
-        
-//        byte[] classPathLenArr = new byte[2];
-//        byte[] classPathStrArr = getClass().getCanonicalName().getBytes();
-//        
-//        //Get the length
-//        int classPathLen = classPathStrArr.length;
-//        SocketUtilities.intToByteArray(classPathLenArr, classPathLen);
-//        
-//        //Add the classpath
-//        rtnBuffer.put(classPathLenArr);
-//        rtnBuffer.put(classPathStrArr);
-        
+                
         //Add the options
         for( ControlOption aTlv : optionList){            
             aTlv.append( rtnBuffer );
@@ -275,4 +264,4 @@ public class StageMessage extends Message {
      */
     public boolean setOption( ControlOption tempTlv ){ return false; }
 
-}/* END CLASS StageMessage */
+}

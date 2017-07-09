@@ -301,4 +301,4 @@ public abstract class ControlMessage extends Message {
      */
     public boolean setOption( ControlOption tempTlv ){ return false; }
 
-}/* END CLASS ControlMessage */
+}

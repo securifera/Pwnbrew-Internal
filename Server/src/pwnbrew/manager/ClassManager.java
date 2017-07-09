@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
  * Created on June 26, 2013, 7:31:44 PM
  */
 
-package pwnbrew;
+package pwnbrew.manager;
 
 import java.io.*;
 import java.net.URI;
@@ -63,25 +63,21 @@ import pwnbrew.log.LogLevel;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.Utilities;
-import pwnbrew.xmlBase.JarItem;
-import pwnbrew.xmlBase.JarItemException;
-import pwnbrew.xmlBase.XmlBase;
-import pwnbrew.xmlBase.XmlBaseFactory;
+import pwnbrew.xml.JarItem;
+import pwnbrew.xml.JarItemException;
+import pwnbrew.xml.XmlObject;
+import pwnbrew.xml.XmlObjectFactory;
 
 
 /**
  * 
  */
-final public class Environment {
+final public class ClassManager {
 
-    private static final String NAME_Class = Environment.class.getSimpleName();
-
+    private static final String NAME_Class = ClassManager.class.getSimpleName();
     private static final TreeMap<String, Class<? extends Object>> thePathToClassMap = new TreeMap<>();
-
     private static final String ClassNameDiscriminator = ".class";       
-
-    //private static final String theArch = System.getProperty("os.arch");
-    private static final ProtectionDomain theProtectionDomain = Environment.class.getProtectionDomain();
+    private static final ProtectionDomain theProtectionDomain = ClassManager.class.getProtectionDomain();
     private static final CodeSource theCodeSource = theProtectionDomain.getCodeSource();
     private static final URL theCodeSourceLocationUrl = theCodeSource.getLocation();
     private static URI theCodeSourceLocationUri = null;
@@ -100,7 +96,7 @@ final public class Environment {
     /**
     * Prevents instantiation of {@link Environment} outside of itself.
     */
-    private Environment() {
+    private ClassManager() {
     }
 
     @SuppressWarnings("ucd")
@@ -109,7 +105,6 @@ final public class Environment {
         populateNameToClassMap();
         loadSavedModules();
         loadDefaultModules();
-        return;
     }
     
     // ==========================================================================
@@ -123,7 +118,7 @@ final public class Environment {
         File[] fileArr = jarLibDir.listFiles();
         if( fileArr != null ){
             for( File aFile : fileArr ){
-                XmlBase anObj = XmlBaseFactory.createFromXmlFile(aFile);
+                XmlObject anObj = XmlObjectFactory.createFromXmlFile(aFile);
                 if( anObj instanceof JarItem ){
 
                     //Add the jar to the map
@@ -168,7 +163,7 @@ final public class Environment {
                     int bytesRead = 0;
                     //Create a temp file to write to
                     File aFile = File.createTempFile("tmp", null);
-                    ClassLoader theClassLoader = Environment.class.getClassLoader();
+                    ClassLoader theClassLoader = ClassManager.class.getClassLoader();
                     String jarPath = MODULE_PACKAGE + aModuleUID;
                     //Get the resource
                     try (InputStream anIS = theClassLoader.getResourceAsStream(jarPath)) {
@@ -201,7 +196,7 @@ final public class Environment {
                                 Utilities.addJarItem( aJarItem );
 
                                 //Write the file to disk
-                                String fileHash = FileUtilities.createHashedFile( aFile, null );
+                                String fileHash = FileUtilities.createHashedFile( aFile );
                                 if( fileHash != null ) {
 
                                     //Create a FileContentRef
@@ -431,19 +426,13 @@ final public class Environment {
     public static void addClassToMap( Class aClass ) {
 
         if( aClass != null ){
-            //Determine if the class is an XmlBase
+            //Determine if the class is an XmlObject
             Class parentClass = aClass.getSuperclass();
             if( parentClass != null ){
                 while( parentClass != Object.class){
-                    if( parentClass == XmlBase.class ){
+                    if( parentClass == XmlObject.class ){
                         thePathToClassMap.put( aClass.getSimpleName(), aClass ); //Map the path to the Class
                         break;
-//                    } else if( parentClass == RunnableItemController.class ){
-//                        Utilities.addRunnableController( aClass.getCanonicalName() );
-//                        break;
-//                    } else if( parentClass == OptionsJPanel.class ){
-//                        Utilities.addOptionsJPanel( aClass.getCanonicalName() );
-//                        break;
                     }else {
                         parentClass = parentClass.getSuperclass();
                     }
@@ -451,7 +440,7 @@ final public class Environment {
             }
         }
 
-    }/* END addClassToMap( String ) */
+    }
     
     // ==========================================================================
     /**
@@ -479,7 +468,7 @@ final public class Environment {
         
         addClassToMap(aClass);
 
-    }/* END addClassToMap( String ) */
+    }
 
 
     // ==========================================================================
@@ -506,4 +495,4 @@ final public class Environment {
 
     }
 
-}/* END CLASS Environment */
+}

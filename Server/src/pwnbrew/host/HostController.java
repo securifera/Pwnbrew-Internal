@@ -54,7 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
-import pwnbrew.library.LibraryItemController;
+//import pwnbrew.library.LibraryItemController;
 import pwnbrew.log.Log;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
@@ -62,12 +62,15 @@ import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.control.messages.Sleep;
 import pwnbrew.utilities.FileUtilities;
+import pwnbrew.xml.XmlObject;
 
 /**
  *
  *  
  */
-public final class HostController extends LibraryItemController {
+public final class HostController /*extends LibraryItemController */{
+    
+    private static final String NAME_Class = HostController.class.getSimpleName();
 
     private Host theHost; 
     
@@ -78,7 +81,7 @@ public final class HostController extends LibraryItemController {
      * @param passedHost 
     */
     public HostController( Host passedHost ) {
-        super();
+        //super();
         setObject(passedHost);
     }
      
@@ -87,7 +90,7 @@ public final class HostController extends LibraryItemController {
      *  Returns the scripting language managed by the controller.
      * @return 
      */
-    @Override
+//    @Override
     public Host getObject() {
         return theHost;
     }    
@@ -107,7 +110,7 @@ public final class HostController extends LibraryItemController {
      *  Sets the Object managed by the controller.
      * @param passedObj
      */
-    @Override
+//    @Override
     public void setObject(Object passedObj) {
         if( passedObj != null ){
             theHost = (Host) passedObj;
@@ -120,7 +123,7 @@ public final class HostController extends LibraryItemController {
      * 
      * @return the name of the {@code Host}; null if the {@code Host} is not set
      */
-    @Override 
+//    @Override 
     public String getItemName() {
         
         String rtnString = null;
@@ -137,7 +140,7 @@ public final class HostController extends LibraryItemController {
      *  Returns the object library.
      * @return 
      */
-    @Override
+//    @Override
     public File getObjectLibraryDirectory() {
         
         File objDir;
@@ -168,7 +171,7 @@ public final class HostController extends LibraryItemController {
      * to the user.
      * @return 
      */
-    @Override
+//    @Override
     public String getItemTypeDisplayName() {
         return "Host";
     }
@@ -179,7 +182,6 @@ public final class HostController extends LibraryItemController {
      * 
      * @return 
      */
-//    @Override
     public List<String> getCheckInDateList() {
         return theHost.getCheckInList();
     }
@@ -200,7 +202,6 @@ public final class HostController extends LibraryItemController {
      * @param oldDate
      * @param newDate
      */
-//    @Override
     public void replaceDate(String oldDate, String newDate){
        
         //Replace and refresh
@@ -252,16 +253,21 @@ public final class HostController extends LibraryItemController {
     
      //===================================================================
     /**
-    * Deletes the given {@link XmlBase} from the library.
+    * Deletes the given {@link XmlObject} from the library.
     * 
     * <p>
-    * If the given {@code XmlBase} is null, this method does nothing.
+    * If the given {@code XmlObject} is null, this method does nothing.
     *
     */
-    @Override
+//    @Override
     public void deleteFromLibrary() {
 
-        super.deleteFromLibrary();
+        Object theObj = getObject();
+        if( theObj != null ) {        
+            //Delete the object's file
+            XmlObject theXB = (XmlObject)theObj;
+            theXB.deleteSelfFromDirectory( getObjectLibraryDirectory() );
+        }
         try {
             FileUtilities.deleteDir( getObjectLibraryDirectory() );
         } catch (IOException ex) {
@@ -292,19 +298,17 @@ public final class HostController extends LibraryItemController {
     
      // ==========================================================================
     /**
-     * Saves the given {@link XmlBase} to the Object Library directory.
+     * Saves the given {@link XmlObject} to the Object Library directory.
      * 
     */
-    @Override
+//    @Override
     public void saveToDisk() {
         
-        try {
-            
+        try {            
             String clientIdStr = getId();
            
             //Make sure it save correctly
             theHost.writeSelfToDisk(getObjectLibraryDirectory(), clientIdStr);
-            setIsDirty( false );            
             
         } catch (IOException ex) {
             Log.log(Level.WARNING, NAME_Class, "saveToDisk()", ex.getMessage(), ex );          
@@ -340,7 +344,6 @@ public final class HostController extends LibraryItemController {
         } catch( UnsupportedEncodingException ex ){
             Log.log(Level.WARNING, NAME_Class, "actionPerformed()", ex.getMessage(), ex );
         }
-        
         
     }
 

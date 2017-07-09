@@ -86,6 +86,7 @@ final public class SocketUtilities {
                     aCommand.run();
 
                     theHostname = aCommand.getStdOut().trim().toLowerCase();
+                    System.out.println("Hostname: " + theHostname);
 
                 }
             }
@@ -276,6 +277,5 @@ final public class SocketUtilities {
 
         return data;
     }
-    
   
-}/* END CLASS SocketUtilities */
+}

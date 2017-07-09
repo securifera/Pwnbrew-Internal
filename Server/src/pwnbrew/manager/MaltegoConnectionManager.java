@@ -63,17 +63,8 @@ public class MaltegoConnectionManager extends IncomingConnectionManager {
      */
     @Override
     public boolean setHandler(int channelId, SocketChannelHandler theHandler) {        
-         
-//        boolean retVal;
-        
+
         channelId = COMM_CHANNEL_ID;
-//        retVal = verifyHandlerId(channelId);
-//        if( retVal ){
-//            synchronized(channelIdHandlerMap){
-//                channelIdHandlerMap.put(channelId, theHandler);
-//            }
-//        }
-        
         return super.setHandler(channelId, theHandler);
     }
     
@@ -85,52 +76,9 @@ public class MaltegoConnectionManager extends IncomingConnectionManager {
      */
     @Override
     public SocketChannelHandler removeHandler( int channelId ) {
-        
-//        SocketChannelHandler aSCH = null;
-//        synchronized(channelIdHandlerMap){
-//            aSCH = channelIdHandlerMap.remove(channelId);
-//            if( channelId == COMM_CHANNEL_ID ){
-//                //Shutdown the rest if the comm channel is being removed them clear
-//                for( SocketChannelHandler aHandler : channelIdHandlerMap.values() ){
-//                    aHandler.shutdown();
-//                }
-//                channelIdHandlerMap.clear();
-//            }                           
-//        }
         channelId = COMM_CHANNEL_ID;
         return super.removeHandler(channelId);
     }
-
-//    //==========================================================================
-//    /**
-//     * 
-//     * @param channelId
-//     * @return 
-//     */
-//    private boolean verifyHandlerId(int channelId) {
-//        
-//        boolean retVal = true;
-//        synchronized(channelIdHandlerMap){
-//            
-//            //Check if the channel id is staging
-//            if( channelId == STAGE_CHANNEL_ID){
-//                if( !channelIdHandlerMap.isEmpty())
-//                    //Make sure this is the first connection
-//                    retVal = false;     
-//                
-//            } else {
-//                SocketChannelHandler commChan = channelIdHandlerMap.get(COMM_CHANNEL_ID);
-//                //Make sure the comm channel is defined in the right order
-//                if( (commChan == null && (channelId != COMM_CHANNEL_ID )) || 
-//                    commChan != null && channelId == COMM_CHANNEL_ID )
-//                    retVal = false;
-//            }
-//        }
-//        
-//        return retVal;
-//        
-//    }
-
     
     //===============================================================
     /**
@@ -141,12 +89,6 @@ public class MaltegoConnectionManager extends IncomingConnectionManager {
     */  
     @Override
     public SocketChannelHandler getSocketChannelHandler( Integer channelId ){
-        
-//        //Get the Address
-//        SocketChannelHandler theSCH;     
-//        synchronized(channelIdHandlerMap){
-//            theSCH = channelIdHandlerMap.get( channelId );            
-//        }
         channelId = COMM_CHANNEL_ID;
         return super.getSocketChannelHandler(channelId);
     }

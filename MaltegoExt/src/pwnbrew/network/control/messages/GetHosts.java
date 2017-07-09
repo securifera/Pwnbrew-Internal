@@ -45,7 +45,6 @@ import java.util.logging.Level;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.HostFactory;
-import pwnbrew.library.LibraryItemController;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
@@ -112,7 +111,7 @@ public final class GetHosts extends MaltegoMessage{ // NO_UCD (use default)
         
         ServerManager aSM = (ServerManager) passedManager;
         //Get the host controllers 
-        List<LibraryItemController> theHostControllers = new ArrayList<>();
+        List<HostController> theHostControllers = new ArrayList<>();
         if( hostId == 0 ){
 
             //Add everything
@@ -143,38 +142,35 @@ public final class GetHosts extends MaltegoMessage{ // NO_UCD (use default)
 
             //Add each host to the list
             for( String anId : internalHosts ){
-                LibraryItemController aController = aSM.getHostController( anId );
+                HostController aController = aSM.getHostController( anId );
                 if( aController != null)
                     theHostControllers.add(aController);
             }
         }                
 
         //Create a hsot msg for each controller
-        for( LibraryItemController aController : theHostControllers ){
-            if( aController instanceof HostController ){
+        for( HostController aHostController : theHostControllers ){
+            
+            if( !aHostController.isLocalHost() ){
 
-                HostController aHostController = (HostController)aController;
-                if( !aHostController.isLocalHost() ){
+                Host aHost = aHostController.getHost();
+                try {
 
-                    Host aHost = aHostController.getHost();
-                    try {
+                    HostMsg aHostMsg = new HostMsg( getSrcHostId(), aHost.getHostname(), 
+                        aHost.getOsName(), aHost.getJvmArch(), Integer.parseInt(aHost.getId()), aHost.isConnected(),
+                        !aHost.getCheckInList().isEmpty() );
 
-                        HostMsg aHostMsg = new HostMsg( getSrcHostId(), aHost.getHostname(), 
-                            aHost.getOsName(), aHost.getJvmArch(), Integer.parseInt(aHost.getId()), aHost.isConnected(),
-                            !aHost.getCheckInList().isEmpty() );
+                    String relayPort = aHost.getRelayPort();
+                    if( !relayPort.isEmpty() )
+                        aHostMsg.addRelayPort( Integer.parseInt(relayPort));
 
-                        String relayPort = aHost.getRelayPort();
-                        if( !relayPort.isEmpty() )
-                            aHostMsg.addRelayPort( Integer.parseInt(relayPort));
-
-                        DataManager.send( passedManager, aHostMsg);
-                    } catch ( UnsupportedEncodingException ex) {
-                        Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
-                    }
-
+                    DataManager.send( passedManager, aHostMsg);
+                } catch ( UnsupportedEncodingException ex) {
+                    Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
                 }
 
             }
+            
         }           
             
     }

@@ -38,21 +38,30 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
- * SSLTaskListener.java
+ * XmlObjectCreationException.java
  *
- * Created on June 7, 2013, 11:27:27 PM
+ * Created on July 20, 2013, 3:30:42 PM
  */
 
-package pwnbrew.network;
+package pwnbrew.exception;
 
-import java.nio.channels.SelectionKey;
 
 /**
- *
- *  
+ * 
  */
-public interface SSLTaskListener { // NO_UCD (use default)
+public class XmlObjectCreationException extends RuntimeException {
 
-    public void taskFinished(SelectionKey passedKey);
+  
+
+
+    // ==========================================================================
+    /**
+    * Creates a new instance of {@link XmlObjectCreationException}.
+    *
+    * @param message
+    */
+    public XmlObjectCreationException( String message ) {
+        super( message );
+    }
 
 }

@@ -53,7 +53,7 @@ import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SSLUtilities;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xml.ServerConfig;
 
 /**
  *

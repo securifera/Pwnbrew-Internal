@@ -45,14 +45,14 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network;
 
-import pwnbrew.xmlBase.XmlBase;
+import pwnbrew.xml.XmlObject;
 
 
 /**
  *
  *  
  */
-public class Nic extends XmlBase{
+public class Nic extends XmlObject{
 
    private static final String ATTRIBUTE_MAC_ADDRESS = "MacAddress";
    private static final String ATTRIBUTE_IP_ADDRESS = "IpAddress";
@@ -64,9 +64,9 @@ public class Nic extends XmlBase{
    * Creates a new instance of Nic
    */
    public Nic() {
-      theAttributeMap.put( ATTRIBUTE_MAC_ADDRESS, "");
-      theAttributeMap.put( ATTRIBUTE_IP_ADDRESS, "");
-      theAttributeMap.put( ATTRIBUTE_SUBNET_MASK, "");
+      thePropertyMap.put( ATTRIBUTE_MAC_ADDRESS, "");
+      thePropertyMap.put( ATTRIBUTE_IP_ADDRESS, "");
+      thePropertyMap.put( ATTRIBUTE_SUBNET_MASK, "");
    }
 
    // ==========================================================================
@@ -78,9 +78,9 @@ public class Nic extends XmlBase{
    */
    public Nic( String macAddress, String passedInet, String subnetMask ) {
       
-      theAttributeMap.put( ATTRIBUTE_MAC_ADDRESS, macAddress);
-      theAttributeMap.put( ATTRIBUTE_IP_ADDRESS,  passedInet );
-      theAttributeMap.put( ATTRIBUTE_SUBNET_MASK,  subnetMask );
+      thePropertyMap.put( ATTRIBUTE_MAC_ADDRESS, macAddress);
+      thePropertyMap.put( ATTRIBUTE_IP_ADDRESS,  passedInet );
+      thePropertyMap.put( ATTRIBUTE_SUBNET_MASK,  subnetMask );
  
    }
 
@@ -91,7 +91,7 @@ public class Nic extends XmlBase{
     * @return
    */
    public String getMacAddress(){
-      return getAttribute( ATTRIBUTE_MAC_ADDRESS );
+      return getProperty( ATTRIBUTE_MAC_ADDRESS );
    }
    
    //===============================================================
@@ -101,7 +101,7 @@ public class Nic extends XmlBase{
     * @return
    */
    public String getIpAddress(){
-      return getAttribute( ATTRIBUTE_IP_ADDRESS );
+      return getProperty( ATTRIBUTE_IP_ADDRESS );
    }
    
     //===============================================================
@@ -111,7 +111,7 @@ public class Nic extends XmlBase{
     * @return
    */
    public String getSubnetMask(){
-      return getAttribute( ATTRIBUTE_SUBNET_MASK );
+      return getProperty( ATTRIBUTE_SUBNET_MASK );
    }
 
    //===============================================================

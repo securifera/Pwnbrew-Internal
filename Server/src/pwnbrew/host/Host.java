@@ -45,14 +45,12 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.host;
 
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import pwnbrew.utilities.Utilities;
-import pwnbrew.xmlBase.AttributeCollection;
-import pwnbrew.xmlBase.Node;
-import pwnbrew.xmlBase.XmlBase;
+import pwnbrew.xml.AttributeCollection;
+import pwnbrew.xml.Node;
+import pwnbrew.xml.XmlObject;
 
 /**
  *
@@ -67,15 +65,15 @@ public class Host extends Node {
     private boolean connected = false;
     
     private List<Session> sessionList = new LinkedList<>(); //A list of sessions
-    private static final String ATTRIBUTE_CheckInDates = "CheckInDates";
-    private static final String ATTRIBUTE_ConnectedHostIds = "ConnectedHostIds";
-    private static final String ATTRIBUTE_AutoSleep = "autoSleep";
+    private static final String CHECK_IN_DATES = "CheckInDates";
+    private static final String CONNECTED_HOST_IDS = "ConnectedHostIds";
+    private static final String AUTO_SLEEP = "autoSleep";
   
-    private static final String ATTRIBUTE_Os_Name = "osName";
-    private static final String ATTRIBUTE_JVM_Arch = "jvmArch";
-    private static final String ATTRIBUTE_Relay_Port = "relayPort";
-    private static final String ATTRIBUTE_JAR_Version = "jarVersion";
-    private static final String ATTRIBUTE_JRE_Version = "jreVersion";
+    private static final String OS_NAME = "osName";
+    private static final String JVM_ARCH = "jvmArch";
+    private static final String RELAY_PORT = "relayPort";
+    private static final String JAR_VERSION = "jarVersion";
+    private static final String JRE_VERSION = "jreVersion";
     
     // ========================================================================
     /**
@@ -84,29 +82,29 @@ public class Host extends Node {
     public Host() {
                 
          //Add the attributes
-        theAttributeMap.put( ATTRIBUTE_Os_Name,  ""  );
+        thePropertyMap.put( OS_NAME,  ""  );
         
          //Add the attributes
-        theAttributeMap.put( ATTRIBUTE_JVM_Arch,  ""  );
+        thePropertyMap.put( JVM_ARCH,  ""  );
         
         //Add the attributes
-        theAttributeMap.put( ATTRIBUTE_JAR_Version,  ""  );
+        thePropertyMap.put( JAR_VERSION,  ""  );
         
         //Add the attributes
-        theAttributeMap.put( ATTRIBUTE_JRE_Version,  ""  );
+        thePropertyMap.put( JRE_VERSION,  ""  );
         
          //Add the attributes
-        theAttributeMap.put( ATTRIBUTE_Relay_Port,  ""  );
+        thePropertyMap.put( RELAY_PORT,  ""  );
               
         //Add the check in date array
-        theAttributeCollectionMap.put(ATTRIBUTE_CheckInDates, new AttributeCollection(ATTRIBUTE_CheckInDates, new String[0]));
+        thePropertyCollectionMap.put(CHECK_IN_DATES, new AttributeCollection(CHECK_IN_DATES, new String[0]));
         
-        theAttributeCollectionMap.put(ATTRIBUTE_ConnectedHostIds, new AttributeCollection(ATTRIBUTE_ConnectedHostIds, new String[0]));
+        thePropertyCollectionMap.put(CONNECTED_HOST_IDS, new AttributeCollection(CONNECTED_HOST_IDS, new String[0]));
 
         //Add the auto sleep flag
-        theAttributeMap.put( ATTRIBUTE_AutoSleep, "FALSE"  );
+        thePropertyMap.put( AUTO_SLEEP, "FALSE"  );
         
-    }/* END CONSTRUCTOR() */
+    }
     
     
     //===============================================================
@@ -122,30 +120,28 @@ public class Host extends Node {
     
     // ==========================================================================
     /**
-    * Adds and updates local support objects, determining the appropriate manner
-    * in which to do so according to the class of the <code>passedGRB</code> argument.
     *
-    * @param xmlBase the support object to be added/updated
+    * @param passedObj the support object to be added/updated
     */
     @Override
-    public void addUpdateComponent( XmlBase xmlBase ) {
+    public void addChildObject( XmlObject passedObj ) {
 
-        super.addUpdateComponent(xmlBase);
-        if( xmlBase instanceof Session ) { //If the XmlBase is a session...
-            sessionList.add( (Session)xmlBase );
-        }
+        super.addChildObject(passedObj);
+        if( passedObj instanceof Session )
+            sessionList.add( (Session)passedObj );
+        
     }
     
       // ==========================================================================
     /**
-    *  Removes a supporting object from the XmlBase
+    *  Removes a supporting object from the XmlObject
     *
     *  @param passedGRB  the object to be removed
     *
     *  @return true if the object was successfully removed
     */
     @Override
-    public boolean removeComponent( XmlBase passedGRB ) {
+    public boolean removeChildObject( XmlObject passedGRB ) {
         
         boolean objectRemoved = false;
         if( passedGRB instanceof Session ) { //If the object is a Parameter...
@@ -154,7 +150,7 @@ public class Host extends Node {
                 objectRemoved = true; //...update the return value
             }
         } else {
-            objectRemoved = super.removeComponent(passedGRB);
+            objectRemoved = super.removeChildObject(passedGRB);
         }
 
         return objectRemoved;
@@ -165,15 +161,15 @@ public class Host extends Node {
     * Returns a list of this object's subcomponents that should be added to its
     * XML data.
     * <p>
-    * NOTE: This overrides a method in {@link XmlBase}.
+    * NOTE: This overrides a method in {@link XmlObject}.
     * 
-    * @return an {@link ArrayList} of the {@link XmlBase} components for this
+    * @return an {@link ArrayList} of the {@link XmlObject} components for this
     * object
     */
     @Override
-    public List<XmlBase> getXmlComponents() {
+    public List<XmlObject> getXmlObjects() {
 
-        List<XmlBase> rtnList = super.getXmlComponents();
+        List<XmlObject> rtnList = super.getXmlObjects();
         
         //Add the sessions
         rtnList.addAll( sessionList );
@@ -190,7 +186,7 @@ public class Host extends Node {
     public void addSession( Session aSession ) {
         sessionList.add(aSession);
         
-    }/* END addSession() */
+    }
     
     // ==========================================================================
     /**
@@ -200,8 +196,7 @@ public class Host extends Node {
     */
     public List<Session> getSessionList() {
         return new ArrayList<>( sessionList );
-    }/* END getSessionList() */
-    
+    }
     
     // ==========================================================================
     /**
@@ -210,9 +205,9 @@ public class Host extends Node {
     */
     public void setSessionList( List<Session> passedList ) {
         sessionList = new ArrayList<>( passedList );
-    }/* END setSessionList() */
+    }
     
-      // ==========================================================================
+    // ==========================================================================
     /**
      * Returns the check-in list.
      *
@@ -222,13 +217,13 @@ public class Host extends Node {
         
         List<String> theCheckInList = null;
         
-        AttributeCollection theCollection = theAttributeCollectionMap.get( ATTRIBUTE_CheckInDates );
+        AttributeCollection theCollection = thePropertyCollectionMap.get( CHECK_IN_DATES );
         if(theCollection != null){
            theCheckInList = theCollection.getCollection();
         }
         return theCheckInList;
         
-    }/* END getCheckIn() */
+    }
     
      // ==========================================================================
     /**
@@ -238,12 +233,12 @@ public class Host extends Node {
      */
     public void setCheckInList( List<String> passedList ) {
         
-        AttributeCollection theCollection = theAttributeCollectionMap.get( ATTRIBUTE_CheckInDates );
+        AttributeCollection theCollection = thePropertyCollectionMap.get( CHECK_IN_DATES );
         if(theCollection != null){
             theCollection.setCollection( passedList );
         }
         
-    }/* END setCheckInList() */
+    }
     
     // ========================================================================
     /**
@@ -256,7 +251,7 @@ public class Host extends Node {
         
         List<String> theCheckInList = getCheckInList();
         if( theCheckInList != null && !theCheckInList.contains( passedDateStr )){
-            AttributeCollection theCollection = theAttributeCollectionMap.get( ATTRIBUTE_CheckInDates );
+            AttributeCollection theCollection = thePropertyCollectionMap.get( CHECK_IN_DATES );
             theCollection.addToCollection( passedDateStr );
         }
     }
@@ -269,7 +264,7 @@ public class Host extends Node {
      * @param passedDateStr 
      */
     public void removeCheckInTime( String passedDateStr ){
-        AttributeCollection theCollection = theAttributeCollectionMap.get( ATTRIBUTE_CheckInDates );
+        AttributeCollection theCollection = thePropertyCollectionMap.get( CHECK_IN_DATES );
         theCollection.removeFromCollection(passedDateStr);
     }
     
@@ -283,7 +278,7 @@ public class Host extends Node {
         
         List<String> theCheckInList = null;
         
-        AttributeCollection theCollection = theAttributeCollectionMap.get( ATTRIBUTE_ConnectedHostIds );
+        AttributeCollection theCollection = thePropertyCollectionMap.get( CONNECTED_HOST_IDS );
         if(theCollection != null)
            theCheckInList = theCollection.getCollection();
         
@@ -299,7 +294,7 @@ public class Host extends Node {
      */
     public void setConnectedHostIdList( List<String> passedList ) {
         
-        AttributeCollection theCollection = theAttributeCollectionMap.get( ATTRIBUTE_ConnectedHostIds );
+        AttributeCollection theCollection = thePropertyCollectionMap.get( CONNECTED_HOST_IDS );
         if(theCollection != null)
             theCollection.setCollection( passedList );        
         
@@ -315,7 +310,7 @@ public class Host extends Node {
         
         List<String> hostIdList = getConnectedHostIdList();
         if( hostIdList != null && !hostIdList.contains( passedDateStr )){
-            AttributeCollection theCollection = theAttributeCollectionMap.get( ATTRIBUTE_ConnectedHostIds );
+            AttributeCollection theCollection = thePropertyCollectionMap.get( CONNECTED_HOST_IDS );
             theCollection.addToCollection( passedDateStr );
         }
     }
@@ -327,7 +322,7 @@ public class Host extends Node {
      * @param passedDateStr 
      */
     public void removeConnectedHostId( String passedDateStr ){
-        AttributeCollection theCollection = theAttributeCollectionMap.get( ATTRIBUTE_ConnectedHostIds );
+        AttributeCollection theCollection = thePropertyCollectionMap.get( CONNECTED_HOST_IDS );
         theCollection.removeFromCollection(passedDateStr);
     }
     
@@ -339,8 +334,7 @@ public class Host extends Node {
      */
     public String getNextCheckInTime(){
         
-        AttributeCollection theCollection = theAttributeCollectionMap.get( ATTRIBUTE_CheckInDates );
-        
+        AttributeCollection theCollection = thePropertyCollectionMap.get( CHECK_IN_DATES );        
         return theCollection.getStringAt( 0 );
     }
 
@@ -404,8 +398,6 @@ public class Host extends Node {
             virtual = ((Host)prevNode).isVirtual();
         }
     }
-    
-    
 
     //===============================================================
     /**
@@ -434,7 +426,7 @@ public class Host extends Node {
      * @return 
      */
     public String getOsName(){
-        return getAttribute( ATTRIBUTE_Os_Name );
+        return getProperty( OS_NAME );
     }
     
     //===============================================================
@@ -444,7 +436,7 @@ public class Host extends Node {
      * @param passedDate 
      */
     public void setOsName( String passedDate) {
-        setAttribute( ATTRIBUTE_Os_Name, passedDate);
+        setProperty( OS_NAME, passedDate);
     }
     
     //===============================================================
@@ -454,7 +446,7 @@ public class Host extends Node {
      * @return 
      */
     public String getJvmArch(){
-        return getAttribute( ATTRIBUTE_JVM_Arch );
+        return getProperty( JVM_ARCH );
     }
     
     //===============================================================
@@ -464,7 +456,7 @@ public class Host extends Node {
      * @param passedArch 
      */
     public void setJvmArch( String passedArch ) {
-        setAttribute( ATTRIBUTE_JVM_Arch, passedArch);
+        setProperty( JVM_ARCH, passedArch);
     }
     
     //===============================================================
@@ -474,7 +466,7 @@ public class Host extends Node {
      * @return 
      */
     public String getJarVersion(){
-        return getAttribute( ATTRIBUTE_JAR_Version );
+        return getProperty( JAR_VERSION );
     }
     
     //===============================================================
@@ -484,7 +476,7 @@ public class Host extends Node {
      * @param passedString 
      */
     public void setJarVersion( String passedString ) {
-        setAttribute( ATTRIBUTE_JAR_Version, passedString);
+        setProperty( JAR_VERSION, passedString);
     }
     
      //===============================================================
@@ -494,7 +486,7 @@ public class Host extends Node {
      * @return 
      */
     public String getJreVersion(){
-        return getAttribute( ATTRIBUTE_JRE_Version );
+        return getProperty( JRE_VERSION );
     }
     
     //===============================================================
@@ -504,7 +496,7 @@ public class Host extends Node {
      * @param passedString 
      */
     public void setJreVersion( String passedString ) {
-        setAttribute( ATTRIBUTE_JRE_Version, passedString);
+        setProperty( JRE_VERSION, passedString);
     }
     
       //===============================================================
@@ -514,7 +506,7 @@ public class Host extends Node {
      * @return 
      */
     public String getRelayPort(){
-        return getAttribute( ATTRIBUTE_Relay_Port );
+        return getProperty( RELAY_PORT );
     }
     
     //===============================================================
@@ -524,7 +516,7 @@ public class Host extends Node {
      * @param passedPort 
      */
     public void setRelayPort( String passedPort ) {
-        setAttribute( ATTRIBUTE_Relay_Port, passedPort);
+        setProperty( RELAY_PORT, passedPort);
     }
     
     //===================================================================
@@ -535,7 +527,7 @@ public class Host extends Node {
      */
     public boolean getAutoSleepFlag(){
 
-        String theVal = theAttributeMap.get(ATTRIBUTE_AutoSleep);
+        String theVal = thePropertyMap.get(AUTO_SLEEP);
         if(theVal.equals("TRUE")){
             return true;
         }
@@ -555,7 +547,7 @@ public class Host extends Node {
             autoSleepFlag = "TRUE";
         }
 
-        theAttributeMap.put(ATTRIBUTE_AutoSleep, autoSleepFlag);
+        thePropertyMap.put(AUTO_SLEEP, autoSleepFlag);
     }
 
     //===================================================================

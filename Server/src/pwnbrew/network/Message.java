@@ -49,7 +49,7 @@ import java.nio.ByteBuffer;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xml.ServerConfig;
 
 /**
  *
@@ -77,9 +77,12 @@ public abstract class Message {
     private final byte[] destHostId = new byte[4];
     protected byte[] channelId = new byte[4];
  
-    //Class name
-//    private static final String NAME_Class = Message.class.getSimpleName();
-
+    //========================================================================
+    /**
+     * 
+     * @param passedType
+     * @param destClientId 
+     */
     public Message(byte passedType, int destClientId ) {
         
         type = passedType;
@@ -100,6 +103,12 @@ public abstract class Message {
         length[3] = 11;
     }
     
+    //=========================================================================
+    /**
+     * 
+     * @param passedType
+     * @param passedId 
+     */
     public Message(byte passedType, byte[] passedId ) {
         
         type = passedType;
@@ -274,4 +283,4 @@ public abstract class Message {
         return msgBytes;
     }
     
-}/* END CLASS Message */
+}

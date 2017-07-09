@@ -53,7 +53,7 @@ import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.messages.RemoteException;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xml.ServerConfig;
 
 /**
  *

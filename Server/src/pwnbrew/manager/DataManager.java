@@ -69,7 +69,7 @@ import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.stage.StagingMessageManager;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xml.ServerConfig;
 /**
  *
  *  

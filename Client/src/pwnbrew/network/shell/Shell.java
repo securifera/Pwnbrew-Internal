@@ -57,7 +57,6 @@ import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.ManagedRunnable;
-import pwnbrew.output.StreamReader;
 import pwnbrew.output.StreamReaderListener;
 import pwnbrew.output.StreamRecorder;
 import pwnbrew.network.shell.messages.ProcessMessage;

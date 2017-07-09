@@ -47,8 +47,8 @@ import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
-import pwnbrew.xmlBase.JarItem;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xml.JarItem;
+import pwnbrew.xml.ServerConfig;
 
 /**
  *

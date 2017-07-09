@@ -48,7 +48,6 @@ import pwnbrew.Server;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.Session;
-import pwnbrew.library.LibraryItemController;
 import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
@@ -58,8 +57,8 @@ import pwnbrew.network.control.messages.RelayStart;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.Utilities;
-import pwnbrew.xmlBase.ServerConfig;
-import pwnbrew.xmlBase.XmlBase;
+import pwnbrew.xml.ServerConfig;
+import pwnbrew.xml.XmlObject;
 
 /**
  *
@@ -86,7 +85,7 @@ public class ServerManager extends PortManager {
         theServer = passedServer;
             
         //Create list to hold of the separate controllers
-        Map<Host, List<XmlBase>> retMap = Utilities.rebuildLibrary(); //Get the Scripts in the library
+        Map<Host, List<XmlObject>> retMap = Utilities.rebuildLibrary(); //Get the Scripts in the library
         Set<Host> hostSet = retMap.keySet();
         synchronized(theHostControllerMap){
             for( Host aHost : hostSet ){
@@ -256,9 +255,9 @@ public class ServerManager extends PortManager {
      * 
      * @return 
      */
-    public List<LibraryItemController> getHostControllers() {
+    public List<HostController> getHostControllers() {
         
-        List<LibraryItemController> aList = new ArrayList<>();
+        List<HostController> aList = new ArrayList<>();
         synchronized(theHostControllerMap){
             aList.addAll( theHostControllerMap.values() );
         }
@@ -448,6 +447,5 @@ public class ServerManager extends PortManager {
        
         passedHost.setConnected( false );
     }
-    
 
 }

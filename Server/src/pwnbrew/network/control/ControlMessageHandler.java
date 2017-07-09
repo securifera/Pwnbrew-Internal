@@ -213,5 +213,4 @@ public class ControlMessageHandler extends DataHandler {
         return retVal;
     }
 
-
-}/* END CLASS ControlMessageHandler */
+}

@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
 * Created on July 20, 2013, 6:17:21 PM
 */
 
-package pwnbrew.xmlBase;
+package pwnbrew.xml;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -66,7 +66,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
-public class ServerConfig extends XmlBase {
+public class ServerConfig extends XmlObject {
 
     private static final String ATTRIBUTE_HostId = "hostId";
     
@@ -89,10 +89,10 @@ public class ServerConfig extends XmlBase {
      */
     public ServerConfig() {
        // Extend the object's structure
-       theAttributeMap.put( ATTRIBUTE_HostId, ""  );
-       theAttributeMap.put( ATTRIBUTE_StorePass, "password" );
-       theAttributeMap.put( ATTRIBUTE_CertAlias, "" );
-       theAttributeMap.put( ATTRIBUTE_CommPort, Integer.toString(Constants.COMM_PORT) );
+       thePropertyMap.put( ATTRIBUTE_HostId, ""  );
+       thePropertyMap.put( ATTRIBUTE_StorePass, "password" );
+       thePropertyMap.put( ATTRIBUTE_CertAlias, "" );
+       thePropertyMap.put( ATTRIBUTE_CommPort, Integer.toString(Constants.COMM_PORT) );
 
     }
 
@@ -102,7 +102,7 @@ public class ServerConfig extends XmlBase {
      * @return 
     */
     public String getHostId(){
-       return theAttributeMap.get(ATTRIBUTE_HostId);
+       return thePropertyMap.get(ATTRIBUTE_HostId);
     }
 
 
@@ -112,7 +112,7 @@ public class ServerConfig extends XmlBase {
      * @return 
     */
     public String getAlias(){
-       return theAttributeMap.get(ATTRIBUTE_CertAlias);
+       return thePropertyMap.get(ATTRIBUTE_CertAlias);
     }
 
      //==========================================================================
@@ -121,7 +121,7 @@ public class ServerConfig extends XmlBase {
      * @param passedAlias
     */
     public void setAlias(String passedAlias){
-       theAttributeMap.put(ATTRIBUTE_CertAlias, passedAlias);
+       thePropertyMap.put(ATTRIBUTE_CertAlias, passedAlias);
     }
 
      //==========================================================================
@@ -133,7 +133,7 @@ public class ServerConfig extends XmlBase {
 
        //Return the default if the value is empty
        int retPort = Constants.COMM_PORT;
-       String thePort = theAttributeMap.get(ATTRIBUTE_CommPort);
+       String thePort = thePropertyMap.get(ATTRIBUTE_CommPort);
        if(!thePort.isEmpty()){
           retPort = Integer.valueOf( thePort );
        }
@@ -146,7 +146,7 @@ public class ServerConfig extends XmlBase {
      * @param passedPort
     */
     public void setSocketPort(String passedPort){
-       theAttributeMap.put(ATTRIBUTE_CommPort, passedPort);
+       thePropertyMap.put(ATTRIBUTE_CommPort, passedPort);
     }
 
      //==========================================================================
@@ -155,7 +155,7 @@ public class ServerConfig extends XmlBase {
      * @return 
     */
     public String getKeyStorePass(){
-        return theAttributeMap.get(ATTRIBUTE_StorePass);
+        return thePropertyMap.get(ATTRIBUTE_StorePass);
     }
 
      //==========================================================================
@@ -168,7 +168,7 @@ public class ServerConfig extends XmlBase {
 
         //Make sure the passed key pass is not empty
         if(passedKey != null )
-            theAttributeMap.put(ATTRIBUTE_StorePass, passedKey);
+            thePropertyMap.put(ATTRIBUTE_StorePass, passedKey);
     }
     
      //==========================================================================
@@ -178,7 +178,7 @@ public class ServerConfig extends XmlBase {
     */
     public void setHostId(String hostIdStr) {
         if(hostIdStr != null){
-           theAttributeMap.put(ATTRIBUTE_HostId, hostIdStr);
+           thePropertyMap.put(ATTRIBUTE_HostId, hostIdStr);
         }  
     }
     
@@ -192,7 +192,7 @@ public class ServerConfig extends XmlBase {
         try {
             
             byte[] theConfBytes = getXml().getBytes("US-ASCII");
-            String rootPathStr = Directories.getRoot();
+            String rootPathStr = Directories.getHomeDir();
             File configFile = new File(rootPathStr, theConfigFileName );
             
             FileOutputStream theOutStream = new FileOutputStream(configFile);
@@ -236,7 +236,7 @@ public class ServerConfig extends XmlBase {
         ServerConfig localConf = null;
         try {
 
-            String rootPathStr = Directories.getRoot();
+            String rootPathStr = Directories.getHomeDir();
             File configFile = new File(rootPathStr, theConfigFileName );
             if( configFile.exists() ){
          
@@ -273,7 +273,7 @@ public class ServerConfig extends XmlBase {
                         byte[] theConfBytes = theBOS.toByteArray();
 
                         //Get the object
-                        XmlBase anXB = XmlBaseFactory.createFromXml(new String(theConfBytes, "US-ASCII"));
+                        XmlObject anXB = XmlObjectFactory.createFromXml(new String(theConfBytes, "US-ASCII"));
                         if(anXB instanceof ServerConfig){
                             localConf = (ServerConfig)anXB;
                         }                    

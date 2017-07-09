@@ -52,7 +52,7 @@
 //import pwnbrew.misc.Constants;
 //import pwnbrew.network.ControlOption;
 //import pwnbrew.tasks.RemoteTask;
-//import pwnbrew.xmlBase.FileContentRef;
+//import pwnbrew.XmlObject.FileContentRef;
 //
 ///**
 // *

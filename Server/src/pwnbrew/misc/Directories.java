@@ -63,45 +63,31 @@ final public class Directories {
     private static final String DEFAULT_Root_Unix = "/opt";
     private static String PATH_Root;
 
-    // <root>/...
     private static final String DEFAULT_NAME_Home = "Pwnbrew";
     private static final String NAME_Home = DEFAULT_NAME_Home;
-    private static String PATH_Home; // <root>/<home>
+    private static String PATH_Home;    
+    private static String PATH_Data;    
+    private static String PATH_Log;
     
-    // <root>/<home>/...
-//    private static String PATH_Bin; // <root>/<home>/bin
-    private static String PATH_Data; // <root>/<home>/data
-//    private static String PATH_Doc; // <root>/<home>/doc    
-    private static String PATH_Log; // <root>/<home>/log
-      
-    // <root>/<home>/data/...
-    private static String PATH_FileLibrary; // <root>/<home>/data/filelib
-    private static String PATH_JarLib; // <root>/<home>/data/jarlib
-    private static String PATH_ObjectLibrary; // <root>/<home>/data/objlib
-    private static String PATH_LocalObjectLibrary; // <root>/<home>/data/objlib/local
-    private static String PATH_Tasks; // <root>/<home>/data/taskarc
-    
-    
-    // <root>/<home>/data/taskarc/...
-//    private static String PATH_LocalTasks; // <root>/<home>/data/taskarc/local
-    private static String PATH_RemoteTasks; // <root>/<home>/data/taskarc/local
+    private static String PATH_FileLibrary; 
+    private static String PATH_JarLib; 
+    private static String PATH_ObjectLibrary;
+    private static String PATH_LocalObjectLibrary; 
+    private static String PATH_Tasks; 
+    private static String PATH_RemoteTasks;
     
     private static boolean directoriesCreated = false;
-
-    static {
-      
+    static {      
         try {
           
             determinePathRoot();
             buildDirectoryPaths();
-            createDirectories();
-            
+            createDirectories();            
             directoriesCreated = true;
             
         } catch( IOException ex ) {
             System.err.println( ex.getMessage() );
-        }
-      
+        }      
     }
     
     
@@ -110,8 +96,7 @@ final public class Directories {
      * Prevents instantiation of {@link Directories} outside of itself.
      */
     private Directories() {
-    }/* END CONSTRUCTOR() */
-    
+    }    
     
     // ==========================================================================
     /**
@@ -132,7 +117,7 @@ final public class Directories {
                     new StringBuilder( "The local operating system \"" ).append( Utilities.OsName )
                     .append( "\" is not recognized." ).toString() );
 
-    }/* END determinePathRoot() */
+    }
     
     
     // ==========================================================================
@@ -144,7 +129,6 @@ final public class Directories {
       
         StringBuilder strBldr = new StringBuilder();
       
-        // <root>/<home>
         PATH_Home = strBldr.append( PATH_Root ).append( DELIM_Path ).append( NAME_Home ).toString();
         strBldr.setLength( 0 ); //Reset the StringBuilder
 
@@ -154,25 +138,23 @@ final public class Directories {
         PATH_Log = strBldr.append( PATH_Home ).append( DELIM_Path ).append( "log" ).toString();
         strBldr.setLength( 0 );
         
-        // <root>/<home>/data/...
         PATH_FileLibrary = strBldr.append( PATH_Data ).append( DELIM_Path ).append( "filelib" ).toString();
         strBldr.setLength( 0 );
+        
         PATH_JarLib = strBldr.append( PATH_Data ).append( DELIM_Path ).append( "jarlib" ).toString();
         strBldr.setLength( 0 );
+        
         PATH_ObjectLibrary = strBldr.append( PATH_Data ).append( DELIM_Path ).append( "objlib" ).toString();
         PATH_LocalObjectLibrary = strBldr.append( DELIM_Path ).append( HostFactory.LOCALHOST ).toString();        
         strBldr.setLength( 0 );
+        
         PATH_Tasks = strBldr.append( PATH_Log ).append( DELIM_Path ).append( "taskarc" ).toString();
         strBldr.setLength( 0 );
         
-    
-        // <root>/<home>/data/taskarc/...
-//        PATH_LocalTasks = strBldr.append( PATH_Tasks ).append( DELIM_Path ).append( "local" ).toString();
-//        strBldr.setLength( 0 );
         PATH_RemoteTasks = strBldr.append( PATH_Tasks ).append( DELIM_Path ).append( "remote" ).toString();
         strBldr.setLength( 0 );
 
-    }/* END buildDirectoryPaths() */
+    }
 
 
     // ==========================================================================
@@ -198,11 +180,9 @@ final public class Directories {
         ensureDirectoryExists( PATH_Tasks );
 
         // <root>/<home>/data/taskarc/...
-//        ensureDirectoryExists( PATH_LocalTasks );
         ensureDirectoryExists( PATH_RemoteTasks );
         
-    }/* END createDirectories() */
-    
+    }    
   
     // ==========================================================================
     /**
@@ -218,7 +198,7 @@ final public class Directories {
      */
     public static void ensureDirectoryExists( String path ) throws IOException {
         ensureDirectoryExists( new File( path ) );
-    }/* END ensureDirectoryExists( String ) */
+    }
     
     
     // ==========================================================================
@@ -244,7 +224,7 @@ final public class Directories {
                         new StringBuilder( "Could not create the directory \"" )
                         .append( directory ).append( "\"" ).toString() );
    
-    }/* END ensureDirectoryExists( File ) */
+    }
     
     
     // ==========================================================================
@@ -255,18 +235,18 @@ final public class Directories {
      */
     public static boolean directoryStructureInitialized() {
         return directoriesCreated;
-    }/* END directoryStructureInitialized() */
+    }
 
 
     // ==========================================================================
     /**
-     * Returns the path to the root directory.
+     * Returns the path to the home directory.
      *
-     * @return the path to the root directory
+     * @return the path to the home directory
      */
-    public static String getRoot() {
+    public static String getHomeDir() {
         return PATH_Home;
-    }/* END getRoot() */
+    }
 
     
     
@@ -278,7 +258,7 @@ final public class Directories {
      */
     public static String getDataPath() {
         return PATH_Data;
-    }/* END getDataPath() */
+    }
     
      // ==========================================================================
     /**
@@ -288,7 +268,7 @@ final public class Directories {
      */
     public static String getJarLibPath() {
         return PATH_JarLib;
-    }/* END getJarLibPath() */
+    }
    
     // ==========================================================================
     /**
@@ -301,9 +281,7 @@ final public class Directories {
         aSB.append(PATH_Log);
 
         return aSB.toString();
-    }/* END getLogPath() */
-    
-     
+    }
     
     // ==========================================================================
     /**
@@ -313,7 +291,7 @@ final public class Directories {
      */
     public static String getFileLibraryPath() {
         return PATH_FileLibrary;
-    }/* END getFileLibraryPath() */
+    }
     
     
     // ==========================================================================
@@ -324,7 +302,7 @@ final public class Directories {
      */
     public static File getFileLibraryDirectory() {
         return new File( getFileLibraryPath() );
-    }/* END getFileLibraryDirectory() */
+    }
     
     
     // ==========================================================================
@@ -335,7 +313,7 @@ final public class Directories {
      */
     public static String getObjectLibraryPath() {
         return PATH_ObjectLibrary;
-    }/* END getObjectLibraryPath() */
+    }
     
      // ==========================================================================
     /**
@@ -345,7 +323,7 @@ final public class Directories {
      */
     public static String getLocalObjectLibraryPath() {
         return PATH_LocalObjectLibrary;
-    }/* END getLocalObjectLibraryPath() */
+    }
     
     
     // ==========================================================================
@@ -356,7 +334,7 @@ final public class Directories {
      */
     public static File getObjectLibraryDirectory() {
         return new File( getObjectLibraryPath() );
-    }/* END getObjectLibraryDirectory() */
+    }
     
     // ==========================================================================
     /**
@@ -366,29 +344,7 @@ final public class Directories {
      */
     public static File getLocalObjectLibraryDirectory() {
         return new File( getLocalObjectLibraryPath() );
-    }/* END getObjectLibraryDirectory() */
-    
-//    // ==========================================================================
-//    /**
-//     * Returns the path to the local tasks directory.
-//     * 
-//     * @return the path to the local tasks directory
-//     */
-//    private static String getLocalTasksPath() {
-//        return PATH_LocalTasks;
-//    }/* END getLocalTasksPath() */
-    
-    
-//    // ==========================================================================
-//    /**
-//     * Returns a {@link File} representing the local tasks directory.
-//     * 
-//     * @return a {@code File} representing the local tasks directory
-//     */
-//    public static File getLocalTasksDirectory() {
-//        return new File( getLocalTasksPath() );
-//    }/* END getLocalTasksDirectory() */
-    
+    }
     
     // ==========================================================================
     /**
@@ -398,7 +354,7 @@ final public class Directories {
      */
     public static String getRemoteTasksPath() {
         return PATH_RemoteTasks;
-    }/* END getRemoteTasksPath() */
+    }
     
     
     // ==========================================================================
@@ -409,6 +365,6 @@ final public class Directories {
      */
     public static File getRemoteTasksDirectory() {
         return new File( getRemoteTasksPath() );
-    }/* END getRemoteTasksDirectory() */
+    }
     
-}/* END CLASS Directories */
+}

@@ -54,8 +54,8 @@ public class SocketChannelWrapper {
     protected SocketChannel theSocketChannel;    
     protected SocketChannelHandler theParentHandler;
 
-    protected ByteBuffer requestBB;
-    private static final int requestBBSize = Constants.GENERIC_BUFFER_SIZE;
+    protected ByteBuffer theRequestByteBuffer;
+    private static final int theRequestByteBufferSize = Constants.GENERIC_BUFFER_SIZE;
 
     //===============================================================
     /**
@@ -69,9 +69,8 @@ public class SocketChannelWrapper {
     public SocketChannelWrapper (final SocketChannel passedSocketChannel, final SocketChannelHandler passedListener) throws IOException {
 	theSocketChannel = passedSocketChannel;
         theParentHandler = passedListener;
-	theSocketChannel.configureBlocking (false);
-        
-        requestBB = ByteBuffer.allocate(requestBBSize);
+	theSocketChannel.configureBlocking (false);        
+        theRequestByteBuffer = ByteBuffer.allocate(theRequestByteBufferSize);
     }
 
     //===============================================================
@@ -89,7 +88,7 @@ public class SocketChannelWrapper {
      *  Clears the byte buffer
      */
     public void clear(){
-       requestBB.clear();
+       theRequestByteBuffer.clear();
     }
 
     //===============================================================
@@ -100,12 +99,12 @@ public class SocketChannelWrapper {
      * @param remaining 
     */    
     protected void resizeRequestBB (final int remaining) {
-       if (requestBB.remaining() < remaining) {
+       if (theRequestByteBuffer.remaining() < remaining) {
           // Expand buffer for large request
-          ByteBuffer bb = ByteBuffer.allocate(requestBB.capacity() * 2);
-          requestBB.flip();
-          bb.put(requestBB);
-          requestBB = bb;
+          ByteBuffer bb = ByteBuffer.allocate(theRequestByteBuffer.capacity() * 2);
+          theRequestByteBuffer.flip();
+          bb.put(theRequestByteBuffer);
+          theRequestByteBuffer = bb;
        }
     }
 
@@ -135,15 +134,15 @@ public class SocketChannelWrapper {
 	/*
 	 * Allocate more space if less than 5% remains
 	 */
-	resizeRequestBB(requestBBSize/20);
-	return theSocketChannel.read(requestBB);
+	resizeRequestBB(theRequestByteBufferSize/20);
+	return theSocketChannel.read(theRequestByteBuffer);
     }
 
     /*
      * All data has been read, pass back the request in one buffer.
      */
     public ByteBuffer getReadBuf() {
-	return requestBB;
+	return theRequestByteBuffer;
     }
 
     /*

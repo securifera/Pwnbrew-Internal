@@ -45,7 +45,7 @@ import pwnbrew.log.Log;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.utilities.Utilities;
-import pwnbrew.xmlBase.JarItem;
+import pwnbrew.xml.JarItem;
 
 /**
  *

@@ -48,7 +48,6 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.ManifestProperties;
-import pwnbrew.validation.StandardValidation;
 
 /**
  *
@@ -58,7 +57,15 @@ import pwnbrew.validation.StandardValidation;
 public class JarUtilities {
     
     public static final String URL_LABEL ="Private";
-    private static final String prefixStr = "https://";
+    private static final String prefixStr = "https://";  private static final String REGEX_Ipv4Octet = "25[0-5]|2[0-4]\\d|[01]?\\d?\\d";
+    private static final String REGEX_Ipv4Address = "((" + REGEX_Ipv4Octet + ")\\.){3}(" + REGEX_Ipv4Octet + ")";
+
+    //Add port to IPv4
+    private static final String REGEX_PORT = "(6553[0-5]|655[0-2]\\d|65[0-4]\\d{2}|6[0-4]\\d{3}|5\\d{4}|[0-9]\\d{0,3})";
+    //IPv6 address regular expression...
+    private static final String REGEX_Ipv6Address = "^(((?=(?>.*?::)(?!.*::)))(::)?([0-9A-Fa-f]{1,4}::?){0,5}|([0-9A-Fa-f]{1,4}:){6})(\2([0-9A-Fa-f]{1,4}(::?|$)){0,2}|((25[0-5]|(2[0-4]|1\\d|[1-9])?\\d)(\\.|$)){4}|[0-9A-Fa-f]{1,4}:[0-9A-Fa-f]{1,4})(?<![^:]:|\\.)\\z";
+ 
+    
 
     /**
      * @param args the command line arguments
@@ -82,10 +89,10 @@ public class JarUtilities {
                         if( args.length == 6 ){
                             if( args[2].equals("-i")){
                                 String ipAddress = args[3].trim();
-                                if( StandardValidation.validateIpAddress(ipAddress)){
+                                if( validateIpAddress(ipAddress)){
                                     if( args[4].equals("-p")){
                                         String port = args[5].trim();
-                                        if( StandardValidation.validatePort(port)){
+                                        if( validatePort(port)){
                                             String connectStr = prefixStr + ipAddress + ":" + port;
                                             sun.misc.BASE64Encoder anEncoder = new sun.misc.BASE64Encoder();
                                             String encodedStr = anEncoder.encodeBuffer(connectStr.getBytes());
@@ -316,4 +323,103 @@ public class JarUtilities {
            
         }
     }
+    
+     // ==========================================================================
+    /**
+     * Determines if the given String is a valid port.
+     * <p>
+     * If the argument is null this method returns false.
+     *
+     * @param value the String to test
+     *
+     * @return {@code true} if the given String is a valid port;
+     * {@code false} otherwise
+     */
+    private static boolean validatePort( String value ) {
+
+        if( value == null ) //If the String is null...
+            return false; //Do nothing
+
+        boolean rtnBool = false;
+
+        try {
+           int intVal = Integer.parseInt(value);
+           if(intVal >= 0 && intVal <= 65535){
+              rtnBool = true;
+           }
+        } catch (NumberFormatException ex){
+           return false;
+        }
+        return rtnBool;
+
+    }
+    
+     // ==========================================================================
+    /**
+     * Determines if the given String is a valid IPv4 address in the dotted-decimal
+     * notation. (ie. "172.16.254.1")
+     * <p>
+     * If the argument is null this method returns false.
+     *
+     * @param address the String to test
+     *
+     * @return {@code true} if the given String is a valid IPv4 address in the dotted-decimal
+     * notation; {@code false} otherwise
+     */
+    public static boolean validateIpv4Address( String address ) {
+
+        if( address == null ) //If the String is null...
+            return false; //Do nothing
+
+        return address.matches( REGEX_Ipv4Address ); //Determine if the String is a IPv4 address
+
+    }
+    
+      // ==========================================================================
+    /**
+     * Determines if the given String is a valid IPv6 address.
+     * <p>
+     * If the argument is null this method returns false.
+     *
+     * @param address the String to test
+     *
+     * @return {@code true} if the given String is a valid IPv6 address; {@code false}
+     * otherwise
+     */
+    private static boolean validateIpv6Address( String address ) {
+
+        if( address == null ) //If the String is null...
+            return false; //Do nothing
+
+        return address.matches( REGEX_Ipv6Address ); //Determine if the String is a IPv6 address
+
+    }
+    
+     // ==========================================================================
+    /**
+     * Determines if the given String is a valid IP v4 or v6 address.
+     * <p>
+     * If the argument is null this method returns false.
+     *
+     * @param address the String to test
+     *
+     * @return {@code true} if the given String is a valid IP v4 or v6 address;
+     * {@code false} otherwise
+     */
+    private static boolean validateIpAddress( String address ) {
+
+        if( address == null ) //If the String is null...
+            return false; //Do nothing
+
+        boolean rtnBool;
+
+        if( validateIpv4Address( address ) ) //If the String is a valid IPv4 address...
+            rtnBool = true; //The String is valid
+        else //If the String is not a valid IPv4 address...
+            rtnBool = validateIpv6Address( address ); //Determine if the String is a valid IPv6 address
+
+        return rtnBool;
+
+    }
+
 }

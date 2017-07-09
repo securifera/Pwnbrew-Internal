@@ -45,6 +45,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew;
 
+import pwnbrew.manager.ClassManager;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,9 +62,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.logging.Level;
-import javax.swing.JDialog;
 import pwnbrew.host.HostController;
-import pwnbrew.library.LibraryItemController;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
@@ -160,78 +159,76 @@ public final class Server {
         }
         
             
-            StringBuilder aStr = new StringBuilder();
-            aStr.append("\nCommands:\n\n")
-                .append("   i\tImport SSL Certificate\n")
-                .append("   l\tList Hosts\n")
-                .append("   d\tToggle Debug Messages\n")
-                .append("   v\tPrint Version\n")
-                .append("   q\tShutdown");
+        StringBuilder aStr = new StringBuilder();
+        aStr.append("\nCommands:\n\n")
+            .append("   i\tImport SSL Certificate\n")
+            .append("   l\tList Hosts\n")
+            .append("   d\tToggle Debug Messages\n")
+            .append("   v\tPrint Version\n")
+            .append("   q\tShutdown");
             
-            BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
-            boolean loop = true;
-            while(loop){
-                System.out.print("\n>");
-                String line = buffer.readLine();
-                if( line == null )
+        BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
+        boolean loop = true;
+        while(loop){
+            System.out.print("\n>");
+            String line = buffer.readLine();
+            if( line == null )
+                break;
+
+            line = line.toLowerCase();
+            switch(line){
+                case "i":
+                    System.out.print("Please enter the path to the certificate: ");
+                    String filePath = buffer.readLine().toLowerCase().trim();
+                    File aFile = new File(filePath);
+                    if(aFile.exists()){
+                        importCertificate(aFile);
+                    } else 
+                        System.out.println("***Error: File does not exist.");
+
                     break;
-                
-                line = line.toLowerCase();
-                switch(line){
-                    case "i":
-                        System.out.print("Please enter the path to the certificate: ");
-                        String filePath = buffer.readLine().toLowerCase().trim();
-                        File aFile = new File(filePath);
-                        if(aFile.exists()){
-                            importCertificate(aFile);
-                        } else 
-                            System.out.println("***Error: File does not exist.");
-                        
-                        break;
-                     case "l":
-                         
-                        System.out.println();
-                        System.out.println("[+] Current Host List:\n");
-                        //Get all current hosts and print out their names and ids
-                        List<LibraryItemController> theHostControllers = theServerManager.getHostControllers();
-                        for( LibraryItemController aCont : theHostControllers ){
-                            if( aCont instanceof HostController ){
-                                HostController aHC = (HostController)aCont;
-                                //Construct output string
-                                String outStr = String.format("%-30s", aHC.getItemName());
-                                outStr += String.format("( Host ID: %15s )", aHC.getId());
-                                if( aHC.isConnected() )
-                                    outStr += String.format("%6s", "*");
-                                
-                                System.out.println( outStr ); 
-                            }
+                 case "l":
+
+                    System.out.println();
+                    System.out.println("[+] Current Host List:\n");
+                    //Get all current hosts and print out their names and ids
+                    List<HostController> theHostControllers = theServerManager.getHostControllers();
+                    for( HostController aCont : theHostControllers ){
+                        if( aCont instanceof HostController ){
+                            HostController aHC = (HostController)aCont;
+                            //Construct output string
+                            String outStr = String.format("%-30s", aHC.getItemName());
+                            outStr += String.format("( Host ID: %15s )", aHC.getId());
+                            if( aHC.isConnected() )
+                                outStr += String.format("%6s", "*");
+
+                            System.out.println( outStr ); 
                         }
-                        System.out.println();
-                        System.out.println("* Host is connected.");
-                        System.out.println();
-                        
-                        break;
-                    case "d":
-                        boolean isEnabled = !DebugPrinter.isEnabled();
-                        DebugPrinter.enable(isEnabled);
-                        String toggleStr = ( isEnabled ? "Enabled" : "Disabled ");
-                        System.out.println("\n***Debug Messages " + toggleStr);
-                        break;
-                    case "v":
-                        System.out.println("\nVersion: " + Constants.CURRENT_VERSION);
-                        break;
-                    case "q":
-                    case "quit":
-                    case "exit":
-                        shutdown();
-                        loop = false;
-                        break;
-                    default:  
-                        System.out.println(aStr.toString());
-                }                
-            }     
-//        }   
-        
+                    }
+                    System.out.println();
+                    System.out.println("* Host is connected.");
+                    System.out.println();
+
+                    break;
+                case "d":
+                    boolean isEnabled = !DebugPrinter.isEnabled();
+                    DebugPrinter.enable(isEnabled);
+                    String toggleStr = ( isEnabled ? "Enabled" : "Disabled ");
+                    System.out.println("\n***Debug Messages " + toggleStr);
+                    break;
+                case "v":
+                    System.out.println("\nVersion: " + Constants.CURRENT_VERSION);
+                    break;
+                case "q":
+                case "quit":
+                case "exit":
+                    shutdown();
+                    loop = false;
+                    break;
+                default:  
+                    System.out.println(aStr.toString());
+            }                
+        }            
     }
 
     //===============================================================
@@ -309,9 +306,8 @@ public final class Server {
             Log.log(Level.SEVERE, NAME_Class, "main()", ex.getMessage(), ex);
             
             //Shutdown, there was an exception
-            if(staticSelf != null){
-               staticSelf.shutdown();
-            }
+            if(staticSelf != null)
+               staticSelf.shutdown();            
             
             DebugPrinter.shutdown();
             Constants.Executor.shutdownNow();
@@ -403,7 +399,7 @@ public final class Server {
             //Create a cert from the bytes
             Certificate aCert = new sun.security.x509.X509CertImpl( certBytes );
             SSLUtilities.importCertificate( certAlias, aCert);
-            System.out.println("***Certificate import complete.");
+            System.out.println("***Certificate import complete.***");
         
         }
     }
@@ -437,7 +433,7 @@ public final class Server {
     private void initialize() throws LoggableException {
 
         
-        Environment.initialize();
+        ClassManager.initialize();
         if( !Directories.directoryStructureInitialized() ) {
             System.out.println( "Could not initialize the directory structure.\nTerminating run..." );
             System.exit( 1 );
@@ -446,8 +442,7 @@ public final class Server {
         try {
             
             //Add debug if turned on
-            DebugPrinter.enable( debug );
-            
+            DebugPrinter.enable( debug );            
             try {
                 //Initialize log
                 Log.initializeLog( new File( Directories.getLogPath() ));
@@ -464,13 +459,9 @@ public final class Server {
         }
          
         //Make sure the server can run
-        if(!canRun()){
+        if(!canRun())
             throw new LoggableException("Unable to start the Server.  An entry point has already been executed.");
-        }
-        
-//        MainGui.setDefaultLookAndFeelDecorated(true);
-        JDialog.setDefaultLookAndFeelDecorated(true);
+                
     }
 
-
-}/* END CLASS Server */
+}

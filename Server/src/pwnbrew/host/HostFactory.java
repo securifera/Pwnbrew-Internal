@@ -53,11 +53,9 @@ import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.List;
 import pwnbrew.log.LoggableException;
-import pwnbrew.misc.SubnetMaskTable_IPv4;
-import pwnbrew.utilities.NetworkInterfaceUtilities;
 import pwnbrew.network.Nic;
 import pwnbrew.utilities.Utilities;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xml.ServerConfig;
 
 /**
  *
@@ -107,10 +105,10 @@ public class HostFactory {
                             InetAddress anAddr = anIN.getAddress();
                             if( anAddr instanceof Inet4Address ){
 
-                                byte[] macAddressArr = NetworkInterfaceUtilities.getHardwareAddress_SPECIALIZED(theInterface);
+                                byte[] macAddressArr = theInterface.getHardwareAddress();
 
                                 //Convert the mac to a string a add it to the message
-                                String hexString = NetworkInterfaceUtilities.convertHexBytesToString(macAddressArr);
+                                String hexString = Utilities.convertHexBytesToString(macAddressArr);
                                 if(hexString == null)
                                     hexString = "000000000000";
 
@@ -119,7 +117,7 @@ public class HostFactory {
 
                                 //Add the subnet number
                                 int subnet = anIN.getNetworkPrefixLength();
-                                String subnetMask = SubnetMaskTable_IPv4.get( subnet );
+                                String subnetMask = Utilities.get( subnet );
 
                                 Nic aNic = new Nic( hexString, inetStr, subnetMask );
                                 //Add the NIC

@@ -63,7 +63,7 @@ import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileFin;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.FileUtilities;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xml.ServerConfig;
 
 /**
  *
@@ -149,8 +149,6 @@ final public class FileReceiver {
         //Open the file stream
         aFileStream = new FileOutputStream(fileLoc, true);
         
-        //Set the progress listener
-//        theListener = passedManager.getPortManager().getProgressListener();
     }
     
     //===============================================================

@@ -53,7 +53,7 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.network.PortRouter;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xml.ServerConfig;
 
 /**
  *
@@ -108,7 +108,7 @@ public class StagingMessageManager extends DataManager {
         
         return theStagingManager;
 
-    }/* END initialize() */
+    }
     
     // ==========================================================================
     /**

@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
  * Created on Sept 11, 2013, 8:21:29 PM
  */
 
-package pwnbrew.xmlBase;
+package pwnbrew.xml;
 
 import java.util.regex.Pattern;
 

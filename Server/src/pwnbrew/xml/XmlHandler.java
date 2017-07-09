@@ -43,9 +43,9 @@ The copyright on this package is held by Securifera, Inc
  * Created on June 21, 2013, 9:21:32 PM
  */
 
-package pwnbrew.xmlBase;
+package pwnbrew.xml;
 
-import pwnbrew.exception.XmlBaseCreationException;
+import pwnbrew.exception.XmlObjectCreationException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -66,9 +66,9 @@ public class XmlHandler extends DefaultHandler {
 
     private boolean skipTheElement = false;
 
-    private ArrayList<XmlBase> theObjectStack = new ArrayList<>();
+    private ArrayList<XmlObject> theObjectStack = new ArrayList<>();
 
-    private XmlBase theXmlBase = null;
+    private XmlObject theXmlObject = null;
 
     private String errorMessage = null;
     private Locator theLocator = null;
@@ -92,13 +92,13 @@ public class XmlHandler extends DefaultHandler {
 
     // ==========================================================================
     /**
-    * Returns the finished {@link XmlBase}.
+    * Returns the finished {@link XmlObject}.
     *
-    * @return the finished {@code XmlBase}
+    * @return the finished {@code XmlObject}
     */
-    public XmlBase getFinishedXmlBase() {
+    public XmlObject getFinishedXmlObject() {
 
-        XmlBase rtnXB = null;
+        XmlObject rtnXB = null;
         if( theObjectStack.isEmpty() == false ) 
             rtnXB = theObjectStack.get( 0 );        
 
@@ -122,7 +122,7 @@ public class XmlHandler extends DefaultHandler {
         try {
 
             try {
-                theXmlBase = (XmlBase) XmlBaseFactory.instantiateClassByName( localName ); //Get a new instance of the appropriate Class
+                theXmlObject = (XmlObject) XmlObjectFactory.instantiateClassByName( localName ); //Get a new instance of the appropriate Class
             } catch (IllegalAccessException | InstantiationException ex) {
                 throw new LoggableException(ex);
             }
@@ -136,11 +136,11 @@ public class XmlHandler extends DefaultHandler {
                 strBld.append( "\n" );
                 strBld.append( "  The object stack:" );
                 String id;
-                for( XmlBase xb : theObjectStack ) { //For each XmlBase on the stack...
+                for( XmlObject xb : theObjectStack ) { //For each XmlObject on the stack...
 
                     strBld.append( "\n" );
                     strBld.append( "    Class: \"" ).append( xb.getClass().getSimpleName() ).append( "  Id: " );
-                    id = xb.getId(); //Get the XmlBase's id
+                    id = xb.getId(); //Get the XmlObject's id
                     if( id.isEmpty() ) //If the id is an empty String...
                         strBld.append( "<empty>" );
                     else //If the id is not an empty String...
@@ -153,20 +153,20 @@ public class XmlHandler extends DefaultHandler {
         Log.log( Level.WARNING, NAME_Class, "startElement()", strBld.toString(), null );
         }
 
-        if( theXmlBase == null )
-            throw new XmlBaseCreationException("Invalid XmlBase class '" + localName + "'");
-        else if( theXmlBase instanceof FileContent){
+        if( theXmlObject == null )
+            throw new XmlObjectCreationException("Invalid XmlObject class '" + localName + "'");
+        else if( theXmlObject instanceof FileContent){
             skipTheElement = true;
             return;
         }
 
         //Populate the object's data fields...
         for( int i = 0; i < atts.getLength(); i++ ) { //For each attribute...
-            theXmlBase.setAttribute( atts.getQName( i ), atts.getValue( i ) ); //Set the XmlBase's attribute
+            theXmlObject.setProperty( atts.getQName( i ), atts.getValue( i ) ); //Set the XmlObject's attribute
         }
 
-        theObjectStack.add( theXmlBase ); 
-        theXmlBase = null;
+        theObjectStack.add( theXmlObject ); 
+        theXmlObject = null;
 
     }
 
@@ -187,7 +187,7 @@ public class XmlHandler extends DefaultHandler {
 
             if( stackSize > 1 ) { //If there are at least two objects on the stack...
                 //Remove (pop) the last object from the stack and add it as a component to the next-to-last object
-                ( theObjectStack.get( stackSize - 2 ) ).addUpdateComponent( theObjectStack.remove( stackSize - 1 ) );
+                ( theObjectStack.get( stackSize - 2 ) ).addChildObject( theObjectStack.remove( stackSize - 1 ) );
             } else if( stackSize == 1 ) { //If there is only one object on the stack...
                 theObjectStack.trimToSize(); //Remove any unused space
             } else { //If there are no objects on the stack...

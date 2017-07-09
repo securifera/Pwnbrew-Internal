@@ -35,7 +35,7 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-package pwnbrew.xmlBase;
+package pwnbrew.xml;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,9 +64,9 @@ public class JarItem extends FileContentRef {
      * Constructor
      */
     public JarItem() {
-       theAttributeMap.put( theJavaMajorVersion, "");    
-       theAttributeMap.put( theJarVersion,  ""  );
-       theAttributeMap.put( theJarType,  ""  );
+       thePropertyMap.put( theJavaMajorVersion, "");    
+       thePropertyMap.put( theJarVersion,  ""  );
+       thePropertyMap.put( theJarType,  ""  );
     }  
     
     //=====================================================================
@@ -75,7 +75,7 @@ public class JarItem extends FileContentRef {
      * @return 
      */
     public String getJvmMajorVersion() {
-        return getAttribute(theJavaMajorVersion);
+        return getProperty(theJavaMajorVersion);
     }
 
     //=====================================================================
@@ -84,7 +84,7 @@ public class JarItem extends FileContentRef {
      * @param passedString 
      */
     public void setJvmMajorVersion( String passedString ) {
-        setAttribute(theJavaMajorVersion, passedString );
+        setProperty(theJavaMajorVersion, passedString );
     }
     
     //=====================================================================
@@ -93,7 +93,7 @@ public class JarItem extends FileContentRef {
      * @return 
      */
     public String getType() {
-        return getAttribute(theJarType);
+        return getProperty(theJarType);
     }
     
     //=====================================================================
@@ -111,7 +111,7 @@ public class JarItem extends FileContentRef {
      * @param passedString 
      */
     public void setType( String passedString ) {
-        setAttribute(theJarType, passedString );
+        setProperty(theJarType, passedString );
     }
 
     //=====================================================================
@@ -120,7 +120,7 @@ public class JarItem extends FileContentRef {
      * @return 
      */
     public String getVersion() {
-        return getAttribute(theJarVersion);
+        return getProperty(theJarVersion);
     }
 
     //=====================================================================
@@ -129,7 +129,7 @@ public class JarItem extends FileContentRef {
      * @param passedVersion 
      */
     public void setVersion( String passedVersion ) {
-        setAttribute(theJarVersion, passedVersion );
+        setProperty(theJarVersion, passedVersion );
     }    
     
     //=====================================================================

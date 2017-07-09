@@ -35,7 +35,7 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-package pwnbrew.xmlBase;
+package pwnbrew.xml;
 
 /**
  *

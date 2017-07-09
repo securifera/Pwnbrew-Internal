@@ -219,5 +219,4 @@ public class SelectionRouter extends ManagedRunnable{
         return retVal;
     }
 
-
-}/* END CLASS SelectionRouter */
+}

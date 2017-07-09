@@ -175,6 +175,6 @@ final public class Log {
         }
                
         
-    }/* END log( Level, String, String, String, Throwable ) */
+    }
 
-}/* END CLASS Log */
+}

@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
 * Created on July 20, 2013, 1:21:45 PM
 */
 
-package pwnbrew.xmlBase;
+package pwnbrew.xml;
 
 import pwnbrew.network.Nic;
 import java.awt.image.BufferedImage;
@@ -54,7 +54,7 @@ import pwnbrew.utilities.Utilities;
  *
  *  
  */
-public class Node extends XmlBase implements java.io.Serializable {
+public class Node extends XmlObject implements java.io.Serializable {
     
     protected transient BufferedImage theBufferedImage;
     
@@ -69,7 +69,7 @@ public class Node extends XmlBase implements java.io.Serializable {
     */
     public Node() {        
         //Add the attributes
-        theAttributeMap.put( ATTRIBUTE_Name,  "" );
+        thePropertyMap.put(OBJECT_NAME,  "" );
     }
 
      // ==========================================================================
@@ -77,39 +77,39 @@ public class Node extends XmlBase implements java.io.Serializable {
     * Adds and updates local support objects, determining the appropriate manner
     * in which to do so according to the class of the <code>passedGRB</code> argument.
     *
-    * @param xmlBase the support object to be added/updated
+    * @param passedObj the support object to be added/updated
     */
     @Override
-    public void addUpdateComponent( XmlBase xmlBase ) {
+    public void addChildObject( XmlObject passedObj ) {
 
-        if( xmlBase instanceof Nic ) { //If the XmlBase is a Parameter...
+        if( passedObj instanceof Nic ) { //If the XmlObject is a Parameter...
             
-            Nic aNic = (Nic)xmlBase;
+            Nic aNic = (Nic)passedObj;
             nicMap.put( aNic.getMacAddress(), aNic );
         
         } else {
-            super.addUpdateComponent( xmlBase );
+            super.addChildObject( passedObj );
         }
 
     }/* END addUpdateComponent() */
     
      // ==========================================================================
     /**
-    *  Removes a supporting object from the XmlBase
+    *  Removes a supporting object from the XmlObject
     *
     *  @param passedGRB  the object to be removed
     *
     *  @return true if the object was successfully removed
     */
     @Override
-    public boolean removeComponent( XmlBase passedGRB ) {
+    public boolean removeChildObject( XmlObject passedGRB ) {
         boolean objectRemoved = true;
 
         if( passedGRB instanceof Nic ) { //If the object is a Parameter...
             Nic aNic = (Nic)passedGRB;
             nicMap.remove( aNic.getMacAddress() );
         } else {
-            objectRemoved = super.removeComponent(passedGRB);
+            objectRemoved = super.removeChildObject(passedGRB);
         }
 
         return objectRemoved;
@@ -117,25 +117,21 @@ public class Node extends XmlBase implements java.io.Serializable {
     
      // ==========================================================================
     /**
-    * Returns a list of this object's subcomponents that should be added to its
-    * XML data.
-    * <p>
-    * NOTE: This overrides a method in {@link XmlBase}.
     * 
-    * @return an {@link ArrayList} of the {@link XmlBase} components for this
+    * @return an {@link ArrayList} of the {@link XmlObject} components for this
     * object
     */
     @Override
-    public List<XmlBase> getXmlComponents() {
+    public List<XmlObject> getXmlObjects() {
 
-        List<XmlBase> rtnList = super.getXmlComponents();
+        List<XmlObject> rtnList = super.getXmlObjects();
 
         if( nicMap.size() > 0 ) //If there are Nics...
             rtnList.addAll( nicMap.values() ); //Add the Nics
    
         return rtnList;
 
-    }/* END getXmlComponents() */
+    }
     
     //===============================================================
     /**
@@ -144,7 +140,7 @@ public class Node extends XmlBase implements java.io.Serializable {
      * @return 
     */
     public String getHostname() {
-        return getAttribute( ATTRIBUTE_Name );
+        return getProperty(OBJECT_NAME );
     }
 
     //===============================================================
@@ -304,7 +300,7 @@ public class Node extends XmlBase implements java.io.Serializable {
     */
     public void setHostname(String theHostname) {
         if( theHostname != null ){
-            setAttribute( ATTRIBUTE_Name, theHostname);
+            setProperty(OBJECT_NAME, theHostname);
         }
     }
 

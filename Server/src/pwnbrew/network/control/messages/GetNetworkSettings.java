@@ -49,7 +49,7 @@ import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.utilities.SSLUtilities;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xml.ServerConfig;
 
 /**
  *

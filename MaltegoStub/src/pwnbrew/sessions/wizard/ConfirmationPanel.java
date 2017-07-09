@@ -215,7 +215,7 @@ public final class ConfirmationPanel extends HostCheckInWizardPanel {
     /**
     * Adds {@code theObjectToAdd} as a child node under {@code parentNode} at the specified {@code index}.
     *
-    * @param theObjectToAdd  the {@link XmlBase} object to be added to the tree
+    * @param theObjectToAdd  the {@link XmlObject} object to be added to the tree
     * @param parentNode      the node under which this object will be added ({@code null}
     *                        to set {@code theObjectToAdd} as the root of the tree)
     * @param index           the child index of {@code parentNode} at which to add {@code theNodeToAdd},

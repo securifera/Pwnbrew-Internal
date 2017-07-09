@@ -100,7 +100,7 @@ public class IncomingConnectionManager extends ConnectionManager {
     @Override
     public SocketChannelHandler removeHandler( int channelId ) {
         
-        SocketChannelHandler aSCH = null;
+        SocketChannelHandler aSCH;
         synchronized(channelIdHandlerMap){
             aSCH = channelIdHandlerMap.remove(channelId);
             if( channelId == COMM_CHANNEL_ID ){
@@ -143,75 +143,6 @@ public class IncomingConnectionManager extends ConnectionManager {
         return retVal;
         
     }
-    
-//    //===============================================================
-//     /**
-//     *  Registers the provided AccessHandler with the server under the
-//     * given InetAddress.
-//     *
-//     * @param passedClientId
-//     * @param passedParentId
-//     * @param channelId
-//     * @param theHandler
-//     * @return 
-//     */
-//    @Override
-//    public boolean registerHandler( int passedParentId, int channelId, SocketChannelHandler theHandler) {
-//
-//        if( theHandler != null){
-////            DebugPrinter.printMessage(NAME_Class, "Registering " + passedClientId.toString());
-////            synchronized(clientIdManagerMap){
-////                IncomingConnectionManager aCCM = clientIdManagerMap.get( passedClientId );
-////                if( aCCM == null ){
-////                    aCCM = new IncomingConnectionManager( passedClientId );
-////                }
-//                
-//                //Set the handler for the channelId
-//            if ( !setHandler( channelId, theHandler ) )
-//                return false;
-//                
-////                clientIdManagerMap.put(passedClientId, aCCM );
-////                
-////            }
-//            
-//            Integer anInt = thePortManager.getClientParent(passedClientId);
-//            if( anInt != null && !anInt.equals(passedParentId) ){    
-//                
-//                //Remove the registration with the other host if it exists
-//                ServerManager theServMgr = (ServerManager)thePortManager;
-//                HostController lastParent = theServMgr.getHostController( Integer.toString(anInt) );
-//                if( lastParent != null ){
-//                    Host parentHost = lastParent.getHost();
-//                    parentHost.removeConnectedHostId( Integer.toString( passedClientId) ); 
-//                    lastParent.saveToDisk();
-//                }
-//                
-//            }  
-//            
-//            thePortManager.setClientParent(passedClientId, passedParentId);
-//        }
-//        
-//        return true;
-//    }
-    
-//  
-//    //===============================================================
-//    /**
-//     *  Removes the client id
-//     * 
-//     * @param clientId 
-//     * @param channelId 
-//    */
-//    @Override
-//    public void removeHandler( int clientId, int channelId ) {
-////        DebugPrinter.printMessage(NAME_Class, "Removing " + Integer.toString( clientId ));
-//        synchronized(clientIdManagerMap){
-//            IncomingConnectionManager aCCM = clientIdManagerMap.get( clientId );
-//            if( aCCM != null )
-//                aCCM.removeHandler( channelId );                
-//            
-//        }
-//    }
     
     //===============================================================
     /**

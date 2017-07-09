@@ -59,45 +59,21 @@ import pwnbrew.misc.DebugPrinter;
 import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.utilities.SocketUtilities;
 
-/**
- * A helper class which performs I/O using the SSLEngine API.
- *
- */
+
 public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
 
-    private final SSLEngine sslEngine;
+    private final SSLEngine theSSLEngine;
     private static final String NAME_Class = EncryptedSocketChannelWrapper.class.getSimpleName();
 
-    private final int appBBSize;
-    private final int netBBSize;
-
-    /*
-    * All I/O goes through these buffers.
-    * <P>
-    * It might be nice to use a cache of ByteBuffers so we're
-    * not alloc/dealloc'ing ByteBuffer's for each new SSLEngine.
-    * <P>
-    * We use our superclass' requestBB for our application input buffer.
-    * Outbound application data is supplied to us by our callers.
-    */
-    private final ByteBuffer inNetBB;
-    private final ByteBuffer outNetBB;
-
-    /*
-    * An empty ByteBuffer for use when one isn't available, say
-    * as a source buffer during initial handshake wraps or for flush
-    * operations.
-    */
-    private static final ByteBuffer handshakeBB = ByteBuffer.allocate(0);
-
-    //Accessible from several threads
-    private volatile boolean initialHSComplete;
-    private boolean handShakeMsg = true;
+    private final int applicationByteBufferSize;
+    private final int networkByteBufferSize;
     
-     /*
-    * We have received the shutdown request by our caller, and have
-    * closed our outbound side.
-    */
+    private final ByteBuffer incomingByteBuffer;
+    private final ByteBuffer outgoingByteBuffer;
+    private static final ByteBuffer handshakeByteBuffer = ByteBuffer.allocate(0);
+
+    private volatile boolean handshakeComplete;
+    private boolean handShakeMsg = true;
     private boolean shutdown = false;
 
     //===============================================================
@@ -117,41 +93,45 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
         //Get the type and the SSL context
         SSLContext theContext = SSLUtilities.getSSLContext();
 
-        sslEngine = theContext.createSSLEngine(SocketUtilities.getHostname(), sc.socket().getPort());
-        sslEngine.setUseClientMode(false);  
+        theSSLEngine = theContext.createSSLEngine(SocketUtilities.getHostname(), sc.socket().getPort());
+        theSSLEngine.setUseClientMode(false);  
         
         //Set authentication is it is set
-        sslEngine.setNeedClientAuth(requireAuth);        
+        theSSLEngine.setNeedClientAuth(requireAuth);        
      
-        netBBSize = sslEngine.getSession().getPacketBufferSize();
-        inNetBB  = ByteBuffer.allocate(netBBSize);
-        outNetBB = ByteBuffer.allocate(netBBSize);
-        outNetBB.position(0);
-        outNetBB.limit(0);
+        networkByteBufferSize = theSSLEngine.getSession().getPacketBufferSize();
+        incomingByteBuffer  = ByteBuffer.allocate(networkByteBufferSize);
+        outgoingByteBuffer = ByteBuffer.allocate(networkByteBufferSize);
+        outgoingByteBuffer.position(0);
+        outgoingByteBuffer.limit(0);
         
         //Set the size
-        appBBSize = sslEngine.getSession().getApplicationBufferSize();
-        requestBB = ByteBuffer.allocate( appBBSize );
+        applicationByteBufferSize = theSSLEngine.getSession().getApplicationBufferSize();
+        theRequestByteBuffer = ByteBuffer.allocate( applicationByteBufferSize );
     }
 
-    /*
-    * Returns the buffer size
-    */
+    //==========================================================================
+    /**
+     * Returns the buffer size
+     * @return 
+     */
     public int getBufferSize(){
-        return appBBSize;
+        return applicationByteBufferSize;
     }
 
-    /*
-    * Calls up to the superclass to adjust the buffer size
-    * by an appropriate increment.
-    */
-    private void resizeRequestBB() {
-        resizeRequestBB(appBBSize);
+    //==========================================================================
+    /**
+     *  Calls up to the superclass to adjust the buffer size
+     *   by an appropriate increment.
+     */
+    private void resizeRequestByteBuffer() {
+        resizeRequestBB(applicationByteBufferSize);
     }
 
-    /*
+    //==========================================================================
+    /**
     * Writes bb to the SocketChannel.
-    * <P>
+    *
     * Returns true when the ByteBuffer has no remaining data.
     */
     private boolean tryFlush(ByteBuffer bb) throws IOException {
@@ -159,16 +139,17 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
         return !bb.hasRemaining();
     }
 
-    /*
+    //==========================================================================
+    /**
     * If any data remains in the output buffer then send it
     */
     private boolean flushHandshakeBuffer(SelectionKey passedKey) throws IOException {
 
-        HandshakeStatus currStatus = sslEngine.getHandshakeStatus();
+        HandshakeStatus currStatus = theSSLEngine.getHandshakeStatus();
         boolean setRead = false;
 
         //Send data
-        if (!tryFlush(outNetBB)) {
+        if (!tryFlush(outgoingByteBuffer)) {
             return false;
         }
 
@@ -177,7 +158,7 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
 
             //If finished
             case FINISHED:
-                initialHSComplete = true;
+                handshakeComplete = true;
 //                theParentHandler.setState(Constants.CONNECTED);
                 theParentHandler.getPortRouter().getSelRouter().changeOps(theSocketChannel, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
         
@@ -196,7 +177,7 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
             theParentHandler.getPortRouter().getSelRouter().changeOps(theSocketChannel, SelectionKey.OP_READ);
         }
 
-        return initialHSComplete;
+        return handshakeComplete;
     }
 
     /*
@@ -221,7 +202,7 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
 
         HandshakeStatus currStatus;
 
-        if ( initialHSComplete ){
+        if ( handshakeComplete ){
             return true;
         }
 
@@ -229,12 +210,12 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
         * Flush out the outgoing buffer, if there's anything left in
         * it.
         */
-        if (outNetBB.hasRemaining()) {
+        if (outgoingByteBuffer.hasRemaining()) {
             return flushHandshakeBuffer(passedKey);
         }
 
         //Get the current handshake status
-        currStatus = sslEngine.getHandshakeStatus();
+        currStatus = theSSLEngine.getHandshakeStatus();
 
         //If no data to send, switch on status
         switch (currStatus) {
@@ -246,13 +227,13 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
 
                     //Read the next bytes
                     int readCount;
-                    synchronized(inNetBB){
-                        readCount = theSocketChannel.read(inNetBB);
+                    synchronized(incomingByteBuffer){
+                        readCount = theSocketChannel.read(incomingByteBuffer);
                     }
 
                     if (readCount == -1) {
-                        sslEngine.closeInbound();
-                        return initialHSComplete;
+                        theSSLEngine.closeInbound();
+                        return handshakeComplete;
                     }
 
                 } catch (BufferOverflowException ex){
@@ -279,9 +260,11 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
                 throw new SSLException("Invalid Handshaking State" + currStatus);
         } // switch
 
-        return initialHSComplete;
+        return handshakeComplete;
     }
 
+    //==========================================================================
+    /**
     /*
     * Do all the outstanding handshake tasks in a separate thread.
     */
@@ -290,7 +273,7 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
         
         //Need to check for "No trusted certificate found" - ValidatorException
         Runnable taskRunnable;
-        while((taskRunnable = sslEngine.getDelegatedTask()) != null) {
+        while((taskRunnable = theSSLEngine.getDelegatedTask()) != null) {
             try {
                 taskRunnable.run();
             } catch( RuntimeException ex ){
@@ -315,21 +298,21 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
     @Override
     public int read() throws IOException {
 
-        if (!initialHSComplete) throw new IllegalStateException();
+        if (!handshakeComplete) throw new IllegalStateException();
 
-        final int pos = requestBB.position();
+        final int pos = theRequestByteBuffer.position();
 
-        if (theSocketChannel.read(inNetBB) == -1) {
-            sslEngine.closeInbound();  // probably throws exception
+        if (theSocketChannel.read(incomingByteBuffer) == -1) {
+            theSSLEngine.closeInbound();  // probably throws exception
             return -1;
         }
 
         SSLEngineResult result;
         do {
-            resizeRequestBB();    // guarantees enough room for unwrap
-            inNetBB.flip();
-            result = sslEngine.unwrap(inNetBB, requestBB);
-            inNetBB.compact();
+            resizeRequestByteBuffer();    // guarantees enough room for unwrap
+            incomingByteBuffer.flip();
+            result = theSSLEngine.unwrap(incomingByteBuffer, theRequestByteBuffer);
+            incomingByteBuffer.compact();
 
             /*
             * Could check here for a renegotation, but we're only
@@ -353,9 +336,9 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
                 default:
                     throw new SSLException("sslEngine error during data read: " + result.getStatus());
             }
-        } while ((inNetBB.position() != 0) && result.getStatus() != Status.BUFFER_UNDERFLOW);
+        } while ((incomingByteBuffer.position() != 0) && result.getStatus() != Status.BUFFER_UNDERFLOW);
 
-        return (requestBB.position() - pos);
+        return (theRequestByteBuffer.position() - pos);
     }
 
     /*
@@ -364,7 +347,7 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
     @Override
     public int write(ByteBuffer src) throws IOException {
 
-        if (!initialHSComplete) {
+        if (!handshakeComplete) {
 
             //Check if this is the handshake message
             if(handShakeMsg){
@@ -390,19 +373,19 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
     private int doWrite(ByteBuffer src) throws IOException {
         int retValue = 0;
 
-        if (outNetBB.hasRemaining() && !tryFlush(outNetBB)) {
+        if (outgoingByteBuffer.hasRemaining() && !tryFlush(outgoingByteBuffer)) {
             return retValue;
         }
 
         /*
         * The data buffer is empty, we can reuse the entire buffer.
         */
-        outNetBB.clear();
+        outgoingByteBuffer.clear();
 
-        final SSLEngineResult result = sslEngine.wrap(src, outNetBB);
+        final SSLEngineResult result = theSSLEngine.wrap(src, outgoingByteBuffer);
         retValue = result.bytesConsumed();
 
-        outNetBB.flip();
+        outgoingByteBuffer.flip();
 
         switch (result.getStatus()) {
 
@@ -422,8 +405,8 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
         * it's been selected.  Odds of a write buffer being full
         * is less than a read buffer being empty.
         */
-        while (outNetBB.hasRemaining()) {
-            tryFlush(outNetBB);
+        while (outgoingByteBuffer.hasRemaining()) {
+            tryFlush(outgoingByteBuffer);
             try {
                 Thread.sleep(10);
             } catch (InterruptedException ex) {}
@@ -441,12 +424,12 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
     public boolean dataFlush() throws IOException {
         boolean fileFlushed = true;
 
-        if (outNetBB.hasRemaining()) {
-            tryFlush(outNetBB);
+        if (outgoingByteBuffer.hasRemaining()) {
+            tryFlush(outgoingByteBuffer);
         }
 
         theSocketChannel.socket().getOutputStream().flush();
-        return (fileFlushed && !outNetBB.hasRemaining());
+        return (fileFlushed && !outgoingByteBuffer.hasRemaining());
     }
 
     /*
@@ -465,11 +448,11 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
         try {
             
             if (!shutdown) {
-                sslEngine.closeOutbound();
+                theSSLEngine.closeOutbound();
                 shutdown = true;
             }
 
-            if (outNetBB.hasRemaining() && tryFlush(outNetBB)) {
+            if (outgoingByteBuffer.hasRemaining() && tryFlush(outgoingByteBuffer)) {
                 return false;
             }
 
@@ -477,26 +460,26 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
             * By RFC 2616, we can "fire and forget" our close_notify
             * message, so that's what we'll do here.
             */
-            outNetBB.clear();
-            result = sslEngine.wrap(handshakeBB, outNetBB);
+            outgoingByteBuffer.clear();
+            result = theSSLEngine.wrap(handshakeByteBuffer, outgoingByteBuffer);
             if (result.getStatus() != Status.CLOSED) {
                 throw new SSLException("Improper close state");
             }
-            outNetBB.flip();
+            outgoingByteBuffer.flip();
 
             /*
             * We won't wait for a select here, but if this doesn't work,
             * we'll cycle back through on the next select.
             */
-            if (outNetBB.hasRemaining()) {
-                tryFlush(outNetBB);
+            if (outgoingByteBuffer.hasRemaining()) {
+                tryFlush(outgoingByteBuffer);
             }
             
         } finally {
             close();
         }
         
-        return (!outNetBB.hasRemaining() && (result.getHandshakeStatus() != HandshakeStatus.NEED_WRAP));
+        return (!outgoingByteBuffer.hasRemaining() && (result.getHandshakeStatus() != HandshakeStatus.NEED_WRAP));
     }
 
 
@@ -504,7 +487,7 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
     * Begins the handshake process
     */
     public void beginHandshake() throws SSLException {
-        sslEngine.beginHandshake();
+        theSSLEngine.beginHandshake();
     }
 
     /*
@@ -517,19 +500,19 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
         DebugPrinter.printMessage( this.getClass().getSimpleName(), "Wrapping.");
 
         // The flush above guarantees the out buffer to be empty
-        outNetBB.clear();
-        result = sslEngine.wrap(handshakeBB, outNetBB);
-        outNetBB.flip();
+        outgoingByteBuffer.clear();
+        result = theSSLEngine.wrap(handshakeByteBuffer, outgoingByteBuffer);
+        outgoingByteBuffer.flip();
 
         HandshakeStatus currStatus = result.getHandshakeStatus();
         if(currStatus == HandshakeStatus.FINISHED){
 
-            initialHSComplete = true;
+            handshakeComplete = true;
             DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
 
             //Flush the buffer so that the client will get a finished flag too
-            if (outNetBB.hasRemaining()){
-                tryFlush(outNetBB);
+            if (outgoingByteBuffer.hasRemaining()){
+                tryFlush(outgoingByteBuffer);
             }
 
             //Set the state and change to read
@@ -560,6 +543,8 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
 
     }
 
+    //==========================================================================
+    /**
     /*
     * Called when the SSL engine needs to unwrap data
     *
@@ -571,10 +556,10 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
 
         // Don't need to resize requestBB, since no app data should
         try {
-            synchronized(inNetBB){
-                inNetBB.flip();
-                result = sslEngine.unwrap(inNetBB, requestBB);
-                inNetBB.compact();
+            synchronized(incomingByteBuffer){
+                incomingByteBuffer.flip();
+                result = theSSLEngine.unwrap(incomingByteBuffer, theRequestByteBuffer);
+                incomingByteBuffer.compact();
             } 
             
         } catch(RuntimeException ex ){
@@ -598,7 +583,7 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
                         break;
 
                     case FINISHED:
-                        initialHSComplete = true;
+                        handshakeComplete = true;
                         DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
 
                         //Set the state and change to read
@@ -643,7 +628,7 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
     */
     public void taskFinished(SelectionKey passedKey) {
 
-        HandshakeStatus currStatus = sslEngine.getHandshakeStatus();
+        HandshakeStatus currStatus = theSSLEngine.getHandshakeStatus();
 
         try {
 
@@ -651,13 +636,13 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
                 case NEED_UNWRAP:
 
                     // Don't need to resize requestBB, since no app data should
-                    if(!outNetBB.hasRemaining()){
+                    if(!outgoingByteBuffer.hasRemaining()){
                         doUnwrap(passedKey);
                     }
                     break;
 
                 case NEED_WRAP:
-                    if(!outNetBB.hasRemaining())  {
+                    if(!outgoingByteBuffer.hasRemaining())  {
 
                         // Wrap up the next data and change to read
                         doWrap(passedKey);
@@ -665,7 +650,7 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
                     break;
                     
                 case FINISHED:
-                    initialHSComplete = true;
+                    handshakeComplete = true;
                     DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
 
                     //Set the state and change to read

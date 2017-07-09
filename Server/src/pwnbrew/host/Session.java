@@ -46,16 +46,16 @@ package pwnbrew.host;
 
 import java.util.Date;
 import pwnbrew.misc.Constants;
-import pwnbrew.xmlBase.XmlBase;
+import pwnbrew.xml.XmlObject;
 
 /**
  *
  *  
  */
-public class Session extends XmlBase {
+public class Session extends XmlObject {
     
-    private static final String ATTRIBUTE_CheckInDate = "CheckinDate";
-    private static final String ATTRIBUTE_DisconnectedDate = "DisconnectedDate";
+    private static final String CHECK_IN_DATE = "CheckinDate";
+    private static final String DISCONNECT_DATE = "DisconnectedDate";
     
     // ========================================================================
     /**
@@ -64,10 +64,10 @@ public class Session extends XmlBase {
     public Session() {
         
         //Add the attributes
-        theAttributeMap.put( ATTRIBUTE_CheckInDate,  Constants.CHECKIN_DATE_FORMAT.format( new Date() )  );
+        thePropertyMap.put( CHECK_IN_DATE,  Constants.CHECKIN_DATE_FORMAT.format( new Date() )  );
         
         //Add the attributes
-        theAttributeMap.put( ATTRIBUTE_DisconnectedDate,  ""  );
+        thePropertyMap.put( DISCONNECT_DATE,  ""  );
     }
     
     //===============================================================
@@ -77,7 +77,7 @@ public class Session extends XmlBase {
      * @return 
     */
     public String getCheckInTime(){
-        return getAttribute( ATTRIBUTE_CheckInDate );
+        return getProperty( CHECK_IN_DATE );
     }
     
     //===============================================================
@@ -87,7 +87,7 @@ public class Session extends XmlBase {
      * @param passedDate 
      */
     public void setCheckInDate( String passedDate) {
-        setAttribute( ATTRIBUTE_CheckInDate, passedDate);
+        setProperty( CHECK_IN_DATE, passedDate);
     }
     
     //===============================================================
@@ -97,7 +97,7 @@ public class Session extends XmlBase {
      * @return 
      */
     public String getDisconnectedTime(){
-        return getAttribute( ATTRIBUTE_DisconnectedDate );
+        return getProperty( DISCONNECT_DATE );
     }
     
     //===============================================================
@@ -107,7 +107,7 @@ public class Session extends XmlBase {
      * @param passedDate 
      */
     public void setDisconnectedTime( String passedDate) {
-        setAttribute( ATTRIBUTE_DisconnectedDate, passedDate);
+        setProperty( DISCONNECT_DATE, passedDate);
     }
  
 }

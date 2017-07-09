@@ -51,7 +51,7 @@ import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.xmlBase.ServerConfig;
+import pwnbrew.xml.ServerConfig;
 
 /**
  *

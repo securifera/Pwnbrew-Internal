@@ -59,7 +59,6 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import pwnbrew.utilities.Constants;
-import pwnbrew.utilities.NetworkInterfaceUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
@@ -121,10 +120,10 @@ public final class Hello extends ControlMessage {
             aSB = new StringBuilder();
             NetworkInterface theInterface = anEnum.nextElement();
             
-            byte[] macAddressArr = NetworkInterfaceUtilities.getHardwareAddress_SPECIALIZED(theInterface);
+            byte[] macAddressArr = Utilities.getCachedHardwareAddress(theInterface);
                 
             //Convert the mac to a string a add it to the message
-            String hexString = NetworkInterfaceUtilities.convertHexBytesToString(macAddressArr);
+            String hexString = Utilities.convertHexBytesToString(macAddressArr);
             if(hexString == null){
                 hexString = "";
             }

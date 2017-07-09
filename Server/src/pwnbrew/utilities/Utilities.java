@@ -36,11 +36,9 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-
 package pwnbrew.utilities;
 
-import pwnbrew.xmlBase.JarItemException;
+import pwnbrew.xml.JarItemException;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.beans.IntrospectionException;
@@ -54,37 +52,26 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.ByteBuffer;
 import java.security.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import javax.imageio.ImageIO;
-import pwnbrew.exception.NoSuchValidationException;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostFactory;
-import pwnbrew.library.LibraryItemController;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
-import pwnbrew.misc.Base64Converter;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
-import pwnbrew.xmlBase.XmlBase;
-import pwnbrew.exception.XmlBaseCreationException;
-import pwnbrew.xmlBase.XmlBaseFactory;
+import pwnbrew.xml.XmlObject;
+import pwnbrew.exception.XmlObjectCreationException;
+import pwnbrew.xml.XmlObjectFactory;
 import pwnbrew.misc.IdGenerator;
 import pwnbrew.network.control.messages.Payload;
 import pwnbrew.network.control.messages.SendStage;
-import pwnbrew.validation.StandardValidation;
-import pwnbrew.xmlBase.JarItem;
+import pwnbrew.xml.JarItem;
 
 
 /**
@@ -154,6 +141,77 @@ public class Utilities {
     //Local OS values...
     public static final String OsName    = System.getProperty( PROPERTY_OsName ).toLowerCase();
     private static final String JAVA_ARCH    = System.getProperty( PROPERTY_OsArch ).toLowerCase();
+    
+    //IPv4 address regular expressions...
+    private static final String REGEX_Ipv4Octet = "25[0-5]|2[0-4]\\d|[01]?\\d?\\d";
+    private static final String REGEX_Ipv4Address = "((" + REGEX_Ipv4Octet + ")\\.){3}(" + REGEX_Ipv4Octet + ")";
+
+    //Add port to IPv4
+    private static final String REGEX_PORT = "(6553[0-5]|655[0-2]\\d|65[0-4]\\d{2}|6[0-4]\\d{3}|5\\d{4}|[0-9]\\d{0,3})";
+    //Special Validation for Client
+    private static final String REGEX_Client_Connection = REGEX_Ipv4Address +"(:("+REGEX_PORT+"))";
+    
+    private final static ArrayList<String> theSubnetMaskList = new ArrayList<>();
+    static {
+
+        theSubnetMaskList.add( "0.0.0.0" );        //0        
+        theSubnetMaskList.add( "128.0.0.0" );        //1
+        theSubnetMaskList.add( "192.0.0.0" );        //2
+        theSubnetMaskList.add( "224.0.0.0" );        //3
+        theSubnetMaskList.add( "240.0.0.0" );        //4
+        theSubnetMaskList.add( "248.0.0.0" );        //5
+        theSubnetMaskList.add( "252.0.0.0" );        //6
+        theSubnetMaskList.add( "254.0.0.0" );        //7
+        theSubnetMaskList.add( "255.0.0.0" );        //8
+
+        theSubnetMaskList.add( "255.128.0.0" );      //9
+        theSubnetMaskList.add( "255.192.0.0" );      //10
+        theSubnetMaskList.add( "255.224.0.0" );      //11
+        theSubnetMaskList.add( "255.240.0.0" );      //12
+        theSubnetMaskList.add( "255.248.0.0" );      //13
+        theSubnetMaskList.add( "255.252.0.0" );      //14
+        theSubnetMaskList.add( "255.254.0.0" );      //15
+        theSubnetMaskList.add( "255.255.0.0" );      //16
+
+        theSubnetMaskList.add( "255.255.128.0" );    //17
+        theSubnetMaskList.add( "255.255.192.0" );    //18
+        theSubnetMaskList.add( "255.255.224.0" );    //19
+        theSubnetMaskList.add( "255.255.240.0" );    //20
+        theSubnetMaskList.add( "255.255.248.0" );    //21
+        theSubnetMaskList.add( "255.255.252.0" );    //22
+        theSubnetMaskList.add( "255.255.254.0" );    //23
+        theSubnetMaskList.add( "255.255.255.0" );    //24
+
+        theSubnetMaskList.add( "255.255.255.128" );  //25
+        theSubnetMaskList.add( "255.255.255.192" );  //26
+        theSubnetMaskList.add( "255.255.255.224" );  //27
+        theSubnetMaskList.add( "255.255.255.240" );  //28
+        theSubnetMaskList.add( "255.255.255.248" );  //29
+        theSubnetMaskList.add( "255.255.255.252" );  //30
+        theSubnetMaskList.add( "255.255.255.254" );  //31
+        theSubnetMaskList.add( "255.255.255.255" );  //32
+
+    }
+
+
+    // ==========================================================================
+    /**
+    * Gets the octet notation associated with the given integer subnet mask.
+    *
+    * @param passedMask the subnet mask in integer notation
+    * 
+    * @return the corresponding octet notation or NULL if the arguement is
+    * invalid
+    */
+    public static String get( int passedMask ) {
+
+        if( passedMask < 0 || 32 < passedMask ) { //If the given int is not a mask...
+            return null; //...the arguement is invalid
+        }
+
+        return theSubnetMaskList.get( passedMask ); //Return the mask's octet notation
+
+    }/* END get( int ) */
 
 
     //===========================================================================
@@ -303,7 +361,7 @@ public class Utilities {
      * 
      * @param payloadFile
      * @return 
-     * @throws pwnbrew.xmlBase.JarItemException 
+     * @throws pwnbrew.xml.JarItemException 
      */
     public static JarItem getJavaItem( File payloadFile ) throws JarItemException{
         
@@ -313,7 +371,7 @@ public class Utilities {
 
             try {                 
                 
-                aJarItem = (JarItem) XmlBaseFactory.instantiateClass( JarItem.class );
+                aJarItem = (JarItem) XmlObjectFactory.instantiateClass( JarItem.class );
                 aJarItem.setId( IdGenerator.next() );
                 String jarVersionString = "";
                 String jvmVersionString = "";
@@ -411,16 +469,16 @@ public class Utilities {
                             
                             if( jarType.equals( JarItem.STAGER_TYPE )){
                                 String aStr = localProperties.getProperty(Constants.STAGER_URL);
-                                try {
-                                    sun.misc.BASE64Decoder aDecoder = new sun.misc.BASE64Decoder();
-                                    byte[] decodedBytes = aDecoder.decodeBuffer(aStr);
-                                    String connectStr = new String(decodedBytes).replace("https://", "").trim();
-                                    boolean isValid = StandardValidation.validate( StandardValidation.KEYWORD_ClientConnect, connectStr);
-                                    if( !isValid )
-                                        throw new JarItemException("The JAR item does not contain a valid [IP Address:Port] connection string.");
-                                    
-                                } catch (NoSuchValidationException | LoggableException ex) {
-                                }
+
+                                sun.misc.BASE64Decoder aDecoder = new sun.misc.BASE64Decoder();
+                                byte[] decodedBytes = aDecoder.decodeBuffer(aStr);
+                                String connectStr = new String(decodedBytes).replace("https://", "").trim();
+
+
+                                boolean isValid = validateClientConnect(connectStr);
+                                if( !isValid )
+                                    throw new JarItemException("The JAR item does not contain a valid [IP Address:Port] connection string.");
+
                             }
                             
                             continue;
@@ -494,6 +552,25 @@ public class Utilities {
         }
         return aJarItem;
     }
+    
+     // ==========================================================================
+    /**
+     * Determines if the given String is a valid connection string. (ie. "172.16.254.1:80")
+     * <p>
+     * If the argument is null this method returns false.
+     *
+     * @param address the String to test
+     *
+     * @return {@code true} if the given String is a valid connection string; {@code false} otherwise
+     */
+    private static boolean validateClientConnect( String address ) {
+
+        if( address == null ) //If the String is null...
+            return false; //Do nothing
+
+        return address.matches( REGEX_Client_Connection ); //Determine if the String is a IPv4 address
+
+    }/* END validateClientConnect( String ) */
 
     //=======================================================================
     /**
@@ -679,176 +756,32 @@ public class Utilities {
         return aSB.toString();
     }
     
-    //****************************************************************************
+    // ==========================================================================
     /**
-    *   Wrapper function for simpleEncrypt that takes a string and returns a Base64 encoded String.
-     * @param clearText
-     * @param preSharedKey
-     * @return 
-     * @throws pwnbrew.log.LoggableException 
+    * 
+    * @param passedBytes
+    * @return
     */
-    public static String simpleEncrypt( String clearText, String preSharedKey) throws LoggableException {
+    public static String convertHexBytesToString( byte [] passedBytes ) {
+        if ( passedBytes == null )
+            return null;
         
-        try {
-            
-            byte[] dataToEncrypt = clearText.getBytes("US-ASCII");
-            byte[] encryptedData = simpleEncrypt( dataToEncrypt, preSharedKey );
-            return Base64Converter.encode(encryptedData);
-            
-        } catch (IOException ex){
-           throw new LoggableException(ex);
-        }
-    }
+        StringBuilder strBuf= new StringBuilder();
+        int byteInt;
+        for ( int i = 0; i < passedBytes.length; i++ ) {
 
-    //****************************************************************************
-    /**
-    * Takes a byte array and input key and encrypts using
-     * AES_Cipher 256
-     * @param dataToEncrypt
-     * @param preSharedKey
-     * @return 
-     * @throws pwnbrew.log.LoggableException 
-    */
-    public static byte[] simpleEncrypt( byte[] dataToEncrypt, String preSharedKey ) throws LoggableException {
+            byteInt = passedBytes[ i ];
+            byteInt = byteInt << 24;
+            byteInt = byteInt >>> 24;
 
-        byte[] encryptedData = null;
-        try {
-            Cipher theEncryptCipher = Cipher.getInstance( AES_CFB_ENCRYPTION  );
-            byte[] initVect = new byte[ 16 ];
-
-            if(dataToEncrypt != null && preSharedKey != null){
-                
-                //Get a 256 bit key for the preshared input
-                MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
-                
-                //Instantiate a secret key object from the SHA1 256 bit digest
-                byte[] encryptionKey = hash.digest(preSharedKey.getBytes("US-ASCII"));
-                SecretKeySpec key = new SecretKeySpec( encryptionKey, AES_Cipher );
-                IvParameterSpec ivSpec = new IvParameterSpec( initVect );
-                
-                try {
-                   theEncryptCipher.init( Cipher.ENCRYPT_MODE, key, ivSpec );
-                } catch (InvalidKeyException ex) {
-
-                   //Use 128 bit since the policy file is obviously not in place
-                   //for 256 bit encryption
-                   key = new SecretKeySpec(encryptionKey, 0, 16, AES_Cipher);
-                   theEncryptCipher = Cipher.getInstance( AES_CFB_ENCRYPTION  );
-                   theEncryptCipher.init( Cipher.ENCRYPT_MODE, key, ivSpec );
-                }
-
-                encryptedData = theEncryptCipher.doFinal( dataToEncrypt, 0, dataToEncrypt.length );
-            }
-
-        } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | 
-                InvalidAlgorithmParameterException | NoSuchAlgorithmException | 
-                NoSuchPaddingException | IOException ex) {
-           throw new LoggableException(ex);
+            //Add the byte as hex to the String
+            strBuf.append( byteInt < 16 ? "0" + Integer.toHexString( byteInt ) : Integer.toHexString( byteInt ) );
         }
 
-        return encryptedData;
-
+        return strBuf.toString().toUpperCase();
     }
-    
-      //****************************************************************************
-    /**
-     * Takes a base64 encrypted string and input key and returns the clear text after
-     * decoding the base 64 and decrypting using AES_Cipher 256.
-     * @param encryptedText
-     * @param preSharedKey
-     * @return 
-     * @throws pwnbrew.log.LoggableException 
-    */
-    public static String simpleDecrypt ( String encryptedText, String preSharedKey ) throws LoggableException {
-
-        String retVal = null;
-
-        try {
-           Cipher theDecryptCipher = Cipher.getInstance( AES_CFB_ENCRYPTION  );
-           byte[] initVect = new byte[ 16 ];
-
-           if(encryptedText != null && preSharedKey != null){
-
-              //Get a 256 bit key for the preshared input
-              MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
-              byte[] decryptionKey = hash.digest(preSharedKey.getBytes("US-ASCII"));
-
-              SecretKeySpec key = new SecretKeySpec( decryptionKey, AES_Cipher );
-              IvParameterSpec ivSpec = new IvParameterSpec( initVect );
-
-              try {
-                 theDecryptCipher.init( Cipher.DECRYPT_MODE, key, ivSpec );
-              } catch (InvalidKeyException ex) {
-
-                 //Use 128 bit since the policy file is obviously not in place
-                 //for 256 bit encryption
-                 key = new SecretKeySpec(decryptionKey, 0, 16, AES_Cipher);
-                 theDecryptCipher = Cipher.getInstance( AES_CFB_ENCRYPTION  );
-                 theDecryptCipher.init( Cipher.DECRYPT_MODE, key, ivSpec );
-              }
-
-              byte[] decodedBytes = Base64Converter.decode(encryptedText);
-              byte[] decryptedData = theDecryptCipher.doFinal( decodedBytes, 0, decodedBytes.length );
-              retVal = new String(decryptedData, "US-ASCII");
-           }
-           
-        } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException | NoSuchAlgorithmException | IOException ex) {
-           throw new LoggableException(ex);
-        }
-
-        return retVal;
-
-    }
-
-    //****************************************************************************
-    /**
-     * Takes a base64 encrypted string and input key and returns the clear text after
-     * decoding the base 64 and decrypting using AES_Cipher 256.
-     * @param encryptedText
-     * @param preSharedKey
-     * @return 
-     * @throws pwnbrew.log.LoggableException 
-    */
-    public static byte[] simpleDecrypt ( byte[] encryptedText, String preSharedKey ) throws LoggableException {
-
-        byte[] retVal = null;
-
-        try {
-           Cipher theDecryptCipher = Cipher.getInstance( AES_CFB_ENCRYPTION  );
-           byte[] initVect = new byte[ 16 ];
-
-           if(encryptedText != null && preSharedKey != null){
-
-              //Get a 256 bit key for the preshared input
-              MessageDigest hash = MessageDigest.getInstance(Constants.HASH_FUNCTION);
-              byte[] decryptionKey = hash.digest(preSharedKey.getBytes("US-ASCII"));
-
-              SecretKeySpec key = new SecretKeySpec( decryptionKey, AES_Cipher );
-              IvParameterSpec ivSpec = new IvParameterSpec( initVect );
-
-              try {
-                 theDecryptCipher.init( Cipher.DECRYPT_MODE, key, ivSpec );
-              } catch (InvalidKeyException ex) {
-
-                 //Use 128 bit since the policy file is obviously not in place
-                 //for 256 bit encryption
-                 key = new SecretKeySpec(decryptionKey, 0, 16, AES_Cipher);
-                 theDecryptCipher = Cipher.getInstance( AES_CFB_ENCRYPTION  );
-                 theDecryptCipher.init( Cipher.DECRYPT_MODE, key, ivSpec );
-              }
-
-              retVal = theDecryptCipher.doFinal( encryptedText, 0, encryptedText.length );
-           }
-           
-        } catch (IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException | NoSuchAlgorithmException | IOException ex) {
-           throw new LoggableException(ex);
-        }
-
-        return retVal;
-
-    }
-    
-    //****************************************************************************
+      
+    // ==========================================================================
     /**
      *   Returns the class path for the application.
      * 
@@ -1089,79 +1022,6 @@ public class Utilities {
 
         return rtnImage;
     }
-  
-    // ========================================================================
-    /**
-     * Returns the {@link LibraryItemController} in the given list that's controlling
-     * the {@link LibraryItem} that has the given name.
-     * <p>
-     * If either argument is null or empty, this method does nothing and returns null.
-     * 
-     * @param <T>
-     * @param controllers the list of {@code LibraryItemController}s to search
-     * @param itemName the name of the {@code LibraryItem}
-     * 
-     * @return the {@code LibraryItemController} in the given list that's controlling
-     * the {@code LibraryItem} having the given name; null if there isn't one
-     */
-     public static <T extends LibraryItemController> T findControllerByItemName( List<T> controllers, String itemName ) {
-        
-        if( controllers == null || controllers.isEmpty() )
-            return null;
-        
-        if( itemName == null || itemName.isEmpty() )
-            return null;
-        
-        T rtnT = null;
-        
-        for( T t : controllers ) { //For each controller...
-            
-            if( itemName.equals( t.getItemName() ) ) { //If the controller's item has the given name...
-                rtnT = t; //Return the controller
-                break; //Stop iterating throught the controllers
-            } 
-            
-        }
-
-        return rtnT;
-        
-    }/* END findControllerByItemName( List<T extends LibraryItemController>, String ) */
-
-    //****************************************************************************
-    /**
-    * Returns a string for the date depending on how distant from the current date
-     * @param passedDate
-     * @return 
-    */
-    public static String getCustomDateString(Date passedDate) {
-
-        String theDateStr;
-
-        Calendar currCalendarDate = Calendar.getInstance();
-        Calendar passedCalendarDate = Calendar.getInstance();
-
-        currCalendarDate.setTime(new Date());
-        passedCalendarDate.setTime(passedDate);
-
-        if(currCalendarDate.get(Calendar.YEAR) == passedCalendarDate.get(Calendar.YEAR) &&
-                currCalendarDate.get(Calendar.DAY_OF_YEAR) == passedCalendarDate.get(Calendar.DAY_OF_YEAR)){
-           theDateStr = new SimpleDateFormat("h:mm a").format(passedDate);
-        } else if(currCalendarDate.get(Calendar.YEAR) == passedCalendarDate.get(Calendar.YEAR) &&
-                (currCalendarDate.get(Calendar.DAY_OF_YEAR) - 1) == passedCalendarDate.get(Calendar.DAY_OF_YEAR) ){
-           theDateStr = "Yesterday";
-        } else if(currCalendarDate.get(Calendar.YEAR) == passedCalendarDate.get(Calendar.YEAR)){
-        
-           //Show just month
-           theDateStr = new SimpleDateFormat("MMMM d").format(passedDate);
-        
-        } else {
-            
-           //Show full
-           theDateStr = new SimpleDateFormat("MM/d/yyyy").format(passedDate);    
-        }
-
-        return theDateStr;
-    }
     
     // ==========================================================================
     /**
@@ -1181,9 +1041,9 @@ public class Utilities {
      * @throws java.net.SocketException 
     * @returna list of {@link Object}s reconstructed from the xml files in the library
     */
-    public static Map<Host, List<XmlBase>> rebuildLibrary() throws LoggableException, SocketException {
+    public static Map<Host, List<XmlObject>> rebuildLibrary() throws LoggableException, SocketException {
 
-        Map<Host, List<XmlBase>> rtnMap = new LinkedHashMap<>();
+        Map<Host, List<XmlObject>> rtnMap = new LinkedHashMap<>();
         
         File objDir = Directories.getObjectLibraryDirectory(); //Get the library directory
         if( objDir != null ) { //If the File for the directory was obtained...
@@ -1211,7 +1071,7 @@ public class Utilities {
                         if( theHostFile.exists() ){
                             
                             //Create the host file and remove it from the list
-                            aHost = (Host)XmlBaseFactory.createFromXmlFile( theHostFile);
+                            aHost = (Host)XmlObjectFactory.createFromXmlFile( theHostFile);
                             aHost.updateData(currHost);    
                             aHost.setConnected(true);
                             HostFactory.setLocalHost(aHost);
@@ -1230,7 +1090,7 @@ public class Utilities {
                         if( theHostFile.exists() ){
                             
                             //Create the host file and remove it from the list
-                            aHost = (Host)XmlBaseFactory.createFromXmlFile( theHostFile);
+                            aHost = (Host)XmlObjectFactory.createFromXmlFile( theHostFile);
                             fileList.remove(theHostFile);
                             
                         } else {
@@ -1239,24 +1099,23 @@ public class Utilities {
                         }
                     }
                     
-                    List<XmlBase> rtnList = new ArrayList<>();
+                    List<XmlObject> rtnList = new ArrayList<>();
                     for( File aFile : fileList ) { //For each File...
 
                         try {
 
-                            XmlBase anXB = XmlBaseFactory.createFromXmlFile( aFile ); //Reconstruct the XmlBase
-                            anXB.doPostCreation();
+                            XmlObject anXB = XmlObjectFactory.createFromXmlFile( aFile ); //Reconstruct the XmlObject
                             
                             //Add to the list
                             rtnList.add( anXB );                            
 
-                        } catch( XmlBaseCreationException ex ) {
+                        } catch( XmlObjectCreationException ex ) {
                             Log.log(Level.WARNING, NAME_Class, "rebuildLibrary()", ex.getMessage(), ex );
                         }
 
                     }
                     
-                    //Add the host and xmlbase list
+                    //Add the host and XmlObject list
                     rtnMap.put( aHost, rtnList );
                 }
             }

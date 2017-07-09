@@ -38,14 +38,14 @@ The copyright on this package is held by Securifera, Inc
 
 
 /*
- * XmlBase.java
+ * XmlObject.java
  *
  * Created on June 25, 2013, 11:21:41 PM
  */
 
-package pwnbrew.xmlBase;
+package pwnbrew.xml;
 
-import pwnbrew.exception.WriteFileException;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -55,150 +55,120 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import pwnbrew.generic.Identifiable;
 import pwnbrew.utilities.FileUtilities;
 
 
 /**
  *
  */
-abstract public class XmlBase implements Identifiable{
+abstract public class XmlObject {
 
-    //Attributes...
-    /** The attribute HashMap maps the attributes' names to their respective values.
-    * <p>
-    * The use of 'attributes' reflects the XML terminology in which each this=that
-    * pair in the start tag is called an attribute with 'this' being the name and
-    * 'that' being the value. */
-    //NOTE: HashMap is NOT synchronized, will allow null keys and values, and makes
-    //  no guarantees about the order of the entries when iterating.
-    protected final Map<String, String> theAttributeMap = new LinkedHashMap<>();
-    protected final Map<String, AttributeCollection> theAttributeCollectionMap = new LinkedHashMap<>();
+    protected final Map<String, String> thePropertyMap = new LinkedHashMap<>();
+    protected final Map<String, AttributeCollection> thePropertyCollectionMap = new LinkedHashMap<>();
 
-    /** The XmlBase's instance ID. */
-    private static final String ATT_Id = "Id";
-    public static final String ATTRIBUTE_Name = "Name";
+    public static final String OBJECT_ID = "Id";
+    public static final String OBJECT_NAME = "Name";
  
     // ==========================================================================
     /**
-    * Creates a new instance of {@link XmlBase}.
+    * Creates a new instance of {@link XmlObject}.
     */
-    public XmlBase() {
+    public XmlObject() {
 
         //Initialize attributes...
-        theAttributeMap.put( ATT_Id, "" );
-        theAttributeMap.put( ATTRIBUTE_Name, "");
+        thePropertyMap.put( OBJECT_ID, "" );
+        thePropertyMap.put(OBJECT_NAME, "");
 
-    }/* END CONSTRUCTOR() */
+    }
 
 
     // ==========================================================================
     /**
-    * Sets the attribute with the given name to the given value.
-    * <p>
-    * If the {@link XmlBase} does not have an attribute with the given name or if
-    * the 'name' argument is null, this method does nothing. If the 'value' argument
-    * is null, the attribute's value is set to the empty String.
+    * Sets the property with the given name to the given value.
     *
-    * @param name the name of the attribute to set
-    * @param value the value to give the attribute
+    * @param name the name of the property to set
+    * @param value the value to give the property
     */
-    public synchronized void setAttribute( String name, String value ) {
+    public synchronized void setProperty( String name, String value ) {
 
-        //NOTE: The condition below ensures this method will not add attributes.
-        if( theAttributeMap.get( name ) != null ) //If the key is already in the map...
-            theAttributeMap.put( name, ( value != null ? value : "" ) ); //Set the value of the attribute
+        if( thePropertyMap.get( name ) != null ) 
+            thePropertyMap.put( name, ( value != null ? value : "" ) ); 
 
-    }/* END setFieldValue( String, String ) */
-
+    }
 
     // ==========================================================================
     /**
-    * Returns the value of the attribute with the given name.
+    * Returns the value of the property with the given name.
     * <p>
     * If the given String is null, this method returns null.
     *
     * @param name the name of the attribute
     *
-    * @return the value of the attribute with the given name, null if the {@link XmlBase}
-    * has no such attribute
+    * @return the value of the property with the given name, null if the {@link XmlObject}
+    * has no such property
     */
-    public final synchronized String getAttribute( String name ) {
-        return theAttributeMap.get( name );
-    }/* END getFieldValue( String ) */
+    public final synchronized String getProperty( String name ) {
+        return thePropertyMap.get( name );
+    }
 
     // ==========================================================================
     /**
-    * Returns the value of the {@link XmlBase}'s Id attribute.
+    * Returns the value of the {@link XmlObject}'s Id.
     *
-    * @return the value of the {@code XmlBase}'s Id attribute
+    * @return the value of the {@code XmlObject}'s Id
     */
     public final String getId() {
-        return getAttribute( ATT_Id );
-    }/* END getId() */
-
+        return getProperty( OBJECT_ID );
+    }
 
     // ==========================================================================
     /**
-    * Sets the value of the {@link XmlBase}'s Id attribute to the given value.
-    * <p>
-    * If the given String is null, the Id attribute's value is set to the empty String.
+    * Sets the value of the {@link XmlObject}'s Id attribute to the given value.
     *
     * @param id the new id
     */
     public final void setId( String id ) {
-        setAttribute( ATT_Id, id );
-    }/* END setId( String ) */
-
+        setProperty( OBJECT_ID, id );
+    }
 
     // ==========================================================================
     /**
-    * Returns the value of the {@link XmlBase}'s Name attribute.
+    * Returns the value of the {@link XmlObject}'s Name
     *
-    * @return the value of the {@code XmlBase}'s Name attribute
+    * @return the value of the {@code XmlObject}'s Name
     */
-    @Override
     public final String getName() {
-        return getAttribute( ATTRIBUTE_Name );
-    }/* END getName() */
-
+        return getProperty(OBJECT_NAME );
+    }
 
     // ==========================================================================
     /**
-    * Sets the value of the {@link XmlBase}'s Name attribute to the given value.
-    * <p>
-    * If the given String is null, the Name attribute's value is set to the empty String.
+    * Sets the value of the {@link XmlObject}'s Name to the given value.
     *
      * @param name
     */
     public final void setName( String name ) {
-        setAttribute( ATTRIBUTE_Name, name );
-    }/* END setName( String ) */
-
-  // ===============================================
+        setProperty(OBJECT_NAME, name );
+    }
+    
+    // ===============================================
     /**
-    * Writes this object to the specified directory in XML format.  The file
-    * is given the InstanceID of the object as its filename.  To specify the
-    * filename, use {@link #writeSelfToDirectoryInXML(java.io.File, java.lang.String)}.
+    * Writes this object to the specified directory in XML format. 
     *
     * @param  targDirFile   the directory in which to store the file
     * @param  index   the location in the tree
     *
     * @return   an error message string, <code>null</code> if no errors occurred
-     * @throws java.io.IOException
-    *
-    * @see #writeSelfToDirectoryInXML(java.io.File, java.lang.String)
+    * @throws java.io.IOException
     */
     public String writeSelfToDisk( File targDirFile, int index ) throws IOException {
 
         String rtnStr = null;
-
         StringBuilder aSB = new StringBuilder();
         if(index != -1){
             aSB.append(Integer.toString(index));
         }
         aSB.append("_");
-
 
         String theObjId = getId(); //Get the object's instance ID
         if( theObjId != null ) { //If the String is not NULL...
@@ -210,7 +180,6 @@ abstract public class XmlBase implements Identifiable{
             if( !(new File(targDirFile, aSB.toString()).exists())){
 
                 File[] theFileList = targDirFile.listFiles();
-
                 if( theFileList != null ){
                     for(File aFile : theFileList){
                         String fileName = aFile.getName();
@@ -233,12 +202,12 @@ abstract public class XmlBase implements Identifiable{
 
         return rtnStr;
 
-    }/* END writeSelfToDirectoryInXML( File ) */
-
+    }
+    
 
     // ==========================================================================
     /**
-    * Writes a file with the given name containing the {@link XmlBase}'s data in
+    * Writes a file with the given name containing the {@link XmlObject}'s data in
     * the directory represented by the given {@link File}.
     *
     * @param directory a {@code File} representing the directory in which the file
@@ -250,7 +219,6 @@ abstract public class XmlBase implements Identifiable{
     * @throws IllegalArgumentException if the {@code File} is null or does not represent
     * a directory; if the file name is invalid
     * @throws IOException if an I/O error occurs
-    * @throws WriteFileException if the target file cannot be written to
     */
     public final synchronized File writeSelfToDisk( File directory, String fileName ) throws IOException {
 
@@ -279,7 +247,7 @@ abstract public class XmlBase implements Identifiable{
         targetFile.setWritable(true);
 
         if( FileUtilities.verifyCanWrite( targetFile ) == false ) //If the file cannot be written to...
-            throw new WriteFileException( "Cannot write to the file \"" + targetFile + "\"." );
+            throw new IOException( "Cannot write to the file \"" + targetFile + "\"." );
 
         //Block until we obtain a write lock
         RandomAccessFile randomAccessFile = new RandomAccessFile( targetFile, "rw" );
@@ -317,17 +285,11 @@ abstract public class XmlBase implements Identifiable{
       
         return targetFile;
 
-    }/* END writeSelfToDisk( File, String ) */
-
+    }
 
     // ==========================================================================
     /**
-    * Deletes the file representing this {@link XmlBase} from the specified directory.
-    * <p>
-    * This method looks for a file that has a name matching the value returned by
-    * {@link #generateFileName()}. If such a file is found it is deleted.
-    * <p>
-    * If the given {@code File} is null, this method does nothing and returns false.
+    * Deletes the file representing this {@link XmlObject} from the specified directory.
     *
     * @param directory the directory from which to delete the file
     *
@@ -335,11 +297,6 @@ abstract public class XmlBase implements Identifiable{
     * otherwise, specifically if the given {@code File} represents a file or a non-existent
     * directory or if no file is found
     *
-    * @throws IllegalArgumentException if the argument is null
-    * @throws SecurityException if a security manager exists and its {@link
-    * java.lang.SecurityManager#checkDelete} method denies delete access to the file
-    *
-    * @see #generateFileName()
     */
     public boolean deleteSelfFromDirectory( File directory ) {
 
@@ -375,86 +332,71 @@ abstract public class XmlBase implements Identifiable{
 
                 }
 
-            } //End of "if( theDirectory.isDirectory() ) { //If the given File is a directory..."
-
-        } //End of "if( theDirectory.exists() ) { //If the given File exists..."
-
+            }
+        } 
         return rtnBool;
 
-    }/* END deleteSelfFromDirectory( File ) */
-
+    }
 
     // ==========================================================================
     /**
-    * Adds the given {@link XmlBase} to this {@code XmlBase} or updates an existing
+    * Adds the given {@link XmlObject} to this {@code XmlObject} or updates an existing
     * component.
     * <p>
-    * The behavior of this method is to be refined by subclasses of {@code XmlBase}.
+    * The behavior of this method is to be refined by subclasses of {@code XmlObject}.
     *
     * @param component the component to add/update
     */
-    public void addUpdateComponent( XmlBase component ) {
+    public void addChildObject( XmlObject component ) {
 
-        if( component instanceof AttributeCollection ) { //If the XmlBase is a AttributeCollection...
-            theAttributeCollectionMap.put(component.getName(), (AttributeCollection)component);
-        }
+        if( component instanceof AttributeCollection )
+            thePropertyCollectionMap.put(component.getName(), (AttributeCollection)component);        
 
-    }/* END addUpdateComponent( XmlBase ) */
+    }
 
 
     // ==========================================================================
     /**
-    * Removes references to the given {@link XmlBase} from this {@code XmlBase}.
-    * <p>
-    * The behavior of this method is to be defined by subclasses of {@code XmlBase}.
-    * This version does nothing and always returns <tt>false</tt>.
+    * Removes references to the given {@link XmlObject} from this {@code XmlObject}.
     *
     * @param component the component to remove
     * 
-    * @return <tt>true</tt> if references to the given {@code XmlBase} were removed,
+    * @return <tt>true</tt> if references to the given {@code XmlObject} were removed,
     * <tt>false</tt> otherwise
     */
-    public boolean removeComponent( XmlBase component ) {
+    public boolean removeChildObject( XmlObject component ) {
 
         boolean retVal = false;
-        if( component instanceof AttributeCollection ) { //If the XmlBase is a AttributeCollection...
-            theAttributeCollectionMap.remove(component.getName());
+        if( component instanceof AttributeCollection ) { //If the XmlObject is a AttributeCollection...
+            thePropertyCollectionMap.remove(component.getName());
             retVal = true;
         }
 
         return retVal;
-    }/* END removeComponent( XmlBase ) */
+    }
 
     // ==========================================================================
     /**
-    * Returns a list of the {@link XmlBase}'s components.
-    * <p>
-    * The list this method returns is to be defined by subclasses. Generally, the
-    * first line in the subclasses' implementations of this method should be a call
-    * to "super.getXmlComponents()" so that each Class need be concerned with adding
-    * only the components it defines.
-    * 
-     * @param <T>
-    * @return an empty {@code ArrayList<XmlBase>}
+    * @param <T>
+    * @return an empty {@code ArrayList<XmlObject>}
     */
-    public <T extends XmlBase> List<T> getXmlComponents() {
+    public <T extends XmlObject> List<T> getXmlObjects() {
 
         List<T> rtnList = new ArrayList<>();
-        synchronized( theAttributeCollectionMap ){
-            if(theAttributeCollectionMap.size() > 0){
-                for(String aKey : theAttributeCollectionMap.keySet()){
-                    rtnList.add((T)theAttributeCollectionMap.get(aKey));
+        synchronized( thePropertyCollectionMap ){
+            if(thePropertyCollectionMap.size() > 0){
+                for(String aKey : thePropertyCollectionMap.keySet()){
+                    rtnList.add((T)thePropertyCollectionMap.get(aKey));
                 }
             }
         }
 
         return rtnList;
-    }/* END getXmlComponents() */
-
+    }
 
     // ==========================================================================
     /**
-    * Generates the XML data for this {@link XmlBase} and its {@code XmlBase} components.
+    * Generates the XML data for this {@link XmlObject} and its {@code XmlObject} components.
     *
     * @return a {@code String} containing the XML data representing this object
     */
@@ -466,12 +408,11 @@ abstract public class XmlBase implements Identifiable{
 
         return rtnStr;
 
-    }/* END getXml() */
-
+    }
 
     // ==========================================================================
     /**
-    * Generates the XML data for this {@link XmlBase} and its {@code XmlBase} components
+    * Generates the XML data for this {@link XmlObject} and its {@code XmlObject} components
     * and appends it to the given {@link StringBuilder}.
     *
     * @param stringBuilder the {@link StringBuilder} to which the XML data is to
@@ -485,10 +426,10 @@ abstract public class XmlBase implements Identifiable{
             throw new IllegalArgumentException( "The StringBuilder cannot be null." );
         }
 
-        List<XmlBase> componentList = getXmlComponents(); //Get the XMLable components
+        List<XmlObject> componentList = getXmlObjects(); //Get the XMLable components
         if(  componentList == null || componentList.isEmpty() ) {
 
-            appendXml_OneLine( stringBuilder ); //Append the XML data for this XmlBase in the one-line format
+            appendXml_OneLine( stringBuilder ); //Append the XML data for this XmlObject in the one-line format
 
         } else { //If there are components or character data...
 
@@ -496,7 +437,7 @@ abstract public class XmlBase implements Identifiable{
             appendXmlStartTag( stringBuilder ); //Add the start tag
 
             //The components...
-            for( XmlBase anXB : componentList ) { //For each component...
+            for( XmlObject anXB : componentList ) { //For each component...
 
                 if( anXB != null ) { //If the component is not null...
 
@@ -511,20 +452,12 @@ abstract public class XmlBase implements Identifiable{
 
         }
 
-    //NOTE: While it may be tempting to add line separators between the components
-    //  so the data will have a nice, structured, indented look when you view it
-    //  in a text editor, don't do it. The XML parser will assume the line separator
-    //  is the beginning of the character data for the next component. A known sign
-    //  of this situation (indeed how it was discovered) is the appearance of an
-    //  unexpected '&#xa;' (the XML-flavored '\n') as the first part of the character
-    //  data in the following element.
-
-    }/* END getXml( StringBuilder ) */  
+    }
 
 
     // ==========================================================================
     /**
-    * Generates the XML data for this {@link XmlBase} in the single-line format and
+    * Generates the XML data for this {@link XmlObject} in the single-line format and
     * appends it to the given {@code StringBuilder}.
     *
     * @param stringBuilder the {@link StringBuilder} to which the XML data is to
@@ -542,15 +475,14 @@ abstract public class XmlBase implements Identifiable{
 
         stringBuilder.insert( stringBuilder.length() - 1, "/" ); //Change the start tag to a one-line element
 
-    }/* END appendXml_OneLine( StringBuilder ) */
-
+    }
 
     // ==========================================================================
     /**
     * Generates the XML start tag for this object and appends it to the given {@link StringBuilder}.
     * <p>
     * In the XML generated by this method, each attribute represents a {@link Field}
-    * of this {@code XmlBase}.
+    * of this {@code XmlObject}.
     *
     * @param stringBuilder the {@link StringBuilder} to which the XML data is to
     * be appended
@@ -567,9 +499,9 @@ abstract public class XmlBase implements Identifiable{
         stringBuilder.append( "<" ).append( this.getClass().getSimpleName() );
 
         //Add the attributes...
-        for( String name : theAttributeMap.keySet() ) { //For each attribute name...
+        for( String name : thePropertyMap.keySet() ) { //For each attribute name...
 
-            String value = theAttributeMap.get( name ); //Get the value mapped to the name
+            String value = thePropertyMap.get( name ); //Get the value mapped to the name
             if( value != null ) { //If a value was obtained...
 
                 stringBuilder.append( " " ); //Add a space
@@ -579,17 +511,13 @@ abstract public class XmlBase implements Identifiable{
                 stringBuilder.append( "\"" ); //Add the close quote
 
             } else { //If no value was obtained...
-            //The attribute name/value pair was not added (or was removed) from the
-            //  attribute HashMap.
-            //Error?
             }
 
         }
 
         stringBuilder.append( ">" ); //End the start tag
 
-    }/* END appendXmlStartTag( StringBuilder ) */
-
+    }
 
     // ==========================================================================
     /**
@@ -608,14 +536,14 @@ abstract public class XmlBase implements Identifiable{
 
         stringBuilder.append( "</" ).append( this.getClass().getSimpleName() ).append( ">" );
 
-    }/* END appendXmlEndTag( StringBuilder ) */
-
+    }
+    
     // ==========================================================================
     /**
     * Generates the XML start tag for this object and writes it to the given {@link RandomAccessFile}.
     * <p>
     * In the XML generated by this method, each attribute represents a {@link Field}
-    * of this {@code XmlBase}.
+    * of this {@code XmlObject}.
     *
     * @param passedFile the {@link RandomAccessFile} to which the XML data is to
     * be written
@@ -634,9 +562,9 @@ abstract public class XmlBase implements Identifiable{
         StringBuilder stringBuilder = new StringBuilder().append( "<" ).append( this.getClass().getSimpleName() );
 
         //Add the attributes...
-        for( String name : theAttributeMap.keySet() ) { //For each attribute name...
+        for( String name : thePropertyMap.keySet() ) { //For each attribute name...
 
-            String value = theAttributeMap.get( name ); //Get the value mapped to the name
+            String value = thePropertyMap.get( name ); //Get the value mapped to the name
             if( value != null ) { //If a value was obtained...
 
                 stringBuilder.append( " " ); //Add a space
@@ -646,9 +574,6 @@ abstract public class XmlBase implements Identifiable{
                 stringBuilder.append( "\"" ); //Add the close quote
 
             } else { //If no value was obtained...
-            //The attribute name/value pair was not added (or was removed) from the
-            //  attribute HashMap.
-            //Error?
             }
 
         }
@@ -661,8 +586,7 @@ abstract public class XmlBase implements Identifiable{
         }
         passedFile.write(stringBuilder.toString().getBytes("US-ASCII"));
 
-    }/* END writeXmlStartTag( RandomAccessFile ) */
-
+    }
 
     // ==========================================================================
     /**
@@ -681,9 +605,7 @@ abstract public class XmlBase implements Identifiable{
 
         passedFile.write(new StringBuilder().append( "</" ).append( this.getClass().getSimpleName() ).append( ">" ).toString().getBytes("US-ASCII"));
 
-    }/* END writeXmlEndTag( RandomAccessFile ) */
-
-
+    }
 
     @Override
     // ==========================================================================
@@ -691,18 +613,12 @@ abstract public class XmlBase implements Identifiable{
      *  Get the string representation
      */
     public String toString() {
-        return getAttribute(ATTRIBUTE_Name);
+        return getProperty(OBJECT_NAME);
     }
 
     // ==========================================================================
     /**
-     * 
-     */
-    public void doPostCreation(){}
-
-    // ==========================================================================
-    /**
-    * Tells the XmlBase to write its bytes to the passed random access file
+    * Tells the XmlObject to write its bytes to the passed random access file
     *
     * @param randomAccessFile the {@link RandomAccessFile} to which the XML data is to
     * be written
@@ -714,7 +630,7 @@ abstract public class XmlBase implements Identifiable{
         if( randomAccessFile == null ) //If the StringBuilder is null...
             throw new IllegalArgumentException( "The StringBuilder cannot be null." );
 
-        List<XmlBase> componentList = getXmlComponents(); //Get the XMLable components
+        List<XmlObject> componentList = getXmlObjects(); //Get the XMLable components
         if(  componentList == null || componentList.isEmpty() )
             writeXmlStartTag( randomAccessFile, true ); //Append the XML start tag
         else { //If there are components or character data...
@@ -722,7 +638,7 @@ abstract public class XmlBase implements Identifiable{
             //The start tag...
             writeXmlStartTag( randomAccessFile, false ); //Add the start tag
 
-            for( XmlBase anXB : componentList )//For each component...
+            for( XmlObject anXB : componentList )//For each component...
                 if( anXB != null ) //If the component is not null...
                     //Add the XML data for the component...
                     anXB.writeXml( randomAccessFile ); //Add the components XML (recursive call)
@@ -732,5 +648,4 @@ abstract public class XmlBase implements Identifiable{
         }
     }
 
-
-}/* END CLASS XmlBase */
+}
