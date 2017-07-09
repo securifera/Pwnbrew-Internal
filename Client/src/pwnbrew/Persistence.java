@@ -58,12 +58,7 @@ import pwnbrew.utilities.Utilities;
 final public class Persistence {
 
     private static final String NAME_Class = Persistence.class.getSimpleName();
-
-    private static void Sleep(int i) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    
+   
     // ==========================================================================
     /**
      * Constructor
@@ -215,4 +210,4 @@ final public class Persistence {
 
     }
 
-}/* END CLASS Directories */
+}

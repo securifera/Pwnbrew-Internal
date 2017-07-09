@@ -253,4 +253,4 @@ public class ClientConfig {
         return localConf;
     } 
 
-}/* END CLASS ClientConfig */
+}
