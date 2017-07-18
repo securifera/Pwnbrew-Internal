@@ -211,22 +211,26 @@ public class FileJTable extends JTable {
             @Override
             public void actionPerformed(ActionEvent e){
 
-                int[] selRowIndexes = theJTable.getSelectedRows();
-                DefaultTableModel theTableModel = (DefaultTableModel) theJTable.getModel();
-                for( int anInt : selRowIndexes ){
-                     
-                    //Converts the view index for the row to the underlying model
-                    anInt = theJTable.convertRowIndexToModel(anInt);            
-                    FileNode aFileNode = (FileNode)theTableModel.getValueAt(anInt, 0);
-                    RemoteFile theFile = aFileNode.getFile();
-                    String filePath = theFile.getAbsolutePath();
-                    theListener.performFileOperation( FileOperation.DELETE, filePath, "" );
+                String theMessage = "Are you sure you want to delete the selected file(s)?";
+                int dialogValue = JOptionPane.showConfirmDialog(null, theMessage, "Delete file(s)?", JOptionPane.YES_NO_OPTION);
+                if ( dialogValue == JOptionPane.YES_OPTION ){
+                   
+                    int[] selRowIndexes = theJTable.getSelectedRows();
+                    DefaultTableModel theTableModel = (DefaultTableModel) theJTable.getModel();
+                    for( int anInt : selRowIndexes ){
 
+                        //Converts the view index for the row to the underlying model
+                        anInt = theJTable.convertRowIndexToModel(anInt);            
+                        FileNode aFileNode = (FileNode)theTableModel.getValueAt(anInt, 0);
+                        RemoteFile theFile = aFileNode.getFile();
+                        String filePath = theFile.getAbsolutePath();
+                        theListener.performFileOperation( FileOperation.DELETE, filePath, "" );
+
+                    }
                 }
                
             }
         };
-//        theJPopup.add(deleteAction);
 
         final Action renameAction = new AbstractAction("Rename"){ 
             @Override

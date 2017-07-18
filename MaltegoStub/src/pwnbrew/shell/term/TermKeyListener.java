@@ -489,7 +489,7 @@ class TermKeyListener {
                     break;
 
                 case KeyEvent.VK_SHIFT:
-                    break;
+                    return;
 
                 case KeyEvent.VK_CONTROL:
                     return;
