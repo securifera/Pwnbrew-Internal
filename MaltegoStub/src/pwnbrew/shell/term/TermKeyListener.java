@@ -115,14 +115,14 @@ class TermKeyListener {
         mKeyCodes[KeyEvent.VK_PAGE_UP] = "\033[5~";
         mKeyCodes[KeyEvent.VK_PAGE_DOWN] = "\033[6~";
         //mKeyCodes[KeyEvent.VK_DELETE]= "\177";
-        mKeyCodes[KeyEvent.VK_NUM_LOCK] = "\033OP";
+        //mKeyCodes[KeyEvent.VK_NUM_LOCK] = "\033OP";
         mKeyCodes[KeyEvent.VK_DIVIDE] = "/";
         mKeyCodes[KeyEvent.VK_MULTIPLY] = "*";
         mKeyCodes[KeyEvent.VK_SUBTRACT] = "-";
-        mKeyCodes[KeyEvent.VK_ADD] = "+";
-        mKeyCodes[KeyEvent.VK_ENTER] = "\015";
-        mKeyCodes[KeyEvent.VK_EQUALS] = "=";
-        mKeyCodes[KeyEvent.VK_COMMA] = ",";
+        //mKeyCodes[KeyEvent.VK_ADD] = "+";
+        //mKeyCodes[KeyEvent.VK_ENTER] = "\015";
+        //mKeyCodes[KeyEvent.VK_EQUALS] = "=";
+        //mKeyCodes[KeyEvent.VK_COMMA] = ",";
 /*
         mKeyCodes[KEYCODE_NUMPAD_DOT] = ".";
         mKeyCodes[KEYCODE_NUMPAD_0] = "0";
@@ -478,37 +478,40 @@ class TermKeyListener {
      */
     public void keyDown( int keyCode, int keyChar, KeyEvent event, boolean appMode ) throws IOException {
 
-        int result = keyChar;
-        if( keyCode != -1 ){
-            if (event != null && handleKeyCode(keyCode, event, appMode)) {
-                return;
-            }
-
-            switch (keyCode) {
-                case KeyEvent.VK_ALT:
-                    break;
-
-                case KeyEvent.VK_SHIFT:
+        if( keyChar != 65535 ){
+            mTermSession.write(keyChar);
+        } else {
+            int result = keyChar;
+            if( keyCode != -1 ){
+                if (event != null && handleKeyCode(keyCode, event, appMode)) {
                     return;
-
-                case KeyEvent.VK_CONTROL:
-                    return;
-
-                case KeyEvent.VK_CAPS_LOCK:
-                    // Ignore the capslock key.
-                    return;
-
-                default: {
-                    break;
                 }
-            }
-            
-            boolean effectiveControl = mControlKey.isActive();
-            result = mapControlChar(effectiveControl, result);
-        }
 
-        if (result >= 0)
-            mTermSession.write(result);
+                switch (keyCode) {
+                    case KeyEvent.VK_ALT:
+                        return;
+
+                    case KeyEvent.VK_SHIFT:
+                        return;
+
+                    case KeyEvent.VK_CONTROL:
+                        return;
+
+                    case KeyEvent.VK_CAPS_LOCK:
+                        // Ignore the capslock key.
+                        return;
+
+                    default: {
+                        break;
+                    }
+                }
+
+                boolean effectiveControl = mControlKey.isActive();
+                result = mapControlChar(effectiveControl, result);
+            }
+            if (result >= 0)
+                mTermSession.write(result);
+        }
         
     }
 
