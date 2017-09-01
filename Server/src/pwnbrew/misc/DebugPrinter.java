@@ -76,7 +76,6 @@ public class DebugPrinter implements Runnable {
         enabled = passedBool;
         if( !passedBool && staticSelf != null ){
             DebugPrinter.shutdown();
-            staticSelf = null;
         }
     }
     
@@ -185,6 +184,8 @@ public class DebugPrinter implements Runnable {
               }
            }
        }
+       shutdownRequested = false;       
+       staticSelf = null;
     }
 
     //===============================================================

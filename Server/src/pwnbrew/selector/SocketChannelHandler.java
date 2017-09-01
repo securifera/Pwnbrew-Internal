@@ -344,7 +344,7 @@ public class SocketChannelHandler implements Selectable {
                                             ServerPortRouter aSPR = (ServerPortRouter)thePortRouter;
                                             aSPR.registerHandler(srcHostId, parentId, ConnectionManager.STAGE_CHANNEL_ID, this);        
                                         }                                      
-                                    }
+                                    } 
                                 
                                     //Get dest id
                                     byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
@@ -424,8 +424,10 @@ public class SocketChannelHandler implements Selectable {
                         //If handler exist but is not this one
                         } else {
 
-                            if( theSCW.getSocketChannel().socket().getInetAddress().equals( 
-                                    aHandler.getSocketChannelWrapper().getSocketChannel().socket().getInetAddress())){
+                            SocketChannel sockChan = theSCW.getSocketChannel();
+                            SocketChannel handlerChan = aHandler.getSocketChannelWrapper().getSocketChannel();
+                            if( sockChan != null && handlerChan != null && sockChan.socket().getInetAddress().equals( 
+                                    handlerChan.socket().getInetAddress())){
 
                                 //Register the new one
                                 rootHostId = passedClientId;
