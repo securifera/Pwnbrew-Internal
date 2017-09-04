@@ -424,18 +424,23 @@ public class SocketChannelHandler implements Selectable {
                         //If handler exist but is not this one
                         } else {
 
-                            SocketChannel sockChan = theSCW.getSocketChannel();
+                            SocketChannel sockChan = null;
+                            if( theSCW != null )
+                                sockChan = theSCW.getSocketChannel();
+                            
                             SocketChannel handlerChan = aHandler.getSocketChannelWrapper().getSocketChannel();
                             if( sockChan != null && handlerChan != null && sockChan.socket().getInetAddress().equals( 
                                     handlerChan.socket().getInetAddress())){
 
+                                //Shutdown the previous one and remove it
+                                aICM.removeHandler(passedChannelId);
+                                aHandler.shutdown();
+                                
                                 //Register the new one
                                 rootHostId = passedClientId;
                                 if( !aSPR.registerHandler(passedClientId, Integer.parseInt(localhostId), passedChannelId, this) )
                                     return false;
 
-                                //Shutdown the previous one
-                                aHandler.shutdown();
                                 return true;
 
                             } else {    

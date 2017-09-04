@@ -145,7 +145,7 @@ public class ServerHttpWrapper extends HttpWrapper {
       
                                                 if( passedHandler.registerId(srcId, chanId) ){
                                                     
-                                                    DebugPrinter.printMessage(ControlMessage.class.getSimpleName(), "Registered host: " + Integer.toString(srcId) + " channel: " + Integer.toString(chanId));
+                                                    DebugPrinter.printMessage(ServerHttpWrapper.class.getSimpleName(), "Registered host: " + Integer.toString(srcId) + " channel: " + Integer.toString(chanId));
                                                     passedHandler.setRegisteredFlag(true);                                                    
                                                      
                                                     RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, srcId, chanId);
@@ -153,7 +153,12 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                     
                                                     //Set wrapping after it is sent
                                                     passedHandler.setWrapping( srcId, false);
-                                                }    
+                                                    
+                                                } else {
+                                                    
+                                                    DebugPrinter.printMessage(ServerHttpWrapper.class.getSimpleName(), "Host registration failed: "+ Integer.toString(srcId) + " channel: " + Integer.toString(chanId));
+                                                                                                        
+                                                }   
                                                 
                                                 return;
                                                 
