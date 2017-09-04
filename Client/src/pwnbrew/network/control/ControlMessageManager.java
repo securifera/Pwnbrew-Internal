@@ -47,14 +47,10 @@ package pwnbrew.network.control;
 
 import pwnbrew.network.PortRouter;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.utilities.DebugPrinter;
-import pwnbrew.network.Message;
 
 /**
  *
@@ -121,28 +117,7 @@ public class ControlMessageManager extends DataManager {
     public void handleMessage( PortRouter srcPortRouter, byte[] msgBytes ) {        
         theControlManager.getDataHandler().processData( srcPortRouter, msgBytes);        
     }
-    
-//    //===============================================================
-//    /**
-//     *   Send the message out the given channel.
-//     *
-//     * @param passedMessage
-//    */
-//    public void send( Message passedMessage ) {
-//
-//        int msgLen = passedMessage.getLength();
-//        ByteBuffer aByteBuffer = ByteBuffer.allocate( msgLen );
-//        passedMessage.append(aByteBuffer);
-//        
-//        //Get the port router
-//        PortRouter thePR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
-//        
-//        //Queue the message to be sent
-//        if( thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getChannelId() ))
-//            DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-//        
-//    }
-    
+
      //===========================================================================
     /*
      *  Returns the data handler

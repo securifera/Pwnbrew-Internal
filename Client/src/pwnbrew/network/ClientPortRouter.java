@@ -222,6 +222,8 @@ public class ClientPortRouter extends PortRouter {
                     DataManager.send( thePortManager, aMsg );
 
                 } else {
+                    
+                    DebugPrinter.printMessage( NAME_Class, "Unable to get socket channel handler. Not sending Register Msg.");
                     connected = false;
                 }
 
@@ -314,6 +316,20 @@ public class ClientPortRouter extends PortRouter {
         
             //Execute it
             aReconnectTimer.start();
+            
+        } else if( !reconnectEnable ){
+            
+            DebugPrinter.printMessage(NAME_Class, "Reconnect not enabled");
+            
+        } else if (aReconnectTimer == null){
+            
+            DebugPrinter.printMessage(NAME_Class, "ReconnectTimer is null");
+            
+        } else if (aReconnectTimer.isRunning() && reconnectEnable){
+            
+            aReconnectTimer.beNotified();
+            DebugPrinter.printMessage(NAME_Class, "ReconnectTimer is already running");
+            
         }
         
     };

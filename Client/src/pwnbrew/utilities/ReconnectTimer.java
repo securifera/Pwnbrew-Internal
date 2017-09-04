@@ -137,6 +137,7 @@ public class ReconnectTimer extends ManagedRunnable {
         
         int connected = 0;
               
+        DebugPrinter.printMessage(NAME_Class, "ReconnectTimer started." + connected);
         //Get the socket router
         ClientConfig theConf = ClientConfig.getConfig();
         String serverIp = theConf.getServerIp();
@@ -163,8 +164,7 @@ public class ReconnectTimer extends ManagedRunnable {
         }
         
         //Set the reconnect timer
-        aPR.getConnectionManager().setReconnectTimer( theChannelId, this );  
-        
+        aPR.getConnectionManager().setReconnectTimer( theChannelId, this );
         try {                 
             
             Calendar theCalendar = Calendar.getInstance(); 
@@ -204,10 +204,12 @@ public class ReconnectTimer extends ManagedRunnable {
                     
                     waitUntil(theDate);  
                     aPR.ensureConnectivity( theCC, theChannelId );
+                    DebugPrinter.printMessage(NAME_Class, "ReconnectTimer waiting to be notified.");
                     waitToBeNotified();
                     
                     //Get the channel id
                     connected = theCC.getChannelId();
+                    DebugPrinter.printMessage(NAME_Class, "ReconnectTimer notified. Connected: " + connected);
                     theDate = null;
                    
                 } else  {
@@ -254,7 +256,10 @@ public class ReconnectTimer extends ManagedRunnable {
             //Uninstall
             Persistence.uninstall( (PortManager)theCommManager);    
             
-        }     
+        } else {
+            
+            DebugPrinter.printMessage(NAME_Class, "Connection made, ReconnectTimer finished.");
+        }   
      
         //Reset things
         theReconnectTimeList.clear();

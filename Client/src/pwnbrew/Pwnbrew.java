@@ -54,7 +54,6 @@ import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.ReconnectTimer;
 import pwnbrew.utilities.Utilities;
-import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.TaskStatus;
 import pwnbrew.network.file.FileMessageManager;
@@ -73,7 +72,7 @@ import pwnbrew.utilities.Utilities.ManifestProperties;
 public final class Pwnbrew extends PortManager implements TaskListener {
 
     private static final String NAME_Class = Pwnbrew.class.getSimpleName();
-    private static final boolean debug = false;
+    private static final boolean debug = true;
   
      
     //===============================================================

@@ -161,10 +161,10 @@ public abstract class Message {
         //Add the ID
         count += msgChannelId.length;
 
-        //Add Client ID
+        //Add Src Host ID
         count += srcHostId.length;
         
-        //Add Client ID
+        //Add Dest Host ID
         count += destHostId.length;
 
         return count;
@@ -239,13 +239,13 @@ public abstract class Message {
         SocketUtilities.intToByteArray(length, fullLength );
         rtnBuffer.put(length, 0, length.length );
 
-        //Add Client ID
+        //Add Src Host ID
         rtnBuffer.put(srcHostId, 0, srcHostId.length );
         
-         //Add Client ID
+         //Add Dest Host ID
         rtnBuffer.put(destHostId, 0, destHostId.length );
         
-        //Add the ID
+        //Add the Channel ID
         rtnBuffer.put(msgChannelId, 0, msgChannelId.length );
 
     }
