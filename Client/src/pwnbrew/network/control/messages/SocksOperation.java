@@ -188,4 +188,4 @@ public final class SocksOperation extends ControlMessage {
     }
 
 
-}/* END CLASS CreateShell */
+}

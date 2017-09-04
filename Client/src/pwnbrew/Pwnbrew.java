@@ -63,6 +63,7 @@ import pwnbrew.network.http.ClientHttpWrapper;
 import pwnbrew.network.http.Http;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.shell.ShellMessageManager;
+import pwnbrew.socks.SocksMessageManager;
 import pwnbrew.task.TaskListener;
 import pwnbrew.utilities.Utilities.ManifestProperties;
 
@@ -165,6 +166,11 @@ public final class Pwnbrew extends PortManager implements TaskListener {
             if( theRelayManager != null ){
                 theRelayManager.shutdown();
             }
+            
+            SocksMessageManager aSocksMM = SocksMessageManager.getSocksMessageManager();
+            if( aSocksMM != null ){
+                aSocksMM.shutdown();
+            } 
 
             //Shutdown debugger
             DebugPrinter.shutdown();

@@ -211,6 +211,20 @@ public class SocksMessageManager extends DataManager {
             aSHS.shutdown();
         }
     }
+    
+    //===========================================================================
+    /**
+     *  Shutdown the handler 
+     */
+    @Override
+    public void shutdown() {
+        super.shutdown();
+        synchronized(hostIdToSockHandlerStructMap){
+            for( SockHandlerStruct aSHS : hostIdToSockHandlerStructMap.values()){
+                aSHS.shutdown();
+            }
+        }
+    }
 
     //========================================================================
     /**
