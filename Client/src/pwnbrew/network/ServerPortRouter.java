@@ -266,8 +266,13 @@ public class ServerPortRouter extends PortRouter {
             if( !sendReset ){
 
                 DebugPrinter.printMessage(NAME_Class, "Handler already exists, sending reset.");
+                //Check if certs didn't match
+                byte stlth_val = 0;
+                if( theConf.useStealth() )
+                    stlth_val = 1;
+                
                 //Create a byte array from the messagen byte buffe
-                RegisterMessage aMsg = new RegisterMessage(RegisterMessage.REG_RST, channelId);
+                RegisterMessage aMsg = new RegisterMessage(RegisterMessage.REG_RST, stlth_val, channelId);
                 aMsg.setDestHostId(passedSrcHostId);
                 byte[] msgBytes = aMsg.getBytes();
 

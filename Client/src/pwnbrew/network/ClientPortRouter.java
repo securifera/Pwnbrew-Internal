@@ -49,6 +49,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.EmptyStackException;
 import java.util.logging.Level;
+import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
@@ -217,8 +218,15 @@ public class ClientPortRouter extends PortRouter {
                 if( aSC != null ){
 
                     DebugPrinter.printMessage( NAME_Class, "Registering id: " + Integer.toString(channedId));
+                    
+                    //Check if certs didn't match
+                    ClientConfig theConf = ClientConfig.getConfig();
+                    byte stlth_val = 0;
+                    if( theConf.useStealth() )
+                        stlth_val = 1;                    
+                    
                     //Send register message
-                    RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, channedId);
+                    RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, channedId);
                     DataManager.send( thePortManager, aMsg );
 
                 } else {

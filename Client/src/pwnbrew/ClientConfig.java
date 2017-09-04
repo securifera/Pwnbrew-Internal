@@ -42,6 +42,7 @@ package pwnbrew;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.logging.Level;
@@ -51,6 +52,7 @@ import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.LoaderUtilities;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
+import pwnbrew.utilities.Utilities.ManifestProperties;
 
 /**
  *
@@ -61,6 +63,8 @@ public class ClientConfig {
     private String theHostId = "";
     private String theServerIp = "0.0.0.0";
     private int theServerId = -1;
+    private BigInteger theServerCertSerial = null;
+    private boolean stlth = false;
     
     //Configurable Ports
     private int theSocketPort = 443;
@@ -124,6 +128,15 @@ public class ClientConfig {
         if(ipStr != null)
             theServerIp = ipStr;        
     }
+    
+    //==========================================================================
+    /**
+     * Sets the server cert serial
+     * @param serial
+    */
+    public void setServerCertSerial(String serial) {
+        theServerCertSerial = new BigInteger( serial, 10 );
+    }
 
     //==========================================================================
     /**
@@ -142,6 +155,15 @@ public class ClientConfig {
     */
     public int getServerId(){
        return theServerId;
+    }
+    
+    //==========================================================================
+    /**
+     * Returns the server cert serial if it's been set
+     * @return 
+    */
+    public BigInteger getServerCertSerial(){
+       return theServerCertSerial;
     }
     
      //==========================================================================
@@ -216,7 +238,7 @@ public class ClientConfig {
         try {
         
             //Get the manifest
-            Utilities.ManifestProperties localProperties = new Utilities.ManifestProperties();
+            ManifestProperties localProperties = new ManifestProperties();
             String properties = Constants.PROP_FILE;
             String propLabel = Constants.HOST_ID_LABEL;
 
@@ -252,5 +274,24 @@ public class ClientConfig {
        
         return localConf;
     } 
+
+    //=========================================================================
+    /**
+     * 
+     * @param b 
+     */
+    public void setStealth(boolean b) {
+        stlth = b;
+    }
+    
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public boolean useStealth(){
+        return stlth;
+    }
+
 
 }

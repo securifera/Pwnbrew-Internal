@@ -381,11 +381,14 @@ public class SocketChannelHandler implements Selectable {
                                                 if( srcChannelId != ConnectionManager.COMM_CHANNEL_ID ){
                                                                                                         
                                                     //Send back the ack
-                                                    RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
+                                                    RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, aMsg.getStlth(), chanId);
                                                     retMsg.setDestHostId(srcHostId);
                                                     //Try to send back
                                                     DataManager.send(aSPR.getPortManager(), retMsg);
-                                                    setWrapping( false);
+                                                    
+                                                    //Turn off wrapping if not stlth
+                                                    if( !aMsg.keepWrapping() )
+                                                        setWrapping( false);
                                                          
                                                     if( thePR instanceof ClientPortRouter ){
                                                         
@@ -427,8 +430,9 @@ public class SocketChannelHandler implements Selectable {
                                                 //Get the socket handler
                                                 if( aCM != null ){
                                                     SocketChannelHandler theHandler = aCM.getSocketChannelHandler( chanId );
-                                                    if( theHandler != null )
-                                                        theHandler.setWrapping(false);                                                    
+                                                    if( !aMsg.keepWrapping() && theHandler != null )
+                                                        theHandler.setWrapping(false);   
+                                                                                                     
                                                 }
                                             }
                                         }

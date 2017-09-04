@@ -180,7 +180,7 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                             if( srcChannelId != ConnectionManager.COMM_CHANNEL_ID ){
                                                                 
                                                                 //Send back the ack
-                                                                RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, chanId);
+                                                                RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, aMsg.getStlth(), chanId);
                                                                 retMsg.setDestHostId(srcHostId);
                                                                 
                                                                 RelayManager aRelayManager = RelayManager.getRelayManager();
@@ -193,7 +193,10 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                                 
                                                                 //Try to send back
                                                                 DataManager.send(aSPR.getPortManager(), retMsg);
-                                                                passedHandler.setWrapping( false);
+                                                                
+                                                                //Turn off wrapping if not stlth
+                                                                if( !aMsg.keepWrapping() )
+                                                                    passedHandler.setWrapping( false);
 ////                                                                
                                                                 if( thePR instanceof ClientPortRouter ){
                                                                     
@@ -204,7 +207,7 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                                     ClientPortRouter aCPR = (ClientPortRouter)thePR;
                                                                     aCPR.ensureConnectivity(aSCC, chanId);
                                                                     
-                                                                 }
+                                                                }
                                                             } else {
                                                             
                                                                 SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );

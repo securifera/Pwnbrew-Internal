@@ -137,7 +137,7 @@ public class ReconnectTimer extends ManagedRunnable {
         
         int connected = 0;
               
-        DebugPrinter.printMessage(NAME_Class, "ReconnectTimer started." + connected);
+        DebugPrinter.printMessage(NAME_Class, "ReconnectTimer started.");
         //Get the socket router
         ClientConfig theConf = ClientConfig.getConfig();
         String serverIp = theConf.getServerIp();

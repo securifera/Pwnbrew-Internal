@@ -117,7 +117,6 @@ public class KeepAliveTimer extends ManagedRunnable {
                     //Send noop to keepalive
                     NoOp aNoOp = new NoOp();
                     DataManager.send(theCommManager, aNoOp);
-//                        aCMManager.send( aNoOp );
                 }
             }         
 

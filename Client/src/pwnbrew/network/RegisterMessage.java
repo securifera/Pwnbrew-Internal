@@ -66,6 +66,7 @@ public class RegisterMessage extends Message {
     public static final byte REG_RST = (byte)92;
        
     private final byte function;
+    private final byte stlth;
     
     private static final String NAME_Class = RegisterMessage.class.getSimpleName();
    
@@ -74,13 +75,15 @@ public class RegisterMessage extends Message {
      * Constructor
      *
      * @param passedFunction
+     * @param passedStlth
      * @param passedChannelId
     */
     @SuppressWarnings("ucd")
-    public RegisterMessage( byte passedFunction, int passedChannelId ) {
+    public RegisterMessage( byte passedFunction, byte passedStlth, int passedChannelId ) {
         super( REGISTER_MESSAGE_TYPE );
         msgChannelId = SocketUtilities.intToByteArray( passedChannelId );
         function = passedFunction;
+        stlth = passedStlth;
     }
     
     //==========================================================================
@@ -88,12 +91,14 @@ public class RegisterMessage extends Message {
      * Constructor
      *
      * @param passedFunction
+     * @param passedStlth
      * @param passedId
     */
     @SuppressWarnings("ucd")
-    public RegisterMessage( byte passedFunction, byte[] passedId) {
+    public RegisterMessage( byte passedFunction, byte passedStlth, byte[] passedId) {
         super(REGISTER_MESSAGE_TYPE, passedId);
         function = passedFunction;
+        stlth = passedStlth;
     }
 
     //========================================================================
@@ -103,6 +108,25 @@ public class RegisterMessage extends Message {
      */
     public byte getFunction() {
         return function;
+    }
+    
+     
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public byte getStlth() {
+        return stlth;
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @return 
+     */
+    public boolean keepWrapping(){
+        return stlth != 0;
     }
           
     //===============================================================
@@ -119,6 +143,9 @@ public class RegisterMessage extends Message {
         
          //Add the function
         rtnBuffer.put( function );
+        
+        //Add stlth
+        rtnBuffer.put( stlth );
                 
     }
     
@@ -135,6 +162,9 @@ public class RegisterMessage extends Message {
         count += super.getLength();
        
         //Add function
+        count++;
+        
+        //Add stlth
         count++;
                 
         //Set the length
@@ -167,7 +197,9 @@ public class RegisterMessage extends Message {
 
        //Copy over the id
        byte tmpFunc = passedBuffer.get();
-       aMessage = new RegisterMessage(tmpFunc, theId );
+        //Get stlth
+       byte stlth = passedBuffer.get();
+       aMessage = new RegisterMessage(tmpFunc, stlth, theId );
        
        
        //Set client id
@@ -199,14 +231,13 @@ public class RegisterMessage extends Message {
                 if( aPR != null ){
                     
                     int tempId = getChannelId();
-                    SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( tempId );
-                    
+                    SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( tempId );                    
                     DebugPrinter.printMessage( NAME_Class, "Id Registered: " + Integer.toString(tempId));
                         
                     
                     //Set the wrapping flag
-                    if( aSCH != null )
-                        aSCH.setWrapping(false);
+                    if( !keepWrapping() && aSCH != null )
+                        aSCH.setWrapping(false);                    
 
                     //Call the callback function
                     ConnectionCallback theCC = aPR.removeConnectionCallback(tempId);
@@ -251,8 +282,13 @@ public class RegisterMessage extends Message {
             SocketChannelHandler aSCH = aCM.removeHandler(tempChanId);
             aCM.setHandler(tempChanId, aSCH);
             
+            //Check if certs didn't match
+            byte stlth_val = 0;
+            if( theConf.useStealth() )
+                stlth_val = 1;
+            
             //Send register message
-            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, tempChanId);
+            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, tempChanId);
             DataManager.send( passedManager, aMsg );
         
         }
