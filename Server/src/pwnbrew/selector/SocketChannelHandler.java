@@ -321,11 +321,13 @@ public class SocketChannelHandler implements Selectable {
                                     if( registerId(srcHostId, chanId) ){
                                         setRegisteredFlag(true);                                           
 
-                                        RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, srcHostId, chanId);
+                                        RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, aMsg.getStlth(), srcHostId, chanId);
                                         DataManager.send( getPortRouter().getPortManager(), retMsg);
                                         
-                                        //Set wrapping after it is sent
-                                        setWrapping( srcHostId, false);
+                                        //Turn off wrapping if not stlth
+                                        if( !aMsg.keepWrapping() )
+                                            setWrapping( srcHostId, false);
+                                        
                                     } else {
                                         DebugPrinter.printMessage(NAME_Class, "Error unable to register handler.");
                                     }

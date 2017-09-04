@@ -39,6 +39,7 @@ package pwnbrew.network.relay;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.logging.Level;
 import pwnbrew.log.Log;
@@ -49,8 +50,10 @@ import pwnbrew.manager.PortManager;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
+import pwnbrew.network.PortWrapper;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.control.messages.RemoteException;
+import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.xml.ServerConfig;
@@ -142,6 +145,23 @@ public class RelayManager extends DataManager {
             if( aCM != null ){
                 SocketChannelHandler theHandler = aCM.getSocketChannelHandler( channelId );
                 if( theHandler != null ){
+                    
+                    //If wrapping is necessary then wrap it
+                    if( theHandler.isWrapping() ){
+                        PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
+                        if( aWrapper != null ){
+
+                            //Set the staged wrapper if necessary
+                            if( aWrapper instanceof ServerHttpWrapper ){
+                                ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+                                aSrvWrapper.setStaging( theHandler.isStaged());
+                            }
+
+                            ByteBuffer aByteBuffer = aWrapper.wrapBytes( msgBytes );  
+                            msgBytes = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
+                        } 
+                    }
+                    
                     theHandler.queueBytes(msgBytes);
                     return;
                 }
@@ -159,6 +179,23 @@ public class RelayManager extends DataManager {
                 SocketChannelHandler theHandler = aCM.getSocketChannelHandler( channelId );
                 if( theHandler != null ){
                     byte[] retBytes = exceptionMsg.getBytes();
+                    
+                     //If wrapping is necessary then wrap it
+                    if( theHandler.isWrapping() ){
+                        PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
+                        if( aWrapper != null ){
+
+                            //Set the staged wrapper if necessary
+                            if( aWrapper instanceof ServerHttpWrapper ){
+                                ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+                                aSrvWrapper.setStaging( theHandler.isStaged());
+                            }
+
+                            ByteBuffer aByteBuffer = aWrapper.wrapBytes( retBytes );  
+                            retBytes = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
+                        } 
+                    }
+                    
                     theHandler.queueBytes(retBytes);
                 }                    
             }

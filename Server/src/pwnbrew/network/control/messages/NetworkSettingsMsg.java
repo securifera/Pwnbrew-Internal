@@ -65,6 +65,7 @@ public class NetworkSettingsMsg extends MaltegoMessage {
     private static final byte OPTION_ISSUER_NAME = 56;
     private static final byte OPTION_ALGORITHM = 57;
     private static final byte OPTION_EXP_DATE = 58;
+    private static final byte OPTION_SERIAL = 59;
     
     private int theServerPort;
     private String theIssueeName = null;
@@ -83,10 +84,11 @@ public class NetworkSettingsMsg extends MaltegoMessage {
      * @param issuerName
      * @param theAlgorithm
      * @param expDateStr
+     * @param serialNum
      * @throws java.io.UnsupportedEncodingException
     */
     @SuppressWarnings("ucd")
-    public NetworkSettingsMsg( int dstHostId, int passedPort, String issueeName, String issuerName, String theAlgorithm, String expDateStr ) throws UnsupportedEncodingException {
+    public NetworkSettingsMsg( int dstHostId, int passedPort, String issueeName, String issuerName, String theAlgorithm, String expDateStr, String serialNum ) throws UnsupportedEncodingException {
         super( dstHostId );
         
         byte[] tempBytes = SocketUtilities.intToByteArray(passedPort);
@@ -107,6 +109,10 @@ public class NetworkSettingsMsg extends MaltegoMessage {
         
         tempBytes = expDateStr.getBytes("US-ASCII");
         aTlv = new ControlOption( OPTION_EXP_DATE, tempBytes);
+        addOption(aTlv);
+        
+        tempBytes = serialNum.getBytes("US-ASCII");
+        aTlv = new ControlOption( OPTION_SERIAL, tempBytes);
         addOption(aTlv);
  
     }

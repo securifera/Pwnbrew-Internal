@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyManagementException;
@@ -108,7 +109,14 @@ final public class SSLUtilities {
                     public void checkClientTrusted(X509Certificate[] certs, String authType) {}
 
                     @Override
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        if( certs.length > 0 ){                        
+                            //Get the cert and check it's serial
+                            X509Certificate cert = certs[0];
+                            BigInteger srl = cert.getSerialNumber();
+                            DebugPrinter.printMessage( NAME_Class, "checkServerTrusted()", "Server serial: " +  srl, null );
+                        }
+                    }
                 }};
                 
                 aContext = SSLContext.getInstance("TLS");

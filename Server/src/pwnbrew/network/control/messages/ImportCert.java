@@ -161,10 +161,13 @@ public final class ImportCert extends MaltegoMessage { // NO_UCD (use default)
 
                             //Set the date
                             Date expirationDate = theCustomCert.getNotAfter();
-                            String expDateStr = Constants.CHECKIN_DATE_FORMAT.format(expirationDate);                        
+                            String expDateStr = Constants.CHECKIN_DATE_FORMAT.format(expirationDate);    
+                            
+                            //Set the serial num
+                            String serialNum = theCustomCert.getSerialNumber().toString(10);
 
                             //Send back the data
-                            NetworkSettingsMsg aMsg = new NetworkSettingsMsg( getSrcHostId(), serverPort, issueeName, issuerName, theAlgorithm, expDateStr );
+                            NetworkSettingsMsg aMsg = new NetworkSettingsMsg( getSrcHostId(), serverPort, issueeName, issuerName, theAlgorithm, expDateStr, serialNum );
                             DataManager.send( passedManager, aMsg);
 
                         }

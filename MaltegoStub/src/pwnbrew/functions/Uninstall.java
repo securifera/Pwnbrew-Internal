@@ -1,13 +1,19 @@
 
 package pwnbrew.functions;
 
+import com.sun.java.swing.plaf.windows.WindowsTreeUI;
 import java.io.IOException;
 import java.util.Map;
+import javax.swing.JOptionPane;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
+import javax.swing.plaf.metal.MetalIconFactory;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
+import pwnbrew.misc.Utilities;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
@@ -40,7 +46,7 @@ public class Uninstall extends Function {
         
         String retStr = "";
         Map<String, String> objectMap = getKeyValueMap(passedObjectStr); 
-         
+                
         //Get server IP
         String serverIp = objectMap.get( Constants.SERVER_IP);
         if( serverIp == null ){
@@ -61,7 +67,19 @@ public class Uninstall extends Function {
             DebugPrinter.printMessage( NAME_Class, "Uninstall", "No host id provided", null);
             return;
         }
-         
+        
+        //Get Name
+        String nameStr = objectMap.get( Constants.NAME);
+        if( nameStr == null ){
+            DebugPrinter.printMessage( NAME_Class, "Uninstall", "No nameStr provided", null);
+            return;
+        }
+                 
+        String theMessage = "Are you sure you want to uninstall host: " + nameStr + "?";
+        int dialogValue = JOptionPane.showConfirmDialog(null, theMessage, "Uninstall Host?", JOptionPane.YES_NO_OPTION);
+        if ( dialogValue != JOptionPane.YES_OPTION )
+            return;
+        
         //Create the connection
         try {
             

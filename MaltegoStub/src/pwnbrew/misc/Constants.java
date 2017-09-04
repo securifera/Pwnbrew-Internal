@@ -120,6 +120,7 @@ abstract public class Constants {
     public static final String MODULE_TYPE_LABEL = "Type";
     public static final String PAYLOAD_VERSION_LABEL = "Version";
     public static final String STAGER_URL = "Private";
+    public static final String CERT_SERIAL_LABEL = "CRT-ID";
     
     public static final String PAYLOAD_ALIAS_TYPE = "plib";
     public static final String STAGER_ALIAS_TYPE = "slib";

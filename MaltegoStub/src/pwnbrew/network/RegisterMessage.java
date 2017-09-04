@@ -63,6 +63,7 @@ public class RegisterMessage extends Message {
     public static final byte REG_RST = (byte)92;    
        
     private final byte function;
+    private final byte stlth;
     
     private static final String NAME_Class = RegisterMessage.class.getSimpleName();
    
@@ -71,14 +72,16 @@ public class RegisterMessage extends Message {
      * Constructor
      *
      * @param passedFunction
+     * @param passedStlth
      * @param passedDestHostId
      * @param passedChannelId
     */
     @SuppressWarnings("ucd")
-    public RegisterMessage( byte passedFunction, int passedDestHostId, int passedChannelId ) {
+    public RegisterMessage( byte passedFunction, byte passedStlth, int passedDestHostId, int passedChannelId ) {
         super( REGISTER_MESSAGE_TYPE, passedDestHostId );
         channelId = SocketUtilities.intToByteArray( passedChannelId );
         function = passedFunction;
+        stlth = passedStlth;
     }
     
     //==========================================================================
@@ -86,12 +89,14 @@ public class RegisterMessage extends Message {
      * Constructor
      *
      * @param passedFunction
+     * @param passedStlth
      * @param passedId
     */
     @SuppressWarnings("ucd")
-    public RegisterMessage( byte passedFunction, byte[] passedId) {
+    public RegisterMessage( byte passedFunction, byte passedStlth, byte[] passedId) {
         super(REGISTER_MESSAGE_TYPE, passedId);
         function = passedFunction;
+        stlth = passedStlth;
     }
 
     //========================================================================
@@ -101,6 +106,24 @@ public class RegisterMessage extends Message {
      */
     public byte getFunction() {
         return function;
+    }
+    
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public byte getStlth() {
+        return stlth;
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @return 
+     */
+    public boolean keepWrapping(){
+        return stlth != 0;
     }
           
     //===============================================================
@@ -116,7 +139,10 @@ public class RegisterMessage extends Message {
         super.append(rtnBuffer);
         
          //Add the function
-        rtnBuffer.put( function );
+        rtnBuffer.put( function );        
+        
+        //Add stlth
+        rtnBuffer.put( stlth );
                 
     }
     
@@ -133,6 +159,9 @@ public class RegisterMessage extends Message {
         count += super.getLength();
        
         //Add function
+        count++;
+        
+        //Add stlth
         count++;
                 
         //Set the length
@@ -165,8 +194,9 @@ public class RegisterMessage extends Message {
 
        //Copy over the id
        byte tmpFunc = passedBuffer.get();
-       aMessage = new RegisterMessage(tmpFunc, theId );
-       
+       //Get stlth
+       byte stlth = passedBuffer.get();
+       aMessage = new RegisterMessage(tmpFunc, stlth, theId );       
        
        //Set client id
        int theClientId = SocketUtilities.byteArrayToInt(clientId);
@@ -204,23 +234,9 @@ public class RegisterMessage extends Message {
                 //Get the port router
                 int serverPort = theConfig.getSocketPort();
                 ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( serverPort );
-                if( aPR != null ){
-//                        SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( getChannelId() );
-
-//                        //Set the wrapping flag
-//                        if( aSCH != null )
-//                            aSCH.setWrapping(false);
-                        
-                        //Notify the port router to continue
-                        aPR.beNotified(); 
-
-//                        //Create a hello message and send it
-//                        if( getChannelId() == ConnectionManager.COMM_CHANNEL_ID ){
-//                            //Get the port router
-//                            String hostname = SocketUtilities.getHostname();
-//                            Hello helloMessage = new Hello( hostname, ConnectionManager.COMM_CHANNEL_ID );
-//                            aCMManager.send(helloMessage); 
-//                        }
+                if( aPR != null ){                        
+                    //Notify the port router to continue
+                    aPR.beNotified(); 
                 }
 
             } catch ( IOException ex) {

@@ -208,7 +208,7 @@ public class ClientPortRouter extends PortRouter {
                             }
                             
                             //Send register message
-                            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, Constants.SERVER_ID, Constants.COMM_CHANNEL_ID );
+                            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, (byte)0, Constants.SERVER_ID, Constants.COMM_CHANNEL_ID );
                             aCMManager.send( aMsg );
                             
                             //Wait for the registration to complete

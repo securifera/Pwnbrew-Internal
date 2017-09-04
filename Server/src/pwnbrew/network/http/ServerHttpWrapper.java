@@ -148,16 +148,15 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                     DebugPrinter.printMessage(ServerHttpWrapper.class.getSimpleName(), "Registered host: " + Integer.toString(srcId) + " channel: " + Integer.toString(chanId));
                                                     passedHandler.setRegisteredFlag(true);                                                    
                                                      
-                                                    RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, srcId, chanId);
+                                                    RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, aMsg.getStlth(), srcId, chanId);
                                                     DataManager.send(passedHandler.getPortRouter().getPortManager(), retMsg);
                                                     
-                                                    //Set wrapping after it is sent
-                                                    passedHandler.setWrapping( srcId, false);
+                                                    //Turn off wrapping if not stlth
+                                                    if( !aMsg.keepWrapping() )
+                                                        passedHandler.setWrapping( srcId, false);
                                                     
-                                                } else {
-                                                    
+                                                } else {                                                    
                                                     DebugPrinter.printMessage(ServerHttpWrapper.class.getSimpleName(), "Host registration failed: "+ Integer.toString(srcId) + " channel: " + Integer.toString(chanId));
-                                                                                                        
                                                 }   
                                                 
                                                 return;

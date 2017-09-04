@@ -56,12 +56,14 @@ public final class NetworkSettingsMsg extends MaltegoMessage {
     private static final byte OPTION_ISSUER_NAME = 56;
     private static final byte OPTION_ALGORITHM = 57;
     private static final byte OPTION_EXP_DATE = 58;
+    private static final byte OPTION_SERIAL = 59;
     
     private int theServerPort;
     private String theIssueeName = null;
     private String theIssuerName = null;
     private String theAlgorithm = null;
     private String theExpDate = null;
+    private String theSerialNum = null;
     
     // ==========================================================================
     /**
@@ -97,6 +99,7 @@ public final class NetworkSettingsMsg extends MaltegoMessage {
         tempBytes = expDateStr.getBytes("US-ASCII");
         aTlv = new ControlOption( OPTION_EXP_DATE, tempBytes);
         addOption(aTlv);
+        
  
     }
         
@@ -136,6 +139,9 @@ public final class NetworkSettingsMsg extends MaltegoMessage {
                 case OPTION_EXP_DATE:
                     theExpDate = new String( theValue, "US-ASCII");
                     break;
+                case OPTION_SERIAL:
+                    theSerialNum = new String( theValue, "US-ASCII");
+                    break;
                 case OPTION_ALGORITHM:
                     theAlgorithm = new String( theValue, "US-ASCII");
                     break;
@@ -165,10 +171,10 @@ public final class NetworkSettingsMsg extends MaltegoMessage {
             if( aFunction instanceof ToServerConfiguration ){
                 
                 //Cast the function
-                ToServerConfiguration aFunc = (ToServerConfiguration)aFunction;
+                ToServerConfiguration srvConfFunc = (ToServerConfiguration)aFunction;
                 
                 //Add the jar item
-                aFunc.setNetworkSettings(theServerPort, theIssueeName, theIssuerName, theExpDate, theAlgorithm );
+                srvConfFunc.setNetworkSettings(theServerPort, theIssueeName, theIssuerName, theExpDate, theAlgorithm, theSerialNum );
             }            
         }  
     }

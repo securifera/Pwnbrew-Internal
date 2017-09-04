@@ -54,20 +54,23 @@ public class RegisterMessage extends Message {
     public static final byte REG_RST = (byte)92;
        
     private final byte function;
+    private final byte stlth;
     
     //==========================================================================
     /**
      * Constructor
      *
      * @param passedFunction
+     * @param passedStlth
      * @param passedChannelId
      * @param destId
     */
     
-    public RegisterMessage( byte passedFunction, int destId, int passedChannelId ) {
+    public RegisterMessage( byte passedFunction, byte passedStlth, int destId, int passedChannelId ) {
         super( REGISTER_MESSAGE_TYPE, destId );
         channelId = SocketUtilities.intToByteArray( passedChannelId );
         function = passedFunction;
+        stlth = passedStlth;
     }
     
     //==========================================================================
@@ -75,12 +78,33 @@ public class RegisterMessage extends Message {
      * Constructor
      *
      * @param passedFunction
+     * @param passedStlth
      * @param passedId
     */
     
-    public RegisterMessage( byte passedFunction, byte[] passedId) {
+    public RegisterMessage( byte passedFunction, byte passedStlth, byte[] passedId) {
         super(REGISTER_MESSAGE_TYPE, passedId);
         function = passedFunction;
+        stlth = passedStlth;
+    }
+    
+    
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public byte getStlth() {
+        return stlth;
+    }
+    
+    //===============================================================
+    /**
+     * 
+     * @return 
+     */
+    public boolean keepWrapping(){
+        return stlth != 0;
     }
       
     //===============================================================
@@ -95,8 +119,11 @@ public class RegisterMessage extends Message {
         //Add the parent
         super.append(rtnBuffer);
         
-         //Add the function
+        //Add the function
         rtnBuffer.put( function );
+        
+        //Add stlth
+        rtnBuffer.put( stlth );
                 
     }
     
@@ -113,6 +140,9 @@ public class RegisterMessage extends Message {
         count += super.getLength();
        
         //Add function
+        count++;
+        
+        //Add stlth
         count++;
                 
         //Set the length
@@ -143,9 +173,11 @@ public class RegisterMessage extends Message {
         //Copy over the id
        passedBuffer.get(theId, 0, theId.length);
 
-       //Copy over the id
+       //Get function
        byte tmpFunc = passedBuffer.get();
-       aMessage = new RegisterMessage(tmpFunc, theId );
+       //Get stlth
+       byte stlth = passedBuffer.get();
+       aMessage = new RegisterMessage(tmpFunc, stlth, theId );
        
        //Set client id
        int theClientId = SocketUtilities.byteArrayToInt(clientId);

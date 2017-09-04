@@ -304,6 +304,22 @@ abstract public class DataManager {
                             theHandler = aCM.getSocketChannelHandler( channelId );
                             if( theHandler != null ){
                                 byte[] retBytes = exceptionMsg.getBytes();
+                                
+                                //If wrapping is necessary then wrap it
+                                if( theHandler.isWrapping() ){
+                                    PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
+                                    if( aWrapper != null ){
+
+                                        //Set the staged wrapper if necessary
+                                        if( aWrapper instanceof ServerHttpWrapper ){
+                                            ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+                                            aSrvWrapper.setStaging( theHandler.isStaged());
+                                        }
+
+                                        ByteBuffer aByteBuffer = aWrapper.wrapBytes( retBytes );  
+                                        retBytes = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
+                                    } 
+                                }
                                 theHandler.queueBytes(retBytes);
                             }                    
                         }                    

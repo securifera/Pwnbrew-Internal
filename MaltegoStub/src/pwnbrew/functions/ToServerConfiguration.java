@@ -78,6 +78,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
     
     private volatile boolean notified = false;
     private OptionsJFrame optionsGui = null;
+    private String theCertSerial = "";
     
     //Map for temp strings
     private final Map<Integer, String> taskIdToStringMap = new HashMap<>();
@@ -346,7 +347,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
                 aCMManager = ControlMessageManager.initialize( theManager );            
             
             //Send the msg
-            NetworkSettingsMsg aMsg = new NetworkSettingsMsg( Constants.SERVER_ID, serverPort, issueeDN, issuerDN, "", Integer.toString(days));
+            NetworkSettingsMsg aMsg = new NetworkSettingsMsg( Constants.SERVER_ID, serverPort, issueeDN, issuerDN, "", Integer.toString(days) );
             aCMManager.send(aMsg);
             
         } catch (IOException ex) {
@@ -436,10 +437,12 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
      * @param theIssuerName
      * @param theExpDate
      * @param theAlgorithm 
+     * @param theSerial 
      */
-    public void setNetworkSettings(int theServerPort, String theIssueeName, String theIssuerName, String theExpDate, String theAlgorithm) {
+    public void setNetworkSettings(int theServerPort, String theIssueeName, String theIssuerName, String theExpDate, String theAlgorithm, String theSerial) {
         NetworkOptionsPanel thePanel = optionsGui.getNetworkSettingsPanel();
         thePanel.setNetworkSettings(theServerPort, theIssueeName, theIssuerName, theAlgorithm, theExpDate );
+        theCertSerial = theSerial;
     }
 
     //========================================================================
@@ -541,8 +544,8 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
             
             //Add the properties that need to be updated
             Map<String, String> propMap = new HashMap<>();
-            String propLabel = Constants.STAGER_URL;  
-            propMap.put(propLabel, encodedStr.trim());
+            propMap.put(Constants.STAGER_URL, encodedStr.trim());
+            propMap.put(Constants.CERT_SERIAL_LABEL, theCertSerial); //Replace with actual cert
             
             //Update the jar
             Utilities.updateJarProperties(fileLoc, Constants.MANIFEST_FILE, propMap); 
