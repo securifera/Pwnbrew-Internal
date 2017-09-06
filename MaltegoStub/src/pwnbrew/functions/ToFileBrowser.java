@@ -41,10 +41,14 @@ import com.sun.java.swing.plaf.windows.WindowsTreeUI;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Image;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -689,14 +693,40 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                             
             //Get the control message manager
             if( filePath != null ){
+                
+                File uploadLogFile = getUploadLogFile();
+                BufferedWriter aBufferWriter = null;
+                // if file doesnt exists, then create it
+                try {
+                    if (!uploadLogFile.exists())
+                        uploadLogFile.createNewFile();
+                    // true = append file
+                    FileWriter aFileWrite = new FileWriter(uploadLogFile.getAbsoluteFile(), true);
+                    aBufferWriter = new BufferedWriter(aFileWrite);
+                } catch ( IOException ex) {
+                    JOptionPane.showMessageDialog( theFsFrame, ex.getMessage(), "Unable to open upload log file.", JOptionPane.ERROR_MESSAGE );
+                }
+                
                 ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
                 for( Object anObj : theObjList) { //For each file path...
 
                     if(anObj instanceof File){
                         File aFile = (File)anObj;
                         if( aFile.exists() && aFile.canRead() ) { 
-
+                            
+                            //Logging for remote shells
                             try {
+                                
+                                //Create the date string file
+                                String dateStr = Constants.THE_DATE_FORMAT.format( new Date()); 
+                                String logString = dateStr + ":  " + aFile.getAbsolutePath() + "\n";
+                                if( aBufferWriter != null ){
+                                    try {
+                                        aBufferWriter.write(logString);
+                                    } catch ( IOException ex) {
+                                        JOptionPane.showMessageDialog( theFsFrame, ex.getMessage(), "Unable to write to upload log file.", JOptionPane.ERROR_MESSAGE );
+                                    }
+                                }
 
                                 int taskId = SocketUtilities.getNextId();
 
@@ -736,6 +766,13 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                     }
 
                 }
+                
+                try {
+                    if (aBufferWriter != null)
+                        aBufferWriter.close();
+                } catch (IOException ex) {
+                }
+		
             }
         }
         
@@ -913,6 +950,24 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         } catch (IOException ex) {}
         
         return retDir;
+    }
+    
+     //=================================================================
+    /**
+     * 
+     * @return 
+     */
+    public File getUploadLogFile() {
+        
+        File dataDir = MaltegoStub.getDataDir();
+        File hostDir = new File(dataDir, theHostName );
+        File retDir = new File(hostDir, "upload");        
+        try {
+            Utilities.ensureDirectoryExists(retDir);
+        } catch (IOException ex) {}
+        
+        File uploadLogFile = new File(retDir, "log.txt");
+        return uploadLogFile;
     }
 
     //=================================================================
