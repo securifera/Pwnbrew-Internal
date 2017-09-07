@@ -40,7 +40,6 @@ package pwnbrew;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Point;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -53,7 +52,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -182,7 +180,7 @@ public class Installer {
         aIG.addStatusString("Attemping to run Maltego for Pwnbrew import...\n");
         
         //Attempt to run maltego so the entities can be imported
-        aFile = new File(MALTEGO_INSTALL_DIR, IMPORT_FILE );
+        aFile = new File(INSTALL_DIR, IMPORT_FILE );
         String msg = "To Import Pwnbrew Entities & Transforms,\n\n"
                 + "Click Maltego Logo in the top left corner of the Maltego application.\n"
                 + "Select Import->Import Configuration.\n"
@@ -321,7 +319,7 @@ public class Installer {
                 MALTEGO_INSTALL_DIR.mkdirs();
                 
                 //Create the maltego import file
-                File destFile = new File( MALTEGO_INSTALL_DIR, IMPORT_FILE);
+                File destFile = new File( INSTALL_DIR, IMPORT_FILE);
                 writeJarElementToDisk(destFile, IMPORT_FILE);
                 
                 //Create the maltego jar
@@ -364,7 +362,7 @@ public class Installer {
                 MALTEGO_INSTALL_DIR.mkdirs();
                  
                 //Create the maltego import file
-                File destFile = new File( MALTEGO_INSTALL_DIR, IMPORT_FILE);
+                File destFile = new File( INSTALL_DIR, IMPORT_FILE);
                 writeJarElementToDisk(destFile, IMPORT_FILE);   
                 
                 //Create the maltego jar
