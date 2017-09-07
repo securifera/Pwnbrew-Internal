@@ -38,22 +38,23 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.shell;
 
+import pwnbrew.shell.term.TermJTextPane;
+import pwnbrew.shell.term.TermSession;
 import java.awt.Component;
 import java.util.concurrent.Executor;
-import java.util.regex.Pattern;
-import javax.swing.text.StyledDocument;
+import javax.swing.SwingUtilities;
 
 /**
  *
  *  
  */
-public class Bash extends Shell {
+public class BashExp extends Shell {
     
 //    private static final String[] BASH_EXE_STR = new String[]{ "/bin/bash", "-i"};
     private static final String[] BASH_EXE_STR = new String[]{ "python", "-c", "import pty;pty.spawn(\"/bin/bash\")"};
     private static final String encoding = "UTF-8";
-    private static final String PROMPT_REGEX_BASH = "\\x1b.*[$#]";
-    private static final Pattern PROMPT_PATTERN = Pattern.compile(PROMPT_REGEX_BASH);
+    private final TermSession theTermSession;
+    private final TermJTextPane theTermJTextArea;
    
     
     // ==========================================================================
@@ -63,8 +64,10 @@ public class Bash extends Shell {
      * @param passedExecutor
      * @param passedListener 
      */
-    public Bash(Executor passedExecutor, ShellListener passedListener) {
+    public BashExp(Executor passedExecutor, ShellListener passedListener) {
         super(passedExecutor, passedListener);
+        theTermSession = new TermSession(this, true);
+        theTermJTextArea = new TermJTextPane(theTermSession);
     }
     
     // ==========================================================================
@@ -86,17 +89,29 @@ public class Bash extends Shell {
      * @param buffer the buffer into which the bytes were read
      */
     @Override
-    public void handleBytesRead( int passedId, byte[] buffer ) {
-
-        //Remove ansi codes
-        String aStr = new String(buffer);
-        if( !aStr.equals("\r\n")){
-            aStr = aStr.replaceAll("\u001B\\[[;\\d]*[ -/]*[@-~]", "");
-            aStr = aStr.replaceAll("\u001B.*\u0007", "");
-            aStr = aStr.replaceAll("\u0007", "");
-        }
-        super.handleBytesRead(passedId, aStr.getBytes());
-       
+    public void handleBytesRead( final int passedId, final byte[] buffer ) {
+        theTermSession.handleIncoming(passedId, buffer);
+        theTermJTextArea.updateScreen();     
+    }
+    
+    // ==========================================================================
+    /**
+     * 
+     */
+    @Override
+    public void windowResized(int w, int h, int oldw, int oldh) {
+        theTermJTextArea.updateSize();
+    }
+    
+     // ==========================================================================
+    /**
+     * 
+     * @param keyCode 
+     */
+    @Override
+    public void handleCtrlChar(int keyCode) {
+        char EOT = (byte)0x3;
+        sendInput( "" + EOT );
     }
     
     //===============================================================
@@ -105,22 +120,9 @@ public class Bash extends Shell {
     */
     @Override
     public void printPreviousCommand(){
-        
-        Component theView = theListener.getShellView();
-        if( theView instanceof ShellJTextPane ){
                 
-            ShellJTextPane thePane = (ShellJTextPane)theView;
-            if( theHistoryOffset == -1 )
-                theHistoryOffset = thePane.getEndOffset();
-            StyledDocument theSD = thePane.getStyledDocument();
-
-            //Set the new length
-            int newLength = theSD.getLength();
-            thePane.setCaretPosition( newLength ); 
-
-            char escape = (byte)0x1b;
-            sendInput( escape + "[A" );
-        }
+        char escape = (byte)0x1b;
+        sendInput( escape + "[A" );
     }
     
     //===============================================================
@@ -129,22 +131,9 @@ public class Bash extends Shell {
     */
     @Override
     public void printNextCommand(){
-        
-        Component theView = theListener.getShellView();
-        if( theView instanceof ShellJTextPane ){
                 
-            ShellJTextPane thePane = (ShellJTextPane)theView;
-            if( theHistoryOffset == -1 )
-                theHistoryOffset = thePane.getEndOffset();
-            StyledDocument theSD = thePane.getStyledDocument();
-
-            //Set the new length
-            int newLength = theSD.getLength();
-            thePane.setCaretPosition( newLength ); 
-
-            char escape = 0x1b;
-            sendInput( escape + "[B" );
-        }
+        char escape = 0x1b;
+        sendInput( escape + "[B" );
     }
     
     // ==========================================================================
@@ -166,5 +155,24 @@ public class Bash extends Shell {
     @Override
     public String toString(){
         return "Bash";
+    }
+    
+    //===============================================================
+    /**
+    *  Shut down the detector
+    */
+    @Override
+    public synchronized void shutdown(){
+        super.shutdown();
+    }
+    
+    // ==========================================================================
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public Component createView() {
+        return theTermJTextArea;        
     }
 }

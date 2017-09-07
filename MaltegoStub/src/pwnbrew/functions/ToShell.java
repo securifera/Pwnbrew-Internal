@@ -62,6 +62,7 @@ import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.RemoteException;
 import pwnbrew.shell.Bash;
+import pwnbrew.shell.BashExp;
 import pwnbrew.shell.CommandPrompt;
 import pwnbrew.shell.Custom;
 import pwnbrew.shell.Powershell;
@@ -300,6 +301,9 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
             
             //Add bash
             theShellList.add(Bash.class);   
+            
+            //Add bash
+            theShellList.add(BashExp.class);   
         }
         
         return theShellList;

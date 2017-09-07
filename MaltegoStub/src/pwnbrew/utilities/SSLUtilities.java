@@ -110,12 +110,12 @@ final public class SSLUtilities {
 
                     @Override
                     public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        if( certs.length > 0 ){                        
-                            //Get the cert and check it's serial
-                            X509Certificate cert = certs[0];
-                            BigInteger srl = cert.getSerialNumber();
-                            DebugPrinter.printMessage( NAME_Class, "checkServerTrusted()", "Server serial: " +  srl, null );
-                        }
+//                        if( certs.length > 0 ){                        
+//                            //Get the cert and check it's serial
+//                            X509Certificate cert = certs[0];
+//                            BigInteger srl = cert.getSerialNumber();
+//                            DebugPrinter.printMessage( NAME_Class, "checkServerTrusted()", "Server serial: " +  srl, null );
+//                        }
                     }
                 }};
                 

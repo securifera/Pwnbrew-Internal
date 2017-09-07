@@ -48,6 +48,7 @@ package pwnbrew.selector;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
@@ -372,7 +373,11 @@ public class SocketChannelHandler implements Selectable {
             } else {
                 
                 //Unwrap and process the data
-                aPortWrapper.processData( this, readByteBuf );
+                try {
+                    aPortWrapper.processData( this, readByteBuf );
+                } catch (BufferUnderflowException ex ){
+                    Log.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);                
+                }
             }  
 
         
