@@ -155,7 +155,9 @@ public class SocketChannelHandler implements Selectable {
             
             thePortRouter.getPortManager().socketClosed( this );
             
-        } 
+        } catch ( Exception ex ){
+            DebugPrinter.printException(ex);
+        }
 
         //TODO handle the case a RuntimeException is thrown doing SSL handshake
     }
