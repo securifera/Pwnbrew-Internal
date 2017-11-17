@@ -53,8 +53,6 @@ import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -65,6 +63,8 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
 
      //Class name
     private static final String NAME_Class = ResetId.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x4c;
     
     // ==========================================================================
     /**

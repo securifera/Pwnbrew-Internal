@@ -71,7 +71,9 @@ public final class RelayDisconnect extends ControlMessage{
     private static final byte OPTION_ID = 25; 
     private static final byte OPTION_CHANNEL_ID = 102; 
     private int relayHostId;
-    private int relayChannelId;    
+    private int relayChannelId;   
+    
+    public static final short MESSAGE_ID = 0x47;
     
     // ==========================================================================
     /**

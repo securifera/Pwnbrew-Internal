@@ -60,13 +60,15 @@ public final class Reload extends ControlMessage{ // NO_UCD (use default)
 
     private static final String NAME_Class = Reload.class.getSimpleName();
     
+    public static final short MESSAGE_ID = 0x4b;
+    
     // ==========================================================================
     /**
      * Constructor
      *
     */
     public Reload() {
-        super();
+        super(MESSAGE_ID);
     }
     
     // ==========================================================================

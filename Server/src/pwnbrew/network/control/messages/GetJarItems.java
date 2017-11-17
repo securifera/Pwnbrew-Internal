@@ -51,9 +51,11 @@ import pwnbrew.xml.JarItem;
  *
  * @author Securifera
  */
-public class GetJarItems extends MaltegoMessage{ // NO_UCD (use default)
+public final class GetJarItems extends MaltegoMessage{ // NO_UCD (use default)
     
     private static final String NAME_Class = GetJarItems.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x5d;
     
     // ==========================================================================
     /**

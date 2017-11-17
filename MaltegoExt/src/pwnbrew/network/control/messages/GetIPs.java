@@ -60,6 +60,7 @@ public final class GetIPs extends MaltegoMessage{ // NO_UCD (use default)
     private int hostId;
     private static final String NAME_Class = GetIPs.class.getSimpleName();
 
+    public static final short MESSAGE_ID = 0x6a;
     // ==========================================================================
     /**
      * Constructor

@@ -65,7 +65,7 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
-public class Sleep extends ControlMessage {    
+public final class Sleep extends ControlMessage {    
     
     private static final byte OPTION_SLEEP_TIME = 17; //IN SECONDS    
     private static final byte OPTION_SENDER_TIME = 19; //IN SECONDS
@@ -75,6 +75,8 @@ public class Sleep extends ControlMessage {
     
     //Class name
     private static final String NAME_Class = Sleep.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x4e;
  
     // ==========================================================================
     /**

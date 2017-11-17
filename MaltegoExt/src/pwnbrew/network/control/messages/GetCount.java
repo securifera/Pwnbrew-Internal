@@ -68,6 +68,8 @@ public final class GetCount extends MaltegoMessage{ // NO_UCD (use default)
     
     private int countType;
     private int optionalId;
+    
+    public static final short MESSAGE_ID = 0x68;
 
     // ==========================================================================
     /**

@@ -70,14 +70,15 @@ public class TaskStatus extends Tasking {
     /**
     * Constructor
     *
+     * @param passedClassId
      * @param taskId
      * @param dstHostId
      * @param passedStatus
      * @throws java.io.IOException
     */
     @SuppressWarnings("ucd")
-    public TaskStatus(int taskId, String passedStatus, int dstHostId ) throws IOException  {
-        super( taskId, dstHostId );
+    public TaskStatus( short passedClassId, int taskId, String passedStatus, int dstHostId ) throws IOException  {
+        super( passedClassId, taskId, dstHostId );
 
         taskStatus = passedStatus;
         byte[] strBytes = passedStatus.getBytes("US-ASCII");

@@ -43,7 +43,7 @@ The copyright on this package is held by Securifera, Inc
 * Created on Feb 2, 2014, 7:21:29 PM
 */
 
-package pwnbrew.network.control.messages;
+package pwnbrew.network.stage;
 
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.stage.StageMessage;
@@ -58,8 +58,8 @@ public final class Payload extends StageMessage{
     private static final byte OPTION_PAYLOAD = 32;
     
      //Class name
-    private static final String NAME_Class = Payload.class.getSimpleName();    
-
+    private static final String NAME_Class = Payload.class.getSimpleName(); 
+    
 
     // ==========================================================================
     /**

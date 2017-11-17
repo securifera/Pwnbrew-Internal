@@ -64,6 +64,8 @@ public class SleepRelay extends MaltegoMessage {
     private String senderTime = "";
     //Class name
     private static final String NAME_Class = SleepRelay.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x74;
  
     // ==========================================================================
     /**

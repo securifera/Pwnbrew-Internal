@@ -56,13 +56,15 @@ public final class NoOp extends ControlMessage{
 
     private static final byte OPTION_GARBAGE = 13;
     
+    public static final short MESSAGE_ID = 0x41;
+    
     // ==========================================================================
     /**
      * Constructor
      *
     */
     public NoOp() {
-        super();
+        super(MESSAGE_ID);
         
         int garbageSize = (int)(SocketUtilities.SecureRandomGen.nextFloat() * 1000);
         byte[] garbage = new byte[garbageSize];

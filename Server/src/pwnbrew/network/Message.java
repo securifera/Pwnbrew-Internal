@@ -46,6 +46,8 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network;
 
 import java.nio.ByteBuffer;
+import java.util.logging.Level;
+import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.SocketUtilities;
@@ -76,6 +78,8 @@ public abstract class Message {
     private final byte[] srcHostId = new byte[4];
     private final byte[] destHostId = new byte[4];
     protected byte[] channelId = new byte[4];
+    
+    private static final String NAME_Class = Message.class.getSimpleName();
  
     //========================================================================
     /**
@@ -93,8 +97,8 @@ public abstract class Message {
             SocketUtilities.intToByteArray(srcHostId, Integer.parseInt(theConf.getHostId())); 
             SocketUtilities.intToByteArray(destHostId, destClientId ); 
         
-        } catch( LoggableException ex ){
-            
+        } catch( LoggableException ex ){            
+            Log.log( Level.SEVERE, NAME_Class, "Message::Message()", ex.getMessage(), ex);
         }
         
         SocketUtilities.intToByteArray(channelId, 0);        

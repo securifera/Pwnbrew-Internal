@@ -45,6 +45,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import pwnbrew.network.stage.Payload;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import pwnbrew.log.Log;
@@ -69,7 +70,9 @@ public final class StageFlagAck extends ControlMessage{
     private int theRelayClientId;
     
      //Class name
-    private static final String NAME_Class = StageFlagAck.class.getSimpleName();    
+    private static final String NAME_Class = StageFlagAck.class.getSimpleName();  
+    
+    public static final short MESSAGE_ID = 0x63;
 
     // ==========================================================================
     /**

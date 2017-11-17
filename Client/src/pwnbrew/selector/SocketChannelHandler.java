@@ -477,7 +477,7 @@ public class SocketChannelHandler implements Selectable {
             } else {
                 
                 //Unwrap and process the data
-                aPortWrapper.processData( this, readByteBuf, getInetAddress() );
+                aPortWrapper.processData( this, readByteBuf );
             }  
 
         
@@ -597,23 +597,7 @@ public class SocketChannelHandler implements Selectable {
 
         }); 
     }
-     
-    //===============================================================
-    /**
-    * Returns the Inet Address associated with the channel io for the
-    * access handler
-    *
-    * @return
-    */
-    public InetAddress getInetAddress(){
-        
-        InetAddress theInet = null;
-        if( theSCW != null){
-            theInet = theSCW.getSocketChannel().socket().getInetAddress();
-        }
-        return theInet;
-    }
-    
+         
     //===============================================================
     /**
     * Returns the Inet Address associated with the channel io for the

@@ -62,6 +62,8 @@ public final class GetSessions extends MaltegoMessage{
     private int hostId;
     
     private static final String NAME_Class = GetSessions.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x6b;
 
     // ==========================================================================
     /**

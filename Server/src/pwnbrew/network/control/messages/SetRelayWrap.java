@@ -58,6 +58,8 @@ public final class SetRelayWrap extends ControlMessage{
     private static final byte OPTION_WRAPPER = 45;
     private static final byte OPTION_CLIENT_ID = 43;
     
+    public static final short MESSAGE_ID = 0x4d;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -67,7 +69,7 @@ public final class SetRelayWrap extends ControlMessage{
      * @param passedWrapper
     */
     public SetRelayWrap( int dstHostId, int clientId, byte passedWrapper ) {
-        super( dstHostId );     
+        super( MESSAGE_ID, dstHostId );     
         
          //Add the option
         byte[] clientIdArr = SocketUtilities.intToByteArray(clientId);

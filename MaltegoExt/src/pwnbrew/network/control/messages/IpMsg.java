@@ -48,6 +48,8 @@ public final class IpMsg extends MaltegoMessage{
     
     private static final byte OPTION_IP = 72;
     
+    public static final short MESSAGE_ID = 0x6e;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -56,7 +58,7 @@ public final class IpMsg extends MaltegoMessage{
      * @param passedIP
     */
     public IpMsg( int dstHostId, String passedIP ) {
-        super( dstHostId );
+        super(MESSAGE_ID, dstHostId );
         
         byte[] tempBytes = passedIP.getBytes();
         ControlOption aTlv = new ControlOption( OPTION_IP, tempBytes);

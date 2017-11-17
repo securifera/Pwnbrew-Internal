@@ -54,7 +54,6 @@ import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.FileFinder;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 
 /**
  *
@@ -74,6 +73,8 @@ public final class FileOperation extends Tasking {
     private byte theOperation;
     private String theFilePath;
     private String addParam;
+        
+    public static final short MESSAGE_ID = 0x38;
     
     private static final String NAME_Class = FileOperation.class.getSimpleName();
     

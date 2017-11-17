@@ -59,6 +59,8 @@ public final class GetUpgradeFlag extends MaltegoMessage{ // NO_UCD (use default
     private static final byte OPTION_HOST_ID = 100;
     private int hostId;
     private static final String NAME_Class = GetUpgradeFlag.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x6c;
 
     // ==========================================================================
     /**

@@ -52,10 +52,12 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
-public class LogMsg extends ControlMessage {
+public final class LogMsg extends ControlMessage {
     
     static final byte OPTION_LOG_MSG = 21;
     private String theMessage = "";
+    
+    public static final short MESSAGE_ID = 0x40;
     
      // ==========================================================================
     /**
@@ -64,7 +66,7 @@ public class LogMsg extends ControlMessage {
      * @param passedMsg
     */
     public LogMsg( String passedMsg ) {
-        super();
+        super(MESSAGE_ID);
 
         //Add the message  
         theMessage = passedMsg;

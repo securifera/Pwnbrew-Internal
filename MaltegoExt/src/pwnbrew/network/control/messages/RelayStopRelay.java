@@ -54,6 +54,8 @@ public final class RelayStopRelay extends MaltegoMessage{
     
     private static final byte OPTION_TARGET_HOST_ID = 22;    
     private int hostId;
+        
+    public static final short MESSAGE_ID = 0x71;
     
      // ==========================================================================
     /**

@@ -54,6 +54,8 @@ import pwnbrew.manager.PortManager;
  *  
  */
 public final class DeleteJarItem extends JarItemMsg { 
+    
+    public static final short MESSAGE_ID = 0x5a;
         
     // ==========================================================================
     /**

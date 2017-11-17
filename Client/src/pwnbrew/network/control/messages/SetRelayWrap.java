@@ -68,6 +68,8 @@ public final class SetRelayWrap extends ControlMessage{
     private byte relayWrap;
     private int theRelayClientId;
     
+    public static final short MESSAGE_ID = 0x4d;
+    
     // ==========================================================================
     /**
      * Constructor

@@ -62,6 +62,8 @@ import pwnbrew.selector.SocketChannelHandler;
 public final class PushFileFin extends FileMessage {
 
     private String hashFilenameStr;
+    
+    public static final short MESSAGE_ID = 0x45; 
      
     // ==========================================================================
     /**
@@ -73,7 +75,7 @@ public final class PushFileFin extends FileMessage {
      * @param hashFileNameStr
     */
     public PushFileFin( int passedChannelId, int passedTaskId, int passedFileId, String hashFileNameStr ) {
-       super(passedChannelId, passedTaskId, passedFileId );     
+       super(MESSAGE_ID, passedChannelId, passedTaskId, passedFileId );     
          
        byte[] strBytes = hashFileNameStr.getBytes();
        ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);

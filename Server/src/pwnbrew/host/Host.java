@@ -74,6 +74,7 @@ public class Host extends Node {
     private static final String RELAY_PORT = "relayPort";
     private static final String JAR_VERSION = "jarVersion";
     private static final String JRE_VERSION = "jreVersion";
+    private static final String PID = "pid";
     
     // ========================================================================
     /**
@@ -92,6 +93,9 @@ public class Host extends Node {
         
         //Add the attributes
         thePropertyMap.put( JRE_VERSION,  ""  );
+        
+        //Add the attributes
+        thePropertyMap.put( PID,  ""  );
         
          //Add the attributes
         thePropertyMap.put( RELAY_PORT,  ""  );
@@ -501,6 +505,26 @@ public class Host extends Node {
     
       //===============================================================
     /**
+     *  Get the PID
+     * 
+     * @return 
+     */
+    public String getPid(){
+        return getProperty( PID );
+    }
+    
+    //===============================================================
+    /**
+     *  Sets the PID
+     * 
+     * @param passedString 
+     */
+    public void setPid( String passedString ) {
+        setProperty( PID, passedString);
+    }
+    
+      //===============================================================
+    /**
      *  Gets the relay port
      * 
      * @return 
@@ -562,6 +586,7 @@ public class Host extends Node {
         setJvmArch( passedHost.getJvmArch());
         setJreVersion( passedHost.getJreVersion());
         setOsName( passedHost.getOsName());
+        setPid( passedHost.getPid());
     }
    
    

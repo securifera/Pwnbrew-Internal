@@ -47,10 +47,14 @@ package pwnbrew.network.control;
 
 import pwnbrew.network.PortRouter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.network.control.messages.*;
+import pwnbrew.utilities.DebugPrinter;
 
 /**
  *
@@ -60,9 +64,183 @@ public class ControlMessageManager extends DataManager {
 
     private static ControlMessageManager theControlManager;
     private String serverAlias = null;
+    private static final Map<Short, String> theControlMessageMap = new HashMap();
     
-    private static final String NAME_Class = ControlMessageManager.class.getSimpleName();
+    private static final String NAME_Class = ControlMessageManager.class.getSimpleName();    
+    //Populate message map
+    static {
+        
+        //Add message
+        if( theControlMessageMap.containsKey(CancelSearch.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id: " + CancelSearch.MESSAGE_ID);
+        theControlMessageMap.put(CancelSearch.MESSAGE_ID, CancelSearch.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(ClassRequest.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + ClassRequest.MESSAGE_ID);
+        theControlMessageMap.put(ClassRequest.MESSAGE_ID, ClassRequest.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(ClassResponse.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + ClassResponse.MESSAGE_ID);
+        theControlMessageMap.put(ClassResponse.MESSAGE_ID, ClassResponse.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(CreateShell.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + CreateShell.MESSAGE_ID);
+        theControlMessageMap.put(CreateShell.MESSAGE_ID, CreateShell.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(CreateShellAck.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + CreateShellAck.MESSAGE_ID);
+        theControlMessageMap.put(CreateShellAck.MESSAGE_ID, CreateShellAck.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(DirCount.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + DirCount.MESSAGE_ID);
+        theControlMessageMap.put(DirCount.MESSAGE_ID, DirCount.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(FileOpResult.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + FileOpResult.MESSAGE_ID);
+        theControlMessageMap.put(FileOpResult.MESSAGE_ID, FileOpResult.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(FileOperation.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + FileOperation.MESSAGE_ID);
+        theControlMessageMap.put(FileOperation.MESSAGE_ID, FileOperation.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(FileSystemMsg.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + FileSystemMsg.MESSAGE_ID);
+        theControlMessageMap.put(FileSystemMsg.MESSAGE_ID, FileSystemMsg.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(GetDrives.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + GetDrives.MESSAGE_ID);
+        theControlMessageMap.put(GetDrives.MESSAGE_ID, GetDrives.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(Hello.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + Hello.MESSAGE_ID);
+        theControlMessageMap.put(Hello.MESSAGE_ID, Hello.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(HelloAck.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + HelloAck.MESSAGE_ID);
+        theControlMessageMap.put(HelloAck.MESSAGE_ID, HelloAck.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(HelloRepeat.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + HelloRepeat.MESSAGE_ID);
+        theControlMessageMap.put(HelloRepeat.MESSAGE_ID, HelloRepeat.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(KillShell.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + KillShell.MESSAGE_ID);
+        theControlMessageMap.put(KillShell.MESSAGE_ID, KillShell.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(ListFiles.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + ListFiles.MESSAGE_ID);
+        theControlMessageMap.put(ListFiles.MESSAGE_ID, ListFiles.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(LogMsg.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + LogMsg.MESSAGE_ID);
+        theControlMessageMap.put(LogMsg.MESSAGE_ID, LogMsg.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(Migrate.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + Migrate.MESSAGE_ID);
+        theControlMessageMap.put(Migrate.MESSAGE_ID, Migrate.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(NoOp.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + NoOp.MESSAGE_ID);
+        theControlMessageMap.put(NoOp.MESSAGE_ID, NoOp.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(PushFile.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + PushFile.MESSAGE_ID);
+        theControlMessageMap.put(PushFile.MESSAGE_ID, PushFile.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(PushFileAbort.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + PushFileAbort.MESSAGE_ID);
+        theControlMessageMap.put(PushFileAbort.MESSAGE_ID, PushFileAbort.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(PushFileAck.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + PushFileAck.MESSAGE_ID);
+        theControlMessageMap.put(PushFileAck.MESSAGE_ID, PushFileAck.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(PushFileFin.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + PushFileFin.MESSAGE_ID);
+        theControlMessageMap.put(PushFileFin.MESSAGE_ID, PushFileFin.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(PushFileUpdate.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + PushFileUpdate.MESSAGE_ID);
+        theControlMessageMap.put(PushFileUpdate.MESSAGE_ID, PushFileUpdate.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(RelayDisconnect.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + RelayDisconnect.MESSAGE_ID);
+        theControlMessageMap.put(RelayDisconnect.MESSAGE_ID, RelayDisconnect.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(RelayStart.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + RelayStart.MESSAGE_ID);
+        theControlMessageMap.put(RelayStart.MESSAGE_ID, RelayStart.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(RelayStatus.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + RelayStatus.MESSAGE_ID);
+        theControlMessageMap.put(RelayStatus.MESSAGE_ID, RelayStatus.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(RelayStop.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + RelayStop.MESSAGE_ID);
+        theControlMessageMap.put(RelayStop.MESSAGE_ID, RelayStop.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(Reload.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + Reload.MESSAGE_ID);
+        theControlMessageMap.put(Reload.MESSAGE_ID, Reload.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(SetRelayWrap.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + SetRelayWrap.MESSAGE_ID);
+        theControlMessageMap.put(SetRelayWrap.MESSAGE_ID, SetRelayWrap.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(Sleep.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + Sleep.MESSAGE_ID);
+        theControlMessageMap.put(Sleep.MESSAGE_ID, Sleep.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(SocksCreateHandlerAckMsg.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + SocksCreateHandlerAckMsg.MESSAGE_ID);
+        theControlMessageMap.put(SocksCreateHandlerAckMsg.MESSAGE_ID, SocksCreateHandlerAckMsg.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(SocksOperation.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + SocksOperation.MESSAGE_ID);
+        theControlMessageMap.put(SocksOperation.MESSAGE_ID, SocksOperation.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(SocksOperationAck.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + SocksOperationAck.MESSAGE_ID);
+        theControlMessageMap.put(SocksOperationAck.MESSAGE_ID, SocksOperationAck.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(StageFlag.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + StageFlag.MESSAGE_ID);
+        theControlMessageMap.put(StageFlag.MESSAGE_ID, StageFlag.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(StageFlagAck.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + StageFlagAck.MESSAGE_ID);
+        theControlMessageMap.put(StageFlagAck.MESSAGE_ID, StageFlagAck.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(TaskGetFile.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + TaskGetFile.MESSAGE_ID);
+        theControlMessageMap.put(TaskGetFile.MESSAGE_ID, TaskGetFile.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(TaskProgress.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + TaskProgress.MESSAGE_ID);
+        theControlMessageMap.put(TaskProgress.MESSAGE_ID, TaskProgress.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(Uninstall.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + Uninstall.MESSAGE_ID);
+        theControlMessageMap.put(Uninstall.MESSAGE_ID, Uninstall.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(UpgradeStager.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + UpgradeStager.MESSAGE_ID);
+        theControlMessageMap.put(UpgradeStager.MESSAGE_ID, UpgradeStager.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(UpgradeStagerComplete.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + UpgradeStagerComplete.MESSAGE_ID);
+        theControlMessageMap.put(UpgradeStagerComplete.MESSAGE_ID, UpgradeStagerComplete.class.getCanonicalName());
+
+        
+    }
     
+    public static String getControlMessagePath( short msgId ){
+        String retStr;
+        synchronized(theControlMessageMap){
+            retStr = theControlMessageMap.get(msgId);
+        }
+        return retStr;
+    }
     //===========================================================================
     /*
      *  Constructor

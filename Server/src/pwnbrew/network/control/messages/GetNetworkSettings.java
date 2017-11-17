@@ -55,9 +55,11 @@ import pwnbrew.xml.ServerConfig;
  *
  * @author Securifera
  */
-public class GetNetworkSettings extends MaltegoMessage{ // NO_UCD (use default)
+public final class GetNetworkSettings extends MaltegoMessage{ // NO_UCD (use default)
     
     private static final String NAME_Class = GetNetworkSettings.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x5f;
     
     // ==========================================================================
     /**

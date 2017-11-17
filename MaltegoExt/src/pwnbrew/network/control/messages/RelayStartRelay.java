@@ -58,6 +58,8 @@ public final class RelayStartRelay extends MaltegoMessage{
     private int hostId;
     private int thePort;
     
+    public static final short MESSAGE_ID = 0x70;
+    
      // ==========================================================================
     /**
      * Constructor

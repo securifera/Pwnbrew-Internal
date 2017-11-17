@@ -62,7 +62,8 @@ public final class StageFlag extends ControlMessage{
     
      //Class name
     private static final String NAME_Class = StageFlag.class.getSimpleName();    
-
+    
+    public static final short MESSAGE_ID = 0x52;
 
     // ==========================================================================
     /**
@@ -75,7 +76,7 @@ public final class StageFlag extends ControlMessage{
      * @throws java.io.UnsupportedEncodingException
     */
     public StageFlag( int dstHostId, int clientId, boolean isStaged, String passedVersion ) throws UnsupportedEncodingException {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         //Add the option
         byte[] clientIdArr = SocketUtilities.intToByteArray(clientId);

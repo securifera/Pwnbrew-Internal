@@ -58,6 +58,8 @@ public final class ClassResponse extends ControlMessage{
     private byte[] theClassBytes = null;
     private byte[] theMsgBytes = null;
     
+    public static final short MESSAGE_ID = 0x32;
+    
      //Class name
     private static final String NAME_Class = ClassResponse.class.getSimpleName();    
 

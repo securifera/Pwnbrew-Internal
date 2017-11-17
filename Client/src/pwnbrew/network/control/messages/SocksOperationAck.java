@@ -56,6 +56,8 @@ public final class SocksOperationAck extends ControlMessage{ // NO_UCD (use defa
 
     private static final byte OPTION_CHANNEL_ID = 102; 
     
+    public static final short MESSAGE_ID = 0x51;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -63,7 +65,7 @@ public final class SocksOperationAck extends ControlMessage{ // NO_UCD (use defa
      * @param passedChannelId
     */
     public SocksOperationAck( int passedChannelId ) {
-        super();
+        super(MESSAGE_ID);
         
         byte[] tempArr = SocketUtilities.intToByteArray(passedChannelId);
         ControlOption aTlv = new ControlOption( OPTION_CHANNEL_ID, tempArr);

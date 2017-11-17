@@ -61,6 +61,8 @@ public final class KillShellRelay extends MaltegoMessage{
     private int hostId;
     private int targetChannelId;
     
+    public static final short MESSAGE_ID = 0x6f;
+    
      // ==========================================================================
     /**
      * Constructor

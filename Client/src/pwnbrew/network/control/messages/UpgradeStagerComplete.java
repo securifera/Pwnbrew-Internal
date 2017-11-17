@@ -48,6 +48,8 @@ public final class UpgradeStagerComplete extends ControlMessage{
     
     
     private static final byte OPTION_JAR_VERSION = 19;    
+        
+    public static final short MESSAGE_ID = 0x59;
 
     // ==========================================================================
     /**
@@ -57,7 +59,7 @@ public final class UpgradeStagerComplete extends ControlMessage{
     */
     @SuppressWarnings("ucd")
     public UpgradeStagerComplete( String passedVersion ) {
-        super();
+        super(MESSAGE_ID);
         
         //Add the version
         byte[] strBytes = passedVersion.getBytes();

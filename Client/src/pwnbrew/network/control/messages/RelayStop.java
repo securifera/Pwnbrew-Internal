@@ -46,7 +46,6 @@ package pwnbrew.network.control.messages;
 
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.relay.RelayManager;
 
 /**
@@ -57,6 +56,8 @@ public final class RelayStop extends ControlMessage{
 
     //Class name
     private static final String NAME_Class = RelayStop.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x4a;
     
     // ==========================================================================
     /**

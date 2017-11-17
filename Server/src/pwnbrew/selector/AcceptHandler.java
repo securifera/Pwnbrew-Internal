@@ -121,10 +121,10 @@ final public class AcceptHandler implements Selectable {
             if( !requireAuthentication ){
                 
                 //Create a disconnect timer
-                SocketDisconnectTimer aTimerTask = new SocketDisconnectTimer( (ServerManager)theSPR.getPortManager(), theSCH);
+                //SocketDisconnectTimer aTimerTask = new SocketDisconnectTimer( (ServerManager)theSPR.getPortManager(), theSCH);
                 
                 //Create a timer
-                theSPR.schedulerKillTimer(aTimerTask);
+                //theSPR.schedulerKillTimer(aTimerTask);
             }
             
             try {

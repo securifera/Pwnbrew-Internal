@@ -65,7 +65,7 @@ public class Host extends Entity {
      * @param passedOS 
      * @param passedId 
      */
-    public Host( boolean connected, boolean sleepable, int relayPort, String passedHostname, String passedArch, String passedOS, String passedId ) {
+    public Host( boolean connected, boolean sleepable, int relayPort, String passedHostname, String passedArch, String passedPid, String passedOS, String passedId ) {
         super( connected ? ( sleepable ? PWNBREW_HOST_SLEEPABLE : PWNBREW_HOST_CONNECTED ): PWNBREW_HOST_DISCONNECTED );
         
         //Set the hostname
@@ -87,6 +87,11 @@ public class Host extends Entity {
         //Add the server ip
         aField = new Field( Constants.HOST_ARCH );
         aField.setXmlObjectContent( passedArch );
+        addField(aField);
+        
+        //Add the server ip
+        aField = new Field( Constants.HOST_PID );
+        aField.setXmlObjectContent( passedPid );
         addField(aField);
         
         //Add the server ip

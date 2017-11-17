@@ -71,15 +71,17 @@ public class TaskStatus extends Tasking {
     
     protected String taskStatus = "";
     
+    
     // ==========================================================================
     /**
      * Constructor
      *
+     * @param passedClassId
      * @param passedId
      * @param passedStatus
     */
-    public TaskStatus( int passedId, String passedStatus  ) {
-        super( passedId );
+    public TaskStatus( short passedClassId, int passedId, String passedStatus  ) {
+        super( passedClassId, passedId );
 
         taskStatus = passedStatus;
         byte[] strBytes = passedStatus.getBytes();

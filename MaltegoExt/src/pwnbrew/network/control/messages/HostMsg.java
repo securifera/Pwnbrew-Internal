@@ -61,6 +61,9 @@ public final class HostMsg extends MaltegoMessage{
     private static final byte OPTION_HOST_ID = 64;
     private static final byte OPTION_SLEEPABLE = 65;
     private static final byte OPTION_RELAY_PORT = 67;
+    private static final byte OPTION_PID = 68;
+    
+    public static final short MESSAGE_ID = 0x6d;
     
     // ==========================================================================
     /**
@@ -70,16 +73,16 @@ public final class HostMsg extends MaltegoMessage{
      * @param passeHostname
      * @param passedOS
      * @param passedArch
+     * @param passedPid
      * @param hostId
      * @param isConnected
      * @param isSleepable
-     * @param relayPort
      * @throws java.io.UnsupportedEncodingException
     */
     public HostMsg( int dstHostId, String passeHostname, String passedOS, 
-            String passedArch, int hostId, boolean isConnected, 
+            String passedArch, String passedPid, int hostId, boolean isConnected, 
             boolean isSleepable ) throws UnsupportedEncodingException {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
           //Add file type
         byte[] tempBytes = passeHostname.getBytes("US-ASCII");
@@ -89,6 +92,11 @@ public final class HostMsg extends MaltegoMessage{
         //Add file path
         tempBytes = passedArch.getBytes("US-ASCII");
         aTlv = new ControlOption( OPTION_ARCH, tempBytes);
+        addOption(aTlv);
+        
+         //Add pid
+        tempBytes = passedPid.getBytes("US-ASCII");
+        aTlv = new ControlOption( OPTION_PID, tempBytes);
         addOption(aTlv);
         
         //Add additional param

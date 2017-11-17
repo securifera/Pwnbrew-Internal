@@ -63,7 +63,7 @@ public final class ListFiles extends Tasking {
      //Class name
     private static final String NAME_Class = ListFiles.class.getSimpleName();    
 
-
+    public static final short MESSAGE_ID = 0x3f;
      // ==========================================================================
     /**
      * Constructor

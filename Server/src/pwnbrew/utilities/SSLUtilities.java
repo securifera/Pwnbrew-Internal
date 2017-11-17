@@ -386,7 +386,7 @@ final public class SSLUtilities {
             String[] ca = STATIC_CA_LIST[ca_int];
             String ca_subject = SSLUtilities.constructDN(ca);
             
-            Object[] theObjArr = X509CertificateFactory.generateCertificate( ca_subject, ca_subject, 3600, "RSA", 2048, true );
+            Object[] theObjArr = X509CertificateFactory.generateCertificate( ca_subject, ca_subject, 3600, "RSA", 2048, true, false );
             PrivateKey caKey = (PrivateKey) theObjArr[0];
             sun.security.x509.X509CertImpl caCert = (sun.security.x509.X509CertImpl) theObjArr[1];
             
@@ -395,14 +395,14 @@ final public class SSLUtilities {
             String[] inter = STATIC_CA_LIST[inter_int];
             String inter_subject = SSLUtilities.constructDN(inter);
             
-            theObjArr = X509CertificateFactory.generateCertificate( inter_subject, ca_subject, 3600, "RSA", 2048, false );
+            theObjArr = X509CertificateFactory.generateCertificate( inter_subject, ca_subject, 3600, "RSA", 2048, false, false );
             PrivateKey interKey = (PrivateKey) theObjArr[0];
             sun.security.x509.X509CertImpl interCert = (sun.security.x509.X509CertImpl) theObjArr[1];
             
             //Sign with ca
             interCert.sign( caKey, hashAlg );           
             
-            theObjArr = X509CertificateFactory.generateCertificate( subjectDN, inter_subject, 1080, "RSA", 2048, false );
+            theObjArr = X509CertificateFactory.generateCertificate( subjectDN, inter_subject, 1080, "RSA", 2048, false, true );
             Key theKey = (Key) theObjArr[0];
             sun.security.x509.X509CertImpl newCert = (sun.security.x509.X509CertImpl) theObjArr[1];
             

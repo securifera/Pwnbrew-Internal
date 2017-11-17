@@ -59,6 +59,8 @@ public final class UpgradeStagerRelay extends MaltegoMessage { // NO_UCD (use de
     private static final byte OPTION_HOST_ID = 100;
     private int hostId;
     private static final String NAME_Class = UpgradeStagerRelay.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x76;
 
     // ==========================================================================
     /**

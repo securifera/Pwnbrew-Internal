@@ -63,8 +63,8 @@ abstract public class Tasking extends ControlMessage {
     * Constructor
     *
     */
-    Tasking(int passedTaskId, int dstHostId ) {
-        super( dstHostId );
+    Tasking( short passedClassId, int passedTaskId, int dstHostId ) {
+        super(passedClassId, dstHostId );
 
         //Copy the task Id
         taskId = passedTaskId;

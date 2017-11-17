@@ -45,9 +45,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.host.HostController;
 import pwnbrew.manager.PortManager;
-import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
 
@@ -61,6 +59,8 @@ public final class RelayStatus extends ControlMessage{
     private static final byte OPTION_TASK_STATUS = 8;
     boolean connected;
     
+    public static final short MESSAGE_ID = 0x49;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -69,7 +69,7 @@ public final class RelayStatus extends ControlMessage{
      * @param passedResult
     */
     public RelayStatus( int dstHostId, boolean passedResult ) {
-        super(dstHostId);
+        super(MESSAGE_ID, dstHostId);
         
         int status = 0;
         if( passedResult )

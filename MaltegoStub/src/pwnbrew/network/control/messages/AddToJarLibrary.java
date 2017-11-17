@@ -48,7 +48,7 @@ import pwnbrew.manager.PortManager;
  *
  *  
  */
-public final class AddToJarLibrary extends JarItemMsg{ // NO_UCD (use default)
+public final class AddToJarLibrary extends JarItemMsg { // NO_UCD (use default)
     
     // ==========================================================================
     /**
