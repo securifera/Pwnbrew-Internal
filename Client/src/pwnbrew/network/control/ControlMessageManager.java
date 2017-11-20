@@ -76,15 +76,15 @@ public class ControlMessageManager extends DataManager {
         theControlMessageMap.put(CancelSearch.MESSAGE_ID, CancelSearch.class.getCanonicalName());
         //Add message
         if( theControlMessageMap.containsKey(ClassRequest.MESSAGE_ID))
-            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + ClassRequest.MESSAGE_ID);
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id: " + ClassRequest.MESSAGE_ID);
         theControlMessageMap.put(ClassRequest.MESSAGE_ID, ClassRequest.class.getCanonicalName());
         //Add message
         if( theControlMessageMap.containsKey(ClassResponse.MESSAGE_ID))
-            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + ClassResponse.MESSAGE_ID);
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id: " + ClassResponse.MESSAGE_ID);
         theControlMessageMap.put(ClassResponse.MESSAGE_ID, ClassResponse.class.getCanonicalName());
         //Add message
         if( theControlMessageMap.containsKey(CreateShell.MESSAGE_ID))
-            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + CreateShell.MESSAGE_ID);
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id: " + CreateShell.MESSAGE_ID);
         theControlMessageMap.put(CreateShell.MESSAGE_ID, CreateShell.class.getCanonicalName());
         //Add message
         if( theControlMessageMap.containsKey(CreateShellAck.MESSAGE_ID))

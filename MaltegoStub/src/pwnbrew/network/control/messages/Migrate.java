@@ -51,7 +51,7 @@ public class Migrate extends ControlMessage {
     private static final byte OPTION_IPADDRESS = 2;
     private String connectStr = "";
      
-    public static final short MESSAGE_ID = 0x41;
+    public static final short MESSAGE_ID = 0x7b;
     
     // ==========================================================================
     /**

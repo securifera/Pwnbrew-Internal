@@ -62,7 +62,7 @@ public final class Migrate extends ControlMessage {
     //Class name
     private static final String NAME_Class = Migrate.class.getSimpleName();
     
-    public static final short MESSAGE_ID = 0x41;
+    public static final short MESSAGE_ID = 0x7b;
  
     // ==========================================================================
     /**

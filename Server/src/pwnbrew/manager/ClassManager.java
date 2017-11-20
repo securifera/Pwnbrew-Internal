@@ -445,6 +445,7 @@ final public class ClassManager {
                         } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException | SecurityException ex) {
                             Log.log( LogLevel.WARNING, NAME_Class, "addClassToMap()", "Could not obtain the MESSAGE_ID for the given Class: " + aClass.getSimpleName(),ex );
                         } 
+                        break;
                     } else {
                         parentClass = parentClass.getSuperclass();
                     }

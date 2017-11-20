@@ -56,7 +56,7 @@ public final class SocksOperationAck extends ControlMessage{ // NO_UCD (use defa
 
     private static final byte OPTION_CHANNEL_ID = 102; 
     
-    public static final short MESSAGE_ID = 0x51;
+    public static final short MESSAGE_ID = 0x7c;
     
     // ==========================================================================
     /**

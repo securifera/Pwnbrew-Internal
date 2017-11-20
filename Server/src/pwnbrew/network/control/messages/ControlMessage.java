@@ -294,7 +294,6 @@ public abstract class ControlMessage extends Message {
         
         //Add the function
         count += 2;
-        count += getClass().getCanonicalName().getBytes().length;
         
         //Add the options
         for( ControlOption aTlv : optionList){  

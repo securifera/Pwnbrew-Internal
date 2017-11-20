@@ -65,7 +65,7 @@ public final class NetworkSettingsMsg extends MaltegoMessage {
     private String theExpDate = null;
     private String theSerialNum = null;
     
-    public static final short MESSAGE_ID = 0x5b;
+    public static final short MESSAGE_ID = 0x7f;
     
     // ==========================================================================
     /**

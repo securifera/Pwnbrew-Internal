@@ -57,6 +57,7 @@ public class FileMessage extends Tasking {
     protected int fileChannelId = 0;  
     private int fileId = 0;
 
+    public static final short MESSAGE_ID = -1;
     
     // ==========================================================================
     /**

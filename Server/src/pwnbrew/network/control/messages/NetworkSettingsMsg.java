@@ -72,7 +72,7 @@ public final class NetworkSettingsMsg extends MaltegoMessage {
     private String theIssuerName = null;
     private String theExpDate = null;
     
-    public static final short MESSAGE_ID = 0x5b;
+    public static final short MESSAGE_ID = 0x7f;
     
     private static final String NAME_Class = GetNetworkSettings.class.getSimpleName();    
         

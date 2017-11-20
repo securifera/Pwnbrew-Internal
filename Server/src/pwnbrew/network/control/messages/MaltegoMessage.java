@@ -50,6 +50,8 @@ package pwnbrew.network.control.messages;
  *  
  */
 public class MaltegoMessage extends ControlMessage{ 
+    
+    public static final short MESSAGE_ID = -1;
 
     //=========================================================================
     /*
