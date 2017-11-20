@@ -64,15 +64,7 @@ public final class KillShell extends ControlMessage{ // NO_UCD (use default)
     private int theChannelId = 0;
   
     public static final short MESSAGE_ID = 0x3e;
-    // ==========================================================================
-    /**
-     * Constructor
-     *
-    */
-    public KillShell() {
-        super(MESSAGE_ID);
-    }
-    
+     
     // ==========================================================================
     /**
      *  Constructor 

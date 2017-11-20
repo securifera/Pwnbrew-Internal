@@ -191,7 +191,7 @@ final public class ClassManager {
                                 aJarItem = Utilities.getJavaItem( aFile );
                             } catch (JarItemException ex) {
                                 Log.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex);         
-                                return;
+                                System.exit(1);
                             }
                             
                             //Add the jar

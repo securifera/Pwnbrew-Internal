@@ -168,21 +168,24 @@ public abstract class ControlMessage extends Message {
         try {
             //Create a message
             aMessage = instatiateMessage(theId, passedBuffer );
+            if( aMessage != null){
              
-            //Ignore NoOps
-            if( !aMessage.getClass().equals( NoOp.class ))
-                DebugPrinter.printMessage(NAME_Class, "Received " + aMessage.getClass().getSimpleName() + " message.");
+                //Ignore NoOps
+                if( !aMessage.getClass().equals( NoOp.class ))
+                    DebugPrinter.printMessage(NAME_Class, "Received " + aMessage.getClass().getSimpleName() + " message.");
 
-            //Set client id
-            int theClientId = SocketUtilities.byteArrayToInt(clientId);
-            aMessage.setSrcHostId( theClientId );
+                //Set client id
+                int theClientId = SocketUtilities.byteArrayToInt(clientId);
+                aMessage.setSrcHostId( theClientId );
 
-            //Set dest host id
-            int theDestHostId= SocketUtilities.byteArrayToInt(destHostId);
-            aMessage.setDestHostId( theDestHostId );
+                //Set dest host id
+                int theDestHostId= SocketUtilities.byteArrayToInt(destHostId);
+                aMessage.setDestHostId( theDestHostId );
 
-            //Parse the tlvs
-            aMessage.parseControlOptions(passedBuffer);
+                //Parse the tlvs
+                aMessage.parseControlOptions(passedBuffer);
+                
+            }
             
         } catch (ClassNotFoundException ex) {
             
@@ -226,18 +229,21 @@ public abstract class ControlMessage extends Message {
 //        
 //        passedBuffer.get(classPath, 0, classPath.length);
 //        String thePath = new String(classPath);
-        
-        try {
-            
-            //Get the class
-            Class aClass = Class.forName(thePath);
-            Constructor aConstruct = aClass.getConstructor( byte[].class);
-            aMsg = (ControlMessage)aConstruct.newInstance(msgId);
+        if( thePath != null ){
+            try {
 
-        } catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Log.log(Level.SEVERE, NAME_Class, "instatiateMessage()", ex.getMessage(), ex );  
-            throw new LoggableException(ex);
-        } 
+                //Get the class
+                Class aClass = Class.forName(thePath);
+                Constructor aConstruct = aClass.getConstructor( byte[].class);
+                aMsg = (ControlMessage)aConstruct.newInstance(msgId);
+
+            } catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                Log.log(Level.SEVERE, NAME_Class, "instatiateMessage()", ex.getMessage(), ex );  
+                throw new LoggableException(ex);
+            } 
+        } else {
+            throw new LoggableException("No message found for given id.");  
+        }
         
         return aMsg;
     }
