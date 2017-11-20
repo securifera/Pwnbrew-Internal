@@ -57,11 +57,12 @@ public final class TaskGetFile extends TaskStatus {
 
     private String hashFilenameStr;    
     private int compress_flag = 0;
-    public static final byte OPTION_COMPRESSED = 78;
-    
+    public static final byte OPTION_COMPRESSED = 78;    
     
     //Class name
     private static final String NAME_Class = TaskGetFile.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x53;
      
     // ==========================================================================
     /**

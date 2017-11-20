@@ -62,6 +62,8 @@ public final class TaskGetFile extends TaskStatus{
     static final String TASK_XFER_FILES = "Transferring Files";
     //Class name
     private static final String NAME_Class = TaskGetFile.class.getSimpleName();
+        
+    public static final short MESSAGE_ID = 0x53;
      
     // ==========================================================================
     /**
@@ -74,7 +76,7 @@ public final class TaskGetFile extends TaskStatus{
      * @throws java.io.IOException
     */
     public TaskGetFile(int taskId, String fileNameHashStr, int dstId, int compressed ) throws IOException  {
-        super(taskId , TASK_XFER_FILES, dstId );
+        super( MESSAGE_ID, taskId , TASK_XFER_FILES, dstId );
    
         byte[] tempArr = fileNameHashStr.getBytes("US-ASCII");
         ControlOption aTlv = new ControlOption(OPTION_HASH_FILENAME, tempArr);

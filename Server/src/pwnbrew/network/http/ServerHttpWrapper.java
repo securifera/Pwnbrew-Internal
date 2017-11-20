@@ -312,12 +312,16 @@ public class ServerHttpWrapper extends HttpWrapper {
                     String[] cookieArr = cookieVal.split("=");
                     if( cookieArr.length > 1 ){
                         //Convert the hexstring to bytes
-                        String hexString = cookieArr[1];                        
-                        byte[] xorBytes = SocketUtilities.hexStringToByteArray(hexString);
-                        
-                        //XOR the bytes
-                        msgBytes = Utilities.xorData(xorBytes, XOR_STRING.getBytes());
+                        String hexString = cookieArr[1];  
+                        try {
+                            byte[] xorBytes = SocketUtilities.hexStringToByteArray(hexString);
+
+                            //XOR the bytes
+                            msgBytes = Utilities.xorData(xorBytes, XOR_STRING.getBytes());
           
+                        } catch (LoggableException ex) {
+                            Log.log( Level.SEVERE, NAME_Class, "getMessageBytes()", ex.getMessage(), ex);   
+                        }
                     }
                 }
                 break;

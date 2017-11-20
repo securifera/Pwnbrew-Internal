@@ -51,6 +51,8 @@ package pwnbrew.network.control.messages;
  */
 @SuppressWarnings("ucd")
 public final class RelayStop extends ControlMessage{
+    
+    public static final short MESSAGE_ID = 0x4a;
    
     // ==========================================================================
     /**
@@ -59,7 +61,7 @@ public final class RelayStop extends ControlMessage{
      * @param passedDestHostId
     */
     public RelayStop( int passedDestHostId ) {
-        super( passedDestHostId );
+        super(MESSAGE_ID, passedDestHostId );
     }
 
 }/* END CLASS RelayStop */

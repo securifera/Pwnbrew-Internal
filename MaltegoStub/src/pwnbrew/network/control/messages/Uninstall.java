@@ -43,6 +43,8 @@ package pwnbrew.network.control.messages;
  *  
  */
 public class Uninstall extends ControlMessage {    
+    
+    public static final short MESSAGE_ID = 0x57;
  
     // ==========================================================================
     /**
@@ -51,7 +53,7 @@ public class Uninstall extends ControlMessage {
      * @param dstHostId
     */
     public Uninstall( int dstHostId ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
     }
 
 }/* END CLASS Uninstall */

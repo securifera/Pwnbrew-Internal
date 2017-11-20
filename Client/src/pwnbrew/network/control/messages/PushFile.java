@@ -61,7 +61,7 @@ import pwnbrew.network.file.FileMessageManager;
  *
  *  
  */
-public class PushFile extends FileMessage {
+public final class PushFile extends FileMessage {
 
     private String hashFilenameStr;
     protected long fileSize = 0;
@@ -81,6 +81,8 @@ public class PushFile extends FileMessage {
      //Class name
     private static final String NAME_Class = PushFile.class.getSimpleName();
     
+    public static final short MESSAGE_ID = 0x42;
+    
       // ==========================================================================
     /**
      * Constructor
@@ -92,7 +94,7 @@ public class PushFile extends FileMessage {
      * @param passedLength
     */
     public PushFile( int taskId, int channelId, String fileHashNameStr, long passedLength, int passedType ) { // NO_UCD (use default)
-        super( channelId, taskId );
+        super(MESSAGE_ID, channelId, taskId );
         
         byte[] strBytes = fileHashNameStr.getBytes();
         ControlOption aTlv = new ControlOption(OPTION_HASH_FILENAME, strBytes);

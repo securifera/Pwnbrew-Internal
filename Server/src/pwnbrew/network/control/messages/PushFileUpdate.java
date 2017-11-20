@@ -60,6 +60,8 @@ public final class PushFileUpdate extends FileMessage {
     //Class name
     private static final String NAME_Class = PushFileUpdate.class.getSimpleName();
     
+    public static final short MESSAGE_ID = 0x46;
+    
     // ==========================================================================
     /**
      * Constructor

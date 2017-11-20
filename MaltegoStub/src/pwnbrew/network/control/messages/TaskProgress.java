@@ -60,6 +60,8 @@ public final class TaskProgress extends TaskStatus{
 
     private static final byte OPTION_PROGRESS = 16; 
     private int fileProgress;
+    
+    public static final short MESSAGE_ID = 0x54;
         
     // ==========================================================================
     /**

@@ -100,6 +100,7 @@ abstract public class Constants {
     public static final String RELAY_PORT = "relayport";
     
     public static final String HOST_ARCH = "arch";
+    public static final String HOST_PID = "hostpid";
     public static final String HOST_OS = "os";
     public static final String HOST_ID = "hostid";
     

@@ -60,6 +60,8 @@ public final class PushFileAbort extends FileMessage {
     
      //Class name
     private static final String NAME_Class = PushFileAbort.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x43;
 
     // ==========================================================================
     /**
@@ -71,7 +73,7 @@ public final class PushFileAbort extends FileMessage {
      * @param passedFileId
     */
     public PushFileAbort( int taskId, int dstHostId, int passedChannelId, int passedFileId ) {
-        super( dstHostId, passedChannelId, taskId, passedFileId );
+        super(MESSAGE_ID, dstHostId, passedChannelId, taskId, passedFileId );
     }
     
     // ==========================================================================

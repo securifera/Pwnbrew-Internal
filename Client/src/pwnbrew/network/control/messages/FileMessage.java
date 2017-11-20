@@ -65,16 +65,18 @@ public class FileMessage extends Tasking {
     protected int fileChannelId = 0;  
     protected boolean compressionFlag = false;
     
+    
     // ==========================================================================
     /**
      * Constructor
      *
+     * @param passedClassId
      * @param taskId
       * @param passedChannelId
      * @param passedFileId
     */
-    public FileMessage( int passedChannelId, int taskId, Integer... passedFileId ) { // NO_UCD (use default)
-        super( taskId );
+    public FileMessage( short passedClassId, int passedChannelId, int taskId, Integer... passedFileId ) { // NO_UCD (use default)
+        super( passedClassId, taskId );
         
         if( passedFileId.length == 0 )
             fileId = SocketUtilities.getNextId();

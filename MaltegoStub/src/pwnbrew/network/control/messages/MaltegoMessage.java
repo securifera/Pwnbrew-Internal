@@ -55,9 +55,9 @@ public class MaltegoMessage extends ControlMessage{
     /*
      *  Contructor
      */
-    public MaltegoMessage( int passedDestHostId ) { // NO_UCD (use default)
+    public MaltegoMessage(  short passedClassId, int passedDestHostId ) { // NO_UCD (use default)
         //Set id
-        super( passedDestHostId );
+        super( passedClassId, passedDestHostId );
     }
     
     // ==========================================================================

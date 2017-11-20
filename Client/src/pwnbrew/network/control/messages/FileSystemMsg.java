@@ -66,8 +66,8 @@ public final class FileSystemMsg extends Tasking {
     public static final byte FILE = 13; 
     public static final byte FOLDER = 14; 
     
+    public static final short MESSAGE_ID = 0x39;
     
-
     // ==========================================================================
     /**
      * Constructor
@@ -77,7 +77,7 @@ public final class FileSystemMsg extends Tasking {
      * @param isRoot
     */
     public FileSystemMsg( int taskId, File passedFile, boolean isRoot ) {
-        super(taskId);
+        super(MESSAGE_ID, taskId);
         
         //Get file details
         if( passedFile != null ){

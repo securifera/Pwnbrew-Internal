@@ -72,6 +72,8 @@ public final class CreateShell extends ControlMessage {
     public static final byte OPTION_STARTUP_CMD = 22;
     public static final byte OPTION_REDIRECT_STDERR = 24;
         
+    public static final short MESSAGE_ID = 0x33;
+    
     //Class name
     private static final String NAME_Class = CreateShell.class.getSimpleName();
     

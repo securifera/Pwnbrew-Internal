@@ -56,6 +56,8 @@ public final class RelayStatus extends ControlMessage{
     private static final byte OPTION_TASK_STATUS = 8;
     boolean connected;
     
+    public static final short MESSAGE_ID = 0x49;
+    
     // ==========================================================================
     /**
      * Constructor

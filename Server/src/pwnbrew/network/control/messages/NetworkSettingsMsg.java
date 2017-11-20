@@ -58,7 +58,7 @@ import pwnbrew.xml.ServerConfig;
  * @author Securifera
  */
 @SuppressWarnings("ucd")
-public class NetworkSettingsMsg extends MaltegoMessage {
+public final class NetworkSettingsMsg extends MaltegoMessage {
     
     private static final byte OPTION_SERVER_PORT = 54;  
     private static final byte OPTION_ISSUEE_NAME = 55;
@@ -71,6 +71,8 @@ public class NetworkSettingsMsg extends MaltegoMessage {
     private String theIssueeName = null;
     private String theIssuerName = null;
     private String theExpDate = null;
+    
+    public static final short MESSAGE_ID = 0x7f;
     
     private static final String NAME_Class = GetNetworkSettings.class.getSimpleName();    
         
@@ -89,7 +91,7 @@ public class NetworkSettingsMsg extends MaltegoMessage {
     */
     @SuppressWarnings("ucd")
     public NetworkSettingsMsg( int dstHostId, int passedPort, String issueeName, String issuerName, String theAlgorithm, String expDateStr, String serialNum ) throws UnsupportedEncodingException {
-        super( dstHostId );
+        super(MESSAGE_ID, dstHostId );
         
         byte[] tempBytes = SocketUtilities.intToByteArray(passedPort);
         ControlOption aTlv = new ControlOption( OPTION_SERVER_PORT, tempBytes);

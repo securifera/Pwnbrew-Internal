@@ -64,6 +64,8 @@ public final class CheckInTimeMsg extends MaltegoMessage{
     private int hostId;
     private String checkInDatStr;
     
+    public static final short MESSAGE_ID = 0x64;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -75,7 +77,7 @@ public final class CheckInTimeMsg extends MaltegoMessage{
      * @throws java.io.UnsupportedEncodingException
     */
     public CheckInTimeMsg( int dstHostId, int hostId, String passedStr, byte passedOperation ) throws UnsupportedEncodingException {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         //Add host id
         byte[] tempBytes = SocketUtilities.intToByteArray( hostId );

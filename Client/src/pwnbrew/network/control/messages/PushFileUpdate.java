@@ -58,6 +58,8 @@ public final class PushFileUpdate extends FileMessage {
     
     //Class name
     private static final String NAME_Class = PushFileUpdate.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x46;
    
     
     // ==========================================================================
@@ -70,7 +72,7 @@ public final class PushFileUpdate extends FileMessage {
      * @param passedFileSize
     */
     public PushFileUpdate( int passedChannelId, int passedTaskId, int passedFileId, long passedFileSize ) {
-        super(passedChannelId, passedTaskId, passedFileId );     
+        super(MESSAGE_ID, passedChannelId, passedTaskId, passedFileId );     
 
         byte[] tempArr = SocketUtilities.longToByteArray(passedFileSize);
         ControlOption aTlv = new ControlOption( OPTION_DATASIZE, tempArr);

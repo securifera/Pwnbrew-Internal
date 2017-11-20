@@ -58,7 +58,9 @@ public final class ClassResponse extends ControlMessage{
     private static final byte OPTION_CLASS_BYTES = 92;
     
      //Class name
-    private static final String NAME_Class = ClassResponse.class.getSimpleName();    
+    private static final String NAME_Class = ClassResponse.class.getSimpleName();
+
+    public static final short MESSAGE_ID = 0x32;    
 
 
     // ==========================================================================
@@ -71,7 +73,7 @@ public final class ClassResponse extends ControlMessage{
     */
     @SuppressWarnings("ucd")
     public ClassResponse( int destId, byte[] classBytes, byte[] msgBytes ) {
-        super(destId);
+        super(MESSAGE_ID, destId);
         
         //Add the bytes for the class
         ControlOption aTlv = new ControlOption( OPTION_CLASS_BYTES, classBytes);

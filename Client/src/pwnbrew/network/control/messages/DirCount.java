@@ -56,6 +56,7 @@ public final class DirCount extends Tasking {
     
     private static final byte OPTION_COUNT = 15;   
     
+    public static final short MESSAGE_ID = 0x35;
 
     // ==========================================================================
     /**
@@ -66,7 +67,7 @@ public final class DirCount extends Tasking {
     */
     @SuppressWarnings("ucd")
     public DirCount( int taskId, int fileCount ) {
-        super(taskId);
+        super( MESSAGE_ID, taskId);
         
         //Get file details
         byte[] tempBytes = SocketUtilities.intToByteArray(fileCount);

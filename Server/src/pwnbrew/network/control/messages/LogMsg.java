@@ -59,10 +59,12 @@ import pwnbrew.network.ControlOption;
  */
 
 @SuppressWarnings("ucd")
-public class LogMsg extends ControlMessage {
+public final class LogMsg extends ControlMessage {
         
     private static final byte OPTION_LOG_MSG = 21;
     private String theMessage = "";
+    
+    public static final short MESSAGE_ID = 0x40;
     
     //Class name
     private static final String NAME_Class = LogMsg.class.getSimpleName();

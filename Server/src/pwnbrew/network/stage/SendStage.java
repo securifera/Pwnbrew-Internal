@@ -42,8 +42,9 @@ The copyright on this package is held by Securifera, Inc
 * Created on Oct 7, 2013, 10:12:33 PM
 */
 
-package pwnbrew.network.control.messages;
+package pwnbrew.network.stage;
 
+import pwnbrew.network.stage.Payload;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;

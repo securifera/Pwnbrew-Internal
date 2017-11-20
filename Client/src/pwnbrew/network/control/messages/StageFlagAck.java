@@ -59,6 +59,8 @@ public final class StageFlagAck extends ControlMessage{
     
      //Class name
     private static final String NAME_Class = StageFlagAck.class.getSimpleName();    
+    
+    public static final short MESSAGE_ID = 0x63;
 
 
     // ==========================================================================
@@ -69,7 +71,7 @@ public final class StageFlagAck extends ControlMessage{
      * @param passedVersion
     */
     public StageFlagAck( int clientId, String passedVersion ) {
-        super();
+        super(MESSAGE_ID);
         
         //Add the option
         byte[] clientIdArr = SocketUtilities.intToByteArray(clientId);

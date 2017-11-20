@@ -73,6 +73,8 @@ public final class SocksOperation extends ControlMessage {
     private byte theSocksOperation = 0;
     private int theHandlerId = -1;
     
+    public static final short MESSAGE_ID = 0x51;
+    
     // ==========================================================================
     /**
     * Constructor
@@ -82,7 +84,7 @@ public final class SocksOperation extends ControlMessage {
      * @param passedHandlerId
     */
     public SocksOperation( int dstHostId, byte socksOperation, Integer... passedHandlerId ) {
-        super();
+        super(MESSAGE_ID);
                 
         setDestHostId(dstHostId);
         //Set flag for handler creation 

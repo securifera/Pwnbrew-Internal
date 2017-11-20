@@ -57,7 +57,6 @@ import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.LoaderUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 
 /**
  *
@@ -73,6 +72,8 @@ public final class UpgradeStager extends ControlMessage{
     private static final String NAME_Class = UpgradeStager.class.getSimpleName();   
     private byte[] stagerBytes = null;
     private String jar_version = "";
+        
+    public static final short MESSAGE_ID = 0x58;
     
     // ==========================================================================
     /**

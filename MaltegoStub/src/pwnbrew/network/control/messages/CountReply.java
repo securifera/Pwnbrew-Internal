@@ -64,6 +64,8 @@ public final class CountReply extends MaltegoMessage {
     private int optionalId;
     
     private static final String NAME_Class = CountReply.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x66;
 
     // ==========================================================================
     /**

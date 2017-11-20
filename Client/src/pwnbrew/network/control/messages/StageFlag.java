@@ -72,7 +72,9 @@ public final class StageFlag extends ControlMessage{
     private int theRelayClientId;
     
      //Class name
-    private static final String NAME_Class = StageFlag.class.getSimpleName();    
+    private static final String NAME_Class = StageFlag.class.getSimpleName();  
+    
+    public static final short MESSAGE_ID = 0x52;
 
     // ==========================================================================
     /**

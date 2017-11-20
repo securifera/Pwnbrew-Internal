@@ -54,6 +54,8 @@ import pwnbrew.network.ControlOption;
 public final class FileOpResult extends Tasking {
     
     private static final byte OPTION_OP_RESULT = 50;
+    
+    public static final short MESSAGE_ID = 0x37;
 
     // ==========================================================================
     /**
@@ -63,7 +65,7 @@ public final class FileOpResult extends Tasking {
      * @param passedResult
     */
     public FileOpResult( int taskId, byte passedResult ) {
-        super( taskId );   
+        super( MESSAGE_ID, taskId );   
         
         //Add file type
         byte[] tempBytes = new byte[]{ passedResult };

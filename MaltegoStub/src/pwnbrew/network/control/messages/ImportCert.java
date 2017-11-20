@@ -48,7 +48,9 @@ import pwnbrew.network.ControlOption;
 public final class ImportCert extends MaltegoMessage { // NO_UCD (use default)
         
     private static final byte OPTION_CERT_FILENAME = 78;
-    private static final byte OPTION_CERT_PASSWORD = 79;
+    private static final byte OPTION_CERT_PASSWORD = 79;    
+    
+    public static final short MESSAGE_ID = 0x60;
     
     // ==========================================================================
     /**
@@ -60,7 +62,7 @@ public final class ImportCert extends MaltegoMessage { // NO_UCD (use default)
      * @throws java.io.UnsupportedEncodingException
     */
     public ImportCert(int dstHostId, String passedName, String passedType ) throws UnsupportedEncodingException {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         byte[] tempBytes = passedName.getBytes("US-ASCII");
         ControlOption aTlv = new ControlOption( OPTION_CERT_FILENAME, tempBytes);

@@ -54,7 +54,7 @@ import pwnbrew.utilities.SocketUtilities;
 public final class KillShell extends ControlMessage{ // NO_UCD (use default)
     
     private static final byte OPTION_CHANNEL_ID = 102; 
-   
+    public static final short MESSAGE_ID = 0x3e;
 
     // ==========================================================================
     /**
@@ -64,7 +64,7 @@ public final class KillShell extends ControlMessage{ // NO_UCD (use default)
      * @param passedChannelId
     */
     public KillShell( int dstHostId, int passedChannelId ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         byte[] tempArr = SocketUtilities.intToByteArray(passedChannelId);
         ControlOption aTlv = new ControlOption( OPTION_CHANNEL_ID, tempArr);

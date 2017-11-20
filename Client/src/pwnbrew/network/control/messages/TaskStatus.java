@@ -71,15 +71,19 @@ public class TaskStatus extends Tasking {
     
     protected String taskStatus = "";
     
+    public static final short MESSAGE_ID = 0x7a;
+    
+    
     // ==========================================================================
     /**
      * Constructor
      *
+     * @param passedClassId
      * @param passedId
      * @param passedStatus
     */
-    public TaskStatus( int passedId, String passedStatus  ) {
-        super( passedId );
+    public TaskStatus( short passedClassId, int passedId, String passedStatus  ) {
+        super( passedClassId, passedId );
 
         taskStatus = passedStatus;
         byte[] strBytes = passedStatus.getBytes();
@@ -148,10 +152,8 @@ public class TaskStatus extends Tasking {
     public void evaluate( PortManager passedManager ) {
         
         //Pass it to the manager
-        if( passedManager instanceof TaskListener ){
-            ((TaskListener)passedManager).taskChanged(this);
-        }
+        if( passedManager instanceof TaskListener )
+            ((TaskListener)passedManager).taskChanged(this);        
         
     }
-
-}/* END CLASS TaskStatus */
+}

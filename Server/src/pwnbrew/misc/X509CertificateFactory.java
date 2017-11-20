@@ -56,8 +56,16 @@ import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Extension;
 import java.util.Date;
 import javax.net.ssl.SSLException;
+import sun.security.x509.CertificateExtensions;
+import sun.security.x509.DNSName;
+import sun.security.x509.GeneralName;
+import sun.security.x509.GeneralNames;
+import sun.security.x509.IPAddressName;
+import sun.security.x509.SubjectAlternativeNameExtension;
+import sun.security.x509.X509CertInfo;
 
 
 public class X509CertificateFactory {
@@ -92,7 +100,7 @@ public class X509CertificateFactory {
      * @throws java.io.IOException
      * @throws java.security.NoSuchAlgorithmException
      */
-    public static Object[] generateCertificate( String name, String issuer, int days, String algorithm, int KeySize, boolean selfSign )
+    public static Object[] generateCertificate( String name, String issuer, int days, String algorithm, int KeySize, boolean selfSign, boolean addSAN )
             throws CertificateException, InvalidKeyException, IOException, NoSuchAlgorithmException,
             NoSuchProviderException, SignatureException {
 
@@ -110,7 +118,7 @@ public class X509CertificateFactory {
 
             kpGenerator.initialize( KeySize, new SecureRandom() );
             KeyPair keyPair = kpGenerator.generateKeyPair();
-
+            
             Date from = new Date();
             Date to = new Date( from.getTime() + ((long)days * (long)86400000) ); //Milliseconds in one day = 86400000
             sun.security.x509.CertificateValidity certValidity = new sun.security.x509.CertificateValidity( from, to );
@@ -139,8 +147,26 @@ public class X509CertificateFactory {
             certInfo.set( sun.security.x509.X509CertInfo.ALGORITHM_ID, new sun.security.x509.CertificateAlgorithmId( algorithmId ) );
 
             privKey = keyPair.getPrivate();
-            cert = new sun.security.x509.X509CertImpl( certInfo );
+             
+            if( addSAN ){
+                // add extensions
+                CertificateExtensions ext = new CertificateExtensions();
+                GeneralNames alternativeNames  = new GeneralNames();
+
+                //Get the web name
+                String arr = name.split(",")[0];
+                String domainName = arr.split(("="))[1].trim();
+
+                DNSName dnsName = new DNSName(domainName);
+                alternativeNames.add(new GeneralName(dnsName));
+                ext.set(SubjectAlternativeNameExtension.NAME,
+                        new SubjectAlternativeNameExtension(alternativeNames));
+
+                certInfo.set(X509CertInfo.EXTENSIONS, ext);
+            }
             
+            
+            cert = new sun.security.x509.X509CertImpl( certInfo );
             //Sign it if it's self signed
             if( selfSign ){
                 //Sign the certificate to identify the Algorithm_RSA that's used...

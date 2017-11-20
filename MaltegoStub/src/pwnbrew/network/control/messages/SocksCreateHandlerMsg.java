@@ -45,13 +45,15 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
-public class SocksCreateHandlerMsg extends ControlMessage {
+public final class SocksCreateHandlerMsg extends ControlMessage {
     
     private static final byte OPTION_HANDLER_ID = 29;
     private static final byte OPTION_CONNECT_STR = 30;
     
     //Class name
     private static final String NAME_Class = SocksCreateHandlerMsg.class.getSimpleName();
+        
+    public static final short MESSAGE_ID = 0x50;
  
      // ==========================================================================
     /**
@@ -62,7 +64,7 @@ public class SocksCreateHandlerMsg extends ControlMessage {
      * @param connectStr
     */
     public SocksCreateHandlerMsg( int dstHostId, int targedId, String connectStr ) {
-        super( dstHostId);
+        super( MESSAGE_ID, dstHostId);
                 
         byte[] tempBytes =SocketUtilities.intToByteArray(targedId);        
         ControlOption aTlv = new ControlOption(OPTION_HANDLER_ID, tempBytes);

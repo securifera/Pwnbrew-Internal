@@ -65,6 +65,8 @@ public final class NetworkSettingsMsg extends MaltegoMessage {
     private String theExpDate = null;
     private String theSerialNum = null;
     
+    public static final short MESSAGE_ID = 0x7f;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -78,7 +80,7 @@ public final class NetworkSettingsMsg extends MaltegoMessage {
      * @throws java.io.UnsupportedEncodingException
     */
     public NetworkSettingsMsg( int dstHostId, int passedPort, String issueeName, String issuerName, String theAlgorithm, String expDateStr ) throws UnsupportedEncodingException {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         byte[] tempBytes = SocketUtilities.intToByteArray(passedPort);
         ControlOption aTlv = new ControlOption( OPTION_SERVER_PORT, tempBytes);

@@ -61,6 +61,8 @@ public final class GetJarItemFile extends JarItemMsg {
     private int theTaskId;
     
     private static final String NAME_Class = GetJarItemFile.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x5c;
       
      // =====================================================================
     /**

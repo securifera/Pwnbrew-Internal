@@ -48,6 +48,7 @@ package pwnbrew.network.control.messages;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
@@ -75,6 +76,9 @@ public final class Hello extends ControlMessage {
     private static final byte OPTION_NIC_INFO = 18;
     private static final byte OPTION_JAR_VERSION = 19;
     private static final byte OPTION_JRE_VERSION = 20;
+    private static final byte OPTION_PID = 21;
+    
+    public static final short MESSAGE_ID = 0x3b;
    
     // ==========================================================================
     /**
@@ -86,7 +90,7 @@ public final class Hello extends ControlMessage {
      * @throws java.net.SocketException
     */
     public Hello( String passedHostname, int passedChannelId ) throws SocketException, IOException {
-        super();
+        super(MESSAGE_ID);
 
         byte[] strBytes = SocketUtilities.intToByteArray(passedChannelId);
         ControlOption aTlv = new ControlOption( OPTION_CHANNEL_ID, strBytes);
@@ -110,6 +114,12 @@ public final class Hello extends ControlMessage {
         //Add the Java Version
         String theVersion = System.getProperty("java.version");
         aTlv = new ControlOption( OPTION_JRE_VERSION, theVersion.getBytes());
+        addOption(aTlv);
+        
+        //Add the pid
+        String pidHostname = ManagementFactory.getRuntimeMXBean().getName();
+        String pid = pidHostname.split("@")[0];
+        aTlv = new ControlOption( OPTION_PID, pid.getBytes());
         addOption(aTlv);
         
         //Get the network interface for the ip address and then the mac address from it

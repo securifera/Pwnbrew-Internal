@@ -56,6 +56,8 @@ public final class UpgradeStagerFlag extends ControlMessage{
         
     private static final byte OPTION_UPGRADE_STAGER_FLAG = 78;  
     private boolean upgradeStagerFlag = false;
+        
+    public static final short MESSAGE_ID = 0x75;
    
      //===========================================================================
     /**

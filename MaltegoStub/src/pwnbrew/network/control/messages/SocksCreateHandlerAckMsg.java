@@ -55,6 +55,8 @@ public final class SocksCreateHandlerAckMsg extends ControlMessage{ // NO_UCD (u
     private int theHandlerId = 0;    
     private boolean creationFlag = false;
     
+    public static final short MESSAGE_ID = 0x4f;
+    
     // ==========================================================================
     /**
      * Constructor

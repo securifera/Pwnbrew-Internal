@@ -45,7 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 
@@ -59,12 +58,13 @@ public final class TaskProgress extends TaskStatus{
     private static final byte OPTION_PROGRESS = 16; 
     private int fileProgress;
         
+    public static final short MESSAGE_ID = 0x54;
+    
     // ==========================================================================
     /**
      * Constructor
      *
      * @param msgId
-     * @throws java.io.IOException
     */
     public TaskProgress(byte[] msgId ) { // NO_UCD (use default)
         super( msgId );
@@ -78,7 +78,7 @@ public final class TaskProgress extends TaskStatus{
      * @param fileProgress
     */
     public TaskProgress(int taskId, int fileProgress ) {
-        super(taskId, TaskStatus.TASK_XFER_FILES );
+        super(MESSAGE_ID, taskId, TaskStatus.TASK_XFER_FILES );
        
         byte[] progBytes = SocketUtilities.intToByteArray(fileProgress);
         ControlOption aTlv = new ControlOption(OPTION_PROGRESS, progBytes);

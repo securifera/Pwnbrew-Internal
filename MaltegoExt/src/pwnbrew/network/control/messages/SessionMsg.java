@@ -52,6 +52,8 @@ public final class SessionMsg extends MaltegoMessage{
     private static final byte OPTION_CHECK_IN = 72;
     private static final byte OPTION_CHECK_OUT = 73;
     
+    public static final short MESSAGE_ID = 0x73;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -63,7 +65,7 @@ public final class SessionMsg extends MaltegoMessage{
      * @throws java.io.UnsupportedEncodingException
     */
     public SessionMsg( int dstHostId, int hostId, String passedCheckInDate, String passedDisconnectDate ) throws UnsupportedEncodingException {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         //Add host id
         byte[] tempBytes = SocketUtilities.intToByteArray( hostId );

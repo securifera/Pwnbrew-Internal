@@ -54,7 +54,9 @@ import pwnbrew.network.ControlOption;
  */
 public final class RelayStatus extends ControlMessage{
     
-     static final byte OPTION_TASK_STATUS = 8;
+    static final byte OPTION_TASK_STATUS = 8;
+          
+    public static final short MESSAGE_ID = 0x49;
      
      // ==========================================================================
     /**
@@ -64,7 +66,7 @@ public final class RelayStatus extends ControlMessage{
     */
     @SuppressWarnings("ucd")
     public RelayStatus( boolean passedResult ) {
-        super();
+        super(MESSAGE_ID);
         
         int status = 0;
         if( passedResult ){

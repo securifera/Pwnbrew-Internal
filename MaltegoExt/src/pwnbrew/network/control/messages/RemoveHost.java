@@ -38,16 +38,8 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-import java.util.logging.Level;
-import pwnbrew.host.Host;
-import pwnbrew.host.HostController;
-import pwnbrew.host.Session;
-import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
-import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
@@ -62,6 +54,8 @@ public final class RemoveHost extends MaltegoMessage{
     private int hostId;
     
     private static final String NAME_Class = RemoveHost.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x72;
 
     // ==========================================================================
     /**

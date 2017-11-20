@@ -54,6 +54,8 @@ import pwnbrew.manager.PortManager;
  *  
  */
 public final class DeleteJarItem extends JarItemMsg { 
+    
+    public static final short MESSAGE_ID = 0x5b;
         
     // ==========================================================================
     /**
@@ -67,7 +69,7 @@ public final class DeleteJarItem extends JarItemMsg {
      * @throws java.io.UnsupportedEncodingException
     */
     public DeleteJarItem(int dstHostId, String passedName, String passedType, String passedJvmVersion, String passedJarVersion ) throws UnsupportedEncodingException {
-        super( dstHostId, passedName, passedType, passedJvmVersion, passedJarVersion );
+        super( MESSAGE_ID, dstHostId, passedName, passedType, passedJvmVersion, passedJarVersion );
     }
     
      // =====================================================================

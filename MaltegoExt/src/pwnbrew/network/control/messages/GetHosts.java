@@ -63,7 +63,8 @@ public final class GetHosts extends MaltegoMessage{ // NO_UCD (use default)
     private static final String NAME_Class = GetHosts.class.getSimpleName();
     private static final byte OPTION_HOST_ID = 124;
 
-    private int hostId;
+    private int hostId;    
+    public static final short MESSAGE_ID = 0x69;
 
     // ==========================================================================
     /**
@@ -157,7 +158,7 @@ public final class GetHosts extends MaltegoMessage{ // NO_UCD (use default)
                 try {
 
                     HostMsg aHostMsg = new HostMsg( getSrcHostId(), aHost.getHostname(), 
-                        aHost.getOsName(), aHost.getJvmArch(), Integer.parseInt(aHost.getId()), aHost.isConnected(),
+                        aHost.getOsName(), aHost.getJvmArch(), aHost.getPid(), Integer.parseInt(aHost.getId()), aHost.isConnected(),
                         !aHost.getCheckInList().isEmpty() );
 
                     String relayPort = aHost.getRelayPort();

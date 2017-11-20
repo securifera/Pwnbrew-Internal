@@ -57,6 +57,8 @@ public final class RelayDisconnect extends ControlMessage{
     private static final byte OPTION_ID = 25; 
     private static final byte OPTION_CHANNEL_ID = 102; 
     
+    public static final short MESSAGE_ID = 0x47;
+    
      // ==========================================================================
     /**
      * Constructor
@@ -65,7 +67,7 @@ public final class RelayDisconnect extends ControlMessage{
      * @param passedChannelId
     */
     public RelayDisconnect( int passedId, int passedChannelId ) {
-        super();
+        super(MESSAGE_ID);
         
         //Convert to bytes
         byte[] strBytes = SocketUtilities.intToByteArray(passedId);

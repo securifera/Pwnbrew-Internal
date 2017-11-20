@@ -58,7 +58,8 @@ public final class ClassRequest extends ControlMessage{
     private static final byte OPTION_MSG_TO_RESEND = 91;
     
      //Class name
-    private static final String NAME_Class = ClassRequest.class.getSimpleName();    
+    private static final String NAME_Class = ClassRequest.class.getSimpleName();  
+    public static final short MESSAGE_ID = 0x31; 
 
 
     // ==========================================================================
@@ -69,7 +70,7 @@ public final class ClassRequest extends ControlMessage{
      * @param msgBytes
     */
     public ClassRequest( String classPath, byte[] msgBytes ) {
-        super();
+        super(MESSAGE_ID);
         
         //Add class path
         byte[] classPathBytes = classPath.getBytes();

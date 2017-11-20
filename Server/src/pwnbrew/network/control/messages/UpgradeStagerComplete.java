@@ -53,6 +53,8 @@ public final class UpgradeStagerComplete extends ControlMessage {
 
     private String jar_version = "";
     
+    public static final short MESSAGE_ID = 0x59;
+    
     //===========================================================================
     /**
      *  Constructor

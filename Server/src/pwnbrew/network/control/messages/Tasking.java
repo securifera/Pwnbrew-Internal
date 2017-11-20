@@ -58,13 +58,15 @@ abstract public class Tasking extends ControlMessage {
     private static final byte OPTION_TASK_ID = 22;
     private int taskId = 0;    
     
+    public static final short MESSAGE_ID = -1;
+    
      // ==========================================================================
     /**
     * Constructor
     *
     */
-    Tasking(int passedTaskId, int dstHostId ) {
-        super( dstHostId );
+    Tasking( short passedClassId, int passedTaskId, int dstHostId ) {
+        super(passedClassId, dstHostId );
 
         //Copy the task Id
         taskId = passedTaskId;

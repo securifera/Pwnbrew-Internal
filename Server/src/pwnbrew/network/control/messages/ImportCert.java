@@ -68,6 +68,8 @@ public final class ImportCert extends MaltegoMessage { // NO_UCD (use default)
     protected String theCertPass = null;
     
     private static final String NAME_Class = ImportCert.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x60;
         
     // ==========================================================================
     /**

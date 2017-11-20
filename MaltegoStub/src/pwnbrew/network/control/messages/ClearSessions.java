@@ -47,7 +47,9 @@ import pwnbrew.network.ControlOption;
  */
 public final class ClearSessions extends MaltegoMessage{ 
     
-    private static final byte OPTION_HOST_ID = 124;
+    private static final byte OPTION_HOST_ID = 124;    
+    
+    public static final short MESSAGE_ID = 0x65;
 
     // ==========================================================================
     /**
@@ -57,7 +59,7 @@ public final class ClearSessions extends MaltegoMessage{
      * @param passedHostId
     */
     public ClearSessions( int dstHostId, String passedHostId ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         //Add file type
         byte[] tempBytes = SocketUtilities.intToByteArray( Integer.parseInt(passedHostId));

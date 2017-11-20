@@ -170,7 +170,8 @@ public class Installer {
         aIG.addStatusString("Copying Pwnbrew Maltego Plugin...\n");
         copyMaltegoPwnbrewFiles();
         
-        aIG.addStatusString("Exporting SSL Public Key to " + INSTALL_DIR.getAbsolutePath() + "...\n");
+        if( INSTALL_DIR != null )
+            aIG.addStatusString("Exporting SSL Public Key to " + INSTALL_DIR.getAbsolutePath() + "...\n");
         
         //Export the SSL Cert to a file specified by the user
         File aFile = new File(MALTEGO_INSTALL_DIR, MALTEGO_STUB );
@@ -180,11 +181,15 @@ public class Installer {
         aIG.addStatusString("Attemping to run Maltego for Pwnbrew import...\n");
         
         //Attempt to run maltego so the entities can be imported
-        aFile = new File(INSTALL_DIR, IMPORT_FILE );
+        String installDir = "<NOT DEFINED>";
+        if( INSTALL_DIR != null ){
+            aFile = new File(INSTALL_DIR, IMPORT_FILE );
+            installDir = aFile.getAbsolutePath();
+        } 
         String msg = "To Import Pwnbrew Entities & Transforms,\n\n"
                 + "Click Maltego Logo in the top left corner of the Maltego application.\n"
                 + "Select Import->Import Configuration.\n"
-                + "Navigate to \"" + aFile.getAbsolutePath() + "\"\n"
+                + "Navigate to \"" + installDir + "\"\n"
                 + "Click \"Next\",\"Next\",\"Finish\"\n"
                 + "Close Maltego to conclude installation.\n\n";
         
@@ -203,10 +208,12 @@ public class Installer {
         
         
         File maltegoExe = null;
-        if( isWindows() )
-            maltegoExe = new File(MALTEGO_INSTALL_DIR.getParentFile(), "bin" + FILE_SEPARATOR + MALTEGO + ".exe" );
-        else if ( isUnix() )   
-            maltegoExe = new File(MALTEGO_INSTALL_DIR.getParentFile(), MALTEGO );
+        if( MALTEGO_INSTALL_DIR != null ){
+            if( isWindows() )
+                maltegoExe = new File(MALTEGO_INSTALL_DIR.getParentFile(), "bin" + FILE_SEPARATOR + MALTEGO + ".exe" );
+            else if ( isUnix() )   
+                maltegoExe = new File(MALTEGO_INSTALL_DIR.getParentFile(), MALTEGO );
+        }
         
         if( maltegoExe != null ){
             cmdArgs = new String[]{ maltegoExe.getAbsolutePath() };
@@ -229,7 +236,7 @@ public class Installer {
         theFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         theFileChooser.setMultiSelectionEnabled( false );
         
-        int returnVal = theFileChooser.showDialog( null, "Select Install Directory" ); //Show the dialog
+        int returnVal = theFileChooser.showDialog( null, "Select Pwnbrew Install Directory" ); //Show the dialog
         if( returnVal != JFileChooser.APPROVE_OPTION )
             System.exit(0);
 
@@ -263,54 +270,54 @@ public class Installer {
         
         if( isWindows()){
             
-            File aDir = new File("C:\\Program Files (x86)");
-            if( !aDir.exists()){
-                aDir = new File("C:\\Program Files");
+//            File aDir = new File("C:\\Program Files (x86)");
+//            if( !aDir.exists()){
+//                aDir = new File("C:\\Program Files");
+//            }
+//            
+//            //Check for maltego directory
+            File malDir = null;
+//            File malDir = new File(aDir, "Paterva");
+//            if( !malDir.exists()){
+            int returnVal = theFileChooser.showDialog( null, "Select Maltego Installation Directory, ex. Peterva\\Maltego\\<version>" ); //Show the dialog
+            switch( returnVal ) {
+
+                case JFileChooser.CANCEL_OPTION: //If the user canceled the selecting...
+                case JFileChooser.ERROR_OPTION: //If the dialog was dismissed or an error occurred...
+                    break; //Do nothing
+
+                case JFileChooser.APPROVE_OPTION: //If the user approved the selection...
+                    malDir = theFileChooser.getSelectedFile(); //Get the files the user selected
+                    break;
+                default:
+                    break;
+
             }
-            
-            //Check for maltego directory
-            File malDir = new File(aDir, "Paterva");
-            if( !malDir.exists()){
-                int returnVal = theFileChooser.showDialog( null, "Select Maltego Installation Directory" ); //Show the dialog
-                switch( returnVal ) {
 
-                    case JFileChooser.CANCEL_OPTION: //If the user canceled the selecting...
-                    case JFileChooser.ERROR_OPTION: //If the dialog was dismissed or an error occurred...
-                        break; //Do nothing
-
-                    case JFileChooser.APPROVE_OPTION: //If the user approved the selection...
-                        malDir = theFileChooser.getSelectedFile(); //Get the files the user selected
-                        break;
-                    default:
-                        break;
-
-                }
-
-            } else {
-                
-                //List the files
-                File[] aFileArr = malDir.listFiles();
-                if( aFileArr.length > 0 ){
-                    File installDir = aFileArr[0];
-                    if( installDir.isDirectory()){
-                        File[] anotherFileArr = installDir.listFiles();
-                        if( anotherFileArr.length > 0 ){
-                            
-                            //Get the install dir
-                            installDir = anotherFileArr[anotherFileArr.length - 1];
-                            File testFile = new File( installDir,  "uninstall.exe");
-                            if( testFile.exists())
-                                malDir = installDir;
-                            else
-                                malDir = null;
-                        }
-                    }
-                                      
-                } else
-                    malDir = null;
-                
-            }
-            
+//            } else {
+//                
+//                //List the files
+//                File[] aFileArr = malDir.listFiles();
+//                if( aFileArr.length > 0 ){
+//                    File installDir = aFileArr[0];
+//                    if( installDir.isDirectory()){
+//                        File[] anotherFileArr = installDir.listFiles();
+//                        if( anotherFileArr.length > 0 ){                            
+//                            //Get the install dir
+//                            installDir = anotherFileArr[anotherFileArr.length - 1];
+//                            File testFile = new File( installDir,  "uninstall.exe");
+//                            if( testFile.exists())
+//                                malDir = installDir;
+//                            else
+//                                malDir = null;
+//                        }
+//                    }
+//                                      
+//                } else
+//                    malDir = null;
+//                
+//            }
+//            
             //Move the JAR to the install dir
             if( malDir !=null && malDir.exists()){
                 
@@ -329,6 +336,10 @@ public class Installer {
                 //Create the ssl bat
                 destFile = new File( MALTEGO_INSTALL_DIR, SSL_BAT);
                 writeJarElementToDisk(destFile, SSL_BAT);
+                
+            } else {
+                JOptionPane.showMessageDialog(null, "No Maltego directory defined. Exiting.", "Error", JOptionPane.ERROR_MESSAGE);
+                System.exit(1);
             }
             
         } else if( isUnix() ){

@@ -56,6 +56,8 @@ public final class ClearSessions extends MaltegoMessage{
     
     private static final byte OPTION_HOST_ID = 124;
     private int hostId;
+    
+    public static final short MESSAGE_ID = 0x65;
 
     // ==========================================================================
     /**

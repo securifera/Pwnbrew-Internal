@@ -69,6 +69,8 @@ public final class RelayStart extends ControlMessage{
     //Class name
     private static final String NAME_Class = RelayStart.class.getSimpleName();
     
+    public static final short MESSAGE_ID = 0x48;
+    
     // ==========================================================================
     /**
      * Constructor

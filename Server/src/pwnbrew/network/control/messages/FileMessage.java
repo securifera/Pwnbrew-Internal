@@ -57,18 +57,20 @@ public class FileMessage extends Tasking {
     protected int fileChannelId = 0;  
     private int fileId = 0;
 
+    public static final short MESSAGE_ID = -1;
     
     // ==========================================================================
     /**
      * Constructor
      *
+     * @param passedClassId
      * @param taskId
      * @param dstHostId
      * @param passedChannelId
      * @param passedFileId
     */
-    public FileMessage( int dstHostId, int passedChannelId, int taskId, Integer... passedFileId ) { // NO_UCD (use default)
-        super( taskId, dstHostId );
+    public FileMessage( short passedClassId, int dstHostId, int passedChannelId, int taskId, Integer... passedFileId ) { // NO_UCD (use default)
+        super(passedClassId, taskId, dstHostId );
         
         if( passedFileId.length == 0 )
             fileId = SocketUtilities.getNextId();

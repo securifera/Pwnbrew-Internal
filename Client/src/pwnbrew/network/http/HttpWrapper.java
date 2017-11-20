@@ -45,7 +45,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.http;
 
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import pwnbrew.network.PortWrapper;
 import pwnbrew.selector.SocketChannelHandler;
@@ -83,10 +82,9 @@ abstract public class HttpWrapper extends PortWrapper {
      * Handles the bytes passed in from the selector
      *
      * @param aByteBuffer
-     * @param passedAddress
     */
     @Override
-    public void processData( SocketChannelHandler passedHandler, ByteBuffer aByteBuffer, InetAddress passedAddress ) {
+    public void processData( SocketChannelHandler passedHandler, ByteBuffer aByteBuffer ) {
         
         if(aByteBuffer != null){             
 

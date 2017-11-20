@@ -65,14 +65,18 @@ public final class HostMsg extends MaltegoMessage{
     private static final byte OPTION_HOST_ID = 64;
     private static final byte OPTION_SLEEPABLE = 65;
     private static final byte OPTION_RELAY_PORT = 67;
+    private static final byte OPTION_PID = 68;
     
     private boolean connected = false;
     private boolean sleepable = false;
     private int relayPort = -1;
-    private String clientHostname = null;
-    private String os_name = null;
-    private String java_arch = null;
+    private String clientHostname = "";
+    private String os_name = "";
+    private String java_arch = "";
+    private String pid = "";
     private int hostid = 0;
+    
+    public static final short MESSAGE_ID = 0x6d;
     
      //===========================================================================
     /**
@@ -103,6 +107,9 @@ public final class HostMsg extends MaltegoMessage{
                     break;
                 case OPTION_ARCH:
                     java_arch = new String(theValue, "US-ASCII");
+                    break;
+                case OPTION_PID:
+                    pid = new String(theValue, "US-ASCII");
                     break;
                 case OPTION_OS:
                     os_name = new String(theValue, "US-ASCII");
@@ -159,7 +166,7 @@ public final class HostMsg extends MaltegoMessage{
                 HostHandler aHandler = (HostHandler)aFunction;
                 
                 //Add the host to the list
-                Host aHost = new Host( connected, sleepable, relayPort, clientHostname, java_arch, os_name, Integer.toString( hostid) );
+                Host aHost = new Host( connected, sleepable, relayPort, clientHostname, java_arch, pid, os_name, Integer.toString( hostid) );
                 aHandler.addHost( aHost );
             }            
         }  

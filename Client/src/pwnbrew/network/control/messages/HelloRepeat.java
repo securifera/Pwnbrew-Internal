@@ -63,6 +63,8 @@ public final class HelloRepeat extends ControlMessage {
 
     //Class name
     private static final String NAME_Class = HelloRepeat.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x3d;
   
     // ==========================================================================
     /**
@@ -71,7 +73,7 @@ public final class HelloRepeat extends ControlMessage {
      * @param destId
     */
     public HelloRepeat( int destId ){
-       super( );
+       super(MESSAGE_ID);
        
        setDestHostId(destId);
     }

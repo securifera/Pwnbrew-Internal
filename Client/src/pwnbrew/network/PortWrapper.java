@@ -63,7 +63,7 @@ public abstract class PortWrapper {
      * @param aByteBuffer
      * @param passedAddress
     */
-    abstract public void processData( SocketChannelHandler passedHandler, ByteBuffer aByteBuffer, InetAddress passedAddress );
+    abstract public void processData( SocketChannelHandler passedHandler, ByteBuffer aByteBuffer );
     
     //===============================================================
     /**

@@ -53,6 +53,8 @@ import pwnbrew.manager.PortManager;
  *  
  */
 public class Uninstall extends ControlMessage {
+    
+    public static final short MESSAGE_ID = 0x57;
  
     // ==========================================================================
     /**

@@ -56,6 +56,8 @@ public final class RelayStart extends ControlMessage{
     
     private static final byte OPTION_PORT = 24;
     
+    public static final short MESSAGE_ID = 0x48;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -64,7 +66,7 @@ public final class RelayStart extends ControlMessage{
      * @param passedDestHostId
     */
     public RelayStart( int passedPort, int passedDestHostId ) {
-        super( passedDestHostId );
+        super( MESSAGE_ID, passedDestHostId );
         
         byte[] strBytes = SocketUtilities.intToByteArray(passedPort);
 

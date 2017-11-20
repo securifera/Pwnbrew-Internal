@@ -68,6 +68,8 @@ public final class PushFileAck extends FileMessage {
      //Class name
     private static final String NAME_Class = PushFileAck.class.getSimpleName();
     
+    public static final short MESSAGE_ID = 0x44;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -80,7 +82,7 @@ public final class PushFileAck extends FileMessage {
      * @throws java.io.IOException
     */
     public PushFileAck(int passedId, int passedFileId, int passedFileChannelId, String hashFileNameStr, int dstHostId ) throws IOException  {
-       super(dstHostId, passedFileChannelId, passedId, passedFileId  );
+       super(MESSAGE_ID, dstHostId, passedFileChannelId, passedId, passedFileId  );
 
        byte[] strBytes = hashFileNameStr.getBytes("US-ASCII");
        ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);

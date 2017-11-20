@@ -48,7 +48,9 @@ import pwnbrew.manager.PortManager;
  *
  *  
  */
-public final class AddToJarLibrary extends JarItemMsg{ // NO_UCD (use default)
+public final class AddToJarLibrary extends JarItemMsg { // NO_UCD (use default)
+    
+    public static final short MESSAGE_ID = 0x5a;
     
     // ==========================================================================
     /**
@@ -62,7 +64,7 @@ public final class AddToJarLibrary extends JarItemMsg{ // NO_UCD (use default)
      * @throws java.io.UnsupportedEncodingException
     */
     public AddToJarLibrary(int dstHostId, String passedName, String passedType, String passedJvmVersion, String passedJarVersion ) throws UnsupportedEncodingException {
-        super( dstHostId, passedName, passedType, passedJvmVersion, passedJarVersion );
+        super(MESSAGE_ID, dstHostId, passedName, passedType, passedJvmVersion, passedJarVersion );
     }
     
       // =====================================================================

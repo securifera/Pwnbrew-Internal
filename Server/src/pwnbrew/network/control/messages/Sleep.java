@@ -54,7 +54,7 @@ import pwnbrew.network.ControlOption;
  *
  *  
  */
-public class Sleep extends ControlMessage {
+public final class Sleep extends ControlMessage {
     
     private static final byte OPTION_SLEEP_TIME = 17;
     private static final byte OPTION_SENDER_TIME = 19;
@@ -64,6 +64,8 @@ public class Sleep extends ControlMessage {
     
     //Class name
     private static final String NAME_Class = Sleep.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x4e;
  
      // ==========================================================================
     /**
@@ -75,7 +77,7 @@ public class Sleep extends ControlMessage {
      * @throws java.io.UnsupportedEncodingException
     */
     public Sleep( int dstHostId, String passedTime, String... passedSenderTime ) throws UnsupportedEncodingException  {
-        super( dstHostId);
+        super( MESSAGE_ID, dstHostId);
 
         senderTime = Constants.CHECKIN_DATE_FORMAT.format( new Date() );
         if( passedSenderTime != null && passedSenderTime.length > 0 )

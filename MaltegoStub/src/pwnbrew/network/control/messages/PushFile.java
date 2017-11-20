@@ -58,7 +58,7 @@ import pwnbrew.network.file.FileMessageManager;
  *
  *  
  */
-public class PushFile extends FileMessage {
+public final class PushFile extends FileMessage {
     
     private static final byte OPTION_DATASIZE = 4;
     private static final byte OPTION_FILE_TYPE = 10;    
@@ -81,6 +81,8 @@ public class PushFile extends FileMessage {
      //Class name
     private static final String NAME_Class = PushFile.class.getSimpleName();
     
+    public static final short MESSAGE_ID = 0x42;
+    
      // ==========================================================================
     /**
      * Constructor
@@ -93,7 +95,7 @@ public class PushFile extends FileMessage {
      * @throws java.io.IOException
     */
     public PushFile(int taskId, String fileHashNameStr, long passedLength, int passedType, int dstHostId ) throws IOException {
-        super( dstHostId, 0 , taskId );
+        super( MESSAGE_ID, dstHostId, 0 , taskId );
 
         byte[] tempArr = fileHashNameStr.getBytes("US-ASCII");
         ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, tempArr);
@@ -119,7 +121,7 @@ public class PushFile extends FileMessage {
      * @throws pwnbrew.log.LoggableException
     */
     public PushFile( int taskId , int dstHostId, int passedChannelId ) throws LoggableException { // NO_UCD (use default)
-        super( dstHostId, passedChannelId, taskId);
+        super( MESSAGE_ID, dstHostId, passedChannelId, taskId);
     }
     
     // ==========================================================================

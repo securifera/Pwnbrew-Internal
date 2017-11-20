@@ -48,6 +48,8 @@ import pwnbrew.network.ControlOption;
 public final class GetSessions extends MaltegoMessage{ 
     
     private static final byte OPTION_HOST_ID = 124;
+    
+    public static final short MESSAGE_ID = 0x6b;
 
     // ==========================================================================
     /**
@@ -57,7 +59,7 @@ public final class GetSessions extends MaltegoMessage{
      * @param passedHostId
     */
     public GetSessions( int dstHostId, int passedHostId ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         //Add file type
         byte[] tempBytes = SocketUtilities.intToByteArray( passedHostId );

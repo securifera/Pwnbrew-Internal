@@ -50,6 +50,8 @@ public final class GetJarItemFile extends JarItemMsg {
         
     private static final byte OPTION_TASK_ID = 92;
     
+    public static final short MESSAGE_ID = 0x5c;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -63,7 +65,7 @@ public final class GetJarItemFile extends JarItemMsg {
      * @throws java.io.UnsupportedEncodingException
     */
     public GetJarItemFile(int taskId, int dstHostId, String passedName, String passedType, String passedJvmVersion, String passedJarVersion ) throws UnsupportedEncodingException {
-        super( dstHostId, passedName, passedType, passedJvmVersion, passedJarVersion );
+        super( MESSAGE_ID, dstHostId, passedName, passedType, passedJvmVersion, passedJarVersion );
         
         byte[] byteArr = SocketUtilities.intToByteArray(taskId);
         ControlOption aTlv = new ControlOption(OPTION_TASK_ID, byteArr);

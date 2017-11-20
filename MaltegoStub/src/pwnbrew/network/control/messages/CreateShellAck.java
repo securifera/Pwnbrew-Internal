@@ -56,6 +56,8 @@ public final class CreateShellAck extends ControlMessage{ // NO_UCD (use default
     private static final byte OPTION_CHANNEL_ID = 102; 
     private int theChannelId = 0;    
     
+    public static final short MESSAGE_ID = 0x34;
+    
     // ==========================================================================
     /**
      * Constructor

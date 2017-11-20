@@ -1,1 +1,1 @@
-java -cp dist\MaltegoStub.jar pwnbrew.misc.SSLUtilities
+java -cp dist\MaltegoStub.jar pwnbrew.utilities.SSLUtilities

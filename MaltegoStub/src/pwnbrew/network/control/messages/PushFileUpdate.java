@@ -39,7 +39,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.IOException;
-import pwnbrew.MaltegoStub;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
@@ -59,6 +58,8 @@ public final class PushFileUpdate extends FileMessage {
     //Class name
     private static final String NAME_Class = PushFileUpdate.class.getSimpleName();
     
+    public static final short MESSAGE_ID = 0x46;
+    
     
    // ==========================================================================
     /**
@@ -71,7 +72,7 @@ public final class PushFileUpdate extends FileMessage {
      * @param passedFileSize
     */
     public PushFileUpdate( int destHostId, int passedChannelId, int passedTaskId, int passedFileId, long passedFileSize ) {
-        super(destHostId, passedChannelId, passedTaskId, passedFileId );     
+        super( MESSAGE_ID, destHostId, passedChannelId, passedTaskId, passedFileId );     
 
         byte[] tempArr = SocketUtilities.longToByteArray(passedFileSize);
         ControlOption aTlv = new ControlOption( OPTION_DATASIZE, tempArr);

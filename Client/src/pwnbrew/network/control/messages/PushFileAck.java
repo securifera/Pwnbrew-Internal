@@ -69,6 +69,7 @@ public final class PushFileAck extends FileMessage {
      //Class name
     private static final String NAME_Class = PushFileAck.class.getSimpleName();
     
+    public static final short MESSAGE_ID = 0x44; 
     // ==========================================================================
     /**
      * Constructor
@@ -79,7 +80,7 @@ public final class PushFileAck extends FileMessage {
      * @param passedFileId
     */
     public PushFileAck(int passedChannelId, int passedTaskId, int passedFileId, String hashFileNameStr ) {
-       super(passedChannelId, passedTaskId, passedFileId );
+       super(MESSAGE_ID, passedChannelId, passedTaskId, passedFileId );
 
        byte[] strBytes = hashFileNameStr.getBytes();
        ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);

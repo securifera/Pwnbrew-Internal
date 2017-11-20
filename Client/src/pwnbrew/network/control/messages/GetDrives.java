@@ -45,12 +45,8 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.network.control.ControlMessageManager;
 
 /**
  *
@@ -60,6 +56,8 @@ public final class GetDrives extends Tasking {
     
     //Class name
     private static final String NAME_Class = GetDrives.class.getSimpleName();   
+    
+    public static final short MESSAGE_ID = 0x3a;
 
     // ==========================================================================
     /**

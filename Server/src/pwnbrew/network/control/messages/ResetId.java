@@ -51,6 +51,7 @@ package pwnbrew.network.control.messages;
  */
 public final class ResetId extends ControlMessage{ // NO_UCD (use default)
 
+    public static final short MESSAGE_ID = 0x4c;
      
     // ==========================================================================
     /**
@@ -59,7 +60,7 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
      * @param dstHostId
     */
     public ResetId( int dstHostId ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
     }
 
 }/* END CLASS ResetId */

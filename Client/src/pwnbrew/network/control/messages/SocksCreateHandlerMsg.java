@@ -40,7 +40,6 @@ package pwnbrew.network.control.messages;
 
 import java.io.IOException;
 import java.util.logging.Level;
-import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
@@ -52,7 +51,7 @@ import pwnbrew.utilities.SocketUtilities;
  *
  *  
  */
-public class SocksCreateHandlerMsg extends ControlMessage {
+public final  class SocksCreateHandlerMsg extends ControlMessage {
     
     private int theHandlerId = 0;
     private String theConnectStr = null;
@@ -61,6 +60,8 @@ public class SocksCreateHandlerMsg extends ControlMessage {
     private static final byte OPTION_CONNECT_STR = 30;
     //Class name
     private static final String NAME_Class = SocksCreateHandlerMsg.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x50;
      
     // ==========================================================================
     /**

@@ -59,6 +59,8 @@ public final class ClassRequest extends ControlMessage{
     private byte[] theMsgToResend = null;
     private String theClassPath = null;
     
+    public static final short MESSAGE_ID = 0x31;
+    
      //Class name
     private static final String NAME_Class = ClassRequest.class.getSimpleName();    
 

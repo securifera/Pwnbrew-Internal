@@ -59,6 +59,7 @@ import pwnbrew.manager.ConnectionManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Message;
+import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -71,15 +72,17 @@ public abstract class ControlMessage extends Message {
         
     //Data members
     protected List<ControlOption> optionList = new ArrayList<>();
+    private short theClassId;
 
     //=========================================================================
     /*
      *  Contructor
      */
-    public ControlMessage( int passedDestHostId ) { // NO_UCD (use default)
+    public ControlMessage( short classIdType, int passedDestHostId ) { // NO_UCD (use default)
         //Set id
         super( CONTROL_MESSAGE_TYPE, passedDestHostId );
         setChannelId( ConnectionManager.COMM_CHANNEL_ID );
+        theClassId = classIdType;
     }
 
     //=========================================================================
@@ -105,16 +108,21 @@ public abstract class ControlMessage extends Message {
         //Add the parent
         super.append(rtnBuffer);
         
-        byte[] classPathLenArr = new byte[2];
-        byte[] classPathStrArr = getClass().getCanonicalName().getBytes();
+        //Add the control message type
+        byte[] msgTypeArr = new byte[2]; 
+        SocketUtilities.intToByteArray(msgTypeArr, theClassId);
+        rtnBuffer.put(msgTypeArr);
         
-        //Get the length
-        int classPathLen = classPathStrArr.length;
-        SocketUtilities.intToByteArray(classPathLenArr, classPathLen);
-        
-        //Add the classpath
-        rtnBuffer.put(classPathLenArr);
-        rtnBuffer.put(classPathStrArr);
+//        byte[] classPathLenArr = new byte[2];
+//        byte[] classPathStrArr = getClass().getCanonicalName().getBytes();
+//        
+//        //Get the length
+//        int classPathLen = classPathStrArr.length;
+//        SocketUtilities.intToByteArray(classPathLenArr, classPathLen);
+//        
+//        //Add the classpath
+//        rtnBuffer.put(classPathLenArr);
+//        rtnBuffer.put(classPathStrArr);
         
         //Add the options
         for( ControlOption aTlv : optionList){            
@@ -160,21 +168,24 @@ public abstract class ControlMessage extends Message {
         try {
             //Create a message
             aMessage = instatiateMessage(theId, passedBuffer );
+            if( aMessage != null){
              
-            //Ignore NoOps
-            if( !aMessage.getClass().equals( NoOp.class ))
-                DebugPrinter.printMessage(NAME_Class, "Received " + aMessage.getClass().getSimpleName() + " message.");
+                //Ignore NoOps
+                if( !aMessage.getClass().equals( NoOp.class ))
+                    DebugPrinter.printMessage(NAME_Class, "Received " + aMessage.getClass().getSimpleName() + " message.");
 
-            //Set client id
-            int theClientId = SocketUtilities.byteArrayToInt(clientId);
-            aMessage.setSrcHostId( theClientId );
+                //Set client id
+                int theClientId = SocketUtilities.byteArrayToInt(clientId);
+                aMessage.setSrcHostId( theClientId );
 
-            //Set dest host id
-            int theDestHostId= SocketUtilities.byteArrayToInt(destHostId);
-            aMessage.setDestHostId( theDestHostId );
+                //Set dest host id
+                int theDestHostId= SocketUtilities.byteArrayToInt(destHostId);
+                aMessage.setDestHostId( theDestHostId );
 
-            //Parse the tlvs
-            aMessage.parseControlOptions(passedBuffer);
+                //Parse the tlvs
+                aMessage.parseControlOptions(passedBuffer);
+                
+            }
             
         } catch (ClassNotFoundException ex) {
             
@@ -202,27 +213,37 @@ public abstract class ControlMessage extends Message {
     public static ControlMessage instatiateMessage( byte[] msgId, ByteBuffer passedBuffer ) throws LoggableException, ClassNotFoundException{
         
         ControlMessage aMsg = null;
-        byte[] classFqnLength = new byte[2];
-        passedBuffer.get(classFqnLength, 0, classFqnLength.length);
+        byte[] classIdArr = new byte[2];
         
-        //Get the length of the class path
-        int theLength = SocketUtilities.byteArrayToInt(classFqnLength);
-        byte[] classPath = new byte[theLength];
-        
-        passedBuffer.get(classPath, 0, classPath.length);
-        String thePath = new String(classPath);
-        
-        try {
-            
-            //Get the class
-            Class aClass = Class.forName(thePath);
-            Constructor aConstruct = aClass.getConstructor( byte[].class);
-            aMsg = (ControlMessage)aConstruct.newInstance(msgId);
+        //Copy over the class path length
+        passedBuffer.get(classIdArr, 0, classIdArr.length);
 
-        } catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Log.log(Level.SEVERE, NAME_Class, "instatiateMessage()", ex.getMessage(), ex );  
-            throw new LoggableException(ex);
-        } 
+        short classId = (short)SocketUtilities.byteArrayToInt(classIdArr);
+        String thePath = ControlMessageManager.getControlMessageClassPath(classId);
+//        byte[] classFqnLength = new byte[2];
+//        passedBuffer.get(classFqnLength, 0, classFqnLength.length);
+//        
+//        //Get the length of the class path
+//        int theLength = SocketUtilities.byteArrayToInt(classFqnLength);
+//        byte[] classPath = new byte[theLength];
+//        
+//        passedBuffer.get(classPath, 0, classPath.length);
+//        String thePath = new String(classPath);
+        if( thePath != null ){
+            try {
+
+                //Get the class
+                Class aClass = Class.forName(thePath);
+                Constructor aConstruct = aClass.getConstructor( byte[].class);
+                aMsg = (ControlMessage)aConstruct.newInstance(msgId);
+
+            } catch ( NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                Log.log(Level.SEVERE, NAME_Class, "instatiateMessage()", ex.getMessage(), ex );  
+                throw new LoggableException(ex);
+            } 
+        } else {
+            throw new LoggableException("No message found for given id.");  
+        }
         
         return aMsg;
     }
@@ -279,7 +300,6 @@ public abstract class ControlMessage extends Message {
         
         //Add the function
         count += 2;
-        count += getClass().getCanonicalName().getBytes().length;
         
         //Add the options
         for( ControlOption aTlv : optionList){  

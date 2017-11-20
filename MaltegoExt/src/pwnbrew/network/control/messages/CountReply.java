@@ -58,6 +58,8 @@ public final class CountReply extends MaltegoMessage{
     private static final byte OPTION_COUNT_ID = 80;
     private static final byte OPTION_OPTIONAL_ID = 81;
     
+    public static final short MESSAGE_ID = 0x66;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -69,7 +71,7 @@ public final class CountReply extends MaltegoMessage{
      * @throws java.io.UnsupportedEncodingException
     */
     public CountReply( int dstHostId, int passedCount, int passedType, int passedId ) throws UnsupportedEncodingException {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         byte[] tempBytes = SocketUtilities.intToByteArray(passedCount);
         ControlOption aTlv = new ControlOption(OPTION_COUNT, tempBytes);

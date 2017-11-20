@@ -87,6 +87,7 @@ final public class Directories {
             
         } catch( IOException ex ) {
             System.err.println( ex.getMessage() );
+            System.exit(1);
         }      
     }
     

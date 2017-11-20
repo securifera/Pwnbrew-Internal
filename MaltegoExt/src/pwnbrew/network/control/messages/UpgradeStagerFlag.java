@@ -48,6 +48,8 @@ public final class UpgradeStagerFlag extends MaltegoMessage{
     
     private static final byte OPTION_UPGRADE_STAGER_FLAG = 78;
     
+    public static final short MESSAGE_ID = 0x75;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -56,7 +58,7 @@ public final class UpgradeStagerFlag extends MaltegoMessage{
      * @param upgradeStagerFlag
     */
     public UpgradeStagerFlag( int dstHostId, boolean upgradeStagerFlag ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         int upgradeBool = 0;
         if( upgradeStagerFlag )

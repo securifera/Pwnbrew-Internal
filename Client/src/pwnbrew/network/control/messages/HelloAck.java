@@ -67,7 +67,8 @@ public final class HelloAck extends ControlMessage {
     //Class name
     private static final String NAME_Class = HelloAck.class.getSimpleName();
     
-     
+    public static final short MESSAGE_ID = 0x3c;
+    
     // ==========================================================================
     /**
      *  Constructor 

@@ -50,14 +50,16 @@ package pwnbrew.network.control.messages;
  *  
  */
 public class MaltegoMessage extends ControlMessage{ 
+    
+    public static final short MESSAGE_ID = -1;
 
     //=========================================================================
     /*
      *  Contructor
      */
-    public MaltegoMessage( int passedDestHostId ) { // NO_UCD (use default)
+    public MaltegoMessage( short passedClassId, int passedDestHostId ) { // NO_UCD (use default)
         //Set id
-        super( passedDestHostId );
+        super(passedClassId, passedDestHostId );
     }
     
     // ==========================================================================

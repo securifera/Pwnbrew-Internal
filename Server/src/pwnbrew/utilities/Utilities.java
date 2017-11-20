@@ -69,8 +69,8 @@ import pwnbrew.xml.XmlObject;
 import pwnbrew.exception.XmlObjectCreationException;
 import pwnbrew.xml.XmlObjectFactory;
 import pwnbrew.misc.IdGenerator;
-import pwnbrew.network.control.messages.Payload;
-import pwnbrew.network.control.messages.SendStage;
+import pwnbrew.network.stage.Payload;
+import pwnbrew.network.stage.SendStage;
 import pwnbrew.xml.JarItem;
 
 
@@ -94,8 +94,8 @@ public class Utilities {
     private static final String OS_NAME_Unix         = "unix";    
      
     //Used for simple encrypt and decrypt
-    private static final String AES_CFB_ENCRYPTION = "AES/CFB/NoPadding";
-    private static final String AES_Cipher = "AES";
+//    private static final String AES_CFB_ENCRYPTION = "AES/CFB/NoPadding";
+//    private static final String AES_Cipher = "AES";
   
     private static final String NAME_Class = Utilities.class.getSimpleName();
 

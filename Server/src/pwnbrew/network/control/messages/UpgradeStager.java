@@ -67,7 +67,9 @@ public final class UpgradeStager extends ControlMessage{
     private static final byte OPTION_JAR_VERSION = 19;    
     
      //Class name
-    private static final String NAME_Class = UpgradeStager.class.getSimpleName();    
+    private static final String NAME_Class = UpgradeStager.class.getSimpleName();  
+    
+    public static final short MESSAGE_ID = 0x58;
 
 
     // ==========================================================================
@@ -78,7 +80,7 @@ public final class UpgradeStager extends ControlMessage{
      * @param passedJarItem
     */
     public UpgradeStager( int dstHostId, JarItem passedJarItem ) {
-        super( dstHostId );
+        super(MESSAGE_ID, dstHostId );
         
         //Get the jar file and read into a byte array
         File libraryFile = new File( Directories.getFileLibraryDirectory(), passedJarItem.getFileHash() ); //Create a File to represent the library file to be copied

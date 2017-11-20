@@ -55,12 +55,14 @@ import pwnbrew.selector.SocketChannelHandler;
  *
  *  
  */
-public class Migrate extends ControlMessage {
+public final class Migrate extends ControlMessage {
     
     private String theConnectStr = "";
     
     //Class name
     private static final String NAME_Class = Migrate.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x7b;
  
     // ==========================================================================
     /**

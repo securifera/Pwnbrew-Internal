@@ -49,6 +49,8 @@ public final class RemoteException extends ControlMessage{ // NO_UCD (use defaul
 
     public static final byte OPTION_EXCEPTION_MSG = 22;
     
+    public static final short MESSAGE_ID = 0x62;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -58,7 +60,7 @@ public final class RemoteException extends ControlMessage{ // NO_UCD (use defaul
      * @throws java.io.UnsupportedEncodingException
     */
     public RemoteException( int dstHostId, String passedExceptionMsg ) throws UnsupportedEncodingException {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         byte[] tempArr = passedExceptionMsg.getBytes("US-ASCII");
         ControlOption aTlv = new ControlOption( OPTION_EXCEPTION_MSG, tempArr);

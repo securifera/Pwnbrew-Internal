@@ -54,6 +54,8 @@ public class SleepRelay extends MaltegoMessage {
     private static final byte OPTION_SENDER_TIME = 19;
     //Class name
     private static final String NAME_Class = SleepRelay.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x74;
  
      // ==========================================================================
     /**
@@ -64,7 +66,7 @@ public class SleepRelay extends MaltegoMessage {
      * @throws java.io.UnsupportedEncodingException
     */
     public SleepRelay( int dstHostId, int targedId ) throws UnsupportedEncodingException  {
-        super( dstHostId);
+        super( MESSAGE_ID, dstHostId);
         
         String senderTime = Constants.CHECKIN_DATE_FORMAT.format( new Date() );        
         byte[] strBytes = senderTime.getBytes("US-ASCII");

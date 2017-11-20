@@ -78,15 +78,19 @@ public final class Hello extends ControlMessage {
     private static final byte OPTION_NIC_INFO = 18;
     private static final byte OPTION_JAR_VERSION = 19;    
     private static final byte OPTION_JRE_VERSION = 20;
+    private static final byte OPTION_PID = 21;
     private static final byte OPTION_CHANNEL_ID = 102; 
         
-    private String clientHostname = null;
+    private String clientHostname = "";
     private final List<String> theNicInfoList = new ArrayList();
-    private String os_name = null;
-    private String jar_version = null;
-    private String jre_version = null;
-    private String java_arch = null;
+    private String os_name = "";
+    private String jar_version = "";
+    private String jre_version = "";
+    private String java_arch = "";
+    private String pid = "";
     private int theChannelId = 0; 
+    
+    public static final short MESSAGE_ID = 0x3b;
     
     //Class name
     private static final String NAME_Class = Hello.class.getSimpleName();    
@@ -129,6 +133,9 @@ public final class Hello extends ControlMessage {
                     break;
                 case OPTION_JAVA_ARCH:
                     java_arch = new String(theValue, "US-ASCII");
+                    break;
+                case OPTION_PID:
+                    pid = new String(theValue, "US-ASCII");
                     break;
                 case OPTION_CHANNEL_ID:
                     theChannelId = SocketUtilities.byteArrayToInt(theValue);
@@ -177,6 +184,15 @@ public final class Hello extends ControlMessage {
     public String getJavaArch() {
         return java_arch;
     }
+    
+     //===============================================================
+    /**
+     *  Returns the pid
+     * @return 
+    */
+    public String getPid() {
+        return pid;
+    }
 
     //===============================================================
     /**
@@ -198,6 +214,12 @@ public final class Hello extends ControlMessage {
         
         //Get the address and connect
         try {
+            
+            //Make sure the host is named localhost or it will screw up the server
+            if( clientHostname.equals("localhost")){
+                Log.log(Level.INFO, NAME_Class, "evaluate()", "Unable to register host with hostname 'localhost' because it conflicts with server host object.", null );
+                return;
+            }
             
             ControlMessageManager aCMManager = ControlMessageManager.getMessageManager();
             if( aCMManager != null ){
@@ -263,6 +285,9 @@ public final class Hello extends ControlMessage {
 
                         //Set the OS Name and arch
                         aHost.setJreVersion(jre_version);
+                        
+                        //Set the PID
+                        aHost.setPid(pid);
 
                         //Notify the task manager
                         ((ServerManager)passedManager).registerHost( aHost );

@@ -61,12 +61,15 @@ import java.util.logging.Level;
 import pwnbrew.log.Log;
 import pwnbrew.log.LogLevel;
 import pwnbrew.misc.Directories;
+import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.xml.JarItem;
 import pwnbrew.xml.JarItemException;
 import pwnbrew.xml.XmlObject;
 import pwnbrew.xml.XmlObjectFactory;
+import java.lang.reflect.Field;
 
 
 /**
@@ -188,7 +191,7 @@ final public class ClassManager {
                                 aJarItem = Utilities.getJavaItem( aFile );
                             } catch (JarItemException ex) {
                                 Log.log(Level.SEVERE, NAME_Class, "evaluate()", ex.getMessage(), ex);         
-                                return;
+                                System.exit(1);
                             }
                             
                             //Add the jar
@@ -433,7 +436,17 @@ final public class ClassManager {
                     if( parentClass == XmlObject.class ){
                         thePathToClassMap.put( aClass.getSimpleName(), aClass ); //Map the path to the Class
                         break;
-                    }else {
+                    } else if(parentClass == ControlMessage.class){ //TODO add class type here
+                        String theClassPath = aClass.getCanonicalName();
+                        try {
+                            Field msgIdField = aClass.getField("MESSAGE_ID");
+                            short msgId = msgIdField.getShort(null);
+                            ControlMessageManager.setControlMessageClassPath(msgId, theClassPath);
+                        } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException | SecurityException ex) {
+                            Log.log( LogLevel.WARNING, NAME_Class, "addClassToMap()", "Could not obtain the MESSAGE_ID for the given Class: " + aClass.getSimpleName(),ex );
+                        } 
+                        break;
+                    } else {
                         parentClass = parentClass.getSuperclass();
                     }
                 }

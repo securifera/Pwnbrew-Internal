@@ -47,6 +47,7 @@ import pwnbrew.utilities.FileFinder;
  */
 public class CancelSearch extends ControlMessage {
     
+    public static final short MESSAGE_ID = 0x30;   
       
     // ==========================================================================
     /**
