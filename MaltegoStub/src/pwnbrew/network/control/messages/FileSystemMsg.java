@@ -73,6 +73,8 @@ public final class FileSystemMsg extends Tasking {
     private long size;
     private String dateModified;
     private byte fileType = 0;
+    
+    public static final short MESSAGE_ID = 0x39;
 
      // ==========================================================================
     /**

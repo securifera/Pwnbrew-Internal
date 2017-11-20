@@ -43,6 +43,8 @@ package pwnbrew.network.control.messages;
  *  
  */
 public class CancelSearch extends ControlMessage {
+    
+    public static final short MESSAGE_ID = 0x30; 
      
     // ==========================================================================
     /**
@@ -51,7 +53,7 @@ public class CancelSearch extends ControlMessage {
      * @param dstHostId
     */
     public CancelSearch( int dstHostId )  {
-        super( dstHostId);
+        super( MESSAGE_ID, dstHostId);
     }
     
 

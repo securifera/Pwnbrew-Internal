@@ -62,6 +62,8 @@ public final class AutoSleep extends MaltegoMessage{ // NO_UCD (use default)
     private byte theOperation;
     private int hostId;
     
+    public static final short MESSAGE_ID = 0x63;
+    
      // ==========================================================================
     /**
      * Constructor
@@ -72,7 +74,7 @@ public final class AutoSleep extends MaltegoMessage{ // NO_UCD (use default)
      * @param passedBool
     */
     public AutoSleep( int dstHostId, int passedHostId, byte passedOperation, boolean passedBool ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         //Add host id
         byte[] tempBytes = SocketUtilities.intToByteArray(passedHostId);

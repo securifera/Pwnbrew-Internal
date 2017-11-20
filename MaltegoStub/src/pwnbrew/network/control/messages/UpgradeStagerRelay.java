@@ -48,7 +48,8 @@ import pwnbrew.network.ControlOption;
 public class UpgradeStagerRelay extends MaltegoMessage {
     
     private static final byte OPTION_HOST_ID = 100;
-
+    
+    public static final short MESSAGE_ID = 0x76;
     
     // ==========================================================================
     /**
@@ -58,7 +59,7 @@ public class UpgradeStagerRelay extends MaltegoMessage {
      * @param hostId
     */
     public UpgradeStagerRelay( int dstHostId , String hostId ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         //Add file type
         byte[] tempBytes = SocketUtilities.intToByteArray( Integer.parseInt(hostId) );

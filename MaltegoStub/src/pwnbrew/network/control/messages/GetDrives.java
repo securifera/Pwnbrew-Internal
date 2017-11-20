@@ -50,7 +50,8 @@ public final class GetDrives extends Tasking {
      //Class name
     private static final String NAME_Class = GetDrives.class.getSimpleName();    
 
-
+    public static final short MESSAGE_ID = 0x3a;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -58,7 +59,7 @@ public final class GetDrives extends Tasking {
      * @param dstHostId
     */
     public GetDrives( int dstHostId ) {
-        super( SocketUtilities.getNextId(), dstHostId );        
+        super( MESSAGE_ID, SocketUtilities.getNextId(), dstHostId );        
     }
 
 }

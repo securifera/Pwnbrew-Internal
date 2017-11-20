@@ -48,6 +48,9 @@ import pwnbrew.network.ControlOption;
 public final class RemoveHost extends MaltegoMessage{ 
     
     private static final byte OPTION_HOST_ID = 124;
+    
+    public static final short MESSAGE_ID = 0x72;
+
 
     // ==========================================================================
     /**
@@ -57,7 +60,7 @@ public final class RemoveHost extends MaltegoMessage{
      * @param passedHostId
     */
     public RemoveHost( int dstHostId, int passedHostId ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         //Add file type
         byte[] tempBytes = SocketUtilities.intToByteArray( passedHostId );

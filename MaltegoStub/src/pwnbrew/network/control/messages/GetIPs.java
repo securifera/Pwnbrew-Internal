@@ -47,6 +47,8 @@ import pwnbrew.network.ControlOption;
 public class GetIPs extends MaltegoMessage{ // NO_UCD (use default)
     
     private static final byte OPTION_HOST_ID = 100;
+    
+    public static final short MESSAGE_ID = 0x6a;
 
     // ==========================================================================
     /**
@@ -56,7 +58,7 @@ public class GetIPs extends MaltegoMessage{ // NO_UCD (use default)
      * @param hostId
     */
     public GetIPs( int dstHostId, String hostId ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         //Add file type
         byte[] tempBytes = SocketUtilities.intToByteArray( Integer.parseInt(hostId) );

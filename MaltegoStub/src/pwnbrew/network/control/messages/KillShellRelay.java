@@ -50,6 +50,8 @@ public final class KillShellRelay extends MaltegoMessage{
     private static final byte OPTION_TARGET_HOST_ID = 22;
     private static final byte OPTION_TARGET_CHANNEL_ID = 23;
     
+    public static final short MESSAGE_ID = 0x6f;
+    
      // ==========================================================================
     /**
      * Constructor
@@ -59,7 +61,7 @@ public final class KillShellRelay extends MaltegoMessage{
      * @param channelId
     */
     public KillShellRelay( int passedDestHostId, int targetHostId, int channelId ) {
-        super( passedDestHostId );
+        super( MESSAGE_ID, passedDestHostId );
         
         byte[] strBytes = SocketUtilities.intToByteArray(targetHostId);
         ControlOption aTlv = new ControlOption(OPTION_TARGET_HOST_ID, strBytes);

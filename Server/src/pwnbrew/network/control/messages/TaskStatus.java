@@ -65,6 +65,8 @@ public class TaskStatus extends Tasking {
     
     //Class name
     private static final String NAME_Class = TaskStatus.class.getSimpleName();
+    
+    public static final short MESSAGE_ID = 0x7a;
         
      // ==========================================================================
     /**

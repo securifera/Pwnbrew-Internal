@@ -54,6 +54,7 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.Message;
+import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -66,15 +67,19 @@ public abstract class ControlMessage extends Message {
         
     //Data members
     protected List<ControlOption> optionList = new ArrayList<>();
+    
+    private short theClassId;
 
     //=========================================================================
     /*
      *  Contructor
      */
-    public ControlMessage( int passedDestHostId ) { // NO_UCD (use default)
+    public ControlMessage( short classIdType, int passedDestHostId ) { // NO_UCD (use default)
         //Set id
         super( CONTROL_MESSAGE_TYPE, passedDestHostId );
         setChannelId( Constants.COMM_CHANNEL_ID );
+        theClassId = classIdType;
+        
     }
 
     //=========================================================================
@@ -99,16 +104,21 @@ public abstract class ControlMessage extends Message {
         //Add the parent
         super.append(rtnBuffer);
         
-        byte[] classPathLenArr = new byte[2];
-        byte[] classPathStrArr = getClass().getCanonicalName().getBytes();
+         //Add the control message type
+        byte[] msgTypeArr = new byte[2]; 
+        SocketUtilities.intToByteArray(msgTypeArr, theClassId);
+        rtnBuffer.put(msgTypeArr);
         
-        //Get the length
-        int classPathLen = classPathStrArr.length;
-        SocketUtilities.intToByteArray(classPathLenArr, classPathLen);
-        
-        //Add the classpath
-        rtnBuffer.put(classPathLenArr);
-        rtnBuffer.put(classPathStrArr);
+//        byte[] classPathLenArr = new byte[2];
+//        byte[] classPathStrArr = getClass().getCanonicalName().getBytes();
+//        
+//        //Get the length
+//        int classPathLen = classPathStrArr.length;
+//        SocketUtilities.intToByteArray(classPathLenArr, classPathLen);
+//        
+//        //Add the classpath
+//        rtnBuffer.put(classPathLenArr);
+//        rtnBuffer.put(classPathStrArr);
         
         //Add the options
         for( ControlOption aTlv : optionList){            
@@ -179,15 +189,22 @@ public abstract class ControlMessage extends Message {
     public static ControlMessage instatiateMessage( byte[] msgId, ByteBuffer passedBuffer ) throws LoggableException{
         
         ControlMessage aMsg = null;
-        byte[] classFqnLength = new byte[2];
-        passedBuffer.get(classFqnLength, 0, classFqnLength.length);
+        byte[] classIdArr = new byte[2];
         
-        //Get the length of the class path
-        int theLength = SocketUtilities.byteArrayToInt(classFqnLength);
-        byte[] classPath = new byte[theLength];
-        
-        passedBuffer.get(classPath, 0, classPath.length);
-        String thePath = new String(classPath);
+        //Copy over the class path length
+        passedBuffer.get(classIdArr, 0, classIdArr.length);
+
+        short classId = (short)SocketUtilities.byteArrayToInt(classIdArr);
+        String thePath = ControlMessageManager.getControlMessageClassPath(classId);
+//        byte[] classFqnLength = new byte[2];
+//        passedBuffer.get(classFqnLength, 0, classFqnLength.length);
+//        
+//        //Get the length of the class path
+//        int theLength = SocketUtilities.byteArrayToInt(classFqnLength);
+//        byte[] classPath = new byte[theLength];
+//        
+//        passedBuffer.get(classPath, 0, classPath.length);
+//        String thePath = new String(classPath);
         
         try {
             

@@ -63,6 +63,8 @@ public final class FileOperation extends Tasking {
     private static final byte OPTION_FILE_PATH = 43;
     private static final byte OPTION_ADDITIONAL = 44;
     
+    public static final short MESSAGE_ID = 0x38;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -73,7 +75,7 @@ public final class FileOperation extends Tasking {
      * @param addParam
     */
     public FileOperation( int dstHostId, byte passedOperation, String filePath, String addParam ) {
-        super( SocketUtilities.getNextId(), dstHostId );   
+        super( MESSAGE_ID, SocketUtilities.getNextId(), dstHostId );   
         
         //Add file type
         byte[] tempBytes = new byte[]{ passedOperation };

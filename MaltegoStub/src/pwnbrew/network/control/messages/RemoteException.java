@@ -53,6 +53,8 @@ public final class RemoteException extends ControlMessage{ // NO_UCD (use defaul
     public static final byte OPTION_EXCEPTION_MSG = 22;
     private String theExceptionMsg;
     
+    public static final short MESSAGE_ID = 0x62;
+    
     // ==========================================================================
     /**
      * Constructor

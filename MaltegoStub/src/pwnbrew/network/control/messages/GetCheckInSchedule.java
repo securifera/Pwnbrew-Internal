@@ -48,6 +48,8 @@ import pwnbrew.network.ControlOption;
 public final class GetCheckInSchedule extends MaltegoMessage{ 
     
     private static final byte OPTION_HOST_ID = 124;
+    
+    public static final short MESSAGE_ID = 0x67;
 
     // ==========================================================================
     /**
@@ -57,7 +59,7 @@ public final class GetCheckInSchedule extends MaltegoMessage{
      * @param passedHostId
     */
     public GetCheckInSchedule( int dstHostId, int passedHostId ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         //Add host id
         byte[] tempBytes = SocketUtilities.intToByteArray( passedHostId );

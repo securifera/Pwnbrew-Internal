@@ -51,6 +51,7 @@ public final class ListFiles extends Tasking {
     
     private static final byte OPTION_PATH = 7; 
     
+    public static final short MESSAGE_ID = 0x3f;
 
     // ==========================================================================
     /**\
@@ -60,7 +61,7 @@ public final class ListFiles extends Tasking {
      * @param passedFilePath
     */
     public ListFiles( int dstHostId, String passedFilePath ) {
-        super( SocketUtilities.getNextId(), dstHostId );    
+        super( MESSAGE_ID, SocketUtilities.getNextId(), dstHostId );    
         
         try {
             

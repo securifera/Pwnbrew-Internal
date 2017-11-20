@@ -76,6 +76,8 @@ public final class HostMsg extends MaltegoMessage{
     private String pid = "";
     private int hostid = 0;
     
+    public static final short MESSAGE_ID = 0x6d;
+    
      //===========================================================================
     /**
      *  Constructor

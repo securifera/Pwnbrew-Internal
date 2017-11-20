@@ -60,6 +60,8 @@ public final class CreateShell extends ControlMessage{
     public static final byte OPTION_STARTUP_CMD = 22;
     public static final byte OPTION_REDIRECT_STDERR = 24;
     
+    public static final short MESSAGE_ID = 0x33;
+    
     // ==========================================================================
     /**
     * Constructor
@@ -73,7 +75,7 @@ public final class CreateShell extends ControlMessage{
     */
     public CreateShell( int dstHostId, String[] passedCmdString, String passedEncoding, 
             String passedStartCmd, boolean passedBool ) throws UnsupportedEncodingException {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
 
         //Get each string and append a null byte to ensure that each string is terminated
         ByteBuffer aBB = ByteBuffer.allocate(Constants.GENERIC_BUFFER_SIZE);

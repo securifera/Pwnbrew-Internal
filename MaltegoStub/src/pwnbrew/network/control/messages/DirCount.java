@@ -61,6 +61,7 @@ public final class DirCount extends Tasking {
     private static final byte OPTION_COUNT = 15; 
     private int theDirCount = 0;
     
+    public static final short MESSAGE_ID = 0x35;
 
     // ==========================================================================
     /**

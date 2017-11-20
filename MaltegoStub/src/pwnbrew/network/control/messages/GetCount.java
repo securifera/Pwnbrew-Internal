@@ -52,6 +52,8 @@ public final class GetCount extends MaltegoMessage{ // NO_UCD (use default)
     
     public static final byte HOST_COUNT = 20;
     public static final byte NIC_COUNT = 21;
+    
+    public static final short MESSAGE_ID = 0x68;
 
     // ==========================================================================
     /**
@@ -62,7 +64,7 @@ public final class GetCount extends MaltegoMessage{ // NO_UCD (use default)
      * @param passedId
     */
     public GetCount( int dstHostId, int passedType, String passedId ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         //Add file type
         byte[] tempBytes = SocketUtilities.intToByteArray(passedType);

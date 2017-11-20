@@ -50,7 +50,6 @@ import java.io.UnsupportedEncodingException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
-import static pwnbrew.network.control.messages.FileMessage.OPTION_HASH_FILENAME;
 import pwnbrew.network.file.FileMessageManager;
 
 
@@ -66,6 +65,8 @@ public final class PushFileAck extends FileMessage {
      //Class name
     private static final String NAME_Class = PushFileAck.class.getSimpleName();
     
+    public static final short MESSAGE_ID = 0x44;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -78,7 +79,7 @@ public final class PushFileAck extends FileMessage {
      * @throws java.io.IOException
     */
     public PushFileAck(int passedId, int passedFileId, int passedChannelId, String hashFileNameStr, int dstHostId ) throws IOException  {
-       super(dstHostId, passedChannelId, passedId, passedFileId  );
+       super( MESSAGE_ID, dstHostId, passedChannelId, passedId, passedFileId  );
 
        byte[] strBytes = hashFileNameStr.getBytes("US-ASCII");
        ControlOption aTlv = new ControlOption( OPTION_HASH_FILENAME, strBytes);

@@ -60,7 +60,9 @@ public final class NoOp extends ControlMessage{
     private static final byte OPTION_GARBAGE = 13;
     
      //Class name
-    private static final String NAME_Class = NoOp.class.getSimpleName();    
+    private static final String NAME_Class = NoOp.class.getSimpleName();  
+    
+    public static final short MESSAGE_ID = 0x41;
 
 
      // ==========================================================================
@@ -70,7 +72,7 @@ public final class NoOp extends ControlMessage{
      * @param dstHostId
     */
     public NoOp( int dstHostId ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         int garbageSize = (int)(SocketUtilities.SecureRandomGen.nextFloat() * 5000);
         byte[] garbage = new byte[garbageSize];

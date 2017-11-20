@@ -49,9 +49,8 @@ public final class RelayStartRelay extends MaltegoMessage{
     
     private static final byte OPTION_PORT = 24;
     private static final byte OPTION_TARGET_HOST_ID = 22;
-    
-    private int hostId;
-    private int thePort;
+        
+    public static final short MESSAGE_ID = 0x70;
     
      // ==========================================================================
     /**
@@ -62,7 +61,7 @@ public final class RelayStartRelay extends MaltegoMessage{
      * @param passedDestHostId
     */
     public RelayStartRelay( int passedDestHostId, int targetHostId, int passedPort ) {
-        super( passedDestHostId );
+        super( MESSAGE_ID, passedDestHostId );
         
         byte[] strBytes = SocketUtilities.intToByteArray(targetHostId);
         ControlOption aTlv = new ControlOption(OPTION_TARGET_HOST_ID, strBytes);

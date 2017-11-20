@@ -61,6 +61,43 @@ public class JarItemMsg extends MaltegoMessage{
     protected String theJarVersion = null;
     protected String theJvmVersion = null;
     
+    public static final short MESSAGE_ID = 0x5e;
+    
+    
+    // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param passedClassId
+     * @param dstHostId
+     * @param passedName
+     * @param passedType
+     * @param passedJvmVersion
+     * @param passedJarVersion
+     * @throws java.io.UnsupportedEncodingException
+    */
+    @SuppressWarnings("ucd")
+    public JarItemMsg(short passedClassId, int dstHostId, String passedName, String passedType, String passedJvmVersion, String passedJarVersion ) throws UnsupportedEncodingException {
+        super(passedClassId, dstHostId );
+        
+        byte[] tempBytes = passedName.getBytes("US-ASCII");
+        ControlOption aTlv = new ControlOption( OPTION_JAR_NAME, tempBytes);
+        addOption(aTlv);
+        
+        tempBytes = passedType.getBytes("US-ASCII");
+        aTlv = new ControlOption( OPTION_JAR_TYPE, tempBytes);
+        addOption(aTlv);
+        
+        tempBytes = passedJvmVersion.getBytes("US-ASCII");
+        aTlv = new ControlOption( OPTION_JVM_VERSION, tempBytes);
+        addOption(aTlv);
+        
+        tempBytes = passedJarVersion.getBytes("US-ASCII");
+        aTlv = new ControlOption( OPTION_JAR_VERSION, tempBytes);
+        addOption(aTlv);
+ 
+    }
+    
      // ==========================================================================
     /**
      * Constructor
@@ -73,7 +110,7 @@ public class JarItemMsg extends MaltegoMessage{
      * @throws java.io.UnsupportedEncodingException
     */
     public JarItemMsg( int dstHostId, String passedName, String passedType, String passedJvmVersion, String passedJarVersion ) throws UnsupportedEncodingException {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         byte[] tempBytes = passedName.getBytes("US-ASCII");
         ControlOption aTlv = new ControlOption( OPTION_JAR_NAME, tempBytes);

@@ -43,6 +43,8 @@ package pwnbrew.network.control.messages;
  */
 public class GetNetworkSettings extends MaltegoMessage{ // NO_UCD (use default)
     
+    public static final short MESSAGE_ID = 0x5f;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -50,7 +52,7 @@ public class GetNetworkSettings extends MaltegoMessage{ // NO_UCD (use default)
      * @param dstHostId
     */
     public GetNetworkSettings( int dstHostId ) {
-        super( dstHostId );             
+        super( MESSAGE_ID, dstHostId );             
     }
 
 }

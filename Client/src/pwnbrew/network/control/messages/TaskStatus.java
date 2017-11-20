@@ -71,6 +71,8 @@ public class TaskStatus extends Tasking {
     
     protected String taskStatus = "";
     
+    public static final short MESSAGE_ID = 0x7a;
+    
     
     // ==========================================================================
     /**
@@ -150,10 +152,8 @@ public class TaskStatus extends Tasking {
     public void evaluate( PortManager passedManager ) {
         
         //Pass it to the manager
-        if( passedManager instanceof TaskListener ){
-            ((TaskListener)passedManager).taskChanged(this);
-        }
+        if( passedManager instanceof TaskListener )
+            ((TaskListener)passedManager).taskChanged(this);        
         
     }
-
-}/* END CLASS TaskStatus */
+}

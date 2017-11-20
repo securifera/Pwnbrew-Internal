@@ -60,9 +60,31 @@ public class TaskStatus extends Tasking {
     protected String taskStatus = "";
     
     //Class name
-    private static final String NAME_Class = TaskStatus.class.getSimpleName();
+    private static final String NAME_Class = TaskStatus.class.getSimpleName();    
+    
+    public static final short MESSAGE_ID = 0x7a;
         
      // ==========================================================================
+    /**
+    * Constructor
+    *
+     * @param passedClassId
+     * @param taskId
+     * @param dstHostId
+     * @param passedStatus
+     * @throws java.io.IOException
+    */
+    public TaskStatus(short passedClassId, int taskId, String passedStatus, int dstHostId ) throws IOException  {
+        super( passedClassId, taskId, dstHostId );
+
+        taskStatus = passedStatus;
+        byte[] strBytes = passedStatus.getBytes("US-ASCII");
+
+        ControlOption aTlv = new ControlOption(OPTION_TASK_STATUS, strBytes);
+        addOption(aTlv);
+    }
+    
+        // ==========================================================================
     /**
     * Constructor
     *
@@ -71,8 +93,8 @@ public class TaskStatus extends Tasking {
      * @param passedStatus
      * @throws java.io.IOException
     */
-    public TaskStatus(int taskId, String passedStatus, int dstHostId ) throws IOException  {
-        super( taskId, dstHostId );
+    public TaskStatus( int taskId, String passedStatus, int dstHostId ) throws IOException  {
+        super( MESSAGE_ID, taskId, dstHostId );
 
         taskStatus = passedStatus;
         byte[] strBytes = passedStatus.getBytes("US-ASCII");

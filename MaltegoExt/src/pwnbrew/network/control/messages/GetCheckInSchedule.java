@@ -63,6 +63,7 @@ public final class GetCheckInSchedule extends MaltegoMessage{
     private static final String NAME_Class = GetCheckInSchedule.class.getSimpleName();
     
     public static final short MESSAGE_ID = 0x67;
+    
     // ==========================================================================
     /**
      * Constructor

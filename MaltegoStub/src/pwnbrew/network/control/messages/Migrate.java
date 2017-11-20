@@ -51,6 +51,8 @@ public class Migrate extends ControlMessage {
     private static final byte OPTION_IPADDRESS = 2;
     private String connectStr = "";
      
+    public static final short MESSAGE_ID = 0x41;
+    
     // ==========================================================================
     /**
      * Constructor
@@ -60,7 +62,7 @@ public class Migrate extends ControlMessage {
      * @throws java.io.UnsupportedEncodingException
     */
     public Migrate( int dstHostId, String passedIpStr ) throws UnsupportedEncodingException  {
-        super( dstHostId);
+        super( MESSAGE_ID, dstHostId);
 
         connectStr = passedIpStr;
         byte[] strBytes = passedIpStr.getBytes("US-ASCII");

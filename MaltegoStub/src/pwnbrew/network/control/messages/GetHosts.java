@@ -53,6 +53,8 @@ import pwnbrew.network.ControlOption;
 public final class GetHosts extends MaltegoMessage{ // NO_UCD (use default)
     
     private static final byte OPTION_HOST_ID = 124;
+    
+    public static final short MESSAGE_ID = 0x69;
 
     // ==========================================================================
     /**
@@ -62,7 +64,7 @@ public final class GetHosts extends MaltegoMessage{ // NO_UCD (use default)
      * @param passedHostId
     */
     public GetHosts( int dstHostId, String passedHostId ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
         
         //Add file type
         byte[] tempBytes = SocketUtilities.intToByteArray( Integer.parseInt(passedHostId));

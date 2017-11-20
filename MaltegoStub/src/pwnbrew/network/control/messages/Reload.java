@@ -42,7 +42,9 @@ package pwnbrew.network.control.messages;
  *
  *  
  */
-public final class Reload extends ControlMessage{ // NO_UCD (use default)
+public final class Reload extends ControlMessage{ // NO_UCD (use default)    
+    
+    public static final short MESSAGE_ID = 0x4b;
 
     // ==========================================================================
     /**
@@ -51,7 +53,7 @@ public final class Reload extends ControlMessage{ // NO_UCD (use default)
      * @param dstHostId
     */
     public Reload( int dstHostId ) {
-        super( dstHostId );
+        super( MESSAGE_ID, dstHostId );
     }
    
 }/* END CLASS Reload */

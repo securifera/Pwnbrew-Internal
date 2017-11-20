@@ -60,6 +60,7 @@ public final class SessionMsg extends MaltegoMessage{
     private String checkInDatStr;
     private String checkOutDatStr;
     
+    public static final short MESSAGE_ID = 0x73;
     
     //===========================================================================
     /**
