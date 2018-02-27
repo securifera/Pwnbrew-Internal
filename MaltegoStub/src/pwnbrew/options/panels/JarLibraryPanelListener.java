@@ -72,7 +72,8 @@ public interface JarLibraryPanelListener extends PanelListener {
      * @param passedType 
      * @param passedJvmVersion 
      * @param passedJarVersion 
+     * @param passedHostHdrStr 
      */
-    public void  getStagerFile(String connectStr, String passedName, String passedType, String passedJvmVersion, String passedJarVersion);
+    public void  getStagerFile(String connectStr, String passedName, String passedType, String passedJvmVersion, String passedJarVersion, String passedHostHdrStr);
 
 }

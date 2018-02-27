@@ -331,8 +331,8 @@ public class OptionsJFrame extends JFrame implements JarLibraryPanelListener, Ne
      * @param connectStr 
      */
     @Override
-    public void getStagerFile(String connectStr, String passedName, String passedType, String passedJvmVersion, String passedJarVersion) {
-        theListener.getStagerFile( connectStr, passedName, passedType, passedJvmVersion, passedJarVersion );
+    public void getStagerFile(String connectStr, String passedName, String passedType, String passedJvmVersion, String passedJarVersion, String passedHostHeaderStr) {
+        theListener.getStagerFile( connectStr, passedName, passedType, passedJvmVersion, passedJarVersion, passedHostHeaderStr );
     }
     
     //========================================================================

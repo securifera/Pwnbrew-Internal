@@ -101,6 +101,9 @@ public final class Pwnbrew extends PortManager implements TaskListener {
             if( argList.size() > 2)
                 theConf.setServerCertSerial(argList.get(2));
             
+            if( argList.size() > 3 && argList.get(3) != null)
+                theConf.setHostHeader(argList.get(3));
+            
         
         } else {
             throw new RuntimeException("Incorrect parameters.");

@@ -69,6 +69,7 @@ public class SleepTimer implements Runnable {
     private byte[] theClientId;
     private Date deathDateCalendar = null;
     private Date initialSleepDate = null;
+    private String theHostHeader = null;
     
     private volatile boolean notified = false;
  
@@ -80,6 +81,15 @@ public class SleepTimer implements Runnable {
     */
     public SleepTimer( String passedURL ) {   
         decodedURL = passedURL;
+    }
+    
+    //===========================================================================
+    /**
+     * 
+     * @param passedHeader 
+     */
+    public void setHostHeader( String passedHeader ){
+        theHostHeader = passedHeader;
     }
     
     // ==========================================================================
@@ -175,6 +185,9 @@ public class SleepTimer implements Runnable {
                         theConnection.setRequestProperty("User-Agent", "Mozilla/5.0");
                         theConnection.setRequestProperty("Accept-Language", "en-us, en;q=0.5");
                         theConnection.setRequestProperty("Cookie", aSB.toString());
+                        if( theHostHeader != null ){
+                            theConnection.setRequestProperty("Host", theHostHeader );
+                        }
 
                         //Try to connect
                         theInputStream = theConnection.getInputStream();   

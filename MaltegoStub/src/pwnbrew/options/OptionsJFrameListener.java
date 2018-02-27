@@ -59,6 +59,6 @@ public interface OptionsJFrameListener {
 
     public void sendCertFile(File theCertFile, String string);
 
-    public void getStagerFile(String connectStr, String passedName, String passedType, String passedJvmVersion, String passedJarVersion);
+    public void getStagerFile(String connectStr, String passedName, String passedType, String passedJvmVersion, String passedJarVersion, String hostHeader);
     
 }

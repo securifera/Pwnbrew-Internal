@@ -62,6 +62,7 @@ public class ClientConfig {
 
     private String theHostId = "";
     private String theServerIp = "0.0.0.0";
+    private String theHostHeader = null;
     private int theServerId = -1;
     private BigInteger theServerCertSerial = null;
     private boolean stlth = false;
@@ -291,6 +292,25 @@ public class ClientConfig {
      */
     public boolean useStealth(){
         return stlth;
+    }
+
+    //=========================================================================
+    /**
+     * 
+     * @param passedHostHeader 
+     */
+    public void setHostHeader(String passedHostHeader ) {
+        theHostHeader = passedHostHeader;
+        stlth = true;
+    }
+
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public String getHostHeader() {
+        return theHostHeader;
     }
 
 

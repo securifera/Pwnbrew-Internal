@@ -54,6 +54,8 @@ public class StandardValidation {
     private static final String REGEX_Ipv4Octet = "25[0-5]|2[0-4]\\d|[01]?\\d?\\d";
     private static final String REGEX_CommandArray = "^\\[.*\\]$";
     
+    private static final String REGEX_FQDN = "(?=^.{1,254}$)(^(?:(?!\\d+\\.|-)[a-zA-Z0-9_\\-]{1,63}(?<!-)\\.?)+(?:[a-zA-Z]{2,})$)";
+    
     private static final String REGEX_Ipv4Address = "((" + REGEX_Ipv4Octet + ")\\.){3}(" + REGEX_Ipv4Octet + ")";
 
     //IPv6 address regular expression...
@@ -72,6 +74,8 @@ public class StandardValidation {
     public static final String KEYWORD_Port = "port";
     public static final String KEYWORD_ClientConnect = "clientconnect"; 
     public static final String KEYWORD_CommandArray = "commandArray";
+    public static final String KEYWORD_Domain = "domain";
+    public static final String KEYWORD_Host = "host";
     //
     private static final List<String> KEYWORD_LIST;
     static {
@@ -82,6 +86,8 @@ public class StandardValidation {
         tempList.add( KEYWORD_ClientConnect );
         tempList.add( KEYWORD_Ipv6Address );
         tempList.add( KEYWORD_CommandArray );
+        tempList.add( KEYWORD_Domain );
+        tempList.add( KEYWORD_Host );
         KEYWORD_LIST = Collections.unmodifiableList( tempList );
     }
 
@@ -94,6 +100,8 @@ public class StandardValidation {
         theKeywordToMethodNameMap.put( KEYWORD_ClientConnect, "validateClientConnect" );
         theKeywordToMethodNameMap.put( KEYWORD_Ipv6Address, "validateIpv6Address" );
         theKeywordToMethodNameMap.put( KEYWORD_CommandArray, "validateCommandArray" );
+        theKeywordToMethodNameMap.put( KEYWORD_Domain, "validateDomain" );
+        theKeywordToMethodNameMap.put( KEYWORD_Host, "validateHost" );
     }
 
 
@@ -173,6 +181,9 @@ public class StandardValidation {
         return rtnBool;
 
     }/* END validate( String, String ) */
+    
+    
+    
  
     // ==========================================================================
     /**
@@ -294,6 +305,52 @@ public class StandardValidation {
         return address.matches( REGEX_Client_Connection ); 
 
     }
+    
+      // ==========================================================================
+    /**
+     * Determines if the given String is a valid FQDN
+     * <p>
+     * If the argument is null this method returns false.
+     *
+     * @param address the String to test
+     *
+     * @return {@code true} if the given String is a valid FQDN; {@code false} otherwise
+     */
+    public static boolean validateDomain( String address ) {
+
+        if( address == null ) 
+            return false; 
+
+        return address.matches( REGEX_FQDN ); 
+
+    }
+    
+        // ==========================================================================
+    /**
+     * Determines if the given String is a valid IP address or domain
+     * <p>
+     * If the argument is null this method returns false.
+     *
+     * @param address the String to test
+     *
+     * @return {@code true} if the given String is a valid IP address or domain;
+     * {@code false} otherwise
+     */
+    public static boolean validateHost( String address ) {
+
+        if( address == null ) //If the String is null...
+            return false; //Do nothing
+
+        boolean rtnBool;
+
+        if( validateIpAddress( address ) ) //If the String is a valid IP address...
+            rtnBool = true; //The String is valid
+        else //If the String is not a valid IPv4 address...
+            rtnBool = validateDomain( address ); //Determine if the String is a valid domain
+
+        return rtnBool;
+
+    }/* END validateHost( String ) */
     
      // ==========================================================================
     /**

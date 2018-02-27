@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 X-COMMENT: Main-Class will be added automatically by build
 UID: 10001
-Version: 1.1.2.1
+Version: 1.1.3.0
 Type: llib
 

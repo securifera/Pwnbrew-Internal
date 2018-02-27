@@ -105,9 +105,13 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
         
         StubConfig theConf = StubConfig.getConfig();
         String serverIp = theConf.getServerIp();
-        ((ValidTextField)ipTextField).setValidation( StandardValidation.KEYWORD_IpAddress);
+        ((ValidTextField)ipTextField).setValidation( StandardValidation.KEYWORD_Host);
         ipTextField.setText(serverIp);
         ipTextField.setMargin(new Insets(2,4,2,4));
+        
+        ((ValidTextField)cdnTextField).setValidation( StandardValidation.KEYWORD_Host);
+        cdnTextField.setText(serverIp);
+        cdnTextField.setMargin(new Insets(2,4,2,4));
         
         ((ValidTextField)portTextField).setValidation( StandardValidation.KEYWORD_Port);
         portTextField.setMargin(new Insets(2,4,2,4));
@@ -126,9 +130,11 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
         stagerSetupPanel = new javax.swing.JPanel();
         buildStagerButton = new javax.swing.JButton();
         ipLabel = new javax.swing.JLabel();
-        ipTextField = ipTextField = new ValidTextField( "0.0.0.0" );
+        ipTextField = new ValidTextField( "0.0.0.0" );
         portLabel = new javax.swing.JLabel();
         portTextField = portTextField = new ValidTextField( "443" );
+        cdnLabel = new javax.swing.JLabel();
+        cdnTextField =  new ValidTextField( "localhost.localhost" );
         removeFile = new javax.swing.JButton();
         addFile = new javax.swing.JButton();
         jarScrollPane = new javax.swing.JScrollPane();
@@ -143,41 +149,63 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
             }
         });
 
-        ipLabel.setText("Callback IP Address:");
+        ipLabel.setText("Server Host/IP:");
 
         portLabel.setText("Port:");
+
+        cdnLabel.setText("Host Header:");
+
+        cdnTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cdnTextFieldActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout stagerSetupPanelLayout = new javax.swing.GroupLayout(stagerSetupPanel);
         stagerSetupPanel.setLayout(stagerSetupPanelLayout);
         stagerSetupPanelLayout.setHorizontalGroup(
             stagerSetupPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, stagerSetupPanelLayout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addComponent(ipLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(ipTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(portLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(portTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 54, Short.MAX_VALUE)
-                .addComponent(buildStagerButton, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE)
+            .addGroup(stagerSetupPanelLayout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addGroup(stagerSetupPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(stagerSetupPanelLayout.createSequentialGroup()
+                        .addComponent(ipLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(ipTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(portLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(portTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
+                        .addComponent(buildStagerButton, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(stagerSetupPanelLayout.createSequentialGroup()
+                        .addComponent(cdnLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cdnTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         stagerSetupPanelLayout.setVerticalGroup(
             stagerSetupPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(stagerSetupPanelLayout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addGroup(stagerSetupPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(ipLabel)
-                    .addComponent(ipTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(portLabel)
-                    .addComponent(portTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(stagerSetupPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(buildStagerButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap()
+                .addGroup(stagerSetupPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(stagerSetupPanelLayout.createSequentialGroup()
+                        .addGroup(stagerSetupPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(ipTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(ipLabel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(stagerSetupPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(cdnTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(cdnLabel))
+                        .addGap(11, 11, 11))
+                    .addGroup(stagerSetupPanelLayout.createSequentialGroup()
+                        .addGroup(stagerSetupPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(buildStagerButton)
+                            .addGroup(stagerSetupPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(portTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(portLabel)))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
         removeFile.setText(" ");
@@ -220,13 +248,13 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(stagerSetupPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jarScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 335, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jarScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 315, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(addFile)
                     .addComponent(removeFile))
-                .addContainerGap(52, Short.MAX_VALUE))
+                .addGap(45, 45, 45))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -252,12 +280,24 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
                 //Get table entries
                 String jarType = (String) theJarTable.getValueAt(i, 1);
                 if(jarType.equals(Constants.STAGER_TYPE)){
-                    String connectStr = "https://" + ipField.getText().trim() + ":" + portTextField.getText().trim();
+                    String ipStr = ipField.getText().trim();
+                    String connectStr = "https://" + ipStr + ":" + portTextField.getText().trim();
                     //Get table entries
                     String jarName = (String) theJarTable.getValueAt(i, 0);
                     String jvmVersion = (String) theJarTable.getValueAt(i, 2);
                     String jarVersion = (String) theJarTable.getValueAt(i, 3);
-                    getListener().getStagerFile( connectStr, jarName, jarType, jvmVersion, jarVersion );
+                    
+                    //See if the host header has been set and it's different than the C2 IP
+                    String hostHeaderStr = null;
+                    ValidTextField cdnField = (ValidTextField) cdnTextField;
+                    if(cdnField.isValid() ){
+                        String cdnHost = cdnField.getText().trim();
+                        if( !cdnHost.equals(ipStr))
+                            hostHeaderStr = cdnHost;
+                                               
+                    }                    
+                    
+                    getListener().getStagerFile( connectStr, jarName, jarType, jvmVersion, jarVersion, hostHeaderStr );
                     return;
                 }
             }
@@ -269,10 +309,16 @@ public class JarLibraryPanel extends OptionsJPanel implements JarTableListener {
         }
     }//GEN-LAST:event_buildStagerButtonActionPerformed
 
+    private void cdnTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cdnTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cdnTextFieldActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addFile;
     private javax.swing.JButton buildStagerButton;
+    private javax.swing.JLabel cdnLabel;
+    private javax.swing.JTextField cdnTextField;
     private javax.swing.JLabel ipLabel;
     private javax.swing.JTextField ipTextField;
     private javax.swing.JScrollPane jarScrollPane;

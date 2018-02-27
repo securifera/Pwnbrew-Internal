@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.logging.Level;
+import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.DataManager;
@@ -169,11 +170,16 @@ public class ClientHttpWrapper extends HttpWrapper {
     public ByteBuffer wrapBytes( byte[] passedBytes ) {
          
         //Allocate and add the bytes from the message
-        Http aHttpMsg = Http.getGeneric( Http.GET );
-        aHttpMsg.setOption( Http.HOST, "http://www.google.com/");
+        Http aHttpMsg = Http.getGeneric( Http.GET );       
         aHttpMsg.setOption( Http.REFERER, "http://www.google.com/");
         aHttpMsg.setOption( Http.USER_AGENT, "Mozilla/5.0");
         
+        //See if the host header has been set
+        String hostHeader = ClientConfig.getConfig().getHostHeader();
+        if( hostHeader == null )
+            hostHeader = "www.google.com";
+        
+        aHttpMsg.setOption( Http.HOST, hostHeader);        
         if( passedBytes.length > 0 ){
             
             //XOR the bytes
