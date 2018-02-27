@@ -244,7 +244,11 @@ public final class Pwnbrew extends PortManager implements TaskListener {
                 
                 //Check if a cert serial was sent
                 if( args.length > 1 && args[1] != null )
-                    argList.add(args[1]);                
+                    argList.add(args[1]);     
+                
+                //Check if a host was provided
+                if( args.length > 2 && args[2] != null )
+                    argList.add(args[2]);  
                 
             }
         

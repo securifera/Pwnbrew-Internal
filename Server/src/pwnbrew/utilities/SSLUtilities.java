@@ -518,7 +518,7 @@ final public class SSLUtilities {
                         if(fileKeystore.isKeyEntry(anAlias)){
                             Key thePrivKey = fileKeystore.getKey(anAlias, passedPW);
                             Certificate[] theCertChain = fileKeystore.getCertificateChain(anAlias);
-
+           
                             //Create a unique alias so that the key is different
                             if(anAlias.equals(localAlias)){
 

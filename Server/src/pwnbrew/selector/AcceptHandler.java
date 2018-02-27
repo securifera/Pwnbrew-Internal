@@ -55,10 +55,8 @@ import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ServerPortRouter;
-import pwnbrew.network.SocketDisconnectTimer;
 import pwnbrew.network.socket.EncryptedSocketChannelWrapper;
 
 /**
@@ -118,15 +116,7 @@ final public class AcceptHandler implements Selectable {
             
             DebugPrinter.printMessage(NAME_Class, "Received a connection from " + srcAddr.getHostAddress());
             SocketChannelHandler theSCH = new SocketChannelHandler(theSPR);
-            if( !requireAuthentication ){
-                
-                //Create a disconnect timer
-                //SocketDisconnectTimer aTimerTask = new SocketDisconnectTimer( (ServerManager)theSPR.getPortManager(), theSCH);
-                
-                //Create a timer
-                //theSPR.schedulerKillTimer(aTimerTask);
-            }
-            
+  
             try {
                 //Set a keepalive so we are notified of disconnects
                 theSocketChannel.socket().setKeepAlive(true);
@@ -142,11 +132,6 @@ final public class AcceptHandler implements Selectable {
 
             //Register the new socket with this handler
             theSPR.getSelRouter().register(theSocketChannel, SelectionKey.OP_READ | SelectionKey.OP_WRITE, theSCH);
-
-//            //Set to connected
-//            if( theSCH.getState() == Constants.DISCONNECTED){
-//                theSCH.setState(Constants.CONNECTED);
-//            }           
 
         } catch ( IOException | LoggableException | InterruptedException ex) {
             Log.log(Level.WARNING, NAME_Class, "handle()", ex.getMessage(), ex);

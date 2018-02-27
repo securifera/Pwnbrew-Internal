@@ -416,7 +416,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
                 ControlMessage aMsg = null;
                 if( hashFilenameStr.endsWith("jar")){
                     aMsg = new AddToJarLibrary(Constants.SERVER_ID, hashFilenameStr, tempStr, "", "");
-                } else if( hashFilenameStr.endsWith("p12")){
+                } else if( hashFilenameStr.endsWith("p12") || hashFilenameStr.endsWith("pfx")){
                     aMsg = new ImportCert(Constants.SERVER_ID, hashFilenameStr, tempStr );
                 }
                 

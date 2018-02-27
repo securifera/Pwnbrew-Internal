@@ -149,6 +149,8 @@ public class SocketChannelHandler implements Selectable {
             //Cancel the key
             passedSelKey.cancel();
             
+            DebugPrinter.printMessage(NAME_Class, "handle() Exception: " + ex.getMessage());
+                                        
             //Flush any remaining packets from the queue in the handler
             shutdown();
             thePortRouter.socketClosed( this );

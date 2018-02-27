@@ -40,6 +40,7 @@ package pwnbrew.network;
 
 import java.util.TimerTask;
 import pwnbrew.manager.ServerManager;
+import pwnbrew.misc.DebugPrinter;
 import pwnbrew.selector.SocketChannelHandler;
 
 /**
@@ -51,6 +52,8 @@ public class SocketDisconnectTimer extends TimerTask {
     private final SocketChannelHandler theHandler;
     private final ServerManager theManager;
 
+    private static final String NAME_Class = SocketDisconnectTimer.class.getSimpleName();
+     
     //==========================================================
     /**
      * 
@@ -70,6 +73,8 @@ public class SocketDisconnectTimer extends TimerTask {
     @Override
     public void run() {
         if( !theHandler.hasRegistered()){
+            
+            DebugPrinter.printMessage( NAME_Class, "Shutting down handler.");
             theHandler.shutdown();        
             theManager.socketClosed(theHandler);
         }

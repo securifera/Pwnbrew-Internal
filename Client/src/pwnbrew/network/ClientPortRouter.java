@@ -217,7 +217,7 @@ public class ClientPortRouter extends PortRouter {
                 SocketChannelHandler aSC = theOCM.getSocketChannelHandler( channedId );   
                 if( aSC != null ){
 
-                    DebugPrinter.printMessage( NAME_Class, "Registering id: " + Integer.toString(channedId));
+                    //DebugPrinter.printMessage( NAME_Class, "Registering id: " + Integer.toString(channedId));
                     
                     //Check if certs didn't match
                     ClientConfig theConf = ClientConfig.getConfig();
@@ -225,6 +225,8 @@ public class ClientPortRouter extends PortRouter {
                     if( theConf.useStealth() )
                         stlth_val = 1;                    
                     
+                    DebugPrinter.printMessage( NAME_Class, "Registering id: " + Integer.toString(channedId) + " Stealth: " + Integer.toString(stlth_val));
+                                      
                     //Send register message
                     RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, channedId);
                     DataManager.send( thePortManager, aMsg );

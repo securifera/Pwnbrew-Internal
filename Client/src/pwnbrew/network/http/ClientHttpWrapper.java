@@ -55,6 +55,7 @@ import pwnbrew.manager.DataManager;
 import pwnbrew.network.Message;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
 
@@ -179,6 +180,7 @@ public class ClientHttpWrapper extends HttpWrapper {
         if( hostHeader == null )
             hostHeader = "www.google.com";
         
+        DebugPrinter.printMessage(NAME_Class, "Host Header: " + hostHeader);
         aHttpMsg.setOption( Http.HOST, hostHeader);        
         if( passedBytes.length > 0 ){
             

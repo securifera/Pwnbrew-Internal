@@ -66,6 +66,7 @@ public class NetworkOptionsPanel extends OptionsJPanel {
     public static final Color COLOR_InputDeviceBackground_Normal = Color.WHITE;
         
     private static final String P12_EXT = "p12"; 
+    private static final String PFX_EXT = "pfx"; 
     private static final String NAME_Class = NetworkOptionsPanel.class.getSimpleName();
     private static final String SUBJECT = "SUBJECT";
     private static final String ISSUER = "ISSUER";
@@ -125,6 +126,7 @@ public class NetworkOptionsPanel extends OptionsJPanel {
 
         //Create a JFileChooser to select wim files...
         theCertFilter.addExt( P12_EXT);
+        theCertFilter.addExt( PFX_EXT);
         theCertificateChooser = new JFileChooser();
         theCertificateChooser.setMultiSelectionEnabled(false);
         theCertificateChooser.setFileFilter(theCertFilter);
