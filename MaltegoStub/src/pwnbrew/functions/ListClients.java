@@ -38,7 +38,12 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.functions;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
@@ -64,6 +69,7 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
     
     private static final String NAME_Class = MaltegoStub.class.getSimpleName();
     private volatile int theClientCount = 0;   
+    private final Map<String,Host> hostMap = new HashMap<>();
     
     //==================================================================
     /**
@@ -156,6 +162,9 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
                 
                     //Wait for the response
                     waitToBeNotified( 180 * 1000);
+                    
+                    //Add hosts to entity list
+                    addEntities();
                                         
                 }
                 
@@ -189,6 +198,16 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
         theClientCount = passedCount;
         beNotified();
     }
+    
+    public void addEntities(){
+        
+        for( Host aHost : hostMap.values() ){
+            MaltegoTransformResponseMessage rspMsg = theReturnMsg.getResponseMessage();
+            Entities theEntities = rspMsg.getEntityList();
+            theEntities.addEntity(aHost);
+        }
+        
+    }
 
     //===============================================================
     /**
@@ -198,9 +217,14 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
     @Override
     public synchronized void addHost(Host aHost) {
         
-        MaltegoTransformResponseMessage rspMsg = theReturnMsg.getResponseMessage();
-        Entities theEntities = rspMsg.getEntityList();
-        theEntities.addEntity(aHost);
+        String hostname = aHost.getDisplayValue();
+         
+        Host prevHost = hostMap.get(hostname);
+        if( prevHost != null && (prevHost.getType() == Host.PWNBREW_HOST_DISCONNECTED) ){
+            hostMap.put(hostname, aHost);
+        } else {
+            hostMap.put(hostname, aHost);
+        }
         
         //Decrement and see if we are done
         theClientCount--;

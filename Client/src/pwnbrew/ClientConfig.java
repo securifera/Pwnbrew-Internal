@@ -301,7 +301,7 @@ public class ClientConfig {
      */
     public void setHostHeader(String passedHostHeader ) {
         theHostHeader = passedHostHeader;
-        stlth = true;
+//        stlth = true;
     }
 
     //=========================================================================

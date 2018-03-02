@@ -72,8 +72,10 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
+import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Directories;
 import pwnbrew.misc.X509CertificateFactory;
+import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.xml.ServerConfig;
 /**
  *
@@ -504,7 +506,6 @@ final public class SSLUtilities {
 
                 KeyStore fileKeystore = KeyStore.getInstance("PKCS12");
                 FileInputStream aFIS = new FileInputStream(passedFile);
-
                 try {
 
                     fileKeystore.load(aFIS, passedPW); 
@@ -512,8 +513,11 @@ final public class SSLUtilities {
                     //Get all of the aliases
                     Enumeration<String> keystoreAliases = fileKeystore.aliases();
                     while( keystoreAliases.hasMoreElements() ){
+                        
+                        
                         String anAlias = keystoreAliases.nextElement();
-
+                        DebugPrinter.printMessage(SSLUtilities.NAME_Class, "Import Cert Alias: " + anAlias);
+                    
                         //If the entry is a key entry
                         if(fileKeystore.isKeyEntry(anAlias)){
                             Key thePrivKey = fileKeystore.getKey(anAlias, passedPW);
@@ -536,7 +540,7 @@ final public class SSLUtilities {
                             //Save
                             theConf.writeSelfToDisk();
                             localKeystore.setKeyEntry(anAlias, thePrivKey, keyStorePassArr, theCertChain);
-                            break;
+                        
                         }                    
                     }
 

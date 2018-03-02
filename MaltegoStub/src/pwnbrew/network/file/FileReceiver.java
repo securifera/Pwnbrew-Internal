@@ -49,7 +49,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import static java.lang.System.in;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -344,6 +343,7 @@ final public class FileReceiver {
      */
     public void updateFileSize( long passedSize ){
         fileSize = passedSize;
+        compBB = ByteBuffer.allocate((int)fileSize);
         receiveFile(new byte[0]);
     }
 

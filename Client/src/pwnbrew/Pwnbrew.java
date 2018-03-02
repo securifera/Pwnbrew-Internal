@@ -86,7 +86,6 @@ public final class Pwnbrew extends PortManager implements TaskListener {
         
         //Make sure the we aren't running already
         DebugPrinter.enable( debug );   
-        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
         if( argList.size() > 1 ){
 
             //Get the control port

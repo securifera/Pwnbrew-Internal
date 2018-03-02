@@ -206,6 +206,7 @@ final public class FileReceiver {
      */
     public void updateFileSize( long passedSize ){
         fileSize = passedSize;
+        compBB = ByteBuffer.allocate((int)fileSize);
         receiveFile(new byte[0]);
     }
     
