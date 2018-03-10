@@ -91,7 +91,8 @@ public class Utilities {
     private static final String OS_NAME_Windows    = "windows";
     private static final String OS_NAME_SunSolaris   = "sunos";
     private static final String OS_NAME_Linux        = "linux";
-    private static final String OS_NAME_Unix         = "unix";    
+    private static final String OS_NAME_Unix         = "unix";  
+    private static final String OS_NAME_Mac         = "mac os x";  
      
     //Used for simple encrypt and decrypt
 //    private static final String AES_CFB_ENCRYPTION = "AES/CFB/NoPadding";
@@ -135,6 +136,7 @@ public class Utilities {
         temp.add( OS_NAME_SunSolaris );
         temp.add( OS_NAME_Linux );
         temp.add( OS_NAME_Unix );
+        temp.add( OS_NAME_Mac );
         OS_FAMILY_Unix = Collections.unmodifiableList( temp );
     }
 

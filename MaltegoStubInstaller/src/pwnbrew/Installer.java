@@ -279,7 +279,7 @@ public class Installer {
             File malDir = null;
 //            File malDir = new File(aDir, "Paterva");
 //            if( !malDir.exists()){
-            int returnVal = theFileChooser.showDialog( null, "Select Maltego Installation Directory, ex. Peterva\\Maltego\\<version>" ); //Show the dialog
+            int returnVal = theFileChooser.showDialog( null, "Select Maltego Installation Directory, ex. Paterva\\Maltego\\<version>" ); //Show the dialog
             switch( returnVal ) {
 
                 case JFileChooser.CANCEL_OPTION: //If the user canceled the selecting...
