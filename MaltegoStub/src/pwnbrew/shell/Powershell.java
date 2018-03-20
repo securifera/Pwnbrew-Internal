@@ -54,7 +54,7 @@ import pwnbrew.misc.Constants;
  */
 public class Powershell extends Shell {
     
-    private static final String[] POWERSHELL_EXE_STR = new String[]{"powershell", "-ExecutionPolicy", "ByPass", "-"};
+    private static final String[] POWERSHELL_EXE_STR = new String[]{"powershell", "-version", "2", "-exec", "bypass", "-"};
     private static final String encoding = "UTF-8";
     private static final String promptCmd = "prompt\r\n";
     private static final String PROMPT_REGEX = "PS [a-zA-Z]:(\\\\|(\\\\[^\\\\/:*\"<>|]+)+)>";

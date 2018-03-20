@@ -411,39 +411,39 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
         return encoding;
     }
 
-    // ==========================================================================
-    /**
-     *  Attempts to retrieve the current directory of the shell
-     * 
-     * @return 
-     */
-    public synchronized File getCurrentDirectory() {
-        
-        File aFile;
-        
-        //Set flag
-        localStringBuilder = new StringBuilder();
-        sendRemote = false;
-        sendInput("\n");
-        
-        //Wait to be notified
-        while(true){
-            
-            waitToBeNotified();
-
-            String currentDir = localStringBuilder.toString().trim().replace(">", "");
-            aFile = new File(currentDir);  
-            if( aFile.exists() ){
-                break;
-            }
-            
-        }
-        
-        //Reset flag
-        sendRemote = true;
-        
-        return aFile;        
-        
-    }
+//    // ==========================================================================
+//    /**
+//     *  Attempts to retrieve the current directory of the shell
+//     * 
+//     * @return 
+//     */
+//    public synchronized File getCurrentDirectory() {
+//        
+//        File aFile;
+//        
+//        //Set flag
+//        localStringBuilder = new StringBuilder();
+//        sendRemote = false;
+//        sendInput("\n");
+//        
+//        //Wait to be notified
+//        while(true){
+//            
+//            waitToBeNotified();
+//
+//            String currentDir = localStringBuilder.toString().trim().replace(">", "");
+//            aFile = new File(currentDir);  
+//            if( aFile.exists() ){
+//                break;
+//            }
+//            
+//        }
+//        
+//        //Reset flag
+//        sendRemote = true;
+//        
+//        return aFile;        
+//        
+//    }
 
 }
