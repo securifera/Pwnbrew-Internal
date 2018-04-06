@@ -109,20 +109,7 @@ public abstract class ControlMessage extends Message {
         byte[] msgTypeArr = new byte[2]; 
         SocketUtilities.intToByteArray(msgTypeArr, theClassId);
         rtnBuffer.put(msgTypeArr);
-        
-        //Add the class path
-//        byte[] classPathLenArr = new byte[2];
-//        byte[] classPathStrArr = getClass().getCanonicalName().getBytes();
-//        
-//        //Get the length
-//        int classPathLen = classPathStrArr.length;
-//        SocketUtilities.intToByteArray(classPathLenArr, classPathLen);
-//        
-//        //Add the classpath
-//        rtnBuffer.put(classPathLenArr);
-//        rtnBuffer.put(classPathStrArr);
-        
-        
+               
         //Add the options
         for( ControlOption aTlv : optionList){            
             aTlv.append( rtnBuffer );
@@ -169,13 +156,6 @@ public abstract class ControlMessage extends Message {
 
         short classId = (short)SocketUtilities.byteArrayToInt(classIdArr);
         String thePath = ControlMessageManager.getControlMessagePath(classId);
-//        //Get the length of the class path
-//        int theLength = SocketUtilities.byteArrayToInt(classFqnLength);
-//        byte[] classPath = new byte[theLength];
-//
-//        //Get the class path
-//        passedBuffer.get(classPath, 0, classPath.length);
-//        String thePath = new String(classPath);
 
         if( thePath != null ){
             try {

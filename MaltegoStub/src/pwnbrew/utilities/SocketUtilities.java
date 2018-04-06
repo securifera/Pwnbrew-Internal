@@ -129,7 +129,7 @@ final public class SocketUtilities {
 
         long tempInt = 0;
         for(int i = 0, j = value.length; i < value.length; i++, j-- ){
-            tempInt += (value[i] & 0xff) << (8 * (j - 1));
+            tempInt += (long)((long)value[i] & 0xff) << (8 * (j - 1));
         }
         return tempInt;
 

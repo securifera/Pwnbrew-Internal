@@ -68,7 +68,7 @@ public class DebugPrinter implements Runnable {
 
      //===============================================================
      /**
-     *  Queues a message to be handled
+     *  Toggles whether debugging is enabled
      *
      * @param passedBool
      */
@@ -76,6 +76,7 @@ public class DebugPrinter implements Runnable {
         enabled = passedBool;
         if( !passedBool && staticSelf != null ){
             DebugPrinter.shutdown();
+            staticSelf = null;
         }
     }
     

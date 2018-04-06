@@ -41,6 +41,8 @@ import com.sun.java.swing.plaf.windows.WindowsTreeUI;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Image;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -57,6 +59,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
@@ -169,7 +172,6 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         //Set the file chooser
         uiDefaults.put("FileChooserUI", fileChooserUI);
         
-        String retStr = "";
         Map<String, String> objectMap = getKeyValueMap(passedObjectStr); 
          
         //Get server IP
@@ -328,8 +330,8 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         notified = true;
         notifyAll();
     }
-    
-      //===============================================================
+ 
+    //===============================================================
     /**
      * 
      * @param taskId
@@ -400,6 +402,8 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                                 IconData theIconData = new IconData( currentNode.getIcon(), currentNode.getExpandedIcon(), currentNode);
                                 DefaultMutableTreeNode node = new DefaultMutableTreeNode(theIconData);
                                 parent.add(node);
+                                
+                                
 
                                 if( currentNode.getSize() > 0)
                                     node.add(new DefaultMutableTreeNode( true));
@@ -1036,16 +1040,17 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
      //=================================================================
     /**
      * 
+     * @param currentTreePath
      * @param anEvent 
      */
     @Override
-    public void fileTreePanelValueChanged(TreeSelectionEvent anEvent) {
+    public void fileTreePanelValueChanged(TreePath currentTreePath ) {
         
         boolean uploadEnable = false;
         JTree theJTree = theFsFrame.getFileTreePanel().getJTree();
         TreePath aTreePath = theJTree.getSelectionPath();
         if( aTreePath != null ){
-            DefaultMutableTreeNode node = theFsFrame.getFileTreePanel().getTreeNode( anEvent.getPath() );    
+            DefaultMutableTreeNode node = theFsFrame.getFileTreePanel().getTreeNode( currentTreePath );    
             getChildren( node );
             
             FileJTable theFileJTable = theFsFrame.getFileJTable();

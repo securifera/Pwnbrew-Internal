@@ -144,4 +144,4 @@ public final class LogMsg extends ControlMessage {
         }
     }
 
-}/* END CLASS TaskStatus */
+}

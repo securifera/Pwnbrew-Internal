@@ -40,8 +40,8 @@ package pwnbrew.filesystem;
 import java.io.File;
 import java.util.List;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import pwnbrew.fileoperation.TaskManager;
 
 /**
@@ -70,7 +70,7 @@ public interface FileBrowserListener extends TaskManager {
 
     public void fileJTableValueChanged(ListSelectionEvent e);
     
-    public void fileTreePanelValueChanged(TreeSelectionEvent anEvent);
+    public void fileTreePanelValueChanged(TreePath aPath);
 
     public void selectNodeInTree(FileNode aFileNode);
 

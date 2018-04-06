@@ -100,7 +100,7 @@ public class KeepAliveTimer extends ManagedRunnable {
         while( isConnected() && !shutdownRequested ){
 
             //Get the next sleep time
-            int sleepTime = Math.abs( aSR.nextInt() % 300 );
+            int sleepTime = Math.abs( aSR.nextInt() % 30 );
 
             Calendar theCalendar = Calendar.getInstance(); 
             theCalendar.setTime( new Date() );

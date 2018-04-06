@@ -191,6 +191,10 @@ public class ControlMessageManager extends DataManager {
             DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + Sleep.MESSAGE_ID);
         theControlMessageMap.put(Sleep.MESSAGE_ID, Sleep.class.getCanonicalName());
         //Add message
+        if( theControlMessageMap.containsKey(SocksCreateHandlerMsg.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + SocksCreateHandlerMsg.MESSAGE_ID);
+        theControlMessageMap.put(SocksCreateHandlerMsg.MESSAGE_ID, SocksCreateHandlerMsg.class.getCanonicalName());
+        //Add message
         if( theControlMessageMap.containsKey(SocksCreateHandlerAckMsg.MESSAGE_ID))
             DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + SocksCreateHandlerAckMsg.MESSAGE_ID);
         theControlMessageMap.put(SocksCreateHandlerAckMsg.MESSAGE_ID, SocksCreateHandlerAckMsg.class.getCanonicalName());

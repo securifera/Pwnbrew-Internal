@@ -48,9 +48,15 @@ package pwnbrew.filesystem;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.Icon;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.UIManager;
@@ -69,10 +75,11 @@ import pwnbrew.network.control.messages.FileSystemMsg;
  *
  *  
  */
-public class FileTreePanel extends JPanel {
+public class FileTreePanel extends JPanel implements ActionListener {
     
     protected JTree  theJTree;
     protected DefaultTreeModel theJTreeModel;
+    private final static String refresh ="Refresh";
     
     private final FileBrowserListener theFileBrowserListener; 
     private final JScrollPane theScrollPane = new JScrollPane();       
@@ -116,8 +123,41 @@ public class FileTreePanel extends JPanel {
         theJTree.collapseRow(0);
 
         theScrollPane.getViewport().add(theJTree);
+        
+        theJTree.addMouseListener( new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e){
+                if(e.isPopupTrigger()){
+                    doTreePopupMenuLogic(e);
+                } 
+            }
+        });
+        
+        
 
         setupLayout();
+    }
+    
+     //=======================================================================
+    /**
+    * 
+    */
+    private void doTreePopupMenuLogic( MouseEvent e ) {
+       
+        
+        JPopupMenu popup = new JPopupMenu();
+        JMenuItem menuItem;
+                 
+        menuItem = new JMenuItem( refresh );
+        menuItem.setActionCommand( refresh );
+        menuItem.addActionListener(this);
+        menuItem.setEnabled( true );
+        popup.add(menuItem);
+
+
+        if( popup.getComponentCount() > 0 )
+            popup.show(e.getComponent(), e.getX(), e.getY());
+       
     }
     
      //==========================================================================
@@ -186,6 +226,23 @@ public class FileTreePanel extends JPanel {
         
         );
     }
+
+    //=========================================================================
+    /**
+     * 
+     * @param e 
+     */
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String actionCommand = e.getActionCommand();            
+        switch (actionCommand) {
+            case refresh:
+                TreePath theSelPath = theJTree.getSelectionPath(); 
+                theFileBrowserListener.fileTreePanelValueChanged(theSelPath);
+                break;
+        }
+
+    }
     
     //=========================================================================
     /**
@@ -195,7 +252,7 @@ public class FileTreePanel extends JPanel {
         
         @Override
         public void valueChanged(TreeSelectionEvent event) {            
-            theFileBrowserListener.fileTreePanelValueChanged(event);
+            theFileBrowserListener.fileTreePanelValueChanged(event.getPath());
         }
     }
 

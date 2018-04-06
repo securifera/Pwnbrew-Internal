@@ -67,7 +67,6 @@ import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.ManagedRunnable;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.Message;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFileAbort;
 import pwnbrew.network.control.messages.PushFileAck;
 import pwnbrew.network.control.messages.PushFileUpdate;
@@ -103,6 +102,15 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
         theFileAck = passedAck;
         channelId = theFileAck.getFileChannelId();
     }   
+    
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getTaskId(){
+        return theFileAck.getTaskId();
+    }
     
     @Override
     protected void go() {

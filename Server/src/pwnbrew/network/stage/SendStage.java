@@ -44,7 +44,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.stage;
 
-import pwnbrew.network.stage.Payload;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.logging.Level;
@@ -56,7 +55,6 @@ import pwnbrew.network.ControlOption;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.http.Http;
-import pwnbrew.network.stage.StageMessage;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.Utilities;
 
