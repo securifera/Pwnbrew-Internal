@@ -53,6 +53,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.logging.Level;
 import javax.net.ssl.SSLException;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
@@ -428,7 +429,12 @@ public class SocketChannelHandler implements Selectable {
         }
 
         //Flush the channel
-        theSCW.dataFlush();
+        try {
+            if( theSCW != null)
+                theSCW.dataFlush();
+        } catch( IOException ex ){
+            DebugPrinter.printMessage( NAME_Class, "send", ex.getMessage(), ex);
+        }
 
     }
     

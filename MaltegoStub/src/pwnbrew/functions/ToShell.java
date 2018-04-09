@@ -38,14 +38,12 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.functions;
 
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -67,9 +65,11 @@ import pwnbrew.shell.CommandPrompt;
 import pwnbrew.shell.Custom;
 import pwnbrew.shell.Powershell;
 import pwnbrew.shell.Shell;
+import pwnbrew.shell.ShellJFrame;
 import pwnbrew.shell.ShellJPanel;
 import pwnbrew.shell.ShellJPanelListener;
 import pwnbrew.shell.ShellListener;
+import pwnbrew.shell.ShellSettings;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
@@ -84,9 +84,9 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
     private String theOS;
     private String theHostName;
     
-    private JFrame parentFrame;
-    private ShellJPanel theShellPanel;
+    private ShellJFrame parentFrame;
     private Shell theShell = null;
+    private final ShellSettings theShellSettings = new ShellSettings();
       
     //==================================================================
     /**
@@ -177,6 +177,7 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
             } catch ( ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
             }
             
+            JDialog.setDefaultLookAndFeelDecorated(true);
             
             //Connect to server
             try {
@@ -189,42 +190,8 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
                 theHostName = tempName;                
                 
                 //Create and add the shell panel
-                theShellPanel = new ShellJPanel( this );
-                
-                parentFrame = new JFrame(){
-                       // ==========================================================================
-                       /**
-                       * Processes {@link WindowEvent}s occurring on this component.
-                       * @param event the {@code WindowEvent}
-                       */
-                       @Override //Overrides JFrame.processWindowEvent( WindowEvent )
-                       protected void processWindowEvent( WindowEvent event ) {
-                            if( WindowEvent.WINDOW_CLOSING == event.getID() ) { //If the event is the window closing...
-                                dispose();
-                                beNotified();
-                                theShellPanel.disablePanel( true );
-                            } else { //If the event is not the window closing...
-                                super.processWindowEvent( event ); //Proceed normally
-                            } 
-                       }
-                };
-                
-                       
-                //Set the title
+                parentFrame = new ShellJFrame( this );
                 parentFrame.setTitle(theHostName);
-                parentFrame.add(theShellPanel);
-                parentFrame.setMinimumSize( new Dimension(455,260));
-                
-                //Set the size
-                parentFrame.setPreferredSize( new Dimension(710,560) );
-                
-                //Set the icon
-                Image appIcon = Utilities.loadImageFromJar( Constants.TERM_IMG_STR );
-                if( appIcon != null )
-                    parentFrame.setIconImage( appIcon );                
-                
-                //Pack and show
-                parentFrame.pack();
                 parentFrame.setVisible(true);
                 
                 //Wait to be notified
@@ -261,7 +228,8 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
      */
     @Override
     public Component getParentComponent(){
-        return theShellPanel;
+        //return theShellPanel;
+        return parentFrame.getShellPanel();
     }
 
     // ==========================================================================
@@ -365,6 +333,7 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
     public void handleException(RemoteException aMsg ) {
         super.handleException(aMsg); 
         
+        
         //Set the component back
         ShellJPanel aPanel = (ShellJPanel) getParentComponent();
         aPanel.disablePanel(true);
@@ -411,7 +380,7 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
      */
     @Override
     public Component getShellView() {
-        return theShellPanel.getShellView();
+        return parentFrame.getShellPanel().getShellView();
     }
     
     //=======================================================================
@@ -442,5 +411,22 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
     public void setFrameTitle(String title) {
         parentFrame.setTitle(title);
     }
+
+    //=======================================================================
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public ShellSettings getShellSettings() {
+        return theShellSettings;
+    }
+
+    @Override
+    public String getCurrentShellDir() {
+        return theShellSettings.getCurrentDir();
+    }
+
+  
 
 }

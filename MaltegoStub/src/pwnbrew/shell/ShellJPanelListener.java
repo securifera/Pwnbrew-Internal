@@ -92,6 +92,20 @@ public interface ShellJPanelListener {
      * @param theShell 
      */
     public void setShell(Shell theShell);
+
+    //==========================================================================
+    /**
+     * 
+     */
+    public void beNotified();
+    
+    
+     //==========================================================================
+    /**
+     * 
+     * @return  
+     */
+    public ShellSettings getShellSettings();
     
 
 

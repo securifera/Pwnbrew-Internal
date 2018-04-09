@@ -567,7 +567,12 @@ public class SocketChannelHandler implements Selectable {
         }
 
         //Flush the channel
-        theSCW.dataFlush();
+        try {
+            if( theSCW != null)
+                theSCW.dataFlush();
+        } catch( IOException ex ){
+            RemoteLog.log(Level.INFO, NAME_Class, "send()", ex.getMessage(), ex );
+        }
 
     }
     

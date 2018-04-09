@@ -45,6 +45,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.file;
 
 import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -62,6 +63,7 @@ import pwnbrew.misc.Utilities;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileFin;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
@@ -137,7 +139,7 @@ final public class FileReceiver {
         
         //create byte buffer
         if( compressed )
-            compBB = ByteBuffer.allocate((int)fileSize);
+            compBB = ByteBuffer.allocate((int)fileSize + 256);
 
         String filePath = new File( fileHashFileNameArr[1] ).getName();        
         fileLoc = new File( parentDir,  filePath);
@@ -224,10 +226,12 @@ final public class FileReceiver {
             }
 
             //Copy over the bytes
-            if( compressed ){
-                compBB.put(passedByteArray);
-            } else {
-                aFileStream.write(passedByteArray);
+            if( passedByteArray.length > 0 ){
+                if( compressed ){
+                    compBB.put(passedByteArray);
+                } else {
+                    aFileStream.write(passedByteArray);
+                }
             }
             
             fileByteCounter += passedByteArray.length;
@@ -267,9 +271,12 @@ final public class FileReceiver {
                     
                     //Convert bytebuffer to array
                     byte[] compFileByteArr = new byte[ compBB.position() ];
+                                        
                     compBB.flip();
                     compBB.get( compFileByteArr, 0, compFileByteArr.length ); 
                     compBB.clear();
+                    
+                    byte[] byteCopy = Arrays.copyOf(compFileByteArr, compFileByteArr.length);
                     
                     //Make the array into a stream                   
                     ByteArrayInputStream bais = new ByteArrayInputStream( compFileByteArr );
@@ -282,6 +289,10 @@ final public class FileReceiver {
                         while((len = iis.read(buffer)) > 0){
                             aFileStream.write(buffer, 0, len);
                         }
+                        aFileStream.flush();
+                        
+                    } catch(EOFException ex){
+                        int i = 0;
                     }
                     aFileStream.close();
                     
@@ -342,9 +353,10 @@ final public class FileReceiver {
      * @param passedSize 
      */
     public void updateFileSize( long passedSize ){
-        fileSize = passedSize;
-        compBB = ByteBuffer.allocate((int)fileSize);
-        receiveFile(new byte[0]);
+        if( passedSize != fileSize ){
+            fileSize = passedSize;
+            receiveFile(new byte[0]);
+        }
     }
 
     //===============================================================
@@ -365,14 +377,5 @@ final public class FileReceiver {
     public int getChannelId() {
         return channelId;
     }
-
-//    //===============================================================
-//    /**
-//     * 
-//     * @param passedSize
-//     */
-//    public void setFileSize(long passedSize) {
-//        fileSize = passedSize;
-//    }
 
 }

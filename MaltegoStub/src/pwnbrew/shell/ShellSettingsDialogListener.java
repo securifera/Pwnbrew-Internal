@@ -35,51 +35,16 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-package pwnbrew.filesystem;
+package pwnbrew.shell;
 
-import java.io.File;
-import java.util.List;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.tree.DefaultMutableTreeNode;
-import pwnbrew.fileoperation.TaskManager;
+import javax.swing.JFrame;
 
 /**
  *
- * @author Securifera
+ * @author user
  */
-public interface FileBrowserListener extends TaskManager {
-
-    public void downloadFiles(List<RemoteFile> theFileList);
-
-    public void uploadFiles( List<File> theObjList );
+public interface ShellSettingsDialogListener {
     
-    public String getId();
-
-    public void addRemoteFileSystemTask(RemoteFileSystemTask aRFST);
-
-    public void performFileOperation(byte DATE, String filePath, String string);
-
-    public String getHost();
-
-    public void beNotified();
-
-    public void getChildren( DefaultMutableTreeNode passedNode );
-    
-    public String getHostDelimiter();
-
-    public void fileJTableValueChanged(ListSelectionEvent e);
-    
-    public void fileTreePanelValueChanged(TreeSelectionEvent anEvent);
-
-    public void selectNodeInTree(FileNode aFileNode);
-
-    public void searchForFiles(DefaultMutableTreeNode passedNode, String searchStr);
-
-    public void cancelSearch();
-
-    public void cancelOperation();
-    
-    public FileBrowserSettings getFileBrowserSettings();
-
+    public JFrame getParentJFrame();
+            
 }

@@ -50,7 +50,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -63,7 +62,6 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.network.ClientPortRouter;
-import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileFin;
@@ -137,7 +135,7 @@ final public class FileReceiver {
         
         //create byte buffer
         if( compressed )
-            compBB = ByteBuffer.allocate((int)fileSize);
+            compBB = ByteBuffer.allocate((int)fileSize + 256);
 
         String filePath = fileHashFileNameArr[1];
         String fileName = filePath.substring( filePath.lastIndexOf("\\") + 1 );
@@ -206,7 +204,6 @@ final public class FileReceiver {
      */
     public void updateFileSize( long passedSize ){
         fileSize = passedSize;
-        compBB = ByteBuffer.allocate((int)fileSize);
         receiveFile(new byte[0]);
     }
     

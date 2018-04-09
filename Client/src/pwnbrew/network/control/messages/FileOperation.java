@@ -65,6 +65,8 @@ public final class FileOperation extends Tasking {
     private static final byte RENAME = 79;
     private static final byte DATE = 80;
     private static final byte SEARCH = 81;
+    private static final byte DOWNLOAD_DIR = 82;
+    private static final byte MAKE_DIR = 83;
             
     private static final byte OPTION_OPERATION = 42;
     private static final byte OPTION_FILE_PATH = 43;
@@ -144,27 +146,16 @@ public final class FileOperation extends Tasking {
                     retVal = theFile.delete();              
                     break;
                 case SEARCH:
-                    File theRemoteFile = new File(theFilePath);
-                    FileFinder theFileFinder = FileFinder.getFileFinder();
-
-                    //Shutdown the file finder if it's running
-                    if( theFileFinder.isRunning() ){
-                        theFileFinder.shutdown();
-                        theFileFinder.waitToBeNotified();
-                    }            
-
-                    //Set file finder options
-                    theFileFinder.setSearchStr(addParam);
-                    theFileFinder.setRootFile(theRemoteFile);
-                    theFileFinder.setSrcId( getSrcHostId());
-                    theFileFinder.setTaskId( getTaskId());
-
-                    //Start a new one
-                    theFileFinder.start();
+                    startFileFinder(false); 
                     return;
                 case RENAME:
                     File newFile = new File( theFile.getParentFile(), addParam);                    
                     retVal = theFile.renameTo(newFile);  
+                    break;
+                case MAKE_DIR:
+                    break;
+                case DOWNLOAD_DIR:
+                    startFileFinder(true);                    
                     break;
                 case DATE:
                     try {
@@ -182,14 +173,31 @@ public final class FileOperation extends Tasking {
         if( retVal)
             retByte = 1;        
         
-//        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//        if( aCMManager != null ){
         FileOpResult theResult = new FileOpResult( getTaskId(), retByte);
         theResult.setDestHostId( getSrcHostId() );
         DataManager.send(passedManager, theResult);
-//            aCMManager.send(theResult);
-//        }       
-    
-    }
    
+    }
+    
+    private void startFileFinder( boolean enumDirs ){
+        
+        File theRemoteFile = new File(theFilePath);
+        FileFinder theFileFinder = FileFinder.getFileFinder();
+
+        //Shutdown the file finder if it's running
+        if( theFileFinder.isRunning() ){
+            theFileFinder.shutdown();
+            theFileFinder.waitToBeNotified();
+        }            
+
+        //Set file finder options
+        theFileFinder.setSearchStr(addParam);
+        theFileFinder.setRootFile(theRemoteFile);
+        theFileFinder.setSrcId( getSrcHostId());
+        theFileFinder.setTaskId( getTaskId());
+        theFileFinder.setEnumDirFlag(enumDirs);
+
+        //Start a new one
+        theFileFinder.start();
+    }
 }

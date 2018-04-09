@@ -169,13 +169,6 @@ public abstract class ControlMessage extends Message {
 
         short classId = (short)SocketUtilities.byteArrayToInt(classIdArr);
         String thePath = ControlMessageManager.getControlMessagePath(classId);
-//        //Get the length of the class path
-//        int theLength = SocketUtilities.byteArrayToInt(classFqnLength);
-//        byte[] classPath = new byte[theLength];
-//
-//        //Get the class path
-//        passedBuffer.get(classPath, 0, classPath.length);
-//        String thePath = new String(classPath);
 
         if( thePath != null ){
             try {
@@ -205,7 +198,7 @@ public abstract class ControlMessage extends Message {
 
             }
         } else {
-            throw new LoggableException("Unknown message id.");
+            throw new LoggableException("Unknown message id: " + Integer.toString(classId));
         }
 
         return aMessage;

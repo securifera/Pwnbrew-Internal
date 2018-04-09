@@ -101,6 +101,8 @@ public class ShellJPanel extends javax.swing.JPanel {
         cmdLabel = new javax.swing.JLabel();
         cmdTextField = new ValidTextField();
 
+        setMinimumSize(new java.awt.Dimension(624, 581));
+
         shellScrollPane.setBorder(null);
         shellScrollPane.setPreferredSize(new java.awt.Dimension(472, 472));
 
@@ -258,20 +260,22 @@ public class ShellJPanel extends javax.swing.JPanel {
             
             String[] retArr = null;
             String retStr = cmdTextField.getText();
-            retStr = retStr.substring(1, retStr.length()-1);
-            
-            //Create an array from the string
-            int pos = retStr.indexOf("\"");
-            if( pos == -1 ){
-                retArr = retStr.split(",");
-            } else {
-                StringBuilder aSB = new StringBuilder(retStr);                
-                ArrayList<String> aList = new ArrayList<>();
-                retArr = aList.toArray( new String[aList.size()]);
+            if( !retStr.isEmpty() ){
+                retStr = retStr.substring(1, retStr.length()-1);
+
+                //Create an array from the string
+                int pos = retStr.indexOf("\"");
+                if( pos == -1 ){
+                    retArr = retStr.split(",");
+                } else {
+                    StringBuilder aSB = new StringBuilder(retStr);                
+                    ArrayList<String> aList = new ArrayList<>();
+                    retArr = aList.toArray( new String[aList.size()]);
+                }
+
+
+                Custom.setCommandStringArray( retArr );
             }
-            
-            
-            Custom.setCommandStringArray( retArr );
         }
     }//GEN-LAST:event_cmdTextFieldKeyReleased
 

@@ -43,7 +43,6 @@ import java.awt.Cursor;
 import java.awt.Image;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -75,6 +74,7 @@ import pwnbrew.fileoperation.FileOperationUpdater;
 import pwnbrew.fileoperation.RemoteFileIO;
 import pwnbrew.fileoperation.RemoteFileIOListener;
 import pwnbrew.filesystem.FileBrowserListener;
+import pwnbrew.filesystem.FileBrowserSettings;
 import pwnbrew.filesystem.FileJTable;
 import pwnbrew.filesystem.FileNode;
 import pwnbrew.filesystem.FileSystemJFrame;
@@ -102,7 +102,6 @@ import pwnbrew.network.control.messages.TaskGetFile;
 import pwnbrew.network.control.messages.TaskStatus;
 import pwnbrew.network.control.messages.Tasking;
 import pwnbrew.network.file.FileMessageManager;
-import pwnbrew.shell.ShellJPanel;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
@@ -121,6 +120,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     //The file system separator
     private String hostPathSeparator;   
     private FileSystemJFrame theFsFrame;
+    private final FileBrowserSettings theFileBrowserSettings = new FileBrowserSettings();
         
     //Create the return msg
     private final Map<Integer, RemoteFileSystemTask> theRemoteFileSystemTaskMap = new HashMap<>();
@@ -648,7 +648,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
      * @return 
      */
     public int useCompression(){
-        return theFsFrame.useCompression();
+        return ( theFileBrowserSettings.useCompression() ? 1 : 0 );
     }
 
     //===============================================================
@@ -1058,7 +1058,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         }
         
         //Enable or disable the upload and download button
-        theFsFrame.setFileIOButtonEnablements( uploadEnable, false );
+        theFsFrame.setFileIOButtonEnablements( uploadEnable, true );
     }
 
     //=================================================================
@@ -1224,6 +1224,16 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         //Show popup
         JOptionPane.showMessageDialog( theFsFrame, "Server is not connected to the Host.","Error", JOptionPane.ERROR_MESSAGE );
                 
+    }
+
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public FileBrowserSettings getFileBrowserSettings() {
+        return theFileBrowserSettings;
     }
 
 
