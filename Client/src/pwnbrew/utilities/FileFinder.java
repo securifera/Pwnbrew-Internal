@@ -66,6 +66,7 @@ public class FileFinder extends ManagedRunnable {
     private String theSearchStr;
     private int theSrcId;
     private int theTaskId;
+    private boolean enumDirs = false;
     
     private static final String NAME_Class = FileFinder.class.getSimpleName();
 
@@ -88,6 +89,15 @@ public class FileFinder extends ManagedRunnable {
             theFileFinder = new FileFinder();
         }
         return theFileFinder;
+    }
+    
+    //==========================================================================
+    /**
+     * 
+     * @param passedBool 
+     */
+    public void setEnumDirFlag(boolean passedBool){
+        enumDirs = passedBool;
     }
 
     // ==========================================================================
@@ -163,8 +173,7 @@ public class FileFinder extends ManagedRunnable {
                                 //Send a message per file                                                
                                 FileSystemMsg aMsg = new FileSystemMsg( theTaskId, aFile.toFile(), false );
                                 aMsg.setDestHostId( theSrcId );
-                                DataManager.send(aCMManager.getPortManager(), aMsg);
-//                                aCMManager.send(aMsg);                               
+                                DataManager.send(aCMManager.getPortManager(), aMsg);  
                             }
                         }                                                                       
 
@@ -174,6 +183,29 @@ public class FileFinder extends ManagedRunnable {
                     @Override
                     public FileVisitResult visitFileFailed(Path file, IOException e) throws IOException {
                         return FileVisitResult.SKIP_SUBTREE;
+                    }
+                    
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path aFile, IOException e) {
+                        
+                        FileVisitResult theResult = FileVisitResult.CONTINUE;
+                        if( finished() ) {
+                            theResult  = FileVisitResult.TERMINATE; 
+                        } else {
+                            
+                            if( enumDirs ){
+
+                                //Check if it matches
+                                Path name = aFile.getFileName();
+                                if (matcher.matches(name)) {
+                                    //Send a message per file                                                
+                                    FileSystemMsg aMsg = new FileSystemMsg( theTaskId, aFile.toFile(), false );
+                                    aMsg.setDestHostId( theSrcId );
+                                    DataManager.send(aCMManager.getPortManager(), aMsg); 
+                                }
+                            }                              
+                        }
+                        return theResult;
                     }
                 };
 

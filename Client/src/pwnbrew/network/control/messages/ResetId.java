@@ -53,6 +53,9 @@ import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
+import pwnbrew.network.ConnectionCallback;
+import pwnbrew.network.PortRouter;
+import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -96,15 +99,31 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
 //            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
 //            if( aCMManager != null ){
                 //Get the port router
-                String hostname = SocketUtilities.getHostname();
-
+                //String hostname = SocketUtilities.getHostname();
+            //passedManager.shutdown();
+            ClientConfig theClientConfig = ClientConfig.getConfig();
+            PortRouter aPR = passedManager.getPortRouter( theClientConfig.getSocketPort() );
+            if( aPR != null ){
+                  
+                int tempId = getChannelId();                
+                
+                //Notify reconnect timer
+                ConnectionCallback aCC = aPR.removeConnectionCallback(tempId);
+                aCC.handleConnection(tempId);
+                
+                //Shutdown the socket
+                SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( tempId ); 
+                aSCH.shutdown(); 
+                aPR.socketClosed(aSCH);
+                                          
+            }
                 //Create a hello message and send it
-                Hello helloMessage = new Hello( hostname, ConnectionManager.COMM_CHANNEL_ID );
-                DataManager.send(passedManager, helloMessage);
+                //Hello helloMessage = new Hello( hostname, ConnectionManager.COMM_CHANNEL_ID );
+                //DataManager.send(passedManager, helloMessage);
 //                aCMManager.send(helloMessage);
 //            }              
                        
-        } catch (IOException | LoggableException ex) {
+        } catch (LoggableException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
         }
         

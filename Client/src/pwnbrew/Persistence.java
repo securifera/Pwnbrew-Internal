@@ -149,9 +149,9 @@ final public class Persistence {
 
                             StringBuilder aSB = new StringBuilder();
                             //aSB.append("net stop \"").append(svcStr).append("\"");
-                            String pidHostname = ManagementFactory.getRuntimeMXBean().getName();
-                            String pid = pidHostname.split("@")[0];
-                            aSB.append("taskkill /pid ").append(pid).append(" /f ");
+                            //String pidHostname = ManagementFactory.getRuntimeMXBean().getName();
+                            //String pid = pidHostname.split("@")[0];
+                            aSB.append("net stop ").append(svcStr).append(" ");
                             aSB.append(" && sc delete \"").append(svcStr).append("\"");
                             
                             //If this starts becoming unreliable, possibly move to
@@ -205,7 +205,13 @@ final public class Persistence {
             } catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException ex) {
             }
             
-        }      
+        } else {
+            
+            
+            //Shutdown the client
+            passedManager.shutdown(); 
+            
+        }  
         
 
     }

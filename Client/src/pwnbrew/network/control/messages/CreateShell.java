@@ -64,6 +64,7 @@ public final class CreateShell extends ControlMessage {
 
     private String[] cmdString;
     private String encoding;
+    private String currentDir;
     private String startupCmd;
     private boolean redirectStderr = false;
     
@@ -71,6 +72,7 @@ public final class CreateShell extends ControlMessage {
     private static final byte OPTION_ENCODING = 20;
     public static final byte OPTION_STARTUP_CMD = 22;
     public static final byte OPTION_REDIRECT_STDERR = 24;
+    private static final byte OPTION_CURRENT_DIR = 35;
         
     public static final short MESSAGE_ID = 0x33;
     
@@ -121,6 +123,9 @@ public final class CreateShell extends ControlMessage {
                 case OPTION_ENCODING:
                     encoding = new String( theValue, "US-ASCII");
                     break;
+                case OPTION_CURRENT_DIR:
+                    currentDir = new String( theValue, "US-ASCII");
+                    break;
                 case OPTION_STARTUP_CMD:
                     startupCmd = new String( theValue, "US-ASCII");
                     break;
@@ -161,7 +166,7 @@ public final class CreateShell extends ControlMessage {
         
         //Create the shell
         Shell aShell = new Shell( Constants.Executor, passedManager, 
-                    theClientId, encoding, cmdString, startupCmd, redirectStderr );
+                    theClientId, encoding, cmdString, startupCmd, currentDir,redirectStderr );
         
         //Create the shell callback
         ShellConnectionCallback aSCC = new ShellConnectionCallback(serverIp, socketPort, passedManager, aShell);

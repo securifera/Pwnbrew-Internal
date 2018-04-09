@@ -249,6 +249,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
 
             //Add the command terminator
             String startupStr = getStartupCommand();
+            String currentDir = theListener.getCurrentShellDir();
             String inputTerm = getInputTerminator();
             if( !startupStr.isEmpty() && !inputTerm.isEmpty() )
                 startupStr = startupStr.concat( inputTerm );
@@ -256,7 +257,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
             //Create the message
             int clientId = theListener.getHostId();
             CreateShell aShellMsg = new CreateShell( clientId, getCommandStringArray(),
-                    getEncoding(), startupStr, getStderrRedirectFlag() );
+                    getEncoding(), startupStr, currentDir, getStderrRedirectFlag() );
             aCMManager.send( aShellMsg );
 
         } catch ( IOException ex) {

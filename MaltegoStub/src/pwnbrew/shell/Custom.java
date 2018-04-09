@@ -53,7 +53,7 @@ import java.util.concurrent.Executor;
  */
 public class Custom extends Shell {
     
-    public static String[] CMD_EXE_STR = new String[]{ "cmd", "/k"};
+    public static String[] CMD_EXE_STR = new String[]{ "cmd","/k"};
     private static final String ENCODING = "UTF-8";
     private static final String PROMPT_REGEX = "^[a-zA-Z]:(\\\\|(\\\\[^\\\\/:*\"<>|]+)+)>";
      

@@ -45,6 +45,9 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.manager;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import pwnbrew.StubConfig;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ClientPortRouter;
@@ -52,6 +55,7 @@ import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.file.FileMessageManager;
+import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.shell.ShellMessageManager;
 import pwnbrew.socks.SocksMessageManager;
 /**
@@ -212,6 +216,24 @@ abstract public class DataManager {
      */
     public void shutdown() {
         theDataHandler.shutdown();
+    }
+    
+      //===============================================================
+    /**
+     *  Queues the byte array to be sent
+     * @param passedCommManager
+     * @param passedMessage
+     */
+    public static void send( PortManager passedCommManager, Message passedMessage ) {
+        
+        int destClientId = passedMessage.getDestHostId();
+        
+        //Send the message out
+        StubConfig aConf = StubConfig.getConfig();
+        int thePort = aConf.getSocketPort();
+        PortRouter thePR = passedCommManager.getPortRouter( thePort );       
+        thePR.queueSend( passedMessage.getBytes(), destClientId );
+         
     }
     
 }

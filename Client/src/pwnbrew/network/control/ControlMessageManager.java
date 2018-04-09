@@ -178,6 +178,10 @@ public class ControlMessageManager extends DataManager {
         if( theControlMessageMap.containsKey(RelayStop.MESSAGE_ID))
             DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + RelayStop.MESSAGE_ID);
         theControlMessageMap.put(RelayStop.MESSAGE_ID, RelayStop.class.getCanonicalName());
+         //Add message
+        if( theControlMessageMap.containsKey(ResetId.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + ResetId.MESSAGE_ID);
+        theControlMessageMap.put(ResetId.MESSAGE_ID, ResetId.class.getCanonicalName());
         //Add message
         if( theControlMessageMap.containsKey(Reload.MESSAGE_ID))
             DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + Reload.MESSAGE_ID);

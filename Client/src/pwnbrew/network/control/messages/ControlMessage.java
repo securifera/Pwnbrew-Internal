@@ -185,7 +185,7 @@ public abstract class ControlMessage extends Message {
 
             }
         } else {
-            throw new LoggableException("Unknown message id.");
+            throw new LoggableException("Unknown message id: " + Integer.toString(classId));
         }
 
         return aMessage;

@@ -51,6 +51,7 @@ import java.lang.reflect.Method;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.PortManager;
+import pwnbrew.utilities.Utilities;
 
 /**
  *
@@ -93,22 +94,24 @@ public final class Reload extends ControlMessage{ // NO_UCD (use default)
         
         try {
             
-            //Get the stager class
-            String svcStr = "";
-            Class stagerClass = Class.forName("stager.Stager");
-            Field aField = stagerClass.getField("serviceName");
-            Object anObj = aField.get(null);
-            if( anObj != null && anObj instanceof String ){
-                //Cast to string
-                svcStr = (String)anObj;
+            if( Utilities.isStaged() ){
+                //Get the stager class
+                String svcStr = "";
+                Class stagerClass = Class.forName("stager.Stager");
+                Field aField = stagerClass.getField("serviceName");
+                Object anObj = aField.get(null);
+                if( anObj != null && anObj instanceof String ){
+                    //Cast to string
+                    svcStr = (String)anObj;
+                }
+
+                //Shutdown the client
+                passedManager.shutdown();
+
+                //Call the stager main function
+                Method aMethod = stagerClass.getMethod( "main", new Class[]{ String[].class } );
+                aMethod.invoke(null, new Object[] { new String[]{ svcStr } });
             }
-            
-            //Shutdown the client
-            passedManager.shutdown();
-            
-            //Call the stager main function
-            Method aMethod = stagerClass.getMethod( "main", new Class[]{ String[].class } );
-            aMethod.invoke(null, new Object[] { new String[]{ svcStr } });
                         
         } catch (ClassNotFoundException ex) {
             ex = null;

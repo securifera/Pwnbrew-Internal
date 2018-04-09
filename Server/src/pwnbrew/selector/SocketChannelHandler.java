@@ -585,8 +585,13 @@ public class SocketChannelHandler implements Selectable {
                 break;
         }
 
-        //Flush the channel
-        theSCW.dataFlush();
+         //Flush the channel
+        try {
+            if( theSCW != null)
+                theSCW.dataFlush();
+        } catch( IOException ex ){
+            Log.log(Level.INFO, NAME_Class, "send()", ex.getMessage(), ex );
+        }
 
     }
     

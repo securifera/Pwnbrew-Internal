@@ -76,12 +76,8 @@ final public class FileReceiver {
     private File fileLoc = null;
     private long fileByteCounter = 0;
     private long fileSize = 0;
-    
-    //Send update to the progress listener
-//    private final ProgressListener theListener;
-    
-    //For progress
-    private int sndFileProgress = 0;                
+        
+    //For progress              
     private final int srcId;
     private final int taskId;
     private final int fileId;

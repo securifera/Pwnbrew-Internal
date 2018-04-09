@@ -259,7 +259,8 @@ public class ServerHttpWrapper extends HttpWrapper {
                             //Do nothing because it doesn't fit the criteria
                             ex = null;
                         } catch (LoggableException ex) {
-                            Logger.getLogger(ServerHttpWrapper.class.getName()).log(Level.SEVERE, null, ex);
+                            
+                            RemoteLog.log(Level.SEVERE, NAME_Class, "processHeader()", ex.getMessage(), ex );   
                         }
                     }
                 }

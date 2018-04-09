@@ -69,6 +69,15 @@ public interface ShellListener {
      * @return 
     */
     public File getShellLogDir();
+    
+    
+     //===============================================================
+    /**
+     * Returns the directory the shell is to be spawned into
+     *
+     * @return 
+    */
+    public String getCurrentShellDir();
 
     //===============================================================
     /**

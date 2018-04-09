@@ -45,18 +45,19 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.file;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
-import pwnbrew.ClientConfig;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
@@ -65,8 +66,6 @@ import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.utilities.ManagedRunnable;
-import pwnbrew.utilities.SocketUtilities;
-import pwnbrew.network.Message;
 import pwnbrew.network.control.messages.PushFileAbort;
 import pwnbrew.network.control.messages.PushFileAck;
 import pwnbrew.network.control.messages.PushFileUpdate;
@@ -80,16 +79,12 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
     private final PortManager thePortManager;
     private final PushFileAck theFileAck;
     
-//    protected static final int CONNECT_RETRY = 3;
-//    private static int maxMsgLen = (256 * 256) - 8; 
-    private static final int maxMsgLen = 14982 - 7;
+    private static final int MAX_BUFFER_SIZE = 32768;
+    private int channelId = 0;
     
     //Class name
     private static final String NAME_Class = FileSender.class.getSimpleName();
-    
-//    private int lockVal = 0;
-    private int channelId = 0;
-    
+   
     
     //=========================================================================
     /*
@@ -155,15 +150,8 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
         
         //Get the port router
         int dstHostId = theFileAck.getSrcHostId();
-        ClientConfig theClientConf = ClientConfig.getConfig();
-        
-        //Get the client id and dest id
-        int clientId = Integer.parseInt( theClientConf.getHostId() );
-        byte[] clientIdArr = SocketUtilities.intToByteArray(clientId);
-        byte[] destIdArr = SocketUtilities.intToByteArray(dstHostId);
-        
-        //Get the id and port router
-        byte[] theFileId = SocketUtilities.intToByteArray(fileId); 
+                
+        //Get the id and port router 
         if( fileToBeSent.length() == 0 ){
             
             //Send the file data
@@ -176,65 +164,10 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
         } else {  
             
             //Compress file then send
-            if( theFileAck.useCompression() ){
-                
-                compressFileAndSend( fileToBeSent );
-                
-            } else {
-        
-                //Normal file send
-                FileInputStream aFIS = new FileInputStream( fileToBeSent);
-                try {
-
-                    //Get the file channel
-                    FileChannel theFC = aFIS.getChannel();
-                    ByteBuffer fileChannelBB = ByteBuffer.allocate(maxMsgLen);
-
-                    //Set the msglen
-                    final byte[] msgLen = new byte[Message.MSG_LEN_SIZE];
-                    int readCount;            
-
-                    int fileRead = 0;
-                    DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sending " + theFileAck.getHashFilenameString() + " Channel: " + Integer.toString(channelId));
-                    while(fileRead != -1 && !finished() ){
-
-                        //Add the file message type
-                        fileChannelBB.clear();
-                        fileRead = theFC.read(fileChannelBB);                
-
-                        //Set file length
-                        if( fileRead == -1 ){
-                            continue;
-                        } else {
-                            readCount = fileRead;
-                        }
-
-                        //Convert the length to a byte array
-                        SocketUtilities.intToByteArray(msgLen, readCount + clientIdArr.length + destIdArr.length + theFileId.length );
-                        fileChannelBB.flip();
-
-                        //Set the data and channel id
-                        byte[] fileBytes = Arrays.copyOf(fileChannelBB.array(), fileChannelBB.limit());
-                        FileData fileDataMsg = new FileData(fileId, fileBytes);
-                        fileDataMsg.setChannelId(channelId);
-                        fileDataMsg.setDestHostId(dstHostId);
-
-                        DataManager.send(thePortManager, fileDataMsg);
-
-                    }
-
-                    //Close the file channel
-                    theFC.force(true);
-
-                }  finally {
-
-                    //Close file input stream
-                    try {
-                        aFIS.close();
-                    } catch (IOException ex) {
-                        ex = null;
-                    }
-                }
+            if( theFileAck.useCompression() ){                
+                sendCompressedFile(fileToBeSent);                
+            } else {        
+                sendUncompressedFile(fileToBeSent);
             }
         }        
         
@@ -253,21 +186,77 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
         return channelId;
     }
 
+     //=====================================================================
+    /**
+     * 
+     */
+    private void sendUncompressedFile( File fileToBeSent ) throws IOException {
+    
+        //Get compressed bytes
+        int fileId = theFileAck.getFileId();
+        int dstHostId = theFileAck.getSrcHostId();
+        
+        //Normal file send
+        FileInputStream aFIS = new FileInputStream( fileToBeSent);
+        try {
+
+            //Get the file channel
+            FileChannel theFC = aFIS.getChannel();
+            ByteBuffer fileChannelBB = ByteBuffer.allocate(MAX_BUFFER_SIZE);
+
+            int fileRead = 0;
+            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sending " + theFileAck.getHashFilenameString() + " Channel: " + Integer.toString(channelId));
+            while(fileRead != -1 && !finished() ){
+
+                //Add the file message type
+                fileChannelBB.clear();
+                fileRead = theFC.read(fileChannelBB);                
+
+                //Set file length
+                if( fileRead == -1 )
+                    continue;
+
+                fileChannelBB.flip();
+
+                //Set the data and channel id
+                byte[] fileBytes = Arrays.copyOf(fileChannelBB.array(), fileChannelBB.limit());
+                FileData fileDataMsg = new FileData(fileId, fileBytes);
+                fileDataMsg.setChannelId(channelId);
+                fileDataMsg.setDestHostId(dstHostId);
+
+                DataManager.send(thePortManager, fileDataMsg);
+
+            }
+
+            //Close the file channel
+            theFC.force(true);
+
+        }  finally {
+
+            //Close file input stream
+            try {
+                aFIS.close();
+            } catch (IOException ex) {
+                ex = null;
+            }
+        }
+    }
+    
     //=====================================================================
     /**
      * 
      */
-    private void compressFileAndSend( File fileToBeSent ) {
+    private void sendCompressedFile( File fileToBeSent ) throws IOException {
     
         ByteArrayOutputStream baos = new ByteArrayOutputStream( (int) fileToBeSent.length());
         Deflater aDef = new Deflater();
         aDef.setLevel(Deflater.BEST_COMPRESSION);
         DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(baos, aDef );
-
+        
         //Normal file send
         try {
             
-            byte[] readBuf = new byte[32768];
+            byte[] readBuf = new byte[MAX_BUFFER_SIZE];
             FileInputStream aFIS = new FileInputStream( fileToBeSent);
             try {                
                 int read;
@@ -277,6 +266,9 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
                 
             }  finally {
 
+                deflaterOutputStream.finish();
+                deflaterOutputStream.close();
+                
                 //Close file input stream
                 try {
                     aFIS.close();
@@ -284,44 +276,56 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
                     ex = null;
                 }
             }
-
-            deflaterOutputStream.finish();
-            deflaterOutputStream.close();
                         
         } catch (IOException ex) {
-            Logger.getLogger(FileSender.class.getName()).log(Level.SEVERE, null, ex);
+            RemoteLog.log(Level.SEVERE, NAME_Class, "compressFileAndSend()", ex.getMessage(), ex );
+            return;
         }
-
+            
+        byte[] outputBytes = baos.toByteArray();
+        baos.close();
+        ByteArrayInputStream fileInputStream = new ByteArrayInputStream(outputBytes);
+        outputBytes = null;
+      
+        
         //Get compressed bytes
         int fileId = theFileAck.getFileId();
         int taskId = theFileAck.getTaskId();
         int dstHostId = theFileAck.getSrcHostId();
-        
-        byte[] compressedBytes = baos.toByteArray();
 
         //Send message update the file size to the compressed one
-        PushFileUpdate fileSizeUpdateMsg = new PushFileUpdate( ConnectionManager.COMM_CHANNEL_ID, taskId, fileId, compressedBytes.length );
+        PushFileUpdate fileSizeUpdateMsg = new PushFileUpdate( ConnectionManager.COMM_CHANNEL_ID, taskId, fileId, outputBytes.length );
         fileSizeUpdateMsg.setDestHostId(dstHostId);
         DataManager.send(thePortManager, fileSizeUpdateMsg);
-    
-        byte[] byteChunk = new byte[maxMsgLen];
-        ByteBuffer fileChannelBB = ByteBuffer.wrap(compressedBytes);
-        while( fileChannelBB.hasRemaining() ){   
-            
-            if( fileChannelBB.remaining() >  maxMsgLen )
-                fileChannelBB.get(byteChunk);
-            else {
-                byteChunk = new byte[fileChannelBB.remaining()];
-                fileChannelBB.get(byteChunk);
+
+        byte[] byteChunk = new byte[MAX_BUFFER_SIZE];
+        int fileRead = 0;
+
+        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sending " + theFileAck.getHashFilenameString() + " Channel: " + Integer.toString(channelId));
+        while(fileRead != -1 && !finished() ){
+
+            try{
+                fileRead = fileInputStream.read(byteChunk); 
+            } catch(IOException ex){   
+                fileRead = -1;
             }
-            
-            //Set the data and channel id
-            FileData fileDataMsg = new FileData(fileId, byteChunk);
+
+            //Set file length
+            if( fileRead == -1 )
+                continue;
+
+            FileData fileDataMsg = new FileData(fileId, Arrays.copyOf(byteChunk, fileRead));
             fileDataMsg.setChannelId(channelId);
             fileDataMsg.setDestHostId(dstHostId);
 
-            //Send
             DataManager.send(thePortManager, fileDataMsg);
+
+        }
+        
+        try {
+            //Close the stream
+            fileInputStream.close();
+        } catch (IOException ex) {
         }
     }
 

@@ -51,12 +51,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.functions.Function;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
+import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFile;
@@ -288,7 +291,7 @@ public class FileMessageManager extends DataManager {
         
         int taskId = aMessage.getTaskId();
         int fileId = aMessage.getFileId();
-                
+        
         synchronized( taskId_fileId_FileSenderMap ){
             Map<Integer, FileSender> senderMap = taskId_fileId_FileSenderMap.get(taskId);
             if( senderMap == null){
