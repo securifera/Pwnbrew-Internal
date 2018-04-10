@@ -57,7 +57,6 @@ import pwnbrew.log.LoggableException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.utilities.SocketUtilities;
@@ -75,7 +74,11 @@ public class ServerConfig extends XmlObject {
     private static final String ATTRIBUTE_CertAlias = "certAlias";
     
     //Configurable Ports
-    private static final String ATTRIBUTE_CommPort = "ctrlPort";    
+    private static final String ATTRIBUTE_CommPort = "ctrlPort";   
+    
+    //Current version
+    private static final String ATTRIBUTE_CurrentVersion = "version";  
+    
     private static final String theConfigFileName = "config.xml";
     private static ServerConfig theConf = null;
     
@@ -93,7 +96,7 @@ public class ServerConfig extends XmlObject {
        thePropertyMap.put( ATTRIBUTE_StorePass, "password" );
        thePropertyMap.put( ATTRIBUTE_CertAlias, "" );
        thePropertyMap.put( ATTRIBUTE_CommPort, Integer.toString(Constants.COMM_PORT) );
-
+       thePropertyMap.put( ATTRIBUTE_CurrentVersion, "" );
     }
 
      //==========================================================================
@@ -157,8 +160,8 @@ public class ServerConfig extends XmlObject {
     public String getKeyStorePass(){
         return thePropertyMap.get(ATTRIBUTE_StorePass);
     }
-
-     //==========================================================================
+    
+      //==========================================================================
     /**
      * Sets the password to the java keystore in the configuration file
      * @param passedKey
@@ -179,6 +182,26 @@ public class ServerConfig extends XmlObject {
     public void setHostId(String hostIdStr) {
         if(hostIdStr != null){
            thePropertyMap.put(ATTRIBUTE_HostId, hostIdStr);
+        }  
+    }
+    
+    //==========================================================================
+    /**
+     * Returns the current server version stored in the config
+     * @return 
+    */
+    public String getCurrentVersion(){
+        return thePropertyMap.get(ATTRIBUTE_CurrentVersion);
+    }
+    
+     //==========================================================================
+    /**
+     * Sets the current version of the server
+     * @param currVersionStr
+    */
+    public void setCurrentVersion(String currVersionStr) {
+        if(currVersionStr != null){
+           thePropertyMap.put(ATTRIBUTE_CurrentVersion, currVersionStr);
         }  
     }
     
@@ -274,9 +297,9 @@ public class ServerConfig extends XmlObject {
 
                         //Get the object
                         XmlObject anXB = XmlObjectFactory.createFromXml(new String(theConfBytes, "US-ASCII"));
-                        if(anXB instanceof ServerConfig){
-                            localConf = (ServerConfig)anXB;
-                        }                    
+                        if(anXB instanceof ServerConfig)
+                            localConf = (ServerConfig)anXB;                            
+                                            
 
                     } catch (UnsupportedEncodingException ex) {
                     } finally {
@@ -287,6 +310,12 @@ public class ServerConfig extends XmlObject {
                     } 
                 } catch(FileNotFoundException ex){                    
                 }
+                
+                //Set the current version
+                if(localConf != null && localConf.getCurrentVersion().isEmpty()){
+                    localConf.setCurrentVersion( Constants.CURRENT_VERSION );
+                    localConf.writeSelfToDisk();
+                }
 
             } else {
 
@@ -294,6 +323,7 @@ public class ServerConfig extends XmlObject {
                 localConf = new ServerConfig();
                 Integer anInteger = SocketUtilities.getNextId();
                 localConf.setHostId(anInteger.toString());
+                localConf.setCurrentVersion( Constants.CURRENT_VERSION );
                 localConf.writeSelfToDisk();
             }
 
