@@ -218,7 +218,7 @@ public class FileFinder extends ManagedRunnable {
                     FileOpResult aMsg = new FileOpResult( theTaskId, (byte)0x1 );
                     aMsg.setDestHostId( theSrcId );
                     DataManager.send(aCMManager.getPortManager(), aMsg);
-//                    aCMManager.send( aMsg );     
+   
                     
                 } catch (IOException ex) {
                     RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );        

@@ -82,4 +82,6 @@ public interface FileBrowserListener extends TaskManager {
     
     public FileBrowserSettings getFileBrowserSettings();
 
+    public void downloadFolders(List<RemoteFile> theFolderList);
+
 }

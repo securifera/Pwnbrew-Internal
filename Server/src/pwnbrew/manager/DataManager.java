@@ -251,7 +251,7 @@ abstract public class DataManager {
                 aManager.handleMessage( passedRouter, msgBytes );            
             
         } catch (LoggableException | IOException ex) {
-            DebugPrinter.printMessage(DataManager.class.getSimpleName(), "No manager for bytes");                                 
+            Log.log( Level.SEVERE, DataManager.class.getSimpleName(), "routeMessage", "No manager for bytes", null);                                 
         } catch (RemoteExceptionWrapper ex) {
             send( passedRouter.getPortManager(), ex.getRemoteExceptionMsg() );
         }

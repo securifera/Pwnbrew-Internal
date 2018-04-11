@@ -59,9 +59,10 @@ public interface TaskManager {
     /**
      * Returns the client directory
      *
+     * @param taskId
      * @return
     */
-    public File getDownloadDirectory();
+    public File getDownloadDirectory(String taskId);
 
     //===============================================================
     /**

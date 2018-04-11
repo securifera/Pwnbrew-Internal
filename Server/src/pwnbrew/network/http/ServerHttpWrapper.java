@@ -144,7 +144,7 @@ public class ServerHttpWrapper extends HttpWrapper {
       
                                                 if( passedHandler.registerId(srcId, chanId) ){
                                                     
-                                                    DebugPrinter.printMessage(ServerHttpWrapper.class.getSimpleName(), "Registered host: " + Integer.toString(srcId) + " channel: " + Integer.toString(chanId));
+                                                    Log.log( Level.SEVERE,ServerHttpWrapper.class.getSimpleName(),  "processHeader()", "Registered host: " + Integer.toString(srcId) + " channel: " + Integer.toString(chanId), null );
                                                     passedHandler.setRegisteredFlag(true);                                                    
                                                      
                                                     RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, aMsg.getStlth(), srcId, chanId);
@@ -155,7 +155,7 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                         passedHandler.setWrapping( srcId, false);
                                                     
                                                 } else {                                                    
-                                                    DebugPrinter.printMessage(ServerHttpWrapper.class.getSimpleName(), "Host registration failed: "+ Integer.toString(srcId) + " channel: " + Integer.toString(chanId));
+                                                    Log.log( Level.SEVERE,ServerHttpWrapper.class.getSimpleName(), "processHeader()", "Host registration failed: "+ Integer.toString(srcId) + " channel: " + Integer.toString(chanId), null);
                                                 }   
                                                 
                                                 return;

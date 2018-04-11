@@ -153,10 +153,19 @@ public final class FileOperation extends Tasking {
                     retVal = theFile.renameTo(newFile);  
                     break;
                 case MAKE_DIR:
-                    break;
+                    // if the directory does not exist, create it
+                    newFile = new File( theFile, addParam); 
+                    if (!newFile.exists()) {
+                       try{
+                           retVal = newFile.mkdir();
+                       } catch(SecurityException se){
+                           retVal = false;
+                       }   
+                    }
+                    break;      
                 case DOWNLOAD_DIR:
                     startFileFinder(true);                    
-                    break;
+                    return;
                 case DATE:
                     try {
                         Date aDate = Constants.CHECKIN_DATE_FORMAT.parse(addParam);
@@ -166,7 +175,7 @@ public final class FileOperation extends Tasking {
                     }
                     break;
             }
-        }
+        } 
         
         //Send back the result
         byte retByte = 0;

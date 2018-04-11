@@ -239,7 +239,7 @@ public class SocketChannelHandler implements Selectable {
             PortWrapper aPortWrapper = DataManager.getPortWrapper( getPort() );
             if( aPortWrapper == null || !isWrapping() ){  
                 
-                DebugPrinter.printMessage(NAME_Class, "Got data. Unwrapped.");
+                //DebugPrinter.printMessage(NAME_Class, "Got data. Unwrapped.");
                                     
                 //Until the message length is populated
                 ByteBuffer msgLenBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE );
@@ -376,7 +376,7 @@ public class SocketChannelHandler implements Selectable {
                 
             } else {
                 
-                DebugPrinter.printMessage(NAME_Class, "Got data. Wrapped.");
+                //DebugPrinter.printMessage(NAME_Class, "Got data. Wrapped.");
                 //Unwrap and process the data
                 try {
                     aPortWrapper.processData( this, readByteBuf );

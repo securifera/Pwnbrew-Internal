@@ -402,9 +402,8 @@ public class FileOperationJProgressPanel extends JPanel implements ActionListene
     */
     private void openTaskFolder() throws IOException {
         //Open a file browser to the task directory
-        File fileDir = theListener.getDownloadDirectory();
-        File theTaskDir = new File(fileDir, theRemoteTask.getTaskId());
-
+        String taskId = theRemoteTask.getTaskId();
+        File theTaskDir = theListener.getDownloadDirectory( taskId );
         if(theTaskDir.exists()){
             if(Desktop.isDesktopSupported()){
                 Desktop.getDesktop().open(theTaskDir.getCanonicalFile());

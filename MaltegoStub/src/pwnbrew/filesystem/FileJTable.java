@@ -211,8 +211,8 @@ public class FileJTable extends JTable {
             @Override
             public void actionPerformed(ActionEvent e){
 
-                String theMessage = "Are you sure you want to delete the selected file(s)?";
-                int dialogValue = JOptionPane.showConfirmDialog(null, theMessage, "Delete file(s)?", JOptionPane.YES_NO_OPTION);
+                String theMessage = "Are you sure you want to delete the selected item(s)?";
+                int dialogValue = JOptionPane.showConfirmDialog(null, theMessage, "Delete item(s)?", JOptionPane.YES_NO_OPTION);
                 if ( dialogValue == JOptionPane.YES_OPTION ){
                    
                     int[] selRowIndexes = theJTable.getSelectedRows();

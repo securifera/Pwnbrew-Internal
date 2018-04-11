@@ -52,9 +52,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -62,11 +64,13 @@ import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import pwnbrew.network.control.messages.FileOperation;
 import pwnbrew.network.control.messages.FileSystemMsg;
 
 
@@ -79,7 +83,9 @@ public class FileTreePanel extends JPanel implements ActionListener {
     
     protected JTree  theJTree;
     protected DefaultTreeModel theJTreeModel;
-    private final static String refresh ="Refresh";
+    private final static String REFRESH_MENU_STR ="Refresh";
+    private final static String DELETE_MENU_STR ="Delete";
+    private final static String MKDIR_MENU_STR ="New Folder";
     
     private final FileBrowserListener theFileBrowserListener; 
     private final JScrollPane theScrollPane = new JScrollPane();       
@@ -148,12 +154,23 @@ public class FileTreePanel extends JPanel implements ActionListener {
         JPopupMenu popup = new JPopupMenu();
         JMenuItem menuItem;
                  
-        menuItem = new JMenuItem( refresh );
-        menuItem.setActionCommand( refresh );
+        menuItem = new JMenuItem( REFRESH_MENU_STR );
+        menuItem.setActionCommand( REFRESH_MENU_STR );
+        menuItem.addActionListener(this);
+        menuItem.setEnabled( true );
+        popup.add(menuItem);
+        
+        menuItem = new JMenuItem( MKDIR_MENU_STR );
+        menuItem.setActionCommand( MKDIR_MENU_STR );
         menuItem.addActionListener(this);
         menuItem.setEnabled( true );
         popup.add(menuItem);
 
+        menuItem = new JMenuItem( DELETE_MENU_STR );
+        menuItem.setActionCommand( DELETE_MENU_STR );
+        menuItem.addActionListener(this);
+        menuItem.setEnabled( true );
+        popup.add(menuItem);
 
         if( popup.getComponentCount() > 0 )
             popup.show(e.getComponent(), e.getX(), e.getY());
@@ -236,10 +253,60 @@ public class FileTreePanel extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String actionCommand = e.getActionCommand();            
         switch (actionCommand) {
-            case refresh:
+            case REFRESH_MENU_STR:
                 TreePath theSelPath = theJTree.getSelectionPath(); 
                 theFileBrowserListener.fileTreePanelValueChanged(theSelPath);
                 break;
+            case DELETE_MENU_STR:
+                String theMessage = "Are you sure you want to delete the selected folder(s)?";
+                int dialogValue = JOptionPane.showConfirmDialog(null, theMessage, "Delete folder(s)?", JOptionPane.YES_NO_OPTION);
+                if ( dialogValue == JOptionPane.YES_OPTION ){
+                   
+                    theSelPath = theJTree.getSelectionPath(); 
+                    if( theSelPath != null){
+                        DefaultMutableTreeNode selNode = (DefaultMutableTreeNode) theSelPath.getLastPathComponent();
+                        Object selObj = selNode.getUserObject();
+                        if( selObj instanceof IconData ){
+                            IconData iconDataObj = (IconData)selNode.getUserObject();
+                            Object innerObj = iconDataObj.getObject();
+                            if( innerObj instanceof FileNode){
+                                FileNode aFileNode = (FileNode)innerObj;
+                                if( aFileNode.getType() == FileSystemMsg.FOLDER){
+                                    RemoteFile theFile = aFileNode.getFile();
+                                    String filePath = theFile.getAbsolutePath();
+                                    theFileBrowserListener.performFileOperation( FileOperation.DELETE, filePath, "" );
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
+            case MKDIR_MENU_STR:
+                theSelPath = theJTree.getSelectionPath(); 
+                if( theSelPath != null){
+                    DefaultMutableTreeNode selNode = (DefaultMutableTreeNode) theSelPath.getLastPathComponent();
+                    Object selObj = selNode.getUserObject();
+                    if( selObj instanceof IconData ){
+                        IconData iconDataObj = (IconData)selNode.getUserObject();
+                        Object innerObj = iconDataObj.getObject();
+                        if( innerObj instanceof FileNode){
+                            FileNode aFileNode = (FileNode)innerObj;
+                            if( aFileNode.getType() == FileSystemMsg.FOLDER){
+                                RemoteFile theFile = aFileNode.getFile();
+                                String filePath = theFile.getAbsolutePath();
+
+                                Object userInputStr = JOptionPane.showInputDialog(null, null, "New Folder", JOptionPane.PLAIN_MESSAGE, null, null, null );
+                                if( userInputStr != null && userInputStr instanceof String ) { //If the new name String is null...
+                                     //Get the file
+                                    theFileBrowserListener.performFileOperation( FileOperation.MAKE_DIR, filePath, (String) userInputStr);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                break;
+                        
         }
 
     }

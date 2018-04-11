@@ -226,7 +226,7 @@ public final class Hello extends ControlMessage {
            
                 //Register the host
                 Integer theClientId = getSrcHostId();
-                DebugPrinter.printMessage(NAME_Class, "Accepted connection from host id: " + theClientId + " channel: " + Integer.toString(theChannelId));
+                Log.log(Level.INFO, NAME_Class, "evaluate()", "Accepted connection from host id: " + theClientId + " channel: " + Integer.toString(theChannelId), null);
                 PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort() );
                 
                 //Get connection manager

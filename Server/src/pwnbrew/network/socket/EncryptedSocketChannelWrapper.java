@@ -329,7 +329,7 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
                     }
                 case CLOSED:
                     if (result.getHandshakeStatus() == HandshakeStatus.FINISHED) {
-                        DebugPrinter.printMessage(NAME_Class, "Finished");
+//                        DebugPrinter.printMessage(NAME_Class, "Finished");
                     }
                     break;
 
@@ -497,7 +497,7 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
     private void doWrap(SelectionKey passedKey) throws IOException {
 
         SSLEngineResult result;
-        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Wrapping.");
+        //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Wrapping.");
 
         // The flush above guarantees the out buffer to be empty
         outgoingByteBuffer.clear();
@@ -508,7 +508,7 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
         if(currStatus == HandshakeStatus.FINISHED){
 
             handshakeComplete = true;
-            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
+//            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
 
             //Flush the buffer so that the client will get a finished flag too
             if (outgoingByteBuffer.hasRemaining()){
@@ -516,7 +516,6 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
             }
 
             //Set the state and change to read
-//            theParentHandler.setState( Constants.CONNECTED);
             theParentHandler.getPortRouter().getSelRouter().changeOps(theSocketChannel, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
             
             return;
@@ -552,7 +551,7 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
     private void doUnwrap(SelectionKey passedKey) throws IOException, LoggableException {
 
         SSLEngineResult result;
-        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Unwrapping.");
+        //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Unwrapping.");
 
         // Don't need to resize requestBB, since no app data should
         try {
@@ -584,10 +583,9 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
 
                     case FINISHED:
                         handshakeComplete = true;
-                        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
+//                        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
 
                         //Set the state and change to read
-//                        theParentHandler.setState( Constants.CONNECTED);
                         theParentHandler.getPortRouter().getSelRouter().changeOps(theSocketChannel, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
                                    
                         break;
@@ -654,7 +652,6 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
                     DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking.");
 
                     //Set the state and change to read
-//                    theParentHandler.setState( Constants.CONNECTED);
                     theParentHandler.getPortRouter().getSelRouter().changeOps(theSocketChannel, SelectionKey.OP_READ | SelectionKey.OP_WRITE );
                                                
                     break;

@@ -170,9 +170,8 @@ final public class Log {
                 .append(sourceMethod).toString(), message);  
         
         //Print stace trace
-        if( thrown != null ){
+        if( thrown != null )
             DebugPrinter.printException(thrown);
-        }
                
         
     }

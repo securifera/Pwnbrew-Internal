@@ -201,10 +201,12 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
     
     public void addEntities(){
         
-        for( Host aHost : hostMap.values() ){
-            MaltegoTransformResponseMessage rspMsg = theReturnMsg.getResponseMessage();
-            Entities theEntities = rspMsg.getEntityList();
-            theEntities.addEntity(aHost);
+        synchronized( hostMap ){
+            for( Host aHost : hostMap.values() ){
+                MaltegoTransformResponseMessage rspMsg = theReturnMsg.getResponseMessage();
+                Entities theEntities = rspMsg.getEntityList();
+                theEntities.addEntity(aHost);
+            }
         }
         
     }
@@ -215,15 +217,20 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
      * @param aHost 
      */
     @Override
-    public synchronized void addHost(Host aHost) {
+    public void addHost(Host aHost) {
         
-        String hostname = aHost.getDisplayValue();
-         
-        Host prevHost = hostMap.get(hostname);
-        if( prevHost != null && (prevHost.getType() == Host.PWNBREW_HOST_DISCONNECTED) ){
-            hostMap.put(hostname, aHost);
-        } else {
-            hostMap.put(hostname, aHost);
+        String hostname = aHost.getDisplayValue();         
+        synchronized( hostMap ){
+            Host prevHost = hostMap.remove(hostname);
+            if( prevHost != null ){ 
+                if(prevHost.getType().equals( Host.PWNBREW_HOST_DISCONNECTED)) {
+                    hostMap.put(hostname, aHost);
+                } else {
+                    hostMap.put(hostname, prevHost);
+                }
+            } else {
+                hostMap.put(hostname, aHost);
+            }
         }
         
         //Decrement and see if we are done

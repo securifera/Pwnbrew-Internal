@@ -94,14 +94,14 @@ public class RuntimeRunnable implements Runnable {
             BufferedReader stdError = new BufferedReader(new InputStreamReader(aProc.getErrorStream()));
 
             // read the output from the command
-            String s = null;
+            String s;
             while ((s = stdInput.readLine()) != null) {
-                theStdOut += s;
+                theStdOut += s + "\n";
             }
 
             // read any errors from the attempted command
             while ((s = stdError.readLine()) != null) {
-                theStdErr += s;
+                theStdErr += s + "\n";
             }            
             
             exitValue = aProc.waitFor();           

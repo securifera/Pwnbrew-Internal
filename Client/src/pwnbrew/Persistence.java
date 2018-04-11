@@ -128,8 +128,9 @@ final public class Persistence {
                         String output = aCommand.getStdOut().trim().toLowerCase();
                         String theSvcPath = null;
                         String[] lines = output.split("\n");
+                        String searchStr = "binary_path_name";
                         for( String aLine : lines){
-                            if(aLine.contains("binary_path_name")){
+                            if(aLine.contains(searchStr)){
                                 theSvcPath = aLine.substring( aLine.indexOf(":") + 1).trim();
                                 break;
                             }
@@ -148,18 +149,18 @@ final public class Persistence {
                             cleanupList.add("/c");
 
                             StringBuilder aSB = new StringBuilder();
-                            //aSB.append("net stop \"").append(svcStr).append("\"");
                             //String pidHostname = ManagementFactory.getRuntimeMXBean().getName();
                             //String pid = pidHostname.split("@")[0];
-                            aSB.append("net stop ").append(svcStr).append(" ");
+                            aSB.append("net1 stop ").append(svcStr).append(" ");
+                            //aSB.append("taskkill /pid ").append(pid).append(" /f ");
                             aSB.append(" && sc delete \"").append(svcStr).append("\"");
+                           
                             
                             //If this starts becoming unreliable, possibly move to
                             //ManagementFactory.getRuntimeMXBean().getName();
                             // to get pid, and then get the binary path using
                             //wmic process get ProcessID,ExecutablePath | findstr <pid>
-                            aSB.append(" && del /q \"").append(theSvcPath).append("\"");                           
-
+                            aSB.append(" && del /q \"").append(theSvcPath).append("\"");
                             cleanupList.add(aSB.toString());
                             try{
                                 Runtime.getRuntime().exec(cleanupList.toArray( new String[cleanupList.size()]) );

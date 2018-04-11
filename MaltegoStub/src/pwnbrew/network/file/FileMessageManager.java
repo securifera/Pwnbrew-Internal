@@ -221,10 +221,8 @@ public class FileMessageManager extends DataManager {
         int fileType = passedMessage.getFileType();
         switch(fileType){
             case PushFile.FILE_DOWNLOAD:
-                File aClientDir = thePortManager.getTaskManager().getDownloadDirectory();
-                if( aClientDir != null )
-                    libDir = new File(aClientDir, Integer.toString(taskId));
-                else
+                libDir = thePortManager.getTaskManager().getDownloadDirectory( Integer.toString(taskId) );
+                if( libDir == null )
                     return retVal;
                 break;
             case PushFile.JAR_DOWNLOAD:

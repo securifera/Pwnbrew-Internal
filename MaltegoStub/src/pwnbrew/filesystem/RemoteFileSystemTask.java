@@ -57,20 +57,22 @@ public class RemoteFileSystemTask {
     
     private final int taskId;
     private int theFileCount = 0;
-    private final DefaultMutableTreeNode parentNode;
+    private final Object parentNode;
     private final List<FileNode> theNodeList = new ArrayList<>();
-    private boolean fileSearch = false;
+    private byte taskType = 0;
  
     //=========================================================================
     /**
      *  Constructor
      * 
      * @param passedId
-     * @param passedNode 
+     * @param passedObj 
+     * @param passedType 
      */
-    public RemoteFileSystemTask(int passedId, DefaultMutableTreeNode passedNode ) {
+    public RemoteFileSystemTask(int passedId, Object passedObj, byte passedType ) {
         taskId = passedId;
-        parentNode = passedNode;
+        taskType = passedType;
+        parentNode = passedObj;
     }    
     
     //=========================================================================
@@ -111,7 +113,7 @@ public class RemoteFileSystemTask {
      *  Get parent node
      * @return 
      */
-    public DefaultMutableTreeNode getParentNode() {
+    public Object getParentNode() {
         return parentNode;
     }
 
@@ -148,17 +150,8 @@ public class RemoteFileSystemTask {
      * 
      * @return 
      */
-    public boolean isFileSearch() {
-        return fileSearch;
-    }
-
-    //=========================================================================
-    /**
-     * 
-     * @param passedBool
-     */
-    public void setFileSearchFlag(boolean passedBool) {
-        fileSearch = passedBool;
+    public byte getTaskType() {
+        return taskType;
     }
     
 

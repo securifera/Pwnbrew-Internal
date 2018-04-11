@@ -541,7 +541,7 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
     private void downloadFolderButtonActionPerformed(java.awt.event.ActionEvent evt) throws IOException { 
     
         //Open a file browser to the task directory
-        File fileDir = theListener.getDownloadDirectory();    
+        File fileDir = theListener.getDownloadDirectory(null);    
         if(fileDir.exists()){
             if(Desktop.isDesktopSupported()){
                 Desktop.getDesktop().open(fileDir.getCanonicalFile());
@@ -559,7 +559,9 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
      */
     private void downloadButtonActionPerformed(java.awt.event.ActionEvent evt) { 
   
-        List<RemoteFile> theFileList = new ArrayList<>();
+        List<RemoteFile> theFileList = new ArrayList<>(); 
+        List<RemoteFile> theFolderList = new ArrayList<>();
+        
         int[] selRowIndexes = theFileJTable.getSelectedRows();
         DefaultTableModel theTableModel = (DefaultTableModel) theFileJTable.getModel();
         for( int anInt : selRowIndexes ){            
@@ -567,28 +569,37 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
             anInt = theFileJTable.convertRowIndexToModel(anInt);
             FileNode aFileNode = (FileNode)theTableModel.getValueAt(anInt, 0);
             RemoteFile filePath = aFileNode.getFile();
-            theFileList.add(filePath);            
-        }    
+            if( aFileNode.getType() == FileSystemMsg.FOLDER){
+                theFolderList.add(filePath);   
+            } else if(aFileNode.getType() == FileSystemMsg.FILE){
+                theFileList.add(filePath);
+            }        
+        }           
         
-//        //Add folder
-//        JTree theJTree = getFileTreePanel().getJTree();
-//        TreePath aTreePath = theJTree.getSelectionPath();
-//        DefaultMutableTreeNode selNode = (DefaultMutableTreeNode) aTreePath.getLastPathComponent();
-//        Object selObj = selNode.getUserObject();
-//        if( selObj instanceof IconData ){
-//            IconData iconDataObj = (IconData)selNode.getUserObject();
-//            Object innerObj = iconDataObj.getObject();
-//            if( innerObj instanceof FileNode){
-//                FileNode aFileNode = (FileNode)innerObj;
-//                if( aFileNode.getType() == FileSystemMsg.FOLDER){
-//                    RemoteFile filePath = aFileNode.getFile();
-//                    theFileList.add(filePath);   
-//                }
-//            }
-//        }
+        //Send folder
+        JTree theJTree = getFileTreePanel().getJTree();
+        TreePath aTreePath = theJTree.getSelectionPath();
+        if( aTreePath != null){
+            DefaultMutableTreeNode selNode = (DefaultMutableTreeNode) aTreePath.getLastPathComponent();
+            Object selObj = selNode.getUserObject();
+            if( selObj instanceof IconData ){
+                IconData iconDataObj = (IconData)selNode.getUserObject();
+                Object innerObj = iconDataObj.getObject();
+                if( innerObj instanceof FileNode){
+                    FileNode aFileNode = (FileNode)innerObj;
+                    RemoteFile filePath = aFileNode.getFile();
+                    if( aFileNode.getType() == FileSystemMsg.FOLDER){
+                        theFolderList.add(filePath);   
+                    } else if(aFileNode.getType() == FileSystemMsg.FILE){
+                        theFileList.add(filePath);
+                    } 
+                }
+            }
+        }        
         
-        
+        //If items are selected
         theListener.downloadFiles( theFileList );
+        theListener.downloadFolders( theFolderList );
         
     }
     

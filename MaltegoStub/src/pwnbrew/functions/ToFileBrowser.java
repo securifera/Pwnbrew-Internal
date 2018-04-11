@@ -41,8 +41,6 @@ import com.sun.java.swing.plaf.windows.WindowsTreeUI;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Image;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -58,14 +56,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TreeExpansionListener;
-import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.plaf.metal.MetalIconFactory;
 import javax.swing.table.DefaultTableModel;
@@ -86,6 +82,7 @@ import pwnbrew.filesystem.IconData;
 import pwnbrew.filesystem.RemoteFile;
 import pwnbrew.filesystem.RemoteFileSystemTask;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.ProgressListener;
@@ -129,9 +126,9 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     private final Map<Integer, RemoteFileSystemTask> theRemoteFileSystemTaskMap = new HashMap<>();
     
     //Map relating the msgid to the task
-    private final Map<Integer, RemoteFileIO> theRemoteFileIOMap = new HashMap<>();
-    
+    private final Map<Integer, RemoteFileIO> theRemoteFileIOMap = new HashMap<>();    
     private final AtomicBoolean dirListingFlag = new AtomicBoolean();
+    
   
     //==================================================================
     /**
@@ -348,19 +345,24 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             theTask = theRemoteFileSystemTaskMap.get(taskId);
         }
 
-        if( theTask != null && filePath != null && !filePath.isEmpty() ){
+        if( theTask != null ){
 
-            //Create a file from the path
-            RemoteFile aFile = new RemoteFile( filePath, hostPathSeparator );
-            final FileNode aFileNode = new FileNode( aFile, fileType, size, dateModified );
-            theTask.addFileNode(aFileNode);            
+            //Add the file to the node if one exists
+            final FileNode aFileNode;
+            if( filePath != null && !filePath.isEmpty() ){
+                //Create a file from the path
+                RemoteFile aFile = new RemoteFile( filePath, hostPathSeparator );
+                aFileNode = new FileNode( aFile, fileType, size, dateModified );
+                theTask.addFileNode(aFileNode);    
+            } else{
+                aFileNode = null;
+            }      
             
-            if( theTask.getListLength() == theTask.getFileCount() ){
+            if( theTask.getListLength() == theTask.getFileCount() && 
+                    theTask.getTaskType() != FileOperation.DOWNLOAD_DIR){
 
-                //Run in swing thread
-                //final FileNode theParentNode = parentFileNode;                                
-                final FileTreePanel theFileTreePanel = theFsFrame.getFileTreePanel();                
-                //final TreePath aTreePath = new TreePath( aNode.getPath() );
+                //Run in swing thread                            
+                final FileTreePanel theFileTreePanel = theFsFrame.getFileTreePanel(); 
                 SwingUtilities.invokeLater( new Runnable(){
 
                     @Override
@@ -368,93 +370,96 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                         
                         //Get the parent
                         FileNode parentFileNode = null;
-                        DefaultMutableTreeNode parent = theTask.getParentNode();
-                        try {
-                            parent.removeAllChildren();  // Remove Flag
-                        } catch( ArrayIndexOutOfBoundsException ex ){                    
-                        }
-
-                        Object theParentObj = parent.getUserObject();
-                        if( theParentObj instanceof IconData ){
-                            IconData theIconData = (IconData)theParentObj;
-                            Object innerObj = theIconData.getObject();
-                            if( innerObj instanceof FileNode ){
-                                parentFileNode = (FileNode)innerObj;
+                        Object parentObject = theTask.getParentNode();
+                        if( parentObject instanceof DefaultMutableTreeNode){
+                            DefaultMutableTreeNode parent = (DefaultMutableTreeNode)parentObject;
+                            try {
+                                parent.removeAllChildren();  // Remove Flag
+                            } catch( ArrayIndexOutOfBoundsException ex ){                    
                             }
-                        }
 
-                        //Clear node children
-                        if( parentFileNode != null )
-                            parentFileNode.clearChildNodes();
-
-                        List nodeList = theTask.getFileList();
-                        Collections.sort(nodeList);
-
-                        for (Iterator it = nodeList.iterator(); it.hasNext();) {
-
-                            Object nodeList1 = it.next();
-                            FileNode currentNode = (FileNode) nodeList1;
-                            if( parentFileNode != null ){
-                                parentFileNode.addChildNode(currentNode);
+                            Object theParentObj = parent.getUserObject();
+                            if( theParentObj instanceof IconData ){
+                                IconData theIconData = (IconData)theParentObj;
+                                Object innerObj = theIconData.getObject();
+                                if( innerObj instanceof FileNode ){
+                                    parentFileNode = (FileNode)innerObj;
+                                }
                             }
-                            if ( currentNode.isDirectory() || currentNode.isDrive() ){
 
-                                IconData theIconData = new IconData( currentNode.getIcon(), currentNode.getExpandedIcon(), currentNode);
-                                DefaultMutableTreeNode node = new DefaultMutableTreeNode(theIconData);
-                                parent.add(node);
-                                
-                                
+                            //Clear node children
+                            if( parentFileNode != null )
+                                parentFileNode.clearChildNodes();
 
-                                if( currentNode.getSize() > 0)
-                                    node.add(new DefaultMutableTreeNode( true));
+                            List nodeList = theTask.getFileList();
+                            Collections.sort(nodeList);
 
+                            for (Iterator it = nodeList.iterator(); it.hasNext();) {
+
+                                Object nodeList1 = it.next();
+                                FileNode currentNode = (FileNode) nodeList1;
+                                if( parentFileNode != null ){
+                                    parentFileNode.addChildNode(currentNode);
+                                }
+                                if ( currentNode.isDirectory() || currentNode.isDrive() ){
+
+                                    IconData theIconData = new IconData( currentNode.getIcon(), currentNode.getExpandedIcon(), currentNode);
+                                    DefaultMutableTreeNode node = new DefaultMutableTreeNode(theIconData);
+                                    parent.add(node);
+
+
+
+                                    if( currentNode.getSize() > 0)
+                                        node.add(new DefaultMutableTreeNode( true));
+
+                                }
                             }
-                        }
 
-                        //Get the treepath
-                        DefaultMutableTreeNode aNode = parent;
-                        try {
-                            parent.getFirstChild();       
-                        } catch(NoSuchElementException ex ){
-                            aNode = (DefaultMutableTreeNode) parent.getParent();
-                        }
-                        
-                        //Create treepath
-                        TreePath aTreePath = new TreePath( aNode.getPath() );
+                            //Get the treepath
+                            DefaultMutableTreeNode aNode = parent;
+                            try {
+                                parent.getFirstChild();       
+                            } catch(NoSuchElementException ex ){
+                                aNode = (DefaultMutableTreeNode) parent.getParent();
+                            }
 
-                        //Reload the model
-                        JTree theJTree = theFileTreePanel.getJTree();
-                        TreePath theSelPath = theJTree.getSelectionPath();    
+                            //Create treepath
+                            TreePath aTreePath = new TreePath( aNode.getPath() );
 
-                        //Get the listener and remove it
-                        TreeSelectionListener[] theTreeListenerArr = theJTree.getListeners( TreeSelectionListener.class );
-                        TreeSelectionListener theTSListener = theTreeListenerArr[0];
-                        theJTree.removeTreeSelectionListener( theTSListener);
+                            //Reload the model
+                            JTree theJTree = theFileTreePanel.getJTree();
+                            TreePath theSelPath = theJTree.getSelectionPath();    
 
-                        //Remove any listeners
-                        TreeExpansionListener[] theTreeExpansionArr = theJTree.getTreeExpansionListeners();
-                        TreeExpansionListener theTEListener = theTreeExpansionArr[0];
-                        theJTree.removeTreeExpansionListener( theTEListener );
+                            //Get the listener and remove it
+                            TreeSelectionListener[] theTreeListenerArr = theJTree.getListeners( TreeSelectionListener.class );
+                            TreeSelectionListener theTSListener = theTreeListenerArr[0];
+                            theJTree.removeTreeSelectionListener( theTSListener);
 
-                        theFileTreePanel.getTreeModel().reload(); 
+                            //Remove any listeners
+                            TreeExpansionListener[] theTreeExpansionArr = theJTree.getTreeExpansionListeners();
+                            TreeExpansionListener theTEListener = theTreeExpansionArr[0];
+                            theJTree.removeTreeExpansionListener( theTEListener );
 
-                        //Expand the last path
-                        theJTree.expandPath(aTreePath);   
-                        theJTree.setSelectionPath(theSelPath);
+                            theFileTreePanel.getTreeModel().reload(); 
 
-                        //Add to the table
-                        if( parentFileNode != null )
-                            addToFileTable( parentFileNode, parentFileNode.getChildNodes(), theFileTreePanel );
+                            //Expand the last path
+                            theJTree.expandPath(aTreePath);   
+                            theJTree.setSelectionPath(theSelPath);
 
-                        //Add the listeners back
-                        theJTree.addTreeExpansionListener( theTEListener );
-                        theJTree.addTreeSelectionListener(theTSListener);
+                            //Add to the table
+                            if( parentFileNode != null )
+                                addToFileTable( parentFileNode, parentFileNode.getChildNodes(), theFileTreePanel );
 
-                        theFsFrame.setCursor(null);
-                                                 
-                        //Set flag
-                        synchronized(dirListingFlag){
-                            dirListingFlag.set(false);
+                            //Add the listeners back
+                            theJTree.addTreeExpansionListener( theTEListener );
+                            theJTree.addTreeSelectionListener(theTSListener);
+
+                            theFsFrame.setCursor(null);
+
+                            //Set flag
+                            synchronized(dirListingFlag){
+                                dirListingFlag.set(false);
+                            }
                         }
                     }               
                 });
@@ -465,35 +470,41 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                 }
                
             //Is a file search under way
-            } else if( theTask.isFileSearch()){
+            } else if( theTask.getTaskType() == FileOperation.SEARCH){
                 
                 //Get the parent
                 FileNode parentFileNode = null;
-                DefaultMutableTreeNode parent = theTask.getParentNode();
-                parent.removeAllChildren();  // Remove Flag
+                Object parentObject = theTask.getParentNode();
+                if( parentObject instanceof DefaultMutableTreeNode ){
+                    
+                    DefaultMutableTreeNode parent = (DefaultMutableTreeNode)parentObject;
+                    parent.removeAllChildren();  // Remove Flag
 
-                Object theParentObj = parent.getUserObject();
-                if( theParentObj instanceof IconData ){
-                    IconData theIconData = (IconData)theParentObj;
-                    Object innerObj = theIconData.getObject();
-                    if( innerObj instanceof FileNode ){
-                        parentFileNode = (FileNode)innerObj;
+                    Object theParentObj = parent.getUserObject();
+                    if( theParentObj instanceof IconData ){
+                        IconData theIconData = (IconData)theParentObj;
+                        Object innerObj = theIconData.getObject();
+                        if( innerObj instanceof FileNode ){
+                            parentFileNode = (FileNode)innerObj;
+                        }
                     }
-                }
-                
-                //Run in swing thread
-                final FileNode theParentNode = parentFileNode;                                
-                final FileTreePanel theFileTreePanel = theFsFrame.getFileTreePanel();                
-                SwingUtilities.invokeLater( new Runnable(){
 
-                    @Override
-                    public void run() {
-                        //Add to the table
-                        List<FileNode> nodeList = new ArrayList<>();
-                        nodeList.add(aFileNode);
-                        addToFileTable( theParentNode, nodeList, theFileTreePanel );
-                    } 
-                });
+                    //Run in swing thread
+                    final FileNode theParentNode = parentFileNode;                                
+                    final FileTreePanel theFileTreePanel = theFsFrame.getFileTreePanel();                
+                    SwingUtilities.invokeLater( new Runnable(){
+
+                        @Override
+                        public void run() {
+                            if( aFileNode != null ){
+                                //Add to the table
+                                List<FileNode> nodeList = new ArrayList<>();
+                                nodeList.add(aFileNode);
+                                addToFileTable( theParentNode, nodeList, theFileTreePanel );
+                            }
+                        } 
+                    });
+                }
             }
 
         } else {
@@ -592,6 +603,13 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         int hostId = Integer.parseInt( getId() ); 
             
         FileOperation aFileOp = new FileOperation( hostId, passedOp, filePath, addParam );
+        aFileOp.getTaskId();
+        
+        //Add to the map
+        int taskId = aFileOp.getTaskId();
+        RemoteFileSystemTask aRFST = new RemoteFileSystemTask(taskId, null, passedOp);
+        addRemoteFileSystemTask(aRFST);
+        
         aCMM.send(aFileOp);
         
     }
@@ -683,14 +701,16 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
 
             } else {
                  //Get the selected tree component
-                DefaultMutableTreeNode selNode = (DefaultMutableTreeNode) aTreePath.getLastPathComponent();
-                Object selObj = selNode.getUserObject();
-                if( selObj instanceof IconData ){
-                    IconData iconDataObj = (IconData)selNode.getUserObject();
-                    Object innerObj = iconDataObj.getObject();
-                    if( innerObj instanceof FileNode){
-                        FileNode aFileNode = (FileNode)innerObj;
-                        filePath = aFileNode.getFile().getAbsolutePath();
+                if(aTreePath != null ){
+                    DefaultMutableTreeNode selNode = (DefaultMutableTreeNode) aTreePath.getLastPathComponent();
+                    Object selObj = selNode.getUserObject();
+                    if( selObj instanceof IconData ){
+                        IconData iconDataObj = (IconData)selNode.getUserObject();
+                        Object innerObj = iconDataObj.getObject();
+                        if( innerObj instanceof FileNode){
+                            FileNode aFileNode = (FileNode)innerObj;
+                            filePath = aFileNode.getFile().getAbsolutePath();
+                        }
                     }
                 }
             }
@@ -833,7 +853,6 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                 //Set the flag
                 dirListingFlag.set(true);
                 FileNode aFN = (FileNode)anObj;
-//                aFN.clearChildNodes();
 
                 switch( aFN.getType() ) {
                     case FileSystemMsg.FOLDER:                    
@@ -850,11 +869,11 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
 
         if( aTaskMessage != null ){
             int taskId = aTaskMessage.getTaskId();
-            RemoteFileSystemTask aRFST = new RemoteFileSystemTask(taskId, passedNode );
-
+            RemoteFileSystemTask aRFST = new RemoteFileSystemTask(taskId, passedNode, FileOperation.LIST);
+            addRemoteFileSystemTask(aRFST);
+            
             //Send a message
             ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
-            addRemoteFileSystemTask(aRFST);
             aCMM.send(aTaskMessage);
         }
     }
@@ -940,18 +959,22 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     //=================================================================
     /**
      * 
+     * @param fileId
      * @return 
      */
     @Override
-    public File getDownloadDirectory() {
+    public File getDownloadDirectory( String fileId ) {
         
         File dataDir = MaltegoStub.getDataDir();
         File hostDir = new File(dataDir, theHostName );
-        File retDir = new File(hostDir, "download");
-        
+        File retDir = new File(hostDir, "download");        
         try {
             Utilities.ensureDirectoryExists(retDir);
         } catch (IOException ex) {}
+        
+        //Create the task dir
+        if( fileId != null )
+            retDir = new File(retDir, fileId );        
         
         return retDir;
     }
@@ -1078,26 +1101,51 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             theTask = theRemoteFileSystemTaskMap.get(passedTaskId);
         }
         
-        //Invoke in swing thread so no race condition
-        SwingUtilities.invokeLater( new Runnable(){
-
-            @Override
-            public void run() {
-                if( theTask != null && theTask.isFileSearch() ){
-                    theFsFrame.searchComplete();
-                } else {
-                    JTree theJTree = theFsFrame.getFileTreePanel().getJTree();
-                    TreePath aTreePath = theJTree.getSelectionPath();
-                    theJTree.clearSelection();
-                    theJTree.setSelectionPath(aTreePath);    
-                }  
-                
-                synchronized(theRemoteFileSystemTaskMap){
-                    theRemoteFileSystemTaskMap.remove(passedTaskId);
-                }
+        //Check file operation type
+        if( theTask.getTaskType() == FileOperation.DOWNLOAD_DIR){            
+            //Download each of the files
+            List<FileNode> aFileNodeList = theTask.getFileList();
+            Object parentObj = theTask.getParentNode();
+            if( parentObj instanceof String){
+                String rootDirStr = (String)parentObj;
+                downloadFilesToFolder(rootDirStr, aFileNodeList);
             }
+            
+        } else {
         
-        });
+            //Invoke in swing thread so no race condition
+            SwingUtilities.invokeLater( new Runnable(){
+
+                @Override
+                public void run() {
+                    if( theTask != null){ 
+
+                        if( theTask.getTaskType() == FileOperation.SEARCH ){
+                            theFsFrame.searchComplete();
+                        } else {
+                            JTree theJTree = theFsFrame.getFileTreePanel().getJTree();
+                            TreePath aTreePath = theJTree.getSelectionPath();
+                            if( aTreePath != null){
+                                theJTree.clearSelection();
+                                if( theTask.getTaskType() == FileOperation.DELETE ){
+                                    aTreePath = aTreePath.getParentPath();
+                                    if( aTreePath != null)
+                                        theJTree.setSelectionPath(aTreePath);
+
+                                } else {
+                                    theJTree.setSelectionPath(aTreePath); 
+                                }
+                            }   
+                        }  
+
+                        synchronized(theRemoteFileSystemTaskMap){
+                            theRemoteFileSystemTaskMap.remove(passedTaskId);
+                        }
+                    }
+                }
+
+            });
+        }
  
     }
 
@@ -1173,9 +1221,8 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
 
         if( aTaskMessage != null ){
             int taskId = aTaskMessage.getTaskId();
-            RemoteFileSystemTask aRFST = new RemoteFileSystemTask(taskId, passedNode );
-            aRFST.setFileSearchFlag(true);
-
+            RemoteFileSystemTask aRFST = new RemoteFileSystemTask(taskId, passedNode, FileOperation.SEARCH );
+           
             //Send a message
             addRemoteFileSystemTask(aRFST);
             aCMM.send(aTaskMessage);
@@ -1239,6 +1286,72 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     @Override
     public FileBrowserSettings getFileBrowserSettings() {
         return theFileBrowserSettings;
+    }
+
+    //=========================================================================
+    /**
+     * 
+     * @param theFolderList 
+     */
+    @Override
+    public void downloadFolders(List<RemoteFile> theFolderList) {
+        
+        int taskId;
+        for( RemoteFile aFile : theFolderList ){
+            
+            Tasking aTaskMessage = new FileOperation( theHostId, FileOperation.DOWNLOAD_DIR, aFile.getAbsolutePath(), "*");
+
+            taskId = aTaskMessage.getTaskId();
+            RemoteFileSystemTask aRFST = new RemoteFileSystemTask(taskId, aFile.getName(), FileOperation.DOWNLOAD_DIR );
+
+            //Send a message
+            addRemoteFileSystemTask(aRFST);
+            DataManager.send(MaltegoStub.getMaltegoStub(), aTaskMessage);
+        }
+       
+    }
+
+    //==========================================================================
+    /**
+     * 
+     * @param rootDirStr
+     * @param aFileNodeList 
+     */
+    private void downloadFilesToFolder( String rootDirStr, List<FileNode> aFileNodeList ) {
+        
+        //Get the control message manager
+        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+        for( FileNode aFileNode : aFileNodeList) { //For each file path...
+
+            try {
+
+                //TODO Fix folder structure
+                if( aFileNode.getType() == FileSystemMsg.FILE){
+                    
+                    int taskId = SocketUtilities.getNextId();
+                    RemoteFile aFile = aFileNode.getFile();
+
+                    //Set the remote task information
+                    RemoteFileIO aRemoteTask = new RemoteFileIO( aFile.getAbsolutePath(), Constants.FILE_DOWNLOAD, Constants.DOWNLOAD_IMG_STR );
+                    aRemoteTask.setTaskId(Integer.toString( taskId ));
+                    aRemoteTask.setState( RemoteFileIO.TASK_XFER_FILES);
+
+                    //Add task to the jtable model
+                    addTask(aRemoteTask);
+
+                    //Queue the file to be sent
+                    String fileHashNameStr = new StringBuilder().append("0").append(":").append(aFile.getAbsolutePath()).toString();
+                    TaskGetFile theTaskMsg = new TaskGetFile( taskId, fileHashNameStr, theHostId, useCompression() );
+
+                    //Send the message
+                    aCMManager.send( theTaskMsg );  
+                }
+
+            } catch ( IOException ex) {
+                JOptionPane.showMessageDialog( theFsFrame, ex.getMessage(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
+            }       
+
+        }
     }
 
 
