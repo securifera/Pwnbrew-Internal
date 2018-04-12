@@ -54,6 +54,8 @@ import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLParameters;
+import pwnbrew.ClientConfig;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
 
@@ -116,8 +118,13 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
         //Get the type and the SSL context
         SSLContext theContext = passedHandler.getPortRouter().getSSLContext( isClient );
 
-        sslEngine = theContext.createSSLEngine();
+        ClientConfig aCF = ClientConfig.getConfig();
+        sslEngine = theContext.createSSLEngine(aCF.getServerIp(), aCF.getSocketPort());
         sslEngine.setUseClientMode(isClient);
+        
+        //Set the ssl parameters
+        SSLParameters theParams = sslEngine.getSSLParameters();
+        sslEngine.setSSLParameters(theParams);
 
         netBBSize = sslEngine.getSession().getPacketBufferSize();
         inNetBB  = ByteBuffer.allocate(netBBSize);
