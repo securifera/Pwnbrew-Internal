@@ -213,7 +213,7 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                                 SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
                                                                 if( srvHandler != null ){
                                                                     byte[] regBytes = aMsg.getBytes();
-                                                                    srvHandler.queueBytes(regBytes);
+                                                                    srvHandler.queueBytes(regBytes, aMsg.getCancelId());
                                                                 }
                                                                 
                                                             }

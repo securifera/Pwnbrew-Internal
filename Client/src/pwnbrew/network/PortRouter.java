@@ -55,7 +55,6 @@ import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.selector.SelectionRouter;
-import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.DebugPrinter;
 
 /**
@@ -121,9 +120,10 @@ abstract public class PortRouter {
     /**
      *  Handles when the socket is closed
      * 
-     * @param thePortRouter 
+     * @param clientId
+     * @param channelId 
     */
-    abstract public void socketClosed( SocketChannelHandler thePortRouter );
+    abstract public void socketClosed( int clientId, int channelId );
  
     
     //===============================================================

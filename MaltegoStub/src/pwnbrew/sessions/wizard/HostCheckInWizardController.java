@@ -39,12 +39,13 @@ package pwnbrew.sessions.wizard;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import pwnbrew.MaltegoStub;
 import pwnbrew.generic.gui.wizard.Wizard;
 import pwnbrew.generic.gui.wizard.WizardController;
 import pwnbrew.generic.gui.wizard.WizardModel;
 import pwnbrew.generic.gui.wizard.WizardPanelDescriptor;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.CheckInTimeMsg;
 import pwnbrew.sessions.SessionsJFrame;
 import pwnbrew.xml.maltego.Field;
@@ -126,40 +127,37 @@ public class HostCheckInWizardController extends WizardController {
             WizardModel theWizardModel = theWizard.getModel();
             HostSelectionPanel theHSP = (HostSelectionPanel) theWizardModel.getPanel( HostSelectionDescriptor.IDENTIFIER );
 
-            //Send message to server to clear the session list
-            ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();      
-            if( aCMM != null ){
             
-                //Get the check-in list
-                HostSchedulerPanel theHschP = (HostSchedulerPanel) theWizardModel.getPanel( HostSchedulerDescriptor.IDENTIFIER );
-                List<String> theList = theHschP.getCheckInDates();
-                //Get the host list
-                List<Host> theHostList = theHSP.getSelectedHosts();
-                for( Host aHost : theHostList ){
-                    
-                    Field hostIdField = aHost.getField( Constants.HOST_ID );
-                    if( hostIdField != null ){
-                        
-                        //Get the id
-                        String hostIdStr = hostIdField.getXmlObjectContent();
-                        int hostId = Integer.parseInt(hostIdStr);
+            //Get the check-in list
+            HostSchedulerPanel theHschP = (HostSchedulerPanel) theWizardModel.getPanel( HostSchedulerDescriptor.IDENTIFIER );
+            List<String> theList = theHschP.getCheckInDates();
+            //Get the host list
+            List<Host> theHostList = theHSP.getSelectedHosts();
+            for( Host aHost : theHostList ){
 
-                        //Send a message for each date that is added
-                        for( String aDate : theList ){
-                            try {
-                                CheckInTimeMsg aMsg = new CheckInTimeMsg( Constants.SERVER_ID, hostId, aDate, CheckInTimeMsg.ADD_TIME );
-                                aCMM.send(aMsg);
-                            } catch (UnsupportedEncodingException ex) {
-                            }
+                Field hostIdField = aHost.getField( Constants.HOST_ID );
+                if( hostIdField != null ){
+
+                    //Get the id
+                    String hostIdStr = hostIdField.getXmlObjectContent();
+                    int hostId = Integer.parseInt(hostIdStr);
+
+                    //Send a message for each date that is added
+                    for( String aDate : theList ){
+                        try {
+                            CheckInTimeMsg aMsg = new CheckInTimeMsg( Constants.SERVER_ID, hostId, aDate, CheckInTimeMsg.ADD_TIME );
+                            DataManager.send(MaltegoStub.getMaltegoStub(), aMsg);
+                        } catch (UnsupportedEncodingException ex) {
                         }
                     }
-
                 }
-                
-                //refresh the selection
-                SessionsJFrame theJFrame = (SessionsJFrame) theWizard.getParentDialog().getParent();
-                theJFrame.getListener().refreshSelection();
+
             }
+
+            //refresh the selection
+            SessionsJFrame theJFrame = (SessionsJFrame) theWizard.getParentDialog().getParent();
+            theJFrame.getListener().refreshSelection();
+            
         }
         
         theWizard.getParentDialog().dispose();

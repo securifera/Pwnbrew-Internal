@@ -45,12 +45,12 @@ import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.generic.gui.ValidTextField;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.misc.StandardValidation;
 import pwnbrew.network.ClientPortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.RelayStartRelay;
 import pwnbrew.xml.maltego.Entities;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
@@ -109,118 +109,104 @@ public class ToRelay extends Function {
             return;
         }
         
-        //Create the connection
-        try {        
+        StubConfig theConfig = StubConfig.getConfig();
+        theConfig.setServerIp(serverIp);        
+        theConfig.setSocketPort(serverPortStr);
+        Integer anInteger = SocketUtilities.getNextId();
+        theConfig.setHostId(anInteger.toString());
+        String relayPort = objectMap.get( Constants.RELAY_PORT);
+        if( relayPort != null ){
+            //Create a relay object
+            Relay aRelay = new Relay( hostIdStr, relayPort);
+            MaltegoTransformResponseMessage rspMsg = theReturnMsg.getResponseMessage();
+            Entities theEntities = rspMsg.getEntityList();
+            theEntities.addEntity( aRelay );
             
-            //Set the server ip and port
-            StubConfig theConfig = StubConfig.getConfig();
-            theConfig.setServerIp(serverIp);
-            theConfig.setSocketPort(serverPortStr);
-
-            //Set the client id
-            Integer anInteger = SocketUtilities.getNextId();
-            theConfig.setHostId(anInteger.toString());
+        } else {
             
-                   //Get server IP
-            String relayPort = objectMap.get( Constants.RELAY_PORT);
-            if( relayPort != null ){
-                //Create a relay object
-               Relay aRelay = new Relay( hostIdStr, relayPort);
-               MaltegoTransformResponseMessage rspMsg = theReturnMsg.getResponseMessage();
-               Entities theEntities = rspMsg.getEntityList();
-               theEntities.addEntity( aRelay );
-               
-            } else {
-         
-                ValidTextField aField = new ValidTextField( "0" );
-                aField.setValidation( StandardValidation.KEYWORD_Port );
-                aField.setMargin(new Insets(2,4,2,4));
-                Object[] objMsg = { "Please enter the port number to start listening.", " ", aField};
-
-                //Have the user manually put in the server ip
-                Object retVal = JOptionPane.showOptionDialog(null, objMsg, "Enter Port",
-                       JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
-
-                //If the user pressed OK and the ip was valid
-                if((Integer)retVal == JOptionPane.OK_OPTION && aField.isDataValid()){
-
-                    String strPort =  aField.getText();
-
-                    ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                    if( aCMManager == null ){
-                        aCMManager = ControlMessageManager.initialize( theManager );
-                    }
-
-                    //Get the port router
-                    int serverPort = Integer.parseInt( serverPortStr);
-                    ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
-
-                    //Initiate the file transfer
-                    if(aPR == null){
-                        DebugPrinter.printMessage( NAME_Class, "listclients", "Unable to retrieve port router.", null);
-                        return;     
-                    }           
-
-                    //Set up the port wrapper
-                    theManager.initialize();
-
-                    //Connect to server
-                    try {
-                        
-                        aPR.ensureConnectivity( serverPort, theManager );
-
-                        //Get the client count
-                        int hostId = Integer.parseInt( hostIdStr);
-                        RelayStartRelay aMsg = new RelayStartRelay( Constants.SERVER_ID, hostId, Integer.parseInt( strPort ));               
-                        aCMManager.send(aMsg );  
-
-                        //Wait for the response
-                        waitToBeNotified( 180 * 1000);
-
-                        //If connected create a relay
-                        if( isConnected ){
-
-                            //Create a relay object
-                            Relay aRelay = new Relay( hostIdStr, strPort);
-                            MaltegoTransformResponseMessage rspMsg = theReturnMsg.getResponseMessage();
-                            Entities theEntities = rspMsg.getEntityList();
-                            theEntities.addEntity( aRelay );
-
-                        } else {
-                            
-                            //Create a relay object
-                            pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( "Unable to create relay because one already exists.");
-                            MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
-                            
-                            //Create the message list
-                            malMsg.getExceptionMessages().addExceptionMessage(exMsg);                      
-                            
-                        }
-
-                        try {
-                            //Sleep for a few seconds
-                            Thread.sleep(3000);
-                        } catch (InterruptedException ex) {
-                        }
-
-                    } catch( LoggableException ex ) {
+            ValidTextField aField = new ValidTextField( "0" );
+            aField.setValidation( StandardValidation.KEYWORD_Port );
+            aField.setMargin(new Insets(2,4,2,4));
+            Object[] objMsg = { "Please enter the port number to start listening.", " ", aField};
+            
+            //Have the user manually put in the server ip
+            Object retVal = JOptionPane.showOptionDialog(null, objMsg, "Enter Port",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, null, null);
+            
+            //If the user pressed OK and the ip was valid
+            if((Integer)retVal == JOptionPane.OK_OPTION && aField.isDataValid()){
                 
+                String strPort =  aField.getText();
+                
+                //Get the port router
+                int serverPort = Integer.parseInt( serverPortStr);
+                ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
+                
+                //Initiate the file transfer
+                if(aPR == null){
+                    try {
+                        aPR = (ClientPortRouter)DataManager.createPortRouter(theManager, serverPort, true);
+                    } catch (IOException ex) {
+                        DebugPrinter.printMessage( NAME_Class, "to_relay", "Unable to create port router.", ex);
+                        return;
+                    }
+                }  
+                
+                //Set up the port wrapper
+                theManager.initialize();
+                
+                //Connect to server
+                try {
+                    
+                    aPR.ensureConnectivity( serverPort, theManager );
+                    
+                    //Get the client count
+                    int hostId = Integer.parseInt( hostIdStr);
+                    RelayStartRelay aMsg = new RelayStartRelay( Constants.SERVER_ID, hostId, Integer.parseInt( strPort ));
+                    DataManager.send( theManager, aMsg );
+                    
+                    //Wait for the response
+                    waitToBeNotified( 180 * 1000);
+                    
+                    //If connected create a relay
+                    if( isConnected ){
+                        
                         //Create a relay object
-                        pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+                        Relay aRelay = new Relay( hostIdStr, strPort);
+                        MaltegoTransformResponseMessage rspMsg = theReturnMsg.getResponseMessage();
+                        Entities theEntities = rspMsg.getEntityList();
+                        theEntities.addEntity( aRelay );
+                        
+                    } else {
+                        
+                        //Create a relay object
+                        pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( "Unable to create relay because one already exists.");
                         MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
 
                         //Create the message list
                         malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
+                        
                     }
 
+                    try {
+                        //Sleep for a few seconds
+                        Thread.sleep(3000);
+                    } catch (InterruptedException ex) {
+                    }
+                    
+                } catch( LoggableException ex ) {
+                    
+                    //Create a relay object
+                    pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+                    MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+                    
+                    //Create the message list
+                    malMsg.getExceptionMessages().addExceptionMessage(exMsg);
                 }
+                
             }
-            
-            //Create the return message
-            retStr = theReturnMsg.getXml();
-        } catch (IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "ToRelay", ex.getMessage(), ex );
         }
+        retStr = theReturnMsg.getXml();
     }
 
     //===============================================================

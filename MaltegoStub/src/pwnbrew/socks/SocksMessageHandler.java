@@ -49,9 +49,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.DataHandler;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.SocksOperation;
 
 
@@ -169,11 +169,9 @@ public class SocksMessageHandler extends DataHandler {
                     
                 } 
 
-                //Get the control message manager
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
                 //Send message close that handler
                 SocksOperation aSocksMsg = new SocksOperation( aMessage.getSrcHostId(), SocksOperation.HANDLER_STOP, theHandlerId );
-                aCMManager.send(aSocksMsg );
+                DataManager.send( theSocksManager.getPortManager(), aSocksMsg );
 
                     //DebugPrinter.printMessage( NAME_Class, "receiveByteArray()", "No file receiver for the specified id.", null); 
                 

@@ -248,12 +248,12 @@ public class ClientPortRouter extends PortRouter {
     /**
      *  Connection dropped.
      * 
-     * @param theHandler 
+     * @param clientId
+     * @param channelId 
      */
     @Override
-    public void socketClosed( SocketChannelHandler theHandler ){
+    public void socketClosed( int clientId, int channelId ){
         
-        int channelId = theHandler.getChannelId();
         theOCM.removeHandler( channelId );
         
         OutgoingConnectionManager aOCM = getConnectionManager();

@@ -179,7 +179,7 @@ public final class PushFileAck extends FileMessage {
         
         //Debug
         DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received ACK for " + 
-                getFileToReceive().getName() + " Id: " + Integer.toString( getChannelId()));
+                getFileToReceive().getName() + " Id: " + Integer.toString( getFileChannelId()));
 
         try {
 

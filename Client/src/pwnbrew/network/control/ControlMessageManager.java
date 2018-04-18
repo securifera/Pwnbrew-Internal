@@ -242,6 +242,10 @@ public class ControlMessageManager extends DataManager {
         if( theControlMessageMap.containsKey(TaskStatus.MESSAGE_ID))
             DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + TaskStatus.MESSAGE_ID);
         theControlMessageMap.put(TaskStatus.MESSAGE_ID, TaskStatus.class.getCanonicalName());
+        //Add message
+        if( theControlMessageMap.containsKey(ShutdownChannel.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "ControlMessageMap already contains id" + ShutdownChannel.MESSAGE_ID);
+        theControlMessageMap.put(ShutdownChannel.MESSAGE_ID, ShutdownChannel.class.getCanonicalName());
 
         
     }

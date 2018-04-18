@@ -98,8 +98,8 @@ public class ConnectHandler implements Selectable {
             // Cancel the channel's registration with our selector           
             theSelKey.cancel();
 
-            if(((msg = ex.getMessage()) != null) && msg.toUpperCase().contains("CLOSED"))
-                theClientPortRouter.socketClosed( null );
+            //if(((msg = ex.getMessage()) != null) && msg.toUpperCase().contains("CLOSED"))
+            //    theClientPortRouter.socketClosed( null );
             
             return;
         }

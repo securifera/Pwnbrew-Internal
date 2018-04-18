@@ -53,7 +53,6 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.logging.Level;
 import javax.net.ssl.SSLException;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
@@ -86,7 +85,7 @@ public class SocketChannelHandler implements Selectable {
     private int clientId = -1;
     private int state = 0;
     
-    private final Queue< byte[] > pendingByteArrs = new LinkedList<>();
+    private final Queue< ByteQueueItem > pendingByteQueueItems = new LinkedList<>();
     
     //The byte buffer for holding received bytes
     private byte currMsgType = 0;
@@ -194,8 +193,8 @@ public class SocketChannelHandler implements Selectable {
     */
     public void clearQueue() {
 
-        synchronized (pendingByteArrs) {
-            pendingByteArrs.clear();
+        synchronized (pendingByteQueueItems) {
+            pendingByteQueueItems.clear();
         }
     }
     
@@ -204,13 +203,15 @@ public class SocketChannelHandler implements Selectable {
     *  Queues a byte array to be sent out the specified socket channel
     *
     * @param data
+     * @param cancelId
     */
-    public void queueBytes( byte[] data) {
+    public void queueBytes( byte[] data, int cancelId) {
 
+        ByteQueueItem anItem = new ByteQueueItem(data, cancelId);
         SelectionRouter aSR = thePortRouter.getSelRouter();
         SocketChannel aSC = getSocketChannel();
-        synchronized (pendingByteArrs) {
-            pendingByteArrs.add(data);
+        synchronized (pendingByteQueueItems) {
+            pendingByteQueueItems.add(anItem);
             if( ( aSR.interestOps( aSC) & SelectionKey.OP_WRITE ) == 0){
                 aSR.changeOps( aSC, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
             }
@@ -373,31 +374,33 @@ public class SocketChannelHandler implements Selectable {
         //Sending handshake messages as needed
         if( canSend( theSelKey ) ){          
 
-            synchronized (pendingByteArrs) {
+            synchronized (pendingByteQueueItems) {
 
                 // Write until there's not more data ...
-                if( !pendingByteArrs.isEmpty() ){
+                if( !pendingByteQueueItems.isEmpty() ){
 
                     //Send while there are messages
-                        byte[] nextArr = pendingByteArrs.poll();
-                        if( nextArr != null){
+                    ByteQueueItem nextItem = pendingByteQueueItems.poll();
+//                    byte[] nextArr = pendingByteQueueItems.poll();
+                    if( nextItem != null){
+                        
+                        byte[] nextArr = nextItem.byteArray;
+                        try {
 
-                            try {
+                            send(nextArr);
 
-                                send(nextArr);
+                        } catch( IOException ex ){
 
-                            } catch( IOException ex ){
+                            if (ex.getMessage().startsWith("Resource temporarily")) {
+                                DebugPrinter.printMessage( NAME_Class, "send", ex.getMessage(), ex);
+                                return;
+                            }                                   
 
-                                if (ex.getMessage().startsWith("Resource temporarily")) {
-                                    DebugPrinter.printMessage( NAME_Class, "send", ex.getMessage(), ex);
-                                    return;
-                                }                                   
-
-                            } catch( IllegalStateException ex1 ){
-                                //Resend it
-                                retrySend(nextArr);    
-                            }                            
-                        }
+                        } catch( IllegalStateException ex1 ){
+                            //Resend it
+                            retrySend(nextItem);    
+                        }                            
+                    }
                         
                 }  else {
                     
@@ -408,7 +411,7 @@ public class SocketChannelHandler implements Selectable {
                 }
 
                 //Notify any threads waiting on this monitor
-                pendingByteArrs.notifyAll();
+                pendingByteQueueItems.notifyAll();
             }
 
         }
@@ -445,10 +448,10 @@ public class SocketChannelHandler implements Selectable {
      * @param theSelKey
      * @throws IOException
     */
-    private void retrySend( byte[] passedArr ){
+    private void retrySend( ByteQueueItem passedItem ){
         
         //Handshake is not complete, sleep then add back to the queue
-        final byte[] byteArr = passedArr;
+        final ByteQueueItem finByteQueueItem = passedItem;
         Constants.Executor.execute( new Runnable(){
 
             @Override
@@ -461,9 +464,9 @@ public class SocketChannelHandler implements Selectable {
                 }
 
                 //Get the dest id
-                byte[] dstHostId = Arrays.copyOfRange(byteArr, Message.DEST_HOST_ID_OFFSET, Message.DEST_HOST_ID_OFFSET + 4);
+                byte[] dstHostId = Arrays.copyOfRange( finByteQueueItem.byteArray, Message.DEST_HOST_ID_OFFSET, Message.DEST_HOST_ID_OFFSET + 4);
                 int tempId = SocketUtilities.byteArrayToInt(dstHostId);
-                thePortRouter.queueSend( byteArr, tempId );
+                thePortRouter.queueSend( finByteQueueItem.byteArray, tempId, finByteQueueItem.cancelId );
                 
             }
 
@@ -603,25 +606,39 @@ public class SocketChannelHandler implements Selectable {
         
         return true;
     }
-//
-//    //===================================================================
-//    /**
-//     *  Set the flag
-//     * 
-//     * @param passedBool 
-//     */
-//    public synchronized void setWrapping( boolean passedBool ) {
-//        wrappingFlag = passedBool;
-//    }
-//    
-//    //===================================================================
-//    /**
-//     *  Wrap the data
-//     * 
-//     * @return 
-//     */
-//    public synchronized boolean isWrapping() {
-//        return wrappingFlag;
-//    }
+
+    //===================================================================
+    /**
+     * 
+     * @param cancelId 
+     */
+    public void cancelSend(Integer cancelId) {
+        
+        synchronized (pendingByteQueueItems) {
+            Queue< ByteQueueItem > listCopy = new LinkedList(pendingByteQueueItems);
+            pendingByteQueueItems.clear();
+            for( ByteQueueItem aBQI : listCopy ){
+                if( aBQI.cancelId == cancelId)
+                    continue;
+                pendingByteQueueItems.add(aBQI);
+            }        
+        }        
+    }
+    
+    //=========================================================================
+    /**
+     * Internal class for handling byte queues
+     */
+    class ByteQueueItem {
+        
+        private final byte[] byteArray;
+        private final int cancelId;
+
+        public ByteQueueItem(byte[] byteArray, int cancelId) {
+            this.byteArray = byteArray;
+            this.cancelId = cancelId;
+        }
+
+    }
 
 }/* END CLASS AccessHandler */

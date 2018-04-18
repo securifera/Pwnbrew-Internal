@@ -90,10 +90,10 @@ public interface ShellListener {
     
     //===============================================================
     /**
-     * Returns the comm manager
+     * Returns the port manager
      * @return 
      */
-    public PortManager getCommManager();
+    public PortManager getPortManager();
 
     //===============================================================
     /**

@@ -51,14 +51,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.atomic.AtomicInteger;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.functions.Function;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
+import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.control.ControlMessageManager;
@@ -75,6 +75,8 @@ public class FileMessageManager extends DataManager {
     private static FileMessageManager theFileManager;
     private final Map<Integer, FileReceiver> fileId_FileReceiverMap = new HashMap<>();
     private final Map<Integer, Map<Integer, FileSender>> taskId_fileId_FileSenderMap = new HashMap<>();
+    
+    private final AtomicInteger retChannelId = new AtomicInteger(Constants.CHANNEL_DISCONNECTED);
        
     private static final String NAME_Class = FileMessageManager.class.getSimpleName();
   
@@ -95,28 +97,12 @@ public class FileMessageManager extends DataManager {
     
     // ==========================================================================
     /**
-     *   Creates the FileMessageManager
-     * @param passedCommManager
-     * @return 
-     * @throws java.io.IOException 
-     */
-    public synchronized static FileMessageManager initialize( PortManager passedCommManager ) throws IOException {
-
-        if( theFileManager == null ) {
-            theFileManager = new FileMessageManager( passedCommManager );
-            createPortRouter( passedCommManager, StubConfig.getConfig().getSocketPort(), true );
-        }
-        
-        return theFileManager;
-
-    }/* END instantiate() */
-    
-    // ==========================================================================
-    /**
      *   Gets the FileMessageManager
      * @return 
      */
     public synchronized static FileMessageManager getFileMessageManager(){
+        if( theFileManager == null )
+            theFileManager = new FileMessageManager( MaltegoStub.getMaltegoStub() );
         return theFileManager;
     }
     
@@ -156,8 +142,6 @@ public class FileMessageManager extends DataManager {
             FileReceiver theReceiver = fileId_FileReceiverMap.get(fileId);
             //If the receive flag is not set
             if( theReceiver == null ){
-
-//                theReceiver = new FileReceiver( this, clientId, passedTaskId, passedFileId, passedFileSize, parentDir, hashFilenameStr );
                 try {
                     theReceiver = new FileReceiver( this, passedMsg, parentDir );
                     fileId_FileReceiverMap.put(fileId, theReceiver);
@@ -200,6 +184,61 @@ public class FileMessageManager extends DataManager {
         }
     }
     
+     //=========================================================================
+    /**
+     * 
+     * @param passedInt 
+     */
+    public void setChannelId( int passedInt ){
+        retChannelId.set(passedInt);   
+    }
+    
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getChannelId(){
+        return retChannelId.get();   
+    }
+    
+    //========================================================================
+    /**
+     * 
+     * @param passedMessage
+     */
+    public void fileDownload( PushFile passedMessage ) {
+        
+        synchronized( retChannelId ){
+            int channelId = getChannelId();
+            if( channelId == Constants.CHANNEL_DISCONNECTED)
+                setChannelId(passedMessage.getFileChannelId());
+        }
+        
+        try {
+            prepFilePush(passedMessage);
+         } catch ( IOException | LoggableException ex) {
+            DebugPrinter.printMessage( NAME_Class, "evaluate", ex.getMessage(), ex); 
+        }
+    }
+    
+    //========================================================================
+    /**
+     * 
+     * @param passedMessage
+     */
+    public void fileUpload( PushFileAck passedMessage ) {
+        
+        synchronized( retChannelId ){
+            int channelId = getChannelId();
+            if( channelId == Constants.CHANNEL_DISCONNECTED)
+                setChannelId(passedMessage.getFileChannelId());
+        }
+        
+        sendFile(passedMessage);
+
+    }
+    
     //===============================================================
         /**
         * Prepares a file to be sent through a socket channel.
@@ -209,7 +248,7 @@ public class FileMessageManager extends DataManager {
         * @throws LoggableException 
      * @throws java.io.IOException 
     */
-    public boolean prepFilePush( PushFile passedMessage ) throws LoggableException, IOException {
+    private boolean prepFilePush( PushFile passedMessage ) throws LoggableException, IOException {
 
         boolean retVal = false;
         int taskId = passedMessage.getTaskId();
@@ -242,13 +281,13 @@ public class FileMessageManager extends DataManager {
                 //Try to begin the file transfer
                 initFileTransfer( passedMessage, libDir );
                 //Send an ack to the sender to begin transfer
-        //                DebugPrinter.printMessage( getClass().getSimpleName(), "Sending ACK for " + hashFileNameStr);
+                DebugPrinter.printMessage( getClass().getSimpleName(), "prepFilePush", "Sending ACK for " + hashFileNameStr + " channelId: " + fileChannelId, null);
                 PushFileAck aSFMA = new PushFileAck(taskId, fileId, fileChannelId, hashFileNameStr, srcId );
                 //Set compression flag
                 if( passedMessage.useCompression() )
                     aSFMA.enableCompression();
                 
-                aCMManager.send( aSFMA );
+                DataManager.send(thePortManager, aSFMA);
                 retVal = true;
             }
         }
@@ -283,7 +322,7 @@ public class FileMessageManager extends DataManager {
      * 
      * @param aMessage 
      */
-    public void sendFile(PushFileAck aMessage) {
+    private void sendFile(PushFileAck aMessage) {
         
         FileSender aSender = new FileSender( getPortManager(), aMessage, StubConfig.getConfig().getSocketPort() );
         
@@ -334,27 +373,45 @@ public class FileMessageManager extends DataManager {
             List<Integer> taskIds = new ArrayList<>(taskId_fileId_FileSenderMap.keySet());
             for( Integer aTaskId : taskIds ){
                 
-                Map<Integer, FileSender> aSenderMap = taskId_fileId_FileSenderMap.get(aTaskId);
-                List<Integer> aFileId = new ArrayList<>(aSenderMap.keySet());
-                for( Integer anId : aFileId ){
-                    FileSender aSender = aSenderMap.get(anId);
-                    aSender.shutdown();
-                    aSenderMap.remove( anId );
+                //Only do specified task id
+                if( aTaskId == taskId ){
+                    
+                    Map<Integer, FileSender> aSenderMap = taskId_fileId_FileSenderMap.get(aTaskId);
+                    List<Integer> aFileId = new ArrayList<>(aSenderMap.keySet());
+                    for( Integer anId : aFileId ){
+                        
+                        FileSender aSender = aSenderMap.get(anId);
+                        int channelId = aSender.getChannelId();
+                        
+                        //Shutdown and remove
+                        aSender.shutdown();
+                        aSenderMap.remove( anId );
+                        
+                        //Clear the send queue of all fileIds associated with the cancelled sender
+                        PortRouter aPR = thePortManager.getPortRouter( StubConfig.getConfig().getSocketPort() );
+                        SocketChannelHandler aSCH = aPR.getSocketChannelHandler(channelId);
+
+                        //Remove any packets with the particular file id
+                        if( aSCH != null )
+                            aSCH.cancelSend(anId);
+                    }
+
+                    //Remove from the map
+                    taskId_fileId_FileSenderMap.remove(aTaskId);
                 }
-                
-                //Remove from the map
-                taskId_fileId_FileSenderMap.remove(aTaskId);
             }
         }
         
-         //Clear the send buffer
-        PortRouter aPR = thePortManager.getPortRouter( StubConfig.getConfig().getSocketPort() );
-        SocketChannelHandler aSCH = aPR.getSocketChannelHandler(clientId);
-
-        //Set the wrapper
-        if( aSCH != null ){
-            aSCH.clearQueue();
-        }   
+//         //Clear the send buffer
+//        PortRouter aPR = thePortManager.getPortRouter( StubConfig.getConfig().getSocketPort() );
+//        if( aPR != null ){
+//            SocketChannelHandler aSCH = aPR.getSocketChannelHandler(clientId);
+//
+//            //Set the wrapper
+//            if( aSCH != null )
+//                aSCH.clearQueue();
+//        }
+        
         
     }
 

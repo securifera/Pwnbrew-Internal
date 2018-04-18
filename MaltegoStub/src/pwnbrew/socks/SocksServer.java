@@ -12,10 +12,11 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import pwnbrew.MaltegoStub;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.ManagedRunnable;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.SocksOperation;
 import pwnbrew.utilities.SocketUtilities;
 
@@ -91,12 +92,9 @@ public class SocksServer extends ManagedRunnable {
             }
         }
         
-        //Get the control message manager
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-
         //Send message to create channel for socks proxy
         SocksOperation aSocksMsg = new SocksOperation( theHostId, SocksOperation.SOCKS_STOP );
-        aCMManager.send( aSocksMsg );
+        DataManager.send(MaltegoStub.getMaltegoStub(), aSocksMsg);
     }
 
     //==========================================================================
@@ -178,13 +176,6 @@ public class SocksServer extends ManagedRunnable {
                     break;
             }
         }
-
-//        //Send message to create new sockshandler on the client
-//        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
-//
-//        //Send the socks start msg
-//        SocksCreateHandlerMsg aMsg = new SocksCreateHandlerMsg( theHostId, handlerId);
-//        aCMM.send(aMsg);
 
         //Create the socks handler and register it
         SocksHandler aHandler;

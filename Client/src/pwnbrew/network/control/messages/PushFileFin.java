@@ -53,6 +53,7 @@ import pwnbrew.manager.PortManager;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.ControlOption;
+import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.selector.SocketChannelHandler;
 
 /**
@@ -132,18 +133,23 @@ public final class PushFileFin extends FileMessage {
     public void evaluate( PortManager passedManager ) {
 
         DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received Fin message. Id: " + Integer.toString( getChannelId()));
-
-        ClientConfig theConf = ClientConfig.getConfig();
-        int socketPort = theConf.getSocketPort();
-        ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
-        
-        //Get the connection manager
-        OutgoingConnectionManager aOCM = aPR.getConnectionManager( getSrcHostId() );
-        if( aOCM != null ){
-            SocketChannelHandler aSCH = aOCM.removeHandler( getFileChannelId() );
-            if( aSCH != null )
-                aSCH.shutdown();            
-        }
+         //Remove from the parent map
+        FileMessageManager theFMM = FileMessageManager.getFileMessageManager();
+        theFMM.removeFileSender( getTaskId(), getFileChannelId() );
+//
+//        ClientConfig theConf = ClientConfig.getConfig();
+//        int socketPort = theConf.getSocketPort();
+//        ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
+//        
+//        //Get the connection manager
+//        OutgoingConnectionManager aOCM = aPR.getConnectionManager( getSrcHostId() );
+//        if( aOCM != null ){
+//            SocketChannelHandler aSCH = aOCM.removeHandler( getFileChannelId() );
+//            if( aSCH != null ){
+//                DebugPrinter.printMessage( this.getClass().getSimpleName(), "Shutting down file channel: " + Integer.toString(getFileChannelId()));
+//                aSCH.shutdown();
+//            }            
+//        }
     }
 
 }/* END CLASS PushFileFin */

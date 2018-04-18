@@ -7,14 +7,13 @@ package pwnbrew.socks;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import javax.swing.Timer;
 import pwnbrew.generic.gui.ValidTextField;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.StandardValidation;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.SocksOperation;
 
 /**
@@ -114,26 +113,18 @@ public class SocksJPanel extends javax.swing.JPanel {
             //Do nothing if port is invalid
             if( !((ValidTextField)portJTextField).isDataValid() )
                 return;                        
-                        
-            //Get the control message manager
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            try {
-                
-                if( aCMManager == null )
-                    aCMManager = ControlMessageManager.initialize(theListener.getCommManager());                
-
-                //Send message to create channel for socks proxy
-                int clientId = theListener.getHostId();
-                SocksOperation aSocksMsg = new SocksOperation( clientId, SocksOperation.SOCKS_START );
-                aCMManager.send( aSocksMsg );
+                      
+            //Send message to create channel for socks proxy
+            int clientId = theListener.getHostId();
+            SocksOperation aSocksMsg = new SocksOperation( clientId, SocksOperation.SOCKS_START );
+            DataManager.send( theListener.getPortManager(), aSocksMsg );
 
 
-                actionButton.setText("Please Wait...");
+            actionButton.setText("Please Wait...");
+
+            //Disable
+            portJTextField.setEnabled(false);
                 
-                //Disable
-                portJTextField.setEnabled(false);
-                
-            } catch(IOException ex){}
                
         } else {
             //Change the panels to the defaul

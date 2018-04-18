@@ -48,7 +48,6 @@ import pwnbrew.manager.PortManager;
 public interface SocksJPanelListener {
     
     
-    
     //==========================================================================
     /**
      *  Get the Jframe
@@ -56,9 +55,19 @@ public interface SocksJPanelListener {
      */
     public JFrame getParentJFrame();
 
+    //==========================================================================
+    /**
+     * 
+     * @return 
+     */
     public int getHostId();    
 
-    public PortManager getCommManager();
+    //==========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public PortManager getPortManager();
 
 
 }

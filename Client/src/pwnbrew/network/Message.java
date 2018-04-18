@@ -271,5 +271,15 @@ public abstract class Message {
         
         return msgBytes;
     }
+
+    //=========================================================================
+    /**
+     * Used to cancel an operation and clear the send queue
+     * 
+     * @return 
+     */
+    public int getCancelId() {
+        return 0;
+    }
     
 }

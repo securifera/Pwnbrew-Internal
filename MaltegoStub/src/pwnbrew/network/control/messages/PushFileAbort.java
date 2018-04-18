@@ -93,23 +93,9 @@ public final class PushFileAbort extends FileMessage {
     @Override
     public void evaluate( PortManager passedManager ) {
         
-        //Get the control manager for sending messages
-        try {
-            
-            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
-            if( theFileMM == null ){
-                theFileMM = FileMessageManager.initialize( passedManager );
-            }
-
-            //Abort the file message
-            int theFileId = getFileId();
-
-            //Cleanup the file transfer
-            theFileMM.abortFileReceive( theFileId );
-            
-        } catch (IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "evaluate", ex.getMessage(), ex); 
-        }
+        FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+        int theFileId = getFileId();
+        theFileMM.abortFileReceive( theFileId );
                     
     }
 

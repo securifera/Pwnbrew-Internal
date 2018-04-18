@@ -63,11 +63,11 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.ManagedRunnable;
 import pwnbrew.misc.Utilities;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.CreateShell;
 import pwnbrew.network.control.messages.KillShellRelay;
 import pwnbrew.network.shell.messages.StdInMessage;
@@ -241,12 +241,6 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
             
         try {
 
-            //Get the control message manager
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize(theListener.getCommManager());
-            }
-
             //Add the command terminator
             String startupStr = getStartupCommand();
             String currentDir = theListener.getCurrentShellDir();
@@ -258,7 +252,8 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
             int clientId = theListener.getHostId();
             CreateShell aShellMsg = new CreateShell( clientId, getCommandStringArray(),
                     getEncoding(), startupStr, currentDir, getStderrRedirectFlag() );
-            aCMManager.send( aShellMsg );
+            DataManager.send(theListener.getPortManager(), aShellMsg);
+            
 
         } catch ( IOException ex) {
             DebugPrinter.printMessage( NAME_Class, "start", ex.getMessage(), ex); 
@@ -505,12 +500,7 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
 
                 int clientId = theListener.getHostId();
                 StdInMessage aMsg = new StdInMessage( channelId, ByteBuffer.wrap(theStr.getBytes()), clientId );  
-
-                ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
-                if( aSMM == null){
-                    aSMM = ShellMessageManager.initialize( theListener.getCommManager() );
-                }
-                aSMM.send(aMsg);
+                DataManager.send(theListener.getPortManager(), aMsg);
 
             }
         } catch (IOException ex) {
@@ -536,14 +526,10 @@ abstract public class Shell extends ManagedRunnable implements StreamReaderListe
             ex = null;
         }
             
-        //Get the control message manager
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
-             //Create the message
-            int clientId = theListener.getHostId();
-            KillShellRelay aShellMsg = new KillShellRelay( Constants.SERVER_ID, clientId, channelId );
-            aCMManager.send(aShellMsg );
-        }
+        //Create the message
+        int clientId = theListener.getHostId();
+        KillShellRelay aShellMsg = new KillShellRelay( Constants.SERVER_ID, clientId, channelId );
+        DataManager.send(theListener.getPortManager(), aShellMsg);
 
     }
     

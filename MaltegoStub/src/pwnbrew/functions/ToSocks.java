@@ -47,6 +47,7 @@ import javax.swing.JOptionPane;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
@@ -140,24 +141,21 @@ public class ToSocks extends Function implements SocksJPanelListener {
             //Set the client id
             Integer anInteger = SocketUtilities.getNextId();
             theConfig.setHostId(anInteger.toString());
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null )
-                ControlMessageManager.initialize( theManager );
-            
+                        
             //Create the socks manager for later
-            SocksMessageManager aManager = SocksMessageManager.getSocksMessageManager();
-            if( aManager == null)
-                aManager = SocksMessageManager.initialize(theManager);                
-            
+            SocksMessageManager aManager = SocksMessageManager.getSocksMessageManager();  
 
             //Get the port router
             int serverPort = Integer.parseInt( serverPortStr);
             ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
             if(aPR == null){
-                DebugPrinter.printMessage( NAME_Class, "ToSocks", "Unable to retrieve port router.", null);
-                return;     
-            }           
+                try {
+                    aPR = (ClientPortRouter)DataManager.createPortRouter(theManager, serverPort, true);
+                } catch (IOException ex) {
+                    DebugPrinter.printMessage( NAME_Class, "to_socks", "Unable to create port router.", ex);
+                    return;
+                }
+            }            
             
             //Setup skin
             theManager.initialize();
@@ -211,7 +209,6 @@ public class ToSocks extends Function implements SocksJPanelListener {
                 waitToBeNotified();
                 
                 //Kill all
-                aManager = SocksMessageManager.initialize(theManager);
                 aManager.stopSocksServer();
                 aManager.shutdown();
                 
@@ -231,7 +228,7 @@ public class ToSocks extends Function implements SocksJPanelListener {
                 malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
             }
             
-        } catch (IOException | InterruptedException ex) {
+        } catch (InterruptedException ex) {
             DebugPrinter.printMessage( NAME_Class, "ToShell", ex.getMessage(), ex );
         }
         
@@ -273,7 +270,7 @@ public class ToSocks extends Function implements SocksJPanelListener {
      * @return 
      */
     @Override
-    public PortManager getCommManager() {
+    public PortManager getPortManager() {
         return theManager;        
     }
 

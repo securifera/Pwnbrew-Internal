@@ -134,6 +134,7 @@ abstract public class Constants {
     public static final String LOCAL_EXTENSION_TYPE = "LOCAL EXTENSION";
     public static final String REMOTE_EXTENSION_TYPE = "REMOTE EXTENSION";
     
+    public final static int CHANNEL_DISCONNECTED = -1;
     public final static int COMM_CHANNEL_ID = 1;
     
     

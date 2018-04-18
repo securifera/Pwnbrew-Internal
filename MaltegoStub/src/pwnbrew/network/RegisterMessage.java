@@ -224,40 +224,11 @@ public class RegisterMessage extends Message {
             StubConfig theConfig = StubConfig.getConfig();
             theConfig.getSocketPort();
             
-            try{
-                
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager == null ){
-                    aCMManager = ControlMessageManager.initialize( passedManager );
-                }
-
-                //Get the port router
-                int serverPort = theConfig.getSocketPort();
-                ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( serverPort );
-                if( aPR != null ){                        
-                    //Notify the port router to continue
-                    aPR.beNotified(); 
-                }
-
-            } catch ( IOException ex) {
-                
-                //If the return value is true
-                if( passedManager instanceof MaltegoStub ){            
-                    MaltegoStub theStub = (MaltegoStub)passedManager;
-                    Function aFunction = theStub.getFunction(); 
-                    MaltegoMessage aMsg = aFunction.getMaltegoMsg();
-
-                     //Create a relay object
-                    pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
-                    MaltegoTransformExceptionMessage malMsg = aMsg.getExceptionMessage();
-
-                    //Create the message list
-                    malMsg.getExceptionMessages().addExceptionMessage(exMsg); 
-                    System.out.println( aMsg.getXml() );
-                    System.exit(0);
-
-                }
-            
+            int serverPort = theConfig.getSocketPort();
+            ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( serverPort );
+            if( aPR != null ){
+                //Notify the port router to continue
+                aPR.beNotified();
             }  
         }
 

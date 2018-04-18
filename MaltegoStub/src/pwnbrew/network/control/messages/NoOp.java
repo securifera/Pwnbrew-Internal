@@ -45,10 +45,10 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 
 /**
  *
@@ -98,17 +98,12 @@ public final class NoOp extends ControlMessage{
     */
     @Override
     public void evaluate( PortManager passedManager ) {
-        
-        //Get the address and connect                   
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-        if( aCMManager != null ){
-
-            //Send one back
-            int clientId = getSrcHostId();
-            NoOp aNoOp = new NoOp(clientId);
-            aCMManager.send(  aNoOp );
-        }       
-    
+                      
+        //Send one back
+        int clientId = getSrcHostId();
+        NoOp aNoOp = new NoOp(clientId);
+        DataManager.send(passedManager, aNoOp );
+   
     }
 
 }

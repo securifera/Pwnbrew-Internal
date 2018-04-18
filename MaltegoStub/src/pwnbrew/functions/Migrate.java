@@ -9,12 +9,12 @@ import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.generic.gui.ValidTextField;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.misc.StandardValidation;
 import pwnbrew.network.ClientPortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
@@ -90,20 +90,19 @@ public class Migrate extends Function {
                 Integer anInteger = SocketUtilities.getNextId();
                 theConfig.setHostId(anInteger.toString());
 
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager == null ){
-                    aCMManager = ControlMessageManager.initialize( theManager );
-                }
-
                 //Get the port router
                 int serverPort = Integer.parseInt( serverPortStr);
                 ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
 
                 //Initiate the file transfer
                 if(aPR == null){
-                    DebugPrinter.printMessage( NAME_Class, "listclients", "Unable to retrieve port router.", null);
-                    return;     
-                }           
+                    try {
+                        aPR = (ClientPortRouter)DataManager.createPortRouter(theManager, serverPort, true);
+                    } catch (IOException ex) {
+                        DebugPrinter.printMessage( NAME_Class, "migrate", "Unable to create port router.", ex);
+                        return;
+                    }
+                }       
 
                 //Set up the port wrapper
                 theManager.initialize();
@@ -116,7 +115,7 @@ public class Migrate extends Function {
                     //Get the client count
                     int hostId = Integer.parseInt(hostIdStr);
                     pwnbrew.network.control.messages.Migrate aMsg = new pwnbrew.network.control.messages.Migrate(hostId, newServerIp);               
-                    aCMManager.send(aMsg );    
+                    DataManager.send( theManager, aMsg);
 
                     try {
                         //Sleep for a few seconds

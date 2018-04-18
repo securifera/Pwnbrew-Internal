@@ -108,17 +108,17 @@ public class ServerPortRouter extends PortRouter {
     /**
      *  Connection dropped.
      * 
-     * @param theHandler 
+     * @param hostId
      */
     @Override
-    public void socketClosed( SocketChannelHandler theHandler ){
+    public void socketClosed( int hostId, int channelId ){
         
         //Remove the handler from the map
-        ConnectionManager aCM = getConnectionManager(theHandler.getClientId());
+        ConnectionManager aCM = getConnectionManager( hostId );
         if( aCM != null )
-            aCM.removeHandler(theHandler.getChannelId());
+            aCM.removeHandler(channelId);
         
-        RelayDisconnect aMsg = new RelayDisconnect( theHandler.getClientId(), theHandler.getChannelId() );
+        RelayDisconnect aMsg = new RelayDisconnect( hostId, channelId );
         DataManager.send(thePortManager, aMsg);
         
     }
@@ -292,7 +292,7 @@ public class ServerPortRouter extends PortRouter {
                     } 
                 }
 
-                passedHandler.queueBytes(msgBytes);
+                passedHandler.queueBytes(msgBytes, aMsg.getCancelId());
                 return false;
             }
         }

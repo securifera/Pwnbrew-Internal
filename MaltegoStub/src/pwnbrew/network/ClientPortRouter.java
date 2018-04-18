@@ -57,6 +57,7 @@ import pwnbrew.concurrent.LockListener;
 import pwnbrew.concurrent.LockingThread;
 import pwnbrew.functions.Function;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.network.control.ControlMessageManager;
@@ -198,25 +199,13 @@ public class ClientPortRouter extends PortRouter {
                         //Set connected to false if the server socket is null
                         connected = false;
                     } else {
-                        
-                          //Get the message sender
-                        try {
                             
-                            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                            if( aCMManager == null ){
-                                aCMManager = ControlMessageManager.initialize(thePortManager);
-                            }
-                            
-                            //Send register message
-                            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, (byte)0, Constants.SERVER_ID, Constants.COMM_CHANNEL_ID );
-                            aCMManager.send( aMsg );
-                            
-                            //Wait for the registration to complete
-                            waitForConnection();
-                            
-                        } catch(IOException ex){
-                            throw new LoggableException(ex);
-                        }                       
+                        //Send register message
+                        RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, (byte)0, Constants.SERVER_ID, Constants.COMM_CHANNEL_ID );
+                        DataManager.send(thePortManager, aMsg);
+
+                        //Wait for the registration to complete
+                        waitForConnection();
                         
                     }
 

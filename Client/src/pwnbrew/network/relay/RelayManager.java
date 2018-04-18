@@ -176,7 +176,7 @@ public class RelayManager extends DataManager {
                     } 
                 }
                 
-                theHandler.queueBytes(msgBytes);
+                theHandler.queueBytes(msgBytes, 0);
                 
             } else {
                 RemoteLog.log( Level.SEVERE, NAME_Class, "handleMessage()", "No socket handler found for the given id.", null);

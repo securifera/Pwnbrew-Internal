@@ -36,49 +36,38 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
+
+/*
+* NoOp.java
+*
+* Created on April 18, 2018, 9:55:42 PM
+*/
+
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
+import pwnbrew.ClientConfig;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.DebugPrinter;
-import pwnbrew.network.ControlOption;
-import pwnbrew.network.file.FileMessageManager;
+import pwnbrew.network.ClientPortRouter;
 import pwnbrew.utilities.SocketUtilities;
-
+import pwnbrew.network.ControlOption;
+import pwnbrew.network.PortRouter;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
  *  
  */
-public final class PushFileUpdate extends FileMessage {
-
-    private static final byte OPTION_DATASIZE = 4;
-    private long fileSize;
+@SuppressWarnings("ucd")
+public final class ShutdownChannel extends ControlMessage{
     
-    //Class name
-    private static final String NAME_Class = PushFileUpdate.class.getSimpleName();
+    private static final byte OPTION_CHANNEL_ID = 102; 
+    protected int fileChannelId = 0;   
     
-    public static final short MESSAGE_ID = 0x46;
+     //Class name
+    private static final String NAME_Class = ShutdownChannel.class.getSimpleName();  
     
-    
-   // ==========================================================================
-    /**
-     * Constructor
-     *
-     * @param destHostId
-     * @param passedChannelId
-     * @param passedTaskId
-     * @param passedFileId
-     * @param passedFileSize
-    */
-    public PushFileUpdate( int destHostId, int passedChannelId, int passedTaskId, int passedFileId, long passedFileSize ) {
-        super( MESSAGE_ID, destHostId, passedChannelId, passedTaskId, passedFileId );     
-
-        byte[] tempArr = SocketUtilities.longToByteArray(passedFileSize);
-        ControlOption aTlv = new ControlOption( OPTION_DATASIZE, tempArr);
-        addOption(aTlv);
-       
-    }
+    public static final short MESSAGE_ID = 0x81;
     
     // ==========================================================================
     /**
@@ -86,11 +75,11 @@ public final class PushFileUpdate extends FileMessage {
      *
      * @param passedId
     */
-    public PushFileUpdate( byte[] passedId ) { // NO_UCD (use default)
+    public ShutdownChannel(byte[] passedId ) {
         super( passedId );
     }
     
-     //=========================================================================
+         //=========================================================================
     /**
      *  Sets the variable in the message related to this TLV
      * 
@@ -100,32 +89,20 @@ public final class PushFileUpdate extends FileMessage {
     @Override
     public boolean setOption( ControlOption tempTlv ){      
         
-        boolean retVal = true;
+        boolean retVal = true;    
         if( !super.setOption(tempTlv)){
-            
             byte[] theValue = tempTlv.getValue();
             switch( tempTlv.getType()){
-                case OPTION_DATASIZE:
-                    fileSize = SocketUtilities.byteArrayToLong( theValue );
-                    break; 
+                case OPTION_CHANNEL_ID:
+                    fileChannelId = SocketUtilities.byteArrayToInt(theValue);
+                    break;
                 default:
                     retVal = false;
                     break;              
-            }
-            
-        }
+            }  
+        }     
         return retVal;
     }  
-
-    //===============================================================
-    /**
-     *
-     * @return
-     */
-    public long getFileSize() {
-        return fileSize;
-    }
-    
     
     //===============================================================
     /**
@@ -134,8 +111,24 @@ public final class PushFileUpdate extends FileMessage {
      * @param passedManager
     */
     @Override
-    public void evaluate( PortManager passedManager ) {                
-        FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
-        theFileMM.updateFileSize( fileId, fileSize );
+    public void evaluate( PortManager passedManager ) {
+                      
+        //Send one back
+        if( fileChannelId != ConnectionManager.CHANNEL_DISCONNECTED ){
+            
+            ClientConfig aConf = ClientConfig.getConfig();
+            PortRouter aPR = passedManager.getPortRouter(aConf.getSocketPort());
+            if( aPR != null && aPR instanceof ClientPortRouter){
+                ClientPortRouter aCPR = (ClientPortRouter)aPR;
+                ConnectionManager aCM = aCPR.getConnectionManager();
+                SocketChannelHandler aSCH = aCM.getSocketChannelHandler(fileChannelId);
+                if( aSCH != null ){
+                    aSCH.shutdown();
+                    aCPR.socketClosed(getSrcHostId(), fileChannelId);
+                }
+            }
+        }
+   
     }
+
 }

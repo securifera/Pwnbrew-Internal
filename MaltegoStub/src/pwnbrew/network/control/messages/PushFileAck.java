@@ -195,20 +195,8 @@ public final class PushFileAck extends FileMessage {
     @Override
     public void evaluate( PortManager passedManager ) {
         
-        try {
-            
-            //Get the control manager for sending messages
-            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
-            if( theFileMM == null ){
-                theFileMM = FileMessageManager.initialize( passedManager );
-            }
-
-            //Queue the file send
-            theFileMM.sendFile( this );
-        
-        } catch (IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "evaluate", ex.getMessage(), ex);
-        }
+        FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+        theFileMM.fileUpload(this );
         
     }
 

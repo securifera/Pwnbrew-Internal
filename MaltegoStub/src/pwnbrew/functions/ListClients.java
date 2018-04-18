@@ -38,15 +38,12 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.functions;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.CountSeeker;
 import pwnbrew.misc.DebugPrinter;
@@ -111,75 +108,56 @@ public class ListClients extends Function implements HostHandler, CountSeeker{
             return;
         }
          
-        //Create the connection
+        StubConfig theConfig = StubConfig.getConfig();
+        theConfig.setServerIp(serverIp);
+        theConfig.setSocketPort(serverPortStr);
+        Integer anInteger = SocketUtilities.getNextId();
+        theConfig.setHostId(anInteger.toString());
+        int serverPort = Integer.parseInt( serverPortStr);
+        ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
+        if(aPR == null){
+            try {
+                aPR = (ClientPortRouter)DataManager.createPortRouter(theManager, serverPort, true);
+            } catch (IOException ex) {
+                DebugPrinter.printMessage( NAME_Class, "listclients", "Unable to create port router.", ex);
+                return;
+            }
+        }
+        theManager.initialize();
         try {
             
-            //Set the server ip and port
-            StubConfig theConfig = StubConfig.getConfig();
-            theConfig.setServerIp(serverIp);
-            theConfig.setSocketPort(serverPortStr);
+            aPR.ensureConnectivity( serverPort, theManager );
             
-            //Set the client id
-            Integer anInteger = SocketUtilities.getNextId();
-            theConfig.setHostId(anInteger.toString());
+            //Get the client count
+            ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.HOST_COUNT, hostIdStr );
+            DataManager.send( theManager, aMsg);           
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( theManager );
-            }
-
-            //Get the port router
-            int serverPort = Integer.parseInt( serverPortStr);
-            ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
-
-            //Initiate the file transfer
-            if(aPR == null){
-                DebugPrinter.printMessage( NAME_Class, "listclients", "Unable to retrieve port router.", null);
-                return;     
-            }           
+            //Wait for the response
+            waitToBeNotified( 180 * 1000);
             
-            //Set up the port wrapper
-            theManager.initialize();
-            
-            //Connect to server
-            try {
+            //Get the client info
+            if( theClientCount > 0 ){
                 
-                aPR.ensureConnectivity( serverPort, theManager );
-             
-                //Get the client count
-                ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.HOST_COUNT, hostIdStr );
-                aCMManager.send(aMsg);
+                //Get each client msg
+                aMsg = new pwnbrew.network.control.messages.GetHosts( Constants.SERVER_ID, hostIdStr );
+                DataManager.send( theManager, aMsg);
                 
                 //Wait for the response
                 waitToBeNotified( 180 * 1000);
                 
-                //Get the client info
-                if( theClientCount > 0 ){
+                //Add hosts to entity list
+                addEntities();
                 
-                    //Get each client msg                
-                    aMsg = new pwnbrew.network.control.messages.GetHosts( Constants.SERVER_ID, hostIdStr );
-                    aCMManager.send(aMsg);
-                
-                    //Wait for the response
-                    waitToBeNotified( 180 * 1000);
-                    
-                    //Add hosts to entity list
-                    addEntities();
-                                        
-                }
-                
-            } catch( LoggableException ex ) {
-                
-                //Create a relay object
-                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
-                MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
-
-                //Create the message list
-                malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
             }
             
-        } catch (IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex );
+        } catch( LoggableException ex ) {
+            
+            //Create a relay object
+            pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+            MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+            
+            //Create the message list
+            malMsg.getExceptionMessages().addExceptionMessage(exMsg);
         }
         
         //Create the return message

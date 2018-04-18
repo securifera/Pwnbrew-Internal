@@ -35,49 +35,49 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-package pwnbrew.selector;
 
-import pwnbrew.manager.ConnectionManager;
-import pwnbrew.network.ConnectionCallback;
-import pwnbrew.network.RegisterMessage;
+
+/*
+* NoOp.java
+*
+* Created on April 18, 2018, 9:55:42 PM
+*/
+
+package pwnbrew.network.control.messages;
+
+import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.network.ControlOption;
 
 /**
  *
- * @author Securifera
+ *  
  */
-public class SocketChannelCallback extends ConnectionCallback{
+@SuppressWarnings("ucd")
+public final class ShutdownChannel extends ControlMessage{
     
-    private final RegisterMessage theRegMsg;
-    private final ConnectionManager theCM;
+    private static final byte OPTION_CHANNEL_ID = 102; 
+    protected int fileChannelId = 0;   
     
-    //===========================================================================
+     //Class name
+    private static final String NAME_Class = ShutdownChannel.class.getSimpleName();  
+    
+    public static final short MESSAGE_ID = 0x81;
+
+
+     // ==========================================================================
     /**
-     * 
-     * @param passedIp
-     * @param passedPort 
-     * @param aMsg 
-     * @param passedCM 
-     */
-    public SocketChannelCallback(String passedIp, int passedPort, RegisterMessage aMsg, ConnectionManager passedCM) {
-        super(passedIp, passedPort);
-        theRegMsg = aMsg;
-        theCM = passedCM;
-    }
-    
-     //=====================================================================
-    /**
-     * 
-     * @param theChannelId
-     */
-    @Override
-    public void handleConnection( int theChannelId ) {
+     * Constructor
+     *
+     * @param dstHostId
+     * @param passedChannelId
+    */
+    public ShutdownChannel( int dstHostId, int passedChannelId ) {
+        super( MESSAGE_ID, dstHostId );
         
-        SocketChannelHandler srvHandler = theCM.getSocketChannelHandler( theChannelId );
-        if( srvHandler != null ){
-            byte[] regBytes = theRegMsg.getBytes();
-            srvHandler.queueBytes(regBytes, theRegMsg.getCancelId());
-        }
-    
+        //Add the option
+        byte[] tempChannelId = SocketUtilities.intToByteArray(passedChannelId);
+        ControlOption aTlv = new ControlOption(OPTION_CHANNEL_ID, tempChannelId);
+        addOption(aTlv);
     }
-    
+
 }

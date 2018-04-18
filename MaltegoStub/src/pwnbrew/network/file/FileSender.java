@@ -124,20 +124,21 @@ public class FileSender extends ManagedRunnable {
 
             DebugPrinter.printMessage( NAME_Class, "go", ex.getMessage(), ex);   
 
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            try {
+//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
+//            try {
 
-                if( aCMManager == null )
-                    aCMManager = ControlMessageManager.initialize(thePortManager);                    
+//                if( aCMManager == null )
+//                    aCMManager = ControlMessageManager.initialize(thePortManager);                    
 
                 //Send message to cleanup the file transfer on the client side
                 int srcHostId = theFileAck.getSrcHostId();
                 PushFileAbort fileAbortMsg = new PushFileAbort( taskId, srcHostId, Constants.COMM_CHANNEL_ID, fileId );
-                aCMManager.send(fileAbortMsg ); 
+                DataManager.send(thePortManager, fileAbortMsg);
+//                aCMManager.send(fileAbortMsg ); 
 
-            } catch( IOException ex1 ){
-                 DebugPrinter.printMessage( NAME_Class, "go", ex.getMessage(), ex1);   
-            }
+//            } catch( IOException ex1 ){
+//                 DebugPrinter.printMessage( NAME_Class, "go", ex.getMessage(), ex1);   
+//            }
 
         }
         
@@ -154,6 +155,9 @@ public class FileSender extends ManagedRunnable {
         //Get the port router
         int dstHostId = theFileAck.getSrcHostId();
         PortRouter thePR = thePortManager.getPortRouter( thePort );
+        if(thePR == null)
+            thePR = DataManager.createPortRouter(thePortManager, thePort, true);
+                
         SocketChannelHandler aHandler = thePR.getSocketChannelHandler( dstHostId );
         
         //Get the client id and dest id
@@ -170,7 +174,7 @@ public class FileSender extends ManagedRunnable {
                 fileDataMsg.setDestHostId(dstHostId );   
                 
                 //Send the message
-                thePR.queueSend( fileDataMsg.getBytes(), dstHostId );
+                thePR.queueSend( fileDataMsg.getBytes(), dstHostId, fileDataMsg.getCancelId() );
 
             } else {  
                 

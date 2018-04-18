@@ -184,17 +184,17 @@ final public class FileReceiver {
             ex = null;
         }  
         
-        ClientConfig theConf = ClientConfig.getConfig();
-        int socketPort = theConf.getSocketPort();
-        ClientPortRouter aPR = (ClientPortRouter) theFileMessageManager.getPortManager().getPortRouter( socketPort );
-        
-        //Get the connection manager
-        OutgoingConnectionManager aOCM = aPR.getConnectionManager( srcHostId );
-        if( aOCM != null ){
-            SocketChannelHandler aSCH = aOCM.removeHandler( channelId );
-            if( aSCH != null )
-                aSCH.shutdown();            
-        }
+//        ClientConfig theConf = ClientConfig.getConfig();
+//        int socketPort = theConf.getSocketPort();
+//        ClientPortRouter aPR = (ClientPortRouter) theFileMessageManager.getPortManager().getPortRouter( socketPort );
+//        
+//        //Get the connection manager
+//        OutgoingConnectionManager aOCM = aPR.getConnectionManager( srcHostId );
+//        if( aOCM != null ){
+//            SocketChannelHandler aSCH = aOCM.removeHandler( channelId );
+//            if( aSCH != null )
+//                aSCH.shutdown();            
+//        }
     }
     
     //===========================================================================

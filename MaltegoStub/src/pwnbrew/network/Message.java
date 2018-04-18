@@ -253,5 +253,14 @@ public abstract class Message {
         
         return msgBytes;
     }
+
+    //========================================================================
+    /**
+     * ID Used for canceling a message
+     * @return 
+     */
+    public int getCancelId() {
+        return 0;
+    }
     
 }/* END CLASS Message */

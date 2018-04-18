@@ -96,11 +96,6 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
             theConf.setHostId(anInteger.toString());
             theConf.writeSelfToDisk();
             
-//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//            if( aCMManager != null ){
-                //Get the port router
-                //String hostname = SocketUtilities.getHostname();
-            //passedManager.shutdown();
             ClientConfig theClientConfig = ClientConfig.getConfig();
             PortRouter aPR = passedManager.getPortRouter( theClientConfig.getSocketPort() );
             if( aPR != null ){
@@ -114,14 +109,9 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
                 //Shutdown the socket
                 SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( tempId ); 
                 aSCH.shutdown(); 
-                aPR.socketClosed(aSCH);
+                aPR.socketClosed(getSrcHostId(), tempId);
                                           
-            }
-                //Create a hello message and send it
-                //Hello helloMessage = new Hello( hostname, ConnectionManager.COMM_CHANNEL_ID );
-                //DataManager.send(passedManager, helloMessage);
-//                aCMManager.send(helloMessage);
-//            }              
+            }             
                        
         } catch (LoggableException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );

@@ -11,6 +11,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Arrays;
+import pwnbrew.MaltegoStub;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.ManagedRunnable;
@@ -131,12 +133,9 @@ public class SocksHandler extends ManagedRunnable {
                                         
         } 
         
-        //Get the control message manager
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-
         //Send message to create channel for socks proxy
         SocksOperation aSocksMsg = new SocksOperation( theDstId, SocksOperation.HANDLER_STOP, theSocksHandlerId );
-        aCMManager.send( aSocksMsg );        
+        DataManager.send( MaltegoStub.getMaltegoStub(), aSocksMsg );        
         
     }
     
@@ -269,8 +268,8 @@ public class SocksHandler extends ManagedRunnable {
         socksMsg.setDestHostId(theDstId );   
 
         //Send the message
-        SocksMessageManager.getSocksMessageManager().send(socksMsg);
-
+        DataManager.send( MaltegoStub.getMaltegoStub(), socksMsg );    
+        
     }
 
     //==========================================================================
@@ -359,16 +358,13 @@ public class SocksHandler extends ManagedRunnable {
      * @throws IOException 
      */
     public boolean connectToServer( String server, int port ) throws IOException {
-        
-        //Send message to create new sockshandler on the client
-        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
-        
+                
         //Create the connect string
         String connectStr = server + ":" +Integer.toString(port);
 
         //Send the socks start msg
         SocksCreateHandlerMsg aMsg = new SocksCreateHandlerMsg( theDstId, theSocksHandlerId, connectStr);
-        aCMM.send(aMsg);
+        DataManager.send( MaltegoStub.getMaltegoStub(), aMsg);
         
         //For for connection
         waitToBeNotified();

@@ -56,10 +56,10 @@ public abstract class ConnectionManager {
     /**
      *  Returns the SocketChannelHandler for the passed id.
      * 
-     * @param passedInt
+     * @param channelId
      * @return 
     */  
-    abstract public SocketChannelHandler getSocketChannelHandler( Integer passedInt );
+    abstract public SocketChannelHandler getSocketChannelHandler( Integer channelId );
     
      //===============================================================
      /**

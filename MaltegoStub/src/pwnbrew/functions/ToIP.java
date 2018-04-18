@@ -42,6 +42,7 @@ import java.util.Map;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.CountSeeker;
 import pwnbrew.misc.DebugPrinter;
@@ -106,72 +107,53 @@ public class ToIP extends Function implements CountSeeker {
             hostIdStr = "-1";
         }
          
-        //Create the connection
+        StubConfig theConfig = StubConfig.getConfig();
+        theConfig.setServerIp(serverIp);
+        theConfig.setSocketPort(serverPortStr);
+        Integer anInteger = SocketUtilities.getNextId();
+        theConfig.setHostId(anInteger.toString());
+        int serverPort = Integer.parseInt( serverPortStr);
+        ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
+        if(aPR == null){
+            try {
+                aPR = (ClientPortRouter)DataManager.createPortRouter(theManager, serverPort, true);
+            } catch (IOException ex) {
+                DebugPrinter.printMessage( NAME_Class, "to_ip", "Unable to create port router.", ex);
+                return;
+            }
+        }    
+        theManager.initialize();
         try {
             
-            //Set the server ip and port
-            StubConfig theConfig = StubConfig.getConfig();
-            theConfig.setServerIp(serverIp);
-            theConfig.setSocketPort(serverPortStr);
+            aPR.ensureConnectivity( serverPort, theManager );
             
-            //Set the client id
-            Integer anInteger = SocketUtilities.getNextId();
-            theConfig.setHostId(anInteger.toString());
+            //Get the client count
+            ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.NIC_COUNT,  hostIdStr);
+            DataManager.send( theManager, aMsg);
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( theManager );
-            }
-
-            //Get the port router
-            int serverPort = Integer.parseInt( serverPortStr);
-            ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
-
-            //Initiate the file transfer
-            if(aPR == null){
-                DebugPrinter.printMessage( NAME_Class, "listclients", "Unable to retrieve port router.", null);
-                return;     
-            }           
+            //Wait for the response
+            waitToBeNotified( 180 * 1000);           
             
-            //Set up the port wrapper
-            theManager.initialize();
-            
-            //Connect to server
-            try {
+            //Get the client info
+            if( theIpCount > 0 ){
                 
-                aPR.ensureConnectivity( serverPort, theManager );
-             
-                //Get the client count
-                ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.NIC_COUNT,  hostIdStr);
-                aCMManager.send(aMsg);
+                //Get each client msg
+                aMsg = new GetIPs( Constants.SERVER_ID, hostIdStr );
+                DataManager.send( theManager, aMsg);
                 
                 //Wait for the response
                 waitToBeNotified( 180 * 1000);
                 
-                //Get the client info
-                if( theIpCount > 0 ){
-                
-                    //Get each client msg                
-                    aMsg = new GetIPs( Constants.SERVER_ID, hostIdStr );
-                    aCMManager.send(aMsg);
-                
-                    //Wait for the response
-                    waitToBeNotified( 180 * 1000);
-                    
-                }
-                
-            } catch( LoggableException ex ) {
-                
-                //Create a relay object
-                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
-                MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
-
-                //Create the message list
-                malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
             }
             
-        } catch (IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex );
+        } catch( LoggableException ex ) {
+            
+            //Create a relay object
+            pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+            MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+            
+            //Create the message list
+            malMsg.getExceptionMessages().addExceptionMessage(exMsg);
         }
         
     }

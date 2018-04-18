@@ -92,6 +92,7 @@ import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.CancelSearch;
+import pwnbrew.network.control.messages.ShutdownChannel;
 import pwnbrew.network.control.messages.FileOperation;
 import pwnbrew.network.control.messages.FileSystemMsg;
 import pwnbrew.network.control.messages.GetDrives;
@@ -128,6 +129,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     //Map relating the msgid to the task
     private final Map<Integer, RemoteFileIO> theRemoteFileIOMap = new HashMap<>();    
     private final AtomicBoolean dirListingFlag = new AtomicBoolean();
+    private final AtomicBoolean clearTable = new AtomicBoolean();
     
   
     //==================================================================
@@ -218,19 +220,18 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             Integer anInteger = SocketUtilities.getNextId();
             theConfig.setHostId(anInteger.toString());
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( theManager );
-            }
-
             //Get the port router
             int serverPort = Integer.parseInt( serverPortStr);
             ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
 
             //Initiate the file transfer
             if(aPR == null){
-                DebugPrinter.printMessage( NAME_Class, "ToFileBrowser", "Unable to retrieve port router.", null);
-                return;     
+                try {
+                    aPR = (ClientPortRouter)DataManager.createPortRouter(theManager, serverPort, true);
+                } catch (IOException ex) {
+                    DebugPrinter.printMessage( NAME_Class, "to_file_browser", "Unable to create port router.", ex);
+                    return;
+                }
             }           
             
             //Setup skin
@@ -266,6 +267,14 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                 
                 //Wait to be notified
                 waitToBeNotified();
+                
+                //Close any open sockets on the client-side
+                int channelId = FileMessageManager.getFileMessageManager().getChannelId();
+                if( channelId != Constants.CHANNEL_DISCONNECTED ){
+                    int hostId = Integer.parseInt( getId() ); 
+                    ShutdownChannel aMsg = new ShutdownChannel( hostId, channelId);
+                    DataManager.send(theManager, aMsg);
+                }
     
                 //Sleep a couple seconds to make sure the message was sent
                 Thread.sleep(2000);
@@ -280,7 +289,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                 malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
             }
             
-        } catch (IOException | InterruptedException ex) {
+        } catch (InterruptedException ex) {
             DebugPrinter.printMessage( NAME_Class, "ToFileBrowser", ex.getMessage(), ex );
         }
     
@@ -599,7 +608,6 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     public void performFileOperation(byte passedOp, String filePath, String addParam ) {
         
         //Get the control message manager
-        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
         int hostId = Integer.parseInt( getId() ); 
             
         FileOperation aFileOp = new FileOperation( hostId, passedOp, filePath, addParam );
@@ -610,7 +618,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         RemoteFileSystemTask aRFST = new RemoteFileSystemTask(taskId, null, passedOp);
         addRemoteFileSystemTask(aRFST);
         
-        aCMM.send(aFileOp);
+        DataManager.send( theManager, aFileOp);
         
     }
 
@@ -634,7 +642,6 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     public void downloadFiles(List<RemoteFile> theRemoteFiles) {
                         
         //Get the control message manager
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
         for( RemoteFile aFile : theRemoteFiles) { //For each file path...
 
             try {
@@ -654,7 +661,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                 TaskGetFile theTaskMsg = new TaskGetFile( taskId, fileHashNameStr, theHostId, useCompression() );
 
                 //Send the message
-                aCMManager.send( theTaskMsg );  
+                DataManager.send( theManager, theTaskMsg);
 
             } catch ( IOException ex) {
                 JOptionPane.showMessageDialog( theFsFrame, ex.getMessage(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
@@ -731,7 +738,6 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                     JOptionPane.showMessageDialog( theFsFrame, ex.getMessage(), "Unable to open upload log file.", JOptionPane.ERROR_MESSAGE );
                 }
                 
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
                 for( Object anObj : theObjList) { //For each file path...
 
                     if(anObj instanceof File){
@@ -777,7 +783,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                                 thePFM.addOption(aTlv);
 
                                 //Send the message
-                                aCMManager.send( thePFM );  
+                                DataManager.send( theManager, thePFM);
 
                             } catch ( IOException ex) {
                                 JOptionPane.showMessageDialog( theFsFrame, ex.getMessage(), "Could not upload the file(s).", JOptionPane.ERROR_MESSAGE );
@@ -873,8 +879,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             addRemoteFileSystemTask(aRFST);
             
             //Send a message
-            ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
-            aCMM.send(aTaskMessage);
+            DataManager.send( theManager, aTaskMessage);
         }
     }
 
@@ -931,7 +936,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                     ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
                     if( aCMManager != null ){                       
                         TaskStatus cancelMessage = new TaskStatus( passedId, RemoteFileIO.TASK_CANCELLED, theHostId );
-                        aCMManager.send(cancelMessage);
+                        DataManager.send( theManager, cancelMessage );  
                     }
 
                 }
@@ -1074,7 +1079,10 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         TreePath aTreePath = theJTree.getSelectionPath();
         if( aTreePath != null ){
             DefaultMutableTreeNode node = theFsFrame.getFileTreePanel().getTreeNode( currentTreePath );    
+            
+            clearTable.set(false);
             getChildren( node );
+            clearTable.set(true);
             
             FileJTable theFileJTable = theFsFrame.getFileJTable();
             int selRow = theFileJTable.getSelectedRow();
@@ -1199,7 +1207,6 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         if( anObj instanceof IconData) 
             anObj = ((IconData)anObj).getObject();
         
-        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
         Tasking aTaskMessage = null;
         if( anObj instanceof FileNode ){
             
@@ -1225,7 +1232,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
            
             //Send a message
             addRemoteFileSystemTask(aRFST);
-            aCMM.send(aTaskMessage);
+            DataManager.send( theManager, aTaskMessage);
         }
     
     }
@@ -1235,14 +1242,9 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
      * 
      */
     @Override
-    public void cancelSearch() {
-        
-        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
-        if( aCMM != null ){
-            CancelSearch aCS = new CancelSearch(theHostId);
-            aCMM.send(aCS);
-        }
-        
+    public void cancelSearch() {        
+        CancelSearch aCS = new CancelSearch(theHostId);
+        DataManager.send( theManager, aCS);        
     }
 
     @Override
@@ -1320,7 +1322,6 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     private void downloadFilesToFolder( String rootDirStr, List<FileNode> aFileNodeList ) {
         
         //Get the control message manager
-        ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
         for( FileNode aFileNode : aFileNodeList) { //For each file path...
 
             try {
@@ -1344,7 +1345,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                     TaskGetFile theTaskMsg = new TaskGetFile( taskId, fileHashNameStr, theHostId, useCompression() );
 
                     //Send the message
-                    aCMManager.send( theTaskMsg );  
+                    DataManager.send(theManager, theTaskMsg);
                 }
 
             } catch ( IOException ex) {
@@ -1352,6 +1353,16 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             }       
 
         }
+    }
+
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public boolean shouldClearTable() {
+        return clearTable.get();
     }
 
 

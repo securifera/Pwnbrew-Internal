@@ -70,7 +70,6 @@ import pwnbrew.xml.JarItemException;
 import pwnbrew.xml.XmlObject;
 import pwnbrew.xml.XmlObjectFactory;
 import java.lang.reflect.Field;
-import java.util.logging.Logger;
 import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.xml.ServerConfig;

@@ -51,13 +51,13 @@ import javax.swing.UnsupportedLookAndFeelException;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.RemoteException;
 import pwnbrew.shell.Bash;
 import pwnbrew.shell.BashExp;
@@ -155,20 +155,19 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
             Integer anInteger = SocketUtilities.getNextId();
             theConfig.setHostId(anInteger.toString());
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( theManager );
-            }
-
             //Get the port router
             int serverPort = Integer.parseInt( serverPortStr);
             ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
 
             //Initiate the file transfer
             if(aPR == null){
-                DebugPrinter.printMessage( NAME_Class, "ToShell", "Unable to retrieve port router.", null);
-                return;     
-            }           
+                try {
+                    aPR = (ClientPortRouter)DataManager.createPortRouter(theManager, serverPort, true);
+                } catch (IOException ex) {
+                    DebugPrinter.printMessage( NAME_Class, "to_shell", "Unable to create port router.", ex);
+                    return;
+                }
+            }             
             
             //Set look and feel            
             String lookAndFeelClassStr = "javax.swing.plaf.nimbus.NimbusLookAndFeel";        
@@ -215,7 +214,7 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
                 malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
             }
             
-        } catch (IOException | InterruptedException ex) {
+        } catch (InterruptedException ex) {
             DebugPrinter.printMessage( NAME_Class, "ToShell", ex.getMessage(), ex );
         }
         
@@ -359,7 +358,7 @@ public class ToShell extends Function implements ShellJPanelListener, ShellListe
      * @return 
      */
     @Override
-    public PortManager getCommManager() {
+    public PortManager getPortManager() {
         return theManager;
     }
 

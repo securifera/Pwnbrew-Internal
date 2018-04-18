@@ -1,22 +1,17 @@
 
 package pwnbrew.functions;
 
-import com.sun.java.swing.plaf.windows.WindowsTreeUI;
 import java.io.IOException;
 import java.util.Map;
 import javax.swing.JOptionPane;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
-import javax.swing.plaf.metal.MetalIconFactory;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
-import pwnbrew.misc.Utilities;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ClientPortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 
 /**
@@ -80,73 +75,54 @@ public class Uninstall extends Function {
         if ( dialogValue != JOptionPane.YES_OPTION )
             return;
         
-        //Create the connection
+        StubConfig theConfig = StubConfig.getConfig();
+        theConfig.setServerIp(serverIp);
+        theConfig.setSocketPort(serverPortStr);
+        Integer anInteger = SocketUtilities.getNextId();
+        theConfig.setHostId(anInteger.toString());
+        int serverPort = Integer.parseInt( serverPortStr);
+        ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
+        if(aPR == null){
+            try {
+                aPR = (ClientPortRouter)DataManager.createPortRouter(theManager, serverPort, true);
+            } catch (IOException ex) {
+                DebugPrinter.printMessage( NAME_Class, "to_uninstall", "Unable to create port router.", ex);
+                return;
+            }
+        }  
+        theManager.initialize();
         try {
             
-            //Set the server ip and port
-            StubConfig theConfig = StubConfig.getConfig();
-            theConfig.setServerIp(serverIp);
-            theConfig.setSocketPort(serverPortStr);
+            aPR.ensureConnectivity( serverPort, theManager );
             
-            //Set the client id
-            Integer anInteger = SocketUtilities.getNextId();
-            theConfig.setHostId(anInteger.toString());
+            //Get the client count
+            int hostId = Integer.parseInt(hostIdStr);
+            pwnbrew.network.control.messages.Uninstall aMsg = new pwnbrew.network.control.messages.Uninstall(hostId);
+            DataManager.send( theManager, aMsg );
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( theManager );
-            }
-
-            //Get the port router
-            int serverPort = Integer.parseInt( serverPortStr);
-            ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
-
-            //Initiate the file transfer
-            if(aPR == null){
-                DebugPrinter.printMessage( NAME_Class, "Uninstall", "Unable to retrieve port router.", null);
-                return;     
-            }           
-            
-            //Set up the port wrapper
-            theManager.initialize();
-            
-            //Connect to server
             try {
-                
-                aPR.ensureConnectivity( serverPort, theManager );
-             
-                //Get the client count
-                int hostId = Integer.parseInt(hostIdStr);
-                pwnbrew.network.control.messages.Uninstall aMsg = new pwnbrew.network.control.messages.Uninstall(hostId);               
-                aCMManager.send(aMsg );    
-                
-                try {
-                    //Sleep for a few seconds
-                    Thread.sleep(3000);
-                } catch (InterruptedException ex) {
-                }
-                
-                //Create a relay object
-                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( "Client uninstalled. Please remove the client from the graph.");
-                MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
-
-                //Create the message list
-                malMsg.getExceptionMessages().addExceptionMessage(exMsg); 
-                
-                retStr = theReturnMsg.getXml();
-                            
-            } catch( LoggableException ex ) {
-                
-                //Create a relay object
-                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
-                MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
-
-                //Create the message list
-                malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
+                //Sleep for a few seconds
+                Thread.sleep(3000);
+            } catch (InterruptedException ex) {  
             }
             
-        } catch (IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex );
+            //Create a relay object
+            pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( "Client uninstalled. Please remove the client from the graph.");
+            MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+            
+            //Create the message list
+            malMsg.getExceptionMessages().addExceptionMessage(exMsg);
+            
+            retStr = theReturnMsg.getXml();
+            
+        } catch( LoggableException ex ) {
+            
+            //Create a relay object
+            pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+            MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+            
+            //Create the message list
+            malMsg.getExceptionMessages().addExceptionMessage(exMsg);
         }
     
     }

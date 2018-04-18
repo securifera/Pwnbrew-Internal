@@ -96,6 +96,7 @@ public final class PushFile extends FileMessage {
     public PushFile( int taskId, int channelId, String fileHashNameStr, long passedLength, int passedType ) { // NO_UCD (use default)
         super(MESSAGE_ID, channelId, taskId );
         
+        hashFilenameStr = fileHashNameStr;
         byte[] strBytes = fileHashNameStr.getBytes();
         ControlOption aTlv = new ControlOption(OPTION_HASH_FILENAME, strBytes);
         addOption(aTlv);       
@@ -196,9 +197,8 @@ public final class PushFile extends FileMessage {
      * Returns a string representing the file name
      *
      * @return
-     * @throws java.io.IOException
      */
-    public String getFilename() throws IOException {
+    public String getFilename() {
 
        String fileNameToSend = null;
        String hashFileNameStr = getHashFilenameString();

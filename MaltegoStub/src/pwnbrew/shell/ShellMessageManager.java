@@ -44,14 +44,9 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.shell;
 
-import pwnbrew.network.PortRouter;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import pwnbrew.StubConfig;
+import pwnbrew.MaltegoStub;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.network.shell.messages.ProcessMessage;
 
 /**
  *
@@ -80,31 +75,15 @@ public class ShellMessageManager extends DataManager {
         //Set the data handler
         setDataHandler(theMessageHandler);
     }  
-    
-    // ==========================================================================
-    /**
-     *   Creates a ShellMessageManager
-     * @param passedCommManager
-     * @return 
-     * @throws java.io.IOException 
-     */
-    public synchronized static ShellMessageManager initialize( PortManager passedCommManager ) throws IOException {
-
-        if( theShellMsgManager == null ) {
-            theShellMsgManager = new ShellMessageManager( passedCommManager );
-            createPortRouter( passedCommManager, StubConfig.getConfig().getSocketPort(), true );
-        }
-        
-        return theShellMsgManager;
-
-    }/* END initialize() */
-    
+       
     // ==========================================================================
     /**
      *   Gets the ShellMessageManager
      * @return 
      */
     public synchronized static ShellMessageManager getShellMessageManager(){
+        if( theShellMsgManager == null )
+            theShellMsgManager = new ShellMessageManager( MaltegoStub.getMaltegoStub() );
         return theShellMsgManager;
     }
     
@@ -119,30 +98,30 @@ public class ShellMessageManager extends DataManager {
         theShellMsgManager.getDataHandler().processData(msgBytes);        
     }
     
-    //===============================================================
-    /**
-     *   Send the message out the given channel.
-     *
-     * @param passedMessage
-     * @throws java.io.IOException
-    */
-    public void send( ProcessMessage passedMessage ) throws IOException {
-
-        
-        ByteBuffer aByteBuffer;
-        int msgLen = passedMessage.getLength();
-        aByteBuffer = ByteBuffer.allocate( msgLen );
-        passedMessage.append(aByteBuffer);
-
-        
-        //Get the port router
-        PortRouter thePR = thePortManager.getPortRouter(  StubConfig.getConfig().getSocketPort() );
-                
-        //Queue the message to be sent
-        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId() );
-//        DebugPrinter.printMessage(this, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-          
-    }
+//    //===============================================================
+//    /**
+//     *   Send the message out the given channel.
+//     *
+//     * @param passedMessage
+//     * @throws java.io.IOException
+//    */
+//    public void send( ProcessMessage passedMessage ) throws IOException {
+//
+//        
+//        ByteBuffer aByteBuffer;
+//        int msgLen = passedMessage.getLength();
+//        aByteBuffer = ByteBuffer.allocate( msgLen );
+//        passedMessage.append(aByteBuffer);
+//
+//        
+//        //Get the port router
+//        PortRouter thePR = thePortManager.getPortRouter(  StubConfig.getConfig().getSocketPort() );
+//                
+//        //Queue the message to be sent
+//        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId() );
+////        DebugPrinter.printMessage(this, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
+//          
+//    }
     
     //===========================================================================
     /*

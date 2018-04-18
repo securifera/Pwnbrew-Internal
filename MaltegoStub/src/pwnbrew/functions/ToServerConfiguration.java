@@ -47,11 +47,11 @@ import javax.swing.JFileChooser;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.AddToJarLibrary;
 import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.network.control.messages.DeleteJarItem;
@@ -124,68 +124,50 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
             return;
         }
          
-        //Create the connection
+        StubConfig theConfig = StubConfig.getConfig();
+        theConfig.setServerIp(serverIp);
+        theConfig.setSocketPort(serverPortStr);
+        Integer anInteger = SocketUtilities.getNextId();
+        theConfig.setHostId(anInteger.toString());
+        int serverPort = Integer.parseInt( serverPortStr);
+        ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
+        if(aPR == null){
+            try {
+                aPR = (ClientPortRouter)DataManager.createPortRouter(theManager, serverPort, true);
+            } catch (IOException ex) {
+                DebugPrinter.printMessage( NAME_Class, "to_server_config", "Unable to create port router.", ex);
+                return;
+            }
+        }  
+        
+        theManager.initialize();
         try {
             
-            //Set the server ip and port
-            StubConfig theConfig = StubConfig.getConfig();
-            theConfig.setServerIp(serverIp);
-            theConfig.setSocketPort(serverPortStr);
+            aPR.ensureConnectivity( serverPort, theManager );
             
-            //Set the client id
-            Integer anInteger = SocketUtilities.getNextId();
-            theConfig.setHostId(anInteger.toString());
+            String passedName = objectMap.get( Constants.NAME);
+            optionsGui = new OptionsJFrame( passedName, this );
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( theManager );
-            }
-
-            //Get the port router
-            int serverPort = Integer.parseInt( serverPortStr);
-            ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
-
-            //Initiate the file transfer
-            if(aPR == null){
-                DebugPrinter.printMessage( NAME_Class, "ToServerConfiguration", "Unable to retrieve port router.", null);
-                return;     
-            }           
+            //Get the jar items
+            getJarItems();           
             
-            //Set up the port wrapper
-            theManager.initialize();
+            //Get the network settings
+            getNetworkSettings();
             
-            //Connect to server
-            try {
-                
-                aPR.ensureConnectivity( serverPort, theManager );
-                
-                String passedName = objectMap.get( Constants.NAME);
-                optionsGui = new OptionsJFrame( passedName, this );
-                
-                //Get the jar items
-                getJarItems();
-                
-                //Get the network settings
-                getNetworkSettings();
-                
-                //Show the gui
-                optionsGui.setVisible(true);
-                
-                //Wait to be notified
-                waitToBeNotified();
-                
-            } catch( LoggableException ex ) {
-                
-                //Create a relay object
-                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
-                MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
-
-                //Create the message list
-                malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
-            }
+            //Show the gui
+            optionsGui.setVisible(true);
             
-        } catch (IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "ToServerConfiguration", ex.getMessage(), ex );
+            //Wait to be notified
+            waitToBeNotified();
+            
+        } catch( LoggableException ex ) {
+            
+            //Create a relay object
+            pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+            MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+            
+            //Create the message list
+            malMsg.getExceptionMessages().addExceptionMessage(exMsg);
         }
         
     }
@@ -250,21 +232,10 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
      */
     @Override
     public void getJarItems() {
-        
-        try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( theManager );
-            }
-            
-            //Send the msg
-            GetJarItems aMsg = new GetJarItems(Constants.SERVER_ID );
-            aCMManager.send(aMsg);
-            
-        } catch (IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "getJarItems", ex.getMessage(), ex );
-        }
+              
+        //Send the msg
+        GetJarItems aMsg = new GetJarItems(Constants.SERVER_ID );
+        DataManager.send( theManager, aMsg);
         
     }
     
@@ -273,21 +244,10 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
      * 
      */
     public void getNetworkSettings() {
-        
-        try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( theManager );
-            }
-            
-            //Send the msg
-            GetNetworkSettings aMsg = new GetNetworkSettings(Constants.SERVER_ID );
-            aCMManager.send(aMsg);
-            
-        } catch (IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "getJarItems", ex.getMessage(), ex );
-        }
+               
+        //Send the msg
+        GetNetworkSettings aMsg = new GetNetworkSettings(Constants.SERVER_ID );
+        DataManager.send( theManager, aMsg);
         
     }
 
@@ -315,15 +275,10 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
     @Override
     public void sendDeleteJarItemMsg(String jarName, String jarType, String jvmVersion, String jarVersion) {
         try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( theManager );
-            }
-            
+                        
             //Send the msg
             DeleteJarItem aMsg = new DeleteJarItem(Constants.SERVER_ID, jarName, jarType, jvmVersion, jarVersion );
-            aCMManager.send(aMsg);
+            DataManager.send( theManager, aMsg);
             
         } catch (IOException ex) {
             DebugPrinter.printMessage( NAME_Class, "deleteJarItem", ex.getMessage(), ex );
@@ -340,15 +295,12 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
      */
     @Override
     public void sendCertInfo(int serverPort, String issueeDN, String issuerDN, int days) {
-         try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null )
-                aCMManager = ControlMessageManager.initialize( theManager );            
+        
+        try {    
             
             //Send the msg
             NetworkSettingsMsg aMsg = new NetworkSettingsMsg( Constants.SERVER_ID, serverPort, issueeDN, issuerDN, "", Integer.toString(days) );
-            aCMManager.send(aMsg);
+            DataManager.send( theManager, aMsg);
             
         } catch (IOException ex) {
             DebugPrinter.printMessage( NAME_Class, "deleteJarItem", ex.getMessage(), ex );
@@ -366,11 +318,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
     public void sendJarFile(File userSelectedFile, String selVal) {
         
         try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null )
-                aCMManager = ControlMessageManager.initialize( theManager );            
-            
+               
             int taskId = SocketUtilities.getNextId();
             
             //Add to the map
@@ -378,13 +326,12 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
                 taskIdToStringMap.put(taskId, new String[]{selVal});
             }
 
-            //Queue the file to be sent
-            
+            //Queue the file to be sent            
             String fileHashNameStr = new StringBuilder().append("0").append(":").append(userSelectedFile.getAbsolutePath()).toString();
             PushFile thePFM = new PushFile( taskId, fileHashNameStr, userSelectedFile.length(), PushFile.JAR_UPLOAD, Constants.SERVER_ID );
 
             //Send the message
-            aCMManager.send( thePFM );  
+            DataManager.send( theManager, thePFM );  
             
         } catch (IOException ex) {
             DebugPrinter.printMessage( NAME_Class, "sendJarFile", ex.getMessage(), ex );
@@ -408,9 +355,6 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
             try {
             
                 String tempStr = tempStrArr[0];
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager == null )
-                    aCMManager = ControlMessageManager.initialize( theManager );            
 
                 //Queue the file to be sent
                 ControlMessage aMsg = null;
@@ -422,7 +366,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
                 
                 //Send the message
                 if( aMsg != null )
-                    aCMManager.send( aMsg );
+                    DataManager.send( theManager, aMsg );
                             
             } catch (IOException ex) {
                 DebugPrinter.printMessage( NAME_Class, "jarFileSent", ex.getMessage(), ex );
@@ -456,10 +400,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
     public void sendCertFile( File userSelectedFile, String string ) {
         
         try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null )
-                aCMManager = ControlMessageManager.initialize( theManager );            
+                  
             
             int taskId = SocketUtilities.getNextId();
             
@@ -473,7 +414,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
             PushFile thePFM = new PushFile( taskId, fileHashNameStr, userSelectedFile.length(), PushFile.JAR_UPLOAD, Constants.SERVER_ID );
 
             //Send the message
-            aCMManager.send( thePFM );  
+            DataManager.send( theManager, thePFM );
             
         } catch (IOException ex) {
             DebugPrinter.printMessage( NAME_Class, "sendJarFile", ex.getMessage(), ex );
@@ -494,11 +435,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
     public void getStagerFile(String connectStr, String passedName, String passedType, 
             String passedJvmVersion, String passedJarVersion, String hostHeader ) {
         try {
-            
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null )
-                aCMManager = ControlMessageManager.initialize( theManager );            
-            
+                              
             int taskId = SocketUtilities.getNextId();
             String[] stagerArr;
             if( hostHeader != null){
@@ -516,7 +453,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
             GetJarItemFile getStagerMsg = new GetJarItemFile( taskId, Constants.SERVER_ID, passedName, passedType, passedJvmVersion, passedJarVersion );
 
             //Send the message
-            aCMManager.send( getStagerMsg );  
+            DataManager.send( theManager, getStagerMsg );
             
         } catch (IOException ex) {
             DebugPrinter.printMessage( NAME_Class, "sendJarFile", ex.getMessage(), ex );

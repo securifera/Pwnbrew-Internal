@@ -84,4 +84,6 @@ public interface FileBrowserListener extends TaskManager {
 
     public void downloadFolders(List<RemoteFile> theFolderList);
 
+    public boolean shouldClearTable();
+
 }

@@ -217,9 +217,9 @@ public class FileMessageManager extends DataManager {
     protected void removeFileReceiver( int fileId, int channelId) {
         synchronized( fileId_FileReceiverMap ){
             fileId_FileReceiverMap.remove(fileId );
-            if( fileId_FileReceiverMap.isEmpty() && taskId_fileId_FileSenderMap.isEmpty() && channelId == retChannelId.get() ){
-                retChannelId.set(ConnectionManager.CHANNEL_DISCONNECTED);
-            }
+//            if( fileId_FileReceiverMap.isEmpty() && taskId_fileId_FileSenderMap.isEmpty() && channelId == retChannelId.get() ){
+//                retChannelId.set(ConnectionManager.CHANNEL_DISCONNECTED);
+//            }
         }
     }
     
@@ -330,7 +330,6 @@ public class FileMessageManager extends DataManager {
     public void cancelFileTransfer( int taskId ) {
         
         //Cancel file receives
-        int channelId = 0;
         synchronized( fileId_FileReceiverMap ){
             
             List<Integer> fileIds = new ArrayList<>(fileId_FileReceiverMap.keySet());
@@ -340,7 +339,6 @@ public class FileMessageManager extends DataManager {
                 int receiverId = aReceiver.getTaskId();
                 if( receiverId == taskId ){
                     aReceiver.cleanupFileTransfer();
-                    channelId = aReceiver.getChannelId();
                     fileId_FileReceiverMap.remove( anId );
                 }
                 
@@ -353,32 +351,33 @@ public class FileMessageManager extends DataManager {
             List<Integer> taskIds = new ArrayList<>(taskId_fileId_FileSenderMap.keySet());
             for( Integer aTaskId : taskIds ){
                 
-                Map<Integer, FileSender> aSenderMap = taskId_fileId_FileSenderMap.get(aTaskId);
-                List<Integer> aFileId = new ArrayList<>(aSenderMap.keySet());
-                for( Integer anId : aFileId ){
-                    FileSender aSender = aSenderMap.get(anId);
-                    channelId = aSender.getChannelId();
-                    aSender.shutdown();
-                    aSenderMap.remove( anId );
+                //Only do specified task id
+                if( aTaskId == taskId ){
+                    
+                    Map<Integer, FileSender> aSenderMap = taskId_fileId_FileSenderMap.get(aTaskId);
+                    List<Integer> aFileIdList = new ArrayList<>(aSenderMap.keySet());
+                    for( Integer anId : aFileIdList ){
+                        FileSender aSender = aSenderMap.get(anId);
+                        int channelId = aSender.getChannelId();
+                        aSender.shutdown();
+                        aSenderMap.remove( anId );
+
+                        //Clear the send queue of all fileIds associated with the cancelled sender
+                        PortRouter aPR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+                        SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler(channelId);
+
+                        //Remove any packets with the particular file id
+                        if( aSCH != null )
+                            aSCH.cancelSend(anId);
+
+                    }
+
+                    //Remove from the map
+                    taskId_fileId_FileSenderMap.remove(aTaskId);
                 }
-                
-                //Remove from the map
-                taskId_fileId_FileSenderMap.remove(aTaskId);
             }
         }
-        
-        //Clear the send buffer
-        if( channelId != 0 ){
-            PortRouter aPR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
-            SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler(channelId);
-
-            //Set the wrapper
-            if( aSCH != null ){
-                aSCH.clearQueue();
-            }  
-        }  
-        
-        
+                
     }
 
     //========================================================================
@@ -418,22 +417,25 @@ public class FileMessageManager extends DataManager {
                                
                 //Get the channel id and determine what to do
                 synchronized(retChannelId){
-                    int channelId = retChannelId.get();
+                    int channelId = getChannelId();
                     switch (channelId) {
                         case -1:
                             //Make sure to set channel Id before sending
                             queueFileDownload(thePFM);
+                            DebugPrinter.printMessage(  this.getClass().getSimpleName(), "Calling connection function.");
                             //Start connection
                             FileConnectionCallback aFCC = new FileConnectionCallback(serverIp, socketPort);
                             aPR.ensureConnectivity( aFCC );
-                            retChannelId.set(0);
+                            setChannelId(0);
                             break;
                         case 0:
                             //Queue file download
                             queueFileDownload(thePFM);
                             break;
                         default:
-                            thePFM.setChannelId(channelId);
+                            thePFM.setFileChannelId(channelId);
+                            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sending PushFile for " + 
+                        thePFM.getFilename() + " Id: " + Integer.toString( thePFM.getFileChannelId()));
                             DataManager.send(aPM, thePFM);
                             break;
                     }
@@ -460,7 +462,7 @@ public class FileMessageManager extends DataManager {
         
         //Get the channel id and determine what to do
         synchronized(retChannelId){
-            int channelId = retChannelId.get();
+            int channelId = getChannelId();
             switch (channelId) {
                 case ConnectionManager.CHANNEL_DISCONNECTED:
                     //Make sure to set channel Id before sending
@@ -468,7 +470,7 @@ public class FileMessageManager extends DataManager {
                     //Start connection
                     FileConnectionCallback aFCC = new FileConnectionCallback(serverIp, socketPort);
                     aPR.ensureConnectivity( aFCC );
-                    retChannelId.set(0);
+                    setChannelId(0);
                     break;
                 case 0:
                     //Queue file download
@@ -496,10 +498,25 @@ public class FileMessageManager extends DataManager {
     public void removeFileSender(int fileId, int channelId ) {
         synchronized( taskId_fileId_FileSenderMap ){
             taskId_fileId_FileSenderMap.remove(fileId );
-            if( fileId_FileReceiverMap.isEmpty() && taskId_fileId_FileSenderMap.isEmpty() && channelId == retChannelId.get() ){
-                retChannelId.set(ConnectionManager.CHANNEL_DISCONNECTED);
-            }
         }
+    }
+    
+    //=========================================================================
+    /**
+     * 
+     * @param passedInt 
+     */
+    public void setChannelId( int passedInt ){
+        retChannelId.set(passedInt);   
+    }
+    
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getChannelId(){
+        return retChannelId.get();   
     }
 
     //==========================================================================
@@ -531,9 +548,11 @@ public class FileMessageManager extends DataManager {
      */
     public void connectionCallback(int theChannelId) {
         
+        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Connection callback Id: " + Integer.toString( theChannelId));
+        
         //Set the channelId
         synchronized(retChannelId){
-            retChannelId.set(theChannelId);
+            setChannelId(theChannelId);
         }
         
         //Get the port manager
@@ -545,6 +564,8 @@ public class FileMessageManager extends DataManager {
                 PushFile aPF = pendingDownloads.poll();
                 if( aPF != null ){
                     aPF.setFileChannelId(theChannelId);
+                    DebugPrinter.printMessage( this.getClass().getSimpleName(), "Sending PushFile for " + 
+                        aPF.getFilename() + " Id: " + Integer.toString( aPF.getFileChannelId()));
                     DataManager.send(aPM, aPF);    
                 }          
             }

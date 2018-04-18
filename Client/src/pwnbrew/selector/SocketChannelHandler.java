@@ -46,7 +46,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.selector;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.SelectionKey;
@@ -67,6 +66,7 @@ import pwnbrew.network.PortRouter;
 import pwnbrew.network.PortWrapper;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.socket.SocketChannelWrapper;
 import pwnbrew.utilities.Constants;
@@ -96,7 +96,7 @@ public class SocketChannelHandler implements Selectable {
     private int hostId = -1;
     private int state = 0;
     
-    private final Queue< byte[] > pendingByteArrs = new LinkedList<>();
+    private final Queue< ByteQueueItem > pendingByteQueueItems = new LinkedList<>();
     
     //The byte buffer for holding received bytes
     private byte currMsgType = 0;
@@ -153,7 +153,7 @@ public class SocketChannelHandler implements Selectable {
                                         
             //Flush any remaining packets from the queue in the handler
             shutdown();
-            thePortRouter.socketClosed( this );
+            thePortRouter.socketClosed( hostId, channelId );
             
         } 
 
@@ -211,8 +211,8 @@ public class SocketChannelHandler implements Selectable {
     */
     public void clearQueue() {
 
-        synchronized (pendingByteArrs) {
-            pendingByteArrs.clear();
+        synchronized (pendingByteQueueItems) {
+            pendingByteQueueItems.clear();
         }
     }
     
@@ -221,13 +221,15 @@ public class SocketChannelHandler implements Selectable {
     *  Queues a byte array to be sent out the specified socket channel
     *
     * @param data
+     * @param cancelId
     */
-    public void queueBytes( byte[] data) {
+    public void queueBytes( byte[] data, int cancelId ) {
 
+        ByteQueueItem anItem = new ByteQueueItem(data, cancelId);
         SelectionRouter aSR = thePortRouter.getSelRouter();
         SocketChannel aSC = getSocketChannel();
-        synchronized (pendingByteArrs) {
-            pendingByteArrs.add(data);
+        synchronized (pendingByteQueueItems) {
+            pendingByteQueueItems.add(anItem);
             if( ( aSR.interestOps( aSC) & SelectionKey.OP_WRITE ) == 0){
                 aSR.changeOps( aSC, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
             }
@@ -265,7 +267,7 @@ public class SocketChannelHandler implements Selectable {
 	
         try {
             
-            if ( !theSCW.doHandshake(sk)) {
+            if ( theSCW != null && !theSCW.doHandshake(sk)) {
                 return;
             }
             
@@ -275,226 +277,229 @@ public class SocketChannelHandler implements Selectable {
             throw new IOException(ex);
         }       
 
-        theSCW.clear();
-        int bytesRead = theSCW.read();        
-        if(bytesRead > 0){
+        if( theSCW != null ){
             
-            //Copy over the bytes
-            ByteBuffer readByteBuf = ByteBuffer.wrap( Arrays.copyOf( theSCW.getReadBuf().array(), bytesRead ) );
-//            DebugPrinter.printMessage(this,  "Received Bytes.");
-            
-            //Check if a port wrapper has been assigned
-            PortWrapper aPortWrapper = DataManager.getPortWrapper( getPort() );
-            if( aPortWrapper == null || !isWrapping() ){  
-                
-                //Until the message length is populated
-                ByteBuffer msgLenBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE );
-                while( readByteBuf.hasRemaining() ){
-                    
-                    //See if we are already in the middle of receive
-                    if( localMsgBuffer == null ){
-                        
-                        //Get the message type and ensure it is supported
-                        if( currMsgType == 0 ){
-                            currMsgType = readByteBuf.get();
-                            if( !DataManager.isValidType( currMsgType ) ){
-                                 
-                                //Print error message
-                                currMsgType = 0;
-                                RemoteLog.log( Level.SEVERE, NAME_Class, "handleBytes()", "Encountered unrecognized data on the socket channel.", null);
-                                return;
-                                
-                            }
-                        }
-                        
-                        //Copy over the bytes until we get how many we need
-                        while( msgLenBuffer.hasRemaining() && readByteBuf.hasRemaining() ){
-                            msgLenBuffer.put( readByteBuf.get());
-                        }
-                        
-                        //Convert to the counter
-                        if( !msgLenBuffer.hasRemaining() ){
-                            //Get the counter
-                            byte[] msgLen = Arrays.copyOf( msgLenBuffer.array(), msgLenBuffer.capacity());
-                            localMsgBuffer = ByteBuffer.allocate( SocketUtilities.byteArrayToInt(msgLen) );
-                            msgLenBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE );
-                        }
-                        
-                        //Break out of the loop until more bytes are available
-                        if( !readByteBuf.hasRemaining()){
-                            return;
-                        }
+            theSCW.clear();
+            int bytesRead = theSCW.read();        
+            if(bytesRead > 0){
 
-                    }   
-                    
-                    //Add the bytes to the msg buffer
-                    if( localMsgBuffer != null ){
-                        //Copy over the bytes until we get how many we need
-                        int remBytes = localMsgBuffer.remaining();
-                        if( remBytes >= readByteBuf.remaining()){
-                            
-                            //Put all the bytes in there
-                            localMsgBuffer.put(readByteBuf);
-                        } else {  //if( remBytes < readByteBuf.remaining()){
-                            //Put as many as we can
-                            byte[] remBytesArr = new byte[remBytes];
-                            readByteBuf.get(remBytesArr);
-                            localMsgBuffer.put(remBytesArr);
-                        }
-                        
-                        //If it's full then process it
-                        if( !localMsgBuffer.hasRemaining() ){
+                //Copy over the bytes
+                ByteBuffer readByteBuf = ByteBuffer.wrap( Arrays.copyOf( theSCW.getReadBuf().array(), bytesRead ) );
+    //            DebugPrinter.printMessage(this,  "Received Bytes.");
 
-                            //copy into byte array
-                            byte [] msgByteArr = Arrays.copyOf( localMsgBuffer.array(), localMsgBuffer.position());
-                            if( msgByteArr.length > 3 ){
+                //Check if a port wrapper has been assigned
+                PortWrapper aPortWrapper = DataManager.getPortWrapper( getPort() );
+                if( aPortWrapper == null || !isWrapping() ){  
 
-                                //Get dest id
-                                byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
-                                int dstId = SocketUtilities.byteArrayToInt(dstHostId);
-                                
-                                if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
-                                    
-                                    RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));                                                
-                                    int srcHostId = aMsg.getSrcHostId();
-                                    int chanId = aMsg.getChannelId();
-                                    
-                                    //If register from pivot client
-                                    if( aMsg.getFunction() == RegisterMessage.REG ){
-                                        //Register the relay
-                                        ServerPortRouter aSPR = (ServerPortRouter)getPortRouter();
-                                        if( aSPR.registerHandler(srcHostId, chanId, this) ){
-                                        
-                                            //Send to the server
-                                            aMsg.setDestHostId(-1);
+                    //Until the message length is populated
+                    ByteBuffer msgLenBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE );
+                    while( readByteBuf.hasRemaining() ){
 
-                                            //Try the default port router
-                                            ClientConfig theConf = ClientConfig.getConfig();
-                                            int theSocketPort = theConf.getSocketPort();
-                                            String serverIp = theConf.getServerIp();
-                                            PortRouter thePR = aSPR.getPortManager().getPortRouter( theSocketPort );
+                        //See if we are already in the middle of receive
+                        if( localMsgBuffer == null ){
 
-                                            //Get the connection manager for the server
-                                            ConnectionManager aCM = thePR.getConnectionManager(-1);
-                                            if( aCM != null ){
-                                                 
-                                                //Create a new channel if not comms
-                                                int srcChannelId = aMsg.getChannelId();
-                                                if( srcChannelId != ConnectionManager.COMM_CHANNEL_ID ){
-                                                                                                        
-                                                    //Send back the ack
-                                                    RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, aMsg.getStlth(), chanId);
-                                                    retMsg.setDestHostId(srcHostId);
-                                                    //Try to send back
-                                                    DataManager.send(aSPR.getPortManager(), retMsg);
-                                                    
-                                                    //Turn off wrapping if not stlth
-                                                    if( !aMsg.keepWrapping() )
-                                                        setWrapping( false);
-                                                         
-                                                    if( thePR instanceof ClientPortRouter ){
-                                                        
-                                                        //Create callback
-                                                        SocketChannelCallback aSCC = new SocketChannelCallback(serverIp, theSocketPort, aMsg, aCM);
-                                                                                                             
-                                                        //TODO need to check if the id is taken
-                                                        ClientPortRouter aCPR = (ClientPortRouter)thePR;
-                                                        aCPR.ensureConnectivity(aSCC );
+                            //Get the message type and ensure it is supported
+                            if( currMsgType == 0 ){
+                                currMsgType = readByteBuf.get();
+                                if( !DataManager.isValidType( currMsgType ) ){
 
-                                                    }
-                                                } else {
-                                                    
-                                                    SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
-                                                    if( srvHandler != null ){
-                                                        byte[] regBytes = aMsg.getBytes();
-                                                        srvHandler.queueBytes(regBytes);
-                                                    }
-                                                }
-                                            }
+                                    //Print error message
+                                    currMsgType = 0;
+                                    RemoteLog.log( Level.SEVERE, NAME_Class, "handleBytes()", "Encountered unrecognized data on the socket channel.", null);
+                                    return;
 
-                                        }
-                                    
-                                    } else if( aMsg.getFunction() == RegisterMessage.REG_ACK ) {
-                                        
-                                        DebugPrinter.printMessage(NAME_Class, "Received register acknowledge message.");
-                                        //Process it if it's meant this host or send it on
-                                        if( dstId == hostId )
-                                            aMsg.evaluate(thePortRouter.getPortManager());
-                                        else {
-                                            
-                                            //Send the message then set wrapping
-                                            DataManager.send( getPortRouter().getPortManager(), aMsg);
-                                            RelayManager aRelayManager = RelayManager.getRelayManager();
-                                            if( aRelayManager != null ){
-                                                ServerPortRouter thePR = aRelayManager.getServerPortRouter();
-                                                ConnectionManager aCM = thePR.getConnectionManager(dstId);    
-                                                
-                                                //Get the socket handler
-                                                if( aCM != null ){
-                                                    SocketChannelHandler theHandler = aCM.getSocketChannelHandler( chanId );
-                                                    if( !aMsg.keepWrapping() && theHandler != null )
-                                                        theHandler.setWrapping(false);   
-                                                                                                     
-                                                }
-                                            }
-                                        }
-                                        
-                                    }
-                                                                        
-                                } else {
-                                    
-                                     if( currMsgType == Message.STAGING_MESSAGE_TYPE ){
-
-                                        //Get src id
-                                        byte[] srcHostIdArr = Arrays.copyOfRange(msgByteArr, 0, 4);
-                                        int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);
-
-                                        //Register the relay
-                                        PortRouter aPR = getPortRouter();
-                                        if( aPR instanceof ServerPortRouter){                                            
-                                            ServerPortRouter aSPR = (ServerPortRouter)aPR;
-                                            if( !aSPR.registerHandler(srcHostId, ConnectionManager.STAGE_CHANNEL_ID, this) )
-                                                return;
-                                        }
-
-                                    }
-                                    
-                                    try{
-                                        DataManager.routeMessage( thePortRouter, currMsgType, dstId, msgByteArr );                      
-                                    } catch(Exception ex ){
-                                        RemoteLog.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
-                                    }
                                 }
                             }
 
-                            //Reset the counter
-                            currMsgType = 0;
-                            localMsgBuffer = null;
-                        }
-                        
-                    }
-                
-                }
-                
-            } else {
-                
-                //Unwrap and process the data
-                aPortWrapper.processData( this, readByteBuf );
-            }  
+                            //Copy over the bytes until we get how many we need
+                            while( msgLenBuffer.hasRemaining() && readByteBuf.hasRemaining() ){
+                                msgLenBuffer.put( readByteBuf.get());
+                            }
 
-        
-        } else  if(bytesRead == 0){
-            
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                ex = null;
+                            //Convert to the counter
+                            if( !msgLenBuffer.hasRemaining() ){
+                                //Get the counter
+                                byte[] msgLen = Arrays.copyOf( msgLenBuffer.array(), msgLenBuffer.capacity());
+                                localMsgBuffer = ByteBuffer.allocate( SocketUtilities.byteArrayToInt(msgLen) );
+                                msgLenBuffer = ByteBuffer.allocate( Message.MSG_LEN_SIZE );
+                            }
+
+                            //Break out of the loop until more bytes are available
+                            if( !readByteBuf.hasRemaining()){
+                                return;
+                            }
+
+                        }   
+
+                        //Add the bytes to the msg buffer
+                        if( localMsgBuffer != null ){
+                            //Copy over the bytes until we get how many we need
+                            int remBytes = localMsgBuffer.remaining();
+                            if( remBytes >= readByteBuf.remaining()){
+
+                                //Put all the bytes in there
+                                localMsgBuffer.put(readByteBuf);
+                            } else {  //if( remBytes < readByteBuf.remaining()){
+                                //Put as many as we can
+                                byte[] remBytesArr = new byte[remBytes];
+                                readByteBuf.get(remBytesArr);
+                                localMsgBuffer.put(remBytesArr);
+                            }
+
+                            //If it's full then process it
+                            if( !localMsgBuffer.hasRemaining() ){
+
+                                //copy into byte array
+                                byte [] msgByteArr = Arrays.copyOf( localMsgBuffer.array(), localMsgBuffer.position());
+                                if( msgByteArr.length > 3 ){
+
+                                    //Get dest id
+                                    byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
+                                    int dstId = SocketUtilities.byteArrayToInt(dstHostId);
+
+                                    if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
+
+                                        RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));                                                
+                                        int srcHostId = aMsg.getSrcHostId();
+                                        int chanId = aMsg.getChannelId();
+
+                                        //If register from pivot client
+                                        if( aMsg.getFunction() == RegisterMessage.REG ){
+                                            //Register the relay
+                                            ServerPortRouter aSPR = (ServerPortRouter)getPortRouter();
+                                            if( aSPR.registerHandler(srcHostId, chanId, this) ){
+
+                                                //Send to the server
+                                                aMsg.setDestHostId(-1);
+
+                                                //Try the default port router
+                                                ClientConfig theConf = ClientConfig.getConfig();
+                                                int theSocketPort = theConf.getSocketPort();
+                                                String serverIp = theConf.getServerIp();
+                                                PortRouter thePR = aSPR.getPortManager().getPortRouter( theSocketPort );
+
+                                                //Get the connection manager for the server
+                                                ConnectionManager aCM = thePR.getConnectionManager(-1);
+                                                if( aCM != null ){
+
+                                                    //Create a new channel if not comms
+                                                    int srcChannelId = aMsg.getChannelId();
+                                                    if( srcChannelId != ConnectionManager.COMM_CHANNEL_ID ){
+
+                                                        //Send back the ack
+                                                        RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_ACK, aMsg.getStlth(), chanId);
+                                                        retMsg.setDestHostId(srcHostId);
+                                                        //Try to send back
+                                                        DataManager.send(aSPR.getPortManager(), retMsg);
+
+                                                        //Turn off wrapping if not stlth
+                                                        if( !aMsg.keepWrapping() )
+                                                            setWrapping( false);
+
+                                                        if( thePR instanceof ClientPortRouter ){
+
+                                                            //Create callback
+                                                            SocketChannelCallback aSCC = new SocketChannelCallback(serverIp, theSocketPort, aMsg, aCM);
+
+                                                            //TODO need to check if the id is taken
+                                                            ClientPortRouter aCPR = (ClientPortRouter)thePR;
+                                                            aCPR.ensureConnectivity(aSCC );
+
+                                                        }
+                                                    } else {
+
+                                                        SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );
+                                                        if( srvHandler != null ){
+                                                            byte[] regBytes = aMsg.getBytes();
+                                                            srvHandler.queueBytes(regBytes, 0);
+                                                        }
+                                                    }
+                                                }
+
+                                            }
+
+                                        } else if( aMsg.getFunction() == RegisterMessage.REG_ACK ) {
+
+                                            DebugPrinter.printMessage(NAME_Class, "Received register acknowledge message.");
+                                            //Process it if it's meant this host or send it on
+                                            if( dstId == hostId )
+                                                aMsg.evaluate(thePortRouter.getPortManager());
+                                            else {
+
+                                                //Send the message then set wrapping
+                                                DataManager.send( getPortRouter().getPortManager(), aMsg);
+                                                RelayManager aRelayManager = RelayManager.getRelayManager();
+                                                if( aRelayManager != null ){
+                                                    ServerPortRouter thePR = aRelayManager.getServerPortRouter();
+                                                    ConnectionManager aCM = thePR.getConnectionManager(dstId);    
+
+                                                    //Get the socket handler
+                                                    if( aCM != null ){
+                                                        SocketChannelHandler theHandler = aCM.getSocketChannelHandler( chanId );
+                                                        if( !aMsg.keepWrapping() && theHandler != null )
+                                                            theHandler.setWrapping(false);   
+
+                                                    }
+                                                }
+                                            }
+
+                                        }
+
+                                    } else {
+
+                                         if( currMsgType == Message.STAGING_MESSAGE_TYPE ){
+
+                                            //Get src id
+                                            byte[] srcHostIdArr = Arrays.copyOfRange(msgByteArr, 0, 4);
+                                            int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);
+
+                                            //Register the relay
+                                            PortRouter aPR = getPortRouter();
+                                            if( aPR instanceof ServerPortRouter){                                            
+                                                ServerPortRouter aSPR = (ServerPortRouter)aPR;
+                                                if( !aSPR.registerHandler(srcHostId, ConnectionManager.STAGE_CHANNEL_ID, this) )
+                                                    return;
+                                            }
+
+                                        }
+
+                                        try{
+                                            DataManager.routeMessage( thePortRouter, currMsgType, dstId, msgByteArr );                      
+                                        } catch(Exception ex ){
+                                            RemoteLog.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
+                                        }
+                                    }
+                                }
+
+                                //Reset the counter
+                                currMsgType = 0;
+                                localMsgBuffer = null;
+                            }
+
+                        }
+
+                    }
+
+                } else {
+
+                    //Unwrap and process the data
+                    aPortWrapper.processData( this, readByteBuf );
+                }  
+
+
+            } else  if(bytesRead == 0){
+
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    ex = null;
+                }
+
+            } else if(bytesRead == -1){
+
+               //Socket has been closed on the other side
+                throw new IOException("Socket closed from other end.");
             }
-            
-        } else if(bytesRead == -1){
-            
-           //Socket has been closed on the other side
-            throw new IOException("Socket closed from other end.");
         }
 
     }
@@ -511,15 +516,16 @@ public class SocketChannelHandler implements Selectable {
         //Sending handshake messages as needed
         if( canSend( theSelKey ) ){          
 
-            synchronized (pendingByteArrs) {
+            synchronized (pendingByteQueueItems) {
 
                 // Write until there's not more data ...
-                if( !pendingByteArrs.isEmpty() ){
+                if( !pendingByteQueueItems.isEmpty() ){
 
                     //Send while there are messages
-                    byte[] nextArr = pendingByteArrs.poll();
-                    if( nextArr != null){
+                    ByteQueueItem nextItem = pendingByteQueueItems.poll();
+                    if( nextItem != null){
 
+                        byte[] nextArr = nextItem.byteArray;
                         try {
 
                             send(nextArr);
@@ -533,7 +539,7 @@ public class SocketChannelHandler implements Selectable {
 
                         } catch( IllegalStateException ex1 ){
                             //Resend it
-                            retrySend(nextArr);    
+                            retrySend(nextItem);    
                         }                            
                     }
                         
@@ -546,7 +552,7 @@ public class SocketChannelHandler implements Selectable {
                 }
 
                 //Notify any threads waiting on this monitor
-                pendingByteArrs.notifyAll();
+                pendingByteQueueItems.notifyAll();
             }
 
         }
@@ -561,7 +567,7 @@ public class SocketChannelHandler implements Selectable {
     private void send( byte[] passedArr ) throws IOException {
 
         ByteBuffer aByteBuffer = ByteBuffer.wrap( passedArr );
-        while(aByteBuffer.hasRemaining()) {
+        while(aByteBuffer.hasRemaining() && theSCW != null ) {            
             if (theSCW.write(aByteBuffer) <= 0) 
                 return;
         }
@@ -583,10 +589,10 @@ public class SocketChannelHandler implements Selectable {
      * @param theSelKey
      * @throws IOException
     */
-    private void retrySend( byte[] passedArr ){
+    private void retrySend( ByteQueueItem passedItem ){
         
         //Handshake is not complete, sleep then add back to the queue
-        final byte[] byteArr = passedArr;
+        final ByteQueueItem finByteQueueItem = passedItem;
         Constants.Executor.execute( new Runnable(){
 
             @Override
@@ -598,7 +604,7 @@ public class SocketChannelHandler implements Selectable {
                     ex1 = null;
                 }
                 
-                queueBytes(byteArr);
+                queueBytes(finByteQueueItem.byteArray, finByteQueueItem.cancelId);
                                 
             }
 
@@ -659,11 +665,11 @@ public class SocketChannelHandler implements Selectable {
 
     //===============================================================
     /**
-    * Gets the client id
+    * Gets the host id
     *
     * @return
     */
-    public int getClientId() {
+    public int getHostId() {
        return hostId;
     }
     
@@ -704,6 +710,10 @@ public class SocketChannelHandler implements Selectable {
     */
     public void shutdown() {
 
+        FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
+        if( aFMM.getChannelId() == channelId )
+            aFMM.setChannelId(ConnectionManager.CHANNEL_DISCONNECTED);
+            
         try {
 
             //Shutdown the socket channel
@@ -729,7 +739,7 @@ public class SocketChannelHandler implements Selectable {
         
         try {
             
-            if ( !theSCW.doHandshake(theSelKey) ) {
+            if ( theSCW != null && !theSCW.doHandshake(theSelKey) ) {
 
                 //Set the flag that specifies a send was attempted but failed.
                 return false;
@@ -761,6 +771,40 @@ public class SocketChannelHandler implements Selectable {
      */
     public synchronized boolean isWrapping() {
         return wrappingFlag;
+    }
+
+    //===================================================================
+    /**
+     * 
+     * @param cancelId 
+     */
+    public void cancelSend(Integer cancelId) {
+        
+        synchronized (pendingByteQueueItems) {
+            Queue< ByteQueueItem > listCopy = new LinkedList(pendingByteQueueItems);
+            pendingByteQueueItems.clear();
+            for( ByteQueueItem aBQI : listCopy ){
+                if( aBQI.cancelId == cancelId)
+                    continue;
+                pendingByteQueueItems.add(aBQI);
+            }        
+        }        
+    }
+    
+    //=========================================================================
+    /**
+     * Internal class for handling byte queues
+     */
+    class ByteQueueItem {
+        
+        private final byte[] byteArray;
+        private final int cancelId;
+
+        public ByteQueueItem(byte[] byteArray, int cancelId) {
+            this.byteArray = byteArray;
+            this.cancelId = cancelId;
+        }
+
     }
 
 }/* END CLASS SocketChannelHandler */

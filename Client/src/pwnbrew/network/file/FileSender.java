@@ -50,8 +50,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
@@ -171,9 +169,9 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
             }
         }        
         
-        //Remove from the parent map
-        FileMessageManager theFMM = FileMessageManager.getFileMessageManager();
-        theFMM.removeFileSender( theFileAck.getTaskId(), channelId );
+//        //Remove from the parent map
+//        FileMessageManager theFMM = FileMessageManager.getFileMessageManager();
+//        theFMM.removeFileSender( theFileAck.getTaskId(), channelId );
 
     }
 

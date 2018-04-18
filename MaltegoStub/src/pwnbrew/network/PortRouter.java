@@ -172,12 +172,13 @@ abstract public class PortRouter {
      *  Queues the byte array to be sent
      * @param byteArr
      * @param clientId
+     * @param cancelId
      */
-    public void queueSend( byte[] byteArr, int clientId ) {
+    public void queueSend( byte[] byteArr, int clientId, int cancelId ) {
         
         SocketChannelHandler theHandler = getSocketChannelHandler( clientId );
         if( theHandler != null ){
-            theHandler.queueBytes(byteArr);            
+            theHandler.queueBytes( byteArr, cancelId );            
         }
         
     }

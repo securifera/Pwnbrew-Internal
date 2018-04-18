@@ -45,17 +45,13 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.manager;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import pwnbrew.StubConfig;
 import pwnbrew.network.control.ControlMessageManager;
-import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.file.FileMessageManager;
-import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.shell.ShellMessageManager;
 import pwnbrew.socks.SocksMessageManager;
 /**
@@ -145,52 +141,26 @@ abstract public class DataManager {
      */
     public static void routeMessage( PortManager theCommManager, byte msgType, int dstId, byte[] msgBytes ) {
         
-        try {
-                        
-            //Get the config
-            DataManager aManager = null;
-                    
-            //Pass the message to the right handler
-            switch( msgType ){            
-                case Message.CONTROL_MESSAGE_TYPE:
-
-                    aManager = ControlMessageManager.getControlMessageManager();
-                    if( aManager == null){
-                        aManager = ControlMessageManager.initialize(theCommManager);
-                    }
-                    break;
-                case Message.PROCESS_MESSAGE_TYPE:
-
-                    aManager = ShellMessageManager.getShellMessageManager();
-                    if( aManager == null){
-                        aManager = ShellMessageManager.initialize(theCommManager);
-                    }
-                    break;
-                case Message.SOCKS_MESSAGE_TYPE:
-
-                    aManager = SocksMessageManager.getSocksMessageManager();
-                    if( aManager == null){
-                        aManager = SocksMessageManager.initialize(theCommManager);
-                    }
-                    break;
-                case Message.FILE_MESSAGE_TYPE:
-                    aManager = FileMessageManager.getFileMessageManager();
-                    if( aManager == null){
-                        aManager = FileMessageManager.initialize(theCommManager);
-                    }
-                    break;            
-                default:
-                    break;
-
-            }            
-            
-            //Handle it
-            if( aManager != null ){
-                aManager.handleMessage( msgBytes );
-            }
-            
-        } catch ( IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "routeMessage", ex.getMessage(), ex);                                
+        DataManager aManager = null;
+        switch( msgType ){
+            case Message.CONTROL_MESSAGE_TYPE:
+                aManager = ControlMessageManager.getControlMessageManager();
+                break;
+            case Message.PROCESS_MESSAGE_TYPE:
+                aManager = ShellMessageManager.getShellMessageManager();
+                break;
+            case Message.SOCKS_MESSAGE_TYPE:
+                aManager = SocksMessageManager.getSocksMessageManager();
+                break;
+            case Message.FILE_MESSAGE_TYPE:
+                aManager = FileMessageManager.getFileMessageManager();
+                break;
+            default:
+                break;
+                
+        }
+        if( aManager != null ){
+            aManager.handleMessage( msgBytes );                                
         }
     }
     
@@ -200,14 +170,16 @@ abstract public class DataManager {
      * @param passedManager
      * @param encrypted
      * @param passedPort
+     * @return 
      * @throws java.io.IOException
      */
-    public synchronized static void createPortRouter( PortManager passedManager, int passedPort, boolean encrypted ) throws IOException{
+    public synchronized static PortRouter createPortRouter( PortManager passedManager, int passedPort, boolean encrypted ) throws IOException{
         PortRouter aPR = passedManager.getPortRouter( passedPort );
         if( aPR == null ){
             aPR = new ClientPortRouter( passedManager, encrypted );
             passedManager.setPortRouter( passedPort, aPR);            
         }
+        return aPR;
     }
     
     //===========================================================================
@@ -221,18 +193,20 @@ abstract public class DataManager {
       //===============================================================
     /**
      *  Queues the byte array to be sent
-     * @param passedCommManager
+     * @param passedManager
      * @param passedMessage
      */
-    public static void send( PortManager passedCommManager, Message passedMessage ) {
-        
-        int destClientId = passedMessage.getDestHostId();
+    public static void send( PortManager passedManager, Message passedMessage ) {
         
         //Send the message out
         StubConfig aConf = StubConfig.getConfig();
         int thePort = aConf.getSocketPort();
-        PortRouter thePR = passedCommManager.getPortRouter( thePort );       
-        thePR.queueSend( passedMessage.getBytes(), destClientId );
+        PortRouter thePR = passedManager.getPortRouter( thePort );  
+        if( thePR != null ){            
+            //Get destination id and send
+            int destClientId = passedMessage.getDestHostId();
+            thePR.queueSend( passedMessage.getBytes(), destClientId, passedMessage.getCancelId() );
+        }
          
     }
     

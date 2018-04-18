@@ -49,7 +49,6 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -57,10 +56,10 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 import pwnbrew.fileoperation.TaskManager;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.ProgressListener;
 import pwnbrew.misc.Utilities;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileFin;
 
@@ -310,20 +309,10 @@ final public class FileReceiver {
                 //Get the msg Id before clearing all values
                 cleanupFileTransfer();
 
-                //Send fin message to host
-                try {
+//                Send fin message to host
+                PushFileFin finMessage = new PushFileFin( taskId, "", srcHostId, channelId );
+                DataManager.send(theFileMessageManager.getPortManager(), finMessage);
                     
-                    PushFileFin finMessage = new PushFileFin( taskId, "", srcHostId, channelId );
-                   
-                    //Returns if it should unlock or not
-                    ControlMessageManager theCMM = ControlMessageManager.getControlMessageManager();
-                    if( theCMM != null ){
-                        theCMM.send( finMessage );
-                    }
-                    
-                } catch ( UnsupportedEncodingException ex) {
-                    DebugPrinter.printMessage( NAME_Class, "receiveFile",ex.getMessage(), ex );
-                }
 
                 //Remove from the parent map
                 theFileMessageManager.removeFileReceiver( fileId );

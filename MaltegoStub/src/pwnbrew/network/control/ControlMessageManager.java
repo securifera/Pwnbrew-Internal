@@ -44,17 +44,12 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control;
 
-import pwnbrew.network.PortRouter;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import pwnbrew.StubConfig;
+import pwnbrew.MaltegoStub;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.misc.DebugPrinter;
-import pwnbrew.network.Message;
 import pwnbrew.network.control.messages.*;
 
 /**
@@ -299,6 +294,11 @@ public class ControlMessageManager extends DataManager {
         if( theControlMessageMap.containsKey(TaskStatus.MESSAGE_ID))
             DebugPrinter.printMessage(NAME_Class, "", "ControlMessageMap already contains id" + UpgradeStagerRelay.MESSAGE_ID, null);
         theControlMessageMap.put(TaskStatus.MESSAGE_ID, TaskStatus.class.getCanonicalName());
+          //Add message
+        if( theControlMessageMap.containsKey(ShutdownChannel.MESSAGE_ID))
+            DebugPrinter.printMessage(NAME_Class, "", "ControlMessageMap already contains id" + ShutdownChannel.MESSAGE_ID, null);
+        theControlMessageMap.put(ShutdownChannel.MESSAGE_ID, ShutdownChannel.class.getCanonicalName());
+
 
     
     }
@@ -327,23 +327,23 @@ public class ControlMessageManager extends DataManager {
         setDataHandler(theMessageHandler);
     }  
     
-    // ==========================================================================
-    /**
-     *   Creates a ControlMessageManager
-     * @param passedCommManager
-     * @return 
-     * @throws java.io.IOException 
-     */
-    public synchronized static ControlMessageManager initialize( PortManager passedCommManager ) throws IOException {
-
-        if( theControlManager == null ) {
-            theControlManager = new ControlMessageManager( passedCommManager );
-            createPortRouter( passedCommManager, StubConfig.getConfig().getSocketPort(), true );
-        }
-        
-        return theControlManager;
-
-    }/* END initialize() */
+//    // ==========================================================================
+//    /**
+//     *   Creates a ControlMessageManager
+//     * @param passedCommManager
+//     * @return 
+//     * @throws java.io.IOException 
+//     */
+//    public synchronized static ControlMessageManager initialize( PortManager passedCommManager ) throws IOException {
+//
+//        if( theControlManager == null ) {
+//            theControlManager = new ControlMessageManager( passedCommManager );
+//            createPortRouter( passedCommManager, StubConfig.getConfig().getSocketPort(), true );
+//        }
+//        
+//        return theControlManager;
+//
+//    }/* END initialize() */
     
     // ==========================================================================
     /**
@@ -351,6 +351,8 @@ public class ControlMessageManager extends DataManager {
      * @return 
      */
     public synchronized static ControlMessageManager getControlMessageManager(){
+        if( theControlManager == null )
+            theControlManager = new ControlMessageManager( MaltegoStub.getMaltegoStub() );
         return theControlManager;
     }
     
@@ -363,27 +365,6 @@ public class ControlMessageManager extends DataManager {
     @Override
     public void handleMessage( byte[] msgBytes ) {        
         theControlManager.getDataHandler().processData(msgBytes);        
-    }
-    
-    //===============================================================
-    /**
-     *   Send the message out the given channel.
-     *
-     * @param passedMessage
-    */
-    public void send( Message passedMessage ) {
-
-        int msgLen = passedMessage.getLength();
-        ByteBuffer aByteBuffer = ByteBuffer.allocate( msgLen );
-        passedMessage.append(aByteBuffer);
-        
-        //Get the port router
-        PortRouter thePR = thePortManager.getPortRouter( StubConfig.getConfig().getSocketPort() );
-        
-        //Queue the message to be sent
-        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId());
-//        DebugPrinter.printMessage(NAME_Class, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-        
     }
     
      //===========================================================================

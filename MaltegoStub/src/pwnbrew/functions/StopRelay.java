@@ -42,6 +42,7 @@ import java.util.Map;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.utilities.SocketUtilities;
@@ -102,82 +103,62 @@ public class StopRelay extends Function {
             return;
         }
         
-        //Create the connection
-        try {        
-            
-            //Set the server ip and port
-            StubConfig theConfig = StubConfig.getConfig();
-            theConfig.setServerIp(serverIp);
-            theConfig.setSocketPort(serverPortStr);
-
-            //Set the client id
-            Integer anInteger = SocketUtilities.getNextId();
-            theConfig.setHostId(anInteger.toString());            
-                    
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( theManager );
-            }
-
-            //Get the port router
-            int serverPort = Integer.parseInt( serverPortStr);
-            ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
-
-            //Initiate the file transfer
-            if(aPR == null){
-                DebugPrinter.printMessage( NAME_Class, "StopRelay", "Unable to retrieve port router.", null);
-                return;     
-            }           
-
-            //Set up the port wrapper
-            theManager.initialize();
-
-            //Connect to server
+        StubConfig theConfig = StubConfig.getConfig();
+        theConfig.setServerIp(serverIp);        
+        theConfig.setSocketPort(serverPortStr);
+        Integer anInteger = SocketUtilities.getNextId();
+        theConfig.setHostId(anInteger.toString());
+        int serverPort = Integer.parseInt( serverPortStr);
+        ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
+        if(aPR == null){
             try {
-                
-                aPR.ensureConnectivity( serverPort, theManager );
-
-                //Get the client count
-                int hostId = Integer.parseInt( hostIdStr);
-                RelayStopRelay aMsg = new RelayStopRelay( Constants.SERVER_ID, hostId );               
-                aCMManager.send(aMsg );  
-
-                //Wait for the response
-                waitToBeNotified( 180 * 1000);
-
-                //If connected create a relay
-                if( !isConnected ){
-
-                    //Create a relay object
-                    pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( "Relay stopped. Please remove the relay and any hosts connected to it.");
-                    MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
-
-                    //Create the message list
-                    malMsg.getExceptionMessages().addExceptionMessage(exMsg);      
-
-                } 
-
-                try {
-                    //Sleep for a few seconds
-                    Thread.sleep(3000);
-                } catch (InterruptedException ex) {
-                }
-
-            } catch( LoggableException ex ) {
+                aPR = (ClientPortRouter)DataManager.createPortRouter(theManager, serverPort, true);
+            } catch (IOException ex) {
+                DebugPrinter.printMessage( NAME_Class, "stop_relay", "Unable to create port router.", ex);
+                return;
+            }
+        } 
+        theManager.initialize();
+        try {
+            
+            aPR.ensureConnectivity( serverPort, theManager );
+            
+            //Get the client count
+            int hostId = Integer.parseInt( hostIdStr);
+            RelayStopRelay aMsg = new RelayStopRelay( Constants.SERVER_ID, hostId );
+            DataManager.send( theManager, aMsg );
+            
+            //Wait for the response
+            waitToBeNotified( 180 * 1000);
+            
+            //If connected create a relay
+            if( !isConnected ){
                 
                 //Create a relay object
-                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( "Relay stopped. Please remove the relay and any hosts connected to it.");
                 MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
 
                 //Create the message list
                 malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
+                
             }
             
-            //Create the return message
-            retStr = theReturnMsg.getXml();
-        } catch (IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "listclients", ex.getMessage(), ex );
+            try {
+                //Sleep for a few seconds
+                Thread.sleep(3000);
+            } catch (InterruptedException ex) {
+            }
+            
+        } catch( LoggableException ex ) {
+            
+            //Create a relay object
+            pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+            MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+            
+            //Create the message list
+            malMsg.getExceptionMessages().addExceptionMessage(exMsg);
         }
+        retStr = theReturnMsg.getXml();
     
     }
     

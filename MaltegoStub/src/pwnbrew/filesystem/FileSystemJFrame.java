@@ -621,6 +621,10 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
     @Override
     public void tableValueChanged(ListSelectionEvent passedEvent) {
         
+        //Deselect the tree so there won't be any confustion of what is being uploaded or downloaded
+        if( theListener.shouldClearTable() )
+            theFileTreePanel.getJTree().clearSelection();
+        
         String theTypeStr = null;
         int[] selRowIndexes = theFileJTable.getSelectedRows();
         DefaultTableModel theTableModel = (DefaultTableModel) theFileJTable.getModel();

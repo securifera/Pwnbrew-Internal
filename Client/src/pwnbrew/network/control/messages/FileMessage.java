@@ -104,8 +104,8 @@ public class FileMessage extends Tasking {
     public FileMessage( byte[] passedId ) { // NO_UCD (use default)
         super( passedId );
     }
-    
-      //=========================================================================
+        
+    //=========================================================================
     /**
      *  Sets the variable in the message related to this TLV
      * 

@@ -146,10 +146,10 @@ public class SocketChannelHandler implements Selectable {
             shutdown();
             
             //Print the message if it exists
-            if( ex != null ){
+            if( ex != null && !(ex instanceof SSLException) ){ //Exclude SSL closed exceptions
                 String msg = ex.getMessage();
                 if( msg != null && !msg.contains("closed"))
-                    DebugPrinter.printException(ex);
+                    Log.log(Level.WARNING, NAME_Class, "handle()", ex.getMessage(), ex);
             }
                         
             

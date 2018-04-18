@@ -58,8 +58,10 @@ import pwnbrew.network.Message;
 @SuppressWarnings("ucd")
 public class FileData extends Message {
     
-    private final byte[] fileId = new byte[4];
+    private final byte[] fileIdBytes = new byte[4];
     private byte[] fileBytes = new byte[0];
+    
+    private final int fileId; 
    
     //=========================================================================
     /*
@@ -69,7 +71,8 @@ public class FileData extends Message {
         
         //Set id );
         super( FILE_MESSAGE_TYPE, -1 );
-        SocketUtilities.intToByteArray( fileId, passedId);
+        fileId = passedId;
+        SocketUtilities.intToByteArray( fileIdBytes, fileId);
         fileBytes = Arrays.copyOf(byteVal, byteVal.length);
         
     }
@@ -87,11 +90,21 @@ public class FileData extends Message {
         super.append(rtnBuffer);
         
         //Add the file id
-        rtnBuffer.put( fileId );
+        rtnBuffer.put( fileIdBytes );
         
         //Add the file byte value
         rtnBuffer.put( fileBytes );
         
+    }
+    
+    //===========================================================================
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public int getCancelId(){
+        return fileId;
     }
     
     //===============================================================
@@ -101,7 +114,7 @@ public class FileData extends Message {
      * @return 
      */
     public Integer getFileId(){
-        return SocketUtilities.byteArrayToInt(fileId);
+        return SocketUtilities.byteArrayToInt(fileIdBytes);
     }
     
     //===============================================================
@@ -128,7 +141,7 @@ public class FileData extends Message {
         count += super.getLength();
         
         //Add the function
-        count += fileId.length;
+        count += fileIdBytes.length;
         
         //Add the options
         count += fileBytes.length;

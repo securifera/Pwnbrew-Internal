@@ -44,12 +44,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.socks;
 
-import pwnbrew.network.PortRouter;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import pwnbrew.MaltegoStub;
-import pwnbrew.StubConfig;
 import pwnbrew.functions.Function;
 import pwnbrew.functions.ToSocks;
 import pwnbrew.manager.PortManager;
@@ -82,31 +77,15 @@ public class SocksMessageManager extends DataManager {
         //Set the data handler
         setDataHandler(theMessageHandler);
     }  
-    
-    // ==========================================================================
-    /**
-     *   Creates a ShellMessageManager
-     * @param passedCommManager
-     * @return 
-     * @throws java.io.IOException 
-     */
-    public synchronized static SocksMessageManager initialize( PortManager passedCommManager ) throws IOException {
-
-        if( theSocksMessageManager == null ) {
-            theSocksMessageManager = new SocksMessageManager( passedCommManager );
-            createPortRouter( passedCommManager, StubConfig.getConfig().getSocketPort(), true );
-        }
-        
-        return theSocksMessageManager;
-
-    }/* END initialize() */
-    
+     
     // ==========================================================================
     /**
      *   Gets the ShellMessageManager
      * @return 
      */
     public synchronized static SocksMessageManager getSocksMessageManager(){
+        if( theSocksMessageManager == null )
+            theSocksMessageManager = new SocksMessageManager( MaltegoStub.getMaltegoStub() );
         return theSocksMessageManager;
     }
     
@@ -119,30 +98,6 @@ public class SocksMessageManager extends DataManager {
     @Override
     public void handleMessage( byte[] msgBytes ) {        
         theSocksMessageManager.getDataHandler().processData(msgBytes);        
-    }
-    
-    //===============================================================
-    /**
-     *   Send the message out the given channel.
-     *
-     * @param passedMessage
-    */
-    public void send( SocksMessage passedMessage ) {
-
-        
-        ByteBuffer aByteBuffer;
-        int msgLen = passedMessage.getLength();
-        aByteBuffer = ByteBuffer.allocate( msgLen );
-        passedMessage.append(aByteBuffer);
-
-        
-        //Get the port router
-        PortRouter thePR = thePortManager.getPortRouter(  StubConfig.getConfig().getSocketPort() );
-                
-        //Queue the message to be sent
-        thePR.queueSend( Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position()), passedMessage.getDestHostId() );
-//        DebugPrinter.printMessage(this, "Queueing " + passedMessage.getClass().getSimpleName() + " message");
-          
     }
     
     //===========================================================================

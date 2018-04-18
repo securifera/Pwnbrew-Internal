@@ -48,7 +48,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
-import pwnbrew.misc.DebugPrinter;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import static pwnbrew.network.control.messages.FileMessage.OPTION_HASH_FILENAME;
@@ -276,21 +275,10 @@ public final class PushFile extends FileMessage {
     */
     @Override
     public void evaluate( PortManager passedManager ) {
-                
-        try {
-             
-            //Get the file manager
-            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
-            if( theFileMM == null ){
-                theFileMM = FileMessageManager.initialize( passedManager );
-            }
-
-    //            DebugPrinter.printMessage(  getClass().getSimpleName(), "Received push file.");
-            theFileMM.prepFilePush( this );
-
-        } catch ( IOException | LoggableException ex) {
-            DebugPrinter.printMessage( NAME_Class, "evaluate", ex.getMessage(), ex); 
-        }
+                             
+        //Get the file manager
+        FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+        theFileMM.fileDownload( this );       
         
     }
    

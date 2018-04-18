@@ -48,6 +48,7 @@ import javax.swing.JList;
 import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.CountSeeker;
 import pwnbrew.misc.DebugPrinter;
@@ -55,7 +56,6 @@ import pwnbrew.misc.HostHandler;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.AutoSleep;
 import pwnbrew.network.control.messages.CheckInTimeMsg;
 import pwnbrew.network.control.messages.ClearSessions;
@@ -119,97 +119,78 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
             return;
         }
          
-        //Create the connection
+        StubConfig theConfig = StubConfig.getConfig();
+        theConfig.setServerIp(serverIp);
+        theConfig.setSocketPort(serverPortStr);
+        Integer anInteger = SocketUtilities.getNextId();
+        theConfig.setHostId(anInteger.toString());
+        int serverPort = Integer.parseInt( serverPortStr);
+        ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
+        if(aPR == null){
+            try {
+                aPR = (ClientPortRouter)DataManager.createPortRouter(theManager, serverPort, true);
+            } catch (IOException ex) {
+                DebugPrinter.printMessage( NAME_Class, "to_session_mgr", "Unable to create port router.", ex);
+                return;
+            }
+        }  
+        theManager.initialize();
         try {
             
-            //Set the server ip and port
-            StubConfig theConfig = StubConfig.getConfig();
-            theConfig.setServerIp(serverIp);
-            theConfig.setSocketPort(serverPortStr);
+            aPR.ensureConnectivity( serverPort, theManager );
             
-            //Set the client id
-            Integer anInteger = SocketUtilities.getNextId();
-            theConfig.setHostId(anInteger.toString());
+            //Get the client count
+            ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.HOST_COUNT, "0" );
+            DataManager.send( theManager, aMsg);
             
-            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-            if( aCMManager == null ){
-                aCMManager = ControlMessageManager.initialize( theManager );
-            }
-
-            //Get the port router
-            int serverPort = Integer.parseInt( serverPortStr);
-            ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( serverPort );
-
-            //Initiate the file transfer
-            if(aPR == null){
-                DebugPrinter.printMessage( NAME_Class, "ToSessionManager", "Unable to retrieve port router.", null);
-                return;     
-            }           
+            //Wait for the response
+            waitToBeNotified( 180 * 1000);           
             
-            //Set up the port wrapper
-            theManager.initialize();
-            
-            //Connect to server
-            try {
+            //Get the client info
+            if( theClientCount > 0 ){
                 
-                aPR.ensureConnectivity( serverPort, theManager );
-                
-                 //Get the client count
-                ControlMessage aMsg = new GetCount( Constants.SERVER_ID, GetCount.HOST_COUNT, "0" );
-                aCMManager.send(aMsg);
+                //Get each client msg
+                aMsg = new pwnbrew.network.control.messages.GetHosts( Constants.SERVER_ID, "0" );
+                DataManager.send( theManager, aMsg);
                 
                 //Wait for the response
                 waitToBeNotified( 180 * 1000);
                 
-                //Get the client info
-                if( theClientCount > 0 ){
-                
-                    //Get each client msg                
-                    aMsg = new pwnbrew.network.control.messages.GetHosts( Constants.SERVER_ID, "0" );
-                    aCMManager.send(aMsg);
-                
-                    //Wait for the response
-                    waitToBeNotified( 180 * 1000);
-
-                    if( theClientCount == 0 ){ 
-
-                         //Create the file browser frame
-                        theSessionsJFrame = new SessionsJFrame( this, theHostList );
-                        
-                        //Set to the first element
-                        JList hostList = theSessionsJFrame.getHostJList();
-                        if( hostList.getModel().getSize() > 0)
-                            hostList.setSelectedIndex(0);
-
-                        //Set the title
-                        theSessionsJFrame.setTitle("Session Manager - "+serverIp);
-
-                        //Set the icon
-                        Image appIcon = Utilities.loadImageFromJar( Constants.SCHEDULE_IMG_STR );
-                        if( appIcon != null )
-                            theSessionsJFrame.setIconImage( appIcon );                
-
-                        //Pack and show
-                        theSessionsJFrame.setVisible(true);               
-
-                        //Wait to be notified
-                        waitToBeNotified();
-                    }
-                
+                if( theClientCount == 0 ){
+                    
+                    //Create the file browser frame
+                    theSessionsJFrame = new SessionsJFrame( this, theHostList );
+                    
+                    //Set to the first element
+                    JList hostList = theSessionsJFrame.getHostJList();
+                    if( hostList.getModel().getSize() > 0)
+                        hostList.setSelectedIndex(0);
+                    
+                    //Set the title
+                    theSessionsJFrame.setTitle("Session Manager - "+serverIp);
+                    
+                    //Set the icon
+                    Image appIcon = Utilities.loadImageFromJar( Constants.SCHEDULE_IMG_STR );
+                    if( appIcon != null )
+                        theSessionsJFrame.setIconImage( appIcon );
+                    
+                    //Pack and show
+                    theSessionsJFrame.setVisible(true);
+                    
+                    //Wait to be notified
+                    waitToBeNotified();
                 }
                 
-            } catch( LoggableException ex ) {
-                
-                //Create a relay object
-                pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
-                MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
-
-                //Create the message list
-                malMsg.getExceptionMessages().addExceptionMessage(exMsg);  
             }
             
-        } catch (IOException ex) {
-            DebugPrinter.printMessage( NAME_Class, "run", ex.getMessage(), ex );
+        } catch( LoggableException ex ) {
+            
+            //Create a relay object
+            pwnbrew.xml.maltego.Exception exMsg = new pwnbrew.xml.maltego.Exception( ex.getMessage() );
+            MaltegoTransformExceptionMessage malMsg = theReturnMsg.getExceptionMessage();
+            
+            //Create the message list
+            malMsg.getExceptionMessages().addExceptionMessage(exMsg);
         }
     
     }
@@ -277,13 +258,10 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
         
         if( passedOperation == AutoSleep.SET_VALUE ){
             
-            //Send message to set the auto sleep flag
-            ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();
-            if( aCMM != null ){
-                //Get flag and send a msg
-                AutoSleep anASMsg = new AutoSleep( Constants.SERVER_ID, passedHostId, passedOperation, selected );
-                aCMM.send(anASMsg);                
-            }
+            //Get flag and send a msg
+            AutoSleep anASMsg = new AutoSleep( Constants.SERVER_ID, passedHostId, passedOperation, selected );
+            DataManager.send( theManager, anASMsg);               
+            
             
         } else if(passedOperation == AutoSleep.GET_VALUE){
             
@@ -303,9 +281,8 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
     public void clearSessionList( String passedHostId ) {
         
         //Send message to server to clear the session list
-        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();      
         ControlMessage aMsg = new ClearSessions( Constants.SERVER_ID, passedHostId);
-        aCMM.send(aMsg);
+        DataManager.send( theManager, aMsg);
         
         theSessionsJFrame.repaint();
 
@@ -332,18 +309,16 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
             int hostId = Integer.parseInt(hostIdStr);
             
             //Send message to server to clear the session list
-            ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();      
-            if( aCMM != null ){
-                try {
-                    CheckInTimeMsg aMsg = new CheckInTimeMsg( Constants.SERVER_ID, hostId, newDateStr, CheckInTimeMsg.REPLACE_TIME );
-                    aMsg.addPrevCheckIn(aDate);
-                    aCMM.send(aMsg);
-                } catch (UnsupportedEncodingException ex) {
-                }
-                
-                //refresh
-                refreshSelection();
+            try {
+                CheckInTimeMsg aMsg = new CheckInTimeMsg( Constants.SERVER_ID, hostId, newDateStr, CheckInTimeMsg.REPLACE_TIME );
+                aMsg.addPrevCheckIn(aDate);
+                DataManager.send( theManager, aMsg);
+            } catch (UnsupportedEncodingException ex) {
             }
+
+            //refresh
+            refreshSelection();
+            
         }
     }
     
@@ -382,20 +357,17 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
             List<String> theDatesToRemove = new ArrayList<>(checkInTimeList.getSelectedValuesList());
          
             //Remote the dates
-             //Send message to server to clear the session list
-            ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();      
-            if( aCMM != null ){
-                try {
-                    for( String aStr : theDatesToRemove ){
-                        CheckInTimeMsg aMsg = new CheckInTimeMsg( Constants.SERVER_ID, hostId, aStr, CheckInTimeMsg.REMOVE_TIME );
-                        aCMM.send(aMsg);
-                    }
-                } catch (UnsupportedEncodingException ex) {
+            try {
+                for( String aStr : theDatesToRemove ){
+                    CheckInTimeMsg aMsg = new CheckInTimeMsg( Constants.SERVER_ID, hostId, aStr, CheckInTimeMsg.REMOVE_TIME );
+                    DataManager.send( theManager, aMsg);
                 }
-                
-                //refresh
-                refreshSelection();
+            } catch (UnsupportedEncodingException ex) {
             }
+
+            //refresh
+            refreshSelection();
+            
                      
         }   
     }
@@ -441,18 +413,15 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
      */
     @Override
     public void hostSelected(String hostIdStr) {
-        
-        //Get the client count
-        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();    
-        
+       
         //Send a msg to get the sessions
         int hostId = Integer.parseInt(hostIdStr);
         ControlMessage aMsg = new GetSessions( Constants.SERVER_ID, hostId);
-        aCMM.send(aMsg);
+        DataManager.send( theManager, aMsg);
         
         //Send a msg to get the checkins
         aMsg = new GetCheckInSchedule(  Constants.SERVER_ID, hostId);
-        aCMM.send(aMsg);
+        DataManager.send( theManager, aMsg);
 
     }
 
@@ -490,13 +459,10 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
     @Override
     public void removeHost(Host passedHost) {
         
-        //Get the client count
-        ControlMessageManager aCMM = ControlMessageManager.getControlMessageManager();    
-        
         //Send a msg to remove the host
         int hostId = Integer.parseInt( passedHost.getField(Constants.HOST_ID).getXmlObjectContent() );
         ControlMessage aMsg = new RemoveHost( Constants.SERVER_ID, hostId);
-        aCMM.send(aMsg);
+        DataManager.send( theManager, aMsg);
         
     }
 
