@@ -46,9 +46,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.shell;
 
 import pwnbrew.network.PortRouter;
-import java.io.IOException;
-import pwnbrew.ClientConfig;
-import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 
@@ -76,25 +73,6 @@ public class ShellMessageManager extends DataManager {
         //Set the data handler
         setDataHandler(theMessageHandler);
     }  
-    
-    // ==========================================================================
-    /**
-     *   Creates a ShellMessageManager
-     * @param passedCommManager
-     * @return 
-     * @throws java.io.IOException 
-     * @throws pwnbrew.log.LoggableException 
-     */
-    public synchronized static ShellMessageManager initialize( PortManager passedCommManager ) throws IOException, LoggableException {
-
-        if( theShellMsgManager == null ) {
-            theShellMsgManager = new ShellMessageManager( passedCommManager );
-            createPortRouter( passedCommManager, ClientConfig.getConfig().getSocketPort(), true );
-        }
-        
-        return theShellMsgManager;
-
-    }/* END initialize() */
     
     // ==========================================================================
     /**

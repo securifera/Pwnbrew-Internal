@@ -46,11 +46,9 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control;
 
 import pwnbrew.network.PortRouter;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import pwnbrew.ClientConfig;
-import pwnbrew.log.LoggableException;
+import pwnbrew.Pwnbrew;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.network.control.messages.*;
@@ -275,29 +273,12 @@ public class ControlMessageManager extends DataManager {
     
     // ==========================================================================
     /**
-     *   Creates a ControlMessageManager
-     * @param passedCommManager
-     * @return 
-     * @throws java.io.IOException 
-     * @throws pwnbrew.log.LoggableException 
-     */
-    public synchronized static ControlMessageManager initialize( PortManager passedCommManager ) throws IOException, LoggableException {
-
-        if( theControlManager == null ) {
-            theControlManager = new ControlMessageManager( passedCommManager );
-            createPortRouter( passedCommManager, ClientConfig.getConfig().getSocketPort(), true );
-        }
-        
-        return theControlManager;
-
-    }/* END initialize() */
-    
-    // ==========================================================================
-    /**
      *   Gets the ControlMessageManager
      * @return 
      */
     public synchronized static ControlMessageManager getControlMessageManager(){
+        if( theControlManager == null )
+            theControlManager = new ControlMessageManager( Pwnbrew.getPwnbrewInstance() );
         return theControlManager;
     }
     

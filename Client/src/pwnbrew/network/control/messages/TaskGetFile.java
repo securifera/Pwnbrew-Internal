@@ -38,11 +38,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import pwnbrew.log.LoggableException;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.file.FileMessageManager;
@@ -138,17 +134,8 @@ public final class TaskGetFile extends TaskStatus {
     @Override
     public void evaluate( PortManager passedManager ) {       
 
-        try {
-            //Get the port router
-            FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
-            if( aFMM == null )
-                aFMM = FileMessageManager.initialize( passedManager );
-
-            aFMM.fileDownload( this );
-
-        } catch ( LoggableException | IOException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        }    
+        FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
+        aFMM.fileDownload( this );    
 
     }
     

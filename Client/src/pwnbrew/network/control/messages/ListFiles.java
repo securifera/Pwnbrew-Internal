@@ -44,11 +44,10 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.File;
 import java.io.UnsupportedEncodingException;
-import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
+import pwnbrew.network.file.FileMessageManager;
 
 /**
  *
@@ -112,29 +111,9 @@ public final class ListFiles extends Tasking {
     @Override
     public void evaluate( PortManager passedManager ) {   
     
-            
-        File theRemoteFile = new File(theFilePath);
-        File[] fileList = theRemoteFile.listFiles();
-        if( fileList != null && fileList.length != 0 ){
+        FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
+        aFMM.listFiles(theFilePath, getTaskId(), getSrcHostId());
 
-            //Send the count
-            ControlMessage aMsg = new DirCount(getTaskId(), fileList.length);
-            aMsg.setDestHostId( getSrcHostId() );
-            DataManager.send(passedManager, aMsg);
-
-            //Send a message per file
-            for (File aFile : fileList) {
-                aMsg = new FileSystemMsg( getTaskId(), aFile, false );
-                aMsg.setDestHostId( getSrcHostId() );
-                DataManager.send(passedManager, aMsg);
-            }
-
-        } else {
-            FileSystemMsg aMsg = new FileSystemMsg( getTaskId(), null, false );
-            aMsg.setDestHostId( getSrcHostId() );
-            DataManager.send(passedManager, aMsg);
-        }
-    
     }
 
 }

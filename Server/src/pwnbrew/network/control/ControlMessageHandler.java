@@ -108,7 +108,7 @@ public class ControlMessageHandler extends DataHandler {
             public void run() {
                 try { 
                     aMessage.evaluate( theDataManager.getPortManager() );
-                } catch (LoggableException ex) {
+                } catch (Exception ex) {
                     Log.log(Level.INFO, NAME_Class, "processData()", ex.getMessage(), ex );
                 }
             }

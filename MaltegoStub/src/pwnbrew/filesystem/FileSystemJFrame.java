@@ -622,7 +622,7 @@ public class FileSystemJFrame extends JFrame implements Observer, FileJTableList
     public void tableValueChanged(ListSelectionEvent passedEvent) {
         
         //Deselect the tree so there won't be any confustion of what is being uploaded or downloaded
-        if( theListener.shouldClearTable() )
+        if( theListener.getClearTableFlag() )
             theFileTreePanel.getJTree().clearSelection();
         
         String theTypeStr = null;

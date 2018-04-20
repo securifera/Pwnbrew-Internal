@@ -37,9 +37,6 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.socks;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ConnectionCallback;
@@ -80,21 +77,11 @@ public class SocksConnectionCallback extends ConnectionCallback{
         
         if(theChannelId != 0 ){        
             
-            try {
-                
-                SocksMessageManager aSMM = SocksMessageManager.getSocksMessageManager();
-                if( aSMM == null)
-                    aSMM = SocksMessageManager.initialize(theManager);
-                aSMM.setChannelId(theHostId, theChannelId);              
-
-                //Send ack back to set channel id
-                SocksOperationAck retMsg = new SocksOperationAck( theChannelId );
-                retMsg.setDestHostId( theHostId );
-                DataManager.send(theManager, retMsg);     
-            
-            } catch (IOException ex) {
-                RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );   
-            }
+            SocksMessageManager aSMM = SocksMessageManager.getSocksMessageManager();
+            aSMM.setChannelId(theHostId, theChannelId);
+            SocksOperationAck retMsg = new SocksOperationAck( theChannelId );
+            retMsg.setDestHostId( theHostId );
+            DataManager.send(theManager, retMsg);
 
         }
     }

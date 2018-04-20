@@ -147,21 +147,9 @@ public class ReconnectTimer extends ManagedRunnable {
         //Create the connection callback
         ReconnectCallback theCC = new ReconnectCallback(serverIp, thePort, this);        
         if(aPR == null){
-            try {
-                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                if( aCMManager == null ){
-                    aCMManager = ControlMessageManager.initialize( theCommManager );
-                }
-            } catch ( IOException | LoggableException ex) {
-                RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
-                return;
-            }
-
-            aPR = (ClientPortRouter) theCommManager.getPortRouter( thePort );
-            if(aPR == null)
-                return;
-            
-        }
+            DebugPrinter.printMessage(NAME_Class, "No port router. Aborting.");
+            return;     
+        }      
         
         //Set the reconnect timer
         aPR.getConnectionManager().setReconnectTimer( theChannelId, this );

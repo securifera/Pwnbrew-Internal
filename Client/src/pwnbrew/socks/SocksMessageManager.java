@@ -46,10 +46,8 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.socks;
 
 import pwnbrew.network.PortRouter;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import pwnbrew.ClientConfig;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 
@@ -80,24 +78,6 @@ public class SocksMessageManager extends DataManager {
         //Set the data handler
         setDataHandler(theMessageHandler);
     }  
-    
-    // ==========================================================================
-    /**
-     *   Creates a SocksMessageManager
-     * @param passedCommManager
-     * @return 
-     * @throws java.io.IOException 
-     */
-    public synchronized static SocksMessageManager initialize( PortManager passedCommManager ) throws IOException {
-
-        if( theSocksMessageManager == null ) {
-            theSocksMessageManager = new SocksMessageManager( passedCommManager );
-            createPortRouter( passedCommManager, ClientConfig.getConfig().getSocketPort(), true );
-        }
-        
-        return theSocksMessageManager;
-
-    }/* END initialize() */
     
     // ==========================================================================
     /**

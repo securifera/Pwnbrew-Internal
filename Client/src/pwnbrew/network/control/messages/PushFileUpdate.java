@@ -38,10 +38,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import pwnbrew.log.LoggableException;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
@@ -136,20 +132,8 @@ public final class PushFileUpdate extends FileMessage {
     @Override
     public void evaluate( PortManager passedManager ) {
                 
-        try {
-            
-            //Get the file manager
-            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
-            if( theFileMM == null ){
-                theFileMM = FileMessageManager.initialize( passedManager );
-            }
-
-            //Update the file receiver size
-            theFileMM.updateFileSize( fileId, fileSize );
-            
-        } catch (LoggableException | IOException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        }
+        FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+        theFileMM.updateFileSize( fileId, fileSize );
         
     }
 }

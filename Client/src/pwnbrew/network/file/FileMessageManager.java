@@ -54,17 +54,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
+import pwnbrew.Pwnbrew;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
-import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.PortRouter;
+import pwnbrew.network.control.messages.ControlMessage;
+import pwnbrew.network.control.messages.DirCount;
+import pwnbrew.network.control.messages.FileSystemMsg;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileAck;
 import pwnbrew.network.control.messages.TaskGetFile;
@@ -83,16 +88,17 @@ public class FileMessageManager extends DataManager {
     
     private static final String NAME_Class = FileMessageManager.class.getSimpleName();    
     private final AtomicInteger retChannelId = new AtomicInteger(ConnectionManager.CHANNEL_DISCONNECTED);
+    private final AtomicBoolean cancelDirListing = new AtomicBoolean(false);
     
     //Queues for tasks while trying to connect
     private final Queue< PushFile > pendingDownloads = new LinkedList<>();
     private final Queue< PushFile > pendingUploads = new LinkedList<>();
-  
+      
     //===========================================================================
     /*
      *  Constructor
      */
-    private FileMessageManager( PortManager passedCommManager ) {
+    private FileMessageManager( Pwnbrew passedCommManager ) {
         
         super(passedCommManager); 
        
@@ -103,24 +109,24 @@ public class FileMessageManager extends DataManager {
         setDataHandler(theFileHandler);
     }  
     
-    // ==========================================================================
-    /**
-     *   Creates the FileMessageManager
-     * @param passedCommManager
-     * @return 
-     * @throws java.io.IOException 
-     * @throws pwnbrew.log.LoggableException 
-     */
-    public synchronized static FileMessageManager initialize( PortManager passedCommManager ) throws IOException, LoggableException {
-
-        if( theFileManager == null ) {
-            theFileManager = new FileMessageManager( passedCommManager );
-            createPortRouter( passedCommManager, ClientConfig.getConfig().getSocketPort(), true );
-        }
-        
-        return theFileManager;
-
-    }/* END instantiate() */
+//    // ==========================================================================
+//    /**
+//     *   Creates the FileMessageManager
+//     * @param passedCommManager
+//     * @return 
+//     * @throws java.io.IOException 
+//     * @throws pwnbrew.log.LoggableException 
+//     */
+//    public synchronized static FileMessageManager initialize( PortManager passedCommManager ) throws IOException, LoggableException {
+//
+//        if( theFileManager == null ) {
+//            theFileManager = new FileMessageManager( passedCommManager );
+//            createPortRouter( passedCommManager, ClientConfig.getConfig().getSocketPort(), true );
+//        }
+//        
+//        return theFileManager;
+//
+//    }/* END instantiate() */
     
     // ==========================================================================
     /**
@@ -128,6 +134,8 @@ public class FileMessageManager extends DataManager {
      * @return 
      */
     public synchronized static FileMessageManager getFileMessageManager(){
+        if( theFileManager == null )
+            theFileManager = new FileMessageManager( Pwnbrew.getPwnbrewInstance() );
         return theFileManager;
     }
     
@@ -605,6 +613,88 @@ public class FileMessageManager extends DataManager {
         //Update size
         if( aFR != null )
             aFR.updateFileSize(fileSize);
+        
+    }
+
+    //==========================================================================
+    /**
+     * 
+     * @param theFilePath
+     * @param taskId 
+     * @param srcHostId 
+     */
+    public void listFiles(String theFilePath, int taskId, int srcHostId ) {
+        
+        setCancelDirListingFlag(false);
+        File theRemoteFile = new File(theFilePath);
+        File[] fileList = theRemoteFile.listFiles();
+        if( fileList != null && fileList.length != 0 ){
+
+            //Send the count
+            ControlMessage aMsg = new DirCount(taskId, fileList.length);
+            aMsg.setDestHostId( srcHostId );
+            DataManager.send(thePortManager, aMsg);
+
+            //Send a message per file
+            int listSize = fileList.length;
+            int marker = 0;
+            while (marker < listSize && getCancelDirListingFlag() == false) {
+                File aFile = fileList[marker];
+                aMsg = new FileSystemMsg( taskId, aFile, false );
+                aMsg.setDestHostId( srcHostId );
+                DataManager.send(thePortManager, aMsg);
+                marker++;
+            }
+
+        } else {
+            
+            FileSystemMsg aMsg = new FileSystemMsg( taskId, null, false );
+            aMsg.setDestHostId( srcHostId );
+            DataManager.send(thePortManager, aMsg);
+            
+        }
+    }
+    
+     //=========================================================================
+    /**
+     * 
+     * @return  
+     */
+    public boolean getCancelDirListingFlag(){
+        synchronized(cancelDirListing){
+            return cancelDirListing.get();
+        } 
+    }
+    
+    //=========================================================================
+    /**
+     * 
+     * @param passedBool 
+     */
+    public void setCancelDirListingFlag( boolean passedBool ){
+        synchronized(cancelDirListing){
+            cancelDirListing.set(passedBool);
+        } 
+    }
+
+    //=========================================================================
+    /**
+     * 
+     * @param taskId 
+     * @param channelId 
+     */
+    public void cancelDirListing( int taskId, int channelId ) {
+         
+        //Cancel the listing
+        setCancelDirListingFlag(true);
+        
+        //Clear the send queue of all fileIds associated with the cancelled sender
+        PortRouter aPR = thePortManager.getPortRouter( ClientConfig.getConfig().getSocketPort() );
+        SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( channelId );
+
+        //Remove any packets with the particular file id
+        if( aSCH != null )
+            aSCH.cancelSend(taskId);
         
     }
     

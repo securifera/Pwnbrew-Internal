@@ -91,9 +91,9 @@ public class TaskStatus extends Tasking {
      * @param taskId
      * @param dstHostId
      * @param passedStatus
-     * @throws java.io.IOException
+     * @throws java.io.UnsupportedEncodingException
     */
-    public TaskStatus( int taskId, String passedStatus, int dstHostId ) throws IOException  {
+    public TaskStatus( int taskId, String passedStatus, int dstHostId ) throws UnsupportedEncodingException  {
         super( MESSAGE_ID, taskId, dstHostId );
 
         taskStatus = passedStatus;

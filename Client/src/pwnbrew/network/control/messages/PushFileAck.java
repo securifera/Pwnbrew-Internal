@@ -45,12 +45,9 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.log.LoggableException;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.ControlOption;
@@ -181,20 +178,8 @@ public final class PushFileAck extends FileMessage {
         DebugPrinter.printMessage( this.getClass().getSimpleName(), "Received ACK for " + 
                 getFileToReceive().getName() + " Id: " + Integer.toString( getFileChannelId()));
 
-        try {
-
-            //Get the control manager for sending messages
-            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
-            if( theFileMM == null ){
-                theFileMM = FileMessageManager.initialize( passedManager );
-            }
-
-            //Queue the file send
-            theFileMM.sendFile( this );        
-              
-        } catch (IOException | LoggableException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        }
+        FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+        theFileMM.sendFile( this );
         
     }
 

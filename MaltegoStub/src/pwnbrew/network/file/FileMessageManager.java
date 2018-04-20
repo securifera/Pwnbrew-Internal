@@ -281,7 +281,7 @@ public class FileMessageManager extends DataManager {
                 //Try to begin the file transfer
                 initFileTransfer( passedMessage, libDir );
                 //Send an ack to the sender to begin transfer
-                DebugPrinter.printMessage( getClass().getSimpleName(), "prepFilePush", "Sending ACK for " + hashFileNameStr + " channelId: " + fileChannelId, null);
+//                DebugPrinter.printMessage( getClass().getSimpleName(), "prepFilePush", "Sending ACK for " + hashFileNameStr + " channelId: " + fileChannelId, null);
                 PushFileAck aSFMA = new PushFileAck(taskId, fileId, fileChannelId, hashFileNameStr, srcId );
                 //Set compression flag
                 if( passedMessage.useCompression() )

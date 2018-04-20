@@ -196,16 +196,6 @@ public abstract class ControlMessage extends Message {
 
         short classId = (short)SocketUtilities.byteArrayToInt(classIdArr);
         String thePath = ControlMessageManager.getControlMessageClassPath(classId);
-//        byte[] classFqnLength = new byte[2];
-//        passedBuffer.get(classFqnLength, 0, classFqnLength.length);
-//        
-//        //Get the length of the class path
-//        int theLength = SocketUtilities.byteArrayToInt(classFqnLength);
-//        byte[] classPath = new byte[theLength];
-//        
-//        passedBuffer.get(classPath, 0, classPath.length);
-//        String thePath = new String(classPath);
-        
         try {
             
             //Get the class

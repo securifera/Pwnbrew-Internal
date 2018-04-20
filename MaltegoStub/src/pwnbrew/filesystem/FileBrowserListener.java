@@ -57,7 +57,9 @@ public interface FileBrowserListener extends TaskManager {
     public String getId();
 
     public void addRemoteFileSystemTask(RemoteFileSystemTask aRFST);
-
+    
+    public void removeRemoteFileSystemTask( int taskId );
+    
     public void performFileOperation(byte DATE, String filePath, String string);
 
     public String getHost();
@@ -84,6 +86,6 @@ public interface FileBrowserListener extends TaskManager {
 
     public void downloadFolders(List<RemoteFile> theFolderList);
 
-    public boolean shouldClearTable();
+    public boolean getClearTableFlag();
 
 }

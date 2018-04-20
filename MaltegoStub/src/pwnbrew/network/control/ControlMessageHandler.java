@@ -99,7 +99,7 @@ public class ControlMessageHandler extends DataHandler {
             public void run() {
                 try { 
                     aMessage.evaluate( theDataManager.getPortManager() );
-                } catch (LoggableException ex) {
+                } catch (Exception ex) {
                     DebugPrinter.printMessage( NAME_Class, "run", ex.getMessage(), ex);         
                 }
             }

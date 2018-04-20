@@ -45,6 +45,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -54,6 +55,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JOptionPane;
 import javax.swing.JTree;
@@ -90,7 +92,6 @@ import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.ControlOption;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.CancelSearch;
 import pwnbrew.network.control.messages.ShutdownChannel;
 import pwnbrew.network.control.messages.FileOperation;
@@ -358,15 +359,18 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
 
             //Add the file to the node if one exists
             final FileNode aFileNode;
-            if( filePath != null && !filePath.isEmpty() ){
+            if( filePath != null && !filePath.isEmpty() && theTask.getListLength() < theTask.getFileCount()){
+                                
+                //DebugPrinter.printMessage( getClass().getSimpleName(), "updateFileSystem", "Created file node for \"" + filePath + "\"", null);
+           
                 //Create a file from the path
                 RemoteFile aFile = new RemoteFile( filePath, hostPathSeparator );
                 aFileNode = new FileNode( aFile, fileType, size, dateModified );
                 theTask.addFileNode(aFileNode);    
             } else{
                 aFileNode = null;
-            }      
-            
+            }
+                            
             if( theTask.getListLength() == theTask.getFileCount() && 
                     theTask.getTaskType() != FileOperation.DOWNLOAD_DIR){
 
@@ -416,8 +420,6 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                                     DefaultMutableTreeNode node = new DefaultMutableTreeNode(theIconData);
                                     parent.add(node);
 
-
-
                                     if( currentNode.getSize() > 0)
                                         node.add(new DefaultMutableTreeNode( true));
 
@@ -466,17 +468,14 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                             theFsFrame.setCursor(null);
 
                             //Set flag
-                            synchronized(dirListingFlag){
-                                dirListingFlag.set(false);
-                            }
+                            setDirListingFlag(false);
+                            
                         }
                     }               
                 });
 
-                //Remove the task from the map
-                synchronized(theRemoteFileSystemTaskMap){
-                    theRemoteFileSystemTaskMap.remove(taskId);
-                }
+                //Remove task
+                removeRemoteFileSystemTask(taskId);
                
             //Is a file search under way
             } else if( theTask.getTaskType() == FileOperation.SEARCH){
@@ -521,9 +520,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             theFsFrame.setCursor(null);
             
             //Set flag
-            synchronized(dirListingFlag){
-                dirListingFlag.set(false);
-            }
+            setDirListingFlag(false);
             
         }
         
@@ -594,6 +591,18 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     public void addRemoteFileSystemTask(RemoteFileSystemTask aRFST) {
         synchronized(theRemoteFileSystemTaskMap){
             theRemoteFileSystemTaskMap.put(aRFST.getTaskId(), aRFST);
+        }
+    }
+    
+    //=========================================================================
+    /**
+     * Remove task from map
+     * @param taskId
+     */
+    @Override
+    public void removeRemoteFileSystemTask( int taskId ) {
+        synchronized(theRemoteFileSystemTaskMap){
+            theRemoteFileSystemTaskMap.remove( taskId );
         }
     }
 
@@ -838,38 +847,65 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         
         //Set the Cursor
         theFsFrame.setCursor( Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR) );
-        
-        //Clear the table
+                            
+        //Get flag
+        boolean dirListBool = getDirListingFlag();
+        if(dirListBool){
+
+            synchronized(theRemoteFileSystemTaskMap){
+                
+                HashMap<Integer, RemoteFileSystemTask> mapCopy = new HashMap<>(theRemoteFileSystemTaskMap);
+                for( Iterator<Map.Entry<Integer, RemoteFileSystemTask>> anIter = mapCopy.entrySet().iterator(); anIter.hasNext(); ){
+                    
+                    //Add each entry
+                    Map.Entry<Integer, RemoteFileSystemTask> anEntry = anIter.next();                    
+                    RemoteFileSystemTask aTask = anEntry.getValue();
+                    byte taskType = aTask.getTaskType();
+                    if( taskType == FileOperation.LIST ){
+                        int taskId = aTask.getTaskId();
+                        try {
+                            TaskStatus cancelMessage = new TaskStatus( taskId, RemoteFileIO.TASK_CANCELLED, theHostId );
+                            DataManager.send( theManager, cancelMessage );   
+                        } catch( UnsupportedEncodingException ex ){                                
+                        }   
+                               
+                        //Remote the task
+                        theRemoteFileSystemTaskMap.remove(anEntry.getKey());                  
+                        
+                    }
+                    
+                }                    
+                
+            }
+            
+            //Set flag
+            setDirListingFlag(false);
+        }
+                
+        //Get user object
         Object anObj = passedNode.getUserObject();
         if( anObj instanceof IconData) 
             anObj = ((IconData)anObj).getObject();
         
-        //Set flag
-        boolean dirListBool;
         Tasking aTaskMessage = null;
-        synchronized(dirListingFlag){
-            
-            //Get flag
-            dirListBool = dirListingFlag.get();               
-            if( anObj instanceof FileNode && !dirListBool ){
-                
-                DefaultTableModel theModel = (DefaultTableModel) theFsFrame.getFileJTable().getModel();
-                theModel.setRowCount(0);
+        if( anObj instanceof FileNode ){
 
-                //Set the flag
-                dirListingFlag.set(true);
-                FileNode aFN = (FileNode)anObj;
+            DefaultTableModel theModel = (DefaultTableModel) theFsFrame.getFileJTable().getModel();
+            theModel.setRowCount(0);
 
-                switch( aFN.getType() ) {
-                    case FileSystemMsg.FOLDER:                    
-                    case FileSystemMsg.DRIVE:
-                        RemoteFile aFile = aFN.getFile();
-                        aTaskMessage = new ListFiles( theHostId, aFile.getAbsolutePath());
-                        break;
-                    default:
-                        aTaskMessage = new GetDrives( theHostId );                        
-                        break;
-                }
+            //Set the flag
+            setDirListingFlag(true);
+            FileNode aFN = (FileNode)anObj;
+
+            switch( aFN.getType() ) {
+                case FileSystemMsg.FOLDER:                    
+                case FileSystemMsg.DRIVE:
+                    RemoteFile aFile = aFN.getFile();
+                    aTaskMessage = new ListFiles( theHostId, aFile.getAbsolutePath());
+                    break;
+                default:
+                    aTaskMessage = new GetDrives( theHostId );                        
+                    break;
             }
         }
 
@@ -877,10 +913,12 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             int taskId = aTaskMessage.getTaskId();
             RemoteFileSystemTask aRFST = new RemoteFileSystemTask(taskId, passedNode, FileOperation.LIST);
             addRemoteFileSystemTask(aRFST);
-            
+
             //Send a message
             DataManager.send( theManager, aTaskMessage);
         }
+        
+      
     }
 
     //=================================================================
@@ -933,12 +971,9 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                 if( aFMM != null ){
                 
                     aFMM.cancelFileTransfer( theHostId, passedId);
-                    ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-                    if( aCMManager != null ){                       
-                        TaskStatus cancelMessage = new TaskStatus( passedId, RemoteFileIO.TASK_CANCELLED, theHostId );
-                        DataManager.send( theManager, cancelMessage );  
-                    }
-
+                    TaskStatus cancelMessage = new TaskStatus( passedId, RemoteFileIO.TASK_CANCELLED, theHostId );
+                    DataManager.send( theManager, cancelMessage );  
+                    
                 }
                 
             } catch ( IOException ex) {
@@ -1146,9 +1181,9 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                             }   
                         }  
 
-                        synchronized(theRemoteFileSystemTaskMap){
-                            theRemoteFileSystemTaskMap.remove(passedTaskId);
-                        }
+                        //Remove task
+                        removeRemoteFileSystemTask(passedTaskId);
+                        
                     }
                 }
 
@@ -1253,10 +1288,8 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         theFsFrame.setCursor(null);
             
         //Set flag
-        synchronized(dirListingFlag){
-            dirListingFlag.set(false);
-        }
-        
+        setDirListingFlag(false);
+                
         //Remove all tasks
         synchronized(theRemoteFileSystemTaskMap){
             theRemoteFileSystemTaskMap.clear();
@@ -1361,9 +1394,43 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
      * @return 
      */
     @Override
-    public boolean shouldClearTable() {
-        return clearTable.get();
+    public boolean getClearTableFlag() {
+        synchronized(clearTable){
+            return clearTable.get();
+        }
+    }
+    
+    //=========================================================================
+    /**
+     * 
+     * @param passedFlag 
+     */
+    public void setClearTableFlag(boolean passedFlag) {
+        synchronized(clearTable){
+            clearTable.set(passedFlag);
+        }
     }
 
+     //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public boolean getDirListingFlag() {
+        synchronized(dirListingFlag){
+            return dirListingFlag.get();
+        }
+    }
+    
+    //=========================================================================
+    /**
+     * 
+     * @param passedFlag 
+     */
+    public void setDirListingFlag(boolean passedFlag) {
+        synchronized(dirListingFlag){
+            dirListingFlag.set(passedFlag);
+        }
+    }
 
 }

@@ -56,7 +56,7 @@ abstract public class Tasking extends ControlMessage {
     
     
     private static final byte OPTION_TASK_ID = 22;
-    private int taskId = 0;
+    protected int taskId = 0;
     
     
     // ==========================================================================

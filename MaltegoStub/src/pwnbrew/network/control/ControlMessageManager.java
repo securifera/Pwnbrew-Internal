@@ -327,24 +327,6 @@ public class ControlMessageManager extends DataManager {
         setDataHandler(theMessageHandler);
     }  
     
-//    // ==========================================================================
-//    /**
-//     *   Creates a ControlMessageManager
-//     * @param passedCommManager
-//     * @return 
-//     * @throws java.io.IOException 
-//     */
-//    public synchronized static ControlMessageManager initialize( PortManager passedCommManager ) throws IOException {
-//
-//        if( theControlManager == null ) {
-//            theControlManager = new ControlMessageManager( passedCommManager );
-//            createPortRouter( passedCommManager, StubConfig.getConfig().getSocketPort(), true );
-//        }
-//        
-//        return theControlManager;
-//
-//    }/* END initialize() */
-    
     // ==========================================================================
     /**
      *   Gets the ControlMessageManager

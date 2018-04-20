@@ -38,9 +38,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
-import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
@@ -112,22 +109,12 @@ public final  class SocksCreateHandlerMsg extends ControlMessage {
     @Override
     public void evaluate( PortManager passedManager ) { 
         
-        try {
-            
-            SocksMessageManager aSMM = SocksMessageManager.getSocksMessageManager();
-            if( aSMM == null )
-                aSMM = SocksMessageManager.initialize(passedManager);
-            
-            //Create a handler for this id
-            boolean retVal = aSMM.createHandler( getSrcHostId(), theHandlerId, theConnectStr);
-            if( !retVal ){
-                //Send message to create channel for socks proxy
-                SocksOperation aSocksMsg = new SocksOperation( getSrcHostId(), SocksOperation.HANDLER_STOP, theHandlerId );
-                DataManager.send(passedManager, aSocksMsg );
-            }
-            
-        } catch( IOException ex){
-            RemoteLog.log( Level.SEVERE, NAME_Class, "evaluate", ex.getMessage(), null); 
+        SocksMessageManager aSMM = SocksMessageManager.getSocksMessageManager();
+        boolean retVal = aSMM.createHandler( getSrcHostId(), theHandlerId, theConnectStr);
+        if( !retVal ){
+            //Send message to create channel for socks proxy
+            SocksOperation aSocksMsg = new SocksOperation( getSrcHostId(), SocksOperation.HANDLER_STOP, theHandlerId );
+            DataManager.send(passedManager, aSocksMsg ); 
         }
         
     }

@@ -125,5 +125,15 @@ public final class FileSystemMsg extends Tasking {
             addOption(aTlv);
         }
     }   
+    
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public int getCancelId(){
+        return taskId;
+    }
    
 }

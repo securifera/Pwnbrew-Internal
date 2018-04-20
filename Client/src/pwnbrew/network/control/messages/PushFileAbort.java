@@ -46,10 +46,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 
-import java.io.IOException;
-import java.util.logging.Level;
-import pwnbrew.log.RemoteLog;
-import pwnbrew.log.LoggableException;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.file.FileMessageManager;
 
@@ -95,19 +91,8 @@ public final class PushFileAbort extends FileMessage {
     @Override
     public void evaluate( PortManager passedManager ) {
         
-        //Get the control manager for sending messages
-        try {
-            FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
-            if( theFileMM == null ){
-                theFileMM = FileMessageManager.initialize( passedManager );
-            }
-
-            //Cleanup the file transfer
-            theFileMM.abortFileReceive( fileId );
-            
-        } catch (IOException | LoggableException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
-        }
+        FileMessageManager theFileMM = FileMessageManager.getFileMessageManager();
+        theFileMM.abortFileReceive( fileId );
                     
     }
 
