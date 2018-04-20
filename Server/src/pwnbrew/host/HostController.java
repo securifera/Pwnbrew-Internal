@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
-//import pwnbrew.library.LibraryItemController;
 import pwnbrew.log.Log;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.ServerManager;
@@ -68,7 +67,7 @@ import pwnbrew.xml.XmlObject;
  *
  *  
  */
-public final class HostController /*extends LibraryItemController */{
+public final class HostController {
     
     private static final String NAME_Class = HostController.class.getSimpleName();
 

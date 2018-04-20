@@ -54,6 +54,7 @@ import pwnbrew.host.Host;
 import pwnbrew.log.Log;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.NotificationManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.ServerManager;
 import pwnbrew.misc.DebugPrinter;
@@ -228,7 +229,7 @@ public final class Hello extends ControlMessage {
                 Integer theClientId = getSrcHostId();
                 Log.log(Level.INFO, NAME_Class, "evaluate()", "Accepted connection from host id: " + theClientId + " channel: " + Integer.toString(theChannelId), null);
                 PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort() );
-                
+                              
                 //Get connection manager
                 ConnectionManager aCM = aPR.getConnectionManager(theClientId);
                 if( aCM != null ){
@@ -291,7 +292,10 @@ public final class Hello extends ControlMessage {
 
                         //Notify the task manager
                         ((ServerManager)passedManager).registerHost( aHost );
-
+                        
+                        //Send notification if it's enabled
+                        NotificationManager.hostConnected(aHost);
+                                                  
                     } else {
                         Log.log(Level.INFO, NAME_Class, "evaluate()", "Unable to locate the client id specified.", null );
                     }

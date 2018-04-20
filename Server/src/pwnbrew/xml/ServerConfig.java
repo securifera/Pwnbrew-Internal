@@ -79,6 +79,14 @@ public class ServerConfig extends XmlObject {
     //Current version
     private static final String ATTRIBUTE_CurrentVersion = "version";  
     
+    //SMTP settings
+    private static final String ATTRIBUTE_SMTP_ENABLED = "smtpEnabled";
+    private static final String ATTRIBUTE_SMTP_HOST = "smtpHost";
+    private static final String ATTRIBUTE_SMTP_PORT = "smtpPort";
+    private static final String ATTRIBUTE_SMTP_RECIPIENT = "smtpRecipient";
+    private static final String ATTRIBUTE_SMTP_FROM_HOST = "smtpFromHost"; 
+    
+    
     private static final String theConfigFileName = "config.xml";
     private static ServerConfig theConf = null;
     
@@ -91,12 +99,20 @@ public class ServerConfig extends XmlObject {
      *  Constructor
      */
     public ServerConfig() {
-       // Extend the object's structure
-       thePropertyMap.put( ATTRIBUTE_HostId, ""  );
-       thePropertyMap.put( ATTRIBUTE_StorePass, "password" );
-       thePropertyMap.put( ATTRIBUTE_CertAlias, "" );
-       thePropertyMap.put( ATTRIBUTE_CommPort, Integer.toString(Constants.COMM_PORT) );
-       thePropertyMap.put( ATTRIBUTE_CurrentVersion, "" );
+        // Extend the object's structure
+        thePropertyMap.put( ATTRIBUTE_HostId, ""  );
+        thePropertyMap.put( ATTRIBUTE_StorePass, "password" );
+        thePropertyMap.put( ATTRIBUTE_CertAlias, "" );
+        thePropertyMap.put( ATTRIBUTE_CommPort, Integer.toString(Constants.COMM_PORT) );
+        thePropertyMap.put( ATTRIBUTE_CurrentVersion, "" );
+        
+        //SMTP values
+        thePropertyMap.put( ATTRIBUTE_SMTP_ENABLED, "False"  );
+        thePropertyMap.put( ATTRIBUTE_SMTP_HOST, ""  );
+        thePropertyMap.put( ATTRIBUTE_SMTP_PORT, ""  );
+        thePropertyMap.put( ATTRIBUTE_SMTP_RECIPIENT, ""  );
+        thePropertyMap.put( ATTRIBUTE_SMTP_FROM_HOST, ""  );
+        
     }
 
      //==========================================================================
@@ -105,7 +121,7 @@ public class ServerConfig extends XmlObject {
      * @return 
     */
     public String getHostId(){
-       return thePropertyMap.get(ATTRIBUTE_HostId);
+        return thePropertyMap.get(ATTRIBUTE_HostId);
     }
 
 
@@ -115,7 +131,7 @@ public class ServerConfig extends XmlObject {
      * @return 
     */
     public String getAlias(){
-       return thePropertyMap.get(ATTRIBUTE_CertAlias);
+        return thePropertyMap.get(ATTRIBUTE_CertAlias);
     }
 
      //==========================================================================
@@ -124,7 +140,7 @@ public class ServerConfig extends XmlObject {
      * @param passedAlias
     */
     public void setAlias(String passedAlias){
-       thePropertyMap.put(ATTRIBUTE_CertAlias, passedAlias);
+        thePropertyMap.put(ATTRIBUTE_CertAlias, passedAlias);
     }
 
      //==========================================================================
@@ -134,13 +150,13 @@ public class ServerConfig extends XmlObject {
     */
     public int getSocketPort(){
 
-       //Return the default if the value is empty
-       int retPort = Constants.COMM_PORT;
-       String thePort = thePropertyMap.get(ATTRIBUTE_CommPort);
-       if(!thePort.isEmpty()){
-          retPort = Integer.valueOf( thePort );
-       }
-       return retPort;
+        //Return the default if the value is empty
+        int retPort = Constants.COMM_PORT;
+        String thePort = thePropertyMap.get(ATTRIBUTE_CommPort);
+        if(!thePort.isEmpty())
+            retPort = Integer.valueOf( thePort );
+        
+        return retPort;
     }
 
     //==========================================================================
@@ -149,7 +165,7 @@ public class ServerConfig extends XmlObject {
      * @param passedPort
     */
     public void setSocketPort(String passedPort){
-       thePropertyMap.put(ATTRIBUTE_CommPort, passedPort);
+        thePropertyMap.put(ATTRIBUTE_CommPort, passedPort);
     }
 
      //==========================================================================
@@ -243,9 +259,8 @@ public class ServerConfig extends XmlObject {
     */
     public static ServerConfig getServerConfig() throws LoggableException{
         
-        if(theConf == null){
-            theConf = loadConfig();
-        }
+        if(theConf == null)
+            theConf = loadConfig();        
         
         return theConf;
     }
