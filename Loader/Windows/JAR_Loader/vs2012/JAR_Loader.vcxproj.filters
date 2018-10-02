@@ -15,38 +15,38 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="jarldr.h">
+    <ClInclude Include="..\include\jarldr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\log.h">
+    <ClInclude Include="..\include\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\utilities.h">
+    <ClInclude Include="..\..\util\include\utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
+    <ClInclude Include="..\..\util\include\persist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\persist.h">
+    <ClInclude Include="..\..\util\include\log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="jarldr.cpp">
+    <ClCompile Include="..\src\jarldr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\log.cpp">
+    <ClCompile Include="..\..\util\src\log.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\utilities.cpp">
+    <ClCompile Include="..\..\util\src\persist.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\persist.cpp">
+    <ClCompile Include="..\..\util\src\utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="jarldr.rc">
+    <ResourceCompile Include="..\resource\jarldr.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

@@ -1,14 +1,15 @@
 // ProcessHollowing.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
+//#include "stdafx.h"
 #include <windows.h>
 #include "ph.h"
 #include <time.h>
 #include <sstream>
-#include "..\log.h"
-#include "..\utilities.h"
-#include "..\persist.h"
+#include "log.h"
+#include "utilities.h"
+#include "persist.h"
+#include "resource.h"
 #include <ShlObj.h>
 
 #pragma comment(lib, "Advapi32.lib")

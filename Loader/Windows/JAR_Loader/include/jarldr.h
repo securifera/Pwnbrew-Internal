@@ -3,8 +3,8 @@
 
 #include <Windows.h>
 #include <string>
-#include "include/jni.h"
-#include "../persist.h"
+#include "jni.h"
+#include "persist.h"
 
 #define COLON ":1"
 

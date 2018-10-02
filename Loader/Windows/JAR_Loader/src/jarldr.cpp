@@ -11,8 +11,8 @@
 //****************************************************************
 
 #include "jarldr.h"
-#include "..\log.h"
-#include "..\utilities.h"
+#include "log.h"
+#include "utilities.h"
 #include "resource.h"
 #include <process.h>
 #include <ShlObj.h>

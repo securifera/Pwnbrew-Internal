@@ -1,10 +1,7 @@
 //***************************************************************
-/*  Author: Securifera
-/   Description: 
-/           This application sets up and runs the java application
+/*  Author:       b0yd@securifera.com
+/   Description:  This application sets up and runs the java application
 /   as a service.
-/
-/
 /
 */
 //****************************************************************
@@ -12,9 +9,9 @@
 #pragma once
 
 #include "svc.h"
-#include "..\JAR_Loader\jarldr.h"
-#include "..\log.h"
-#include "..\utilities.h"
+#include "jarldr.h"
+#include "log.h"
+#include "utilities.h"
 #include <ShlObj.h>
 
 HANDLE stopEvent;
