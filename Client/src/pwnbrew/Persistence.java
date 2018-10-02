@@ -138,7 +138,7 @@ final public class Persistence {
                        
                         if( theSvcPath != null ){
                             
-                            RemoteLog.log(Level.INFO, NAME_Class, "uninstall()", "Service Path: " + theSvcPath + ".", null ); 
+                            RemoteLog.log(Level.INFO, NAME_Class, "uninstall()", "Service Path: " + theSvcPath, null ); 
                             try {
                                 Thread.sleep(1000);
                             } catch (InterruptedException ex) {}

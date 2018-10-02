@@ -6,6 +6,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Service", "Service\vs2012\Service.vcxproj", "{23431096-94FD-41CC-A560-CD61187305A1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Process_Hollow", "Process_Hollow\vs2012\Process_Hollow.vcxproj", "{387676AB-C230-4C62-AB96-92749498DB32}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8AB5E5EC-64B9-4D06-82E0-3EABF677BFBE} = {8AB5E5EC-64B9-4D06-82E0-3EABF677BFBE}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
