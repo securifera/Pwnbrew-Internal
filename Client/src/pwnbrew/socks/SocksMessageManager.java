@@ -48,6 +48,7 @@ package pwnbrew.socks;
 import pwnbrew.network.PortRouter;
 import java.util.HashMap;
 import java.util.Map;
+import pwnbrew.Pwnbrew;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
 
@@ -85,6 +86,8 @@ public class SocksMessageManager extends DataManager {
      * @return 
      */
     public synchronized static SocksMessageManager getSocksMessageManager(){
+        if( theSocksMessageManager == null )
+            theSocksMessageManager = new SocksMessageManager( Pwnbrew.getPwnbrewInstance() );
         return theSocksMessageManager;
     }
     

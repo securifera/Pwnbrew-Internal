@@ -45,6 +45,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.shell;
 
+import pwnbrew.Pwnbrew;
 import pwnbrew.network.PortRouter;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
@@ -80,6 +81,8 @@ public class ShellMessageManager extends DataManager {
      * @return 
      */
     public synchronized static ShellMessageManager getShellMessageManager(){
+        if( theShellMsgManager == null )
+            theShellMsgManager = new ShellMessageManager( Pwnbrew.getPwnbrewInstance() );
         return theShellMsgManager;
     }
     

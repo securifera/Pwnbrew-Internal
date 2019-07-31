@@ -109,25 +109,6 @@ public class FileMessageManager extends DataManager {
         setDataHandler(theFileHandler);
     }  
     
-//    // ==========================================================================
-//    /**
-//     *   Creates the FileMessageManager
-//     * @param passedCommManager
-//     * @return 
-//     * @throws java.io.IOException 
-//     * @throws pwnbrew.log.LoggableException 
-//     */
-//    public synchronized static FileMessageManager initialize( PortManager passedCommManager ) throws IOException, LoggableException {
-//
-//        if( theFileManager == null ) {
-//            theFileManager = new FileMessageManager( passedCommManager );
-//            createPortRouter( passedCommManager, ClientConfig.getConfig().getSocketPort(), true );
-//        }
-//        
-//        return theFileManager;
-//
-//    }/* END instantiate() */
-    
     // ==========================================================================
     /**
      *   Gets the FileMessageManager
