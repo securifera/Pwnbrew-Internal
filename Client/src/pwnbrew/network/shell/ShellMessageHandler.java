@@ -55,6 +55,7 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.shell.messages.ProcessMessage;
+import pwnbrew.utilities.DebugPrinter;
 
 
 /**
@@ -151,6 +152,7 @@ public class ShellMessageHandler extends DataHandler {
         try {
             
             ProcessMessage aMessage = ProcessMessage.getMessage( currByteArray );
+            DebugPrinter.printMessage(ProcessMessage.class.getSimpleName(), "Received " + aMessage.getClass().getSimpleName() + " message.");
             aMessage.evaluate( theDataManager.getPortManager() );           
             
         } catch (LoggableException ex) {

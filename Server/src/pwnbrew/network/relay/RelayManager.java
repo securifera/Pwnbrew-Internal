@@ -47,6 +47,7 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
+import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
@@ -162,6 +163,7 @@ public class RelayManager extends DataManager {
                         } 
                     }
                     
+                    DebugPrinter.printMessage(NAME_Class, "Relaying message to \"" + tempId + "\" for \"" + srcHostId + "\" channel id: " + channelId);
                     theHandler.queueBytes(msgBytes);
                     return;
                 }

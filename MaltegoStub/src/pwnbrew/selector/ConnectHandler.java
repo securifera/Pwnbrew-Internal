@@ -110,13 +110,13 @@ public class ConnectHandler implements Selectable {
             return;
         }
         
-        try {
-            //Set a keepalive so we are notified of disconnects
-            socketChannel.socket().setKeepAlive(true);
-        } catch (SocketException ex) {
-            DebugPrinter.printMessage( NAME_Class, "handle", ex.getMessage(), ex);
-            return;
-        }
+//        try {
+//            //Set a keepalive so we are notified of disconnects
+//            socketChannel.socket().setKeepAlive(true);
+//        } catch (SocketException ex) {
+//            DebugPrinter.printMessage( NAME_Class, "handle", ex.getMessage(), ex);
+//            return;
+//        }
 
         try {
             

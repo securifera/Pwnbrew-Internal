@@ -1202,19 +1202,21 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         
         JTree theJTree = theFsFrame.getFileTreePanel().getJTree();
         DefaultMutableTreeNode aNode = (DefaultMutableTreeNode) theJTree.getLastSelectedPathComponent();
-        Enumeration<DefaultMutableTreeNode> e = aNode.breadthFirstEnumeration();
-        DefaultMutableTreeNode currentNode;
-        while( e.hasMoreElements() ) {
-            currentNode = e.nextElement();
-            Object anObj = currentNode.getUserObject();
-            if( anObj instanceof IconData){
-                anObj = ((IconData)anObj).getObject();
-                if( anObj instanceof FileNode ){            
-                    FileNode aFileNode = (FileNode)anObj;
-                    if( passedFileNode.equals(aFileNode) ) {
-                        TreePath objectPath = new TreePath( currentNode.getPath() );
-                        theJTree.setSelectionPath(objectPath);  
-                        break;
+        if( aNode != null ){
+            Enumeration<DefaultMutableTreeNode> e = aNode.breadthFirstEnumeration();
+            DefaultMutableTreeNode currentNode;
+            while( e.hasMoreElements() ) {
+                currentNode = e.nextElement();
+                Object anObj = currentNode.getUserObject();
+                if( anObj instanceof IconData){
+                    anObj = ((IconData)anObj).getObject();
+                    if( anObj instanceof FileNode ){            
+                        FileNode aFileNode = (FileNode)anObj;
+                        if( passedFileNode.equals(aFileNode) ) {
+                            TreePath objectPath = new TreePath( currentNode.getPath() );
+                            theJTree.setSelectionPath(objectPath);  
+                            break;
+                        }
                     }
                 }
             }
