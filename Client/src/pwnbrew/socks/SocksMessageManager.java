@@ -207,6 +207,7 @@ public class SocksMessageManager extends DataManager {
                 aSHS.shutdown();
             }
         }
+        theDataHandler.shutdown();
     }
 
     //========================================================================

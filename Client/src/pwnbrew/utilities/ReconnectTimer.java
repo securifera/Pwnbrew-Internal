@@ -198,14 +198,17 @@ public class ReconnectTimer extends ManagedRunnable {
                     //DebugPrinter.printMessage(NAME_Class, "ReconnectTimer waiting to be notified.");
                     waitToBeNotified();
                     
+                    //Get the channel id and try again if connection failed
+                    connected = theCC.getChannelId();
+                    if( connected == 0)
+                        continue;
+                    
                     //Queue post connect msg if it exists
                     if( postConnectMsg != null){
                         DataManager.send( theCommManager, postConnectMsg );
                         postConnectMsg = null;
-                    }
-                    
-                    //Get the channel id
-                    connected = theCC.getChannelId();
+                    }                    
+
                     //DebugPrinter.printMessage(NAME_Class, "ReconnectTimer notified. Connected: " + connected);
                     theDate = null;
                     
@@ -224,6 +227,7 @@ public class ReconnectTimer extends ManagedRunnable {
                     }
                    
                 } else  {
+                    DebugPrinter.printMessage(NAME_Class, "Reached reconnect limit. exiting");
                     break;
                 }
                 
@@ -261,6 +265,8 @@ public class ReconnectTimer extends ManagedRunnable {
                 return;
             }               
         }
+        
+        DebugPrinter.printMessage(NAME_Class, "Exiting. channel " + Integer.toString(theChannelId));
      
         //Reset things
         theReconnectTimeList.clear();

@@ -49,6 +49,7 @@ import pwnbrew.functions.Function;
 import pwnbrew.functions.ToSocks;
 import pwnbrew.manager.PortManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.network.control.messages.SocksOperation;
 
 /**
  *
@@ -117,6 +118,24 @@ public class SocksMessageManager extends DataManager {
      * 
      */
     public void stopSocksServer() {
+
+        //Send message to shutdown socks beacon
+        if( thePortManager instanceof MaltegoStub ){
+
+            MaltegoStub maltegoManager = (MaltegoStub)thePortManager;
+            Function theFunction = maltegoManager.getFunction();
+            if( theFunction instanceof ToSocks ){
+                ToSocks toSocksFunc = (ToSocks)theFunction;
+                               
+                //Host id
+                int hostId = toSocksFunc.getHostId();
+                                
+                //Send message to shutdown the socks beacon
+                SocksOperation aSocksMsg = new SocksOperation( hostId, SocksOperation.SHUTDOWN, theSocksServer.getChannelId() );
+                DataManager.send( MaltegoStub.getMaltegoStub(), aSocksMsg );   
+            }
+        }
+        
         //Close server
         if( theSocksServer != null ){
             theSocksServer.shutdown();
@@ -155,20 +174,6 @@ public class SocksMessageManager extends DataManager {
         }
 
     }
-
-//    //===========================================================================
-//    /**
-//     * 
-//     * @param theHandlerId 
-//     * @param creationFlag 
-//     */
-//    public void startSocksHandler( int theHandlerId, boolean creationFlag ) {
-//        
-//        //Star the handler
-//        if( theSocksServer != null ){
-//            theSocksServer.startSocksHandler(theHandlerId);
-//        }
-//    }
     
     //==========================================================================
     /**
@@ -192,6 +197,19 @@ public class SocksMessageManager extends DataManager {
             theSH.setConnected(creationFlag);
             theSH.beNotified();
         }
+    }
+    
+     //===========================================================================
+    /**
+     *  Shutdown the handler 
+     */
+    @Override
+    public void shutdown() {
+        super.shutdown();
+        if(theSocksServer != null)
+            theSocksServer.shutdown();
+        if(theDataHandler != null)
+            theDataHandler.shutdown();
     }
    
 }

@@ -45,6 +45,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import javax.swing.JOptionPane;
 import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
 import pwnbrew.functions.ToFileBrowser;
@@ -112,15 +113,18 @@ public final class FileOpResult extends Tasking {
     public void evaluate( PortManager passedManager ) {   
     
         //If the return value is true
-        if( opRetVal && passedManager instanceof MaltegoStub ){
-            
+        if( passedManager instanceof MaltegoStub ){            
             MaltegoStub theStub = (MaltegoStub)passedManager;
             Function aFunction = theStub.getFunction();
             if( aFunction instanceof ToFileBrowser ){
                 ToFileBrowser tfbFunc = (ToFileBrowser)aFunction;
-                tfbFunc.refreshFileSystemJTree( getTaskId() );
+                if( opRetVal){
+                    tfbFunc.refreshFileSystemJTree( getTaskId() );
+                } else {
+                    tfbFunc.handleFileOperationError( getTaskId() );
+                }
             }            
-        }
+        }       
     }
    
 }

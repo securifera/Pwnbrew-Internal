@@ -46,9 +46,12 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import pwnbrew.ClientConfig;
+import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.ControlOption;
+import pwnbrew.network.PortRouter;
+import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.socks.SocksConnectionCallback;
 import pwnbrew.socks.SocksMessageManager;
 import pwnbrew.utilities.DebugPrinter;
@@ -69,6 +72,7 @@ public final class SocksOperation extends ControlMessage {
     public static final byte SOCKS_START = 23;
     public static final byte SOCKS_STOP = 24;
     public static final byte HANDLER_STOP = 25;
+    public static final byte SHUTDOWN = 26;
     
     private byte theSocksOperation = 0;
     private int theHandlerId = -1;
@@ -179,10 +183,25 @@ public final class SocksOperation extends ControlMessage {
                     
         } else if( theSocksOperation == HANDLER_STOP ){
             
-             dbgMsg += " HANDLER_STOP";
+            dbgMsg += " HANDLER_STOP";
             //Stop the socks handlers associated with this host and id
             SocksMessageManager aSMM = SocksMessageManager.getSocksMessageManager();
             aSMM.stopSocksHandler( getSrcHostId(), theHandlerId );
+            
+        } else if( theSocksOperation == SHUTDOWN ){
+            
+            ClientConfig aConf = ClientConfig.getConfig();
+            PortRouter aPR = passedManager.getPortRouter(aConf.getSocketPort());
+            if( aPR != null && aPR instanceof ClientPortRouter){
+                ClientPortRouter aCPR = (ClientPortRouter)aPR;
+                ConnectionManager aCM = aCPR.getConnectionManager();
+                SocketChannelHandler aSCH = aCM.getSocketChannelHandler(theHandlerId);
+                if( aSCH != null ){
+                    aSCH.shutdown();
+                    aCPR.socketClosed(getSrcHostId(), theHandlerId);
+                }
+            }
+        
         }
         
         DebugPrinter.printMessage(NAME_Class, dbgMsg);

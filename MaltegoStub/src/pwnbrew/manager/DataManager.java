@@ -45,12 +45,14 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.manager;
 
 import java.io.IOException;
+import pwnbrew.MaltegoStub;
 import pwnbrew.StubConfig;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.DataHandler;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
+import pwnbrew.network.control.messages.SocksOperation;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.shell.ShellMessageManager;
 import pwnbrew.socks.SocksMessageManager;
@@ -187,7 +189,7 @@ abstract public class DataManager {
      *  Shutdown the handler 
      */
     public void shutdown() {
-        theDataHandler.shutdown();
+        theDataHandler.shutdown();         
     }
     
       //===============================================================

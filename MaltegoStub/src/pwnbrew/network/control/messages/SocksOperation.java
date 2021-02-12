@@ -67,6 +67,7 @@ public final class SocksOperation extends ControlMessage{
     public static final byte SOCKS_START = 23;
     public static final byte SOCKS_STOP = 24;
     public static final byte HANDLER_STOP = 25;
+    public static final byte SHUTDOWN = 26;
         
     private byte theSocksOperation = 0;
     private int theHandlerId = -1;

@@ -187,6 +187,17 @@ public class FileNode implements Comparable{
     public boolean isDirectory(){
         return (fileType == FileSystemMsg.FOLDER);
     }
+    
+    //==========================================================================
+    /**
+     * 
+     * @param toCompare
+     * @return 
+     */
+    @Override
+    public boolean equals(Object toCompare){
+        return compareTo(toCompare) == 0;
+    }
   
     //==========================================================================
     /**
@@ -201,9 +212,31 @@ public class FileNode implements Comparable{
             if( otherNode.fileType == fileType ){
                 return theFile.getName().compareToIgnoreCase( otherNode.theFile.getName() ); 
             } else {
-                if( fileType == FileSystemMsg.FOLDER && otherNode.fileType == FileSystemMsg.FILE ){
+                if( fileType == FileSystemMsg.HOST && otherNode.fileType == FileSystemMsg.DRIVE ){
+                    return -1;
+                } else if( fileType == FileSystemMsg.DRIVE && otherNode.fileType == FileSystemMsg.HOST ){
+                    return 1;
+                } else if( fileType == FileSystemMsg.HOST && otherNode.fileType == FileSystemMsg.FOLDER ){
+                    return -1;
+                } else if( fileType == FileSystemMsg.FOLDER && otherNode.fileType == FileSystemMsg.HOST ){
+                    return 1;
+                } else if( fileType == FileSystemMsg.HOST && otherNode.fileType == FileSystemMsg.FILE ){
+                    return -1;
+                } else if( fileType == FileSystemMsg.FILE && otherNode.fileType == FileSystemMsg.HOST ){
+                    return 1;
+                } else if(fileType == FileSystemMsg.DRIVE && otherNode.fileType == FileSystemMsg.FOLDER ){
+                    return -1;
+                } else if(fileType == FileSystemMsg.FOLDER && otherNode.fileType == FileSystemMsg.DRIVE ){
+                    return 1;
+                } else if(fileType == FileSystemMsg.DRIVE && otherNode.fileType == FileSystemMsg.FILE ){
+                    return -1;
+                } else if(fileType == FileSystemMsg.FILE && otherNode.fileType == FileSystemMsg.DRIVE ){
+                    return 1;
+                } else if( fileType == FileSystemMsg.FOLDER && otherNode.fileType == FileSystemMsg.FILE ){
                     return -1;
                 } else if( fileType == FileSystemMsg.FILE && otherNode.fileType == FileSystemMsg.FOLDER ){
+                    return 1;
+                } else {
                     return 1;
                 }
             }

@@ -728,16 +728,12 @@ public class SocketChannelHandler implements Selectable {
         state = passedState;
     }
     
-     //===============================================================
+    //===============================================================
     /**
-    * Shutdown the handler and any of its resources
+    * Disconnect the socket the handler and any of its resources
     *
     */
     public void disconnect() {
-
-        FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
-        if( aFMM.getChannelId() == channelId )
-            aFMM.setChannelId(ConnectionManager.CHANNEL_DISCONNECTED);
             
         try {
 

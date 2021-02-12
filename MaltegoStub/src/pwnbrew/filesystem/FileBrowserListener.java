@@ -58,7 +58,7 @@ public interface FileBrowserListener extends TaskManager {
 
     public void addRemoteFileSystemTask(RemoteFileSystemTask aRFST);
     
-    public void removeRemoteFileSystemTask( int taskId );
+    public RemoteFileSystemTask removeRemoteFileSystemTask( int taskId );
     
     public void performFileOperation(byte DATE, String filePath, String string);
 

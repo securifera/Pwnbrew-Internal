@@ -597,12 +597,16 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     /**
      * Remove task from map
      * @param taskId
+     * @return 
      */
     @Override
-    public void removeRemoteFileSystemTask( int taskId ) {
+    public RemoteFileSystemTask removeRemoteFileSystemTask( int taskId ) {
+        
+        RemoteFileSystemTask aRFST;
         synchronized(theRemoteFileSystemTaskMap){
-            theRemoteFileSystemTaskMap.remove( taskId );
+            aRFST = theRemoteFileSystemTaskMap.remove( taskId );
         }
+        return aRFST;
     }
 
      //=========================================================================
@@ -623,7 +627,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         
         //Add to the map
         int taskId = aFileOp.getTaskId();
-        RemoteFileSystemTask aRFST = new RemoteFileSystemTask(taskId, null, passedOp);
+        RemoteFileSystemTask aRFST = new RemoteFileSystemTask(taskId, filePath, passedOp);
         addRemoteFileSystemTask(aRFST);
         
         DataManager.send( theManager, aFileOp);
@@ -767,6 +771,10 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                                 }
 
                                 int taskId = SocketUtilities.getNextId();
+                                
+                                //Track this so we can refresh after the upload is complete
+                                RemoteFileSystemTask aRFST = new RemoteFileSystemTask(taskId, filePath, FileOperation.UPLOAD);
+                                addRemoteFileSystemTask(aRFST);
 
                                 //Set the remote task information
                                 RemoteFileIO aRemoteTask = new RemoteFileIO( aFile.getAbsolutePath(), Constants.FILE_UPLOAD, Constants.UPLOAD_IMG_STR );
@@ -1149,11 +1157,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             if( theTask.getTaskType() == FileOperation.DOWNLOAD_DIR){            
                 //Download each of the files
                 List<FileNode> aFileNodeList = theTask.getFileList();
-                Object parentObj = theTask.getParentNode();
-                if( parentObj instanceof String){
-                    String rootDirStr = (String)parentObj;
-                    downloadFilesToFolder(rootDirStr, aFileNodeList);
-                }
+                downloadFilesToFolder(aFileNodeList);
 
             } else {
 
@@ -1189,8 +1193,13 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                                             RemoteFile aFile = aFileNode.getFile();
                                             String aPath = aFile.getAbsolutePath();
                                             int idx = aPath.lastIndexOf("\\");
-                                            String parentPath = aPath.substring(0, idx);                                            
-                                            selectNodeInTree(aFileNode);
+                                            
+                                            //Create FileNode for parent dir
+                                            String parentPath = aPath.substring(0, idx);  
+                                            //Create the first host
+                                            RemoteFile aRemoteFile = new RemoteFile( parentPath,  getHostDelimiter() );
+                                            FileNode parentNode = new FileNode(aRemoteFile, FileSystemMsg.FOLDER, 0, "");
+                                            selectNodeInTree(parentNode);
                                         }
                                     }
                                 } 
@@ -1373,7 +1382,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
      * @param rootDirStr
      * @param aFileNodeList 
      */
-    private void downloadFilesToFolder( String rootDirStr, List<FileNode> aFileNodeList ) {
+    private void downloadFilesToFolder( List<FileNode> aFileNodeList ) {
         
         //Get the control message manager
         for( FileNode aFileNode : aFileNodeList) { //For each file path...
@@ -1452,6 +1461,26 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         synchronized(dirListingFlag){
             dirListingFlag.set(passedFlag);
         }
+    }
+
+    //=========================================================================
+    /**
+     * 
+     * @param taskId 
+     */
+    public void handleFileOperationError(int taskId) {
+        
+        String errorMsg;
+        RemoteFileSystemTask aRFST = removeRemoteFileSystemTask(taskId);
+        byte taskType = aRFST.getTaskType();
+        if( taskType == FileOperation.DELETE){
+            String filePath = (String)aRFST.getParentNode();
+            errorMsg =  "Unable to delete file \"" + filePath + "\"";
+        } else {
+            errorMsg =  "Unable to perform file operation.";
+        }
+        JOptionPane.showMessageDialog(theFsFrame, errorMsg,"Error", JOptionPane.ERROR_MESSAGE ); 
+                
     }
 
 }

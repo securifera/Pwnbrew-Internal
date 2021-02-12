@@ -61,6 +61,7 @@ public final class FileOperation extends Tasking {
     public static final byte SEARCH = 81;
     public static final byte DOWNLOAD_DIR = 82;
     public static final byte MAKE_DIR = 83;
+    public static final byte UPLOAD = 84;
     
     private static final byte OPTION_OPERATION = 42;
     private static final byte OPTION_FILE_PATH = 43;

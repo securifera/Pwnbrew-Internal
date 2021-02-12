@@ -93,7 +93,7 @@ public class ConnectHandler implements Selectable {
         } catch (IOException ex) {
 
             // Notify the comm
-            theClientPortRouter.beNotified(); 
+            theClientPortRouter.beNotified(channelId); 
 
             // Cancel the channel's registration with our selector           
             theSelKey.cancel();

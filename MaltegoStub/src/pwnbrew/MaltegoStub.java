@@ -56,6 +56,7 @@ import pwnbrew.misc.Utilities;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.shell.ShellMessageManager;
+import pwnbrew.socks.SocksMessageManager;
 
 /**
  *
@@ -305,7 +306,12 @@ public class MaltegoStub extends PortManager  implements LockListener {
             ShellMessageManager aSMM = ShellMessageManager.getShellMessageManager();
             if( aSMM != null ){
                 aSMM.shutdown();
-            }      
+            }  
+            
+            SocksMessageManager aSocksMM = SocksMessageManager.getSocksMessageManager();
+            if( aSocksMM != null ){
+                aSocksMM.shutdown();
+            }  
                     
             //Shutdown debugger
             DebugPrinter.shutdown();

@@ -54,8 +54,8 @@ import pwnbrew.misc.DebugPrinter;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.ClientPortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.RemoteException;
+import pwnbrew.network.control.messages.SocksOperation;
 import pwnbrew.socks.SocksJPanel;
 import pwnbrew.socks.SocksJPanelListener;
 import pwnbrew.socks.SocksMessageManager;
@@ -210,8 +210,7 @@ public class ToSocks extends Function implements SocksJPanelListener {
                 
                 //Kill all
                 aManager.stopSocksServer();
-                aManager.shutdown();
-                
+                aManager.shutdown();                                
                                 
                 //Sleep a couple seconds to make sure the message was sent
                 Thread.sleep(2000);

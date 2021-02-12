@@ -55,7 +55,6 @@ import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.SSLUtilities;
 import pwnbrew.selector.SelectionRouter;
-import pwnbrew.utilities.DebugPrinter;
 
 /**
  *
@@ -66,10 +65,7 @@ abstract public class PortRouter {
     protected final SelectionRouter theSelectionRouter;
     private final boolean encrypted;
     protected final PortManager thePortManager;
-    
-    private volatile boolean notified = false;
-    private volatile boolean waiting = false;
-    
+        
     private SSLContext theSSLContext = null;
     
     public static final int CONTROL_CHANNEL_ID = 1;
@@ -142,30 +138,16 @@ abstract public class PortRouter {
     * <p>
     * <strong>This method "blocks" for 3 seconds at which point it returns
      * with whether is was notified or not.</strong>
+     * @param channelId
      * @return 
     */
-    protected synchronized boolean waitForConnection() {
+    protected boolean waitForConnection( int channelId) {
 
         boolean timedOut = true;
-        waiting = true;
-        while( notified == false ) { //Until notified...
-
-            try {
-                wait(60000); //Wait here until notified
-                if(notified){
-                    //Return that the thread was notified
-                    timedOut = false;
-                    break;
-
-                } else {
-                    break;
-                }
-
-            } catch( InterruptedException ex ) {
-            }
-        }
-        waiting = false;
-        notified = false;
+        ConnectionCallback aCC = connectionCallbackMap.get(channelId);
+        if( aCC != null )        
+            timedOut = aCC.waitForConnection();
+        
         return timedOut;
     }
     
@@ -173,17 +155,14 @@ abstract public class PortRouter {
     /**
     *  Notifies the {@link Comm}
     *
+     * @param channelId
     */
-    public synchronized void beNotified() {
+    public void beNotified( int channelId ) {
 
-        //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Notified.");
-        if(waiting){
-            //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Was waiting.");
-
-            notified = true;
-            notifyAll(); //Notify the thread
-        }
-    }/* END beNotified() */
+        ConnectionCallback aCC = connectionCallbackMap.get(channelId);
+        if( aCC != null )
+            aCC.beNotified();        
+    }
      
     //===============================================================
     /**
@@ -193,7 +172,7 @@ abstract public class PortRouter {
      * @return
      * @throws pwnbrew.log.LoggableException
      */
-    public synchronized SSLContext getSSLContext( boolean client ) throws LoggableException {
+    public SSLContext getSSLContext( boolean client ) throws LoggableException {
 
         //If the context has not be created than create it
         if ( theSSLContext == null ){       

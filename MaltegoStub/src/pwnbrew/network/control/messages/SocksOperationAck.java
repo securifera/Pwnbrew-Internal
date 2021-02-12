@@ -39,7 +39,6 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import pwnbrew.MaltegoStub;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.socks.SocksMessageManager;

@@ -105,6 +105,8 @@ public class FileOperationController implements RemoteFileIOListener {
        if(theProgressPanel == null){
           createProgressPanel();
        }
+       
+       theTask.getState();
 
        SwingUtilities.invokeLater( new Runnable(){
            

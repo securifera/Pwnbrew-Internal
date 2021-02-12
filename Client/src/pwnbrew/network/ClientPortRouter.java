@@ -136,12 +136,11 @@ public class ClientPortRouter extends PortRouter {
                 SelectionKey theSelKey = theSelectionRouter.register(theSocketChannel, SelectionKey.OP_CONNECT, connectHandler);
 
                 //Wait until the thread is notified or times out
-                boolean timedOut = waitForConnection();
-//                if( timedOut )
-//                    DebugPrinter.printMessage( NAME_Class, "Connection timed out.");
-//                else
-//                    DebugPrinter.printMessage( NAME_Class, "Connection made.");
-    
+                boolean timedOut = waitForConnection(channelId);
+                if( timedOut )
+                    DebugPrinter.printMessage( NAME_Class, "Connection timed out.");
+                else
+                    DebugPrinter.printMessage( NAME_Class, "Connection made.");    
 
                 //Return if the key was cancelled
                 if(!theSelKey.isValid()){
@@ -151,12 +150,17 @@ public class ClientPortRouter extends PortRouter {
 
                 //If we returned but we are not connected
                 theSCH = theOCM.getSocketChannelHandler( channelId );
-                if( theSCH == null || theSCH.getState() == Constants.DISCONNECTED){
+                if( theSCH == null){ 
+                    
+                    DebugPrinter.printMessage( NAME_Class, "SocketChannelHandler is null.");
+                    return false;
 
-                    DebugPrinter.printMessage( NAME_Class, "Invalid connection.");
+                } else if (theSCH.getState() == Constants.DISCONNECTED){
+                    
+                    DebugPrinter.printMessage( NAME_Class, "SocketChannelHandler is disconnected.");
                     //Shutdown the first connect handler and set it to null
                     //theSelKey.cancel();
-                    return false;
+                    return false;                
                 }
             }
 
@@ -233,6 +237,8 @@ public class ClientPortRouter extends PortRouter {
 //                    connected = false;
 //                }
 
+            } else {
+                DebugPrinter.printMessage( NAME_Class, "Connection made on channel " + Integer.toString(channedId));
             }
 
         }
@@ -386,11 +392,13 @@ public class ClientPortRouter extends PortRouter {
                 setConnectionCallback(channelId, passedCallback);
                 if( !initiateConnection( channelId, srvInet, passedPort, CONNECT_RETRY )){
                     
+                    DebugPrinter.printMessage( NAME_Class, "Unable to connect to port.");
                     RemoteLog.log(Level.INFO, NAME_Class, "ensureConnectivity()", "Unable to connect to port " + passedPort, null );
                     ConnectionCallback aCC = removeConnectionCallback(channelId);
                     aCC.handleConnection(0);
                     
                 } else {
+                    
                 
                     aSC = theOCM.getSocketChannelHandler( channelId );
                     if( aSC == null || aSC.getState() == Constants.DISCONNECTED ){

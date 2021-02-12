@@ -49,6 +49,15 @@ public class SocksServer extends ManagedRunnable {
         theHostId = passedHostId;
         theChannelId = passedChannelId;
     }
+    
+    //==========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getChannelId(){
+        return	theChannelId;
+    }
 
     //==========================================================================
     /**

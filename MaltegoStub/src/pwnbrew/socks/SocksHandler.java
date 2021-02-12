@@ -16,7 +16,6 @@ import pwnbrew.manager.DataManager;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.ManagedRunnable;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.SocksCreateHandlerMsg;
 import pwnbrew.network.control.messages.SocksOperation;
 
@@ -37,7 +36,7 @@ public class SocksHandler extends ManagedRunnable {
     private final int theChannelId;
         
     public static final int DEFAULT_PROXY_TIMEOUT = 10;
-    public static final int DEFAULT_SOCKS_BUFFER_SIZE = 65500;;
+    public static final int DEFAULT_SOCKS_BUFFER_SIZE = 2000;;
     
     private boolean connected = false;
 
