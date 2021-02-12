@@ -45,6 +45,7 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.SocketUtilities;
 
@@ -53,6 +54,9 @@ import pwnbrew.utilities.SocketUtilities;
  *  
  */
 public final class NoOp extends ControlMessage{
+    
+    //Class name
+    private static final String NAME_Class = NoOp.class.getSimpleName();    
 
     private static final byte OPTION_GARBAGE = 13;
     
@@ -79,6 +83,17 @@ public final class NoOp extends ControlMessage{
     */
     public NoOp(byte[] passedId ) {
         super(passedId);
+    }
+    
+      //===============================================================
+    /**
+    *   Performs the logic specific to the message.
+    *
+     * @param passedManager
+    */
+    @Override
+    public void evaluate( PortManager passedManager ) {       
+        //DebugPrinter.printMessage( NAME_Class, "NoOp message received");
     }
    
 }

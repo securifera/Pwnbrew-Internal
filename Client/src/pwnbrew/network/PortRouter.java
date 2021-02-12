@@ -176,9 +176,9 @@ abstract public class PortRouter {
     */
     public synchronized void beNotified() {
 
-        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Notified.");
+        //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Notified.");
         if(waiting){
-            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Was waiting.");
+            //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Was waiting.");
 
             notified = true;
             notifyAll(); //Notify the thread

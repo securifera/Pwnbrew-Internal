@@ -46,8 +46,6 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.network.control.messages;
 
 import pwnbrew.manager.PortManager;
-import pwnbrew.manager.DataManager;
-import pwnbrew.utilities.Utilities;
 import pwnbrew.network.ControlOption;
 
 /**
@@ -75,7 +73,9 @@ public final class NoOp extends ControlMessage{
     public NoOp( int dstHostId ) {
         super(MESSAGE_ID, dstHostId );
         
-        int garbageSize = (int)(Utilities.SecureRandomGen.nextFloat() * 1000);
+        //int garbageSize = (int)(Utilities.SecureRandomGen.nextFloat() * 1000);
+        //TODO fix this
+        int garbageSize = 100;
         byte[] garbage = new byte[garbageSize];
         ControlOption aTlv = new ControlOption( OPTION_GARBAGE, garbage);
         addOption(aTlv);
@@ -102,9 +102,10 @@ public final class NoOp extends ControlMessage{
         
         //Get the address and connect                   
         //Send one back
-        int clientId = getSrcHostId();
-        NoOp aNoOp = new NoOp(clientId);
-        DataManager.send(passedManager, aNoOp);
+//        int clientId = getSrcHostId();
+//        NoOp aNoOp = new NoOp(clientId);
+//        DataManager.send(passedManager, aNoOp);
+        //Log.log(Level.INFO, NAME_Class, "evaluate()", "NoOp message received", null );
     
     }
 

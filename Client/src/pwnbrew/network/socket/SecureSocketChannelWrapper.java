@@ -512,7 +512,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
     private void doWrap(SelectionKey passedKey) throws IOException {
 
         SSLEngineResult result;
-        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Wrapping.");
+        //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Wrapping.");
 
         // The flush above guarantees the out buffer to be empty
         outNetBB.clear();
@@ -523,7 +523,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
         if(currStatus == HandshakeStatus.FINISHED){
 
             initialHSComplete = true;
-            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 1.");
+            //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 1.");
 
             //Flush the buffer so that the client will get a finished flag too
             if (outNetBB.hasRemaining()){
@@ -565,7 +565,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
     private void doUnwrap(SelectionKey passedKey) throws IOException {
 
         SSLEngineResult result;
-        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Unwrapping.");
+        //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Unwrapping.");
 
         // Don't need to resize requestBB, since no app data should
         synchronized(inNetBB){
@@ -592,15 +592,15 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
 
                     case FINISHED:
                         initialHSComplete = true;
-                        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 2.");
+                        //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 2.");
 
                         
                         //Notify the comm
                         theSocketHandler.setState( Constants.CONNECTED);
-                        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Set state.");
+                        //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Set state.");
 
                         theSocketHandler.getPortRouter().beNotified(); 
-                        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Notified.");
+                        //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Notified.");
 //                        thePortRouter.connectionCompleted(theSocketChannel, true, true);
                         
                         break;
@@ -663,7 +663,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
                     
                 case FINISHED:
                     initialHSComplete = true;
-                    DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 3.");
+                    //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 3.");
 
                     //Notify the comm
                     theSocketHandler.setState( Constants.CONNECTED);

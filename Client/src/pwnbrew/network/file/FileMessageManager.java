@@ -206,9 +206,6 @@ public class FileMessageManager extends DataManager {
     protected void removeFileReceiver( int fileId, int channelId) {
         synchronized( fileId_FileReceiverMap ){
             fileId_FileReceiverMap.remove(fileId );
-//            if( fileId_FileReceiverMap.isEmpty() && taskId_fileId_FileSenderMap.isEmpty() && channelId == retChannelId.get() ){
-//                retChannelId.set(ConnectionManager.CHANNEL_DISCONNECTED);
-//            }
         }
     }
     
@@ -412,10 +409,11 @@ public class FileMessageManager extends DataManager {
                             //Make sure to set channel Id before sending
                             queueFileDownload(thePFM);
                             DebugPrinter.printMessage(  this.getClass().getSimpleName(), "Calling connection function.");
-                            //Start connection
-                            FileConnectionCallback aFCC = new FileConnectionCallback(serverIp, socketPort);
-                            aPR.ensureConnectivity( aFCC );
                             setChannelId(0);
+                            
+                            //Start connection
+                            FileConnectionCallback aFCC = new FileConnectionCallback(thePortManager, serverIp, socketPort);
+                            aPR.ensureConnectivity( aFCC );
                             break;
                         case 0:
                             //Queue file download
@@ -456,10 +454,10 @@ public class FileMessageManager extends DataManager {
                 case ConnectionManager.CHANNEL_DISCONNECTED:
                     //Make sure to set channel Id before sending
                     queueFileUpload(pushFileMsg);
-                    //Start connection
-                    FileConnectionCallback aFCC = new FileConnectionCallback(serverIp, socketPort);
-                    aPR.ensureConnectivity( aFCC );
                     setChannelId(0);
+                    //Start connection
+                    FileConnectionCallback aFCC = new FileConnectionCallback(thePortManager, serverIp, socketPort);
+                    aPR.ensureConnectivity( aFCC );
                     break;
                 case 0:
                     //Queue file download

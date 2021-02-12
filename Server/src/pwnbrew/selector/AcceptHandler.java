@@ -114,7 +114,7 @@ final public class AcceptHandler implements Selectable {
         
         try {            
             
-            Log.log(Level.INFO, NAME_Class, "handle()", "Received a connection from " + srcAddr.getHostAddress(), null);
+            //Log.log(Level.INFO, NAME_Class, "handle()", "Received a connection from " + srcAddr.getHostAddress(), null);
             SocketChannelHandler theSCH = new SocketChannelHandler(theSPR);
   
             try {

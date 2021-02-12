@@ -41,7 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import pwnbrew.utilities.ReconnectTimer;
-import pwnbrew.network.KeepAliveTimer;
+//import pwnbrew.network.KeepAliveTimer;
 import pwnbrew.network.shell.Shell;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.SocketUtilities;
@@ -54,7 +54,7 @@ public class OutgoingConnectionManager extends ConnectionManager {
     
     
     private final Map<Integer, SocketChannelHandler> channelIdHandlerMap = new HashMap<>();
-    private final Map<Integer, KeepAliveTimer> theKeepAliveTimerMap = new HashMap<>();
+//    private final Map<Integer, KeepAliveTimer> theKeepAliveTimerMap = new HashMap<>();
     private final Map<Integer, ReconnectTimer> theReconnectTimerMap = new HashMap<>();
     private final Map<Integer, Shell> theShellMap = new HashMap<>();
     
@@ -138,20 +138,20 @@ public class OutgoingConnectionManager extends ConnectionManager {
         return aSCH;
     }
  
-    //==========================================================================
-    /**
-     *  Returns the keep alive timer
-     * @param passedId
-     * @return 
-     */
-    public KeepAliveTimer getKeepAliveTimer( int passedId ) {
-        
-        KeepAliveTimer theTimer;
-        synchronized(theKeepAliveTimerMap){
-            theTimer = theKeepAliveTimerMap.get(passedId);
-        }
-        return theTimer;
-    }
+//    //==========================================================================
+//    /**
+//     *  Returns the keep alive timer
+//     * @param passedId
+//     * @return 
+//     */
+//    public KeepAliveTimer getKeepAliveTimer( int passedId ) {
+//        
+//        KeepAliveTimer theTimer;
+//        synchronized(theKeepAliveTimerMap){
+//            theTimer = theKeepAliveTimerMap.get(passedId);
+//        }
+//        return theTimer;
+//    }
     
     //==========================================================================
     /**
@@ -204,12 +204,7 @@ public class OutgoingConnectionManager extends ConnectionManager {
     @Override
     public void shutdown() {
         
-         //Shutdown the handlers and there keepalives
-        Set<Integer> theKeys = theKeepAliveTimerMap.keySet();
-        for( Integer aKey : theKeys )
-            theKeepAliveTimerMap.get(aKey).shutdown();
-        
-        theKeys = channelIdHandlerMap.keySet();
+        Set<Integer> theKeys = channelIdHandlerMap.keySet();
         for( Integer aKey : theKeys )
             channelIdHandlerMap.get(aKey).shutdown();
         
@@ -253,11 +248,6 @@ public class OutgoingConnectionManager extends ConnectionManager {
             theShell.shutdown();
         
         //Kill the timers
-        KeepAliveTimer aKAT = getKeepAliveTimer(passedId);
-        if( aKAT != null )
-            aKAT.shutdown();
-        
-        //Kill the timers
         ReconnectTimer aRT = getReconnectTimer(passedId);
         if( aRT != null )
             aRT.shutdown();
@@ -269,17 +259,17 @@ public class OutgoingConnectionManager extends ConnectionManager {
         
     }
 
-    //=======================================================================
-    /**
-     * 
-     * @param passedId
-     * @param theKeepAliveTimer 
-     */
-    public void setKeepAliveTimer(int passedId, KeepAliveTimer theKeepAliveTimer) {
-        synchronized(theKeepAliveTimerMap){
-            theKeepAliveTimerMap.put(passedId, theKeepAliveTimer);
-        }
-    }
+//    //=======================================================================
+//    /**
+//     * 
+//     * @param passedId
+//     * @param theKeepAliveTimer 
+//     */
+//    public void setKeepAliveTimer(int passedId, KeepAliveTimer theKeepAliveTimer) {
+//        synchronized(theKeepAliveTimerMap){
+//            theKeepAliveTimerMap.put(passedId, theKeepAliveTimer);
+//        }
+//    }
     
     
 }

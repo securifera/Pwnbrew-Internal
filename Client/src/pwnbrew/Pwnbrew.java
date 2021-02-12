@@ -52,6 +52,8 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
+import pwnbrew.network.ClientPortRouter;
+import pwnbrew.network.RegisterMessage;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.ReconnectTimer;
@@ -141,10 +143,18 @@ public final class Pwnbrew extends PortManager implements TaskListener {
         }
                 
         //Create the Timer
-        ReconnectTimer aReconnectTimer = new ReconnectTimer(OutgoingConnectionManager.COMM_CHANNEL_ID); 
+        ReconnectTimer aReconnectTimer = new ReconnectTimer(this, OutgoingConnectionManager.COMM_CHANNEL_ID); 
+        
+        ClientConfig theConf = ClientConfig.getConfig();
+        byte stlth_val = 0;
+        if( theConf.useStealth() )
+            stlth_val = 1;   
+        
+        //Queue register message
+        RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, OutgoingConnectionManager.COMM_CHANNEL_ID);
+        aReconnectTimer.setPostConnectMessage(aMsg);
         
         //Start the timer
-        aReconnectTimer.setCommManager( this );
         aReconnectTimer.start();
             
         

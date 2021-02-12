@@ -63,7 +63,7 @@ public class ReconnectCallback extends ConnectionCallback{
     @Override
     public void handleConnection(int theChannelId) {
         channelId = theChannelId;
-        theReconnectThread.beNotified();
+        theReconnectThread.beNotified();        
     }
     
     

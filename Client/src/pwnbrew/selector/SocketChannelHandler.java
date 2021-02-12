@@ -67,6 +67,7 @@ import pwnbrew.network.PortWrapper;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.file.FileMessageManager;
+import pwnbrew.network.http.Http;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.socket.SocketChannelWrapper;
 import pwnbrew.utilities.Constants;
@@ -152,8 +153,9 @@ public class SocketChannelHandler implements Selectable {
             DebugPrinter.printMessage(NAME_Class, "handle() Exception: " + ex.getMessage());
                                         
             //Flush any remaining packets from the queue in the handler
-            shutdown();
-            thePortRouter.socketClosed( hostId, channelId );
+            disconnect();
+            if( state != Constants.SHUTDOWN)
+                thePortRouter.socketClosed( hostId, channelId);
             
         } 
 
@@ -226,15 +228,29 @@ public class SocketChannelHandler implements Selectable {
     public void queueBytes( byte[] data, int cancelId ) {
 
         ByteQueueItem anItem = new ByteQueueItem(data, cancelId);
-        SelectionRouter aSR = thePortRouter.getSelRouter();
-        SocketChannel aSC = getSocketChannel();
         synchronized (pendingByteQueueItems) {
             pendingByteQueueItems.add(anItem);
-            if( ( aSR.interestOps( aSC) & SelectionKey.OP_WRITE ) == 0){
-                aSR.changeOps( aSC, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
-            }
-        }
+        }        
         
+    }
+    
+    public int getQueueSize(){
+        int retSize;
+        synchronized (pendingByteQueueItems) {
+            retSize = pendingByteQueueItems.size();
+        }
+        return retSize;
+    }
+    
+    //===================================================================
+    /**
+     * 
+     */
+    public void signalSend(){
+        SelectionRouter aSR = thePortRouter.getSelRouter();
+        SocketChannel aSC = getSocketChannel();
+        if( ( aSR.interestOps( aSC) & SelectionKey.OP_WRITE ) == 0)
+            aSR.changeOps( aSC, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
         
     }
     
@@ -285,7 +301,7 @@ public class SocketChannelHandler implements Selectable {
 
                 //Copy over the bytes
                 ByteBuffer readByteBuf = ByteBuffer.wrap( Arrays.copyOf( theSCW.getReadBuf().array(), bytesRead ) );
-    //            DebugPrinter.printMessage(this,  "Received Bytes.");
+                DebugPrinter.printMessage(NAME_Class, "Received "+ Integer.toString(bytesRead) + " bytes on channel: " + Integer.toString(channelId));
 
                 //Check if a port wrapper has been assigned
                 PortWrapper aPortWrapper = DataManager.getPortWrapper( getPort() );
@@ -469,6 +485,7 @@ public class SocketChannelHandler implements Selectable {
                                             RemoteLog.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
                                         }
                                     }
+                                    
                                 }
 
                                 //Reset the counter
@@ -528,7 +545,13 @@ public class SocketChannelHandler implements Selectable {
                         byte[] nextArr = nextItem.byteArray;
                         try {
 
+                            DebugPrinter.printMessage(NAME_Class, "Sending "+ Integer.toString(nextArr.length) + " bytes on channel: " + Integer.toString(channelId));
                             send(nextArr);
+                            
+                            SocketChannel aSC = getSocketChannel();
+                            if( aSC != null ){
+                                thePortRouter.getSelRouter().changeOps( aSC, SelectionKey.OP_READ);
+                            }
 
                         } catch( IOException ex ){
 
@@ -543,12 +566,12 @@ public class SocketChannelHandler implements Selectable {
                         }                            
                     }
                         
-                }  else {
+//                }  else {
                     
-                    SocketChannel aSC = getSocketChannel();
-                    if( aSC != null ){
-                        thePortRouter.getSelRouter().changeOps( aSC, SelectionKey.OP_READ);
-                    }
+//                    SocketChannel aSC = getSocketChannel();
+//                    if( aSC != null ){
+//                        thePortRouter.getSelRouter().changeOps( aSC, SelectionKey.OP_READ);
+//                    }
                 }
 
                 //Notify any threads waiting on this monitor
@@ -626,6 +649,8 @@ public class SocketChannelHandler implements Selectable {
                 port = theSCW.getSocketChannel().socket().getPort();
             else if(theHandlerType == SocketChannelHandler.SERVER_TYPE  )
                 port = theSCW.getSocketChannel().socket().getLocalPort();
+        } else {
+            port = Http.SECURE_PORT;
         }
         return port;
     }
@@ -702,6 +727,33 @@ public class SocketChannelHandler implements Selectable {
     public synchronized void setState(int passedState) {
         state = passedState;
     }
+    
+     //===============================================================
+    /**
+    * Shutdown the handler and any of its resources
+    *
+    */
+    public void disconnect() {
+
+        FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
+        if( aFMM.getChannelId() == channelId )
+            aFMM.setChannelId(ConnectionManager.CHANNEL_DISCONNECTED);
+            
+        try {
+
+            //Shutdown the socket channel
+            if(theSCW != null){
+                theSCW.shutdown();
+                theSCW = null;
+            }
+            
+        } catch (IOException ex) {
+            ex = null;
+        } finally {
+            state = Constants.DISCONNECTED;
+        }
+        
+    }
 
     //===============================================================
     /**
@@ -725,7 +777,7 @@ public class SocketChannelHandler implements Selectable {
         } catch (IOException ex) {
             ex = null;
         } finally {
-            state = Constants.DISCONNECTED;
+            state = Constants.SHUTDOWN;
         }
         
     }
@@ -807,4 +859,4 @@ public class SocketChannelHandler implements Selectable {
 
     }
 
-}/* END CLASS SocketChannelHandler */
+}

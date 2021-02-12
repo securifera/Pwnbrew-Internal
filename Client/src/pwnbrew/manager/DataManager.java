@@ -304,7 +304,7 @@ abstract public class DataManager {
                 //If wrapping is necessary then wrap it
                 if( theHandler.isWrapping() ){
                     
-                    DebugPrinter.printMessage( NAME_Class, "Wrapping message.");
+                    //DebugPrinter.printMessage( NAME_Class, "Wrapping message.");
                         
                     PortWrapper aWrapper = DataManager.getPortWrapper( theHandler.getPort() );        
                     if( aWrapper != null ){

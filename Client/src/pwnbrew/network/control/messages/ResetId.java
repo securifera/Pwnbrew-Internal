@@ -56,6 +56,7 @@ import pwnbrew.manager.PortManager;
 import pwnbrew.network.ConnectionCallback;
 import pwnbrew.network.PortRouter;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -104,7 +105,10 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
                 
                 //Notify reconnect timer
                 ConnectionCallback aCC = aPR.removeConnectionCallback(tempId);
-                aCC.handleConnection(tempId);
+                if( aCC != null ){
+                    DebugPrinter.printMessage(NAME_Class, "Calling callback function.");
+                    aCC.handleConnection(tempId);
+                }
                 
                 //Shutdown the socket
                 SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( tempId ); 

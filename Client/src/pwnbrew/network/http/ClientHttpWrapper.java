@@ -136,6 +136,11 @@ public class ClientHttpWrapper extends HttpWrapper {
                                         RemoteLog.log( Level.SEVERE, NAME_Class, "receive()", ex.toString(), ex);
                                     }   
                                 }
+                                
+                                //Shutdown the underlying socket after each HTTP request and response
+                                passedHandler.disconnect();
+                                passedHandler.getPortRouter().socketClosed( passedHandler.getHostId(), passedHandler.getChannelId());
+                                
                             } else {
                                 RemoteLog.log( Level.WARNING, NAME_Class, "processHeader()", "Message size doesn't match remaing size.", null);
                             }
@@ -180,7 +185,7 @@ public class ClientHttpWrapper extends HttpWrapper {
         if( hostHeader == null )
             hostHeader = "www.google.com";
         
-        DebugPrinter.printMessage(NAME_Class, "Host Header: " + hostHeader);
+        //DebugPrinter.printMessage(NAME_Class, "Host Header: " + hostHeader);
         aHttpMsg.setOption( Http.HOST, hostHeader);        
         if( passedBytes.length > 0 ){
             

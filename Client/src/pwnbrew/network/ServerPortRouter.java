@@ -114,12 +114,12 @@ public class ServerPortRouter extends PortRouter {
     public void socketClosed( int hostId, int channelId ){
         
         //Remove the handler from the map
-        ConnectionManager aCM = getConnectionManager( hostId );
-        if( aCM != null )
-            aCM.removeHandler(channelId);
+//        ConnectionManager aCM = getConnectionManager( hostId );
+//        if( aCM != null )
+//            aCM.removeHandler(channelId);
         
-        RelayDisconnect aMsg = new RelayDisconnect( hostId, channelId );
-        DataManager.send(thePortManager, aMsg);
+//        RelayDisconnect aMsg = new RelayDisconnect( hostId, channelId );
+//        DataManager.send(thePortManager, aMsg);
         
     }
         
@@ -260,41 +260,41 @@ public class ServerPortRouter extends PortRouter {
 
             //Get the connection manager for the server
             ConnectionManager aCM = thePR.getConnectionManager(-1);
-            boolean sendReset = aCM.getSocketChannelHandler( channelId ) == null;
+            //boolean sendReset = aCM.getSocketChannelHandler( channelId ) == null;
 
             //Send reset flag if we had to change the channel id
-            if( !sendReset ){
-
-                DebugPrinter.printMessage(NAME_Class, "Handler already exists, sending reset.");
-                //Check if certs didn't match
-                byte stlth_val = 0;
-                if( theConf.useStealth() )
-                    stlth_val = 1;
-                
-                //Create a byte array from the messagen byte buffe
-                RegisterMessage aMsg = new RegisterMessage(RegisterMessage.REG_RST, stlth_val, channelId);
-                aMsg.setDestHostId(passedSrcHostId);
-                byte[] msgBytes = aMsg.getBytes();
-
-                //If wrapping is necessary then wrap it
-                if( passedHandler.isWrapping() ){
-                    PortWrapper aWrapper = DataManager.getPortWrapper( passedHandler.getPort() );        
-                    if( aWrapper != null ){
-
-                         //Set the staged wrapper if necessary
-                        if( aWrapper instanceof ServerHttpWrapper ){
-                            ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
-                            aSrvWrapper.setStaging( passedHandler.isStaged());
-                        }
-
-                        ByteBuffer aByteBuffer = aWrapper.wrapBytes( msgBytes );  
-                        msgBytes = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
-                    } 
-                }
-
-                passedHandler.queueBytes(msgBytes, aMsg.getCancelId());
-                return false;
-            }
+//            if( !sendReset ){
+//
+//                DebugPrinter.printMessage(NAME_Class, "Handler already exists, sending reset.");
+//                //Check if certs didn't match
+//                byte stlth_val = 0;
+//                if( theConf.useStealth() )
+//                    stlth_val = 1;
+//                
+//                //Create a byte array from the messagen byte buffe
+//                RegisterMessage aMsg = new RegisterMessage(RegisterMessage.REG_RST, stlth_val, channelId);
+//                aMsg.setDestHostId(passedSrcHostId);
+//                byte[] msgBytes = aMsg.getBytes();
+//
+//                //If wrapping is necessary then wrap it
+//                if( passedHandler.isWrapping() ){
+//                    PortWrapper aWrapper = DataManager.getPortWrapper( passedHandler.getPort() );        
+//                    if( aWrapper != null ){
+//
+//                         //Set the staged wrapper if necessary
+//                        if( aWrapper instanceof ServerHttpWrapper ){
+//                            ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+//                            aSrvWrapper.setStaging( passedHandler.isStaged());
+//                        }
+//
+//                        ByteBuffer aByteBuffer = aWrapper.wrapBytes( msgBytes );  
+//                        msgBytes = Arrays.copyOf(aByteBuffer.array(), aByteBuffer.position());
+//                    } 
+//                }
+//
+//                passedHandler.queueBytes(msgBytes, aMsg.getCancelId());
+//                return false;
+//            }
         }
         
         SocketChannelHandler aSCH = null;
@@ -302,8 +302,9 @@ public class ServerPortRouter extends PortRouter {
         if( anICM == null ){
             anICM = new IncomingConnectionManager(passedSrcHostId);
             setConnectionManager( anICM, passedSrcHostId );
-        } else
+        } else{
             aSCH = anICM.getSocketChannelHandler(channelId);
+        }
         
 
         //If the Handler doesn't exist then register it

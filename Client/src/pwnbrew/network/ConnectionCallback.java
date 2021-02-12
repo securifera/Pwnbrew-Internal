@@ -44,7 +44,7 @@ package pwnbrew.network;
 public abstract class ConnectionCallback {
     
     protected final int socketPort;
-    protected int channelId;
+    protected int channelId = -1;
     protected final String serverIp;
     
     //=================================================================

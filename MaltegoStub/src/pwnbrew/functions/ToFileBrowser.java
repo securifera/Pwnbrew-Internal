@@ -55,7 +55,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JOptionPane;
 import javax.swing.JTree;
@@ -1145,49 +1144,66 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         }
         
         //Check file operation type
-        if( theTask.getTaskType() == FileOperation.DOWNLOAD_DIR){            
-            //Download each of the files
-            List<FileNode> aFileNodeList = theTask.getFileList();
-            Object parentObj = theTask.getParentNode();
-            if( parentObj instanceof String){
-                String rootDirStr = (String)parentObj;
-                downloadFilesToFolder(rootDirStr, aFileNodeList);
-            }
+        if( theTask != null){
             
-        } else {
-        
-            //Invoke in swing thread so no race condition
-            SwingUtilities.invokeLater( new Runnable(){
-
-                @Override
-                public void run() {
-                    if( theTask != null){ 
-
-                        if( theTask.getTaskType() == FileOperation.SEARCH ){
-                            theFsFrame.searchComplete();
-                        } else {
-                            JTree theJTree = theFsFrame.getFileTreePanel().getJTree();
-                            TreePath aTreePath = theJTree.getSelectionPath();
-                            if( aTreePath != null){
-                                theJTree.clearSelection();
-                                if( theTask.getTaskType() == FileOperation.DELETE ){
-                                    aTreePath = aTreePath.getParentPath();
-                                    if( aTreePath != null)
-                                        theJTree.setSelectionPath(aTreePath);
-
-                                } else {
-                                    theJTree.setSelectionPath(aTreePath); 
-                                }
-                            }   
-                        }  
-
-                        //Remove task
-                        removeRemoteFileSystemTask(passedTaskId);
-                        
-                    }
+            if( theTask.getTaskType() == FileOperation.DOWNLOAD_DIR){            
+                //Download each of the files
+                List<FileNode> aFileNodeList = theTask.getFileList();
+                Object parentObj = theTask.getParentNode();
+                if( parentObj instanceof String){
+                    String rootDirStr = (String)parentObj;
+                    downloadFilesToFolder(rootDirStr, aFileNodeList);
                 }
 
-            });
+            } else {
+
+                //Invoke in swing thread so no race condition
+                SwingUtilities.invokeLater( new Runnable(){
+
+                    @Override
+                    public void run() {
+                        if( theTask != null){ 
+
+                            if( theTask.getTaskType() == FileOperation.SEARCH ){
+                                theFsFrame.searchComplete();
+                            } else {
+                                JTree theJTree = theFsFrame.getFileTreePanel().getJTree();
+                                TreePath aTreePath = theJTree.getSelectionPath();
+                                if( aTreePath != null){
+                                    theJTree.clearSelection();
+                                    if( theTask.getTaskType() == FileOperation.DELETE ){
+                                        aTreePath = aTreePath.getParentPath();
+                                        if( aTreePath != null)
+                                            theJTree.setSelectionPath(aTreePath);
+
+                                    } else {
+                                        theJTree.setSelectionPath(aTreePath); 
+                                    }
+                                } else {
+                                    FileJTable theJTable = theFsFrame.getFileJTable();
+                                    int selRow = theJTable.getSelectedRow();
+                                    if( selRow != -1 ){
+                                        if( theTask.getTaskType() == FileOperation.DELETE ){
+                                            //TODO
+                                            FileNode aFileNode = (FileNode)theJTable.getValueAt(selRow, 0);  
+                                            RemoteFile aFile = aFileNode.getFile();
+                                            String aPath = aFile.getAbsolutePath();
+                                            int idx = aPath.lastIndexOf("\\");
+                                            String parentPath = aPath.substring(0, idx);                                            
+                                            selectNodeInTree(aFileNode);
+                                        }
+                                    }
+                                } 
+                            }  
+
+                            //Remove task
+                            removeRemoteFileSystemTask(passedTaskId);
+
+                        }
+                    }
+
+                });
+            }
         }
  
     }
@@ -1202,25 +1218,28 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
         
         JTree theJTree = theFsFrame.getFileTreePanel().getJTree();
         DefaultMutableTreeNode aNode = (DefaultMutableTreeNode) theJTree.getLastSelectedPathComponent();
-        if( aNode != null ){
-            Enumeration<DefaultMutableTreeNode> e = aNode.breadthFirstEnumeration();
-            DefaultMutableTreeNode currentNode;
-            while( e.hasMoreElements() ) {
-                currentNode = e.nextElement();
-                Object anObj = currentNode.getUserObject();
-                if( anObj instanceof IconData){
-                    anObj = ((IconData)anObj).getObject();
-                    if( anObj instanceof FileNode ){            
-                        FileNode aFileNode = (FileNode)anObj;
-                        if( passedFileNode.equals(aFileNode) ) {
-                            TreePath objectPath = new TreePath( currentNode.getPath() );
-                            theJTree.setSelectionPath(objectPath);  
-                            break;
-                        }
+        if( aNode == null)
+            aNode = (DefaultMutableTreeNode)theJTree.getModel().getRoot();
+        
+        //if( aNode != null ){
+        Enumeration<DefaultMutableTreeNode> e = aNode.breadthFirstEnumeration();
+        DefaultMutableTreeNode currentNode;
+        while( e.hasMoreElements() ) {
+            currentNode = e.nextElement();
+            Object anObj = currentNode.getUserObject();
+            if( anObj instanceof IconData){
+                anObj = ((IconData)anObj).getObject();
+                if( anObj instanceof FileNode ){            
+                    FileNode aFileNode = (FileNode)anObj;
+                    if( passedFileNode.equals(aFileNode) ) {
+                        TreePath objectPath = new TreePath( currentNode.getPath() );
+                        theJTree.setSelectionPath(objectPath);  
+                        break;
                     }
                 }
             }
         }
+        //}
         
     }
 

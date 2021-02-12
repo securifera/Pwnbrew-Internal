@@ -170,56 +170,56 @@ public class ServerManager extends PortManager {
     public void socketClosed( SocketChannelHandler theHandler ) {
 
         //Should ever return null since it's a closing socket
-        ControlMessageManager aCMManager = ControlMessageManager.getMessageManager();
-        int controlPort = aCMManager.getPort();
-        
-        ServerPortRouter aSPR = (ServerPortRouter)getPortRouter( controlPort );
-        int clientId = theHandler.getRootHostId();
-        int channelId = theHandler.getChannelId();
-        
-        //Get the connection manager for the id
-        ConnectionManager aCM = aSPR.getConnectionManager(clientId);
-        if( aCM != null ){
-            
-            //Get the socket channel handler
-            SocketChannelHandler aHandler = aCM.getSocketChannelHandler( channelId );
-            if( aHandler != null && aHandler.equals( theHandler )){
-
-                //If the connection was closed
-                String clientIdStr = Integer.toString( clientId );
-                aCM.removeHandler(channelId);
-                
-                if( channelId == ConnectionManager.COMM_CHANNEL_ID ){
-                    //Get the host controller
-                    HostController theController = getHostController(clientIdStr);
-                    if( theController != null ){
-
-                        final List<HostController> theHostList = new ArrayList<>();
-                        theHostList.add(theController);
-
-                        //Add any pivoting hosts
-                        List<String> theInternalHosts = theController.getHost().getConnectedHostIdList();
-                        for( String idStr : theInternalHosts ){
-                            HostController aController = getHostController(idStr);
-                            theHostList.add(aController);
-                        }         
-
-                        SwingUtilities.invokeLater( new Runnable() {
-
-                            @Override
-                            public void run() {                    
-
-                                for( HostController nextController: theHostList ){
-                                    hostDisconnected( (Host) nextController.getObject() );
-                                    nextController.saveToDisk();
-                                }
-                            }
-                        });
-
-                    }
-                }
-            }
-        }
+//        ControlMessageManager aCMManager = ControlMessageManager.getMessageManager();
+//        int controlPort = aCMManager.getPort();
+//        
+//        ServerPortRouter aSPR = (ServerPortRouter)getPortRouter( controlPort );
+//        int clientId = theHandler.getRootHostId();
+//        int channelId = theHandler.getChannelId();
+//        
+//        //Get the connection manager for the id
+//        ConnectionManager aCM = aSPR.getConnectionManager(clientId);
+//        if( aCM != null ){
+//            
+//            //Get the socket channel handler
+//            SocketChannelHandler aHandler = aCM.getSocketChannelHandler( channelId );
+//            if( aHandler != null && aHandler.equals( theHandler )){
+//
+//                //If the connection was closed
+//                String clientIdStr = Integer.toString( clientId );
+//                aCM.removeHandler(channelId);
+//                
+//                if( channelId == ConnectionManager.COMM_CHANNEL_ID ){
+//                    //Get the host controller
+//                    HostController theController = getHostController(clientIdStr);
+//                    if( theController != null ){
+//
+//                        final List<HostController> theHostList = new ArrayList<>();
+//                        theHostList.add(theController);
+//
+//                        //Add any pivoting hosts
+//                        List<String> theInternalHosts = theController.getHost().getConnectedHostIdList();
+//                        for( String idStr : theInternalHosts ){
+//                            HostController aController = getHostController(idStr);
+//                            theHostList.add(aController);
+//                        }         
+//
+//                        SwingUtilities.invokeLater( new Runnable() {
+//
+//                            @Override
+//                            public void run() {                    
+//
+//                                for( HostController nextController: theHostList ){
+//                                    hostDisconnected( (Host) nextController.getObject() );
+//                                    nextController.saveToDisk();
+//                                }
+//                            }
+//                        });
+//
+//                    }
+//                }
+//            }
+//        }
     }   
 
     //===============================================================

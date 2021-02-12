@@ -58,6 +58,7 @@ abstract public class Constants {
     // Network states
     public static final int DISCONNECTED = 0;
     public static final int CONNECTED = 2;
+    public static final int SHUTDOWN = 3;
  
     //File notification messages for the taskruner
     public static final int FILE_SENT = 1000;
@@ -66,11 +67,11 @@ abstract public class Constants {
     //The hash algorithm used by all message digest functions
     public static final String HASH_FUNCTION = "SHA-256";
     
-    public static final int  MAX_MESSAGE_SIZE = 1500;
-    public static final int  GENERIC_BUFFER_SIZE = 4096;
+    //public static final int  MAX_MESSAGE_SIZE = 1500;
+    public static final int  GENERIC_BUFFER_SIZE = 2000;
                
     public static final ExecutorService Executor = Executors.newCachedThreadPool();
-    public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");
+    public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm:ss");
     
     //Constants for process streams
     public static final int STD_OUT_ID = 41;

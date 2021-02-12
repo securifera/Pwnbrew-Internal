@@ -99,6 +99,7 @@ public class SocketChannelHandler implements Selectable {
     private ByteBuffer localMsgBuffer = null;
     
     private boolean isRegistered = false;
+    private int port = -1;
     // ==========================================================================
     /**
      * Constructor
@@ -174,24 +175,60 @@ public class SocketChannelHandler implements Selectable {
     
     //===============================================================
     /**
+     * 
+     * @return 
+     */    
+    public int getQueueSize(){
+        int retSize;
+        synchronized (pendingByteArrs) {
+            retSize = pendingByteArrs.size();
+        }
+        return retSize;
+    }
+    
+    //===============================================================
+    /**
     *  Queues a byte array to be sent out the specified socket channel
     *
     * @param data
     */
     public void queueBytes( byte[] data) {
 
-        SelectionRouter aSR = getPortRouter().getSelRouter();
-        if( theSCW != null ){
-            
-            SocketChannel aSC = theSCW.getSocketChannel();
-            synchronized (pendingByteArrs) {
-                pendingByteArrs.add(data);
-                if( ( aSR.interestOps( aSC) & SelectionKey.OP_WRITE ) == 0){
-                    aSR.changeOps( aSC, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
-                }
-            }
-            
+//        SelectionRouter aSR = getPortRouter().getSelRouter();
+//        if( theSCW != null ){
+//            
+//            SocketChannel aSC = theSCW.getSocketChannel();
+//            synchronized (pendingByteArrs) {
+//                pendingByteArrs.add(data);
+//                if( ( aSR.interestOps( aSC) & SelectionKey.OP_WRITE ) == 0){
+//                    aSR.changeOps( aSC, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
+//                }
+//            }
+//            
+//        }
+        synchronized (pendingByteArrs) {
+            pendingByteArrs.add(data);
         }
+        
+        SelectionRouter aSR = getPortRouter().getSelRouter();
+        if( theSCW != null ){            
+            SocketChannel aSC = theSCW.getSocketChannel();
+            if( ( aSR.interestOps( aSC) & SelectionKey.OP_WRITE ) == 0){
+                aSR.changeOps( aSC, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
+            }           
+        }
+        
+    }
+    
+     //===================================================================
+    /**
+     * 
+     */
+    public void signalSend(){
+        SelectionRouter aSR = thePortRouter.getSelRouter();
+        SocketChannel aSC = theSCW.getSocketChannel();
+        if( ( aSR.interestOps( aSC) & SelectionKey.OP_WRITE ) == 0)
+            aSR.changeOps( aSC, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
         
     }
     
@@ -402,6 +439,23 @@ public class SocketChannelHandler implements Selectable {
 
     }
     
+    public boolean replaceHandler( int passedClientId, int passedChannelId, SocketChannelHandler aHandler ) throws LoggableException{
+        
+        Host localHost = HostFactory.getLocalHost();
+        String localhostId = localHost.getId();
+        ServerPortRouter aSPR = (ServerPortRouter)thePortRouter;
+            
+        //Shutdown the previous one and remove it
+        IncomingConnectionManager aICM = (IncomingConnectionManager) aSPR.getConnectionManager(passedClientId);
+        aICM.removeHandler(passedChannelId);
+        aHandler.shutdown();
+
+        //Register the new one
+        rootHostId = passedClientId;
+        return aSPR.registerHandler(passedClientId, Integer.parseInt(localhostId), passedChannelId, this);
+        
+    }
+    
     //===============================================================
     /**
      *  Register the client
@@ -440,52 +494,61 @@ public class SocketChannelHandler implements Selectable {
                             if( theSCW != null )
                                 sockChan = theSCW.getSocketChannel();
                             
-                            SocketChannel handlerChan = aHandler.getSocketChannelWrapper().getSocketChannel();
-                            if( sockChan != null && handlerChan != null && sockChan.socket().getInetAddress().equals( 
-                                    handlerChan.socket().getInetAddress())){
-
-                                //Shutdown the previous one and remove it
-                                aICM.removeHandler(passedChannelId);
-                                aHandler.shutdown();
+                            SocketChannelWrapper aSCW = aHandler.getSocketChannelWrapper();
+                            if( aSCW == null){
                                 
-                                //Register the new one
-                                rootHostId = passedClientId;
-                                if( !aSPR.registerHandler(passedClientId, Integer.parseInt(localhostId), passedChannelId, this) )
+//                                Log.log( Level.SEVERE, NAME_Class, "registerId()", "SocketChannelWrapper is null", null);   
+//                                return false;
+                                return replaceHandler(passedClientId, passedChannelId, aHandler);
+                                
+                            } else {
+                            
+                                SocketChannel handlerChan = aSCW.getSocketChannel();
+                                if( sockChan != null && handlerChan != null && sockChan.socket().getInetAddress().equals( 
+                                        handlerChan.socket().getInetAddress())){
+
+                                    //Replace the old handler
+                                    return replaceHandler(passedClientId, passedChannelId, aHandler);
+//                                    //Shutdown the previous one and remove it
+//                                    aICM.removeHandler(passedChannelId);
+//                                    aHandler.shutdown();
+//
+//                                    //Register the new one
+//                                    rootHostId = passedClientId;
+//                                    return aSPR.registerHandler(passedClientId, Integer.parseInt(localhostId), passedChannelId, this);
+
+                                } else {    
+
+                                    //Send message to tell client to reset their id
+                                    ResetId resetIdMsg = new ResetId( passedClientId );
+                                    ByteBuffer aByteBuffer;
+
+                                    int msgLen = resetIdMsg.getLength();
+                                    aByteBuffer = ByteBuffer.allocate( msgLen );
+                                    resetIdMsg.append(aByteBuffer);
+
+                                    //Queue to be sent
+                                    byte[] msgBytes = Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position());
+
+                                    //If wrapping is necessary then wrap it
+                                    if( isWrapping() ){
+                                        PortWrapper aWrapper = DataManager.getPortWrapper( getPort() );        
+                                        if( aWrapper != null ){
+
+                                            //Set the staged wrapper if necessary
+                                            if( aWrapper instanceof ServerHttpWrapper ){
+                                                ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
+                                                aSrvWrapper.setStaging( isStaged());
+                                            }
+
+                                            ByteBuffer anotherBB = aWrapper.wrapBytes( msgBytes );  
+                                            msgBytes = Arrays.copyOf(anotherBB.array(), anotherBB.position());
+                                        } 
+                                    }
+
+                                    queueBytes(msgBytes);
                                     return false;
-
-                                return true;
-
-                            } else {    
-
-                                //Send message to tell client to reset their id
-                                ResetId resetIdMsg = new ResetId( passedClientId );
-                                ByteBuffer aByteBuffer;
-
-                                int msgLen = resetIdMsg.getLength();
-                                aByteBuffer = ByteBuffer.allocate( msgLen );
-                                resetIdMsg.append(aByteBuffer);
-
-                                //Queue to be sent
-                                byte[] msgBytes = Arrays.copyOf( aByteBuffer.array(), aByteBuffer.position());
-
-                                //If wrapping is necessary then wrap it
-                                if( isWrapping() ){
-                                    PortWrapper aWrapper = DataManager.getPortWrapper( getPort() );        
-                                    if( aWrapper != null ){
-
-                                        //Set the staged wrapper if necessary
-                                        if( aWrapper instanceof ServerHttpWrapper ){
-                                            ServerHttpWrapper aSrvWrapper = (ServerHttpWrapper)aWrapper;
-                                            aSrvWrapper.setStaging( isStaged());
-                                        }
-
-                                        ByteBuffer anotherBB = aWrapper.wrapBytes( msgBytes );  
-                                        msgBytes = Arrays.copyOf(anotherBB.array(), anotherBB.position());
-                                    } 
                                 }
-
-                                queueBytes(msgBytes);
-                                return false;
                             }
                         }
                     }
@@ -538,6 +601,9 @@ public class SocketChannelHandler implements Selectable {
                     byte[] nextArr = pendingByteArrs.poll();
                     if( nextArr != null){
 
+                        Log.log(Level.INFO, NAME_Class, "send()", "Sending message of size: " + 
+                                Integer.toString(nextArr.length) + " to host " + Integer.toString(rootHostId) + " channel "
+                                + Integer.toString(channelId), null);
                         try {
 
                             send(nextArr);
@@ -558,12 +624,18 @@ public class SocketChannelHandler implements Selectable {
                     
                 } else {
                     
-                    SocketChannelWrapper aSCW = getSocketChannelWrapper();
-                    if( aSCW != null ){
-                        getPortRouter().getSelRouter().changeOps( aSCW.getSocketChannel(), SelectionKey.OP_READ);
-                    }
+                    //Log.log(Level.INFO, NAME_Class, "send()", "Queue is empty.", null);
+                    
+//                    SocketChannelWrapper aSCW = getSocketChannelWrapper();
+//                    if( aSCW != null ){
+//                        getPortRouter().getSelRouter().changeOps( aSCW.getSocketChannel(), SelectionKey.OP_READ);
+//                    }
                 }
-
+                
+                SocketChannelWrapper aSCW = getSocketChannelWrapper();
+                if( aSCW != null )
+                    getPortRouter().getSelRouter().changeOps( aSCW.getSocketChannel(), SelectionKey.OP_READ);
+                
                 //Notify any threads waiting on this monitor
                 pendingByteArrs.notifyAll();
             }
@@ -670,11 +742,13 @@ public class SocketChannelHandler implements Selectable {
     */
     public int getPort(){
         
-        int port = 0;
+        int tmp_port = 0;
         if( theSCW != null){
-            port = theSCW.getSocketChannel().socket().getLocalPort();
+            tmp_port = theSCW.getSocketChannel().socket().getLocalPort();
+        } else{
+            tmp_port = port;
         }
-        return port;
+        return tmp_port;
     }
 
     //===============================================================
@@ -685,6 +759,9 @@ public class SocketChannelHandler implements Selectable {
     */
     public void setSocketChannelWrapper(SocketChannelWrapper passedSCW){      
         theSCW = passedSCW;
+        if( theSCW != null)
+            port = theSCW.getSocketChannel().socket().getLocalPort();
+        
     }
 
     //===============================================================

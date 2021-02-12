@@ -49,13 +49,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import pwnbrew.StubConfig;
@@ -66,7 +62,6 @@ import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.misc.ManagedRunnable;
 import pwnbrew.network.PortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.PushFileAbort;
 import pwnbrew.network.control.messages.PushFileAck;
 import pwnbrew.network.control.messages.PushFileUpdate;
@@ -83,7 +78,7 @@ public class FileSender extends ManagedRunnable {
     private final PushFileAck theFileAck;
     private final int thePort;
     
-    private static final int MAX_BUFFER_SIZE = 32768;
+    private static final int MAX_BUFFER_SIZE = 2000;
     private int channelId = 0;
     
     //Class name
@@ -122,23 +117,12 @@ public class FileSender extends ManagedRunnable {
 
         } catch (IOException | LoggableException ex) {
 
-            DebugPrinter.printMessage( NAME_Class, "go", ex.getMessage(), ex);   
+            DebugPrinter.printMessage( NAME_Class, "go", ex.getMessage(), ex);                  
 
-//            ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//            try {
-
-//                if( aCMManager == null )
-//                    aCMManager = ControlMessageManager.initialize(thePortManager);                    
-
-                //Send message to cleanup the file transfer on the client side
-                int srcHostId = theFileAck.getSrcHostId();
-                PushFileAbort fileAbortMsg = new PushFileAbort( taskId, srcHostId, Constants.COMM_CHANNEL_ID, fileId );
-                DataManager.send(thePortManager, fileAbortMsg);
-//                aCMManager.send(fileAbortMsg ); 
-
-//            } catch( IOException ex1 ){
-//                 DebugPrinter.printMessage( NAME_Class, "go", ex.getMessage(), ex1);   
-//            }
+            //Send message to cleanup the file transfer on the client side
+            int srcHostId = theFileAck.getSrcHostId();
+            PushFileAbort fileAbortMsg = new PushFileAbort( taskId, srcHostId, Constants.COMM_CHANNEL_ID, fileId );
+            DataManager.send(thePortManager, fileAbortMsg);
 
         }
         
@@ -245,7 +229,7 @@ public class FileSender extends ManagedRunnable {
         byte[] outputBytes = baos.toByteArray();
         baos.close();
         ByteArrayInputStream fileInputStream = new ByteArrayInputStream(outputBytes);
-        outputBytes = null;
+        //outputBytes = null;
             
         //Get compressed bytes
         int fileId = theFileAck.getFileId();

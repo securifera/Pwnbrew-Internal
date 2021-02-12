@@ -77,7 +77,7 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
     private final PortManager thePortManager;
     private final PushFileAck theFileAck;
     
-    private static final int MAX_BUFFER_SIZE = 32768;
+    private static final int MAX_BUFFER_SIZE = 2000;
     private int channelId = 0;
     
     //Class name
@@ -283,7 +283,7 @@ public class FileSender extends ManagedRunnable /*implements LockListener */{
         byte[] outputBytes = baos.toByteArray();
         baos.close();
         ByteArrayInputStream fileInputStream = new ByteArrayInputStream(outputBytes);
-        outputBytes = null;
+        //outputBytes = null;
       
         
         //Get compressed bytes

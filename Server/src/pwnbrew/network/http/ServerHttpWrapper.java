@@ -46,18 +46,23 @@ package pwnbrew.network.http;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import pwnbrew.host.Host;
+import pwnbrew.host.HostFactory;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
-import pwnbrew.misc.DebugPrinter;
+import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.network.Message;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.control.messages.NoOp;
+import pwnbrew.network.socket.SocketChannelWrapper;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.selector.SocketChannelHandler;
@@ -162,11 +167,11 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                 
                                             } else {
                                                 
+                                                //Get src id
+                                                byte[] srcHostIdArr = Arrays.copyOfRange(msgByteArr, 0, 4);
+                                                int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);
+                                                
                                                 if( currMsgType == Message.STAGING_MESSAGE_TYPE ){
-
-                                                    //Get src id
-                                                    byte[] srcHostIdArr = Arrays.copyOfRange(msgByteArr, 0, 4);
-                                                    int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);
 
                                                     //Register the relay
                                                     int parentId = passedHandler.getRootHostId();
@@ -179,12 +184,49 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                 //Get dest id
                                                 byte[] dstHostId = Arrays.copyOfRange(msgByteArr, 4, 8);
                                                 int dstId = SocketUtilities.byteArrayToInt(dstHostId);
+                                                
+                                                //Get channel id
+                                                byte[] channelIdArr = Arrays.copyOfRange(msgByteArr, 8, 12);
+                                                int channelId = SocketUtilities.byteArrayToInt(channelIdArr);
+                                                
+                                                //TODO Get socketchannel handler for channel id and make sure it's this one
+                                                ServerPortRouter aSPR = (ServerPortRouter)passedHandler.getPortRouter();
+                                                IncomingConnectionManager aICM = (IncomingConnectionManager) aSPR.getConnectionManager(srcHostId);
+                                                if( aICM != null ){
+                                                    SocketChannelHandler aHandler = aICM.getSocketChannelHandler( channelId );
+                                                    if( aHandler != null && aHandler != passedHandler){
+                                                        
+                                                        //Switch out the selector registration for the socket channel
+                                                        SocketChannelWrapper aSCH = passedHandler.getSocketChannelWrapper();
+                                                        if(aSCH != null){
+                                                            aHandler.setSocketChannelWrapper(aSCH);
 
+                                                            //Register this handler with the selection router
+                                                            aSPR.getSelRouter().register(aSCH.getSocketChannel(), SelectionKey.OP_READ, aHandler);
+                                                            passedHandler = aHandler;
+                                                        } else{
+                                                            Log.log( Level.SEVERE, NAME_Class, "processHeader()", "SocketChannelWrapper is null", null);
+                                                        }
+                                                    } else{
+                                                        Log.log( Level.SEVERE, NAME_Class, "processHeader()", "SocketChannelHandler is null", null);
+                                                    }
+                                                }
+                                                
                                                 try{
                                                     DataManager.routeMessage( passedHandler.getPortRouter(), currMsgType, dstId, msgByteArr );
                                                 } catch(Exception ex ){
                                                     Log.log( Level.SEVERE, NAME_Class, "processHeader()", ex.toString(), ex);
                                                 }
+                                                
+                                                //If return queue is empty, send NoOP so all HTTP requests receive a response
+                                                if( passedHandler.getQueueSize() == 0 ){
+                                                    NoOp aNoOp = new NoOp(srcHostId);
+                                                    aNoOp.setChannelId(channelId);
+                                                    DataManager.send( passedHandler.getPortRouter().getPortManager(), aNoOp);                        
+                                                } else{
+                                                    passedHandler.signalSend();
+                                                }
+                                                
                                                 return;
                                             }
                                         }

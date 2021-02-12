@@ -443,7 +443,7 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
     @Override
     public boolean shutdown() throws IOException {
 
-        DebugPrinter.printMessage(NAME_Class, "Shutdown socket");
+        //DebugPrinter.printMessage(NAME_Class, "Shutdown socket");
         final SSLEngineResult result;
         try {
             

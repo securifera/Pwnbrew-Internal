@@ -37,7 +37,9 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.selector;
 
+import pwnbrew.ClientConfig;
 import pwnbrew.manager.ConnectionManager;
+import pwnbrew.manager.DataManager;
 import pwnbrew.network.ConnectionCallback;
 import pwnbrew.network.RegisterMessage;
 
@@ -76,7 +78,8 @@ public class SocketChannelCallback extends ConnectionCallback{
         if( srvHandler != null ){
             byte[] regBytes = theRegMsg.getBytes();
             srvHandler.queueBytes(regBytes, theRegMsg.getCancelId());
-        }
+            srvHandler.signalSend();
+        }            
     
     }
     

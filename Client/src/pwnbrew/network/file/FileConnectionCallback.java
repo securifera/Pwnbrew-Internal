@@ -37,7 +37,14 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.network.file;
 
+import java.util.logging.Level;
+import pwnbrew.ClientConfig;
+import pwnbrew.log.RemoteLog;
+import pwnbrew.manager.DataManager;
+import pwnbrew.manager.PortManager;
 import pwnbrew.network.ConnectionCallback;
+import pwnbrew.network.RegisterMessage;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
@@ -45,14 +52,19 @@ import pwnbrew.network.ConnectionCallback;
  */
 public class FileConnectionCallback extends ConnectionCallback{
     
+    private final PortManager theManager;
+    private static final String NAME_Class = FileConnectionCallback.class.getSimpleName();
+    
     //=====================================================================
     /**
      * 
+     * @param passedManager
      * @param passedIp
      * @param passedPort 
      */
-    public FileConnectionCallback(String passedIp, int passedPort) {
+    public FileConnectionCallback(PortManager passedManager, String passedIp, int passedPort) {
         super(passedIp, passedPort);
+        theManager = passedManager;
     }
     
      //=====================================================================
@@ -62,10 +74,30 @@ public class FileConnectionCallback extends ConnectionCallback{
      */
     @Override
     public void handleConnection( int theChannelId ) {
-    
-        //Call the file manager callback
-        FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
-        aFMM.connectionCallback(theChannelId);
+        
+        if(theChannelId != 0 ){
+        
+            ClientConfig theConf = ClientConfig.getConfig();
+            byte stlth_val = 0;
+            if( theConf.useStealth() )
+                stlth_val = 1;   
+
+            //Queue register message
+            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, theChannelId);
+            DataManager.send(theManager, aMsg);
+
+            //Set send signal
+            SocketChannelHandler aSCH =  theManager.getPortRouter(theConf.getSocketPort()).getConnectionManager().getSocketChannelHandler(theChannelId);
+            if( aSCH != null )
+                aSCH.signalSend();
+
+            //Call the file manager callback
+            FileMessageManager aFMM = FileMessageManager.getFileMessageManager();
+            aFMM.connectionCallback(theChannelId);
+            
+        } else {
+            RemoteLog.log(Level.INFO, NAME_Class, "handleConnection()", "Channel ID returned 0", null );
+        }
     }
     
 }

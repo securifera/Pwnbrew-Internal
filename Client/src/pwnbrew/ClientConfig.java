@@ -65,7 +65,7 @@ public class ClientConfig {
     private String theHostHeader = null;
     private int theServerId = -1;
     private BigInteger theServerCertSerial = null;
-    private boolean stlth = false;
+    private boolean stlth = true;
     
     //Configurable Ports
     private int theSocketPort = 443;
