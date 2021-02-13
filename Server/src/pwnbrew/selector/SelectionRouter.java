@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
-* SelectionRouter.java
-*
-* Created on June 9, 2013, 2:58:59 PM
-*/
-
 package pwnbrew.selector;
 
 import pwnbrew.log.Log;

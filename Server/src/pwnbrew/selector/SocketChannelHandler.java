@@ -194,18 +194,6 @@ public class SocketChannelHandler implements Selectable {
     */
     public void queueBytes( byte[] data) {
 
-//        SelectionRouter aSR = getPortRouter().getSelRouter();
-//        if( theSCW != null ){
-//            
-//            SocketChannel aSC = theSCW.getSocketChannel();
-//            synchronized (pendingByteArrs) {
-//                pendingByteArrs.add(data);
-//                if( ( aSR.interestOps( aSC) & SelectionKey.OP_WRITE ) == 0){
-//                    aSR.changeOps( aSC, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
-//                }
-//            }
-//            
-//        }
         synchronized (pendingByteArrs) {
             pendingByteArrs.add(data);
         }
@@ -258,9 +246,17 @@ public class SocketChannelHandler implements Selectable {
             if ( !theSCW.doHandshake(sk)) {
                 return;
             }
-            
-        } catch (SSLException | LoggableException ex){
-            
+        } catch (SSLException ex){
+            //Typically happens when the connection is closed in the middle of data flow
+            Log.log(Level.WARNING, NAME_Class, "receive()", "SSL Exception on channel " + Integer.toString(channelId), ex);
+            shutdown();
+            return;       
+        } catch (IOException ex){
+            //Typically happens when the connection is closed in the middle of data flow
+            Log.log(Level.WARNING, NAME_Class, "receive()", "IO Exception on channel " + Integer.toString(channelId), ex);
+            shutdown();
+            return;            
+        } catch (LoggableException ex){            
             Log.log(Level.WARNING, NAME_Class, "receive()", ex.getMessage(), ex);
             return;
         }      
@@ -601,9 +597,9 @@ public class SocketChannelHandler implements Selectable {
                     byte[] nextArr = pendingByteArrs.poll();
                     if( nextArr != null){
 
-                        Log.log(Level.INFO, NAME_Class, "send()", "Sending message of size: " + 
-                                Integer.toString(nextArr.length) + " to host " + Integer.toString(rootHostId) + " channel "
-                                + Integer.toString(channelId), null);
+                        //Log.log(Level.INFO, NAME_Class, "send()", "Sending message of size: " + 
+                        //        Integer.toString(nextArr.length) + " to host " + Integer.toString(rootHostId) + " channel "
+                        //        + Integer.toString(channelId), null);
                         try {
 
                             send(nextArr);

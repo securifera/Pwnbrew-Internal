@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
-* ShellMessageHandler.java
-*
-* Created on July 27, 2013, 2:14:11 PM
-*/
-
 package pwnbrew.network.shell;
 
 import java.nio.ByteBuffer;

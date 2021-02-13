@@ -45,13 +45,10 @@ The copyright on this package is held by Securifera, Inc
 
 package pwnbrew.network.control.messages;
 
-import java.io.IOException;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
-import pwnbrew.manager.ConnectionManager;
-import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ConnectionCallback;
 import pwnbrew.network.PortRouter;
@@ -91,6 +88,7 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
           
         
         try {
+            //TODO fix resetid
             //Create a new client id
             ClientConfig theConf = ClientConfig.getConfig();
             Integer anInteger = SocketUtilities.getNextId();
@@ -104,11 +102,11 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
                 int tempId = getChannelId();                
                 
                 //Notify reconnect timer
-                ConnectionCallback aCC = aPR.removeConnectionCallback(tempId);
-                if( aCC != null ){
-                    DebugPrinter.printMessage(NAME_Class, "Calling callback function.");
-                    aCC.handleConnection(tempId);
-                }
+//                ConnectionCallback aCC = aPR.removeConnectionCallback(tempId);
+//                if( aCC != null ){
+//                    DebugPrinter.printMessage(NAME_Class, "Calling callback function.");
+//                    aCC.handleConnection(tempId);
+//                }
                 
                 //Shutdown the socket
                 SocketChannelHandler aSCH = aPR.getConnectionManager().getSocketChannelHandler( tempId ); 
@@ -123,4 +121,4 @@ public final class ResetId extends ControlMessage{ // NO_UCD (use default)
         
     }
 
-}/* END CLASS ResetId */
+}

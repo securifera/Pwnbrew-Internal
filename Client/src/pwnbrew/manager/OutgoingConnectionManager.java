@@ -54,7 +54,6 @@ public class OutgoingConnectionManager extends ConnectionManager {
     
     
     private final Map<Integer, SocketChannelHandler> channelIdHandlerMap = new HashMap<>();
-//    private final Map<Integer, KeepAliveTimer> theKeepAliveTimerMap = new HashMap<>();
     private final Map<Integer, ReconnectTimer> theReconnectTimerMap = new HashMap<>();
     private final Map<Integer, Shell> theShellMap = new HashMap<>();
     
@@ -137,22 +136,7 @@ public class OutgoingConnectionManager extends ConnectionManager {
         }
         return aSCH;
     }
- 
-//    //==========================================================================
-//    /**
-//     *  Returns the keep alive timer
-//     * @param passedId
-//     * @return 
-//     */
-//    public KeepAliveTimer getKeepAliveTimer( int passedId ) {
-//        
-//        KeepAliveTimer theTimer;
-//        synchronized(theKeepAliveTimerMap){
-//            theTimer = theKeepAliveTimerMap.get(passedId);
-//        }
-//        return theTimer;
-//    }
-    
+     
     //==========================================================================
     /**
      *  Returns the reconnect timer
@@ -249,27 +233,22 @@ public class OutgoingConnectionManager extends ConnectionManager {
         
         //Kill the timers
         ReconnectTimer aRT = getReconnectTimer(passedId);
-        if( aRT != null )
+        if( aRT != null ){
+            aRT.setEnabled(false);
             aRT.shutdown();
-        
-        //Close the connection
-        SocketChannelHandler aSCH = removeHandler(passedId);
-        if( aSCH != null )
-            aSCH.shutdown();
+        }
         
     }
 
-//    //=======================================================================
-//    /**
-//     * 
-//     * @param passedId
-//     * @param theKeepAliveTimer 
-//     */
-//    public void setKeepAliveTimer(int passedId, KeepAliveTimer theKeepAliveTimer) {
-//        synchronized(theKeepAliveTimerMap){
-//            theKeepAliveTimerMap.put(passedId, theKeepAliveTimer);
-//        }
-//    }
-    
+    //===========================================================
+    /**
+     * 
+     * @param theChannelId 
+     */
+    public void removeReconnectTimer(int theChannelId) {
+        synchronized(theReconnectTimerMap){
+            theReconnectTimerMap.remove(theChannelId);
+        }
+    }
     
 }

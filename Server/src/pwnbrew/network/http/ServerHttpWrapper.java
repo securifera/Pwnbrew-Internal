@@ -51,8 +51,6 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import pwnbrew.host.Host;
-import pwnbrew.host.HostFactory;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.ConnectionManager;

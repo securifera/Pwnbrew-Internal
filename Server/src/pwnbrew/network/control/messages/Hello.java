@@ -307,4 +307,4 @@ public final class Hello extends ControlMessage {
         
     }
 
-}/* END CLASS Hello */
+}

@@ -45,6 +45,7 @@ import pwnbrew.manager.PortManager;
 import pwnbrew.network.ConnectionCallback;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.ReconnectTimer;
 
 /**
  *
@@ -61,9 +62,10 @@ public class FileConnectionCallback extends ConnectionCallback{
      * @param passedManager
      * @param passedIp
      * @param passedPort 
+     * @param passedTimer 
      */
-    public FileConnectionCallback(PortManager passedManager, String passedIp, int passedPort) {
-        super(passedIp, passedPort);
+    public FileConnectionCallback(PortManager passedManager, String passedIp, int passedPort, ReconnectTimer passedTimer) {
+        super(passedIp, passedPort, passedTimer);
         theManager = passedManager;
     }
     
@@ -75,21 +77,24 @@ public class FileConnectionCallback extends ConnectionCallback{
     @Override
     public void handleConnection( int theChannelId ) {
         
+        //Call the parent class function first
+        super.handleConnection(theChannelId);
+        
         if(theChannelId != 0 ){
         
-            ClientConfig theConf = ClientConfig.getConfig();
-            byte stlth_val = 0;
-            if( theConf.useStealth() )
-                stlth_val = 1;   
-
-            //Queue register message
-            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, theChannelId);
-            DataManager.send(theManager, aMsg);
-
-            //Set send signal
-            SocketChannelHandler aSCH =  theManager.getPortRouter(theConf.getSocketPort()).getConnectionManager().getSocketChannelHandler(theChannelId);
-            if( aSCH != null )
-                aSCH.signalSend();
+////            ClientConfig theConf = ClientConfig.getConfig();
+////            byte stlth_val = 0;
+////            if( theConf.useStealth() )
+////                stlth_val = 1;   
+////
+////            //Queue register message
+////            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, theChannelId);
+////            DataManager.send(theManager, aMsg);
+////
+////            //Set send signal
+////            SocketChannelHandler aSCH =  theManager.getPortRouter(theConf.getSocketPort()).getConnectionManager().getSocketChannelHandler(theChannelId);
+////            if( aSCH != null )
+////                aSCH.signalSend();
 
             //Call the file manager callback
             FileMessageManager aFMM = FileMessageManager.getFileMessageManager();

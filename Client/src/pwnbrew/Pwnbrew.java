@@ -52,7 +52,6 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
-import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;

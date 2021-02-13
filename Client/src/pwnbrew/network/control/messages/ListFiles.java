@@ -36,12 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-/*
-* ListFiles.java
-*
-* Created on December 22, 2013, 8:21:22 PM
-*/
-
 package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;

@@ -47,12 +47,14 @@ package pwnbrew.network.control.messages;
 
 import pwnbrew.ClientConfig;
 import pwnbrew.manager.ConnectionManager;
+import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.PortRouter;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.ReconnectTimer;
 
 /**
  *
@@ -120,12 +122,20 @@ public final class ShutdownChannel extends ControlMessage{
             PortRouter aPR = passedManager.getPortRouter(aConf.getSocketPort());
             if( aPR != null && aPR instanceof ClientPortRouter){
                 ClientPortRouter aCPR = (ClientPortRouter)aPR;
-                ConnectionManager aCM = aCPR.getConnectionManager();
-                SocketChannelHandler aSCH = aCM.getSocketChannelHandler(fileChannelId);
-                if( aSCH != null ){
-                    aSCH.shutdown();
-                    aCPR.socketClosed(getSrcHostId(), fileChannelId);
+                OutgoingConnectionManager aCM = aCPR.getConnectionManager();
+                
+                //Disable reconnect timer
+                ReconnectTimer aRT = aCM.getReconnectTimer(fileChannelId);
+                if( aRT != null ){
+                    aRT.setEnabled(false);
+                    aRT.shutdown();
                 }
+                
+//                SocketChannelHandler aSCH = aCM.getSocketChannelHandler(fileChannelId);
+//                if( aSCH != null ){
+//                    aSCH.shutdown();
+//                    aCPR.socketClosed(getSrcHostId(), fileChannelId);
+//                }
             }
         }
    

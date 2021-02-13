@@ -55,6 +55,7 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
@@ -63,6 +64,7 @@ import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.relay.RelayManager;
 import pwnbrew.selector.SocketChannelCallback;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.ReconnectTimer;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.utilities.Utilities;
 
@@ -198,14 +200,29 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                                 if( !aMsg.keepWrapping() )
                                                                     passedHandler.setWrapping( false);
 ////                                                                
-                                                                if( thePR instanceof ClientPortRouter ){
+                                                                if( aCM instanceof OutgoingConnectionManager ){
+                                                                    
+                                                                    //Create the Timer
+                                                                    OutgoingConnectionManager theOCM = (OutgoingConnectionManager)aCM;
+                                                                    int newChannelId = theOCM.getNextChannelId();
+                                                                    ReconnectTimer aReconnectTimer = new ReconnectTimer(aSPR.getPortManager(), newChannelId); 
+                                                                    byte stlth_val = 0;
+                                                                    if( theConf.useStealth() )
+                                                                        stlth_val = 1;   
+
+                                                                    //Queue register message
+                                                                    RegisterMessage regMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, newChannelId);
+                                                                    aReconnectTimer.setPostConnectMessage(regMsg);
+                                 
                                                                     
                                                                     //Create callback
-                                                                    SocketChannelCallback aSCC = new SocketChannelCallback(serverIp, theSocketPort, aMsg, aCM);
+                                                                    SocketChannelCallback aSCC = new SocketChannelCallback(serverIp, theSocketPort, aMsg, aCM, aReconnectTimer);
                                                       
                                                                     //TODO need to check if the id is already taken
-                                                                    ClientPortRouter aCPR = (ClientPortRouter)thePR;
-                                                                    aCPR.ensureConnectivity(aSCC, chanId);
+                                                                    //ClientPortRouter aCPR = (ClientPortRouter)thePR;
+                                                                    //aCPR.ensureConnectivity(aSCC, chanId);
+                                                                    aReconnectTimer.setConnectionCallback(aSCC);
+            aReconnectTimer.start();                                aReconnectTimer.start();
                                                                     
                                                                 }
                                                             } else {

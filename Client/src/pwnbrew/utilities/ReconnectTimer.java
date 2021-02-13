@@ -46,22 +46,33 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.utilities;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.nio.channels.AlreadyConnectedException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.EmptyStackException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
+import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ClientPortRouter;
+import pwnbrew.network.ConnectionCallback;
 import pwnbrew.network.Message;
-import pwnbrew.network.ReconnectCallback;
 import pwnbrew.network.control.messages.NoOp;
+import pwnbrew.selector.ConnectHandler;
+import pwnbrew.selector.SelectionRouter;
 import pwnbrew.selector.SocketChannelHandler;
 
 /**
@@ -82,7 +93,13 @@ public class ReconnectTimer extends ManagedRunnable {
     private int backupServerPort = -1;
     
     private final int theChannelId;
+    private ConnectionCallback theConnectionCallback = null;
+    
+    //Used to disable reconnect timer
+    private boolean enabled = true;
            
+    private static final int CONNECT_RETRY = 3;
+    private static final int SLEEP_TIME = 1000;
 
     // ==========================================================================
     /**
@@ -129,6 +146,212 @@ public class ReconnectTimer extends ManagedRunnable {
         backupServerPort = passedPort;  
         
     }/* END setBackupServerPort() */
+    
+    // ==========================================================================
+    /**
+     *   Sets the enabled flag
+     * @param passedBool
+    */
+    public synchronized void setEnabled( boolean passedBool ) {
+
+        enabled = passedBool;  
+        
+    }
+    
+        //===============================================================
+     /**
+     * Recursive function for connecting to the server
+     *
+     * @return
+     * @throws IOException
+    */
+    private boolean connect( ClientPortRouter aPR, int channelId, InetAddress hostAddress, int passedPort ) throws LoggableException {
+
+        OutgoingConnectionManager theOCM = aPR.getConnectionManager();
+        SocketChannelHandler theSCH = theOCM.getSocketChannelHandler( channelId );
+        try {
+            
+            if( theSCH == null || theSCH.getState() == Constants.DISCONNECTED ){
+
+                // Create a non-blocking socket channel
+                SocketChannel theSocketChannel = SocketChannel.open();
+                theSocketChannel.configureBlocking(false);
+
+                // Kick off connection establishment
+                try {
+                    theSocketChannel.connect(new InetSocketAddress(hostAddress, passedPort));
+                } catch( AlreadyConnectedException ex ) {
+                    return true;
+                }
+
+                // Register the server socket channel, indicating an interest in
+                // accepting new connections
+                ConnectHandler connectHandler = new ConnectHandler( aPR, channelId );
+
+                // Register the socket channel and handler with the selector
+                SelectionRouter theSelectionRouter = aPR.getSelRouter();
+                SelectionKey theSelKey = theSelectionRouter.register(theSocketChannel, SelectionKey.OP_CONNECT, connectHandler);
+
+                //Wait until the thread is notified or times out
+                waitToBeNotified(5);
+//                boolean timedOut = waitForConnection(channelId);
+//                if( timedOut )
+//                    DebugPrinter.printMessage( NAME_Class, "Connection timed out.");
+//                else
+//                    DebugPrinter.printMessage( NAME_Class, "Connection made.");    
+
+                //Return if the key was cancelled
+                if(!theSelKey.isValid()){
+                    theSelKey.cancel();
+                    return false;
+                }
+
+                //If we returned but we are not connected
+                theSCH = theOCM.getSocketChannelHandler( channelId );
+                if( theSCH == null){ 
+                    
+                    DebugPrinter.printMessage( NAME_Class, "SocketChannelHandler is null.");
+                    return false;
+
+                } else if (theSCH.getState() == Constants.DISCONNECTED){
+                    
+                    DebugPrinter.printMessage( NAME_Class, "SocketChannelHandler is disconnected.");
+                    //Shutdown the first connect handler and set it to null
+                    //theSelKey.cancel();
+                    return false;                
+                }
+            }
+
+        } catch(IOException ex){
+            throw new LoggableException(ex);
+        }
+
+        return true;
+    }
+    
+    //===============================================================
+    /**
+    * Adds an event for the selector that the client is interested in opening
+    * a connection.
+    *
+    * @return
+    * @throws IOException
+    */
+    private boolean initiateConnection( ClientPortRouter aPR, int channedId, InetAddress hostAddress, int passedPort, int retry ) throws LoggableException {
+
+        int sleepTime = SLEEP_TIME;
+        boolean connected = false;
+           
+        while( retry > 0 && !connected ){
+
+            connected =  connect( aPR, channedId, hostAddress, passedPort );
+
+            //Sleep if not connected
+            if(!connected){
+                try {                    
+                    //Intentially sleeping with lock held so there are no other attempts to
+                    //connect to the server during this loop.
+                    DebugPrinter.printMessage( NAME_Class, "Sleeping because of no connection. channelid " + Integer.toString(channedId));
+
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException ex) {
+                    ex = null;
+                }
+
+                //Update counters and test
+                sleepTime += sleepTime;  
+                retry--;
+
+            } else {
+                DebugPrinter.printMessage( NAME_Class, "Connection made on channel " + Integer.toString(channedId));
+            }
+
+        }
+
+        return connected;
+    }
+    
+     //===============================================================
+    /**
+     * Checks that a connection has been made to the passed port.  If not it
+     * creates one.
+     *
+     * @param aPR
+     * @param passedCallback
+     * @param passedIdArr 
+    */
+    public void ensureConnectivity( ClientPortRouter aPR, ConnectionCallback passedCallback, Integer... passedIdArr ) {
+
+        int channelId;
+        int passedPort = passedCallback.getPort();
+        String serverIp = passedCallback.getServerIp();
+        OutgoingConnectionManager theOCM = aPR.getConnectionManager();
+        try {
+            
+            //Get the channelId
+            if( passedIdArr.length > 0){
+                channelId = passedIdArr[0];
+            } else {
+                channelId = theOCM.getNextChannelId();
+            }
+            
+            //Get the handler
+            SocketChannelHandler aSC = theOCM.getSocketChannelHandler( channelId );
+            if(aSC == null || aSC.getState() == Constants.DISCONNECTED){            
+           
+                //Get the inet
+                InetAddress srvInet = InetAddress.getByName(serverIp);
+                //DebugPrinter.printMessage( NAME_Class, "Attempting to connect to " + srvInet.getHostAddress() + ":" + passedPort);
+     
+                //Set the callback
+//                setConnectionCallback(channelId, passedCallback);
+                if( !initiateConnection( aPR, channelId, srvInet, passedPort, CONNECT_RETRY )){
+                    
+                    DebugPrinter.printMessage( NAME_Class, "Unable to connect to port.");
+                    RemoteLog.log(Level.INFO, NAME_Class, "ensureConnectivity()", "Unable to connect to port " + passedPort, null );
+//                    ConnectionCallback aCC = removeConnectionCallback(channelId);
+                    passedCallback.handleConnection(0);
+                    
+                } else {
+                    
+                
+                    aSC = theOCM.getSocketChannelHandler( channelId );
+                    if( aSC == null || aSC.getState() == Constants.DISCONNECTED ){
+                        
+                        DebugPrinter.printMessage( NAME_Class, "Not connected.");
+                        //ConnectionCallback aCC = removeConnectionCallback(channelId);
+                        passedCallback.handleConnection(0);
+                        
+                    } else {
+                        
+                        passedCallback.handleConnection(channelId);
+                        //if( channelId == ConnectionManager.COMM_CHANNEL_ID ){
+                            
+                            //DebugPrinter.printMessage( NAME_Class, "Start keep alive.");
+                            
+                            //Set the connected flag
+//                            KeepAliveTimer theKeepAliveTimer = new KeepAliveTimer( thePortManager, channelId);
+//                            theKeepAliveTimer.start();   
+
+                            //Set timer
+//                            theOCM.setKeepAliveTimer( channelId, theKeepAliveTimer );
+                        //}
+                        
+                    }
+                }
+        
+            }
+     
+        } catch ( EmptyStackException | UnknownHostException | LoggableException ex) {
+            RemoteLog.log(Level.INFO, NAME_Class, "ensureConnectivity()", ex.getMessage(), ex );
+//            if( channelId != 0 )
+//                removeConnectionCallback(channelId);
+            
+            //Call handler
+            passedCallback.handleConnection(0);
+        }
+        
+    }  
      
     // ==========================================================================
     /**
@@ -146,13 +369,32 @@ public class ReconnectTimer extends ManagedRunnable {
         String serverIp = theConf.getServerIp();
         int thePort = ClientConfig.getConfig().getSocketPort();
         ClientPortRouter aPR = (ClientPortRouter) theCommManager.getPortRouter( thePort );
-        
-        //Create the connection callback
-        ReconnectCallback theCC = new ReconnectCallback(serverIp, thePort, this);        
         if(aPR == null){
             DebugPrinter.printMessage(NAME_Class, "No port router. Aborting.");
             return;     
-        }      
+        }    
+        
+        if(enabled == false){
+            //Cleanup socket handlers and remove reconnect timer
+            OutgoingConnectionManager theOCM = aPR.getConnectionManager();
+            SocketChannelHandler aSCH = theOCM.removeHandler(theChannelId);
+            if( aSCH != null )
+                aSCH.shutdown();
+            
+            //Remove the reconnect timer
+            theOCM.removeReconnectTimer(theChannelId);
+            
+            
+            return;
+        }
+        
+        
+        //Set the connection callback
+        ConnectionCallback aCC;
+        if(theConnectionCallback != null)
+            aCC = theConnectionCallback;
+        else 
+            aCC = new ConnectionCallback(serverIp, thePort, this);        
         
         //Set the reconnect timer
         aPR.getConnectionManager().setReconnectTimer( theChannelId, this );
@@ -194,12 +436,12 @@ public class ReconnectTimer extends ManagedRunnable {
                 if( theDate != null ){
                     
                     waitUntil(theDate);  
-                    aPR.ensureConnectivity( theCC, theChannelId );
+                    ensureConnectivity( aPR, aCC, theChannelId );
                     //DebugPrinter.printMessage(NAME_Class, "ReconnectTimer waiting to be notified.");
                     waitToBeNotified();
                     
                     //Get the channel id and try again if connection failed
-                    connected = theCC.getChannelId();
+                    connected = aCC.getChannelId();
                     if( connected == 0)
                         continue;
                     
@@ -239,13 +481,16 @@ public class ReconnectTimer extends ManagedRunnable {
         
         //Check if there is an alternate server IP/Port
         if( backupServerIp != null && backupServerPort != -1 ){
-
-            theCC = new ReconnectCallback(backupServerIp, backupServerPort, this); 
-            aPR.ensureConnectivity(theCC, theChannelId);
+            
+            //Set the connection callback
+            if(theConnectionCallback == null)
+                aCC = new ConnectionCallback(backupServerIp, backupServerPort, this); 
+            
+            ensureConnectivity(aPR, aCC, theChannelId);
             waitToBeNotified();
 
             //Get the channel id
-            connected = theCC.getChannelId();
+            connected = aCC.getChannelId();
             if( connected != 0 ){
 
                 theConf.setServerIp(backupServerIp);
@@ -269,6 +514,7 @@ public class ReconnectTimer extends ManagedRunnable {
         DebugPrinter.printMessage(NAME_Class, "Exiting. channel " + Integer.toString(theChannelId));
      
         //Reset things
+        theConnectionCallback = null;
         theReconnectTimeList.clear();
         backupServerIp = null;
         backupServerPort = -1;
@@ -326,6 +572,15 @@ public class ReconnectTimer extends ManagedRunnable {
         synchronized(theReconnectTimeList){
             theReconnectTimeList.clear();
         }
+    }
+
+    //===============================================================
+    /**
+     * 
+     * @param aCC
+     */
+    public void setConnectionCallback(ConnectionCallback aCC) {
+        theConnectionCallback = aCC;
     }
 
 }

@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
-* PushFile.java
-*
-* Created on June 7, 2013, 7:22:43 PM
-*/
-
 package pwnbrew.network.control.messages;
 
 import java.io.UnsupportedEncodingException;
@@ -292,8 +285,9 @@ public final class PushFile extends FileMessage {
      *
      * @return
      */
+    @Override
     public boolean useCompression() {
        return compressionFlag;
     }
 
-}/* END CLASS PushFile */
+}

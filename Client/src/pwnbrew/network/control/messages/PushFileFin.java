@@ -136,20 +136,7 @@ public final class PushFileFin extends FileMessage {
          //Remove from the parent map
         FileMessageManager theFMM = FileMessageManager.getFileMessageManager();
         theFMM.removeFileSender( getTaskId(), getFileChannelId() );
-//
-//        ClientConfig theConf = ClientConfig.getConfig();
-//        int socketPort = theConf.getSocketPort();
-//        ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
-//        
-//        //Get the connection manager
-//        OutgoingConnectionManager aOCM = aPR.getConnectionManager( getSrcHostId() );
-//        if( aOCM != null ){
-//            SocketChannelHandler aSCH = aOCM.removeHandler( getFileChannelId() );
-//            if( aSCH != null ){
-//                DebugPrinter.printMessage( this.getClass().getSimpleName(), "Shutting down file channel: " + Integer.toString(getFileChannelId()));
-//                aSCH.shutdown();
-//            }            
-//        }
+
     }
 
-}/* END CLASS PushFileFin */
+}

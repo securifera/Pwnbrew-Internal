@@ -131,9 +131,9 @@ public final class SetRelayWrap extends ControlMessage{
                     IncomingConnectionManager theICM = theSPR.getConnectionManager(theRelayClientId);
                     if( theICM != null ){                    
                         SocketChannelHandler aHandler = theICM.getSocketChannelHandler(ConnectionManager.COMM_CHANNEL_ID);
-                        if( aHandler != null ){
+                        if( aHandler != null )
                             aHandler.setWrapping(false);
-                        }
+                        
                     }
                 }
                 

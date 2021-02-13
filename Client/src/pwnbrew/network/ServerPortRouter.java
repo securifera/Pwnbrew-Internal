@@ -48,22 +48,17 @@ package pwnbrew.network;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import pwnbrew.ClientConfig;
 import pwnbrew.manager.ConnectionManager;
-import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.DebugPrinter;
-import pwnbrew.network.control.messages.RelayDisconnect;
-import pwnbrew.network.http.ServerHttpWrapper;
 import pwnbrew.selector.AcceptHandler;
 import pwnbrew.selector.SocketChannelHandler;
 
@@ -252,14 +247,14 @@ public class ServerPortRouter extends PortRouter {
     public boolean registerHandler(int passedSrcHostId, int channelId, SocketChannelHandler passedHandler) {
     
         //Try the default port router
-        if( channelId != ConnectionManager.COMM_CHANNEL_ID ){
+        //if( channelId != ConnectionManager.COMM_CHANNEL_ID ){
             
-            ClientConfig theConf = ClientConfig.getConfig();
-            int theSocketPort = theConf.getSocketPort();
-            PortRouter thePR = getPortManager().getPortRouter( theSocketPort );
+            //ClientConfig theConf = ClientConfig.getConfig();
+            //int theSocketPort = theConf.getSocketPort();
+            //PortRouter thePR = getPortManager().getPortRouter( theSocketPort );
 
             //Get the connection manager for the server
-            ConnectionManager aCM = thePR.getConnectionManager(-1);
+            //ConnectionManager aCM = thePR.getConnectionManager(-1);
             //boolean sendReset = aCM.getSocketChannelHandler( channelId ) == null;
 
             //Send reset flag if we had to change the channel id
@@ -295,7 +290,7 @@ public class ServerPortRouter extends PortRouter {
 //                passedHandler.queueBytes(msgBytes, aMsg.getCancelId());
 //                return false;
 //            }
-        }
+        //}
         
         SocketChannelHandler aSCH = null;
         IncomingConnectionManager anICM = getConnectionManager(passedSrcHostId);
@@ -344,4 +339,4 @@ public class ServerPortRouter extends PortRouter {
         
     }
    
-}/* END CLASS ServerPortRouter */
+}

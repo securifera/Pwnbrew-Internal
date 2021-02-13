@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- *  SocksMessageManager.java
- *
- *  Created on July 27, 2013
- */
-
 package pwnbrew.socks;
 
 import pwnbrew.network.PortRouter;

@@ -239,13 +239,6 @@ public class RegisterMessage extends Message {
                     if( !keepWrapping() && aSCH != null )
                         aSCH.setWrapping(false);                    
 
-//                    //Call the callback function
-//                    ConnectionCallback theCC = aPR.removeConnectionCallback(tempId);
-//                    if( theCC != null ){
-//                        DebugPrinter.printMessage(NAME_Class, "Calling callback function.");
-//                        theCC.handleConnection(tempId);
-//                    }
-
                     //Create a hello message and send it
                     if( tempId == ConnectionManager.COMM_CHANNEL_ID ){
                         

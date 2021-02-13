@@ -143,12 +143,9 @@ public final class StageFlag extends ControlMessage{
                     aHandler.setStaging(true);                     
 
                 //Send the ack
-//                ControlMessageManager aCMManager = ControlMessageManager.getControlMessageManager();
-//                if( aCMManager != null ){
                 StageFlagAck ackFlag = new StageFlagAck( theRelayClientId, theJvmVersion );
                 DataManager.send(passedManager, ackFlag);
-//                    aCMManager.send(ackFlag);
-//                }            
+                
             }
         }    
     }

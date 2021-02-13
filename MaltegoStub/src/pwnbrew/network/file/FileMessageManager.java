@@ -402,17 +402,6 @@ public class FileMessageManager extends DataManager {
             }
         }
         
-//         //Clear the send buffer
-//        PortRouter aPR = thePortManager.getPortRouter( StubConfig.getConfig().getSocketPort() );
-//        if( aPR != null ){
-//            SocketChannelHandler aSCH = aPR.getSocketChannelHandler(clientId);
-//
-//            //Set the wrapper
-//            if( aSCH != null )
-//                aSCH.clearQueue();
-//        }
-        
-        
     }
 
     //===============================================================

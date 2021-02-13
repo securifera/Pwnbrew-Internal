@@ -180,6 +180,7 @@ public class ToServerConfiguration extends Function implements OptionsJFrameList
     * <strong>This method most certainly "blocks".</strong>
      * @param anInt
     */
+    @Override
     protected synchronized void waitToBeNotified( Integer... anInt ) {
 
         while( !notified ) {

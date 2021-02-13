@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- *  ShellMessageManager.java
- *
- *  Created on July 27, 2013
- */
-
 package pwnbrew.network.shell;
 
 import pwnbrew.Pwnbrew;

@@ -71,7 +71,7 @@ abstract public class PortRouter {
     public static final int CONTROL_CHANNEL_ID = 1;
     private static final String NAME_Class = PortRouter.class.getSimpleName();
     
-    private final Map<Integer, ConnectionCallback> connectionCallbackMap = new HashMap();
+//    private final Map<Integer, ConnectionCallback> connectionCallbackMap = new HashMap();
   
     //===============================================================
     /**
@@ -131,38 +131,38 @@ abstract public class PortRouter {
         return encrypted;
     }
 
-    // ==========================================================================
-    /**
-    * Causes the calling {@link Thread} to <tt>wait()</tt> until notified by
-    * another.
-    * <p>
-    * <strong>This method "blocks" for 3 seconds at which point it returns
-     * with whether is was notified or not.</strong>
-     * @param channelId
-     * @return 
-    */
-    protected boolean waitForConnection( int channelId) {
-
-        boolean timedOut = true;
-        ConnectionCallback aCC = connectionCallbackMap.get(channelId);
-        if( aCC != null )        
-            timedOut = aCC.waitForConnection();
-        
-        return timedOut;
-    }
-    
-    // ==========================================================================
-    /**
-    *  Notifies the {@link Comm}
-    *
-     * @param channelId
-    */
-    public void beNotified( int channelId ) {
-
-        ConnectionCallback aCC = connectionCallbackMap.get(channelId);
-        if( aCC != null )
-            aCC.beNotified();        
-    }
+//    // ==========================================================================
+//    /**
+//    * Causes the calling {@link Thread} to <tt>wait()</tt> until notified by
+//    * another.
+//    * <p>
+//    * <strong>This method "blocks" for 3 seconds at which point it returns
+//     * with whether is was notified or not.</strong>
+//     * @param channelId
+//     * @return 
+//    */
+//    protected boolean waitForConnection( int channelId) {
+//
+//        boolean timedOut = true;
+//        ConnectionCallback aCC = connectionCallbackMap.get(channelId);
+//        if( aCC != null )        
+//            timedOut = aCC.waitForConnection();
+//        
+//        return timedOut;
+//    }
+//    
+//    // ==========================================================================
+//    /**
+//    *  Notifies the {@link Comm}
+//    *
+//     * @param channelId
+//    */
+//    public void beNotified( int channelId ) {
+//
+//        ConnectionCallback aCC = connectionCallbackMap.get(channelId);
+//        if( aCC != null )
+//            aCC.beNotified();        
+//    }
      
     //===============================================================
     /**
@@ -209,29 +209,29 @@ abstract public class PortRouter {
      */
     abstract public void shutdown();
 
-    //===============================================================
-    /**
-     * 
-     * @param channelId
-     * @return 
-     */
-    public ConnectionCallback removeConnectionCallback(int channelId) {
-        ConnectionCallback aCC;
-        synchronized(connectionCallbackMap){
-            aCC = connectionCallbackMap.get(channelId);
-        }        
-        return aCC;
-    }
-    
-    //===============================================================
-    /**
-     * 
-     * @param channelId 
-     * @param aCC 
-     */
-    public void setConnectionCallback( int channelId, ConnectionCallback aCC ) {
-        synchronized(connectionCallbackMap){
-            connectionCallbackMap.put(channelId, aCC);
-        }        
-    }
+//    //===============================================================
+//    /**
+//     * 
+//     * @param channelId
+//     * @return 
+//     */
+//    public ConnectionCallback removeConnectionCallback(int channelId) {
+//        ConnectionCallback aCC;
+//        synchronized(connectionCallbackMap){
+//            aCC = connectionCallbackMap.get(channelId);
+//        }        
+//        return aCC;
+//    }
+//    
+//    //===============================================================
+//    /**
+//     * 
+//     * @param channelId 
+//     * @param aCC 
+//     */
+//    public void setConnectionCallback( int channelId, ConnectionCallback aCC ) {
+//        synchronized(connectionCallbackMap){
+//            connectionCallbackMap.put(channelId, aCC);
+//        }        
+//    }
 }

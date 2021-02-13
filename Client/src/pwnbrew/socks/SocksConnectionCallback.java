@@ -46,6 +46,7 @@ import pwnbrew.network.ConnectionCallback;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.control.messages.SocksOperationAck;
 import pwnbrew.selector.SocketChannelHandler;
+import pwnbrew.utilities.ReconnectTimer;
 
 /**
  *
@@ -65,9 +66,10 @@ public class SocksConnectionCallback extends ConnectionCallback{
      * @param passedPort
      * @param passedManager 
      * @param passedId 
+     * @param passedTimer 
      */
-    public SocksConnectionCallback( String serverIp, int passedPort, PortManager passedManager, int passedId ) {
-        super(serverIp, passedPort);
+    public SocksConnectionCallback( String serverIp, int passedPort, PortManager passedManager, int passedId, ReconnectTimer passedTimer ) {
+        super(serverIp, passedPort, passedTimer);
         theManager = passedManager;
         theHostId = passedId;
     }   
@@ -79,6 +81,9 @@ public class SocksConnectionCallback extends ConnectionCallback{
      */
     @Override
     public void handleConnection( int theChannelId ) {
+        
+        //Call the parent class function first
+        super.handleConnection(theChannelId);
         
         if(theChannelId != 0 ){      
             

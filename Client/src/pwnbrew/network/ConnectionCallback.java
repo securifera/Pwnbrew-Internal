@@ -37,19 +37,20 @@ The copyright on this package is held by Securifera, Inc
 */
 package pwnbrew.network;
 
-import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.ReconnectTimer;
 
 /**
  *
  * @author Securifera
  */
-public abstract class ConnectionCallback {
+public class ConnectionCallback {
     
     protected final int socketPort;
     protected int channelId = -1;
     protected final String serverIp;
-    private volatile boolean notified = false;
-    private volatile boolean waiting = false;
+    protected final ReconnectTimer theReconnectThread;
+//    private volatile boolean notified = false;
+//    private volatile boolean waiting = false;
     
     private static final String NAME_Class = ConnectionCallback.class.getSimpleName();
     
@@ -58,10 +59,12 @@ public abstract class ConnectionCallback {
      * 
      * @param passedIp
      * @param passedPort 
+     * @param passedThread 
      */
-    public ConnectionCallback( String passedIp, int passedPort ){
+    public ConnectionCallback( String passedIp, int passedPort, ReconnectTimer passedThread ){
         serverIp = passedIp;
         socketPort = passedPort;
+        theReconnectThread = passedThread;
     }
     
     //=================================================================
@@ -71,6 +74,7 @@ public abstract class ConnectionCallback {
      */
     public void handleConnection( int passedId ){
         channelId = passedId;
+        theReconnectThread.beNotified();  
     }
     
     //=================================================================
@@ -99,74 +103,74 @@ public abstract class ConnectionCallback {
     public int getChannelId(){
         return channelId;
     }
-
-     //=================================================================
-    /**
-     * 
-     * @return 
-     */
-    public boolean isNotified() {
-        return notified;
-    }
-
-     //=================================================================
-    /**
-     * 
-     * @param passedVal
-     */
-    public void setNotified(boolean passedVal) {
-        notified = passedVal;
-    }
     
-     // ==========================================================================
-    /**
-    * Causes the calling {@link Thread} to <tt>wait()</tt> until notified by
-    * another.
-    * <p>
-    * <strong>This method "blocks" for 60 seconds at which point it returns
-     * with whether is was notified or not.</strong>
-     * @return 
-    */
-    protected synchronized boolean waitForConnection() {
-        
-        boolean timedOut = true;
-        waiting = true;
-        while( notified == false ) { //Until notified...
-
-            try {
-                wait(60000); //Wait here until notified
-                if(notified){
-                    //Return that the thread was notified
-                    timedOut = false;
-                } else {
-                    DebugPrinter.printMessage( NAME_Class, "Thread woke notified variable not set.");
-                }
-                
-                break;
-
-            } catch( InterruptedException ex ) {
-                DebugPrinter.printMessage( NAME_Class, "Connection thread interrupted.");
-                break;
-            }
-        }
-        
-        waiting = false;
-        return timedOut;
+//     //=================================================================
+//    /**
+//     * 
+//     * @return 
+//     */
+//    public boolean isNotified() {
+//        return notified;
+//    }
+//
+//     //=================================================================
+//    /**
+//     * 
+//     * @param passedVal
+//     */
+//    public void setNotified(boolean passedVal) {
+//        notified = passedVal;
+//    }
+//    
+//     // ==========================================================================
+//    /**
+//    * Causes the calling {@link Thread} to <tt>wait()</tt> until notified by
+//    * another.
+//    * <p>
+//    * <strong>This method "blocks" for 60 seconds at which point it returns
+//     * with whether is was notified or not.</strong>
+//     * @return 
+//    */
+//    protected synchronized boolean waitForConnection() {
+//        
+//        boolean timedOut = true;
+//        waiting = true;
+//        while( notified == false ) { //Until notified...
+//
+//            try {
+//                wait(5000); //Wait here until notified
+//                if(notified){
+//                    //Return that the thread was notified
+//                    timedOut = false;
+//                } else {
+//                    DebugPrinter.printMessage( NAME_Class, "Thread woke notified variable not set.");
+//                }
+//                
+//                break;
+//
+//            } catch( InterruptedException ex ) {
+//                DebugPrinter.printMessage( NAME_Class, "Connection thread interrupted.");
+//                break;
+//            }
+//        }
+//        
+//        waiting = false;
+//        return timedOut;
+//    
+//    }
     
-    }
-    
-     // ==========================================================================
-    /**
-    *  Notifies the thread waiting for the socket connection to complete
-    *
-    */
-    public synchronized void beNotified() {
-
-        if(waiting){
-            notified = true;
-            notifyAll(); 
-        } 
-        
-    }        
+//     // ==========================================================================
+//    /**
+//    *  Notifies the thread waiting for the socket connection to complete
+//    *
+//    */
+//    public synchronized void beNotified() {
+//
+//        if(waiting){
+//            notified = true;
+//            notifyAll(); 
+//        } 
+//        
+//    }        
     
 }

@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
- *  StdInMessage.java
- *
- *  Created on May 25, 2013
- */
-
 package pwnbrew.network.shell.messages;
 
 import pwnbrew.ClientConfig;
