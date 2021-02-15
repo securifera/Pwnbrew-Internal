@@ -50,6 +50,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import pwnbrew.log.LoggableException;
 import pwnbrew.log.RemoteLog;
@@ -195,7 +196,9 @@ public class ControlMessageHandler extends DataHandler {
         while(!shutdownRequested) {
 
 
-            waitToBeNotified();
+            try {
+                waitToBeNotified();
+            } catch (TimeoutException ex) {}
 
             //Waits until a msg comes in
             while( !isIncomingEmpty() ){

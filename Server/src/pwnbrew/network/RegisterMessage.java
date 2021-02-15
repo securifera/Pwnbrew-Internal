@@ -52,6 +52,7 @@ public class RegisterMessage extends Message {
     public static final byte REG = (byte)90;
     public static final byte REG_ACK = (byte)91;
     public static final byte REG_RST = (byte)92;
+    public static final byte REG_RPT = (byte)93;
        
     private final byte function;
     private final byte stlth;

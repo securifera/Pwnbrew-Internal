@@ -46,6 +46,7 @@ The copyright on this package is held by Securifera, Inc
 package pwnbrew.utilities;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeoutException;
 
 /**
  *
@@ -117,9 +118,10 @@ abstract public class ManagedRunnable implements Runnable {
     * another.
     * <p>
     * <strong>This method most certainly "blocks".</strong>
-     * @param anInt
+     * @param anInt - time in milliseconds to wait
+     * @throws java.util.concurrent.TimeoutException
     */
-    public synchronized void waitToBeNotified( Integer... anInt ) {
+    public synchronized void waitToBeNotified( Integer... anInt ) throws TimeoutException {
 
         while( !notified && !shutdownRequested) { //Until notified...
 
@@ -129,13 +131,15 @@ abstract public class ManagedRunnable implements Runnable {
                 if( anInt.length > 0 ){
                     
                     wait( anInt[0]);
-                    break;
+                    if( !notified )
+                        throw new TimeoutException("Thread time out waiting for notification.");
                     
                 } else {
                     wait(); //Wait here until notified
                 }
                 
             } catch( InterruptedException ex ) {
+                DebugPrinter.printMessage( getClass().getSimpleName(), "Interrupted wait.");                    
             }
 
         }

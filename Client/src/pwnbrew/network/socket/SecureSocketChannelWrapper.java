@@ -527,7 +527,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
         if(currStatus == HandshakeStatus.FINISHED){
 
             initialHSComplete = true;
-            DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 1.");
+            //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Finished handshaking 1.");
 
             //Flush the buffer so that the client will get a finished flag too
             if (outNetBB.hasRemaining()){

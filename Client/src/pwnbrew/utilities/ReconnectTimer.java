@@ -60,6 +60,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import pwnbrew.ClientConfig;
 import pwnbrew.log.LoggableException;
@@ -168,59 +169,60 @@ public class ReconnectTimer extends ManagedRunnable {
     private boolean connect( ClientPortRouter aPR, int channelId, InetAddress hostAddress, int passedPort ) throws LoggableException {
 
         OutgoingConnectionManager theOCM = aPR.getConnectionManager();
-        SocketChannelHandler theSCH = theOCM.getSocketChannelHandler( channelId );
         try {
-            
-            if( theSCH == null || theSCH.getState() == Constants.DISCONNECTED ){
 
-                // Create a non-blocking socket channel
-                SocketChannel theSocketChannel = SocketChannel.open();
-                theSocketChannel.configureBlocking(false);
+            // Create a non-blocking socket channel
+            SocketChannel theSocketChannel = SocketChannel.open();
+            theSocketChannel.configureBlocking(false);
 
-                // Kick off connection establishment
-                try {
-                    theSocketChannel.connect(new InetSocketAddress(hostAddress, passedPort));
-                } catch( AlreadyConnectedException ex ) {
-                    return true;
-                }
-
-                // Register the server socket channel, indicating an interest in
-                // accepting new connections
-                ConnectHandler connectHandler = new ConnectHandler( aPR, channelId );
-
-                // Register the socket channel and handler with the selector
-                SelectionRouter theSelectionRouter = aPR.getSelRouter();
-                SelectionKey theSelKey = theSelectionRouter.register(theSocketChannel, SelectionKey.OP_CONNECT, connectHandler);
-
-                //Wait until the thread is notified or times out
-                waitToBeNotified(5);
-//                boolean timedOut = waitForConnection(channelId);
-//                if( timedOut )
-//                    DebugPrinter.printMessage( NAME_Class, "Connection timed out.");
-//                else
-//                    DebugPrinter.printMessage( NAME_Class, "Connection made.");    
-
-                //Return if the key was cancelled
-                if(!theSelKey.isValid()){
-                    theSelKey.cancel();
-                    return false;
-                }
-
-                //If we returned but we are not connected
-                theSCH = theOCM.getSocketChannelHandler( channelId );
-                if( theSCH == null){ 
-                    
-                    DebugPrinter.printMessage( NAME_Class, "SocketChannelHandler is null.");
-                    return false;
-
-                } else if (theSCH.getState() == Constants.DISCONNECTED){
-                    
-                    DebugPrinter.printMessage( NAME_Class, "SocketChannelHandler is disconnected.");
-                    //Shutdown the first connect handler and set it to null
-                    //theSelKey.cancel();
-                    return false;                
-                }
+            // Kick off connection establishment
+            try {
+                theSocketChannel.connect(new InetSocketAddress(hostAddress, passedPort));
+            } catch( AlreadyConnectedException ex ) {
+                DebugPrinter.printMessage( NAME_Class, "Socket is already connected.");
+                return true;
             }
+
+            // Register the server socket channel, indicating an interest in
+            // accepting new connections
+            ConnectHandler connectHandler = new ConnectHandler( aPR, channelId );
+
+            // Register the socket channel and handler with the selector
+            SelectionRouter theSelectionRouter = aPR.getSelRouter();
+            SelectionKey theSelKey = theSelectionRouter.register(theSocketChannel, SelectionKey.OP_CONNECT, connectHandler);
+
+            try {
+                //Wait until the thread is notified or times out
+                waitToBeNotified(5000);
+            } catch (TimeoutException ex) {
+                //Close the socket so it's not left in a half open state
+                theSocketChannel.close();
+            }
+            
+            if( shutdownRequested)
+                throw new RuntimeException("Thread shutdown requested.");
+
+            //Return if the key was cancelled
+            if(!theSelKey.isValid()){
+                theSelKey.cancel();
+                return false;
+            }
+
+            //If we returned but we are not connected
+            SocketChannelHandler theSCH = theOCM.getSocketChannelHandler( channelId );
+            if( theSCH == null){ 
+
+                DebugPrinter.printMessage( NAME_Class, "SocketChannelHandler is null.");
+                return false;
+
+            } else if (theSCH.getState() == Constants.DISCONNECTED){
+
+                DebugPrinter.printMessage( NAME_Class, "SocketChannelHandler is disconnected.");
+                //Shutdown the first connect handler and set it to null
+                //theSelKey.cancel();
+                return false;                
+            }
+
 
         } catch(IOException ex){
             throw new LoggableException(ex);
@@ -251,7 +253,7 @@ public class ReconnectTimer extends ManagedRunnable {
                 try {                    
                     //Intentially sleeping with lock held so there are no other attempts to
                     //connect to the server during this loop.
-                    DebugPrinter.printMessage( NAME_Class, "Sleeping because of no connection. channelid " + Integer.toString(channedId));
+                    DebugPrinter.printMessage( NAME_Class, "Sleeping because of no connection. channel id " + Integer.toString(channedId));
 
                     Thread.sleep(sleepTime);
                 } catch (InterruptedException ex) {
@@ -282,7 +284,7 @@ public class ReconnectTimer extends ManagedRunnable {
     */
     public void ensureConnectivity( ClientPortRouter aPR, ConnectionCallback passedCallback, Integer... passedIdArr ) {
 
-        int channelId;
+        int channelId = 1;
         int passedPort = passedCallback.getPort();
         String serverIp = passedCallback.getServerIp();
         OutgoingConnectionManager theOCM = aPR.getConnectionManager();
@@ -295,57 +297,44 @@ public class ReconnectTimer extends ManagedRunnable {
                 channelId = theOCM.getNextChannelId();
             }
             
-            //Get the handler
+            //Get the handler               
             SocketChannelHandler aSC = theOCM.getSocketChannelHandler( channelId );
-            if(aSC == null || aSC.getState() == Constants.DISCONNECTED){            
-           
-                //Get the inet
-                InetAddress srvInet = InetAddress.getByName(serverIp);
-                //DebugPrinter.printMessage( NAME_Class, "Attempting to connect to " + srvInet.getHostAddress() + ":" + passedPort);
-     
-                //Set the callback
-//                setConnectionCallback(channelId, passedCallback);
-                if( !initiateConnection( aPR, channelId, srvInet, passedPort, CONNECT_RETRY )){
-                    
-                    DebugPrinter.printMessage( NAME_Class, "Unable to connect to port.");
-                    RemoteLog.log(Level.INFO, NAME_Class, "ensureConnectivity()", "Unable to connect to port " + passedPort, null );
-//                    ConnectionCallback aCC = removeConnectionCallback(channelId);
-                    passedCallback.handleConnection(0);
-                    
-                } else {
-                    
-                
-                    aSC = theOCM.getSocketChannelHandler( channelId );
-                    if( aSC == null || aSC.getState() == Constants.DISCONNECTED ){
-                        
-                        DebugPrinter.printMessage( NAME_Class, "Not connected.");
-                        //ConnectionCallback aCC = removeConnectionCallback(channelId);
-                        passedCallback.handleConnection(0);
-                        
-                    } else {
-                        
-                        passedCallback.handleConnection(channelId);
-                        //if( channelId == ConnectionManager.COMM_CHANNEL_ID ){
-                            
-                            //DebugPrinter.printMessage( NAME_Class, "Start keep alive.");
-                            
-                            //Set the connected flag
-//                            KeepAliveTimer theKeepAliveTimer = new KeepAliveTimer( thePortManager, channelId);
-//                            theKeepAliveTimer.start();   
-
-                            //Set timer
-//                            theOCM.setKeepAliveTimer( channelId, theKeepAliveTimer );
-                        //}
-                        
-                    }
-                }
-        
+            if(aSC != null && aSC.getState() == Constants.CONNECTED){
+                DebugPrinter.printMessage(NAME_Class, "Connection already made.");
+                return;                    
             }
+           
+            //Get the inet
+            InetAddress srvInet = InetAddress.getByName(serverIp);
+            DebugPrinter.printMessage( NAME_Class, "Attempting to connect to " + srvInet.getHostAddress() + ":" + passedPort);
+
+            //Set the callback
+            if( !initiateConnection( aPR, channelId, srvInet, passedPort, CONNECT_RETRY )){
+
+                DebugPrinter.printMessage( NAME_Class, "Unable to connect to port.");
+                if( channelId != OutgoingConnectionManager.COMM_CHANNEL_ID)
+                    RemoteLog.log(Level.INFO, NAME_Class, "ensureConnectivity()", "Unable to connect to port " + passedPort, null );
+                passedCallback.handleConnection(0);
+
+            } else {
+
+
+                aSC = theOCM.getSocketChannelHandler( channelId );
+                if( aSC == null || aSC.getState() == Constants.DISCONNECTED ){
+
+                    DebugPrinter.printMessage( NAME_Class, "Not connected.");
+                    passedCallback.handleConnection(0);
+
+                } else {                        
+                    passedCallback.handleConnection(channelId);                     
+                }
+            }
+        
      
         } catch ( EmptyStackException | UnknownHostException | LoggableException ex) {
-            RemoteLog.log(Level.INFO, NAME_Class, "ensureConnectivity()", ex.getMessage(), ex );
-//            if( channelId != 0 )
-//                removeConnectionCallback(channelId);
+            
+            if( channelId != OutgoingConnectionManager.COMM_CHANNEL_ID)
+                RemoteLog.log(Level.INFO, NAME_Class, "ensureConnectivity()", ex.getMessage(), ex );
             
             //Call handler
             passedCallback.handleConnection(0);
@@ -362,6 +351,7 @@ public class ReconnectTimer extends ManagedRunnable {
     public void go() {
         
         int connected = 0;
+        shutdownRequested = false;
               
         DebugPrinter.printMessage(NAME_Class, "ReconnectTimer started for channel " + Integer.toString(theChannelId));
         //Get the socket router
@@ -387,8 +377,7 @@ public class ReconnectTimer extends ManagedRunnable {
             
             return;
         }
-        
-        
+                
         //Set the connection callback
         ConnectionCallback aCC;
         if(theConnectionCallback != null)
@@ -435,15 +424,29 @@ public class ReconnectTimer extends ManagedRunnable {
                 //Wait till a certain time
                 if( theDate != null ){
                     
+                    //DebugPrinter.printMessage(NAME_Class, "Retrying again at: " + Constants.CHECKIN_DATE_FORMAT.format(theDate));
+               
                     waitUntil(theDate);  
-                    ensureConnectivity( aPR, aCC, theChannelId );
-                    //DebugPrinter.printMessage(NAME_Class, "ReconnectTimer waiting to be notified.");
-                    waitToBeNotified();
+                    try {
+                        ensureConnectivity( aPR, aCC, theChannelId );
+                    } catch(RuntimeException ex){
+                        continue;
+                    }
+                    
+                    try {
+                        //DebugPrinter.printMessage(NAME_Class, "ReconnectTimer waiting to be notified.");
+                        waitToBeNotified();
+                    } catch (TimeoutException ex) {}
+                    
+                    if( shutdownRequested)
+                        return;
                     
                     //Get the channel id and try again if connection failed
                     connected = aCC.getChannelId();
-                    if( connected == 0)
+                    if( connected == 0){
+                        DebugPrinter.printMessage(NAME_Class, "Notified, but no connection. Trying again later.");
                         continue;
+                    }
                     
                     //Queue post connect msg if it exists
                     if( postConnectMsg != null){
@@ -487,7 +490,12 @@ public class ReconnectTimer extends ManagedRunnable {
                 aCC = new ConnectionCallback(backupServerIp, backupServerPort, this); 
             
             ensureConnectivity(aPR, aCC, theChannelId);
-            waitToBeNotified();
+            try {
+                waitToBeNotified();
+            } catch (TimeoutException ex) {}
+            
+            if( shutdownRequested)
+                return;
 
             //Get the channel id
             connected = aCC.getChannelId();
@@ -500,7 +508,8 @@ public class ReconnectTimer extends ManagedRunnable {
                     //Set JAR conf back to old IP
                     Utilities.updateServerInfoInJar(backupServerIp +":"+ Integer.toString( backupServerPort));
                 } catch (ClassNotFoundException | IOException ex) {
-                    RemoteLog.log(Level.SEVERE, NAME_Class, "go()", ex.getMessage(), ex);
+                    if( theChannelId != OutgoingConnectionManager.COMM_CHANNEL_ID)
+                        RemoteLog.log(Level.SEVERE, NAME_Class, "go()", ex.getMessage(), ex);
                 }
 
                 //Reset things
@@ -511,7 +520,7 @@ public class ReconnectTimer extends ManagedRunnable {
             }               
         }
         
-        DebugPrinter.printMessage(NAME_Class, "Exiting. channel " + Integer.toString(theChannelId));
+        DebugPrinter.printMessage(NAME_Class, "Thread complete channel " + Integer.toString(theChannelId));
      
         //Reset things
         theConnectionCallback = null;
@@ -534,19 +543,20 @@ public class ReconnectTimer extends ManagedRunnable {
             @Override
             public void run() {
                 synchronized (syncedObject) {
-                    syncedObject.notify();
+                    syncedObject.notifyAll();
                 }
             }
         };
         
-        //DebugPrinter.printMessage(NAME_Class, "Trying to connect again at " + date.toString());
+        DebugPrinter.printMessage(NAME_Class, "Trying to connect again at " + date.toString());
         //Create a timer
         Timer aTimer = new Timer();
         aTimer.schedule(aTimerTask, date);
         synchronized(syncedObject) {
             try {
                 syncedObject.wait();
-            } catch (InterruptedException ie) {}
+            } catch (InterruptedException ie) {
+            }
         }
         aTimer.cancel();
         aTimer.purge();

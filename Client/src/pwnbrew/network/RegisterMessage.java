@@ -64,6 +64,7 @@ public class RegisterMessage extends Message {
     public static final byte REG = (byte)90;
     public static final byte REG_ACK = (byte)91;
     public static final byte REG_RST = (byte)92;
+    public static final byte REG_RPT = (byte)93;
        
     private final byte function;
     private final byte stlth;
@@ -222,12 +223,12 @@ public class RegisterMessage extends Message {
     @Override
     public void evaluate( PortManager passedManager ) {   
         
+        ClientConfig theConf = ClientConfig.getConfig();
         if( function == RegisterMessage.REG_ACK ){
             
             try {
 
-                ClientConfig theClientConfig = ClientConfig.getConfig();
-                PortRouter aPR = passedManager.getPortRouter( theClientConfig.getSocketPort() );
+                PortRouter aPR = passedManager.getPortRouter( theConf.getSocketPort() );
                 if( aPR != null ){
                     
                     int tempId = getChannelId();
@@ -259,7 +260,6 @@ public class RegisterMessage extends Message {
         } else if( function == RegisterMessage.REG_RST ){
         
             //Get new id
-            ClientConfig theConf = ClientConfig.getConfig();
             int theSocketPort = theConf.getSocketPort();
             PortRouter thePR = passedManager.getPortRouter( theSocketPort );
 
@@ -284,6 +284,16 @@ public class RegisterMessage extends Message {
             RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, tempChanId);
             DataManager.send( passedManager, aMsg );
         
+        } else if( function == RegisterMessage.REG_RPT ){
+        
+            //Check if certs didn't match
+            byte stlth_val = 0;
+            if( theConf.useStealth() )
+                stlth_val = 1;
+            
+            //Send register message
+            RegisterMessage aMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, getChannelId());
+            DataManager.send( passedManager, aMsg );
         }
 
     }

@@ -49,6 +49,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.concurrent.TimeoutException;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.PortManager;
 import pwnbrew.utilities.Constants;
@@ -196,7 +197,9 @@ public final class FileOperation extends Tasking {
         //Shutdown the file finder if it's running
         if( theFileFinder.isRunning() ){
             theFileFinder.shutdown();
-            theFileFinder.waitToBeNotified();
+            try {
+                theFileFinder.waitToBeNotified();
+            } catch (TimeoutException ex) {}
         }            
 
         //Set file finder options

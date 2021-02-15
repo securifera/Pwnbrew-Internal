@@ -64,7 +64,7 @@ import pwnbrew.xml.maltego.custom.Host;
  */
 public class ListClients extends Function implements HostHandler, CountSeeker{
     
-    private static final String NAME_Class = MaltegoStub.class.getSimpleName();
+    private static final String NAME_Class = ListClients.class.getSimpleName();
     private volatile int theClientCount = 0;   
     private final Map<String,Host> hostMap = new HashMap<>();
     

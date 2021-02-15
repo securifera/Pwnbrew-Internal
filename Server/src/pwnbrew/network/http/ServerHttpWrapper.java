@@ -56,6 +56,7 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
+import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.Message;
 import pwnbrew.network.RegisterMessage;
 import pwnbrew.network.ServerPortRouter;
@@ -141,6 +142,8 @@ public class ServerHttpWrapper extends HttpWrapper {
                                             //Register the handler
                                             if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
                                                 
+                                                DebugPrinter.printMessage( NAME_Class, "Received register message.");
+            
                                                 RegisterMessage aMsg = RegisterMessage.getMessage( ByteBuffer.wrap( msgByteArr ));                                                
                                                 int srcId = aMsg.getSrcHostId();
                                                 int chanId = aMsg.getChannelId();
@@ -208,6 +211,19 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                     } else{
                                                         Log.log( Level.SEVERE, NAME_Class, "processHeader()", "SocketChannelHandler is null", null);
                                                     }
+                                                    
+                                                } else {
+                                                    
+                                                    int parentId = passedHandler.getRootHostId();
+                                                    aSPR.registerHandler(srcHostId, parentId,channelId, passedHandler);
+                                                    
+                                                    //Send back message to force registration
+                                                    RegisterMessage retMsg = new RegisterMessage(RegisterMessage.REG_RPT, (byte)0x1, srcHostId, channelId);
+                                                    DataManager.send(passedHandler.getPortRouter().getPortManager(), retMsg);
+                                                    
+                                                    //Remove the handler
+                                                    aSPR.unregisterHandler(srcHostId);                                                    
+                                                    
                                                 }
                                                 
                                                 try{

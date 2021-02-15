@@ -43,6 +43,7 @@ import pwnbrew.MaltegoStub;
 import pwnbrew.functions.Function;
 import pwnbrew.functions.ToServerConfiguration;
 import pwnbrew.manager.PortManager;
+import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ControlOption;
 
 /**
@@ -62,6 +63,8 @@ public class JarItemMsg extends MaltegoMessage{
     protected String theJvmVersion = null;
     
     public static final short MESSAGE_ID = 0x5e;
+    private static final String NAME_Class = JarItemMsg.class.getSimpleName();
+    
     
     
     // ==========================================================================
@@ -187,7 +190,8 @@ public class JarItemMsg extends MaltegoMessage{
     @Override
     public void evaluate( PortManager passedManager ) {
     
-         if( passedManager instanceof MaltegoStub ){
+        //DebugPrinter.printMessage( NAME_Class, "evaluate", "Received Jar Item Msg", null);
+        if( passedManager instanceof MaltegoStub ){
             MaltegoStub theStub = (MaltegoStub)passedManager;
             Function aFunction = theStub.getFunction();
             if( aFunction instanceof ToServerConfiguration ){

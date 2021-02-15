@@ -152,6 +152,23 @@ public class ServerPortRouter extends PortRouter {
         return true;
     }
     
+      //===============================================================
+     /**
+     *  Registers the provided AccessHandler with the server under the
+     * given InetAddress.
+     *
+     * @param passedClientId
+     * @return 
+     */
+    public boolean unregisterHandler(int passedClientId) {
+        
+        synchronized(clientIdManagerMap){
+            clientIdManagerMap.remove( passedClientId );
+        }
+        return true;
+    }
+
+    
      //===============================================================
     /**
      * Starts the server on the specified port

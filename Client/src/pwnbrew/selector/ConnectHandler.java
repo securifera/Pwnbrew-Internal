@@ -103,7 +103,6 @@ public class ConnectHandler implements Selectable {
                 ReconnectTimer aRT = theOCM.getReconnectTimer(channelId);
                 aRT.beNotified();   
             }  
-//            theClientPortRouter.beNotified(channelId); 
 
             // Cancel the channel's registration with our selector           
             theSelKey.cancel();

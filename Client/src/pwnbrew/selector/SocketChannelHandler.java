@@ -242,9 +242,17 @@ public class SocketChannelHandler implements Selectable {
      */
     public void signalSend(){
         SelectionRouter aSR = thePortRouter.getSelRouter();
-        SocketChannel aSC = getSocketChannel();
-        if( ( aSR.interestOps( aSC) & SelectionKey.OP_WRITE ) == 0)
-            aSR.changeOps( aSC, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
+        if( aSR != null ){
+            SocketChannel aSC = getSocketChannel();
+            if( aSC != null){
+                try {
+                    if( ( aSR.interestOps( aSC) & SelectionKey.OP_WRITE ) == 0)
+                        aSR.changeOps( aSC, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
+                } catch(CancelledKeyException ex ){                    
+                }
+            }
+        
+        }
         
     }
     
@@ -514,7 +522,7 @@ public class SocketChannelHandler implements Selectable {
 
             } else  if(bytesRead == 0){
 
-                DebugPrinter.printMessage( this.getClass().getSimpleName(), "Nothing to receive. Sleeping. channel " + Integer.toString(channelId));
+                //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Nothing to receive. Sleeping. channel " + Integer.toString(channelId));
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ex) {

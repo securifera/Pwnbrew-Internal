@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.DataManager;
@@ -395,7 +396,9 @@ public class Shell extends ManagedRunnable implements StreamReaderListener {
 
         //Until both StreamRecorders have finished...
         while( stdoutRecorderFinished == false || stderrRecorderFinished == false ) {
-            waitToBeNotified();            
+            try {            
+                waitToBeNotified();
+            } catch (TimeoutException ex) {}
         }
 
     }

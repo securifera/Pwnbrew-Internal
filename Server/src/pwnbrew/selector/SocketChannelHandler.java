@@ -147,7 +147,7 @@ public class SocketChannelHandler implements Selectable {
             shutdown();
             
             //Print the message if it exists
-            if( ex != null && !(ex instanceof SSLException) ){ //Exclude SSL closed exceptions
+            if( ex != null && !(ex instanceof IOException) ){ //Exclude SSL closed exceptions
                 String msg = ex.getMessage();
                 if( msg != null && !msg.contains("closed"))
                     Log.log(Level.WARNING, NAME_Class, "handle()", ex.getMessage(), ex);
@@ -621,16 +621,18 @@ public class SocketChannelHandler implements Selectable {
                 } else {
                     
                     //Log.log(Level.INFO, NAME_Class, "send()", "Queue is empty.", null);
-                    
-//                    SocketChannelWrapper aSCW = getSocketChannelWrapper();
-//                    if( aSCW != null ){
-//                        getPortRouter().getSelRouter().changeOps( aSCW.getSocketChannel(), SelectionKey.OP_READ);
-//                    }
+                    SocketChannelWrapper aSCW = getSocketChannelWrapper();
+                    if( aSCW != null ){
+                        getPortRouter().getSelRouter().changeOps( aSCW.getSocketChannel(), SelectionKey.OP_READ);
+                    }
                 }
                 
-                SocketChannelWrapper aSCW = getSocketChannelWrapper();
-                if( aSCW != null )
-                    getPortRouter().getSelRouter().changeOps( aSCW.getSocketChannel(), SelectionKey.OP_READ);
+                //Ensure only one message is sent per received if we are 
+                if( wrappingFlag){
+                    SocketChannelWrapper aSCW = getSocketChannelWrapper();
+                    if( aSCW != null )
+                        getPortRouter().getSelRouter().changeOps( aSCW.getSocketChannel(), SelectionKey.OP_READ);
+                }
                 
                 //Notify any threads waiting on this monitor
                 pendingByteArrs.notifyAll();
