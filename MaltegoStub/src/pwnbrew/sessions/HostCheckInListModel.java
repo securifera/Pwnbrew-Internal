@@ -36,13 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
-* HostCheckInListModel.java
-*
-* Created on June 24, 2013, 7:23:42 PM
-*/
-
 package pwnbrew.sessions;
 
 import java.text.ParseException;
@@ -98,10 +91,10 @@ public class HostCheckInListModel extends SortedListModel implements MutableList
             return;
         }
         
-        //String aDate = (String)super.getElementAt(index);  
+        String aDate = (String)super.getElementAt(index);  
         super.setElementAt(newDateStr, index);
-        //theListener.replaceDate( aDate, newDateStr );                
+        theListener.replaceDate( aDate, newDateStr );                
         
     }
 
-}/* END CLASS HostCheckInListModel */
+}

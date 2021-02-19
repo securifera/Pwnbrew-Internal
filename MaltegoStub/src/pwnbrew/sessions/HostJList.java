@@ -41,6 +41,7 @@ package pwnbrew.sessions;
 
 import java.awt.Image;
 import java.awt.event.*;
+import java.util.List;
 import javax.swing.*;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Utilities;
@@ -106,14 +107,17 @@ public class HostJList extends JList implements ActionListener {
 
         String actionCommand = evt.getActionCommand();            
         if( actionCommand.equals(Constants.DELETE) ) {
-            Object anObj = getSelectedValue();
-            if( anObj instanceof Host ){
-                Host aHost = (Host)anObj;
-                theListener.removeHost(aHost);
+            List<Object> objList = getSelectedValuesList();
+            for( Object anObj : objList){
+                //Object anObj = getSelectedValue();
+                if( anObj instanceof Host ){
+                    Host aHost = (Host)anObj;
+                    theListener.removeHost(aHost);
+                }
+                //Remove the element
+                DefaultListModel theModel = (DefaultListModel) getModel();
+                theModel.removeElement(anObj);
             }
-            //Remove the element
-            DefaultListModel theModel = (DefaultListModel) getModel();
-            theModel.removeElement(anObj);
         }   
 
    }

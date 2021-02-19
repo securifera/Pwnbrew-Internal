@@ -295,6 +295,16 @@ public final class HostController {
         return theHost.getAutoSleepFlag();
     } 
     
+    //===================================================================
+    /**
+     *  Returns interval for when the host calls back
+     * 
+     * @return 
+     */
+    public int getBeaconInterval(){
+        return theHost.getBeaconInterval();
+    } 
+    
      // ==========================================================================
     /**
      * Saves the given {@link XmlObject} to the Object Library directory.

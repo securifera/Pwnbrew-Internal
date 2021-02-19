@@ -60,7 +60,6 @@ import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.network.PortRouter;
 import pwnbrew.utilities.Constants;
-import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.ReconnectTimer;
 
 /**
@@ -496,7 +495,7 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
         }
 
         //Close the socket
-        close();
+        super.shutdown();
 
         return (!outNetBB.hasRemaining() && (result.getHandshakeStatus() != HandshakeStatus.NEED_WRAP));
     }

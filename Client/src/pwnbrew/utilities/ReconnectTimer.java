@@ -87,7 +87,6 @@ public class ReconnectTimer extends ManagedRunnable {
     
     //Static instance
     private final Queue<String> theReconnectTimeList = new LinkedList<>();    
-//    private int lockVal = 0;
     
     private static final String NAME_Class = ReconnectTimer.class.getSimpleName();
     private String backupServerIp = null;
@@ -364,6 +363,7 @@ public class ReconnectTimer extends ManagedRunnable {
             return;     
         }    
         
+        //Shutdown and remove
         if(enabled == false){
             //Cleanup socket handlers and remove reconnect timer
             OutgoingConnectionManager theOCM = aPR.getConnectionManager();
@@ -372,8 +372,7 @@ public class ReconnectTimer extends ManagedRunnable {
                 aSCH.shutdown();
             
             //Remove the reconnect timer
-            theOCM.removeReconnectTimer(theChannelId);
-            
+            theOCM.removeReconnectTimer(theChannelId);            
             
             return;
         }
@@ -520,6 +519,20 @@ public class ReconnectTimer extends ManagedRunnable {
             }               
         }
         
+//         //Shutdown and remove
+//        if(enabled == false){
+//            //Cleanup socket handlers and remove reconnect timer
+//            OutgoingConnectionManager theOCM = aPR.getConnectionManager();
+//            SocketChannelHandler aSCH = theOCM.removeHandler(theChannelId);
+//            if( aSCH != null )
+//                aSCH.shutdown();
+//            
+//            //Remove the reconnect timer
+//            theOCM.removeReconnectTimer(theChannelId);            
+//            
+//            return;
+//        }
+        
         DebugPrinter.printMessage(NAME_Class, "Thread complete channel " + Integer.toString(theChannelId));
      
         //Reset things
@@ -591,6 +604,16 @@ public class ReconnectTimer extends ManagedRunnable {
      */
     public void setConnectionCallback(ConnectionCallback aCC) {
         theConnectionCallback = aCC;
+    }
+    
+    //===============================================================
+    /**
+    *  Shut down the detector
+    */
+    @Override
+    public void shutdown(){
+        super.shutdown();
+        enabled = false;
     }
 
 }

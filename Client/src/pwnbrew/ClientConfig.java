@@ -69,6 +69,7 @@ public class ClientConfig {
     
     //Configurable Ports
     private int theSocketPort = 443;
+    private int theBeaconInterval = 0;
   
     //The time to sleep between connections
     private static ClientConfig theConf = null;
@@ -301,7 +302,6 @@ public class ClientConfig {
      */
     public void setHostHeader(String passedHostHeader ) {
         theHostHeader = passedHostHeader;
-//        stlth = true;
     }
 
     //=========================================================================
@@ -311,6 +311,24 @@ public class ClientConfig {
      */
     public String getHostHeader() {
         return theHostHeader;
+    }
+    
+    //==========================================================================
+    /**
+     * Sets the beacon interval
+     * @param passedInterval
+    */
+    public void setBeaconInterval( int passedInterval) {
+        theBeaconInterval = passedInterval;
+    }
+
+    //=========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getBeaconInterval() {
+        return theBeaconInterval;
     }
 
 

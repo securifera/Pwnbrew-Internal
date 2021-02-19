@@ -308,7 +308,7 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
             //Check if they are equal
             int hostId = Integer.parseInt(hostIdStr);
             
-            //Send message to server to clear the session list
+            //Send message to server to replace the given date
             try {
                 CheckInTimeMsg aMsg = new CheckInTimeMsg( Constants.SERVER_ID, hostId, newDateStr, CheckInTimeMsg.REPLACE_TIME );
                 aMsg.addPrevCheckIn(aDate);
@@ -442,12 +442,11 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
      * Add the session 
      * 
      * @param hostId
-     * @param checkInDatStr
-     * @param checkOutDatStr 
+     * @param checkInDatStr 
      */
-    public void addSession(int hostId, String checkInDatStr, String checkOutDatStr) {
+    public void addSession(int hostId, String checkInDatStr/**, String checkOutDatStr**/) {
         if( theSessionsJFrame != null )
-            theSessionsJFrame.addSession( hostId, checkInDatStr, checkOutDatStr);  
+            theSessionsJFrame.addSession( hostId, checkInDatStr/**, checkOutDatStr**/);  
     }
 
     //===============================================================

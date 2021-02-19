@@ -104,7 +104,7 @@ public final class GetCheckInSchedule extends MaltegoMessage{
     *   Performs the logic specific to the message.
     *
      * @param passedManager
-     * @throws pwnbrew.logging.LoggableException
+     * @throws pwnbrew.log.LoggableException
     */
     @Override
     public void evaluate( PortManager passedManager ) throws LoggableException {     

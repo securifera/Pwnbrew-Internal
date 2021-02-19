@@ -71,7 +71,7 @@ abstract public class Constants {
     public static final int  GENERIC_BUFFER_SIZE = 2000;
                
     public static final ExecutorService Executor = Executors.newCachedThreadPool();
-    public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm:ss");
+    public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm:ssZ");
     
     //Constants for process streams
     public static final int STD_OUT_ID = 41;

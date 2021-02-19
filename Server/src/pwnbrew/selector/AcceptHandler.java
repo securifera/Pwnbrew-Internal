@@ -110,7 +110,10 @@ final public class AcceptHandler implements Selectable {
             srcAddr = InetAddress.getByName(srcAddr.getHostAddress());
         } catch (UnknownHostException ex) {
             Log.log(Level.SEVERE, NAME_Class, "handle()", ex.getMessage(), ex );
-        }        
+        }     
+        
+        int localPort = theSocketChannel.socket().getPort();
+        DebugPrinter.printMessage( NAME_Class, "Socket is connected on port: " + Integer.toString(localPort)); 
         
         try {            
             

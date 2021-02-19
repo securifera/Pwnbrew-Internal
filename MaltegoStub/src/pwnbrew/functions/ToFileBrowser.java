@@ -1192,7 +1192,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                                             FileNode aFileNode = (FileNode)theJTable.getValueAt(selRow, 0);  
                                             RemoteFile aFile = aFileNode.getFile();
                                             String aPath = aFile.getAbsolutePath();
-                                            int idx = aPath.lastIndexOf("\\");
+                                            int idx = aPath.lastIndexOf(getHostDelimiter());
                                             
                                             //Create FileNode for parent dir
                                             String parentPath = aPath.substring(0, idx);  

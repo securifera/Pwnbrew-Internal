@@ -54,11 +54,9 @@ public final class SessionMsg extends MaltegoMessage{
     
     private static final byte OPTION_HOST_ID = 124;
     private static final byte OPTION_CHECK_IN = 72;
-    private static final byte OPTION_CHECK_OUT = 73;
     
     private int hostId;
     private String checkInDatStr;
-    private String checkOutDatStr;
     
     public static final short MESSAGE_ID = 0x73;
     
@@ -88,9 +86,6 @@ public final class SessionMsg extends MaltegoMessage{
             switch( tempTlv.getType()){
                 case OPTION_CHECK_IN:
                     checkInDatStr = new String( theValue, "US-ASCII");
-                    break;
-                case OPTION_CHECK_OUT:
-                    checkOutDatStr = new String( theValue, "US-ASCII");
                     break;
                 case OPTION_HOST_ID:
                     hostId = SocketUtilities.byteArrayToInt(theValue);
@@ -124,7 +119,7 @@ public final class SessionMsg extends MaltegoMessage{
                 ToSessionManager aFunc = (ToSessionManager)aFunction;
                 
                 //Add the ip to the list
-                aFunc.addSession( hostId, checkInDatStr, checkOutDatStr );
+                aFunc.addSession( hostId, checkInDatStr);
             }            
         }  
     }

@@ -174,7 +174,7 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                 
                                                 if( currMsgType == Message.STAGING_MESSAGE_TYPE ){
 
-                                                    //Register the relay
+                                                    //Register the handler
                                                     int parentId = passedHandler.getRootHostId();
                                                     if( srcHostId != parentId ){
                                                         ServerPortRouter aSPR = (ServerPortRouter)passedHandler.getPortRouter();
@@ -233,7 +233,7 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                 }
                                                 
                                                 //If return queue is empty, send NoOP so all HTTP requests receive a response
-                                                if( passedHandler.getQueueSize() == 0 ){
+                                                if( passedHandler.getQueueSize() == 0 && currMsgType != Message.STAGING_MESSAGE_TYPE ){
                                                     NoOp aNoOp = new NoOp(srcHostId);
                                                     aNoOp.setChannelId(channelId);
                                                     DataManager.send( passedHandler.getPortRouter().getPortManager(), aNoOp);                        

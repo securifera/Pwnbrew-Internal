@@ -433,19 +433,19 @@ public class ServerManager extends PortManager {
         return retVal;
     }
 
-    // ==========================================================================
-    /**
-     *  Notify that the host has disconnected.
-     *
-     * @param passedHost 
-     */
-    public void hostDisconnected(final Host passedHost) {
-                
-        List<Session> sessionList = passedHost.getSessionList();
-        Session aSession = sessionList.get(sessionList.size() - 1);
-        aSession.setDisconnectedTime(Constants.CHECKIN_DATE_FORMAT.format( new Date() ));
-       
-        passedHost.setConnected( false );
-    }
+//    // ==========================================================================
+//    /**
+//     *  Notify that the host has disconnected.
+//     *
+//     * @param passedHost 
+//     */
+//    public void hostDisconnected(final Host passedHost) {
+//                
+//        List<Session> sessionList = passedHost.getSessionList();
+//        Session aSession = sessionList.get(sessionList.size() - 1);
+//        aSession.setDisconnectedTime(Constants.CHECKIN_DATE_FORMAT.format( new Date() ));
+//       
+//        passedHost.setConnected( false );
+//    }
 
 }

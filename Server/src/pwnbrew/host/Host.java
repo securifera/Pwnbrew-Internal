@@ -62,12 +62,13 @@ public class Host extends Node {
     private boolean virtual = false;
     
     //Get the MAC that is currently connected.
-    private boolean connected = false;
+    private boolean connected = true;
     
     private List<Session> sessionList = new LinkedList<>(); //A list of sessions
     private static final String CHECK_IN_DATES = "CheckInDates";
     private static final String CONNECTED_HOST_IDS = "ConnectedHostIds";
     private static final String AUTO_SLEEP = "autoSleep";
+    private static final String BEACON_INTERVAL = "beaconInteval";
   
     private static final String OS_NAME = "osName";
     private static final String JVM_ARCH = "jvmArch";
@@ -107,6 +108,9 @@ public class Host extends Node {
 
         //Add the auto sleep flag
         thePropertyMap.put( AUTO_SLEEP, "FALSE"  );
+        
+        //Add the beacon interval in seconds
+        thePropertyMap.put( BEACON_INTERVAL, "5"  );
         
     }
     
@@ -552,10 +556,7 @@ public class Host extends Node {
     public boolean getAutoSleepFlag(){
 
         String theVal = thePropertyMap.get(AUTO_SLEEP);
-        if(theVal.equals("TRUE")){
-            return true;
-        }
-        return false;
+        return theVal.equals("TRUE");
     }
     
     //===================================================================
@@ -572,6 +573,31 @@ public class Host extends Node {
         }
 
         thePropertyMap.put(AUTO_SLEEP, autoSleepFlag);
+    }
+    
+    //===================================================================
+    /**
+     *  Returns the beacon interval
+     * 
+     * @return 
+     */
+    public int getBeaconInterval(){
+
+        String theVal = thePropertyMap.get(BEACON_INTERVAL);
+        return  Integer.parseInt(theVal);
+    }
+    
+    //===================================================================
+    /**
+     *  Set the beacon interval
+     * 
+     * @param passedSeconds
+    */
+    public void setBeaconInterval( int passedSeconds ){
+        if(passedSeconds > -1){
+            String secondStr = Integer.toString(passedSeconds);
+            thePropertyMap.put(BEACON_INTERVAL, secondStr);
+        }
     }
 
     //===================================================================

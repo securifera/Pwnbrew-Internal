@@ -222,7 +222,7 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                                     //ClientPortRouter aCPR = (ClientPortRouter)thePR;
                                                                     //aCPR.ensureConnectivity(aSCC, chanId);
                                                                     aReconnectTimer.setConnectionCallback(aSCC);
-            aReconnectTimer.start();                                aReconnectTimer.start();
+                                                                    aReconnectTimer.start();
                                                                     
                                                                 }
                                                             } else {

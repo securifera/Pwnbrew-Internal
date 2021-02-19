@@ -12,7 +12,6 @@ import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.utilities.SocketUtilities;
 import pwnbrew.network.ClientPortRouter;
-import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.control.messages.SleepRelay;
 import pwnbrew.xml.maltego.MaltegoTransformExceptionMessage;
 

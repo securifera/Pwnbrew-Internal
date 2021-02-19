@@ -188,7 +188,11 @@ public class OutgoingConnectionManager extends ConnectionManager {
     @Override
     public void shutdown() {
         
-        Set<Integer> theKeys = channelIdHandlerMap.keySet();
+        Set<Integer> theKeys = theReconnectTimerMap.keySet();
+        for( Integer aKey : theKeys )
+            theReconnectTimerMap.get(aKey).shutdown();
+        
+        theKeys = channelIdHandlerMap.keySet();
         for( Integer aKey : theKeys )
             channelIdHandlerMap.get(aKey).shutdown();
         

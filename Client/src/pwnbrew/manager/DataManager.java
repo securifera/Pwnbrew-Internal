@@ -66,7 +66,6 @@ import pwnbrew.network.relay.RelayManager;
 import pwnbrew.network.shell.ShellMessageManager;
 import pwnbrew.selector.SocketChannelHandler;
 import pwnbrew.socks.SocksMessageManager;
-import pwnbrew.utilities.DebugPrinter;
 /**
  *
  *  
@@ -233,9 +232,9 @@ abstract public class DataManager {
             }
             
             //Handle it
-            if( aManager != null ){
+            if( aManager != null )
                 aManager.handleMessage( passedRouter, msgBytes );
-            }
+            
             
         } catch (IOException ex) {
             RemoteLog.log(Level.INFO, NAME_Class, "routeMessage()", ex.getMessage(), ex );                                    

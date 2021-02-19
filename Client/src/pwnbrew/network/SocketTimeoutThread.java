@@ -35,51 +35,84 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-package pwnbrew.network.control.messages;
 
-import java.io.UnsupportedEncodingException;
-import pwnbrew.network.ControlOption;
+package pwnbrew.network;
+
+import java.io.IOException;
+import pwnbrew.utilities.ManagedRunnable;
+import pwnbrew.utilities.Constants;
+import java.util.concurrent.TimeoutException;
+import pwnbrew.network.socket.SocketChannelWrapper;
+
 
 /**
  *
- *  
+ * @author user
  */
-public final class Sleep extends ControlMessage {
+public class SocketTimeoutThread extends ManagedRunnable {
     
-    private static final byte OPTION_SLEEP_TIME = 17;
-    private String sleepTime = "";
+    private SocketChannelWrapper theSCW = null;
     
-    //Class name
-    private static final String NAME_Class = Sleep.class.getSimpleName();
-    
-    public static final short MESSAGE_ID = 0x4e;
- 
-     // ==========================================================================
+    //Static instance
+    private static final String NAME_Class = SocketTimeoutThread.class.getSimpleName();
+           
+
+    // ==========================================================================
     /**
      * Constructor
      *
-     * @param dstHostId
-     * @param passedTime
-     * @throws java.io.UnsupportedEncodingException
+     * @param aSCW
     */
-    public Sleep( int dstHostId, String passedTime ) throws UnsupportedEncodingException  {
-        super( MESSAGE_ID, dstHostId);
-       
-        sleepTime = passedTime;
-        byte[] strBytes = passedTime.getBytes("US-ASCII");
-        
-        ControlOption aTlv = new ControlOption(OPTION_SLEEP_TIME, strBytes);
-        addOption(aTlv);
+    @SuppressWarnings("ucd")
+    public SocketTimeoutThread( SocketChannelWrapper aSCW ) {
+        super(Constants.Executor);
+        theSCW = aSCW;
     }
- 
+    
+    // ==========================================================================
+    /**
+     *  Main thread loop
+     *
+    */
+    @Override
+    public void go() {
+                 
+        // Ten seconds
+        int sleepTime = 10000;
+        //Loop while connected
+        while( !shutdownRequested ){
+
+            try {
+                waitToBeNotified(sleepTime);
+            } catch (TimeoutException ex) {
+            }
+
+            //Close and exit loop
+            if( theSCW.getBytesReadFlag() == false ){
+                try {
+                    theSCW.close();
+                } catch (IOException ex) {
+                }
+                break;
+            }
+            
+            //Reset the flag
+            theSCW.setBytesReadFlag(false);
+
+        }
+        
+    }
+     
     //===============================================================
     /**
-     * Returns the number of seconds to sleep before trying to connect to the server.
-     *
-     * @return
-     */
-    public String getSleepTime() {
-        return sleepTime;
+    *  Shut down the detector
+    */
+    @Override
+    public void shutdown(){        
+        super.shutdown();      
     }
-
 }
+    
+    
+    
+

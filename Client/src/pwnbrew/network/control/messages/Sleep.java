@@ -60,6 +60,7 @@ import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.LoaderUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.network.ControlOption;
+import pwnbrew.utilities.DebugPrinter;
 
 /**
  *
@@ -68,9 +69,6 @@ import pwnbrew.network.ControlOption;
 public final class Sleep extends ControlMessage {    
     
     private static final byte OPTION_SLEEP_TIME = 17; //IN SECONDS    
-    private static final byte OPTION_SENDER_TIME = 19; //IN SECONDS
-    
-    private String senderTime = "";
     private String sleepTime = "";
     
     //Class name
@@ -105,9 +103,6 @@ public final class Sleep extends ControlMessage {
                 case OPTION_SLEEP_TIME:
                     sleepTime = new String( theValue, "US-ASCII");
                     break;
-                case OPTION_SENDER_TIME:
-                    senderTime = new String( theValue, "US-ASCII");
-                    break; 
                 default:
                     retVal = false;
                     break;
@@ -129,16 +124,6 @@ public final class Sleep extends ControlMessage {
         return sleepTime;
     }
     
-     //===============================================================
-    /**
-     * Returns the time the message was sent as referenced by the sender.
-     *
-     * @return
-     */
-    public String getSenderTime() {
-        return senderTime;
-    }
-    
     //===============================================================
     /**
     *   Performs the logic specific to the message.
@@ -150,23 +135,19 @@ public final class Sleep extends ControlMessage {
         
         //Pass it to the manager
         try {
-            
+                        
             //Get the sleep time and spin up a thread to connect after the time.
             String theSleepTime = getSleepTime();
-            String theSenderTime = getSenderTime();
-
-            //Set the time to the sender time and get the difference
-            Date senderDate = Constants.CHECKIN_DATE_FORMAT.parse( theSenderTime );
             Date sleepDate = Constants.CHECKIN_DATE_FORMAT.parse( theSleepTime );
-
-            //Get the current date
-            Date theDate = new Date(); 
-            long difference = theDate.getTime() - senderDate.getTime();
 
             //Add the difference to the sleep date
             Calendar aCalendar = Calendar.getInstance();
             aCalendar.setTime(sleepDate);
-            aCalendar.add( Calendar.MILLISECOND, (int)difference);
+            
+            Date adjSleepDate = aCalendar.getTime();
+            String adjSleepDateStr = Constants.CHECKIN_DATE_FORMAT.format(adjSleepDate);
+            DebugPrinter.printMessage(NAME_Class, "Sleeping until " + adjSleepDateStr);
+            
             String dateStr = Long.toString( aCalendar.getTime().getTime() );
                    
             if( Utilities.isStaged()){

@@ -142,14 +142,14 @@ public class SessionsJFrame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Check-In Time", "Disconnect Time"
+                "Check-In Time"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class
+                java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false
+                false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -175,11 +175,10 @@ public class SessionsJFrame extends javax.swing.JFrame {
         checkInPanelLayout.setHorizontalGroup(
             checkInPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
             .addGroup(checkInPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(checkInPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sessionPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 268, Short.MAX_VALUE)
-                    .addComponent(clearButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(134, Short.MAX_VALUE)
+                .addComponent(clearButton, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
+            .addComponent(sessionPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
         );
         checkInPanelLayout.setVerticalGroup(
             checkInPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -274,7 +273,7 @@ public class SessionsJFrame extends javax.swing.JFrame {
                                      //Set the last check in
             DefaultTableModel aModel = new DefaultTableModel( new Object [][] {},
                 new String [] {
-                    "Check-In Time", "Disconnect Time"
+                    "Check-In Time"
                 }){
                     Class[] types = new Class [] {
                         java.lang.String.class, java.lang.String.class
@@ -402,7 +401,7 @@ public class SessionsJFrame extends javax.swing.JFrame {
 
                     DefaultTableModel aModel = new DefaultTableModel( new Object [][] {},
                     new String [] {
-                        "Check-In Time", "Disconnect Time"
+                        "Check-In Time"
                     }){
                         Class[] types = new Class [] {
                             java.lang.String.class, java.lang.String.class
@@ -543,16 +542,15 @@ public class SessionsJFrame extends javax.swing.JFrame {
     /**
      * 
      * @param hostId
-     * @param checkInDatStr
-     * @param checkOutDatStr 
+     * @param checkInDatStr 
      */
-    public synchronized void addSession( int hostId, final String checkInDatStr, final String checkOutDatStr) {     
+    public synchronized void addSession( int hostId, final String checkInDatStr/**, final String checkOutDatStr **/) {     
         if( isSelectedHost(hostId)){
             SwingUtilities.invokeLater(new Runnable(){
                 @Override
                 public void run() {  
                     DefaultTableModel aModel = (DefaultTableModel) sessionTable.getModel();
-                    aModel.addRow( new Object[]{checkInDatStr, checkOutDatStr});
+                    aModel.addRow( new Object[]{checkInDatStr/**, checkOutDatStr**/});
                     
                     sessionTable.getRowSorter().toggleSortOrder(0);
                     

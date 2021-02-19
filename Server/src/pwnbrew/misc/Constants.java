@@ -70,11 +70,11 @@ abstract public class Constants {
     public static final int  GENERIC_BUFFER_SIZE = 4096;
                
     public static final ExecutorService Executor = Executors.newCachedThreadPool();
-    public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");    
+    public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm:ssZ");    
     
-    //Session's start date/time...
-    public static final String FORMAT_SessionDateTime
-    = new StringBuilder( "yyyyMMdd" ).append( "_" ).append( "HHmmss" ).toString();
+//    //Session's start date/time...
+//    public static final String FORMAT_SessionDateTime
+//    = new StringBuilder( "yyyyMMdd" ).append( "_" ).append( "HHmmss" ).toString();
  
     //Stdout & Stderr file names
     public static final String STD_OUT_FILENAME = "stdout.txt";
@@ -95,7 +95,7 @@ abstract public class Constants {
     public static final String UID_LABEL = "UID";
     public static final String PAYLOAD_VERSION_LABEL = "Version";
     public static final String STAGER_URL = "Private";
-    public static String CURRENT_VERSION = "1.1.3.1";
+    public static String CURRENT_VERSION = "2.0.0.1";
         
     //Constants for process streams
     public static final int STD_OUT_ID = 41;

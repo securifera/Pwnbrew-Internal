@@ -48,6 +48,7 @@ package pwnbrew.selector;
 import pwnbrew.log.RemoteLog;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.channels.SelectionKey;
@@ -57,8 +58,8 @@ import pwnbrew.log.LoggableException;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.network.ClientPortRouter;
-import pwnbrew.network.PortRouter;
 import pwnbrew.network.socket.SecureSocketChannelWrapper;
+import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.utilities.ReconnectTimer;
 
 /**
@@ -114,7 +115,11 @@ public class ConnectHandler implements Selectable {
         }
 
         //Necessary because the Inet does not comes back from the channel correctly
-        InetAddress srcAddr = socketChannel.socket().getInetAddress();
+        Socket theSocket = socketChannel.socket();
+        InetAddress srcAddr = theSocket.getInetAddress();
+        int localPort = theSocket.getLocalPort();
+        DebugPrinter.printMessage( NAME_Class, "Socket is connected on port: " + Integer.toString(localPort)); 
+                
         String theAddy = srcAddr.getHostAddress();
         try {
             srcAddr = InetAddress.getByName(theAddy);
@@ -122,12 +127,12 @@ public class ConnectHandler implements Selectable {
             RemoteLog.log(Level.SEVERE, NAME_Class, "handle()", ex.getMessage(), ex);
         }
         
-        try {
-            //Set a keepalive so we are notified of disconnects
-            socketChannel.socket().setKeepAlive(true);
-        } catch (SocketException ex) {
-            RemoteLog.log(Level.SEVERE, NAME_Class, "handle()", ex.getMessage(), ex );
-        }
+//        try {
+//            //Set a keepalive so we are notified of disconnects
+//            theSocket.setKeepAlive(true);
+//        } catch (SocketException ex) {
+//            RemoteLog.log(Level.SEVERE, NAME_Class, "handle()", ex.getMessage(), ex );
+//        }
 
         try {
             
@@ -144,9 +149,11 @@ public class ConnectHandler implements Selectable {
                   
             //Assign an encyrpted socketwrapper to the handler
             SecureSocketChannelWrapper theSCW = new SecureSocketChannelWrapper( socketChannel, theSCH, true);
-            theSCH.setSocketChannelWrapper(theSCW);
-            
+            theSCH.setSocketChannelWrapper(theSCW);            
             theSCW.beginHandshake();
+            
+            //Start the timeout thread
+            theSCW.getSocketTimeoutThread().start();
 
             //Notify the comm
             theClientPortRouter.getSelRouter().changeOps(theSCW.getSocketChannel(), SelectionKey.OP_READ | SelectionKey.OP_WRITE );                        

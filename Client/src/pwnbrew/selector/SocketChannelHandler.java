@@ -522,7 +522,7 @@ public class SocketChannelHandler implements Selectable {
 
             } else  if(bytesRead == 0){
 
-                //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Nothing to receive. Sleeping. channel " + Integer.toString(channelId));
+                DebugPrinter.printMessage( this.getClass().getSimpleName(), "Nothing to receive. Sleeping. channel " + Integer.toString(channelId));
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ex) {

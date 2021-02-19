@@ -52,7 +52,6 @@ import pwnbrew.generic.gui.MutableJList;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Utilities;
 import static pwnbrew.misc.Utilities.loadImageFromJar;
-import static pwnbrew.misc.Utilities.loadImageFromJar;
 
 /**
  *

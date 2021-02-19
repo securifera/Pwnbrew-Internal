@@ -36,12 +36,6 @@ The copyright on this package is held by Securifera, Inc
 
 */
 
-
-/*
-* Session.java
-*
-* Created on November 24, 2013, 1:48:12 PM
-*/
 package pwnbrew.host;
 
 import java.util.Date;
@@ -55,7 +49,6 @@ import pwnbrew.xml.XmlObject;
 public class Session extends XmlObject {
     
     private static final String CHECK_IN_DATE = "CheckinDate";
-    private static final String DISCONNECT_DATE = "DisconnectedDate";
     
     // ========================================================================
     /**
@@ -65,9 +58,7 @@ public class Session extends XmlObject {
         
         //Add the attributes
         thePropertyMap.put( CHECK_IN_DATE,  Constants.CHECKIN_DATE_FORMAT.format( new Date() )  );
-        
-        //Add the attributes
-        thePropertyMap.put( DISCONNECT_DATE,  ""  );
+
     }
     
     //===============================================================
@@ -88,26 +79,6 @@ public class Session extends XmlObject {
      */
     public void setCheckInDate( String passedDate) {
         setProperty( CHECK_IN_DATE, passedDate);
-    }
-    
-    //===============================================================
-    /**
-     *  Get the Date of the last check-in.
-     * 
-     * @return 
-     */
-    public String getDisconnectedTime(){
-        return getProperty( DISCONNECT_DATE );
-    }
-    
-    //===============================================================
-    /**
-     *  Sets the disconnect date.
-     * 
-     * @param passedDate 
-     */
-    public void setDisconnectedTime( String passedDate) {
-        setProperty( DISCONNECT_DATE, passedDate);
     }
  
 }

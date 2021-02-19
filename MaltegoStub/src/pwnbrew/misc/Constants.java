@@ -76,7 +76,7 @@ abstract public class Constants {
     public static final int STD_ERR_ID = 42;
     
     public static final SimpleDateFormat THE_DATE_FORMAT = new SimpleDateFormat("MM-dd-yyyy--HHmm");  
-    public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm");      
+    public static final SimpleDateFormat CHECKIN_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy--HH:mm:ssZ");      
     
     public static final String EDITOR_IMG_STR = "brew.png";  
     public static final String UPLOAD_IMG_STR = "upload.png";

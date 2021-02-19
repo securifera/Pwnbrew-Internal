@@ -43,6 +43,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.atomic.AtomicBoolean;
+import pwnbrew.network.SocketTimeoutThread;
 import pwnbrew.utilities.Constants;
 import pwnbrew.selector.SocketChannelHandler;
 
@@ -52,9 +54,11 @@ public class SocketChannelWrapper {
 
     protected SocketChannel theSocketChannel;    
     protected final SocketChannelHandler theSocketHandler;
+    protected final SocketTimeoutThread theSocketTimeoutThread; 
 
     protected ByteBuffer requestBB;
     private static final int requestBBSize = Constants.GENERIC_BUFFER_SIZE;
+    private final AtomicBoolean bytesRead = new AtomicBoolean(false); 
 
     //===============================================================
     /**
@@ -71,6 +75,7 @@ public class SocketChannelWrapper {
 	theSocketChannel.configureBlocking (false);
         
         requestBB = ByteBuffer.allocate(requestBBSize);
+        theSocketTimeoutThread = new SocketTimeoutThread(this);
     }
 
     //===============================================================
@@ -81,6 +86,16 @@ public class SocketChannelWrapper {
      */
     public SocketChannel getSocketChannel() {
 	return theSocketChannel;
+    }
+    
+    //===============================================================
+    /**
+     * Returns the socket timeout thread
+     * 
+     * @return 
+     */
+    public SocketTimeoutThread getSocketTimeoutThread() {
+	return theSocketTimeoutThread;
     }
 
     //===============================================================
@@ -124,6 +139,24 @@ public class SocketChannelWrapper {
     public boolean doHandshake(SelectionKey sk) throws IOException {
         return true;
     }
+    
+     //==================================================================
+    /**
+     * 
+     * @return  
+     */
+    public boolean getBytesReadFlag(){
+        return bytesRead.get();        
+    }
+    
+    //==================================================================
+    /**
+     * 
+     * @param passedBool 
+     */
+    public void setBytesReadFlag(boolean passedBool){
+        bytesRead.set(passedBool);        
+    }
 
     /*
      * Resize (if necessary) the inbound data buffer, and then read more
@@ -134,7 +167,13 @@ public class SocketChannelWrapper {
 	 * Allocate more space if less than 5% remains
 	 */
 	resizeRequestBB(requestBBSize/20);
-	return theSocketChannel.read(requestBB);
+        int readSize = theSocketChannel.read(requestBB);
+        
+        //Set the flag showing bytes were read
+        if( readSize > 0)
+            setBytesReadFlag(true);
+        
+	return readSize;
     }
 
     /*
@@ -178,6 +217,7 @@ public class SocketChannelWrapper {
      * <P>d the data has been flushed.
      */
     public boolean shutdown() throws IOException {
+        theSocketTimeoutThread.shutdown();
         close();
 	return true;
     }
@@ -188,8 +228,8 @@ public class SocketChannelWrapper {
      * @throws java.io.IOException
      */
     public void close() throws IOException { // NO_UCD (use default)
-        theSocketHandler.getPortRouter().getSelRouter().unregister(theSocketChannel);
 	theSocketChannel.close();
+        theSocketHandler.getPortRouter().getSelRouter().unregister(theSocketChannel);
     }
     
 

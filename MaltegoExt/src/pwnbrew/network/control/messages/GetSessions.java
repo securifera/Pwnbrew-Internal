@@ -121,7 +121,7 @@ public final class GetSessions extends MaltegoMessage{
             for( Session aSession : sessionList ){
 
                 try {
-                    SessionMsg aMsg = new SessionMsg( getSrcHostId(), hostId, aSession.getCheckInTime(), aSession.getDisconnectedTime());
+                    SessionMsg aMsg = new SessionMsg( getSrcHostId(), hostId, aSession.getCheckInTime());
                     DataManager.send( passedManager, aMsg);
                 } catch ( UnsupportedEncodingException ex) {
                     Log.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex );                                
