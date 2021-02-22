@@ -62,10 +62,12 @@ public class Host extends Entity {
      * @param relayPort
      * @param passedHostname
      * @param passedArch 
+     * @param passedPid 
      * @param passedOS 
      * @param passedId 
+     * @param passedBeaconInterval 
      */
-    public Host( boolean connected, boolean sleepable, int relayPort, String passedHostname, String passedArch, String passedPid, String passedOS, String passedId ) {
+    public Host( boolean connected, boolean sleepable, int relayPort, String passedHostname, String passedArch, String passedPid, String passedOS, String passedId, String passedBeaconInterval ) {
         super( connected ? ( sleepable ? PWNBREW_HOST_SLEEPABLE : PWNBREW_HOST_CONNECTED ): PWNBREW_HOST_DISCONNECTED );
         
         //Set the hostname
@@ -89,19 +91,24 @@ public class Host extends Entity {
         aField.setXmlObjectContent( passedArch );
         addField(aField);
         
-        //Add the server ip
+        //Add the host pid
         aField = new Field( Constants.HOST_PID );
         aField.setXmlObjectContent( passedPid );
         addField(aField);
         
-        //Add the server ip
+        //Add the host os
         aField = new Field( Constants.HOST_OS );
         aField.setXmlObjectContent( passedOS );
         addField(aField);
         
-        //Add the server ip
+        //Add the host id
         aField = new Field( Constants.HOST_ID );
         aField.setXmlObjectContent( passedId );
+        addField(aField);
+        
+        //Add the beacon interval
+        aField = new Field( Constants.BEACON_INTERVAL );
+        aField.setXmlObjectContent( passedBeaconInterval );
         addField(aField);
         
         //Add the relaying

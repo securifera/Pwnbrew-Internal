@@ -105,11 +105,9 @@ public class SocketChannelHandler implements Selectable {
      * Constructor
      *
      * @param passedParent
-     * @throws java.io.IOException
     */
-    public SocketChannelHandler( PortRouter passedParent ) throws IOException{ // NO_UCD (use default)
+    public SocketChannelHandler( PortRouter passedParent ) { // NO_UCD (use default)
         thePortRouter = passedParent;
-
     }
    
     //===============================================================

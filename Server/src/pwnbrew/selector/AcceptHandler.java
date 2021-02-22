@@ -53,9 +53,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
+import javax.net.ssl.SSLException;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
-import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.socket.EncryptedSocketChannelWrapper;
 
@@ -109,36 +109,48 @@ final public class AcceptHandler implements Selectable {
         try {
             srcAddr = InetAddress.getByName(srcAddr.getHostAddress());
         } catch (UnknownHostException ex) {
-            Log.log(Level.SEVERE, NAME_Class, "handle()", ex.getMessage(), ex );
+            Log.log(Level.WARNING, NAME_Class, "handle()", ex.getMessage(), ex );
         }     
         
-        int localPort = theSocketChannel.socket().getPort();
-        DebugPrinter.printMessage( NAME_Class, "Socket is connected on port: " + Integer.toString(localPort)); 
-        
-        try {            
+        //int localPort = theSocketChannel.socket().getPort();
+        //DebugPrinter.printMessage( NAME_Class, "Socket is connected on port: " + Integer.toString(localPort)); 
+               
             
-            //Log.log(Level.INFO, NAME_Class, "handle()", "Received a connection from " + srcAddr.getHostAddress(), null);
-            SocketChannelHandler theSCH = new SocketChannelHandler(theSPR);
-  
-            try {
-                //Set a keepalive so we are notified of disconnects
-                theSocketChannel.socket().setKeepAlive(true);
-            } catch (SocketException ex) {
-                Log.log(Level.SEVERE, NAME_Class, "handle()", ex.getMessage(), ex );
-            }
-
-            //Assign an unencyrpted socketwrapper to the handler temporarily
+        //Log.log(Level.INFO, NAME_Class, "handle()", "Received a connection from " + srcAddr.getHostAddress(), null);
+        SocketChannelHandler theSCH = new SocketChannelHandler(theSPR);
+        try {
+            
             EncryptedSocketChannelWrapper theSCW = new EncryptedSocketChannelWrapper( theSocketChannel, theSCH, requireAuthentication );
             theSCH.setSocketChannelWrapper(theSCW);
+
+            try {
+                theSCW.beginHandshake();
+            } catch (SSLException ex) {
+                //Ensure the socket is closed so it doesn't stay in a half opened state
+                try {
+                    theSocketChannel.close();
+                } catch (IOException ex1) {}
+                Log.log(Level.SEVERE, NAME_Class, "handle()", "Socket accept handshake failed.", ex);
+            }
+
+            try {
+                //Register the new socket with this handler
+                theSPR.getSelRouter().register(theSocketChannel, SelectionKey.OP_READ | SelectionKey.OP_WRITE, theSCH);
+            } catch (IOException ex) {
+                //Ensure the socket is closed so it doesn't stay in a half opened state
+                try {
+                    theSocketChannel.close();
+                } catch (IOException ex1) {}
+                Log.log(Level.SEVERE, NAME_Class, "handle()", "SocketChannel register failed.", ex);
+            }
             
-            theSCW.beginHandshake();
-
-            //Register the new socket with this handler
-            theSPR.getSelRouter().register(theSocketChannel, SelectionKey.OP_READ | SelectionKey.OP_WRITE, theSCH);
-
-        } catch ( IOException | LoggableException | InterruptedException ex) {
-            Log.log(Level.WARNING, NAME_Class, "handle()", ex.getMessage(), ex);
-        }
+        } catch (IOException | LoggableException ex){
+            //Ensure the socket is closed so it doesn't stay in a half opened state
+            try {
+                theSocketChannel.close();
+            } catch (IOException ex1) {}
+            Log.log(Level.SEVERE, NAME_Class, "handle()", "Failed creating encrypted socket wrapper.", ex);
+        }        
 
     }
     

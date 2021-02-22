@@ -56,6 +56,7 @@ import pwnbrew.network.ControlOption;
 import pwnbrew.network.PortRouter;
 import pwnbrew.network.ServerPortRouter;
 import pwnbrew.network.relay.RelayManager;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
@@ -68,6 +69,10 @@ public final class HelloAck extends ControlMessage {
     private static final String NAME_Class = HelloAck.class.getSimpleName();
     
     public static final short MESSAGE_ID = 0x3c;
+    private static final byte OPTION_BEACON_INTERVAL = 125;
+    
+    private int beaconInterval = -1;
+    
     
     // ==========================================================================
     /**
@@ -94,6 +99,9 @@ public final class HelloAck extends ControlMessage {
             
             byte[] theValue = tempTlv.getValue();
             switch( tempTlv.getType()){
+                case OPTION_BEACON_INTERVAL:
+                    beaconInterval = SocketUtilities.byteArrayToInt(theValue);
+                    break;
                 default:
                     retVal = false;
                     break;
@@ -114,6 +122,9 @@ public final class HelloAck extends ControlMessage {
         //Get the address and connect    
         int theClientId = getSrcHostId();
         ClientConfig theClientConfig = ClientConfig.getConfig();
+        if( beaconInterval != -1)
+            theClientConfig.setBeaconInterval(beaconInterval);        
+        
         PortRouter aPR = passedManager.getPortRouter( theClientConfig.getSocketPort() );
         if( aPR != null ){
            

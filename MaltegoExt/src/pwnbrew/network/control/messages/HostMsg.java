@@ -62,6 +62,7 @@ public final class HostMsg extends MaltegoMessage{
     private static final byte OPTION_SLEEPABLE = 65;
     private static final byte OPTION_RELAY_PORT = 67;
     private static final byte OPTION_PID = 68;
+    private static final byte OPTION_BEACON_INTERVAL = 69;
     
     public static final short MESSAGE_ID = 0x6d;
     
@@ -77,11 +78,12 @@ public final class HostMsg extends MaltegoMessage{
      * @param hostId
      * @param isConnected
      * @param isSleepable
+     * @param beaconInterval
      * @throws java.io.UnsupportedEncodingException
     */
     public HostMsg( int dstHostId, String passeHostname, String passedOS, 
             String passedArch, String passedPid, int hostId, boolean isConnected, 
-            boolean isSleepable ) throws UnsupportedEncodingException {
+            boolean isSleepable, int beaconInterval ) throws UnsupportedEncodingException {
         super( MESSAGE_ID, dstHostId );
         
           //Add file type
@@ -107,6 +109,11 @@ public final class HostMsg extends MaltegoMessage{
         //Add file type
         tempBytes = SocketUtilities.intToByteArray(hostId);
         aTlv = new ControlOption( OPTION_HOST_ID, tempBytes);
+        addOption(aTlv);
+        
+        //Add beacon interval
+        tempBytes = SocketUtilities.intToByteArray(beaconInterval);
+        aTlv = new ControlOption( OPTION_BEACON_INTERVAL, tempBytes);
         addOption(aTlv);
         
          //Add file type

@@ -72,6 +72,7 @@ public class StandardValidation {
     public static final String KEYWORD_Ipv4Address = "ipv4address";    
     private static final String KEYWORD_Ipv6Address = "ipv6address";
     public static final String KEYWORD_Port = "port";
+    public static final String KEYWORD_Integer = "integer";
     public static final String KEYWORD_ClientConnect = "clientconnect"; 
     public static final String KEYWORD_CommandArray = "commandArray";
     public static final String KEYWORD_Domain = "domain";
@@ -81,6 +82,7 @@ public class StandardValidation {
     static {
         List<String> tempList = new ArrayList<>();
         tempList.add( KEYWORD_Port );
+        tempList.add( KEYWORD_Integer );
         tempList.add( KEYWORD_IpAddress );
         tempList.add( KEYWORD_Ipv4Address );
         tempList.add( KEYWORD_ClientConnect );
@@ -95,6 +97,7 @@ public class StandardValidation {
     private static final HashMap<String, String> theKeywordToMethodNameMap = new HashMap<>();
     static {
         theKeywordToMethodNameMap.put( KEYWORD_Port, "validatePort" );
+        theKeywordToMethodNameMap.put( KEYWORD_Integer, "validateInteger" );
         theKeywordToMethodNameMap.put( KEYWORD_IpAddress, "validateIpAddress" );
         theKeywordToMethodNameMap.put( KEYWORD_Ipv4Address, "validateIpv4Address" );
         theKeywordToMethodNameMap.put( KEYWORD_ClientConnect, "validateClientConnect" );
@@ -183,7 +186,34 @@ public class StandardValidation {
     }/* END validate( String, String ) */
     
     
-    
+    // ==========================================================================
+    /**
+     * Determines if the given String is a valid integer.
+     * <p>
+     * If the argument is null this method returns false.
+     *
+     * @param value the String to test
+     *
+     * @return {@code true} if the given String is a valid port;
+     * {@code false} otherwise
+     */
+    public static boolean validateInteger( String value ) {
+
+        if( value == null ) //If the String is null...
+            return false; //Do nothing
+
+        boolean rtnBool;
+
+        try {
+           Integer.parseInt(value);
+           rtnBool = true;
+
+        } catch (NumberFormatException ex){
+           return false;
+        }
+        return rtnBool;
+
+    }
  
     // ==========================================================================
     /**

@@ -103,6 +103,7 @@ abstract public class Constants {
     public static final String HOST_PID = "hostpid";
     public static final String HOST_OS = "os";
     public static final String HOST_ID = "hostid";
+    public static final String BEACON_INTERVAL = "beaconinterval";
     
     public static final String FILE_UPLOAD = "FILE_UPLOAD";
     public static final String FILE_DOWNLOAD = "FILE_DOWNLOAD";

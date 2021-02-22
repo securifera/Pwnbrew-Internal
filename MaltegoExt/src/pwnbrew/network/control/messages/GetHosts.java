@@ -159,7 +159,7 @@ public final class GetHosts extends MaltegoMessage{ // NO_UCD (use default)
 
                     HostMsg aHostMsg = new HostMsg( getSrcHostId(), aHost.getHostname(), 
                         aHost.getOsName(), aHost.getJvmArch(), aHost.getPid(), Integer.parseInt(aHost.getId()), aHost.isConnected(),
-                        !aHost.getCheckInList().isEmpty() );
+                        !aHost.getCheckInList().isEmpty(), aHost.getBeaconInterval() );
 
                     String relayPort = aHost.getRelayPort();
                     if( !relayPort.isEmpty() )

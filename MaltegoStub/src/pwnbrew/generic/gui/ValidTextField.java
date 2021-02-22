@@ -54,7 +54,7 @@ import pwnbrew.misc.StandardValidation;
 public class ValidTextField extends JTextField implements KeyListener {
 
     private String thePreviousValue = null;
-    private boolean dataIsValid = true;
+    protected boolean dataIsValid = true;
     private String validation = "";
 
     private static final String NAME_Class = ValidTextField.class.getSimpleName();
@@ -62,16 +62,16 @@ public class ValidTextField extends JTextField implements KeyListener {
 
     // ==========================================================================
     /**
-     * Creates a new instance of {@link Ipv4AddressTextField}.
+     * Creates a new instance of {@link ValidTextField}.
      */
     public ValidTextField() {
         this( "" );
-    }/* END CONSTRUCTOR() */
+    }
 
 
     // ==========================================================================
     /**
-     * Creates a new instance of {@link Ipv4AddressTextField}.
+     * Creates a new instance of {@link ValidTextField}.
      * <p>
      * If the argument is null an empty String is used instead.
      *
@@ -86,18 +86,18 @@ public class ValidTextField extends JTextField implements KeyListener {
 
         addKeyListener( this );
 
-    }/* END CONSTRUCTOR( String ) */
+    }
 
 
     // ==========================================================================
     /**
-     * Evaluates the current value in the {@link ClientMigrateTextField}.
+     * Evaluates the current value in the {@link ValidTextField}.
      * <p>
-     * If the value is a valid IPv4 address and ports this method sets the background of th
+     * If the value is valid this method sets the background of th
      * field to white; otherwise the background color is set to red.
      *
      */
-    private void evaluateValue() {
+    protected void evaluateValue() {
 
         String value = getText(); //Get the value
 
@@ -121,8 +121,8 @@ public class ValidTextField extends JTextField implements KeyListener {
 
         } //Else, the value has not changed; do nothing
 
-    }/* END evaluateValue() */
-
+    }
+    
      // ==========================================================================
     /**
      * Sets the validation string
@@ -131,7 +131,7 @@ public class ValidTextField extends JTextField implements KeyListener {
      */
     public void setValidation( String passedValidationString ) {
         validation = passedValidationString;
-    }/* END setValidation() */
+    }
 
     // ==========================================================================
     /**
@@ -142,7 +142,7 @@ public class ValidTextField extends JTextField implements KeyListener {
      */
     public boolean isDataValid() {
         return dataIsValid;
-    }/* END isDataValid() */
+    }
 
 
     // ==========================================================================

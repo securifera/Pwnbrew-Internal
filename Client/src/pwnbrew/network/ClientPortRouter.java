@@ -127,10 +127,9 @@ public class ClientPortRouter extends PortRouter {
             Calendar theCalendar = Calendar.getInstance(); 
             theCalendar.setTime( new Date() );
             
-            //Add 1 Second
+            //Add the seconds to wait before first callback
             theCalendar.add( Calendar.SECOND, beaconInterval);
-            Date aTime = theCalendar.getTime();
-            
+            Date aTime = theCalendar.getTime();            
             
             //Format and add to the queue
             String dateStr = Constants.CHECKIN_DATE_FORMAT.format(aTime);

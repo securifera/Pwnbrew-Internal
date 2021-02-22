@@ -64,6 +64,7 @@ import pwnbrew.network.control.messages.GetCheckInSchedule;
 import pwnbrew.network.control.messages.GetCount;
 import pwnbrew.network.control.messages.GetSessions;
 import pwnbrew.network.control.messages.RemoveHost;
+import pwnbrew.network.control.messages.UpdateBeaconInterval;
 import pwnbrew.sessions.SessionJFrameListener;
 import pwnbrew.sessions.SessionsJFrame;
 import pwnbrew.xml.maltego.Field;
@@ -463,6 +464,20 @@ public class ToSessionManager extends Function implements SessionJFrameListener,
         ControlMessage aMsg = new RemoveHost( Constants.SERVER_ID, hostId);
         DataManager.send( theManager, aMsg);
         
+    }
+
+    //===============================================================
+    /**
+     * 
+     * @param hostIdStr
+     * @param beaconValue 
+     */
+    @Override
+    public void updateBeaconInterval(String hostIdStr, String beaconValue) {        
+        int hostId = Integer.parseInt(hostIdStr);
+        int beaconInterval = Integer.parseInt(beaconValue);
+        ControlMessage aMsg = new UpdateBeaconInterval( Constants.SERVER_ID, hostId, beaconInterval);
+        DataManager.send( theManager, aMsg);
     }
 
 }

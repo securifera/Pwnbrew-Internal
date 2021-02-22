@@ -213,96 +213,88 @@ public final class Hello extends ControlMessage {
     @Override
     public void evaluate( PortManager passedManager ) {
         
-        //Get the address and connect
-        try {
+        if( clientHostname.equals("localhost")){
+            Log.log(Level.INFO, NAME_Class, "evaluate()", "Unable to register host with hostname 'localhost' because it conflicts with server host object.", null );
+            return;
+        }
+        ControlMessageManager aCMManager = ControlMessageManager.getMessageManager();
+        if( aCMManager != null ){
             
-            //Make sure the host is named localhost or it will screw up the server
-            if( clientHostname.equals("localhost")){
-                Log.log(Level.INFO, NAME_Class, "evaluate()", "Unable to register host with hostname 'localhost' because it conflicts with server host object.", null );
-                return;
-            }
+            //Register the host
+            Integer theClientId = getSrcHostId();
+            Log.log(Level.INFO, NAME_Class, "evaluate()", "Accepted connection from host id: " + theClientId + " channel: " + Integer.toString(theChannelId), null);
+            PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort() );
             
-            ControlMessageManager aCMManager = ControlMessageManager.getMessageManager();
-            if( aCMManager != null ){
-           
-                //Register the host
-                Integer theClientId = getSrcHostId();
-                Log.log(Level.INFO, NAME_Class, "evaluate()", "Accepted connection from host id: " + theClientId + " channel: " + Integer.toString(theChannelId), null);
-                PortRouter aPR = passedManager.getPortRouter( aCMManager.getPort() );
-                              
-                //Get connection manager
-                ConnectionManager aCM = aPR.getConnectionManager(theClientId);
-                if( aCM != null ){
+            //Get connection manager
+            ConnectionManager aCM = aPR.getConnectionManager(theClientId);
+            if( aCM != null ){
+                
+                SocketChannelHandler aSCH = aCM.getSocketChannelHandler( theChannelId );
+                if( aSCH != null ){
                     
-                    SocketChannelHandler aSCH = aCM.getSocketChannelHandler( theChannelId );
-                    if( aSCH != null ){
+                    //Send HostAck
+//                        HelloAck aHostAck = new HelloAck( theClientId );
+//                        DataManager.send( passedManager, aHostAck );
 
-                        //Send HostAck
-                        HelloAck aHostAck = new HelloAck( theClientId );
-                        DataManager.send( passedManager, aHostAck );
+                    //Create a host
+                    Host aHost = new Host(theClientId);
+                    aHost.setName(clientHostname);                    
 
-                        //Create a host
-                        Host aHost = new Host(theClientId);   
-                        aHost.setName(clientHostname);                    
+                    //Get the list
+                    List<String> nicInfoList = getNicInfoList();
+                    for( String aStr : nicInfoList ){   
 
-                        //Get the list
-                        List<String> nicInfoList = getNicInfoList();
-                        for( String aStr : nicInfoList ){   
+                        String[] nicTriple = aStr.split(":");
+                        String nicMac = nicTriple[0];
 
-                            String[] nicTriple = aStr.split(":");
-                            String nicMac = nicTriple[0];
-
-                            //Split on delim
-                            String ipAddrTuple = "";
-                            if( nicTriple.length == 2 ){
-                                ipAddrTuple = nicTriple[1];
-                            }
-
-                            //Split the ip details
-                            String ipAddress = "";
-                            String netMask = "";
-                            String[] ipArr = ipAddrTuple.split("/");  
-                            if( ipArr.length == 2){
-                                ipAddress = ipArr[0];
-                                netMask = ipArr[1];
-                            }
-
-                            //Create a NIC
-                            Nic aNic = new Nic( nicMac, ipAddress, netMask);
-                            aHost.addNicPair(nicMac, aNic );
+                        //Split on delim
+                        String ipAddrTuple = "";
+                        if( nicTriple.length == 2 ){
+                            ipAddrTuple = nicTriple[1];
                         }
 
-                        //Set the host to connected
-                        aHost.setConnected(true);
+                        //Split the ip details
+                        String ipAddress = "";
+                        String netMask = "";
+                        String[] ipArr = ipAddrTuple.split("/");
+                        if( ipArr.length == 2){
+                            ipAddress = ipArr[0];
+                            netMask = ipArr[1];
+                        }
 
-                        //Set the OS Name and arch
-                        aHost.setOsName( getOsName() );
-
-                        //Set the OS Name and arch
-                        aHost.setJvmArch( getJavaArch() );
-
-                        //Set the OS Name and arch
-                        aHost.setJarVersion(jar_version);
-
-                        //Set the OS Name and arch
-                        aHost.setJreVersion(jre_version);
-                        
-                        //Set the PID
-                        aHost.setPid(pid);
-
-                        //Notify the task manager
-                        ((ServerManager)passedManager).registerHost( aHost );
-                        
-                        //Send notification if it's enabled
-                        NotificationManager.hostConnected(aHost);
-                                                  
-                    } else {
-                        Log.log(Level.INFO, NAME_Class, "evaluate()", "Unable to locate the client id specified.", null );
+                        //Create a NIC
+                        Nic aNic = new Nic( nicMac, ipAddress, netMask);
+                        aHost.addNicPair(nicMac, aNic );
                     }
+
+                    //Set the host to connected
+                    aHost.setConnected(true);
+
+                    //Set the OS Name and arch
+                    aHost.setOsName( getOsName() );
+
+                    //Set the OS Name and arch
+                    aHost.setJvmArch( getJavaArch() );
+
+                    //Set the OS Name and arch
+                    aHost.setJarVersion(jar_version);
+
+                    //Set the OS Name and arch
+                    aHost.setJreVersion(jre_version);
+
+                    //Set the PID
+                    aHost.setPid(pid);
+
+                    //Notify the task manager
+                    ((ServerManager)passedManager).registerHost( aHost );
+
+                    //Send notification if it's enabled
+                    NotificationManager.hostConnected(aHost);
+
+                } else {
+                    Log.log(Level.INFO, NAME_Class, "evaluate()", "Unable to locate the client id specified.", null );
                 }
             }
-        } catch (IOException ex) {
-            Log.log(Level.INFO, NAME_Class, "evaluate()", ex.getMessage(), ex );
         }
         
     }

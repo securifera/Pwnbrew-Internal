@@ -40,6 +40,8 @@ package pwnbrew.network.control.messages;
 
 
 import java.io.IOException;
+import pwnbrew.network.ControlOption;
+import pwnbrew.utilities.SocketUtilities;
 
 /**
  *
@@ -51,16 +53,23 @@ public final class HelloAck extends ControlMessage {
     
     public static final short MESSAGE_ID = 0x3c;
     
+    private static final byte OPTION_BEACON_INTERVAL = 125;
+    
     // ==========================================================================
     /**
      * Constructor
      *
      * @param dstHostId
-     * @throws java.io.IOException
+     * @param passedInterval
     */
     @SuppressWarnings("ucd")
-    public HelloAck( int dstHostId ) throws IOException {
+    public HelloAck( int dstHostId, int passedInterval ) {
         super(MESSAGE_ID, dstHostId );
+        
+        //Add beacon interval
+        byte[] tempBytes = SocketUtilities.intToByteArray( passedInterval );
+        ControlOption aTlv = new ControlOption( OPTION_BEACON_INTERVAL, tempBytes);
+        addOption(aTlv);
     }
 
 }/* END CLASS HelloAck */

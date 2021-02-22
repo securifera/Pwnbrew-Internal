@@ -76,6 +76,7 @@ public class SocketChannelWrapper {
         
         requestBB = ByteBuffer.allocate(requestBBSize);
         theSocketTimeoutThread = new SocketTimeoutThread(this);
+        theSocketTimeoutThread.start();
     }
 
     //===============================================================

@@ -66,6 +66,7 @@ public final class HostMsg extends MaltegoMessage{
     private static final byte OPTION_SLEEPABLE = 65;
     private static final byte OPTION_RELAY_PORT = 67;
     private static final byte OPTION_PID = 68;
+    private static final byte OPTION_BEACON_INTERVAL = 69;
     
     private boolean connected = false;
     private boolean sleepable = false;
@@ -75,6 +76,7 @@ public final class HostMsg extends MaltegoMessage{
     private String java_arch = "";
     private String pid = "";
     private int hostid = 0;
+    private int beaconInterval = 0;
     
     public static final short MESSAGE_ID = 0x6d;
     
@@ -116,6 +118,9 @@ public final class HostMsg extends MaltegoMessage{
                     break;
                 case OPTION_HOST_ID:
                     hostid = SocketUtilities.byteArrayToInt(theValue);
+                    break;
+                case OPTION_BEACON_INTERVAL:
+                    beaconInterval = SocketUtilities.byteArrayToInt(theValue);
                     break;
                 case OPTION_CONNECTED:
                     
@@ -166,7 +171,7 @@ public final class HostMsg extends MaltegoMessage{
                 HostHandler aHandler = (HostHandler)aFunction;
                 
                 //Add the host to the list
-                Host aHost = new Host( connected, sleepable, relayPort, clientHostname, java_arch, pid, os_name, Integer.toString( hostid) );
+                Host aHost = new Host( connected, sleepable, relayPort, clientHostname, java_arch, pid, os_name, Integer.toString( hostid), Integer.toString(beaconInterval) );
                 aHandler.addHost( aHost );
             }            
         }  

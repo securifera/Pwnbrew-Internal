@@ -84,10 +84,9 @@ public class EncryptedSocketChannelWrapper extends SocketChannelWrapper {
      * @param passedHandler
      * @param requireAuth
      * @throws LoggableException
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws IOException 
      */
-    public EncryptedSocketChannelWrapper ( SocketChannel sc, SocketChannelHandler passedHandler, boolean requireAuth ) throws LoggableException, IOException, InterruptedException {
+    public EncryptedSocketChannelWrapper ( SocketChannel sc, SocketChannelHandler passedHandler, boolean requireAuth ) throws LoggableException, IOException {
         super(sc, passedHandler );
 
         //Get the type and the SSL context

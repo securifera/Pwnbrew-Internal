@@ -195,18 +195,21 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                 IncomingConnectionManager aICM = (IncomingConnectionManager) aSPR.getConnectionManager(srcHostId);
                                                 if( aICM != null ){
                                                     SocketChannelHandler aHandler = aICM.getSocketChannelHandler( channelId );
-                                                    if( aHandler != null && aHandler != passedHandler){
+                                                    if( aHandler != null){
                                                         
-                                                        //Switch out the selector registration for the socket channel
-                                                        SocketChannelWrapper aSCH = passedHandler.getSocketChannelWrapper();
-                                                        if(aSCH != null){
-                                                            aHandler.setSocketChannelWrapper(aSCH);
+                                                        if( aHandler != passedHandler){
+                                                        
+                                                            //Switch out the selector registration for the socket channel
+                                                            SocketChannelWrapper aSCH = passedHandler.getSocketChannelWrapper();
+                                                            if(aSCH != null){
+                                                                aHandler.setSocketChannelWrapper(aSCH);
 
-                                                            //Register this handler with the selection router
-                                                            aSPR.getSelRouter().register(aSCH.getSocketChannel(), SelectionKey.OP_READ, aHandler);
-                                                            passedHandler = aHandler;
-                                                        } else{
-                                                            Log.log( Level.SEVERE, NAME_Class, "processHeader()", "SocketChannelWrapper is null", null);
+                                                                //Register this handler with the selection router
+                                                                aSPR.getSelRouter().register(aSCH.getSocketChannel(), SelectionKey.OP_READ, aHandler);
+                                                                passedHandler = aHandler;
+                                                            } else{
+                                                                Log.log( Level.SEVERE, NAME_Class, "processHeader()", "SocketChannelWrapper is null", null);
+                                                            }
                                                         }
                                                     } else{
                                                         Log.log( Level.SEVERE, NAME_Class, "processHeader()", "SocketChannelHandler is null", null);

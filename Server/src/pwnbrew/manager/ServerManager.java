@@ -53,6 +53,7 @@ import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
 import pwnbrew.network.control.ControlMessageManager;
 import pwnbrew.network.ServerPortRouter;
+import pwnbrew.network.control.messages.HelloAck;
 import pwnbrew.network.control.messages.RelayStart;
 import pwnbrew.network.file.FileMessageManager;
 import pwnbrew.selector.SocketChannelHandler;
@@ -330,7 +331,7 @@ public class ServerManager extends PortManager {
             parentController.saveToDisk();
         }
         
-        final HostController theController = getHostController( clientIdStr );
+        HostController theController = getHostController( clientIdStr );
         if(theController != null /*&& theController.getObject().equals(passedHost)*/){
                 
             //Get the address
@@ -356,6 +357,7 @@ public class ServerManager extends PortManager {
             //Get the auto sleep flag and if it is set then tell the client to goto sleep
             if( theController.getAutoSleepFlag() ){
 
+                final HostController finalController = theController;
                 final ServerManager thiscpy = this;
                 Constants.Executor.execute( new Runnable(){
                     @Override
@@ -363,7 +365,7 @@ public class ServerManager extends PortManager {
                         try {
                             
                             Thread.sleep( 30000 );
-                            theController.sleep( thiscpy, true );
+                            finalController.sleep( thiscpy, true );
                             
                         } catch (InterruptedException ex) {
                             ex = null;
@@ -390,22 +392,29 @@ public class ServerManager extends PortManager {
         } else {
 
             //Start in swing thread since it affects the gui
-            final HostController aHostController = new HostController( passedHost );
+            theController = new HostController( passedHost );
             Session aSession = new Session();
             passedHost.addSession(aSession);
             
+            final HostController finalController = theController;
             SwingUtilities.invokeLater( new Runnable(){
                 @Override
                 public void run() {
                     synchronized(theHostControllerMap){
-                        theHostControllerMap.put( passedHost.getId(), aHostController);
+                        theHostControllerMap.put( passedHost.getId(), finalController);
                     }
                 }
             });
             
-            aHostController.saveToDisk();
+            theController.saveToDisk();
                         
         }
+        
+        //Send the hello ack
+        int clientId = Integer.parseInt(clientIdStr);
+        int beaconInterval = theController.getBeaconInterval();
+        HelloAck aHostAck = new HelloAck( clientId, beaconInterval );
+        DataManager.send( this, aHostAck );
                 
     }
     
@@ -447,5 +456,19 @@ public class ServerManager extends PortManager {
 //       
 //        passedHost.setConnected( false );
 //    }
+
+    //===========================================================================
+    /**
+     * 
+     * @param hostIdStr
+     * @param beaconInterval 
+     */
+    public void updateHostBeaconInterval(String hostIdStr, int beaconInterval) {
+        HostController theController = getHostController( hostIdStr );
+        if(theController != null ){  
+            theController.setBeaconInterval(beaconInterval);
+        }
+    }
+
 
 }

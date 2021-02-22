@@ -305,6 +305,16 @@ public final class HostController {
         return theHost.getBeaconInterval();
     } 
     
+    //===================================================================
+    /**
+     *  Sets the interval for when the host calls back
+     * 
+     * @param passedInterval
+     */
+    public void setBeaconInterval(int passedInterval ){
+        theHost.setBeaconInterval(passedInterval);
+    }
+    
      // ==========================================================================
     /**
      * Saves the given {@link XmlObject} to the Object Library directory.

@@ -35,28 +35,44 @@ Pwnbrew is provided under the 3-clause BSD license above.
 The copyright on this package is held by Securifera, Inc
 
 */
-package pwnbrew.sessions;
 
-import pwnbrew.xml.maltego.custom.Host;
+package pwnbrew.network.control.messages;
+
+import pwnbrew.utilities.SocketUtilities;
+import pwnbrew.network.ControlOption;
 
 /**
  *
- * @author Securifera
+ *  
  */
-public interface SessionJFrameListener extends HostCheckInListListener {
-
-    public void setAutoSleepFlag( int passedHostId, boolean selected, byte passedOperation );
-
-    public void clearSessionList( String hostIdStr );
-
-    public void hostSelected(String hostIdStr);
+public final class UpdateBeaconInterval extends MaltegoMessage{ 
     
-    public void refreshSelection();
-
-    public void beNotified();
+    private static final byte OPTION_HOST_ID = 124;
+    private static final byte OPTION_BEACON_INTERVAL = 125;
     
-    public void removeHost(Host passedHost);
+    public static final short MESSAGE_ID = 0x83;
 
-    public void updateBeaconInterval(String hostIdStr, String beaconValue);
+
+    // ==========================================================================
+    /**
+     * Constructor
+     *
+     * @param dstHostId
+     * @param passedHostId
+     * @param passedInterval
+    */
+    public UpdateBeaconInterval( int dstHostId, int passedHostId, int passedInterval ) {
+        super( MESSAGE_ID, dstHostId );
+        
+        //Add host id
+        byte[] tempBytes = SocketUtilities.intToByteArray( passedHostId );
+        ControlOption aTlv = new ControlOption( OPTION_HOST_ID, tempBytes);
+        addOption(aTlv);
+        
+        //Add beacon interval
+        tempBytes = SocketUtilities.intToByteArray( passedInterval );
+        aTlv = new ControlOption( OPTION_BEACON_INTERVAL, tempBytes);
+        addOption(aTlv);
+    }
 
 }

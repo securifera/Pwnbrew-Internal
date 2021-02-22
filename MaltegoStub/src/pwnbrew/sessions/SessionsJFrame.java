@@ -60,8 +60,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import pwnbrew.generic.gui.ValidTextField;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Iconable;
+import pwnbrew.misc.StandardValidation;
 import pwnbrew.misc.Utilities;
 import pwnbrew.network.control.messages.AutoSleep;
 import pwnbrew.sessions.wizard.HostCheckInWizard;
@@ -73,7 +75,7 @@ import pwnbrew.xml.maltego.custom.Host;
  *
  * @author Securifera
  */
-public class SessionsJFrame extends javax.swing.JFrame {
+public class SessionsJFrame extends javax.swing.JFrame implements BeaconIntervalChangeListener {
 
     private final SessionJFrameListener theListener;
     
@@ -126,6 +128,9 @@ public class SessionsJFrame extends javax.swing.JFrame {
         checkInTimeList = new HostCheckInList( theListener );
         scheduleButton = new javax.swing.JButton();
         autoSleepCheckbox = new javax.swing.JCheckBox();
+        jLabel1 = new javax.swing.JLabel();
+        beaconIntervalTextlField = new BeaconIntervalField(this, "5000" );
+        ((BeaconIntervalField)beaconIntervalTextlField).setValidation( StandardValidation.KEYWORD_Integer );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -184,7 +189,7 @@ public class SessionsJFrame extends javax.swing.JFrame {
             checkInPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(checkInPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(sessionPane, javax.swing.GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
+                .addComponent(sessionPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(clearButton, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -208,6 +213,17 @@ public class SessionsJFrame extends javax.swing.JFrame {
             }
         });
 
+        jLabel1.setText("Beacon Interval");
+
+        beaconIntervalTextlField.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        beaconIntervalTextlField.setText("5");
+        beaconIntervalTextlField.setToolTipText("Host beacon interval in seconds");
+        beaconIntervalTextlField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                beaconIntervalTextlFieldActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
@@ -216,16 +232,21 @@ public class SessionsJFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(hostScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(checkInPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addGap(10, 10, 10)
+                        .addComponent(jLabel1)
+                        .addGap(18, 18, 18)
+                        .addComponent(beaconIntervalTextlField, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(checkInPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(checkInPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
                         .addComponent(scheduleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(autoSleepCheckbox))
-                    .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(checkInPane, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(autoSleepCheckbox)))
                 .addContainerGap())
         );
         mainPanelLayout.setVerticalGroup(
@@ -234,12 +255,15 @@ public class SessionsJFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addComponent(checkInPane, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(checkInPane, javax.swing.GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)
+                            .addComponent(checkInPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(autoSleepCheckbox)
-                            .addComponent(scheduleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(checkInPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(scheduleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1)
+                            .addComponent(beaconIntervalTextlField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(hostScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 268, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -339,15 +363,21 @@ public class SessionsJFrame extends javax.swing.JFrame {
         aDialog.setVisible(true);  
         
     }//GEN-LAST:event_scheduleButtonActionPerformed
+
+    private void beaconIntervalTextlFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_beaconIntervalTextlFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_beaconIntervalTextlFieldActionPerformed
    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox autoSleepCheckbox;
+    private javax.swing.JTextField beaconIntervalTextlField;
     private javax.swing.JScrollPane checkInPane;
     private javax.swing.JPanel checkInPanel;
     private javax.swing.JList checkInTimeList;
     private javax.swing.JButton clearButton;
     private javax.swing.JList hostJList;
     private javax.swing.JScrollPane hostScrollPane;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JButton scheduleButton;
     private javax.swing.JScrollPane sessionPane;
@@ -440,7 +470,13 @@ public class SessionsJFrame extends javax.swing.JFrame {
                         Field hostIdField = aHost.getField( Constants.HOST_ID );
                         String hostIdStr = hostIdField.getXmlObjectContent();
                         theListener.hostSelected(hostIdStr);
+                        
+                        //Set the beacon value
+                        Field beaconIntervalField = aHost.getField( Constants.BEACON_INTERVAL );
+                        String beaconIntervalStr = beaconIntervalField.getXmlObjectContent();
+                        beaconIntervalTextlField.setText(beaconIntervalStr);
                     }
+                    
                 }
             }
         });
@@ -585,5 +621,24 @@ public class SessionsJFrame extends javax.swing.JFrame {
      */
     public void setAutoSleepCheckbox(boolean selected) {
         autoSleepCheckbox.setSelected(selected);
+    }
+
+    @Override
+    public void beaconIntervalChanged(String beaconValue) {
+
+        Object anObj = hostJList.getSelectedValue();
+        if( anObj != null && anObj instanceof Host ){
+            
+            Host aHost = (Host)anObj;
+            Field beaconIntervalField = aHost.getField( Constants.BEACON_INTERVAL );
+            String beaconIntervalStr = beaconIntervalField.getXmlObjectContent();
+            if( !beaconIntervalStr.equals(beaconValue)){
+                //Send message to Server to update beacon value & relay to client
+                Field hostIdField = aHost.getField( Constants.HOST_ID );
+                String hostIdStr = hostIdField.getXmlObjectContent();
+                theListener.updateBeaconInterval(hostIdStr, beaconValue);                
+            }                        
+            
+        }
     }
 }

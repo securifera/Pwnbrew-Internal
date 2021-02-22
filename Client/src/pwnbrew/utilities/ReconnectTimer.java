@@ -100,6 +100,8 @@ public class ReconnectTimer extends ManagedRunnable {
            
     private static final int CONNECT_RETRY = 3;
     private static final int SLEEP_TIME = 1000;
+    
+    private SocketChannel theSocketChannel;
 
     // ==========================================================================
     /**
@@ -169,62 +171,97 @@ public class ReconnectTimer extends ManagedRunnable {
 
         OutgoingConnectionManager theOCM = aPR.getConnectionManager();
         try {
-
             // Create a non-blocking socket channel
-            SocketChannel theSocketChannel = SocketChannel.open();
+            theSocketChannel = SocketChannel.open();
+        } catch (IOException ex) {
+            DebugPrinter.printMessage( NAME_Class, "Error opening socket.");
+            return false;
+        }
+        
+        //Make the socket non blocking
+        try {
             theSocketChannel.configureBlocking(false);
-
-            // Kick off connection establishment
-            try {
-                theSocketChannel.connect(new InetSocketAddress(hostAddress, passedPort));
-            } catch( AlreadyConnectedException ex ) {
-                DebugPrinter.printMessage( NAME_Class, "Socket is already connected.");
-                return true;
-            }
-
-            // Register the server socket channel, indicating an interest in
-            // accepting new connections
-            ConnectHandler connectHandler = new ConnectHandler( aPR, channelId );
-
-            // Register the socket channel and handler with the selector
-            SelectionRouter theSelectionRouter = aPR.getSelRouter();
-            SelectionKey theSelKey = theSelectionRouter.register(theSocketChannel, SelectionKey.OP_CONNECT, connectHandler);
-
-            try {
-                //Wait until the thread is notified or times out
-                waitToBeNotified(5000);
-            } catch (TimeoutException ex) {
-                //Close the socket so it's not left in a half open state
+        } catch (IOException ex) {
+            try{
                 theSocketChannel.close();
-            }
-            
-            if( shutdownRequested)
-                throw new RuntimeException("Thread shutdown requested.");
+            } catch (IOException ex1) {}
+            DebugPrinter.printMessage( NAME_Class, "Error setting non blocking socket.");
+            return false;
+        }
 
-            //Return if the key was cancelled
-            if(!theSelKey.isValid()){
-                theSelKey.cancel();
-                return false;
-            }
+        // Kick off connection establishment
+        try {
+            theSocketChannel.connect(new InetSocketAddress(hostAddress, passedPort));
+        } catch( AlreadyConnectedException ex ) {
+            DebugPrinter.printMessage( NAME_Class, "Socket is already connected.");
+            return true;
+        } catch (IOException ex) {
+            //Close the socket so it's not left in a half open state
+            try{
+                theSocketChannel.close();
+            } catch (IOException ex1) {}
+            DebugPrinter.printMessage( NAME_Class, "Error connecting socket.");
+            return false;
+        }
 
-            //If we returned but we are not connected
-            SocketChannelHandler theSCH = theOCM.getSocketChannelHandler( channelId );
-            if( theSCH == null){ 
+        // Register the server socket channel, indicating an interest in
+        // accepting new connections
+        ConnectHandler connectHandler = new ConnectHandler( aPR, channelId );
 
-                DebugPrinter.printMessage( NAME_Class, "SocketChannelHandler is null.");
-                return false;
+        // Register the socket channel and handler with the selector
+        SelectionRouter theSelectionRouter = aPR.getSelRouter();
+        SelectionKey theSelKey;
+        try {
+            theSelKey = theSelectionRouter.register(theSocketChannel, SelectionKey.OP_CONNECT, connectHandler);
+        } catch (IOException ex) {
+            //Close the socket so it's not left in a half open state
+            try{
+                theSocketChannel.close();
+            } catch (IOException ex1) {}
+            DebugPrinter.printMessage( NAME_Class, "Error registering socket channel with connect handler.");
+            return false;
+        }
 
-            } else if (theSCH.getState() == Constants.DISCONNECTED){
+        try {
+            //Wait until the thread is notified or times out
+            waitToBeNotified(5000);
+        } catch (TimeoutException ex) {
+            //Close the socket so it's not left in a half open state
+            try{
+                theSocketChannel.close();
+            } catch (IOException ex1) {}
+            DebugPrinter.printMessage( NAME_Class, "Socket connect timeout exception.");
+            return false;
+        }
 
-                DebugPrinter.printMessage( NAME_Class, "SocketChannelHandler is disconnected.");
-                //Shutdown the first connect handler and set it to null
-                //theSelKey.cancel();
-                return false;                
-            }
+        //Return if the key was cancelled
+        if(!theSelKey.isValid()){
+            //Close the socket so it's not left in a half open state
+            try{
+                theSocketChannel.close();
+            } catch (IOException ex1) {}
 
+            theSelKey.cancel();
+            return false;
+        }
 
-        } catch(IOException ex){
-            throw new LoggableException(ex);
+        //If we returned but we are not connected
+        SocketChannelHandler theSCH = theOCM.getSocketChannelHandler( channelId );
+        if( theSCH == null){ 
+            //Close the socket so it's not left in a half open state
+            try{
+                theSocketChannel.close();
+            } catch (IOException ex1) {}
+            DebugPrinter.printMessage( NAME_Class, "SocketChannelHandler is null.");
+            return false;
+
+        } else if (theSCH.getState() == Constants.DISCONNECTED){
+            //Close the socket so it's not left in a half open state
+            try{
+                theSocketChannel.close();
+            } catch (IOException ex1) {}
+            DebugPrinter.printMessage( NAME_Class, "SocketChannelHandler is disconnected.");
+            return false;                
         }
 
         return true;
@@ -434,8 +471,9 @@ public class ReconnectTimer extends ManagedRunnable {
                     
                     try {
                         //DebugPrinter.printMessage(NAME_Class, "ReconnectTimer waiting to be notified.");
-                        waitToBeNotified();
-                    } catch (TimeoutException ex) {}
+                        waitToBeNotified(5000);
+                    } catch (TimeoutException ex) {                        
+                    }
                     
                     if( shutdownRequested)
                         return;
@@ -490,8 +528,9 @@ public class ReconnectTimer extends ManagedRunnable {
             
             ensureConnectivity(aPR, aCC, theChannelId);
             try {
-                waitToBeNotified();
-            } catch (TimeoutException ex) {}
+                waitToBeNotified(5000);
+            } catch (TimeoutException ex) {
+            }
             
             if( shutdownRequested)
                 return;
@@ -519,21 +558,14 @@ public class ReconnectTimer extends ManagedRunnable {
             }               
         }
         
-//         //Shutdown and remove
-//        if(enabled == false){
-//            //Cleanup socket handlers and remove reconnect timer
-//            OutgoingConnectionManager theOCM = aPR.getConnectionManager();
-//            SocketChannelHandler aSCH = theOCM.removeHandler(theChannelId);
-//            if( aSCH != null )
-//                aSCH.shutdown();
-//            
-//            //Remove the reconnect timer
-//            theOCM.removeReconnectTimer(theChannelId);            
-//            
-//            return;
-//        }
+        //Close the socket if the thread is being shutdown
+        if( shutdownRequested || enabled == false){
+            try {
+                theSocketChannel.close();
+            } catch (IOException ex) {}
+        }
         
-        DebugPrinter.printMessage(NAME_Class, "Thread complete channel " + Integer.toString(theChannelId));
+        //DebugPrinter.printMessage(NAME_Class, "Thread complete channel " + Integer.toString(theChannelId));
      
         //Reset things
         theConnectionCallback = null;

@@ -126,13 +126,6 @@ public class ConnectHandler implements Selectable {
         } catch (UnknownHostException ex) {
             RemoteLog.log(Level.SEVERE, NAME_Class, "handle()", ex.getMessage(), ex);
         }
-        
-//        try {
-//            //Set a keepalive so we are notified of disconnects
-//            theSocket.setKeepAlive(true);
-//        } catch (SocketException ex) {
-//            RemoteLog.log(Level.SEVERE, NAME_Class, "handle()", ex.getMessage(), ex );
-//        }
 
         try {
             
@@ -152,9 +145,6 @@ public class ConnectHandler implements Selectable {
             theSCH.setSocketChannelWrapper(theSCW);            
             theSCW.beginHandshake();
             
-            //Start the timeout thread
-            theSCW.getSocketTimeoutThread().start();
-
             //Notify the comm
             theClientPortRouter.getSelRouter().changeOps(theSCW.getSocketChannel(), SelectionKey.OP_READ | SelectionKey.OP_WRITE );                        
         
