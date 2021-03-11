@@ -55,18 +55,14 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
-import pwnbrew.ClientConfig;
 import pwnbrew.Persistence;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.DataManager;
-import pwnbrew.manager.OutgoingConnectionManager;
-import pwnbrew.network.ClientPortRouter;
 import pwnbrew.utilities.DebugPrinter;
 import pwnbrew.network.control.messages.PushFile;
 import pwnbrew.network.control.messages.PushFileFin;
 import pwnbrew.network.control.messages.TaskProgress;
-import pwnbrew.selector.SocketChannelHandler;
 
 /**
  *
@@ -183,18 +179,6 @@ final public class FileReceiver {
         } catch (IOException ex) {
             ex = null;
         }  
-        
-//        ClientConfig theConf = ClientConfig.getConfig();
-//        int socketPort = theConf.getSocketPort();
-//        ClientPortRouter aPR = (ClientPortRouter) theFileMessageManager.getPortManager().getPortRouter( socketPort );
-//        
-//        //Get the connection manager
-//        OutgoingConnectionManager aOCM = aPR.getConnectionManager( srcHostId );
-//        if( aOCM != null ){
-//            SocketChannelHandler aSCH = aOCM.removeHandler( channelId );
-//            if( aSCH != null )
-//                aSCH.shutdown();            
-//        }
     }
     
     //===========================================================================

@@ -131,7 +131,7 @@ abstract public class ManagedRunnable implements Runnable {
                 if( anInt.length > 0 ){
                     
                     wait( anInt[0]);
-                    if( !notified )
+                    if( !notified && !shutdownRequested)
                         throw new TimeoutException("Thread time out waiting for notification.");
                     
                 } else {

@@ -338,25 +338,24 @@ public class FileMessageManager extends DataManager {
         
          
         //Close the socket
-        try {
+//        try {
             
-            int srcId = passedMsg.getSrcHostId();
+//            int srcId = passedMsg.getSrcHostId();
             int taskId = passedMsg.getTaskId();
             int fileId = passedMsg.getFileId();
-            int channelId = passedMsg.getFileChannelId();
+//            int channelId = passedMsg.getFileChannelId();
             
-            ServerConfig theConfig = ServerConfig.getServerConfig();
-            int socketPort = theConfig.getSocketPort();
+//            ServerConfig theConfig = ServerConfig.getServerConfig();
+//            int socketPort = theConfig.getSocketPort();
 
             //Shutdown the socket
-            PortRouter aSPR = getPortManager().getPortRouter(socketPort);
-            IncomingConnectionManager aICM = (IncomingConnectionManager)aSPR.getConnectionManager(srcId);
-            if( aICM != null ){
-                SocketChannelHandler aSCH = aICM.removeHandler(channelId);
-                if( aSCH != null )
-                    aSCH.shutdown();
-            }
-            
+//            PortRouter aSPR = getPortManager().getPortRouter(socketPort);
+//            IncomingConnectionManager aICM = (IncomingConnectionManager)aSPR.getConnectionManager(srcId);
+//            if( aICM != null ){
+//                SocketChannelHandler aSCH = aICM.removeHandler(channelId);
+//                if( aSCH != null )
+//                    aSCH.shutdown();
+//            }    
         
                 
             synchronized( theFileSenderMap ){
@@ -368,9 +367,9 @@ public class FileMessageManager extends DataManager {
                 }
             }
         
-        } catch (LoggableException ex) {
-            Log.log(Level.SEVERE, NAME_Class, "cleanupFileTransfer()", ex.getMessage(), ex);
-        } 
+//        } catch (LoggableException ex) {
+//            Log.log(Level.SEVERE, NAME_Class, "cleanupFileTransfer()", ex.getMessage(), ex);
+//        } 
         
     }
 

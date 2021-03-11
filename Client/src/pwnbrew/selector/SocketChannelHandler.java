@@ -303,7 +303,7 @@ public class SocketChannelHandler implements Selectable {
 
                 //Copy over the bytes
                 ByteBuffer readByteBuf = ByteBuffer.wrap( Arrays.copyOf( theSCW.getReadBuf().array(), bytesRead ) );
-                DebugPrinter.printMessage(NAME_Class, "Received "+ Integer.toString(bytesRead) + " bytes on channel: " + Integer.toString(channelId));
+                //DebugPrinter.printMessage(NAME_Class, "Received "+ Integer.toString(bytesRead) + " bytes on channel: " + Integer.toString(channelId));
 
                 //Check if a port wrapper has been assigned
                 PortWrapper aPortWrapper = DataManager.getPortWrapper( getPort() );
@@ -416,26 +416,26 @@ public class SocketChannelHandler implements Selectable {
 
                                                         if( aCM instanceof OutgoingConnectionManager ){
 
-                                                            //Create the Timer
-                                                            OutgoingConnectionManager theOCM = (OutgoingConnectionManager)aCM;
-                                                            int newChannelId = theOCM.getNextChannelId();
-                                                            ReconnectTimer aReconnectTimer = new ReconnectTimer(aSPR.getPortManager(), newChannelId); 
-                                                            byte stlth_val = 0;
-                                                            if( theConf.useStealth() )
-                                                                stlth_val = 1;   
-
-                                                            //Queue register message
-                                                            RegisterMessage regMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, newChannelId);
-                                                            aReconnectTimer.setPostConnectMessage(regMsg);
-                                                            
-                                                            //TODO need to check if the id is taken
-                                                            //ClientPortRouter aCPR = (ClientPortRouter)thePR;
-                                                            //aCPR.ensureConnectivity(aSCC );
-                                                            
-                                                            //Create callback
-                                                            SocketChannelCallback aSCC = new SocketChannelCallback(serverIp, theSocketPort, aMsg, aCM, aReconnectTimer);
-                                                            aReconnectTimer.setConnectionCallback(aSCC);
-                                                            aReconnectTimer.start();       
+//                                                            //Create the Timer
+//                                                            OutgoingConnectionManager theOCM = (OutgoingConnectionManager)aCM;
+//                                                            int newChannelId = theOCM.getNextChannelId();
+//                                                            ReconnectTimer aReconnectTimer = new ReconnectTimer(aSPR.getPortManager(), newChannelId); 
+//                                                            byte stlth_val = 0;
+//                                                            if( theConf.useStealth() )
+//                                                                stlth_val = 1;   
+//
+//                                                            //Queue register message
+//                                                            RegisterMessage regMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, newChannelId);
+//                                                            aReconnectTimer.setPostConnectMessage(regMsg);
+//                                                            
+//                                                            //TODO need to check if the id is taken
+//                                                            //ClientPortRouter aCPR = (ClientPortRouter)thePR;
+//                                                            //aCPR.ensureConnectivity(aSCC );
+//                                                            
+//                                                            //Create callback
+//                                                            SocketChannelCallback aSCC = new SocketChannelCallback(serverIp, theSocketPort, aMsg, aCM, aReconnectTimer);
+//                                                            aReconnectTimer.setConnectionCallback(aSCC);
+//                                                            aReconnectTimer.start();       
 
                                                         }
                                                     } else {
@@ -522,7 +522,7 @@ public class SocketChannelHandler implements Selectable {
 
             } else  if(bytesRead == 0){
 
-                DebugPrinter.printMessage( this.getClass().getSimpleName(), "Nothing to receive. Sleeping. channel " + Integer.toString(channelId));
+                //DebugPrinter.printMessage( this.getClass().getSimpleName(), "Nothing to receive. Sleeping. channel " + Integer.toString(channelId));
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ex) {
@@ -562,7 +562,7 @@ public class SocketChannelHandler implements Selectable {
                         byte[] nextArr = nextItem.byteArray;
                         try {
 
-                            DebugPrinter.printMessage(NAME_Class, "Sending "+ Integer.toString(nextArr.length) + " bytes on channel: " + Integer.toString(channelId));
+                            //DebugPrinter.printMessage(NAME_Class, "Sending "+ Integer.toString(nextArr.length) + " bytes on channel: " + Integer.toString(channelId));
                             send(nextArr);
                             
                             SocketChannel aSC = getSocketChannel();

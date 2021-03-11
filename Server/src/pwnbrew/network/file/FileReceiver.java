@@ -178,23 +178,23 @@ final public class FileReceiver {
         }  
         
         //Close the socket
-        try {
-            
-            ServerConfig theConfig = ServerConfig.getServerConfig();
-            int socketPort = theConfig.getSocketPort();
-
-            //Shutdown the socket
-            PortRouter aSPR = theFileMessageManager.getPortManager().getPortRouter(socketPort);
-            IncomingConnectionManager aICM = (IncomingConnectionManager)aSPR.getConnectionManager(srcId);
-            if( aICM != null ){
-                SocketChannelHandler aSCH = aICM.removeHandler(channelId);
-                if( aSCH != null )
-                    aSCH.shutdown();
-            }
-            
-        } catch (LoggableException ex) {
-            Log.log(Level.SEVERE, NAME_Class, "cleanupFileTransfer()", ex.getMessage(), ex);
-        } 
+//        try {
+//            
+//            ServerConfig theConfig = ServerConfig.getServerConfig();
+//            int socketPort = theConfig.getSocketPort();
+//
+//            //Shutdown the socket
+//            PortRouter aSPR = theFileMessageManager.getPortManager().getPortRouter(socketPort);
+//            IncomingConnectionManager aICM = (IncomingConnectionManager)aSPR.getConnectionManager(srcId);
+//            if( aICM != null ){
+//                SocketChannelHandler aSCH = aICM.removeHandler(channelId);
+//                if( aSCH != null )
+//                    aSCH.shutdown();
+//            }
+//            
+//        } catch (LoggableException ex) {
+//            Log.log(Level.SEVERE, NAME_Class, "cleanupFileTransfer()", ex.getMessage(), ex);
+//        } 
     }
     
     //===============================================================

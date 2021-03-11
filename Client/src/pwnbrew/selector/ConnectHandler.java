@@ -118,7 +118,7 @@ public class ConnectHandler implements Selectable {
         Socket theSocket = socketChannel.socket();
         InetAddress srcAddr = theSocket.getInetAddress();
         int localPort = theSocket.getLocalPort();
-        DebugPrinter.printMessage( NAME_Class, "Socket is connected on port: " + Integer.toString(localPort)); 
+        //DebugPrinter.printMessage( NAME_Class, "Socket is connected on port: " + Integer.toString(localPort) + " channel " + Integer.toString(channelId)); 
                 
         String theAddy = srcAddr.getHostAddress();
         try {
@@ -147,7 +147,7 @@ public class ConnectHandler implements Selectable {
             
             //Notify the comm
             theClientPortRouter.getSelRouter().changeOps(theSCW.getSocketChannel(), SelectionKey.OP_READ | SelectionKey.OP_WRITE );                        
-        
+      
         } catch ( IOException | LoggableException | InterruptedException ex) {
              RemoteLog.log(Level.WARNING, NAME_Class, "handle()", ex.getMessage(), ex);
         }

@@ -135,6 +135,15 @@ public class FileFinder extends ManagedRunnable {
     public void setTaskId( int taskId ) {
         theTaskId = taskId;
     }
+    
+    // ==========================================================================
+    /**
+     * 
+     * @return 
+     */
+    public int getTaskId() {
+        return theTaskId;
+    }
 
     // ==========================================================================
     /**

@@ -69,7 +69,7 @@ public class ClientConfig {
     
     //Configurable Ports
     private int theSocketPort = 443;
-    private int theBeaconInterval = 0;
+    private int theBeaconInterval = 5;
   
     //The time to sleep between connections
     private static ClientConfig theConf = null;

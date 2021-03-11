@@ -200,31 +200,31 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                                 if( !aMsg.keepWrapping() )
                                                                     passedHandler.setWrapping( false);
 ////                                                                
-                                                                if( aCM instanceof OutgoingConnectionManager ){
-                                                                    
-                                                                    //Create the Timer
-                                                                    OutgoingConnectionManager theOCM = (OutgoingConnectionManager)aCM;
-                                                                    int newChannelId = theOCM.getNextChannelId();
-                                                                    ReconnectTimer aReconnectTimer = new ReconnectTimer(aSPR.getPortManager(), newChannelId); 
-                                                                    byte stlth_val = 0;
-                                                                    if( theConf.useStealth() )
-                                                                        stlth_val = 1;   
-
-                                                                    //Queue register message
-                                                                    RegisterMessage regMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, newChannelId);
-                                                                    aReconnectTimer.setPostConnectMessage(regMsg);
-                                 
-                                                                    
-                                                                    //Create callback
-                                                                    SocketChannelCallback aSCC = new SocketChannelCallback(serverIp, theSocketPort, aMsg, aCM, aReconnectTimer);
-                                                      
-                                                                    //TODO need to check if the id is already taken
-                                                                    //ClientPortRouter aCPR = (ClientPortRouter)thePR;
-                                                                    //aCPR.ensureConnectivity(aSCC, chanId);
-                                                                    aReconnectTimer.setConnectionCallback(aSCC);
-                                                                    aReconnectTimer.start();
-                                                                    
-                                                                }
+//                                                                if( aCM instanceof OutgoingConnectionManager ){
+//                                                                    
+//                                                                    //Create the Timer
+//                                                                    OutgoingConnectionManager theOCM = (OutgoingConnectionManager)aCM;
+//                                                                    int newChannelId = theOCM.getNextChannelId();
+//                                                                    ReconnectTimer aReconnectTimer = new ReconnectTimer(aSPR.getPortManager(), newChannelId); 
+//                                                                    byte stlth_val = 0;
+//                                                                    if( theConf.useStealth() )
+//                                                                        stlth_val = 1;   
+//
+//                                                                    //Queue register message
+//                                                                    RegisterMessage regMsg = new RegisterMessage( RegisterMessage.REG, stlth_val, newChannelId);
+//                                                                    aReconnectTimer.setPostConnectMessage(regMsg);
+//                                 
+//                                                                    
+//                                                                    //Create callback
+//                                                                    SocketChannelCallback aSCC = new SocketChannelCallback(serverIp, theSocketPort, aMsg, aCM, aReconnectTimer);
+//                                                      
+//                                                                    //TODO need to check if the id is already taken
+//                                                                    //ClientPortRouter aCPR = (ClientPortRouter)thePR;
+//                                                                    //aCPR.ensureConnectivity(aSCC, chanId);
+//                                                                    aReconnectTimer.setConnectionCallback(aSCC);
+//                                                                    aReconnectTimer.start();
+//                                                                    
+//                                                                }
                                                             } else {
                                                             
                                                                 SocketChannelHandler srvHandler = aCM.getSocketChannelHandler( srcChannelId );

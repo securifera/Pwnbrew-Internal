@@ -237,10 +237,9 @@ public class OutgoingConnectionManager extends ConnectionManager {
         
         //Kill the timers
         ReconnectTimer aRT = getReconnectTimer(passedId);
-        if( aRT != null ){
-            aRT.setEnabled(false);
+        if( aRT != null )
             aRT.shutdown();
-        }
+        
         
     }
 

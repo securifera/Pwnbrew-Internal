@@ -358,7 +358,7 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
 
             //Add the file to the node if one exists
             final FileNode aFileNode;
-            if( filePath != null && !filePath.isEmpty() && theTask.getListLength() < theTask.getFileCount()){
+            if( filePath != null && !filePath.isEmpty() /**&& theTask.getListLength() < theTask.getFileCount()**/){
                                 
                 //DebugPrinter.printMessage( getClass().getSimpleName(), "updateFileSystem", "Created file node for \"" + filePath + "\"", null);
            
@@ -369,8 +369,43 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
             } else{
                 aFileNode = null;
             }
-                            
-            if( theTask.getListLength() == theTask.getFileCount() && 
+            
+            if( theTask.getTaskType() == FileOperation.SEARCH){
+                
+                //Get the parent
+                FileNode parentFileNode = null;
+                Object parentObject = theTask.getParentNode();
+                if( parentObject instanceof DefaultMutableTreeNode ){
+                    
+                    DefaultMutableTreeNode parent = (DefaultMutableTreeNode)parentObject;
+                    parent.removeAllChildren();  // Remove Flag
+
+                    Object theParentObj = parent.getUserObject();
+                    if( theParentObj instanceof IconData ){
+                        IconData theIconData = (IconData)theParentObj;
+                        Object innerObj = theIconData.getObject();
+                        if( innerObj instanceof FileNode ){
+                            parentFileNode = (FileNode)innerObj;
+                        }
+                    }
+
+                    //Run in swing thread
+                    final FileNode theParentNode = parentFileNode;                                
+                    final FileTreePanel theFileTreePanel = theFsFrame.getFileTreePanel();                
+                    SwingUtilities.invokeLater( new Runnable(){
+
+                        @Override
+                        public void run() {
+                            if( aFileNode != null ){
+                                //Add to the table
+                                List<FileNode> nodeList = new ArrayList<>();
+                                nodeList.add(aFileNode);
+                                addToFileTable( theParentNode, nodeList, theFileTreePanel );
+                            }
+                        } 
+                    });
+                }
+            }  else if( theTask.getListLength() == theTask.getFileCount() && 
                     theTask.getTaskType() != FileOperation.DOWNLOAD_DIR){
 
                 //Run in swing thread                            
@@ -477,41 +512,41 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
                 removeRemoteFileSystemTask(taskId);
                
             //Is a file search under way
-            } else if( theTask.getTaskType() == FileOperation.SEARCH){
-                
-                //Get the parent
-                FileNode parentFileNode = null;
-                Object parentObject = theTask.getParentNode();
-                if( parentObject instanceof DefaultMutableTreeNode ){
-                    
-                    DefaultMutableTreeNode parent = (DefaultMutableTreeNode)parentObject;
-                    parent.removeAllChildren();  // Remove Flag
-
-                    Object theParentObj = parent.getUserObject();
-                    if( theParentObj instanceof IconData ){
-                        IconData theIconData = (IconData)theParentObj;
-                        Object innerObj = theIconData.getObject();
-                        if( innerObj instanceof FileNode ){
-                            parentFileNode = (FileNode)innerObj;
-                        }
-                    }
-
-                    //Run in swing thread
-                    final FileNode theParentNode = parentFileNode;                                
-                    final FileTreePanel theFileTreePanel = theFsFrame.getFileTreePanel();                
-                    SwingUtilities.invokeLater( new Runnable(){
-
-                        @Override
-                        public void run() {
-                            if( aFileNode != null ){
-                                //Add to the table
-                                List<FileNode> nodeList = new ArrayList<>();
-                                nodeList.add(aFileNode);
-                                addToFileTable( theParentNode, nodeList, theFileTreePanel );
-                            }
-                        } 
-                    });
-                }
+//            } else if( theTask.getTaskType() == FileOperation.SEARCH){
+//                
+//                //Get the parent
+//                FileNode parentFileNode = null;
+//                Object parentObject = theTask.getParentNode();
+//                if( parentObject instanceof DefaultMutableTreeNode ){
+//                    
+//                    DefaultMutableTreeNode parent = (DefaultMutableTreeNode)parentObject;
+//                    parent.removeAllChildren();  // Remove Flag
+//
+//                    Object theParentObj = parent.getUserObject();
+//                    if( theParentObj instanceof IconData ){
+//                        IconData theIconData = (IconData)theParentObj;
+//                        Object innerObj = theIconData.getObject();
+//                        if( innerObj instanceof FileNode ){
+//                            parentFileNode = (FileNode)innerObj;
+//                        }
+//                    }
+//
+//                    //Run in swing thread
+//                    final FileNode theParentNode = parentFileNode;                                
+//                    final FileTreePanel theFileTreePanel = theFsFrame.getFileTreePanel();                
+//                    SwingUtilities.invokeLater( new Runnable(){
+//
+//                        @Override
+//                        public void run() {
+//                            if( aFileNode != null ){
+//                                //Add to the table
+//                                List<FileNode> nodeList = new ArrayList<>();
+//                                nodeList.add(aFileNode);
+//                                addToFileTable( theParentNode, nodeList, theFileTreePanel );
+//                            }
+//                        } 
+//                    });
+//                }
             }
 
         } else {
@@ -1309,7 +1344,10 @@ public class ToFileBrowser extends Function implements FileBrowserListener, Prog
     @Override
     public void cancelSearch() {        
         CancelSearch aCS = new CancelSearch(theHostId);
-        DataManager.send( theManager, aCS);        
+        DataManager.send( theManager, aCS);    
+        
+        //Reset the button
+        theFsFrame.searchComplete();
     }
 
     @Override
