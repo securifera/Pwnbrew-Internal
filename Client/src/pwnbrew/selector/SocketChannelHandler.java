@@ -572,7 +572,7 @@ public class SocketChannelHandler implements Selectable {
 
                         } catch( IOException ex ){
 
-                            if (ex.getMessage().startsWith("Resource temporarily")) {
+                            if (ex != null && ex.getMessage().startsWith("Resource temporarily")) {
                                 RemoteLog.log(Level.INFO, NAME_Class, "send()", ex.getMessage(), ex );
                                 return;
                             }                                   

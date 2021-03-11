@@ -91,6 +91,16 @@ public class SocketChannelWrapper {
     
     //===============================================================
     /**
+     * Returns the socket channel handler
+     * 
+     * @return 
+     */
+    public SocketChannelHandler getSocketChannelHandler() {
+	return theSocketHandler;
+    }
+    
+    //===============================================================
+    /**
      * Returns the socket timeout thread
      * 
      * @return 
@@ -220,6 +230,7 @@ public class SocketChannelWrapper {
     public boolean shutdown() throws IOException {
         theSocketTimeoutThread.shutdown();
         close();
+        theSocketHandler.getPortRouter().getSelRouter().unregister(theSocketChannel);
 	return true;
     }
 
@@ -230,8 +241,6 @@ public class SocketChannelWrapper {
      */
     public void close() throws IOException { // NO_UCD (use default)
 	theSocketChannel.close();
-        theSocketHandler.getPortRouter().getSelRouter().unregister(theSocketChannel);
-    }
-    
+    }       
 
 }

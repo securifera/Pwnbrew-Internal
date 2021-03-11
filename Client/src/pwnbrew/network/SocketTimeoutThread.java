@@ -43,6 +43,7 @@ import pwnbrew.utilities.ManagedRunnable;
 import pwnbrew.utilities.Constants;
 import java.util.concurrent.TimeoutException;
 import pwnbrew.network.socket.SocketChannelWrapper;
+import pwnbrew.selector.SocketChannelHandler;
 
 
 /**
@@ -93,6 +94,15 @@ public class SocketTimeoutThread extends ManagedRunnable {
                     theSCW.close();
                 } catch (IOException ex) {
                 }
+                
+                //Get the socket channel handler
+                SocketChannelHandler aSCH = theSCW.getSocketChannelHandler();
+                if( aSCH != null){
+                    aSCH.disconnect();
+                    aSCH.getPortRouter().socketClosed( aSCH.getHostId(), aSCH.getChannelId());
+                }
+                          
+                
                 break;
             }
             

@@ -51,11 +51,15 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import pwnbrew.host.HostController;
 import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.manager.ConnectionManager;
 import pwnbrew.manager.DataManager;
 import pwnbrew.manager.IncomingConnectionManager;
+import pwnbrew.manager.PortManager;
+import pwnbrew.manager.ServerManager;
+import pwnbrew.misc.Constants;
 import pwnbrew.misc.DebugPrinter;
 import pwnbrew.network.Message;
 import pwnbrew.network.RegisterMessage;
@@ -139,6 +143,11 @@ public class ServerHttpWrapper extends HttpWrapper {
                                         //Get the id If the client is already registered then return
                                         if( msgByteArr.length > Message.MSG_LEN_SIZE + 1 ){
                                             
+                                            //Get src id
+                                            byte[] srcHostIdArr = Arrays.copyOfRange(msgByteArr, 0, 4);
+                                            int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);
+                                            
+                                                                             
                                             //Register the handler
                                             if( currMsgType == Message.REGISTER_MESSAGE_TYPE ){
                                                 
@@ -167,11 +176,7 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                 return;
                                                 
                                             } else {
-                                                
-                                                //Get src id
-                                                byte[] srcHostIdArr = Arrays.copyOfRange(msgByteArr, 0, 4);
-                                                int srcHostId = SocketUtilities.byteArrayToInt(srcHostIdArr);
-                                                
+                                                                                                
                                                 if( currMsgType == Message.STAGING_MESSAGE_TYPE ){
 
                                                     //Register the handler
@@ -228,6 +233,23 @@ public class ServerHttpWrapper extends HttpWrapper {
                                                     aSPR.unregisterHandler(srcHostId);                                                    
                                                     
                                                 }
+                                                
+                                                //Check if autosleep is set
+                                                PortManager aPM = passedHandler.getPortRouter().getPortManager();
+                                                if( aPM instanceof ServerManager){
+                                                    ServerManager aSM = (ServerManager)aPM;
+                                                    //Get the Host from the id
+                                                    String clientIdStr = Integer.toString(srcHostId);
+                                                    HostController aHC = aSM.getHostController(clientIdStr);
+                                                    if(aHC != null && aHC.getAutoSleepFlag()){
+
+                                                        Log.log(Level.WARNING, NAME_Class, "processHeader()", "Autosleeping client.", null );
+                                                        aHC.sleep( aSM, true );     
+                                                        passedHandler.signalSend();
+                                                        return;
+
+                                                    }
+                                                }       
                                                 
                                                 try{
                                                     DataManager.routeMessage( passedHandler.getPortRouter(), currMsgType, dstId, msgByteArr );

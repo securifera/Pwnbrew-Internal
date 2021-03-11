@@ -358,7 +358,11 @@ public class SecureSocketChannelWrapper extends SocketChannelWrapper {
             }
         } while ((inNetBB.position() != 0) && result.getStatus() != Status.BUFFER_UNDERFLOW);
 
-        return (requestBB.position() - pos);
+        int readSize = (requestBB.position() - pos);
+        if( initialHSComplete && readSize > 0)
+            setBytesReadFlag(true);
+                
+        return readSize;
     }
 
     /*

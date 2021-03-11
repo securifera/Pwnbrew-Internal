@@ -384,7 +384,7 @@ public final class Server {
                     System.in.read( aByteArr );
 
                     //Return if no is chosen
-                    String aStr = new String(aByteArr).toLowerCase();
+                    String aStr = new String(aByteArr).toLowerCase().trim();
                     if( !aStr.equals("yes"))
                         return;                    
                 }

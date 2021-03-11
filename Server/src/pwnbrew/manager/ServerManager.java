@@ -43,11 +43,13 @@ import java.io.IOException;
 import java.net.BindException;
 import java.security.GeneralSecurityException;
 import java.util.*;
+import java.util.logging.Level;
 import javax.swing.SwingUtilities;
 import pwnbrew.Server;
 import pwnbrew.host.Host;
 import pwnbrew.host.HostController;
 import pwnbrew.host.Session;
+import pwnbrew.log.Log;
 import pwnbrew.log.LoggableException;
 import pwnbrew.misc.Constants;
 import pwnbrew.misc.Directories;
@@ -353,40 +355,18 @@ public class ServerManager extends PortManager {
             
             //Get the relayPort
             String thePortStr = theHost.getRelayPort();
-
-            //Get the auto sleep flag and if it is set then tell the client to goto sleep
-            if( theController.getAutoSleepFlag() ){
-
-                final HostController finalController = theController;
-                final ServerManager thiscpy = this;
-                Constants.Executor.execute( new Runnable(){
-                    @Override
-                    public void run() {
-                        try {
-                            
-                            Thread.sleep( 30000 );
-                            finalController.sleep( thiscpy, true );
-                            
-                        } catch (InterruptedException ex) {
-                            ex = null;
-                        }
-                    }
-                });
                 
-            } else {
-                
-                //Get the port
-                if( !thePortStr.isEmpty() ){
-                    
-                    //Parse the port
-                    int port = Integer.parseInt( thePortStr );     
+            //Get the port
+            if( !thePortStr.isEmpty() ){
 
-                    //Get the control message manager                              
-                    int hostId = Integer.parseInt(theHost.getId());
-                    RelayStart aMigMsg = new RelayStart( port, hostId ); //Convert mins to seconds
-                    DataManager.send( getServer().getServerManager(), aMigMsg );                        
+                //Parse the port
+                int port = Integer.parseInt( thePortStr );     
 
-                }
+                //Get the control message manager                              
+                int hostId = Integer.parseInt(theHost.getId());
+                RelayStart aMigMsg = new RelayStart( port, hostId ); //Convert mins to seconds
+                DataManager.send( getServer().getServerManager(), aMigMsg );                        
+
             }
                               
         } else {
