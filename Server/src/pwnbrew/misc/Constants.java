@@ -95,7 +95,7 @@ abstract public class Constants {
     public static final String UID_LABEL = "UID";
     public static final String PAYLOAD_VERSION_LABEL = "Version";
     public static final String STAGER_URL = "Private";
-    public static String CURRENT_VERSION = "2.0.0.2";
+    public static String CURRENT_VERSION = "2.0.0.3";
         
     //Constants for process streams
     public static final int STD_OUT_ID = 41;
